@@ -1,0 +1,11 @@
+{
+  "diceList": [
+    {
+      "id": "DICE_008",
+      "name": "20면체 다이스",
+      "faces": 20,
+      "defaultCoating": "Vanilla",
+      "description": "6면체보다 압도적으로 높은 기대값을 가집니다."
+    }
+  ]
+}
