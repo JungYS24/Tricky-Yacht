@@ -81,7 +81,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 10
+  m_SortingOrder: 5
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 0.07075471, b: 0.07075471, a: 1}
@@ -107,6 +107,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Dice
   currentValue: 3
   isKept: 0
+  currentKeepIndex: -1
+  rollPos: {x: 0, y: 0, z: 0}
   diceFaceSprites:
   - {fileID: 1126806496608297571, guid: adf8c69f814b7834ab46aa7c1513900e, type: 3}
   - {fileID: -4213626499313082479, guid: 5be89e7c95cfc3245af181068e6fbf3c, type: 3}
