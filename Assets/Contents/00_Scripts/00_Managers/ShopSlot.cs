@@ -1,6 +1,6 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems; // ¸¶¿ì½º ÁøÀÔ/ÅğÀå °¨Áö¿ë
+using UnityEngine.EventSystems; // ë§ˆìš°ìŠ¤ ì§„ì…/í‡´ì¥ ê°ì§€ìš©
 using TMPro;
 
 public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
@@ -12,7 +12,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private ShopItemDataSO currentData;
     private ShopManager manager;
 
-    // ¸Å´ÏÀú°¡ ½½·ÔÀ» ÃÊ±âÈ­ÇÒ ¶§ È£Ãâ
+    // ë§¤ë‹ˆì €ê°€ ìŠ¬ë¡¯ì„ ì´ˆê¸°í™”í•  ë•Œ í˜¸ì¶œ
     public void SetupSlot(ShopItemDataSO data, ShopManager shopMgr)
     {
         currentData = data;
@@ -21,19 +21,22 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if (itemIcon != null) itemIcon.sprite = data.icon;
         if (priceText != null) priceText.text = data.price + " G";
 
-        // ¹öÆ° Å¬¸¯ ÀÌº¥Æ® ¿¬°á
+        // ë²„íŠ¼ í´ë¦­ ì´ë²¤íŠ¸ ì—°ê²°
         buyButton.onClick.RemoveAllListeners();
         buyButton.onClick.AddListener(() => manager.PurchaseItem(currentData));
     }
 
-    // ¸¶¿ì½º¸¦ ¿Ã·ÈÀ» ¶§ (¼³¸íÃ¢ ÄÑ±â)
+    // ë§ˆìš°ìŠ¤ë¥¼ ì˜¬ë ¸ì„ ë•Œ (ì„¤ëª…ì°½ ì¼œê¸°)
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (currentData != null)
-            manager.ShowTooltip(currentData.itemName, currentData.description, transform.position);
+        {
+            // ìˆ˜ì •: ì´ë¦„, ì„¤ëª…ê³¼ í•¨ê»˜ ìê¸° ìì‹ (ìŠ¬ë¡¯)ì˜ RectTransform ìœ„ì¹˜ ì •ë³´ë¥¼ ë„˜ê²¨ì¤Œ
+            manager.ShowTooltip(currentData.description, GetComponent<RectTransform>());
+        }
     }
 
-    // ¸¶¿ì½º¸¦ Ä¡¿üÀ» ¶§ (¼³¸íÃ¢ ²ô±â)
+    // ë§ˆìš°ìŠ¤ë¥¼ ì¹˜ì› ì„ ë•Œ (ì„¤ëª…ì°½ ë„ê¸°)
     public void OnPointerExit(PointerEventData eventData)
     {
         manager.HideTooltip();

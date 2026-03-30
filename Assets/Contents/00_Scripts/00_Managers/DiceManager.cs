@@ -1,39 +1,76 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 public class DiceManager : MonoBehaviour
 {
-    [Header("프리팹 및 슬롯 설정")]
+    [Header("프리팹 설정")]
     public GameObject dicePrefab;
-    public Transform[] keepSlots;
-    public Transform[] rollSlots;
+
+    [Header("슬롯 부모 오브젝트 설정")]
+    // 이제 낱개가 아니라 부모(Group)만 연결하면 됩니다.
+    public Transform keepSlotParent;
+    public Transform rollSlotParent;
+
+    // 코드가 내부적으로 사용할 배열들입니다.
+    private Transform[] keepSlots;
+    private Transform[] rollSlots;
 
     [Header("참조 설정")]
     public UIManager ui;
-    public ShopManager shopManager; // ✨ 인스펙터에서 ShopManager 오브젝트를 연결하세요.
+    public ShopManager shopManager;
+    public Slider enemyHPSlider;
 
     private List<Dice> activeDiceList = new List<Dice>();
     private Dice[] keepSlotOccupants;
 
-    [Header("게임 데이터")]
-    public int targetScore = 100;
+    [Header("게임 데이터 (전투)")]
+    public int enemyMaxHP = 40;
+    public int currentEnemyHP;
     public int currentStage = 1;
     public int maxPlays = 3;
     private int currentPlayNum;
-    private int accumulatedScore;
     public int maxRerolls = 2;
     private int currentRerolls;
 
     void Awake()
     {
         if (ui == null) ui = FindObjectOfType<UIManager>();
+
+        // 부모 오브젝트로부터 자식 슬롯들을 자동으로 찾아옵니다.
+        InitializeSlots();
+
         keepSlotOccupants = new Dice[keepSlots.Length];
         Dice.OnDiceStateChanged += HandleDiceChanged;
 
-        // UI 버튼에 함수 연결
         if (ui.goShopButton != null) ui.goShopButton.onClick.AddListener(GoToShop);
         if (ui.nextStageButton != null) ui.nextStageButton.onClick.AddListener(SkipShopAndNextStage);
+    }
+
+    // 자식 슬롯들을 배열에 자동으로 채워넣는 함수입니다.
+    void InitializeSlots()
+    {
+        // KeepSlot 찾기
+        if (keepSlotParent != null)
+        {
+            keepSlots = new Transform[keepSlotParent.childCount];
+            for (int i = 0; i < keepSlotParent.childCount; i++)
+            {
+                keepSlots[i] = keepSlotParent.GetChild(i);
+            }
+        }
+
+        // RollSlot 찾기
+        if (rollSlotParent != null)
+        {
+            rollSlots = new Transform[rollSlotParent.childCount];
+            for (int i = 0; i < rollSlotParent.childCount; i++)
+            {
+                rollSlots[i] = rollSlotParent.GetChild(i);
+            }
+        }
     }
 
     void Start() => StartNewStage();
@@ -69,7 +106,7 @@ public class DiceManager : MonoBehaviour
             CalculateHandData(allValues, out multiplier, out handName);
         }
 
-        ui.UpdateGameUI(currentStage, accumulatedScore, targetScore, currentPlayNum, maxPlays, maxRerolls - currentRerolls, handName, totalBoardSum, multiplier);
+        ui.UpdateGameUI(currentStage, currentEnemyHP, enemyMaxHP, currentPlayNum, maxPlays, maxRerolls - currentRerolls, handName, totalBoardSum, multiplier);
         ui.SetRollButtonInteractable((currentRerolls < maxRerolls) && hasDiceToRoll);
         ui.SetFinishButtonInteractable(keptCount == keepSlots.Length);
     }
@@ -105,16 +142,43 @@ public class DiceManager : MonoBehaviour
         int baseSum = activeDiceList.Where(d => d.isKept).Sum(d => d.currentValue);
         List<int> keptValues = activeDiceList.Where(d => d.isKept).Select(d => d.currentValue).ToList();
         CalculateHandData(keptValues, out float multiplier, out string handName);
-        accumulatedScore += Mathf.FloorToInt(baseSum * multiplier);
 
-        if (accumulatedScore >= targetScore)
+        int damage = Mathf.FloorToInt(baseSum * multiplier);
+        currentEnemyHP -= damage;
+        if (currentEnemyHP < 0) currentEnemyHP = 0;
+
+        StopAllCoroutines();
+        StartCoroutine(ShrinkHPBarRoutine(handName));
+    }
+
+    private IEnumerator ShrinkHPBarRoutine(string handName)
+    {
+        float duration = 0.3f;
+        float elapsed = 0f;
+
+        float startValue = enemyHPSlider != null ? enemyHPSlider.value : 0;
+        float targetValue = currentEnemyHP;
+
+        while (elapsed < duration)
         {
-            ui.ShowResult("스테이지 클리어!", "#00FF00", $"최종 점수: {accumulatedScore}\n목표를 달성했습니다!");
+            elapsed += Time.deltaTime;
+            if (enemyHPSlider != null)
+                enemyHPSlider.value = Mathf.Lerp(startValue, targetValue, elapsed / duration);
+            yield return null;
+        }
+
+        if (enemyHPSlider != null) enemyHPSlider.value = targetValue;
+
+        ui.UpdateGameUI(currentStage, currentEnemyHP, enemyMaxHP, currentPlayNum, maxPlays, maxRerolls - currentRerolls, handName, 0, 0f);
+
+        if (currentEnemyHP <= 0)
+        {
+            ui.ShowResult("#00FF00", "스테이지 클리어!");
             Invoke("PromptShopChoice", 1.5f);
         }
         else if (currentPlayNum >= maxPlays)
         {
-            ui.ShowResult("스테이지 실패...", "#FF0000", $"최종 점수: {accumulatedScore}\n게임 오버");
+            ui.ShowResult("#FF0000", "게임 오버");
             Invoke("RestartGame", 1.5f);
         }
         else
@@ -129,7 +193,7 @@ public class DiceManager : MonoBehaviour
     public void GoToShop()
     {
         ui.HideShopChoice();
-        if (shopManager != null) shopManager.OpenShop(); // ✨ 상점 UI 활성화
+        if (shopManager != null) shopManager.OpenShop();
     }
 
     public void SkipShopAndNextStage() { ui.HideShopChoice(); NextStage(); }
@@ -137,12 +201,26 @@ public class DiceManager : MonoBehaviour
     public void NextStage()
     {
         currentStage++;
-        targetScore += 30;
+        enemyMaxHP += 30;
         StartNewStage();
     }
 
-    void RestartGame() { currentStage = 1; targetScore = 100; StartNewStage(); }
-    void StartNewStage() { accumulatedScore = 0; currentPlayNum = 1; StartNewRound(); }
+    void RestartGame() { currentStage = 1; enemyMaxHP = 40; StartNewStage(); }
+
+    void StartNewStage()
+    {
+        currentEnemyHP = enemyMaxHP;
+        currentPlayNum = 1;
+
+        if (enemyHPSlider != null)
+        {
+            enemyHPSlider.maxValue = enemyMaxHP;
+            enemyHPSlider.value = currentEnemyHP;
+        }
+
+        StartNewRound();
+    }
+
     void StartNewRound() { ui.HideResult(); currentRerolls = 0; SpawnDice(); HandleDiceChanged(); }
 
     void AssignToKeepSlot(Dice d)

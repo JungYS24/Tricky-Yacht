@@ -36,6 +36,5 @@ public class ShopItemDataSO : ScriptableObject
     public int tempRerollAdd = 0;     // 임시 리롤 증가량 (포이즌 코크)
     public bool ignoreDebuff = false; // 디버프 무시 여부 (그린 애플)
 
-    // 💡 팁: '특정 족보 점수 증가', '유니콘의 프리즘 연계' 같은 복잡한 특수 로직은 
-    // GameManager나 ScoreManager에서 이 SO의 itemID나 category를 읽어와서 코드로 별도 처리하는 것이 깔끔합니다.
+    
 }
