@@ -20,7 +20,7 @@ public class DiceManager : MonoBehaviour
     public Slider enemyHPSlider;
 
     [Header("몬스터 피격 효과 설정")]
-    public Image monsterImage;
+    public SpriteRenderer monsterImage;
     public Color hitColor = Color.red;     
     public float hitEffectDuration = 1.0f;   
     private Coroutine hitEffectCoroutine;    
