@@ -132,11 +132,25 @@ public class DiceManager : MonoBehaviour
     public void OnRollButtonClick()
     {
         if (currentRerolls >= maxRerolls) return;
-        foreach (var d in activeDiceList) if (!d.isKept) d.SetValue(Random.Range(1, 7));
+
+        foreach (var d in activeDiceList)
+        {
+            if (!d.isKept)
+            {
+                int rolledValue = Random.Range(1, 7);
+                d.PlayRollEffect(rolledValue);
+            }
+        }
+
         currentRerolls++;
-        HandleDiceChanged();
+        StartCoroutine(HandleDiceChangedDelayed());
     }
 
+    private IEnumerator HandleDiceChangedDelayed()
+{
+    yield return new WaitForSeconds(0.5f);
+    HandleDiceChanged();
+}
     public void OnFinishButtonClick()
     {
         int baseSum = activeDiceList.Where(d => d.isKept).Sum(d => d.currentValue);
