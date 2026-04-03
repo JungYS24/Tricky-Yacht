@@ -49,7 +49,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NoiseTex:
-        m_Texture: {fileID: 2800000, guid: 4ff87638ce5bda346843b4e37e81778f, type: 3}
+        m_Texture: {fileID: 2800000, guid: 909594240d0ee6f4592394ef3e2169a8, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
@@ -70,11 +70,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DissolveAmount: 1
+    - _DissolveAmount: 0
     - _EdgeGlowPower: 4
     - _EdgeWidth: 0.08
     - _EnableExternalAlpha: 0
-    - _NoiseScale: 8
+    - _NoiseScale: 6
     - _ZWrite: 0
     m_Colors:
     - White: {r: 1, g: 1, b: 1, a: 1}
