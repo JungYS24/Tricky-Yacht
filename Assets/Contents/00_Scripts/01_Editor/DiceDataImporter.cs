@@ -15,7 +15,7 @@ public class DiceDataImporter : EditorWindow
 
         if (!File.Exists(fullPath))
         {
-            Debug.LogError($"❌ [파일 없음] 다음 경로를 확인해주세요: {fullPath}");
+            Debug.LogError($"[파일 없음] 다음 경로를 확인해주세요: {fullPath}");
             return;
         }
 
@@ -47,12 +47,12 @@ public class DiceDataImporter : EditorWindow
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            Debug.Log("✅ [성공] 주사위 데이터 동기화가 완료되었습니다!");
+            Debug.Log("주사위 데이터 동기화가 완료되었습니다!");
             Selection.activeObject = db; // 생성된 에셋으로 포커스 이동
         }
         catch (System.Exception e)
         {
-            Debug.LogError("❌ [데이터 오류] JSON 파싱 실패: " + e.Message);
+            Debug.LogError("[데이터 오류] JSON 파싱 실패: " + e.Message);
         }
     }
 }

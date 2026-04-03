@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems; // 마우스 진입/퇴장 감지용
+using UnityEngine.EventSystems;
 using TMPro;
 
 public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
@@ -9,34 +9,61 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public TextMeshProUGUI priceText;
     public Button buyButton;
 
-    private ShopItemDataSO currentData;
+    private BaseItemDataSO currentData;
     private ShopManager manager;
 
-    // 매니저가 슬롯을 초기화할 때 호출
-    public void SetupSlot(ShopItemDataSO data, ShopManager shopMgr)
+    public bool isPurchased = false;
+
+
+    public void SetupSlot(BaseItemDataSO data, ShopManager shopMgr)
     {
         currentData = data;
         manager = shopMgr;
 
-        if (itemIcon != null) itemIcon.sprite = data.icon;
+ 
+        isPurchased = false;
+        if (itemIcon != null)
+        {
+            itemIcon.sprite = data.icon;
+            itemIcon.color = Color.white;
+        }
         if (priceText != null) priceText.text = data.price + " G";
 
-        // 버튼 클릭 이벤트 연결
+        buyButton.interactable = true; 
         buyButton.onClick.RemoveAllListeners();
-        buyButton.onClick.AddListener(() => manager.PurchaseItem(currentData));
+        buyButton.onClick.AddListener(TryPurchase); 
     }
 
-    // 마우스를 올렸을 때 (설명창 켜기)
+    // 버튼 클릭 시 작동하는 구매 로직
+    private void TryPurchase()
+    {
+        if (isPurchased) return;
+
+
+        if (manager.PurchaseItem(currentData))
+        {
+            isPurchased = true; 
+
+            if (itemIcon != null) itemIcon.color = new Color(0.3f, 0.3f, 0.3f, 1f);
+
+            buyButton.interactable = false; 
+            if (priceText != null) priceText.text = "Sold Out"; 
+
+            manager.HideTooltip(); 
+        }
+    }
+
+
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (currentData != null)
+
+        if (currentData != null && !isPurchased)
         {
-            // 수정: 이름, 설명과 함께 자기 자신(슬롯)의 RectTransform 위치 정보를 넘겨줌
             manager.ShowTooltip(currentData.description, GetComponent<RectTransform>());
         }
     }
 
-    // 마우스를 치웠을 때 (설명창 끄기)
+
     public void OnPointerExit(PointerEventData eventData)
     {
         manager.HideTooltip();
