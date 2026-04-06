@@ -7,7 +7,7 @@ public class ShakerItemSO : BaseItemDataSO
     public ItemGrade grade;
     public ShakerClass shakerClass;
 
-    public override void ApplyItemEffect(DiceManager diceManager)
+    public override void ApplyItemEffect(DiceManager2 diceManager)
     {
         Debug.Log($"{itemName} ÀåÂø! ½¦ÀÌÄ¿ Å¬·¡½º: {shakerClass}");
     }

@@ -5,7 +5,7 @@ public class InventoryManager : MonoBehaviour
     public static InventoryManager Instance { get; private set; }
 
     [Header("참조")]
-    public DiceManager diceManager;
+    public DiceManager2 diceManager;
 
     [Header("슬롯 배열")]
     public InventorySlot[] figureSlots; 

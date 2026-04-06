@@ -8,7 +8,7 @@ public class CoatingItemSO : BaseItemDataSO
     public int bonusCoin = 0;
     public float targetScoreReduce = 0f;
 
-    public override void ApplyItemEffect(DiceManager diceManager)
+    public override void ApplyItemEffect(DiceManager2 diceManager)
     {
         Debug.Log($"{itemName} 코팅 적용! 배수 {scoreMultiplier} 증가");
     }

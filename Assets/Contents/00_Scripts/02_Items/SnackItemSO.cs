@@ -8,7 +8,7 @@ public class SnackItemSO : BaseItemDataSO
     public int tempRerollAdd = 0;
     public bool ignoreDebuff = false;
 
-    public override void ApplyItemEffect(DiceManager diceManager)
+    public override void ApplyItemEffect(DiceManager2 diceManager)
     {
         if (diceManager != null)
         {

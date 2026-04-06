@@ -7,7 +7,7 @@ public class FigureItemSO : BaseItemDataSO
     public bool isPermanent = true;
     public int requiredSlots = 1;
 
-    public override void ApplyItemEffect(DiceManager diceManager)
+    public override void ApplyItemEffect(DiceManager2 diceManager)
     {
         Debug.Log($"{itemName} 피규어 배치! 슬롯 {requiredSlots} 소모");
     }
