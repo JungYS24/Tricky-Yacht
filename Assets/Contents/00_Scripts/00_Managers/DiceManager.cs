@@ -201,7 +201,10 @@ public class DiceManager : MonoBehaviour
             yield return null;
         }
 
-        // 3. 디졸브 + 작아짐
+        // 3. 디졸브 + 작아짐 시작할 때 파티클도 같이 터짐
+        if (deathParticlePrefab != null)
+            Instantiate(deathParticlePrefab, monsterImage.bounds.center, Quaternion.identity);
+
         elapsed = 0f;
         while (elapsed < dissolveDuration)
         {
@@ -216,17 +219,14 @@ public class DiceManager : MonoBehaviour
             yield return null;
         }
 
-        // 4. 마지막 파티클
-        if (deathParticlePrefab != null)
-            Instantiate(deathParticlePrefab, monsterObject.transform.position, Quaternion.identity);
-
+       
         if (monsterRuntimeMat != null)
         {
             monsterRuntimeMat.SetFloat(dissolveProperty, 1f);
             monsterRuntimeMat.SetFloat(edgeGlowPowerProperty, normalGlowPower);
         }
 
-        // 5. 숨김
+        // 4. 숨김
         monsterObject.SetActive(false);
         monsterDeathCoroutine = null;
     }
@@ -434,7 +434,10 @@ public class DiceManager : MonoBehaviour
         }
 
         if (monsterImage != null)
+        {
             monsterImage.color = Color.white;
+            monsterImage.enabled = true;
+        }
 
         if (enemyHPSlider != null)
         {
