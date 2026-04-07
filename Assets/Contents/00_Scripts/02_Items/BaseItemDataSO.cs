@@ -14,5 +14,5 @@ public abstract class BaseItemDataSO : ScriptableObject
     public Sprite icon;
     [TextArea(3, 5)] public string description;
 
-    public abstract void ApplyItemEffect(DiceManager2 diceManager);
+    public abstract void ApplyItemEffect(DiceManager diceManager);
 }

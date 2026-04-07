@@ -8,7 +8,7 @@ public class ShopManager : MonoBehaviour
     public static bool IsShopOpen { get; private set; } = false;
 
     [Header("참조 설정")]
-    public DiceManager2 diceManager;
+    public DiceManager diceManager;
     public List<BaseItemDataSO> allItemsPool;
     public ShopSlot[] shopSlots;
     public GameObject shopUI;
