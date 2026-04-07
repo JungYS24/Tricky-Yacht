@@ -59,49 +59,43 @@ public class DiceManager : MonoBehaviour
 
     void Start()
     {
-        InitializeMasterDeck(); // 맨 처음 20개 주사위 생성
+        InitializeMasterDeck(); 
         StartNewStage();
     }
 
     void OnDestroy() => Dice.OnDiceStateChanged -= HandleDiceChanged;
 
-    // 1. 게임 최초 시작 시 20개 기본 주사위 생성
     void InitializeMasterDeck()
     {
         masterDeck.Clear();
         for (int i = 0; i < 20; i++)
         {
-            masterDeck.Add(new DiceData1()); // 흰색, 코팅 안된 쌩 주사위들
+            masterDeck.Add(new DiceData1()); 
         }
     }
 
-    // [수정 후] 유형(DiceType)과 색상(Color)을 함께 받도록 수정
     public void ApplyRandomCoating(DiceType coatingType, float mult, Color color)
     {
-        // 코팅 안 된 주사위 후보 찾기
         var nonCoatedDice = masterDeck.Where(d => !d.isCoated).ToList();
         if (nonCoatedDice.Count > 0)
         {
             DiceData1 selected = nonCoatedDice[UnityEngine.Random.Range(0, nonCoatedDice.Count)];
 
-            // [주요 변경] 주사위의 배율, 색상, 그리고 '유형'을 영구 저장!
             selected.isCoated = true;
             selected.multiplier = mult;
             selected.diceColor = color;
-            selected.type = coatingType; // 유형 저장
+            selected.type = coatingType; 
 
             Debug.Log($"마스터 덱 주사위 업그레이드! 유형: {coatingType}, 색상: {color}");
         }
     }
 
-    // 3. 스테이지 시작 (마스터 덱을 뽑기 통으로 복사 + 셔플)
     void StartNewStage()
     {
         currentPlayNum = 1;
         currentRerolls = 0;
         enemy.Initialize(enemyMaxHP);
 
-        // 마스터 덱의 '참조(상태)'를 그대로 뽑기 통으로 복사
         drawPile = new List<DiceData1>(masterDeck);
         discardPile.Clear();
         ShufflePile(drawPile);
@@ -124,11 +118,10 @@ public class DiceManager : MonoBehaviour
     {
         ui?.HideResult();
         currentRerolls = 0;
-        SpawnDice(); // 여기서 5개 뽑기!
+        SpawnDice(); 
         HandleDiceChanged();
     }
 
-    // 4. 주머니에서 5개 뽑기 (Draw)
     void SpawnDice()
     {
         foreach (var d in activeDiceList) if (d != null) Destroy(d.gameObject);
@@ -137,16 +130,14 @@ public class DiceManager : MonoBehaviour
 
         for (int i = 0; i < rollSlots.Length; i++)
         {
-            // 만약 뽑기 통(drawPile)이 텅 비었다면? 버린 통(discard)을 섞어서 다시 가져옴
             if (drawPile.Count == 0)
             {
                 drawPile = new List<DiceData1>(discardPile);
                 discardPile.Clear();
                 ShufflePile(drawPile);
-                if (drawPile.Count == 0) break; // 그래도 없으면(예외) 멈춤
+                if (drawPile.Count == 0) break; 
             }
 
-            // 위에서 1개 뽑고 버린 통으로 넘김
             DiceData1 drawnData = drawPile[0];
             drawPile.RemoveAt(0);
             discardPile.Add(drawnData);
@@ -155,7 +146,6 @@ public class DiceManager : MonoBehaviour
             Dice d = go.GetComponent<Dice>();
             d.rollPos = rollSlots[i].position;
 
-            // 주사위 굴려서 나온 랜덤 눈금(1~6)과 뽑힌 물리적 데이터(drawnData)를 함께 줌
             d.SetData(drawnData, UnityEngine.Random.Range(1, 7));
             activeDiceList.Add(d);
         }
@@ -166,7 +156,7 @@ public class DiceManager : MonoBehaviour
         if (currentRerolls >= maxRerolls || ShopManager.IsShopOpen) return;
 
         foreach (var d in activeDiceList.Where(d => d != null && !d.isKept))
-            d.PlayRollEffect(UnityEngine.Random.Range(1, 7)); // 리롤은 주사위 눈만 바꿈
+            d.PlayRollEffect(UnityEngine.Random.Range(1, 7)); 
 
         currentRerolls++;
         StartCoroutine(HandleDiceChangedDelayed());
@@ -181,7 +171,6 @@ public class DiceManager : MonoBehaviour
 
         CalculateHandData(keptDice.Select(d => d.currentValue).ToList(), out float comboMultiplier, out string handName);
 
-        // [추가됨] 코팅 주사위들의 배율 합산 로직 (기본 족보 배율 * 코팅 배율들)
         float finalMultiplier = comboMultiplier;
         foreach (var d in keptDice)
         {

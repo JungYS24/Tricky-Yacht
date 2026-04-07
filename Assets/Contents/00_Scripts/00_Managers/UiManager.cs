@@ -5,9 +5,6 @@ using TMPro;
 public class UIManager : MonoBehaviour
 {
 
-    [Header("매니저 참조")]
-    public DiceManager diceManager;
-
     [Header("메인 게임 UI")]
     public TextMeshProUGUI stageText;
     public TextMeshProUGUI targetScoreText;
@@ -25,13 +22,6 @@ public class UIManager : MonoBehaviour
     public Button nextStageButton;
     public TextMeshProUGUI goldText;
 
-    public TMPro.TextMeshProUGUI totalText;
-    public TMPro.TextMeshProUGUI normalText;
-    public TMPro.TextMeshProUGUI prismText;
-    public TMPro.TextMeshProUGUI goldenText;
-    public TMPro.TextMeshProUGUI blackText;
-
-    public GameObject deckPanel; // 덱 상태 팝업창 전체
 
     public void ShowShopChoice() => shopChoicePanel.SetActive(true);
     public void HideShopChoice() => shopChoicePanel.SetActive(false);
@@ -58,21 +48,6 @@ public class UIManager : MonoBehaviour
     }
 
 
-    // 덱 버튼에 연결할 함수
-    public void OnClickDeckButton()
-    {
-        // 1. 데이터 가져오기
-        var status = diceManager.GetCurrentDeckStatus();
-
-        // 2. UI 글자 업데이트
-        totalText.text = status.totalCount.ToString();
-        normalText.text = "x " + status.normalCount;
-        prismText.text = "x " + status.prismCount;
-        goldenText.text = "x " + status.goldCount;
-        blackText.text = "x " + status.blackCount;
-
-        // 3. 패널 열기
-        deckPanel.SetActive(true);
-    }
+  
     public void HideResult() => resultPanel.SetActive(false);
 }
