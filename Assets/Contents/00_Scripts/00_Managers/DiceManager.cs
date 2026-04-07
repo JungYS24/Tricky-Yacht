@@ -7,6 +7,19 @@ using System.Linq;
 
 public class DiceManager : MonoBehaviour
 {
+    public struct DeckStatus
+    {
+        public int totalCount;
+        public int normalCount;
+        public int prismCount;
+        public int goldCount;
+        public int blackCount;
+    }
+    [Header("덱 시스템 ")]
+    public List<DiceData1> masterDeck = new List<DiceData1>(); // 스테이지를 넘나드는 영구 20개 덱
+    private List<DiceData1> drawPile = new List<DiceData1>();  // 이번 스테이지 뽑기 통
+    private List<DiceData1> discardPile = new List<DiceData1>(); // 이번 스테이지 버린 통
+
     [Header("프리팹 및 슬롯 설정")]
     public GameObject dicePrefab;
     public Transform keepSlotParent;
@@ -44,9 +57,120 @@ public class DiceManager : MonoBehaviour
         }
     }
 
-    void Start() => StartNewStage();
+    void Start()
+    {
+        InitializeMasterDeck(); // 맨 처음 20개 주사위 생성
+        StartNewStage();
+    }
 
     void OnDestroy() => Dice.OnDiceStateChanged -= HandleDiceChanged;
+
+    // 1. 게임 최초 시작 시 20개 기본 주사위 생성
+    void InitializeMasterDeck()
+    {
+        masterDeck.Clear();
+        for (int i = 0; i < 20; i++)
+        {
+            masterDeck.Add(new DiceData1()); // 흰색, 코팅 안된 쌩 주사위들
+        }
+    }
+
+    // [수정 후] 유형(DiceType)과 색상(Color)을 함께 받도록 수정
+    public void ApplyRandomCoating(DiceType coatingType, float mult, Color color)
+    {
+        // 코팅 안 된 주사위 후보 찾기
+        var nonCoatedDice = masterDeck.Where(d => !d.isCoated).ToList();
+        if (nonCoatedDice.Count > 0)
+        {
+            DiceData1 selected = nonCoatedDice[UnityEngine.Random.Range(0, nonCoatedDice.Count)];
+
+            // [주요 변경] 주사위의 배율, 색상, 그리고 '유형'을 영구 저장!
+            selected.isCoated = true;
+            selected.multiplier = mult;
+            selected.diceColor = color;
+            selected.type = coatingType; // 유형 저장
+
+            Debug.Log($"마스터 덱 주사위 업그레이드! 유형: {coatingType}, 색상: {color}");
+        }
+    }
+
+    // 3. 스테이지 시작 (마스터 덱을 뽑기 통으로 복사 + 셔플)
+    void StartNewStage()
+    {
+        currentPlayNum = 1;
+        currentRerolls = 0;
+        enemy.Initialize(enemyMaxHP);
+
+        // 마스터 덱의 '참조(상태)'를 그대로 뽑기 통으로 복사
+        drawPile = new List<DiceData1>(masterDeck);
+        discardPile.Clear();
+        ShufflePile(drawPile);
+
+        StartNewRound();
+    }
+
+    void ShufflePile(List<DiceData1> pile)
+    {
+        for (int i = 0; i < pile.Count; i++)
+        {
+            int rnd = UnityEngine.Random.Range(i, pile.Count);
+            var temp = pile[i];
+            pile[i] = pile[rnd];
+            pile[rnd] = temp;
+        }
+    }
+
+    void StartNewRound()
+    {
+        ui?.HideResult();
+        currentRerolls = 0;
+        SpawnDice(); // 여기서 5개 뽑기!
+        HandleDiceChanged();
+    }
+
+    // 4. 주머니에서 5개 뽑기 (Draw)
+    void SpawnDice()
+    {
+        foreach (var d in activeDiceList) if (d != null) Destroy(d.gameObject);
+        activeDiceList.Clear();
+        Array.Clear(keepSlotOccupants, 0, keepSlotOccupants.Length);
+
+        for (int i = 0; i < rollSlots.Length; i++)
+        {
+            // 만약 뽑기 통(drawPile)이 텅 비었다면? 버린 통(discard)을 섞어서 다시 가져옴
+            if (drawPile.Count == 0)
+            {
+                drawPile = new List<DiceData1>(discardPile);
+                discardPile.Clear();
+                ShufflePile(drawPile);
+                if (drawPile.Count == 0) break; // 그래도 없으면(예외) 멈춤
+            }
+
+            // 위에서 1개 뽑고 버린 통으로 넘김
+            DiceData1 drawnData = drawPile[0];
+            drawPile.RemoveAt(0);
+            discardPile.Add(drawnData);
+
+            GameObject go = Instantiate(dicePrefab, rollSlots[i].position, Quaternion.identity);
+            Dice d = go.GetComponent<Dice>();
+            d.rollPos = rollSlots[i].position;
+
+            // 주사위 굴려서 나온 랜덤 눈금(1~6)과 뽑힌 물리적 데이터(drawnData)를 함께 줌
+            d.SetData(drawnData, UnityEngine.Random.Range(1, 7));
+            activeDiceList.Add(d);
+        }
+    }
+
+    public void OnRollButtonClick()
+    {
+        if (currentRerolls >= maxRerolls || ShopManager.IsShopOpen) return;
+
+        foreach (var d in activeDiceList.Where(d => d != null && !d.isKept))
+            d.PlayRollEffect(UnityEngine.Random.Range(1, 7)); // 리롤은 주사위 눈만 바꿈
+
+        currentRerolls++;
+        StartCoroutine(HandleDiceChangedDelayed());
+    }
 
     public void OnFinishButtonClick()
     {
@@ -55,10 +179,17 @@ public class DiceManager : MonoBehaviour
         var keptDice = activeDiceList.Where(d => d != null && d.isKept).ToList();
         int baseSum = keptDice.Sum(d => d.currentValue);
 
-        CalculateHandData(keptDice.Select(d => d.currentValue).ToList(), out float multiplier, out string handName);
-        int damage = Mathf.FloorToInt(baseSum * multiplier);
+        CalculateHandData(keptDice.Select(d => d.currentValue).ToList(), out float comboMultiplier, out string handName);
 
-        // 적에게 데미지 전달
+        // [추가됨] 코팅 주사위들의 배율 합산 로직 (기본 족보 배율 * 코팅 배율들)
+        float finalMultiplier = comboMultiplier;
+        foreach (var d in keptDice)
+        {
+            if (d.myData.isCoated) finalMultiplier *= d.myData.multiplier;
+        }
+
+        int damage = Mathf.FloorToInt(baseSum * finalMultiplier);
+
         enemy.TakeDamage(damage, () => {
             ui?.ShowResult("#00FF00", "스테이지 클리어!");
             Invoke(nameof(PromptShopChoice), 1.5f);
@@ -91,33 +222,6 @@ public class DiceManager : MonoBehaviour
     {
         if (keepSlotParent != null) keepSlots = keepSlotParent.Cast<Transform>().ToArray();
         if (rollSlotParent != null) rollSlots = rollSlotParent.Cast<Transform>().ToArray();
-    }
-
-    void StartNewStage()
-    {
-        currentPlayNum = 1;
-        currentRerolls = 0;
-        enemy.Initialize(enemyMaxHP);
-        StartNewRound();
-    }
-
-    void StartNewRound()
-    {
-        ui?.HideResult();
-        currentRerolls = 0;
-        SpawnDice();
-        HandleDiceChanged();
-    }
-
-    public void OnRollButtonClick()
-    {
-        if (currentRerolls >= maxRerolls || ShopManager.IsShopOpen) return;
-
-        foreach (var d in activeDiceList.Where(d => d != null && !d.isKept))
-            d.PlayRollEffect(UnityEngine.Random.Range(1, 7));
-
-        currentRerolls++;
-        StartCoroutine(HandleDiceChangedDelayed());
     }
 
     private IEnumerator HandleDiceChangedDelayed()
@@ -153,18 +257,32 @@ public class DiceManager : MonoBehaviour
 
     void UpdateMainUI(string handName)
     {
-        var allValues = activeDiceList.Where(d => d != null).Select(d => d.currentValue).ToList();
-        float multiplier = 1.0f;
+        var keptDice = activeDiceList.Where(d => d != null).ToList();
+        var allValues = keptDice.Select(d => d.currentValue).ToList();
+        float baseMult = 1.0f;
         int totalSum = 0;
 
         if (allValues.Count == 5)
         {
             totalSum = allValues.Sum();
-            CalculateHandData(allValues, out multiplier, out handName);
+            CalculateHandData(allValues, out baseMult, out handName);
         }
 
-        ui?.UpdateGameUI(currentStage, enemy.CurrentHP, enemy.MaxHP, currentPlayNum, maxPlays,
-                         maxRerolls - currentRerolls, handName, totalSum, multiplier);
+        // UI 표기용으로도 코팅 배율 적용
+        float finalMult = baseMult;
+        if (allValues.Count == 5)
+        {
+            foreach (var d in keptDice)
+            {
+                if (d.isKept && d.myData.isCoated) finalMult *= d.myData.multiplier;
+            }
+        }
+
+        int curHP = (enemy != null) ? enemy.CurrentHP : 0;
+        int maxHP = (enemy != null) ? enemy.MaxHP : 100;
+
+        ui?.UpdateGameUI(currentStage, curHP, maxHP, currentPlayNum, maxPlays,
+                         maxRerolls - currentRerolls, handName, totalSum, finalMult);
     }
 
     void AssignToKeepSlot(Dice d)
@@ -188,21 +306,24 @@ public class DiceManager : MonoBehaviour
         }
     }
 
-    void SpawnDice()
+    public DeckStatus GetCurrentDeckStatus()
     {
-        foreach (var d in activeDiceList) if (d != null) Destroy(d.gameObject);
-        activeDiceList.Clear();
-        Array.Clear(keepSlotOccupants, 0, keepSlotOccupants.Length);
+        DeckStatus status = new DeckStatus();
+        status.totalCount = drawPile.Count;
 
-        for (int i = 0; i < rollSlots.Length; i++)
+        foreach (var data in drawPile)
         {
-            GameObject go = Instantiate(dicePrefab, rollSlots[i].position, Quaternion.identity);
-            Dice d = go.GetComponent<Dice>();
-            d.rollPos = rollSlots[i].position;
-            d.SetValue(UnityEngine.Random.Range(1, 7));
-            activeDiceList.Add(d);
+            switch (data.type)
+            {
+                case DiceType.Normal: status.normalCount++; break;
+                case DiceType.Prism: status.prismCount++; break;
+                case DiceType.Gold: status.goldCount++; break;
+                case DiceType.Black: status.blackCount++; break;
+            }
         }
+        return status;
     }
+
 
     void PromptShopChoice() { ui?.HideResult(); ui?.ShowShopChoice(); }
     public void GoToShop() { ui?.HideShopChoice(); shopManager?.OpenShop(); }

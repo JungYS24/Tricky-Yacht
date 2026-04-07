@@ -35,13 +35,22 @@ public class Enemy : MonoBehaviour
     private Material monsterRuntimeMat;
     private Vector3 originalScale;
     private Coroutine hitEffectCoroutine;
+    private Coroutine hpCoroutine; // HP바 코루틴 추적용 변수 추가
+
+    // [수정 1] 최초 크기는 무조건 Awake에서 딱 한 번만 저장!
+    void Awake()
+    {
+        originalScale = transform.localScale;
+    }
 
     public void Initialize(int maxHP)
     {
         MaxHP = maxHP;
         CurrentHP = maxHP;
         IsDead = false;
-        originalScale = transform.localScale;
+
+        // [수정 2] 스테이지가 시작될 때마다 아까 저장해둔 원래 크기로 원상복구
+        transform.localScale = originalScale;
 
         if (monsterImage != null)
         {
@@ -69,7 +78,10 @@ public class Enemy : MonoBehaviour
         if (IsDead) return;
 
         CurrentHP = Mathf.Max(0, CurrentHP - damage);
-        UpdateHPBar(false);
+
+        // [수정 3] 데미지를 입었으니 HP바 깎는 코루틴 실행!
+        if (hpCoroutine != null) StopCoroutine(hpCoroutine);
+        hpCoroutine = StartCoroutine(ShrinkHPBarRoutine());
 
         if (damage > 0)
         {

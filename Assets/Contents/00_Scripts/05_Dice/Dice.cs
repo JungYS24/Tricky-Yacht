@@ -10,6 +10,8 @@ public class Dice : MonoBehaviour, IPointerDownHandler
     public int currentKeepIndex = -1;
     public Vector3 rollPos;
 
+    public DiceData1 myData; // 추가됨: 이 주사위가 가진 고유 데이터 (코팅, 색상 등)
+
     public Sprite[] diceFaceSprites;
     private SpriteRenderer spriteRenderer;
     public ParticleSystem rollParticle;
@@ -29,11 +31,17 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         originalScale = transform.localScale;
     }
 
-    public void SetValue(int value)
+    // SetValue 대신 SetData로 진화! (데이터와 색상을 함께 받음)
+    public void SetData(DiceData1 data, int initialValue)
     {
         if (isKept) return;
-        currentValue = value;
-        UpdateSprite(value);
+        myData = data;
+        currentValue = initialValue;
+        UpdateSprite(initialValue);
+
+        // 코팅된 색상 칠해주기
+        if (spriteRenderer != null)
+            spriteRenderer.color = myData.diceColor;
     }
 
     private void UpdateSprite(int value)
@@ -44,6 +52,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
     public void PlayRollEffect(int finalValue)
     {
+        if (isKept) return;
         if (rollCoroutine != null) StopCoroutine(rollCoroutine);
         rollCoroutine = StartCoroutine(RollRoutine(finalValue));
     }
@@ -85,6 +94,9 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
         yield return new WaitForSeconds(0.06f);
         transform.localScale = originalScale;
+
+        // 연출이 끝나도 코팅 색상 유지
+        spriteRenderer.color = isKept ? myData.diceColor * 0.6f : myData.diceColor;
         rollCoroutine = null;
     }
 
@@ -93,7 +105,9 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         if (ShopManager.IsShopOpen) return;
         isKept = !isKept;
         OnDiceStateChanged?.Invoke();
-        spriteRenderer.color = isKept ? new Color(0.7f, 0.7f, 0.7f) : Color.white;
+
+        // 무조건 하얀색으로 돌아가는 게 아니라, 내 고유의 색상(코팅색)을 기준으로 어두워짐
+        spriteRenderer.color = isKept ? myData.diceColor * 0.6f : myData.diceColor;
     }
 
     public void MoveToTarget(Vector3 targetPos)
