@@ -1,17 +1,31 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class DeckUI : MonoBehaviour
 {
     public DiceManager diceManager;
+    public GameObject deckPanel;
 
-    [Header("UI 텍스트 참조")]
-    public TMPro.TextMeshProUGUI totalText;
-    public TMPro.TextMeshProUGUI normalText;
-    public TMPro.TextMeshProUGUI prismText;
-    public TMPro.TextMeshProUGUI goldText;
-    public TMPro.TextMeshProUGUI blackText;
+    [Header("인벤토리 UI 설정")]
+    public Transform slotParent;
+    public GameObject deckSlotPrefab;
 
-    public GameObject deckPanel; 
+    private List<DeckSlot> slotList = new List<DeckSlot>();
+    private bool isInitialized = false; // 추가됨: 생성 완료 여부 체크
+
+    // Start() 함수는 완전히 삭제했습니다!
+
+    void InitializeSlots()
+    {
+        int maxCapacity = 42;
+
+        for (int i = 0; i < maxCapacity; i++)
+        {
+            GameObject go = Instantiate(deckSlotPrefab, slotParent);
+            DeckSlot slot = go.GetComponent<DeckSlot>();
+            slotList.Add(slot);
+        }
+    }
 
     public void OnClickDeckButton()
     {
@@ -21,20 +35,32 @@ public class DeckUI : MonoBehaviour
             return;
         }
 
-        UpdateDeckStatus();
+        // 추가됨: 패널을 열 때, 슬롯이 한 번도 생성 안 되었다면 지금 당장 42개를 만들어라!
+        if (!isInitialized)
+        {
+            InitializeSlots();
+            isInitialized = true;
+        }
+
+        UpdateDeckUI();
         deckPanel.SetActive(true);
     }
 
-  
-    private void UpdateDeckStatus()
+    private void UpdateDeckUI()
     {
-        var status = diceManager.GetCurrentDeckStatus();
+        List<DiceData1> myDeck = diceManager.masterDeck;
 
-        totalText.text = "남아 있는 주사위 : " + status.totalCount.ToString();
-        normalText.text = "x" + status.normalCount;
-        prismText.text = "x" + status.prismCount;
-        goldText.text = "x" + status.goldCount;
-        blackText.text = "x" + status.blackCount;
+        for (int i = 0; i < slotList.Count; i++)
+        {
+            if (i < myDeck.Count)
+            {
+                slotList[i].SetDice(myDeck[i]);
+            }
+            else
+            {
+                slotList[i].SetEmpty();
+            }
+        }
     }
 
     public void CloseDeckPanel()

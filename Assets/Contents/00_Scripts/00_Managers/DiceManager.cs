@@ -7,14 +7,14 @@ using System.Linq;
 
 public class DiceManager : MonoBehaviour
 {
-    public struct DeckStatus
-    {
-        public int totalCount;
-        public int normalCount;
-        public int prismCount;
-        public int goldCount;
-        public int blackCount;
-    }
+    //public struct DeckStatus
+    //{
+    //    public int totalCount;
+    //    public int normalCount;
+    //    public int prismCount;
+    //    public int goldCount;
+    //    public int blackCount;
+    //}
     [Header("덱 시스템 ")]
     public List<DiceData1> masterDeck = new List<DiceData1>(); // 스테이지를 넘나드는 영구 20개 덱
     private List<DiceData1> drawPile = new List<DiceData1>();  // 이번 스테이지 뽑기 통
@@ -295,23 +295,23 @@ public class DiceManager : MonoBehaviour
         }
     }
 
-    public DeckStatus GetCurrentDeckStatus()
-    {
-        DeckStatus status = new DeckStatus();
-        status.totalCount = drawPile.Count;
+    //public DeckStatus GetCurrentDeckStatus()
+    //{
+    //    DeckStatus status = new DeckStatus();
+    //    status.totalCount = drawPile.Count;
 
-        foreach (var data in drawPile)
-        {
-            switch (data.type)
-            {
-                case DiceType.Normal: status.normalCount++; break;
-                case DiceType.Prism: status.prismCount++; break;
-                case DiceType.Gold: status.goldCount++; break;
-                case DiceType.Black: status.blackCount++; break;
-            }
-        }
-        return status;
-    }
+    //    foreach (var data in drawPile)
+    //    {
+    //        switch (data.type)
+    //        {
+    //            case DiceType.Normal: status.normalCount++; break;
+    //            case DiceType.Prism: status.prismCount++; break;
+    //            case DiceType.Gold: status.goldCount++; break;
+    //            case DiceType.Black: status.blackCount++; break;
+    //        }
+    //    }
+    //    return status;
+    //}
 
 
     void PromptShopChoice() { ui?.HideResult(); ui?.ShowShopChoice(); }

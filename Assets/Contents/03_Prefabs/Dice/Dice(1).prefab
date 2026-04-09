@@ -5004,6 +5004,11 @@ MonoBehaviour:
   isKept: 0
   currentKeepIndex: -1
   rollPos: {x: 0, y: 0, z: 0}
+  myData:
+    isCoated: 0
+    multiplier: 1
+    diceColor: {r: 1, g: 1, b: 1, a: 1}
+    type: 0
   diceFaceSprites:
   - {fileID: 1126806496608297571, guid: adf8c69f814b7834ab46aa7c1513900e, type: 3}
   - {fileID: -4213626499313082479, guid: 5be89e7c95cfc3245af181068e6fbf3c, type: 3}
