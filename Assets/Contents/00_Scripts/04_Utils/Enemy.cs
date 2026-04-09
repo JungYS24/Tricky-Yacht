@@ -137,6 +137,14 @@ public class Enemy : MonoBehaviour
         if (deathParticlePrefab != null)
             Instantiate(deathParticlePrefab, monsterImage.bounds.center, Quaternion.identity);
 
+        // 추가 : 파티클이 바로 재생되도록 보장
+        if (deathParticlePrefab != null)
+        {
+            GameObject particle = Instantiate(deathParticlePrefab, monsterImage.bounds.center, Quaternion.identity);
+            ParticleSystem ps = particle.GetComponent<ParticleSystem>();
+            if (ps != null) ps.Play();
+        }
+
         // 디졸브 연출
         elapsed = 0f;
         while (elapsed < dissolveDuration)
