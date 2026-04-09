@@ -4,11 +4,11 @@ using UnityEngine;
 public class CoatingItemSO : BaseItemDataSO
 {
     [Header("--- 코팅 전용 스펙 ---")]
-    public DiceType coatingType = DiceType.Prism; // 인스펙터에서 Gold, Black 등으로 변경
+    public DiceType coatingType = DiceType.Prism; 
     public float scoreMultiplier = 1.5f;
 
     [Header("--- 코팅 시 씌워질 색상 ---")]
-    public Color coatingColor = Color.yellow; // 프리즘은 연한 핑크, 검정은 연한 검정 등으로 지정
+    public Color coatingColor = Color.yellow; 
 
     public override void ApplyItemEffect(DiceManager diceManager)
     {

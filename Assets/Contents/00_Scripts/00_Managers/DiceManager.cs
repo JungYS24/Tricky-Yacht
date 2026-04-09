@@ -7,17 +7,10 @@ using System.Linq;
 
 public class DiceManager : MonoBehaviour
 {
-    //public struct DeckStatus
-    //{
-    //    public int totalCount;
-    //    public int normalCount;
-    //    public int prismCount;
-    //    public int goldCount;
-    //    public int blackCount;
-    //}
+
     [Header("덱 시스템 ")]
     public List<DiceData1> masterDeck = new List<DiceData1>(); // 스테이지를 넘나드는 영구 20개 덱
-    private List<DiceData1> drawPile = new List<DiceData1>();  // 이번 스테이지 뽑기 통
+    public List<DiceData1> drawPile = new List<DiceData1>();  // 이번 스테이지 뽑기 통
     private List<DiceData1> discardPile = new List<DiceData1>(); // 이번 스테이지 버린 통
 
     [Header("프리팹 및 슬롯 설정")]
@@ -59,7 +52,7 @@ public class DiceManager : MonoBehaviour
 
     void Start()
     {
-        InitializeMasterDeck(); 
+        InitializeMasterDeck();
         StartNewStage();
     }
 
@@ -70,7 +63,7 @@ public class DiceManager : MonoBehaviour
         masterDeck.Clear();
         for (int i = 0; i < 20; i++)
         {
-            masterDeck.Add(new DiceData1()); 
+            masterDeck.Add(new DiceData1());
         }
     }
 
@@ -84,7 +77,7 @@ public class DiceManager : MonoBehaviour
             selected.isCoated = true;
             selected.multiplier = mult;
             selected.diceColor = color;
-            selected.type = coatingType; 
+            selected.type = coatingType;
 
             Debug.Log($"마스터 덱 주사위 업그레이드! 유형: {coatingType}, 색상: {color}");
         }
@@ -118,7 +111,7 @@ public class DiceManager : MonoBehaviour
     {
         ui?.HideResult();
         currentRerolls = 0;
-        SpawnDice(); 
+        SpawnDice();
         HandleDiceChanged();
     }
 
@@ -135,7 +128,7 @@ public class DiceManager : MonoBehaviour
                 drawPile = new List<DiceData1>(discardPile);
                 discardPile.Clear();
                 ShufflePile(drawPile);
-                if (drawPile.Count == 0) break; 
+                if (drawPile.Count == 0) break;
             }
 
             DiceData1 drawnData = drawPile[0];
@@ -156,7 +149,7 @@ public class DiceManager : MonoBehaviour
         if (currentRerolls >= maxRerolls || ShopManager.IsShopOpen) return;
 
         foreach (var d in activeDiceList.Where(d => d != null && !d.isKept))
-            d.PlayRollEffect(UnityEngine.Random.Range(1, 7)); 
+            d.PlayRollEffect(UnityEngine.Random.Range(1, 7));
 
         currentRerolls++;
         StartCoroutine(HandleDiceChangedDelayed());
@@ -294,25 +287,6 @@ public class DiceManager : MonoBehaviour
             d.MoveToTarget(d.rollPos);
         }
     }
-
-    //public DeckStatus GetCurrentDeckStatus()
-    //{
-    //    DeckStatus status = new DeckStatus();
-    //    status.totalCount = drawPile.Count;
-
-    //    foreach (var data in drawPile)
-    //    {
-    //        switch (data.type)
-    //        {
-    //            case DiceType.Normal: status.normalCount++; break;
-    //            case DiceType.Prism: status.prismCount++; break;
-    //            case DiceType.Gold: status.goldCount++; break;
-    //            case DiceType.Black: status.blackCount++; break;
-    //        }
-    //    }
-    //    return status;
-    //}
-
 
     void PromptShopChoice() { ui?.HideResult(); ui?.ShowShopChoice(); }
     public void GoToShop() { ui?.HideShopChoice(); shopManager?.OpenShop(); }

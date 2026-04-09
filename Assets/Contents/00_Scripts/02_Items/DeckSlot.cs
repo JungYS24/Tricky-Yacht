@@ -22,14 +22,14 @@ public class DeckSlot : MonoBehaviour
         filledVisual.SetActive(false);
     }
 
-    public void SetDice(DiceData1 data)
+    public void SetDice(DiceData1 data, bool isUsed)
     {
         emptyVisual.SetActive(false);
         filledVisual.SetActive(true);
 
         if (diceIcon != null)
         {
-            
+
             switch (data.type)
             {
                 case DiceType.Normal: diceIcon.sprite = normalSprite; break;
@@ -37,7 +37,13 @@ public class DeckSlot : MonoBehaviour
                 case DiceType.Gold: diceIcon.sprite = goldSprite; break;
                 case DiceType.Black: diceIcon.sprite = blackSprite; break;
             }
-            diceIcon.color = data.diceColor;
+
+            Color finalColor = Color.white;
+            if (isUsed)
+            {
+                finalColor.a = 0.4f; 
+            }
+            diceIcon.color = finalColor;
         }
 
         if (descText != null)

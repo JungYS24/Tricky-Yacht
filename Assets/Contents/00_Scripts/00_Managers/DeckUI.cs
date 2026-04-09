@@ -7,13 +7,11 @@ public class DeckUI : MonoBehaviour
     public GameObject deckPanel;
 
     [Header("인벤토리 UI 설정")]
-    public Transform slotParent;
-    public GameObject deckSlotPrefab;
+    public Transform slotParent;        
+    public GameObject deckSlotPrefab;   
 
     private List<DeckSlot> slotList = new List<DeckSlot>();
-    private bool isInitialized = false; // 추가됨: 생성 완료 여부 체크
-
-    // Start() 함수는 완전히 삭제했습니다!
+    private bool isInitialized = false; 
 
     void InitializeSlots()
     {
@@ -26,16 +24,15 @@ public class DeckUI : MonoBehaviour
             slotList.Add(slot);
         }
     }
-
     public void OnClickDeckButton()
     {
+
         if (deckPanel.activeSelf)
         {
             CloseDeckPanel();
             return;
         }
 
-        // 추가됨: 패널을 열 때, 슬롯이 한 번도 생성 안 되었다면 지금 당장 42개를 만들어라!
         if (!isInitialized)
         {
             InitializeSlots();
@@ -49,12 +46,19 @@ public class DeckUI : MonoBehaviour
     private void UpdateDeckUI()
     {
         List<DiceData1> myDeck = diceManager.masterDeck;
+        List<DiceData1> currentDrawPile = diceManager.drawPile; 
 
         for (int i = 0; i < slotList.Count; i++)
         {
             if (i < myDeck.Count)
             {
-                slotList[i].SetDice(myDeck[i]);
+                bool isUsed = false;
+
+                if (currentDrawPile != null)
+                {
+                    isUsed = !currentDrawPile.Contains(myDeck[i]);
+                }
+                slotList[i].SetDice(myDeck[i], isUsed);
             }
             else
             {

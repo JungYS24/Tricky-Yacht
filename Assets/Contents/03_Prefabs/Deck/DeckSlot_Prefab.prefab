@@ -94,7 +94,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.35686275}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -172,7 +172,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.23921569}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -204,6 +204,11 @@ MonoBehaviour:
   emptyVisual: {fileID: 2693775411849856244}
   filledVisual: {fileID: 503993234126385096}
   diceIcon: {fileID: 445989346094941115}
+  descText: {fileID: 0}
+  normalSprite: {fileID: 21300000, guid: 69eac61b23e6477428ac787638480632, type: 3}
+  prismSprite: {fileID: 21300000, guid: 8bbf01b9f97145746b67e7c0093af7ac, type: 3}
+  goldSprite: {fileID: 21300000, guid: bf5e455349b9da14697cf42ce9a863b5, type: 3}
+  blackSprite: {fileID: 21300000, guid: 3eee32ef40695be4bbf7427d319bdcd1, type: 3}
 --- !u!1 &5707601627850128561
 GameObject:
   m_ObjectHideFlags: 0
