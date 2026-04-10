@@ -5,7 +5,7 @@ public enum DiceType
     Normal,
     Prism,
     Gold,
-    Black,
+    Dark,
     Ice
 }
 

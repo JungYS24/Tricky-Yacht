@@ -165,11 +165,55 @@ public class DiceManager : MonoBehaviour
         CalculateHandData(keptDice.Select(d => d.currentValue).ToList(), out float comboMultiplier, out string handName);
 
         float finalMultiplier = comboMultiplier;
+
+        int goldEarned = 0;
+        int currentSimulatedHP = enemy.CurrentHP;
+        int darkDamageTotal = 0;
+
         foreach (var d in keptDice)
         {
-            if (d.myData.isCoated) finalMultiplier *= d.myData.multiplier;
+            if (d.myData.isCoated)
+            {
+                switch (d.myData.type)
+                {
+                    case DiceType.Prism:
+                        // [프리즘] 합연산 적용: 기존 배율에 (아이템 배율 - 1.0)만큼 더하기
+                        // 예: 1.2배면 0.2만 더해짐
+                        finalMultiplier += (d.myData.multiplier - 1.0f);
+                        break;
+
+                    case DiceType.Gold:
+                        // [골드] 출현 눈금 수만큼 코인 획득 누적
+                        goldEarned += d.currentValue;
+                        break;
+
+                    case DiceType.Dark:
+                        // [다크] 공격 전 적 현재 체력 10% 감소 (순차 적용)
+                        int drop = Mathf.FloorToInt(currentSimulatedHP * 0.1f);
+                        darkDamageTotal += drop;
+                        currentSimulatedHP -= drop;
+                        break;
+                }
+            }
         }
 
+        // 1. 다크 주사위 선 데미지 적용
+        if (darkDamageTotal > 0)
+        {
+            // 죽음 콜백 없이 데미지만 먼저 입힙니다.
+            enemy.TakeDamage(darkDamageTotal, null);
+            Debug.Log($"[다크 효과] 공격 전 적 체력 {darkDamageTotal} 감소!");
+        }
+
+        // 2. 골드 주사위 재화 획득 적용
+        if (goldEarned > 0 && shopManager != null)
+        {
+            shopManager.currentGold += goldEarned;
+            ui?.UpdateGoldUI(shopManager.currentGold);
+            Debug.Log($"[골드 효과] 눈금 합산하여 {goldEarned} 코인 획득!");
+        }
+
+        // ---최종 메인 데미지 적용 ---
         int damage = Mathf.FloorToInt(baseSum * finalMultiplier);
 
         enemy.TakeDamage(damage, () => {
@@ -239,33 +283,65 @@ public class DiceManager : MonoBehaviour
 
     void UpdateMainUI(string handName)
     {
-        var keptDice = activeDiceList.Where(d => d != null).ToList();
-        var allValues = keptDice.Select(d => d.currentValue).ToList();
+        var targetDice = activeDiceList.Where(d => d != null).ToList();
+        var allValues = targetDice.Select(d => d.currentValue).ToList();
+
+        int baseSum = 0;
         float baseMult = 1.0f;
-        int totalSum = 0;
 
         if (allValues.Count == 5)
         {
-            totalSum = allValues.Sum();
+            baseSum = allValues.Sum();
             CalculateHandData(allValues, out baseMult, out handName);
         }
-
-        // UI 표기용으로도 코팅 배율 적용
-        float finalMult = baseMult;
-        if (allValues.Count == 5)
+        else if (allValues.Count > 0)
         {
-            foreach (var d in keptDice)
+            baseSum = allValues.Sum();
+            handName = "계산 중...";
+        }
+
+        float finalMult = baseMult;
+        int darkDamageTotal = 0;
+        int currentSimulatedHP = (enemy != null) ? enemy.CurrentHP : 0;
+
+        foreach (var d in targetDice)
+        {
+            if (d.myData.isCoated)
             {
-                if (d.isKept && d.myData.isCoated) finalMult *= d.myData.multiplier;
+                if (d.myData.type == DiceType.Prism)
+                {
+                    finalMult += (d.myData.multiplier - 1.0f);
+                }
+                else if (d.myData.type == DiceType.Dark)
+                {
+                    int drop = Mathf.FloorToInt(currentSimulatedHP * 0.1f);
+                    darkDamageTotal += drop;
+                    currentSimulatedHP -= drop;
+                }
             }
         }
+
+        int expectedDiceDamage = Mathf.FloorToInt(baseSum * finalMult);
+        int finalTotalDamage = expectedDiceDamage + darkDamageTotal;
+
+        string formulaString = $"{baseSum} x {finalMult:F1}배";
+        if (darkDamageTotal > 0)
+        {
+            formulaString += $" + {darkDamageTotal}(다크)";
+        }
+
+        // 족보, 계산식, 최종 데미지를 \n(줄바꿈)으로 묶고 색상 태그를 입힙니다.
+        string finalCombinedText = $"<color=#FFD700>{handName}</color>\n{formulaString}\n<color=#FF5555>= {finalTotalDamage} 대미지 예정</color>";
 
         int curHP = (enemy != null) ? enemy.CurrentHP : 0;
         int maxHP = (enemy != null) ? enemy.MaxHP : 100;
 
+        // UI 매니저로 합쳐진 텍스트 하나만 넘겨줍니다.
         ui?.UpdateGameUI(currentStage, curHP, maxHP, currentPlayNum, maxPlays,
-                         maxRerolls - currentRerolls, handName, totalSum, finalMult);
+                         maxRerolls - currentRerolls, finalCombinedText);
     }
+
+
 
     void AssignToKeepSlot(Dice d)
     {

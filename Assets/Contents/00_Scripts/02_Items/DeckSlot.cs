@@ -35,7 +35,7 @@ public class DeckSlot : MonoBehaviour
                 case DiceType.Normal: diceIcon.sprite = normalSprite; break;
                 case DiceType.Prism: diceIcon.sprite = prismSprite; break;
                 case DiceType.Gold: diceIcon.sprite = goldSprite; break;
-                case DiceType.Black: diceIcon.sprite = blackSprite; break;
+                case DiceType.Dark: diceIcon.sprite = blackSprite; break;
             }
 
             Color finalColor = Color.white;

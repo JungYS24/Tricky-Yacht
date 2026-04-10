@@ -64,7 +64,7 @@ public class DiceCoatingVFX : MonoBehaviour
                 targetPrefab = goldVFXPrefab;
                 break;
 
-            case DiceType.Black:
+            case DiceType.Dark:
                 targetPrefab = darkVFXPrefab;
                 break;
 
