@@ -5013,12 +5013,12 @@ MonoBehaviour:
     minRoll: 1
     maxRoll: 6
   diceFaceSprites:
-  - {fileID: 1126806496608297571, guid: adf8c69f814b7834ab46aa7c1513900e, type: 3}
-  - {fileID: -4213626499313082479, guid: 5be89e7c95cfc3245af181068e6fbf3c, type: 3}
-  - {fileID: 939775461624552019, guid: 3208d6d7cdbdf9d4aa6b83410fbf7afa, type: 3}
-  - {fileID: -2987656961877758275, guid: 968a190eac241d14ab79e5ff2f0fc3f0, type: 3}
-  - {fileID: 8671873930857660839, guid: 145848c5cc05ea54a8c47c044410a807, type: 3}
-  - {fileID: -4662723164875807749, guid: 8bb8a7024ec35e74b97a5dfba33b9acc, type: 3}
+  - {fileID: 21300000, guid: e6d4349e6942c9344957fae0a557fc9e, type: 3}
+  - {fileID: 4277651623651152253, guid: 4a4761681d308864e86310e4a393d6f5, type: 3}
+  - {fileID: 8572930375631895552, guid: 797b33bba0f315f4ea1961eb5d6ce62c, type: 3}
+  - {fileID: 6584158007040453875, guid: 73cca03ad1f597441bbc9c999b86a0a7, type: 3}
+  - {fileID: 7099116345629502920, guid: bbf80e8244d1aca46a021ba395282516, type: 3}
+  - {fileID: -7865692014833397383, guid: b1e83609a1defef46b845a44bb9ba73a, type: 3}
   rollParticle: {fileID: 3683730203153096169}
   rollDuration: 0.45
   shakePower: 0.12

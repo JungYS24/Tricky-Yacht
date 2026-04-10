@@ -146,11 +146,13 @@ public class DiceManager : MonoBehaviour
 
     public void OnRollButtonClick()
     {
+       
         if (currentRerolls >= maxRerolls || ShopManager.IsShopOpen) return;
 
         foreach (var d in activeDiceList.Where(d => d != null && !d.isKept))
+        {
             d.PlayRollEffect(UnityEngine.Random.Range(1, 7));
-
+        }
         currentRerolls++;
         StartCoroutine(HandleDiceChangedDelayed());
     }
@@ -163,13 +165,13 @@ public class DiceManager : MonoBehaviour
         int baseSum = keptDice.Sum(d => d.currentValue);
 
         CalculateHandData(keptDice.Select(d => d.currentValue).ToList(), out float comboMultiplier, out string handName);
-
         float finalMultiplier = comboMultiplier;
-
         int goldEarned = 0;
         int currentSimulatedHP = enemy.CurrentHP;
         int darkDamageTotal = 0;
+        int iceBonusChips = 0;
 
+        // ---  특수 코팅 효과 계산 ---
         foreach (var d in keptDice)
         {
             if (d.myData.isCoated)
@@ -177,35 +179,29 @@ public class DiceManager : MonoBehaviour
                 switch (d.myData.type)
                 {
                     case DiceType.Prism:
-                        // [프리즘] 합연산 적용: 기존 배율에 (아이템 배율 - 1.0)만큼 더하기
-                        // 예: 1.2배면 0.2만 더해짐
                         finalMultiplier += (d.myData.multiplier - 1.0f);
                         break;
-
                     case DiceType.Gold:
-                        // [골드] 출현 눈금 수만큼 코인 획득 누적
                         goldEarned += d.currentValue;
                         break;
-
                     case DiceType.Dark:
-                        // [다크] 공격 전 적 현재 체력 10% 감소 (순차 적용)
                         int drop = Mathf.FloorToInt(currentSimulatedHP * 0.1f);
                         darkDamageTotal += drop;
                         currentSimulatedHP -= drop;
                         break;
+                    case DiceType.Ice:
+                        iceBonusChips += 10;
+                        break;
                 }
             }
         }
-
-        // 1. 다크 주사위 선 데미지 적용
+        // 특수 효과 실제 적용 ---
         if (darkDamageTotal > 0)
         {
-            // 죽음 콜백 없이 데미지만 먼저 입힙니다.
             enemy.TakeDamage(darkDamageTotal, null);
             Debug.Log($"[다크 효과] 공격 전 적 체력 {darkDamageTotal} 감소!");
         }
 
-        // 2. 골드 주사위 재화 획득 적용
         if (goldEarned > 0 && shopManager != null)
         {
             shopManager.currentGold += goldEarned;
@@ -213,8 +209,7 @@ public class DiceManager : MonoBehaviour
             Debug.Log($"[골드 효과] 눈금 합산하여 {goldEarned} 코인 획득!");
         }
 
-        // ---최종 메인 데미지 적용 ---
-        int damage = Mathf.FloorToInt(baseSum * finalMultiplier);
+        int damage = Mathf.FloorToInt((baseSum + iceBonusChips) * finalMultiplier);
 
         enemy.TakeDamage(damage, () => {
             ui?.ShowResult("#00FF00", "스테이지 클리어!");
@@ -304,6 +299,9 @@ public class DiceManager : MonoBehaviour
         int darkDamageTotal = 0;
         int currentSimulatedHP = (enemy != null) ? enemy.CurrentHP : 0;
 
+        // 아이스 주사위로 얻는 추가 칩 보너스 변수
+        int iceBonusChips = 0;
+
         foreach (var d in targetDice)
         {
             if (d.myData.isCoated)
@@ -318,25 +316,39 @@ public class DiceManager : MonoBehaviour
                     darkDamageTotal += drop;
                     currentSimulatedHP -= drop;
                 }
+                else if (d.myData.type == DiceType.Ice)
+                {
+                    // 아이스 주사위 1개당 기본 점수 10점 추가!
+                    iceBonusChips += 10;
+                }
             }
         }
 
-        int expectedDiceDamage = Mathf.FloorToInt(baseSum * finalMult);
+        // 기본 눈금 합 + 아이스 보너스
+        int finalBaseSum = baseSum + iceBonusChips;
+
+        int expectedDiceDamage = Mathf.FloorToInt(finalBaseSum * finalMult);
         int finalTotalDamage = expectedDiceDamage + darkDamageTotal;
 
-        string formulaString = $"{baseSum} x {finalMult:F1}배";
+        // 요청하신 대로 족보 이름 뒤에 아이스 칩 추가량을 시원한 하늘색으로 표시합니다.
+        string displayHandName = $"<color=#FFD700>{handName}</color>";
+        if (iceBonusChips > 0)
+        {
+            displayHandName += $" <color=#00FFFF>+{iceBonusChips}</color>";
+        }
+
+        // 수식에는 아이스 보너스가 더해진 합산값(finalBaseSum)을 보여줍니다.
+        string formulaString = $"{finalBaseSum} x {finalMult:F1}배";
         if (darkDamageTotal > 0)
         {
             formulaString += $" + {darkDamageTotal}(다크)";
         }
 
-        // 족보, 계산식, 최종 데미지를 \n(줄바꿈)으로 묶고 색상 태그를 입힙니다.
-        string finalCombinedText = $"<color=#FFD700>{handName}</color>\n{formulaString}\n<color=#FF5555>= {finalTotalDamage} 대미지 예정</color>";
+        string finalCombinedText = $"{displayHandName}\n{formulaString}\n<color=#FF5555>= {finalTotalDamage} 대미지 예정</color>";
 
         int curHP = (enemy != null) ? enemy.CurrentHP : 0;
         int maxHP = (enemy != null) ? enemy.MaxHP : 100;
 
-        // UI 매니저로 합쳐진 텍스트 하나만 넘겨줍니다.
         ui?.UpdateGameUI(currentStage, curHP, maxHP, currentPlayNum, maxPlays,
                          maxRerolls - currentRerolls, finalCombinedText);
     }

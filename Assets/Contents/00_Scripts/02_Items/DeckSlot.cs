@@ -14,7 +14,8 @@ public class DeckSlot : MonoBehaviour
     public Sprite normalSprite;
     public Sprite prismSprite;
     public Sprite goldSprite;
-    public Sprite blackSprite;
+    public Sprite blackSprite; 
+    public Sprite iceSprite;   
 
     public void SetEmpty()
     {
@@ -36,12 +37,14 @@ public class DeckSlot : MonoBehaviour
                 case DiceType.Prism: diceIcon.sprite = prismSprite; break;
                 case DiceType.Gold: diceIcon.sprite = goldSprite; break;
                 case DiceType.Dark: diceIcon.sprite = blackSprite; break;
+                case DiceType.Ice: diceIcon.sprite = iceSprite; break; 
             }
 
             Color finalColor = Color.white;
+
             if (isUsed)
             {
-                finalColor.a = 0.4f; 
+                finalColor.a = 0.4f;
             }
             diceIcon.color = finalColor;
         }
