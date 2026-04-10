@@ -7,7 +7,6 @@ using System.Linq;
 
 public class DiceManager : MonoBehaviour
 {
-
     [Header("덱 시스템 ")]
     public List<DiceData1> masterDeck = new List<DiceData1>(); // 스테이지를 넘나드는 영구 20개 덱
     public List<DiceData1> drawPile = new List<DiceData1>();  // 이번 스테이지 뽑기 통
@@ -33,6 +32,13 @@ public class DiceManager : MonoBehaviour
     public int maxRerolls = 2;
     public int currentRerolls;
 
+    // --- 🍩 스낵 시스템용 변수 추가 ---
+    private int defaultMaxPlays;
+    private int defaultMaxRerolls;
+    [HideInInspector] public float snackBonusMult = 0f;    // 체리: 이번 라운드 배수 추가
+    [HideInInspector] public int snackBonusChips = 0;      // 팬케이크: 이번 라운드 칩 추가
+    [HideInInspector] public int snackBonusRerolls = 0;    // 라임 주스: 이번 라운드 리롤 추가
+
     private List<Dice> activeDiceList = new List<Dice>();
     private Dice[] keepSlotOccupants;
 
@@ -42,6 +48,10 @@ public class DiceManager : MonoBehaviour
         InitializeSlots();
         keepSlotOccupants = new Dice[keepSlots.Length];
         Dice.OnDiceStateChanged += HandleDiceChanged;
+
+        // 게임 시작 시 기본 플레이/리롤 횟수 기억
+        defaultMaxPlays = maxPlays;
+        defaultMaxRerolls = maxRerolls;
 
         if (ui != null)
         {
@@ -87,6 +97,11 @@ public class DiceManager : MonoBehaviour
     {
         currentPlayNum = 1;
         currentRerolls = 0;
+
+        // 스테이지가 넘어가면 최대 횟수 스낵 버프(스테이크) 초기화
+        maxPlays = defaultMaxPlays;
+        maxRerolls = defaultMaxRerolls;
+
         enemy.Initialize(enemyMaxHP);
 
         drawPile = new List<DiceData1>(masterDeck);
@@ -111,7 +126,19 @@ public class DiceManager : MonoBehaviour
     {
         ui?.HideResult();
         currentRerolls = 0;
+
+        // 턴(라운드)이 넘어가면 일회성 스낵 버프(체리, 팬케이크, 라임 주스) 초기화
+        snackBonusMult = 0f;
+        snackBonusChips = 0;
+        snackBonusRerolls = 0;
+
         SpawnDice();
+        HandleDiceChanged();
+    }
+
+    // 스낵을 클릭했을 때 UI를 즉각적으로 새로고침하는 함수
+    public void ForceUpdateUI()
+    {
         HandleDiceChanged();
     }
 
@@ -146,8 +173,8 @@ public class DiceManager : MonoBehaviour
 
     public void OnRollButtonClick()
     {
-       
-        if (currentRerolls >= maxRerolls || ShopManager.IsShopOpen) return;
+        // 🍋 남은 굴리기 계산에 라임 주스 버프(snackBonusRerolls) 적용
+        if (currentRerolls >= (maxRerolls + snackBonusRerolls) || ShopManager.IsShopOpen) return;
 
         foreach (var d in activeDiceList.Where(d => d != null && !d.isKept))
         {
@@ -165,7 +192,10 @@ public class DiceManager : MonoBehaviour
         int baseSum = keptDice.Sum(d => d.currentValue);
 
         CalculateHandData(keptDice.Select(d => d.currentValue).ToList(), out float comboMultiplier, out string handName);
-        float finalMultiplier = comboMultiplier;
+
+        // 🍒 체리 버프 적용!
+        float finalMultiplier = comboMultiplier + snackBonusMult;
+
         int goldEarned = 0;
         int currentSimulatedHP = enemy.CurrentHP;
         int darkDamageTotal = 0;
@@ -195,7 +225,8 @@ public class DiceManager : MonoBehaviour
                 }
             }
         }
-        // 특수 효과 실제 적용 ---
+
+        // --- 특수 효과 실제 적용 ---
         if (darkDamageTotal > 0)
         {
             enemy.TakeDamage(darkDamageTotal, null);
@@ -209,7 +240,8 @@ public class DiceManager : MonoBehaviour
             Debug.Log($"[골드 효과] 눈금 합산하여 {goldEarned} 코인 획득!");
         }
 
-        int damage = Mathf.FloorToInt((baseSum + iceBonusChips) * finalMultiplier);
+        // 🥞 데미지 계산 시 팬케이크 버프(snackBonusChips) 적용!
+        int damage = Mathf.FloorToInt((baseSum + iceBonusChips + snackBonusChips) * finalMultiplier);
 
         enemy.TakeDamage(damage, () => {
             ui?.ShowResult("#00FF00", "스테이지 클리어!");
@@ -272,7 +304,8 @@ public class DiceManager : MonoBehaviour
 
         UpdateMainUI("없음");
 
-        ui?.SetRollButtonInteractable((currentRerolls < maxRerolls) && hasDiceToRoll);
+        // 🍋 리롤 버튼 활성화 조건에 라임 주스 버프 적용
+        ui?.SetRollButtonInteractable((currentRerolls < maxRerolls + snackBonusRerolls) && hasDiceToRoll);
         ui?.SetFinishButtonInteractable(keptCount == keepSlots.Length);
     }
 
@@ -295,11 +328,10 @@ public class DiceManager : MonoBehaviour
             handName = "계산 중...";
         }
 
-        float finalMult = baseMult;
+        // 🍒 체리 버프 적용!
+        float finalMult = baseMult + snackBonusMult;
         int darkDamageTotal = 0;
         int currentSimulatedHP = (enemy != null) ? enemy.CurrentHP : 0;
-
-        // 아이스 주사위로 얻는 추가 칩 보너스 변수
         int iceBonusChips = 0;
 
         foreach (var d in targetDice)
@@ -318,26 +350,28 @@ public class DiceManager : MonoBehaviour
                 }
                 else if (d.myData.type == DiceType.Ice)
                 {
-                    // 아이스 주사위 1개당 기본 점수 10점 추가!
                     iceBonusChips += 10;
                 }
             }
         }
 
-        // 기본 눈금 합 + 아이스 보너스
-        int finalBaseSum = baseSum + iceBonusChips;
+        // 🥞 기본 눈금 합 + 아이스 보너스 + 팬케이크 스낵 보너스
+        int finalBaseSum = baseSum + iceBonusChips + snackBonusChips;
 
         int expectedDiceDamage = Mathf.FloorToInt(finalBaseSum * finalMult);
         int finalTotalDamage = expectedDiceDamage + darkDamageTotal;
 
-        // 요청하신 대로 족보 이름 뒤에 아이스 칩 추가량을 시원한 하늘색으로 표시합니다.
         string displayHandName = $"<color=#FFD700>{handName}</color>";
         if (iceBonusChips > 0)
         {
             displayHandName += $" <color=#00FFFF>+{iceBonusChips}</color>";
         }
+        // 🥞 UI 표기: 팬케이크 칩 추가량을 주황색으로 표시
+        if (snackBonusChips > 0)
+        {
+            displayHandName += $" <color=#FFA500>+{snackBonusChips}(스낵)</color>";
+        }
 
-        // 수식에는 아이스 보너스가 더해진 합산값(finalBaseSum)을 보여줍니다.
         string formulaString = $"{finalBaseSum} x {finalMult:F1}배";
         if (darkDamageTotal > 0)
         {
@@ -349,11 +383,12 @@ public class DiceManager : MonoBehaviour
         int curHP = (enemy != null) ? enemy.CurrentHP : 0;
         int maxHP = (enemy != null) ? enemy.MaxHP : 100;
 
+        // 🍋 남은 굴리기 표시에 라임 주스 버프 적용
+        int remainingRerolls = (maxRerolls + snackBonusRerolls) - currentRerolls;
+
         ui?.UpdateGameUI(currentStage, curHP, maxHP, currentPlayNum, maxPlays,
-                         maxRerolls - currentRerolls, finalCombinedText);
+                         remainingRerolls, finalCombinedText);
     }
-
-
 
     void AssignToKeepSlot(Dice d)
     {
