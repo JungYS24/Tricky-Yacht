@@ -4906,6 +4906,7 @@ GameObject:
   - component: {fileID: 7786413885404776167}
   - component: {fileID: 59632178999516309}
   - component: {fileID: 420654394546865938}
+  - component: {fileID: -6888208857438917302}
   m_Layer: 0
   m_Name: Dice(1)
   m_TagString: Untagged
@@ -5069,3 +5070,20 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &-6888208857438917302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6826951872689829596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e9ae2af8a8c50d4cbc049b4f3f77836, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DiceCoatingVFX
+  iceVFXPrefab: {fileID: 8305203530629180466, guid: 4ebf1839c56a6e44ea9e249325f9d1ca, type: 3}
+  darkVFXPrefab: {fileID: 3394135717981710326, guid: ec67f2afd8c944f4faf1625fb57e32cf, type: 3}
+  goldVFXPrefab: {fileID: 762384880629784995, guid: bb52cdaddc210b44bb80aa4bf1b2129e, type: 3}
+  prismVFXPrefab: {fileID: 4376018025336615863, guid: bd528d959e80e6e4c8f891586427750a, type: 3}
+  vfxLocalOffset: {x: 0, y: 0.15, z: 0}

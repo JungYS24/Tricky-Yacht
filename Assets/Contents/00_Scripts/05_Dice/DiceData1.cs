@@ -2,12 +2,12 @@ using UnityEngine;
 
 public enum DiceType
 {
-    Normal, 
-    Prism,  
-    Gold,   
-    Black   
+    Normal,
+    Prism,
+    Gold,
+    Black,
+    Ice
 }
-
 
 [System.Serializable]
 public class DiceData1
