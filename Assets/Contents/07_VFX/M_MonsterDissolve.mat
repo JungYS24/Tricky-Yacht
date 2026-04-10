@@ -60,7 +60,7 @@ Material:
     - _DissolveAmount: 0
     - _EdgeWidth: 0.025
     - _EnableExternalAlpha: 0
-    - _GlowIntensity: 0.5
+    - _GlowIntensity: 0.3
     - _HitFlash: 0
     - _PixelSize: 64
     - _ZWrite: 0

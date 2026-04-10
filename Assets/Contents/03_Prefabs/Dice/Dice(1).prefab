@@ -4955,7 +4955,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 3404fa0c020765d42a47e197e36497b2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5009,6 +5009,8 @@ MonoBehaviour:
     multiplier: 1
     diceColor: {r: 1, g: 1, b: 1, a: 1}
     type: 0
+    minRoll: 1
+    maxRoll: 6
   diceFaceSprites:
   - {fileID: 1126806496608297571, guid: adf8c69f814b7834ab46aa7c1513900e, type: 3}
   - {fileID: -4213626499313082479, guid: 5be89e7c95cfc3245af181068e6fbf3c, type: 3}
