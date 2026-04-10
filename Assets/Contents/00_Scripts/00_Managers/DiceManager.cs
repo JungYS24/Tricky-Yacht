@@ -32,7 +32,7 @@ public class DiceManager : MonoBehaviour
     public int maxRerolls = 2;
     public int currentRerolls;
 
-    // --- 🍩 스낵 시스템용 변수 추가 ---
+    // --- 스낵 시스템용 변수 추가 ---
     private int defaultMaxPlays;
     private int defaultMaxRerolls;
     [HideInInspector] public float snackBonusMult = 0f;    // 체리: 이번 라운드 배수 추가
@@ -173,7 +173,7 @@ public class DiceManager : MonoBehaviour
 
     public void OnRollButtonClick()
     {
-        // 🍋 남은 굴리기 계산에 라임 주스 버프(snackBonusRerolls) 적용
+        //  남은 굴리기 계산에 라임 주스 버프(snackBonusRerolls) 적용
         if (currentRerolls >= (maxRerolls + snackBonusRerolls) || ShopManager.IsShopOpen) return;
 
         foreach (var d in activeDiceList.Where(d => d != null && !d.isKept))
@@ -193,7 +193,7 @@ public class DiceManager : MonoBehaviour
 
         CalculateHandData(keptDice.Select(d => d.currentValue).ToList(), out float comboMultiplier, out string handName);
 
-        // 🍒 체리 버프 적용!
+        // 체리 버프 적용!
         float finalMultiplier = comboMultiplier + snackBonusMult;
 
         int goldEarned = 0;
@@ -225,7 +225,6 @@ public class DiceManager : MonoBehaviour
                 }
             }
         }
-
         // --- 특수 효과 실제 적용 ---
         if (darkDamageTotal > 0)
         {
@@ -239,16 +238,25 @@ public class DiceManager : MonoBehaviour
             ui?.UpdateGoldUI(shopManager.currentGold);
             Debug.Log($"[골드 효과] 눈금 합산하여 {goldEarned} 코인 획득!");
         }
-
-        // 🥞 데미지 계산 시 팬케이크 버프(snackBonusChips) 적용!
+        // 데미지 계산 시 팬케이크 버프 적용
         int damage = Mathf.FloorToInt((baseSum + iceBonusChips + snackBonusChips) * finalMultiplier);
-
         enemy.TakeDamage(damage, () => {
-            ui?.ShowResult("#00FF00", "스테이지 클리어!");
+            int clearReward = 500; // 스테이지 클리어 보상금!
+
+            if (shopManager != null)
+            {
+                shopManager.currentGold += clearReward;
+                ui?.UpdateGoldUI(shopManager.currentGold);
+            }
+
+            string clearMessage = $"스테이지 클리어!\n<size=80%><color=#FFD700>+{clearReward} 코인 획득!</color></size>";
+            ui?.ShowResult("#00FF00", clearMessage);
+
             Invoke(nameof(PromptShopChoice), 1.5f);
         });
 
         StartCoroutine(ProcessTurnResult(handName));
+
     }
 
     private IEnumerator ProcessTurnResult(string handName)
@@ -304,7 +312,7 @@ public class DiceManager : MonoBehaviour
 
         UpdateMainUI("없음");
 
-        // 🍋 리롤 버튼 활성화 조건에 라임 주스 버프 적용
+        // 리롤 버튼 활성화 조건에 라임 주스 버프 적용
         ui?.SetRollButtonInteractable((currentRerolls < maxRerolls + snackBonusRerolls) && hasDiceToRoll);
         ui?.SetFinishButtonInteractable(keptCount == keepSlots.Length);
     }
@@ -328,7 +336,7 @@ public class DiceManager : MonoBehaviour
             handName = "계산 중...";
         }
 
-        // 🍒 체리 버프 적용!
+        // 체리 버프 적용!
         float finalMult = baseMult + snackBonusMult;
         int darkDamageTotal = 0;
         int currentSimulatedHP = (enemy != null) ? enemy.CurrentHP : 0;
@@ -355,7 +363,7 @@ public class DiceManager : MonoBehaviour
             }
         }
 
-        // 🥞 기본 눈금 합 + 아이스 보너스 + 팬케이크 스낵 보너스
+        //기본 눈금 합 + 아이스 보너스 + 팬케이크 스낵 보너스
         int finalBaseSum = baseSum + iceBonusChips + snackBonusChips;
 
         int expectedDiceDamage = Mathf.FloorToInt(finalBaseSum * finalMult);
@@ -366,7 +374,7 @@ public class DiceManager : MonoBehaviour
         {
             displayHandName += $" <color=#00FFFF>+{iceBonusChips}</color>";
         }
-        // 🥞 UI 표기: 팬케이크 칩 추가량을 주황색으로 표시
+        // UI 표기: 팬케이크 칩 추가량을 주황색으로 표시
         if (snackBonusChips > 0)
         {
             displayHandName += $" <color=#FFA500>+{snackBonusChips}(스낵)</color>";
@@ -383,7 +391,7 @@ public class DiceManager : MonoBehaviour
         int curHP = (enemy != null) ? enemy.CurrentHP : 0;
         int maxHP = (enemy != null) ? enemy.MaxHP : 100;
 
-        // 🍋 남은 굴리기 표시에 라임 주스 버프 적용
+        //남은 굴리기 표시에 라임 주스 버프 적용
         int remainingRerolls = (maxRerolls + snackBonusRerolls) - currentRerolls;
 
         ui?.UpdateGameUI(currentStage, curHP, maxHP, currentPlayNum, maxPlays,

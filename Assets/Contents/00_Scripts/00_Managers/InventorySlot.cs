@@ -32,14 +32,28 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler
         itemIcon.sprite = null;
         itemIcon.gameObject.SetActive(false);
     }
+
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (ShopManager.IsShopOpen || isEmpty) return;
+        if (isEmpty) return; // 빈 슬롯이면 무시
 
-        if (currentItem is SnackItemSO snack)
+        // 좌클릭: 스낵 먹기
+        if (eventData.button == PointerEventData.InputButton.Left)
         {
-            snack.ApplyItemEffect(manager.diceManager);
-            ClearSlot();
+            if (!ShopManager.IsShopOpen && currentItem is SnackItemSO snack)
+            {
+                snack.ApplyItemEffect(manager.diceManager);
+                ClearSlot();
+                manager.HideSellPopup(); // 무언가 사용하면 팝업 닫기
+            }
+        }
+        //  우클릭: 피규어 판매 팝업 띄우기
+        else if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            if (currentItem is FigureItemSO) // 피규어만 판매 가능하게
+            {
+                manager.ShowSellPopup(this);
+            }
         }
     }
 }
