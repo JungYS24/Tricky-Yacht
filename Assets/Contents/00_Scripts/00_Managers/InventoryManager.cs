@@ -72,7 +72,6 @@ public class InventoryManager : MonoBehaviour
             // 실제 내용물이 있는 작은 팝업창만 마우스(슬롯) 위치 근처로 이동시킵니다
             if (sellPopupPanel != null)
             {
-
                 sellPopupPanel.transform.position = slot.transform.position;
 
                 sellPopupPanel.transform.localPosition += new Vector3(0f, 100f, 0f);
@@ -121,19 +120,18 @@ public class InventoryManager : MonoBehaviour
     }
 
     // 2. 보유 중인 피규어들의 클리어 보너스 골드 총합 계산
-    public int GetTotalFigureBonusGold()
+    public int ApplyAllFigurePassives(DiceManager diceManager, ShopManager shopManager)
     {
-        int totalBonus = 0;
+        int totalGoldBonus = 0;
         foreach (var slot in figureSlots)
         {
-            // 슬롯이 비어있지 않고, 들어있는 아이템이 피규어라면
-            if (!slot.isEmpty && slot.currentItem is FigureItemSO figureData)
+            if (!slot.isEmpty && slot.currentItem is FigureItemSO figure)
             {
-                totalBonus += figureData.stageClearGoldBonus;
+                figure.ApplyPassiveEffect(diceManager, shopManager);
+                if (figure.abilityType == FigureAbility.GoldBonus)
+                    totalGoldBonus += figure.abilityValue;
             }
         }
-        return totalBonus;
+        return totalGoldBonus;
     }
-
-
 }
