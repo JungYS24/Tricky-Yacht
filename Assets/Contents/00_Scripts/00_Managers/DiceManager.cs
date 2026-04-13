@@ -345,6 +345,12 @@ public class DiceManager : MonoBehaviour
         int totalDamage = Mathf.FloorToInt(finalBaseSum * finalMult) + darkDamageTotal;
 
         string displayHand = $"<color=#FFD700>{handName}</color>";
+
+        if (iceBonusChips > 0)
+        {
+            displayHand += $" <color=#00FFFF>+{iceBonusChips}</color>";
+        }
+
         if (snackBonusChips > 0) displayHand += $" <color=#FFA500>+{snackBonusChips}(스낵)</color>";
 
         string formula = $"{finalBaseSum} x {finalMult:F1}배" + (darkDamageTotal > 0 ? $" + {darkDamageTotal}(다크)" : "");

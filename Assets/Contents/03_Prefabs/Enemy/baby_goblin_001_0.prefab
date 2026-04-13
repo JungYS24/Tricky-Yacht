@@ -129,6 +129,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
   monsterImage: {fileID: 116277672913902635}
   enemyHPSlider: {fileID: 0}
+  monsterAnimator: {fileID: 5747651581630805986}
   deathParticlePrefab: {fileID: 5502091708639216629, guid: 3d67bcf124b34ad4499a49f4c47c7a0e, type: 3}
   hitColor: {r: 1, g: 0, b: 0, a: 1}
   hitEffectDuration: 0.18
@@ -143,5 +144,6 @@ MonoBehaviour:
   edgeColorAProperty: _EdgeColorA
   edgeColorBProperty: _EdgeColorB
   edgeGlowPowerProperty: _EdgeGlowPower
+  monsterSequenceList: []
   dropFigureData: {fileID: 11400000, guid: 54d773ec539103049b6ca1edaf3c357e, type: 2}
   baseDropRate: 0.42
