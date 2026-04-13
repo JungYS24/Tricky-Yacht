@@ -54,6 +54,10 @@ public class Enemy : MonoBehaviour
         originalScale = transform.localScale;
     }
 
+    public void ResetMonsterIndex()
+    {
+        currentMonsterIndex = 0;
+    }
     public void Initialize(int currentStage)
     {
         // 1. 만약의 사태를 대비한 기본 체력 (리스트가 비어있을 때 등)

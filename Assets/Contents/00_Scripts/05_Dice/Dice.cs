@@ -2,20 +2,24 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using System;
 using System.Collections;
+using System.Linq;
 
 public class Dice : MonoBehaviour, IPointerDownHandler
 {
+    [Header("상태 데이터")]
     public int currentValue;
     public bool isKept = false;
     public int currentKeepIndex = -1;
     public Vector3 rollPos;
+    public DiceData1 myData; // 주사위 고유 데이터 (코팅, 색상, 면 구성 등)
 
-    public DiceData1 myData; // 추가됨: 이 주사위가 가진 고유 데이터 (코팅, 색상 등)
-
-    public Sprite[] diceFaceSprites;
+    [Header("렌더링 및 연출")]
+    public Sprite[] diceFaceSprites;     // 일반 주사위 눈금 이미지 (1~6)
+    public Sprite[] fixedNumberSprites;  // 고정 주사위용 아라비아 숫자 이미지 (1~6)
     private SpriteRenderer spriteRenderer;
     public ParticleSystem rollParticle;
 
+    [Header("애니메이션 설정")]
     public float rollDuration = 0.45f;
     public float shakePower = 0.12f;
     public float rotatePower = 25f;
@@ -23,6 +27,8 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
     private Vector3 originalScale;
     private Coroutine rollCoroutine;
+    private bool isFixedDice = false; // 6면이 모두 같은 숫자인지 여부
+    private bool useNumberSprite = false;
     public static event Action OnDiceStateChanged;
 
     private void Awake()
@@ -31,23 +37,38 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         originalScale = transform.localScale;
     }
 
-    // SetValue 대신 SetData로 진화! (데이터와 색상을 함께 받음)
     public void SetData(DiceData1 data, int initialValue)
     {
         if (isKept) return;
         myData = data;
+
+        // [수정] 고정 주사위이거나, 이름에 '홀수' 또는 '짝수'가 들어가면 숫자 이미지를 사용하도록 설정
+        bool isFixed = myData.faceValues.All(f => f == myData.faceValues[0]);
+        bool isOddEven = !string.IsNullOrEmpty(myData.diceName) &&
+                         (myData.diceName.Contains("홀수") || myData.diceName.Contains("짝수"));
+
+        useNumberSprite = isFixed || isOddEven;
+
         currentValue = initialValue;
         UpdateSprite(initialValue);
 
-        // 코팅된 색상 칠해주기
         if (spriteRenderer != null)
             spriteRenderer.color = myData.diceColor;
     }
 
     private void UpdateSprite(int value)
     {
-        if (diceFaceSprites != null && value > 0 && value <= diceFaceSprites.Length && spriteRenderer != null)
+        if (spriteRenderer == null || value <= 0) return;
+
+        // 판별된 결과에 따라 숫자 스프라이트 또는 눈금 스프라이트를 선택
+        if (useNumberSprite && fixedNumberSprites != null && value <= fixedNumberSprites.Length)
+        {
+            spriteRenderer.sprite = fixedNumberSprites[value - 1];
+        }
+        else if (diceFaceSprites != null && value <= diceFaceSprites.Length)
+        {
             spriteRenderer.sprite = diceFaceSprites[value - 1];
+        }
     }
 
     public void PlayRollEffect(int finalValue)
@@ -67,8 +88,12 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             elapsed += Time.deltaTime;
             float t = elapsed / rollDuration;
 
-            UpdateSprite(UnityEngine.Random.Range(1, 7));
+            // 1~6 전체가 아닌, 이 주사위가 가진 면(faceValues) 중에서만 랜덤하게 보여줌
+            // 홀수 주사위라면 굴러가는 동안에도 1, 3, 5만 보임
+            int randomFaceIndex = UnityEngine.Random.Range(0, 6);
+            UpdateSprite(myData.faceValues[randomFaceIndex]);
 
+            // 흔들림 및 회전 연출
             Vector3 randomOffset = new Vector3(
                 UnityEngine.Random.Range(-shakePower, shakePower),
                 UnityEngine.Random.Range(-shakePower, shakePower), 0f);
@@ -80,11 +105,13 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             yield return null;
         }
 
+        // 연출 종료 후 상태 복구
         transform.SetPositionAndRotation(startPos, Quaternion.identity);
         transform.localScale = originalScale;
         currentValue = finalValue;
         UpdateSprite(finalValue);
 
+        // 팝업 이펙트 및 파티클
         transform.localScale = originalScale * 1.25f;
         if (rollParticle != null)
         {
@@ -95,7 +122,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         yield return new WaitForSeconds(0.06f);
         transform.localScale = originalScale;
 
-        // 연출이 끝나도 코팅 색상 유지
+        // 보관 상태에 따른 색상 최종 조정
         spriteRenderer.color = isKept ? myData.diceColor * 0.6f : myData.diceColor;
         rollCoroutine = null;
     }
@@ -103,10 +130,11 @@ public class Dice : MonoBehaviour, IPointerDownHandler
     public void OnPointerDown(PointerEventData eventData)
     {
         if (ShopManager.IsShopOpen) return;
+
         isKept = !isKept;
         OnDiceStateChanged?.Invoke();
 
-        // 무조건 하얀색으로 돌아가는 게 아니라, 내 고유의 색상(코팅색)을 기준으로 어두워짐
+        // 보관 시에는 고유 코팅 색상을 기준으로 어둡게 처리
         spriteRenderer.color = isKept ? myData.diceColor * 0.6f : myData.diceColor;
     }
 

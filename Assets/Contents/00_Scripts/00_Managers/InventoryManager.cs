@@ -40,16 +40,19 @@ public class InventoryManager : MonoBehaviour
 
         HideSellPopup();
     }
-
+    public void ClearAllSlots()
+    {
+        foreach (var slot in figureSlots) slot.ClearSlot();
+        foreach (var slot in snackSlots) slot.ClearSlot();
+        Debug.Log("인벤토리의 모든 아이템이 초기화되었습니다.");
+    }
     public bool AddItem(BaseItemDataSO item)
     {
-        // [수정] 아이템을 넣을 때 해당 아이템 타입의 최대 제한(maxSlots)을 같이 넘겨줍니다.
         if (item is FigureItemSO) return PlaceIntoEmptySlot(item, figureSlots, maxFigureSlots);
         else if (item is SnackItemSO) return PlaceIntoEmptySlot(item, snackSlots, maxSnackSlots);
         return false;
     }
 
-    // [수정] maxLimit 매개변수를 추가하여 배열 크기가 아무리 커도 정해진 최대치까지만 검사하도록 변경
     private bool PlaceIntoEmptySlot(BaseItemDataSO item, InventorySlot[] slots, int maxLimit)
     {
         // 슬롯 배열의 실제 길이와 기획상 최대 길이 중 더 작은 값을 기준으로 삼습니다.

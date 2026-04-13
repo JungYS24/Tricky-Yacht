@@ -156,7 +156,8 @@ public class DiceManager : MonoBehaviour
             GameObject go = Instantiate(dicePrefab, rollSlots[i].position, Quaternion.identity);
             Dice d = go.GetComponent<Dice>();
             d.rollPos = rollSlots[i].position;
-            d.SetData(drawnData, UnityEngine.Random.Range(1, 7));
+            int initialVal = drawnData.faceValues[UnityEngine.Random.Range(0, 6)];
+            d.SetData(drawnData, initialVal);
             activeDiceList.Add(d);
         }
     }
@@ -164,9 +165,15 @@ public class DiceManager : MonoBehaviour
     public void OnRollButtonClick()
     {
         if (currentRerolls >= (maxRerolls + snackBonusRerolls) || ShopManager.IsShopOpen) return;
+
         CameraShake.Instance.Shake(0.1f, 0.1f);
+
         foreach (var d in activeDiceList.Where(d => d != null && !d.isKept))
-            d.PlayRollEffect(UnityEngine.Random.Range(1, 7));
+        {
+            int finalResult = d.myData.faceValues[UnityEngine.Random.Range(0, 6)];
+            d.PlayRollEffect(finalResult);
+        }
+
         currentRerolls++;
         StartCoroutine(HandleDiceChangedDelayed());
     }
@@ -357,7 +364,38 @@ public class DiceManager : MonoBehaviour
     public void GoToShop() { ui?.HideShopChoice(); shopManager?.OpenShop(); }
     public void SkipShopAndNextStage() { ui?.HideShopChoice(); NextStage(); }
     public void NextStage() { currentStage++; enemyMaxHP += 30; StartNewStage(); }
-    void RestartGame() { currentStage = 1; enemyMaxHP = 40; StartNewStage(); }
+    void RestartGame()
+    {
+        // 1. 기본 스테이지 데이터 초기화
+        currentStage = 1;
+        enemyMaxHP = 40;
+
+        // 2. 덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 20개로)
+        InitializeMasterDeck();
+
+        // 3. 골드 초기화 (ShopManager 참조)
+        if (shopManager != null)
+        {
+            shopManager.currentGold = 3000; // 초기 소지금 (기획에 맞게 수정하세요)
+            ui?.UpdateGoldUI(shopManager.currentGold);
+        }
+
+        // 4. 인벤토리 초기화 (방금 만든 함수 호출)
+        InventoryManager.Instance?.ClearAllSlots();
+
+        // 5. 스낵 및 특수 상태 버프 초기화
+        snackBonusMult = 0f;
+        snackBonusChips = 0;
+        snackBonusRerolls = 0;
+        snackBonusFigureDropRate = 0f;
+        isPeppermintActive = false;
+
+        Debug.Log("게임이 완전히 초기화되었습니다. 다시 시작합니다.");
+        //몬스터 초기화
+        enemy.ResetMonsterIndex();
+        // 6. 새로운 스테이지 시작
+        StartNewStage();
+    }
 
     void CalculateHandData(List<int> values, out float multiplier, out string handName)
     {

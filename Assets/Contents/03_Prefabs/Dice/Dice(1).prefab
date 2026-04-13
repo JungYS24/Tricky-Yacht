@@ -4907,6 +4907,7 @@ GameObject:
   - component: {fileID: 59632178999516309}
   - component: {fileID: 420654394546865938}
   - component: {fileID: -6888208857438917302}
+  - component: {fileID: 7708629646872671777}
   m_Layer: 0
   m_Name: Dice(1)
   m_TagString: Untagged
@@ -4922,7 +4923,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6826951872689829596}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -4980,7 +4981,7 @@ SpriteRenderer:
   m_SortingOrder: 5
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 0.07075471, b: 0.07075471, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -5006,12 +5007,14 @@ MonoBehaviour:
   currentKeepIndex: -1
   rollPos: {x: 0, y: 0, z: 0}
   myData:
+    diceName: 
     isCoated: 0
     multiplier: 1
     diceColor: {r: 1, g: 1, b: 1, a: 1}
     type: 0
     minRoll: 1
     maxRoll: 6
+    faceValues: 010000000200000003000000040000000500000006000000
   diceFaceSprites:
   - {fileID: 21300000, guid: e6d4349e6942c9344957fae0a557fc9e, type: 3}
   - {fileID: 4277651623651152253, guid: 4a4761681d308864e86310e4a393d6f5, type: 3}
@@ -5019,6 +5022,13 @@ MonoBehaviour:
   - {fileID: 6584158007040453875, guid: 73cca03ad1f597441bbc9c999b86a0a7, type: 3}
   - {fileID: 7099116345629502920, guid: bbf80e8244d1aca46a021ba395282516, type: 3}
   - {fileID: -7865692014833397383, guid: b1e83609a1defef46b845a44bb9ba73a, type: 3}
+  fixedNumberSprites:
+  - {fileID: 21300000, guid: 530d105a15c14d6459ffada9fad79886, type: 3}
+  - {fileID: 21300000, guid: aa0a775608c986c409cdb3f873ed8d4c, type: 3}
+  - {fileID: 21300000, guid: db14b69f6e9b8484c8f3c688874f99ee, type: 3}
+  - {fileID: 21300000, guid: c57f507212de77548b0b579ca62f806c, type: 3}
+  - {fileID: 21300000, guid: 474b239e507e45246a28cd1689d621f6, type: 3}
+  - {fileID: 21300000, guid: b7e10860d6dcb124abf517433ca2cfde, type: 3}
   rollParticle: {fileID: 3683730203153096169}
   rollDuration: 0.45
   shakePower: 0.12
@@ -5087,3 +5097,25 @@ MonoBehaviour:
   goldVFXPrefab: {fileID: 762384880629784995, guid: bb52cdaddc210b44bb80aa4bf1b2129e, type: 3}
   prismVFXPrefab: {fileID: 4376018025336615863, guid: bd528d959e80e6e4c8f891586427750a, type: 3}
   vfxLocalOffset: {x: 0, y: 0.15, z: 0}
+--- !u!95 &7708629646872671777
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6826951872689829596}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
