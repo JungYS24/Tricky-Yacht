@@ -23,6 +23,7 @@ public class DiceManager : MonoBehaviour
     public UIManager ui;
     public ShopManager shopManager;
     public Enemy enemy;
+    public HandVFXManager handVFXManager;
 
     [Header("게임 데이터")]
     public int enemyMaxHP = 40;
@@ -196,7 +197,8 @@ public class DiceManager : MonoBehaviour
         int baseSum = keptDice.Sum(d => d.currentValue);
 
         CalculateHandData(keptDice.Select(d => d.currentValue).ToList(), out float comboMultiplier, out string handName);
-        
+        handVFXManager?.PlayHandVFX(handName);
+
         // 좋은 족보일 때 슬로모션
         if (comboMultiplier >= 2.0f)
         {
