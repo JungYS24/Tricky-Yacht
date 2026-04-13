@@ -176,6 +176,8 @@ public class DiceManager : MonoBehaviour
         //  남은 굴리기 계산에 라임 주스 버프(snackBonusRerolls) 적용
         if (currentRerolls >= (maxRerolls + snackBonusRerolls) || ShopManager.IsShopOpen) return;
 
+        CameraShake.Instance.Shake(0.1f, 0.1f);
+
         foreach (var d in activeDiceList.Where(d => d != null && !d.isKept))
         {
             d.PlayRollEffect(UnityEngine.Random.Range(1, 7));
@@ -188,10 +190,19 @@ public class DiceManager : MonoBehaviour
     {
         if (ShopManager.IsShopOpen || enemy.IsDead) return;
 
+        CameraShake.Instance.Shake(0.2f, 0.15f);
+
         var keptDice = activeDiceList.Where(d => d != null && d.isKept).ToList();
         int baseSum = keptDice.Sum(d => d.currentValue);
 
         CalculateHandData(keptDice.Select(d => d.currentValue).ToList(), out float comboMultiplier, out string handName);
+        
+        // 좋은 족보일 때 슬로모션
+        if (comboMultiplier >= 2.0f)
+        {
+            SlowMotion.Instance.PlaySlowMotion(0.2f, 0.2f);
+            CameraShake.Instance.Shake(0.2f, 0.15f);
+        }
 
         // 체리 버프 적용!
         float finalMultiplier = comboMultiplier + snackBonusMult;
@@ -401,6 +412,9 @@ public class DiceManager : MonoBehaviour
     void AssignToKeepSlot(Dice d)
     {
         int index = Array.IndexOf(keepSlotOccupants, null);
+
+        CameraShake.Instance.Shake(0.1f, 0.08f);
+
         if (index != -1)
         {
             keepSlotOccupants[index] = d;
