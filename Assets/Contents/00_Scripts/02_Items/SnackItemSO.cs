@@ -36,15 +36,15 @@ public class SnackItemSO : BaseItemDataSO
                 diceManager.snackBonusFigureDropRate += 0.15f;
                 break;
             case SnackType.Peppermint:
-                // [페퍼민트] 즉시 몬스터 박제 시도 (도박)
-                diceManager.TryPeppermintCapture();
+                // [페퍼민트] 즉시 포획 시도 대신, 이번 턴 처치 시 30% 확률로 포획되는 버프를 켭니다.
+                diceManager.isPeppermintActive = true;
                 break;
 
         }
 
         Debug.Log($"스낵 [{itemName}] 사용! 효과가 적용되었습니다.");
 
-        // 아이템 사용 후 화면에 바뀐 데미지/횟수를 즉시 반영
+        // 아이템 사용 후 화면에 바뀐 데미지/횟수/확률 등을 즉시 반영
         diceManager.ForceUpdateUI();
     }
 }

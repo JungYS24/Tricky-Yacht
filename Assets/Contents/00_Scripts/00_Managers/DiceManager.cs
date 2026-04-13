@@ -41,6 +41,9 @@ public class DiceManager : MonoBehaviour
     [HideInInspector] public int snackBonusRerolls = 0;
     [HideInInspector] public float snackBonusFigureDropRate = 0f;
 
+    // [유지] 페퍼민트를 먹었는지 체크하는 상태 변수 (스테이지 동안 유지)
+    [HideInInspector] public bool isPeppermintActive = false;
+
     private List<Dice> activeDiceList = new List<Dice>();
     private Dice[] keepSlotOccupants;
 
@@ -94,6 +97,9 @@ public class DiceManager : MonoBehaviour
         currentRerolls = 0;
         maxPlays = defaultMaxPlays;
         maxRerolls = defaultMaxRerolls;
+
+        // 스테이지가 넘어갈 때 페퍼민트 효과 초기화
+        isPeppermintActive = false;
 
         enemy.Initialize(enemyMaxHP);
         drawPile = new List<DiceData1>(masterDeck);
@@ -201,6 +207,7 @@ public class DiceManager : MonoBehaviour
         if (darkDamageTotal > 0) enemy.TakeDamage(darkDamageTotal, null);
 
         int damage = Mathf.FloorToInt((baseSum + iceBonusChips + snackBonusChips) * finalMultiplier);
+
         enemy.TakeDamage(damage, () => ProcessStageClear(false));
 
         StartCoroutine(ProcessTurnResult(handName));
@@ -210,7 +217,6 @@ public class DiceManager : MonoBehaviour
     private void ProcessStageClear(bool fromPeppermint)
     {
         int baseClearReward = 500;
-        // 인벤토리 피규어 패시브 전체 적용 및 보너스 골드 합산
         int figureBonusGold = InventoryManager.Instance.ApplyAllFigurePassives(this, shopManager);
 
         if (shopManager != null)
@@ -221,50 +227,23 @@ public class DiceManager : MonoBehaviour
 
         string clearMessage = $"스테이지 클리어!\n<size=80%><color=#FFD700>+{baseClearReward} 코인 획득!</color></size>";
         if (figureBonusGold > 0) clearMessage += $"\n<size=60%><color=#FFA500>피규어 보너스 +{figureBonusGold}G</color></size>";
-
-        // 적 프리팹에 설정된 고유 데이터 활용
-        if (fromPeppermint)
+        if (isPeppermintActive)
         {
-            if (enemy.dropFigureData != null && InventoryManager.Instance.HasEmptyFigureSlot())
-            {
-                InventoryManager.Instance.AddItem(enemy.dropFigureData);
-                clearMessage += $"\n<size=70%><color=#00FFFF>전리품: {enemy.dropFigureData.itemName} 획득 (페퍼민트)</color></size>";
-            }
-        }
-        else
-        {
+           
             float dropChance = enemy.baseDropRate + snackBonusFigureDropRate;
+
             if (enemy.dropFigureData != null && UnityEngine.Random.value <= dropChance)
             {
                 if (InventoryManager.Instance.HasEmptyFigureSlot())
                 {
                     InventoryManager.Instance.AddItem(enemy.dropFigureData);
-                    clearMessage += $"\n<size=70%><color=#00FFFF>전리품: {enemy.dropFigureData.itemName} 획득!</color></size>";
+                    clearMessage += $"\n<size=70%><color=#00FFFF>전리품: {enemy.dropFigureData.itemName} 박제 성공! (페퍼민트 효과)</color></size>";
                 }
             }
         }
 
         ui?.ShowResult("#00FF00", clearMessage);
         Invoke(nameof(PromptShopChoice), 2.0f);
-    }
-
-    public void TryPeppermintCapture()
-    {
-        if (enemy == null || enemy.IsDead) return;
-        float hpPercent = (float)enemy.CurrentHP / enemy.MaxHP;
-        float t = Mathf.InverseLerp(1.0f, 0.05f, hpPercent);
-        float successProbability = Mathf.Lerp(0.03f, 0.30f, t);
-
-        if (UnityEngine.Random.value <= successProbability)
-        {
-            ui?.ShowResult("#00FF00", "페퍼민트 대성공!\n<size=70%>몬스터가 즉시 박제되었습니다!</size>");
-            enemy.TakeDamage(enemy.CurrentHP, () => ProcessStageClear(true));
-        }
-        else
-        {
-            ui?.ShowResult("#FF5555", "박제 실패...\n<size=70%>몬스터가 저항했습니다.</size>");
-            Invoke(nameof(HideResultAfterFailure), 1.5f);
-        }
     }
 
     private void HideResultAfterFailure() { if (!ShopManager.IsShopOpen && !enemy.IsDead) ui?.HideResult(); }
@@ -359,8 +338,7 @@ public class DiceManager : MonoBehaviour
         int remainingRerolls = (maxRerolls + snackBonusRerolls) - currentRerolls;
         ui?.UpdateGameUI(currentStage, enemy.CurrentHP, enemy.MaxHP, currentPlayNum, maxPlays, remainingRerolls, combinedText);
 
-        // 박제 확률 실시간 UI 갱신 (적의 baseDropRate 참조)
-        float currentEnemyDropRate = (enemy != null) ? enemy.baseDropRate : 0f;
+        float currentEnemyDropRate = isPeppermintActive ? enemy.baseDropRate : 0f;
         ui?.UpdateDropRateUI(currentEnemyDropRate, snackBonusFigureDropRate);
     }
 

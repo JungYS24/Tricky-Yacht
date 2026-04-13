@@ -13,8 +13,12 @@ public class InventoryManager : MonoBehaviour
     public InventorySlot[] figureSlots;
     public InventorySlot[] snackSlots;
 
+    [Header("인벤토리 용량 제한")]
+    public int maxFigureSlots = 99; // 피규어는 기존처럼 배열 크기만큼 허용 (원하시면 수정 가능)
+    public int maxSnackSlots = 5;   // [추가] 스낵칸 최대 5개로 제한
+
     [Header("판매 팝업 UI")]
-    public GameObject sellPopupRoot;      
+    public GameObject sellPopupRoot;
     public GameObject sellPopupPanel;     // 실제 그래픽이 있는 팝업창 (마우스 따라다닐 부분)
     public Button sellButton;             // 판매 확인 버튼
     public Button backgroundCloseButton;  // 팝업 뒤에 깔린 투명한 전체화면 닫기 버튼
@@ -39,14 +43,19 @@ public class InventoryManager : MonoBehaviour
 
     public bool AddItem(BaseItemDataSO item)
     {
-        if (item is FigureItemSO) return PlaceIntoEmptySlot(item, figureSlots);
-        else if (item is SnackItemSO) return PlaceIntoEmptySlot(item, snackSlots);
+        // [수정] 아이템을 넣을 때 해당 아이템 타입의 최대 제한(maxSlots)을 같이 넘겨줍니다.
+        if (item is FigureItemSO) return PlaceIntoEmptySlot(item, figureSlots, maxFigureSlots);
+        else if (item is SnackItemSO) return PlaceIntoEmptySlot(item, snackSlots, maxSnackSlots);
         return false;
     }
 
-    private bool PlaceIntoEmptySlot(BaseItemDataSO item, InventorySlot[] slots)
+    // [수정] maxLimit 매개변수를 추가하여 배열 크기가 아무리 커도 정해진 최대치까지만 검사하도록 변경
+    private bool PlaceIntoEmptySlot(BaseItemDataSO item, InventorySlot[] slots, int maxLimit)
     {
-        for (int i = 0; i < slots.Length; i++)
+        // 슬롯 배열의 실제 길이와 기획상 최대 길이 중 더 작은 값을 기준으로 삼습니다.
+        int limit = Mathf.Min(slots.Length, maxLimit);
+
+        for (int i = 0; i < limit; i++)
         {
             if (slots[i].isEmpty)
             {
@@ -73,14 +82,11 @@ public class InventoryManager : MonoBehaviour
             if (sellPopupPanel != null)
             {
                 sellPopupPanel.transform.position = slot.transform.position;
-
                 sellPopupPanel.transform.localPosition += new Vector3(0f, 100f, 0f);
 
                 Vector3 localPos = sellPopupPanel.transform.localPosition;
                 localPos.z = 0f;
                 sellPopupPanel.transform.localPosition = localPos;
-
-
             }
         }
     }
@@ -112,9 +118,10 @@ public class InventoryManager : MonoBehaviour
     // 1. 피규어 슬롯에 빈자리가 있는지 확인
     public bool HasEmptyFigureSlot()
     {
-        foreach (var slot in figureSlots)
+        int limit = Mathf.Min(figureSlots.Length, maxFigureSlots);
+        for (int i = 0; i < limit; i++)
         {
-            if (slot.isEmpty) return true;
+            if (figureSlots[i].isEmpty) return true;
         }
         return false;
     }
