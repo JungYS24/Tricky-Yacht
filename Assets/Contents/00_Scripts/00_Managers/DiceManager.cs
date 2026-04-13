@@ -25,6 +25,9 @@ public class DiceManager : MonoBehaviour
     public Enemy enemy;
     public HandVFXManager handVFXManager;
 
+    [Header("보상 설정")]
+    public FigureItemSO dropMonsterFigureData; // 몬스터 처치 시 드랍할 몬스터 피규어
+
     [Header("게임 데이터")]
     public int enemyMaxHP = 40;
     public int currentStage = 1;
@@ -39,6 +42,7 @@ public class DiceManager : MonoBehaviour
     [HideInInspector] public float snackBonusMult = 0f;    // 체리: 이번 라운드 배수 추가
     [HideInInspector] public int snackBonusChips = 0;      // 팬케이크: 이번 라운드 칩 추가
     [HideInInspector] public int snackBonusRerolls = 0;    // 라임 주스: 이번 라운드 리롤 추가
+    [HideInInspector] public float snackBonusFigureDropRate = 0f; // 가니쉬: 몬스터 박제 확률 증가
 
     private List<Dice> activeDiceList = new List<Dice>();
     private Dice[] keepSlotOccupants;
@@ -128,10 +132,11 @@ public class DiceManager : MonoBehaviour
         ui?.HideResult();
         currentRerolls = 0;
 
-        // 턴(라운드)이 넘어가면 일회성 스낵 버프(체리, 팬케이크, 라임 주스) 초기화
+        // 턴(라운드)이 넘어가면 일회성 스낵 버프 초기화
         snackBonusMult = 0f;
         snackBonusChips = 0;
         snackBonusRerolls = 0;
+        snackBonusFigureDropRate = 0f; // 가니쉬 효과 초기화
 
         SpawnDice();
         HandleDiceChanged();
@@ -174,7 +179,7 @@ public class DiceManager : MonoBehaviour
 
     public void OnRollButtonClick()
     {
-        //  남은 굴리기 계산에 라임 주스 버프(snackBonusRerolls) 적용
+        // 남은 굴리기 계산에 라임 주스 버프(snackBonusRerolls) 적용
         if (currentRerolls >= (maxRerolls + snackBonusRerolls) || ShopManager.IsShopOpen) return;
 
         CameraShake.Instance.Shake(0.1f, 0.1f);
@@ -214,7 +219,7 @@ public class DiceManager : MonoBehaviour
         int darkDamageTotal = 0;
         int iceBonusChips = 0;
 
-        // ---  특수 코팅 효과 계산 ---
+        // --- 특수 코팅 효과 계산 ---
         foreach (var d in keptDice)
         {
             if (d.myData.isCoated)
@@ -238,6 +243,7 @@ public class DiceManager : MonoBehaviour
                 }
             }
         }
+
         // --- 특수 효과 실제 적용 ---
         if (darkDamageTotal > 0)
         {
@@ -251,25 +257,105 @@ public class DiceManager : MonoBehaviour
             ui?.UpdateGoldUI(shopManager.currentGold);
             Debug.Log($"[골드 효과] 눈금 합산하여 {goldEarned} 코인 획득!");
         }
+
         // 데미지 계산 시 팬케이크 버프 적용
         int damage = Mathf.FloorToInt((baseSum + iceBonusChips + snackBonusChips) * finalMultiplier);
+
+        // 적 타격 및 공통 클리어 함수 호출
         enemy.TakeDamage(damage, () => {
-            int clearReward = 500; // 스테이지 클리어 보상금!
-
-            if (shopManager != null)
-            {
-                shopManager.currentGold += clearReward;
-                ui?.UpdateGoldUI(shopManager.currentGold);
-            }
-
-            string clearMessage = $"스테이지 클리어!\n<size=80%><color=#FFD700>+{clearReward} 코인 획득!</color></size>";
-            ui?.ShowResult("#00FF00", clearMessage);
-
-            Invoke(nameof(PromptShopChoice), 1.5f);
+            ProcessStageClear(false); // 일반 클리어
         });
 
         StartCoroutine(ProcessTurnResult(handName));
+    }
 
+
+    //공통 스테이지 클리어 로직
+  
+    private void ProcessStageClear(bool fromPeppermint)
+    {
+        int baseClearReward = 500;
+        int figureBonusGold = InventoryManager.Instance.GetTotalFigureBonusGold();
+        int finalReward = baseClearReward + figureBonusGold;
+
+        // 골드 지급
+        if (shopManager != null)
+        {
+            shopManager.currentGold += finalReward;
+            ui?.UpdateGoldUI(shopManager.currentGold);
+        }
+
+        // 텍스트 생성
+        string clearMessage = $"스테이지 클리어!\n<size=80%><color=#FFD700>+{baseClearReward} 코인 획득!</color></size>";
+        if (figureBonusGold > 0)
+            clearMessage += $"\n<size=60%><color=#FFA500>피규어 보너스 +{figureBonusGold}G</color></size>";
+
+        // 피규어 드랍 체크 (페퍼민트면 100% 드랍, 아니면 50% + 가니쉬 확률)
+        if (fromPeppermint)
+        {
+            clearMessage += $"\n<size=70%><color=#00FFFF>전리품: 몬스터 피규어 획득 (페퍼민트)</color></size>";
+        }
+        else
+        {
+            //박제 확률
+            float dropChance = 0.5f + snackBonusFigureDropRate;
+            if (dropMonsterFigureData != null && UnityEngine.Random.value <= dropChance)
+            {
+                if (InventoryManager.Instance.HasEmptyFigureSlot())
+                {
+                    InventoryManager.Instance.AddItem(dropMonsterFigureData);
+                    clearMessage += $"\n<size=70%><color=#00FFFF>전리품: 몬스터 피규어 획득!</color></size>";
+                }
+            }
+        }
+
+        ui?.ShowResult("#00FF00", clearMessage);
+        Invoke(nameof(PromptShopChoice), 2.0f);
+    }
+
+    public void TryPeppermintCapture()
+    {
+        if (enemy == null || enemy.IsDead) return;
+
+        // 1. 현재 몬스터의 남은 체력 퍼센트 계산
+        float hpPercent = (float)enemy.CurrentHP / enemy.MaxHP;
+
+        // 2. 비례 확률 계산 (최대 30%)
+        float t = Mathf.InverseLerp(1.0f, 0.05f, hpPercent);
+        float successProbability = Mathf.Lerp(0.03f, 0.30f, t);
+
+        // 3. 주사위 굴리기
+        float roll = UnityEngine.Random.value;
+        Debug.Log($"[페퍼민트] 적 체력 {hpPercent * 100:F1}% -> 성공 확률: {successProbability * 100:F1}%. 도박 결과: {roll}");
+
+        if (roll <= successProbability)
+        {
+            // [성공] 페퍼민트 로또 성공!
+            ui?.ShowResult("#00FF00", "페퍼민트 대성공!\n<size=70%>몬스터가 즉시 박제되었습니다!</size>");
+
+            // 인벤토리에 피규어 추가
+            if (dropMonsterFigureData != null && InventoryManager.Instance.HasEmptyFigureSlot())
+            {
+                InventoryManager.Instance.AddItem(dropMonsterFigureData);
+            }
+
+            // 적 즉사 처리 (잔여 체력만큼 데미지를 입히고 공통 스테이지 클리어 로직 실행)
+            enemy.TakeDamage(enemy.CurrentHP, () => ProcessStageClear(true));
+        }
+        else
+        {
+            // [실패] 박제 실패
+            ui?.ShowResult("#FF5555", "박제 실패...\n<size=70%>몬스터가 저항했습니다. 아무 일도 일어나지 않습니다.</size>");
+            Invoke(nameof(HideResultAfterFailure), 1.5f);
+        }
+    }
+
+    private void HideResultAfterFailure()
+    {
+        if (!ShopManager.IsShopOpen && !enemy.IsDead)
+        {
+            ui?.HideResult();
+        }
     }
 
     private IEnumerator ProcessTurnResult(string handName)
@@ -409,6 +495,8 @@ public class DiceManager : MonoBehaviour
 
         ui?.UpdateGameUI(currentStage, curHP, maxHP, currentPlayNum, maxPlays,
                          remainingRerolls, finalCombinedText);
+
+        ui?.UpdateDropRateUI(0.5f, snackBonusFigureDropRate);
     }
 
     void AssignToKeepSlot(Dice d)

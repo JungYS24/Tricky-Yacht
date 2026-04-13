@@ -23,6 +23,9 @@ public class UIManager : MonoBehaviour
     public Button nextStageButton;
     public TextMeshProUGUI goldText;
 
+    [Header("확률 표시 UI")]
+    public TextMeshProUGUI dropRateText; //박제 확률 텍스트
+
     public void ShowShopChoice() => shopChoicePanel.SetActive(true);
     public void HideShopChoice() => shopChoicePanel.SetActive(false);
 
@@ -49,6 +52,23 @@ public class UIManager : MonoBehaviour
     {
         resultPanel.SetActive(true);
         resultDescription.text = $"<color={colorHex}></color>\n{description}";
+    }
+
+    public void UpdateDropRateUI(float baseRate, float bonusRate)
+    {
+        if (dropRateText == null) return;
+
+        float totalRate = (baseRate + bonusRate) * 100f;
+
+        // 가니쉬 버프가 있을 때는 청록색으로 강조하고 보너스 수치 표기
+        if (bonusRate > 0)
+        {
+            dropRateText.text = $"박제 확률: <color=#00FFFF>{totalRate:F0}%</color>";
+        }
+        else
+        {
+            dropRateText.text = $"박제 확률: {totalRate:F0}%";
+        }
     }
 
     public void HideResult() => resultPanel.SetActive(false);

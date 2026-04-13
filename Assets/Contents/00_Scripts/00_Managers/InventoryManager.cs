@@ -109,4 +109,31 @@ public class InventoryManager : MonoBehaviour
         targetSellSlot.ClearSlot();
         HideSellPopup();
     }
+
+    // 1. 피규어 슬롯에 빈자리가 있는지 확인
+    public bool HasEmptyFigureSlot()
+    {
+        foreach (var slot in figureSlots)
+        {
+            if (slot.isEmpty) return true;
+        }
+        return false;
+    }
+
+    // 2. 보유 중인 피규어들의 클리어 보너스 골드 총합 계산
+    public int GetTotalFigureBonusGold()
+    {
+        int totalBonus = 0;
+        foreach (var slot in figureSlots)
+        {
+            // 슬롯이 비어있지 않고, 들어있는 아이템이 피규어라면
+            if (!slot.isEmpty && slot.currentItem is FigureItemSO figureData)
+            {
+                totalBonus += figureData.stageClearGoldBonus;
+            }
+        }
+        return totalBonus;
+    }
+
+
 }
