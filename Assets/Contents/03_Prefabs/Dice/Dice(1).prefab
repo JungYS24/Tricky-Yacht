@@ -5012,8 +5012,6 @@ MonoBehaviour:
     multiplier: 1
     diceColor: {r: 1, g: 1, b: 1, a: 1}
     type: 0
-    minRoll: 1
-    maxRoll: 6
     faceValues: 010000000200000003000000040000000500000006000000
   diceFaceSprites:
   - {fileID: 21300000, guid: e6d4349e6942c9344957fae0a557fc9e, type: 3}
@@ -5034,6 +5032,8 @@ MonoBehaviour:
   shakePower: 0.12
   rotatePower: 25
   popScale: 1.15
+  coatingBrightness: 1.15
+  keptDarkness: 0.6
 --- !u!61 &420654394546865938
 BoxCollider2D:
   m_ObjectHideFlags: 0
