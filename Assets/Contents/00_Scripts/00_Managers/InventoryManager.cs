@@ -15,7 +15,7 @@ public class InventoryManager : MonoBehaviour
 
     [Header("인벤토리 용량 제한")]
     public int maxFigureSlots = 99; // 피규어는 기존처럼 배열 크기만큼 허용 (원하시면 수정 가능)
-    public int maxSnackSlots = 5;   // [추가] 스낵칸 최대 5개로 제한
+    public int maxSnackSlots = 5;   // 스낵칸 최대 5개로 제한
 
     [Header("판매 팝업 UI")]
     public GameObject sellPopupRoot;
@@ -143,5 +143,17 @@ public class InventoryManager : MonoBehaviour
             }
         }
         return totalGoldBonus;
+    }
+    public bool HasActiveFigureAbility(FigureAbility abilityType)
+    {
+        int limit = Mathf.Min(figureSlots.Length, maxFigureSlots);
+        for (int i = 0; i < limit; i++)
+        {
+            if (!figureSlots[i].isEmpty && figureSlots[i].currentItem is FigureItemSO figure)
+            {
+                if (figure.abilityType == abilityType) return true;
+            }
+        }
+        return false;
     }
 }

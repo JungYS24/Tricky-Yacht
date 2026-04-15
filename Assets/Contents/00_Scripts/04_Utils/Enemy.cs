@@ -32,7 +32,6 @@ public class Enemy : MonoBehaviour
 
     // 몬스터 데이터베이스 관리
     [Header("몬스터 출현 순서 리스트")]
-    public List<MonsterDataSO> monsterSequenceList; //몬스터 so추가 
     private int currentMonsterIndex = 0; // 몇번 째 몬스터인지 체크
 
     // 에디터 창에서는 숨기지만 DiceManager가 읽어갈 수 있도록 HideInInspector 처리
@@ -48,32 +47,46 @@ public class Enemy : MonoBehaviour
     private Vector3 originalScale;
     private Coroutine hitEffectCoroutine;
     private Coroutine hpCoroutine;
-    // [수정 1] 최초 크기는 무조건 Awake에서 딱 한 번만 저장!
+    //최초 크기는 무조건 Awake에서 딱 한 번만 저장!
     void Awake()
     {
         originalScale = transform.localScale;
+
+        if (enemyHPSlider == null)
+        {
+            GameObject sliderObj = GameObject.Find("EnemyHPSlider"); 
+            if (sliderObj != null)
+            {
+                enemyHPSlider = sliderObj.GetComponent<Slider>();
+            }
+            else
+            {
+                Debug.LogWarning("씬에 'EnemyHPSlider'라는 이름의 오브젝트가 없습니다!");
+            }
+        }
     }
 
     public void ResetMonsterIndex()
     {
         currentMonsterIndex = 0;
     }
-    public void Initialize(int currentStage)
+    public void Initialize(int currentStage, List<MonsterDataSO> currentBiomeMonsters)
     {
         // 1. 만약의 사태를 대비한 기본 체력 (리스트가 비어있을 때 등)
         int finalMaxHP = 40;
 
-        if (monsterSequenceList != null && monsterSequenceList.Count > 0)
+        if (currentBiomeMonsters != null && currentBiomeMonsters.Count > 0)
         {
-            // 리스트에서 다음 몬스터 데이터를 가져옴
-            MonsterDataSO nextMonsterData = monsterSequenceList[currentMonsterIndex % monsterSequenceList.Count];
+            // 리스트에서 랜덤 몬스터 데이터를 가져옴
+            int randomIndex = UnityEngine.Random.Range(0, currentBiomeMonsters.Count);
+            MonsterDataSO nextMonsterData = currentBiomeMonsters[randomIndex];
 
             // 이미지와 전리품 정보 덮어쓰기
             if (monsterAnimator != null && nextMonsterData.animatorController != null)
             {
                 monsterAnimator.runtimeAnimatorController = nextMonsterData.animatorController;
             }
-            // 2. 전용 애니메이션이 없고 그냥 멈춰있는 이미지라면 애니메이터를 끄고 이미지만 교체
+            // 전용 애니메이션이 없고 그냥 멈춰있는 이미지라면 애니메이터를 끄고 이미지만 교체
             else
             {
                 if (monsterAnimator != null) monsterAnimator.runtimeAnimatorController = null;
@@ -82,8 +95,13 @@ public class Enemy : MonoBehaviour
             dropFigureData = nextMonsterData.dropFigureData;
             baseDropRate = nextMonsterData.dropRate;
             Debug.Log($"[{currentStage} 스테이지] 등장 몬스터: {nextMonsterData.monsterName}");
+
             // 애니메이션 커브로 체력 배율 계산
             float curveMultiplier = nextMonsterData.hpScalingCurve.Evaluate(currentStage);
+            //if (curveMultiplier <= 0f)
+            //{
+            //    curveMultiplier = 1f;
+            //}
 
             // 최종 체력 계산해서 finalMaxHP에 저장
             finalMaxHP = Mathf.FloorToInt(nextMonsterData.baseHP * curveMultiplier);
@@ -92,7 +110,7 @@ public class Enemy : MonoBehaviour
             currentMonsterIndex++;
         }
 
-        // 2. 여기서 최종적으로 체력을 확정 짓습니다(덮어씌워지는 문제 해결)
+        // 여기서 최종적으로 체력을 확정(덮어씌워지는 문제 해결)
         MaxHP = finalMaxHP;
         CurrentHP = finalMaxHP;
         IsDead = false;

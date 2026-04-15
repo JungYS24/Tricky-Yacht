@@ -17,6 +17,7 @@ public class SnackItemSO : BaseItemDataSO
             case SnackType.Cherry:
                 // [체리] 최종 데미지 배수 +0.2 (합연산)
                 diceManager.snackBonusMult += 0.2f;
+                diceManager.consumedCherryCount++;
                 break;
             case SnackType.Pancake:
                 // [팬케이크] 기본 칩 수 +30
