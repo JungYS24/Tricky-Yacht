@@ -29,6 +29,11 @@ public class Dice : MonoBehaviour, IPointerDownHandler
     private Coroutine rollCoroutine;
     private bool isFixedDice = false; // 6면이 모두 같은 숫자인지 여부
     private bool useNumberSprite = false;
+
+    [Header("코팅 색상 보정")]
+    [SerializeField] private float coatingBrightness = 1.35f;
+    [SerializeField] private float keptDarkness = 0.6f;
+
     public static event Action OnDiceStateChanged;
 
     private void Awake()
@@ -52,8 +57,8 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         currentValue = initialValue;
         UpdateSprite(initialValue);
 
-        if (spriteRenderer != null)
-            spriteRenderer.color = myData.diceColor;
+        ApplyDiceColor();
+
     }
 
     private void UpdateSprite(int value)
@@ -71,6 +76,32 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         }
     }
 
+    private void ApplyDiceColor()
+    {
+        if (spriteRenderer == null || myData == null) return;
+
+        Color finalColor;
+
+        if (myData.type == DiceType.Prism)
+        {
+            float hue = Mathf.Repeat(Time.time * 0.6f, 1f);
+            finalColor = Color.HSVToRGB(hue, 0.55f, coatingBrightness);
+        }
+        else
+        {
+            finalColor = myData.diceColor * coatingBrightness;
+        }
+
+        finalColor.a = myData.diceColor.a;
+
+        if (isKept)
+        {
+            finalColor *= keptDarkness;
+            finalColor.a = myData.diceColor.a;
+        }
+
+        spriteRenderer.color = finalColor;
+    }
     public void PlayRollEffect(int finalValue)
     {
         if (isKept) return;
@@ -123,7 +154,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         transform.localScale = originalScale;
 
         // 보관 상태에 따른 색상 최종 조정
-        spriteRenderer.color = isKept ? myData.diceColor * 0.6f : myData.diceColor;
+        ApplyDiceColor();
         rollCoroutine = null;
     }
 
@@ -135,7 +166,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         OnDiceStateChanged?.Invoke();
 
         // 보관 시에는 고유 코팅 색상을 기준으로 어둡게 처리
-        spriteRenderer.color = isKept ? myData.diceColor * 0.6f : myData.diceColor;
+        ApplyDiceColor();
     }
 
     public void MoveToTarget(Vector3 targetPos)
@@ -155,5 +186,12 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             yield return null;
         }
         transform.position = target;
+    }
+    private void Update()
+    {
+        if (myData != null && myData.type == DiceType.Prism)
+        {
+            ApplyDiceColor();
+        }
     }
 }
