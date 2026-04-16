@@ -159,7 +159,7 @@ public class DiceManager : MonoBehaviour
     void StartNewRound()
     {
         ui?.HideResult();
-        //currentRerolls = 0;             
+        currentRerolls = 0;             
         snackBonusMult = 0f;
         snackBonusChips = 0;
         snackBonusRerolls = 0;

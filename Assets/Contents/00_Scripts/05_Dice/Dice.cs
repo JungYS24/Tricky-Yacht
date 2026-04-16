@@ -35,6 +35,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
     [SerializeField] private float keptDarkness = 0.6f;
 
     public static event Action OnDiceStateChanged;
+    private Coroutine idleAnimCoroutine;
 
     private void Awake()
     {
@@ -69,6 +70,10 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         UpdateSprite(initialValue);
 
         ApplyDiceColor();
+
+        // 필드 대기 상태 애니메이션 추가
+        int[] uniqueFaces = myData.faceValues.Distinct().ToArray();
+        bool shouldAnimate = uniqueFaces.Length > 1 && uniqueFaces.Length < 6;
 
     }
 
@@ -113,9 +118,28 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
         spriteRenderer.color = finalColor;
     }
+
+    private System.Collections.IEnumerator IdleAnimationRoutine(int[] faces)
+    {
+        int index = 0;
+        while (true)
+        {
+            UpdateSprite(faces[index]);
+            index = (index + 1) % faces.Length;
+            yield return new WaitForSeconds(0.4f);
+        }
+    }
+
     public void PlayRollEffect(int finalValue)
     {
         if (isKept) return;
+
+        if (idleAnimCoroutine != null)
+        {
+            StopCoroutine(idleAnimCoroutine);
+            idleAnimCoroutine = null;
+        }
+
         if (rollCoroutine != null) StopCoroutine(rollCoroutine);
         rollCoroutine = StartCoroutine(RollRoutine(finalValue));
     }

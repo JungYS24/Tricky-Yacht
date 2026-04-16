@@ -2,6 +2,7 @@
     using UnityEngine.UI;
     using UnityEngine.EventSystems;
     using TMPro;
+using System.Linq;
 
     public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
@@ -13,16 +14,37 @@
         private ShopManager manager;
 
         public bool isPurchased = false;
+        private Coroutine animCoroutine;
 
-
-        public void SetupSlot(BaseItemDataSO data, ShopManager shopMgr)
+    public void SetupSlot(BaseItemDataSO data, ShopManager shopMgr)
         {
             currentData = data;
             manager = shopMgr;
-
- 
             isPurchased = false;
-            if (itemIcon != null)
+
+        if (animCoroutine != null)
+        {
+            StopCoroutine(animCoroutine);
+            animCoroutine = null;
+        }
+
+        // 아이템이 주사위 데이터(DiceItemSO)인지 확인하고 애니메이션 실행
+        if (data is DiceItemSO diceData)
+        {
+            int[] uniqueFaces = diceData.customFaces.Distinct().ToArray();
+            bool shouldAnimate = uniqueFaces.Length > 1 && uniqueFaces.Length < 6;
+
+            if (shouldAnimate && diceData.customFaceSprites != null && diceData.customFaceSprites.Length >= 6)
+            {
+                animCoroutine = StartCoroutine(AnimateShopIcon(uniqueFaces, diceData.customFaceSprites));
+            }
+            else if (itemIcon != null)
+            {
+                itemIcon.sprite = data.icon; // 일반 아이템은 기존 아이콘 사용
+            }
+        }
+
+        if (itemIcon != null)
             {
                 itemIcon.sprite = data.icon;
                 itemIcon.color = Color.white;
@@ -68,4 +90,15 @@
         {
             manager.HideTooltip();
         }
-    }
+    //상점 아이콘 애니메이션 코루틴
+     private System.Collections.IEnumerator AnimateShopIcon(int[] faces, Sprite[] sprites)
+    {
+        int index = 0;
+        while (true)
+        {
+            itemIcon.sprite = sprites[faces[index] - 1];
+            index = (index + 1) % faces.Length;
+            yield return new WaitForSeconds(0.7f);
+        }
+        }
+}

@@ -38,6 +38,7 @@ public class DiceData1
         faceValues = new int[6] { 1, 2, 3, 4, 5, 6 };
     }
 
+
     // 특수 주사위 생성을 위한 생성자 (선택 사항)
     public DiceData1(string name, int[] faces)
     {
