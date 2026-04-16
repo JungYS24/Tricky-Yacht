@@ -20,6 +20,9 @@ public class DiceData1
     public Color diceColor = Color.white;
     public DiceType type = DiceType.Normal;
 
+    public Sprite customDiceShell;
+    public Sprite[] customFaceSprites;
+
     //public int minRoll = 1;
     //public int maxRoll = 6;
     public int[] faceValues = new int[6] { 1, 2, 3, 4, 5, 6 };

@@ -118,7 +118,7 @@ public class DiceManager : MonoBehaviour
         //2스테이지마다 바이옴(맵) 변경 로직
         if (biomeList.Count > 0)
         {
-            int biomeIndex = ((currentStage - 1) / 2) % biomeList.Count;
+            int biomeIndex = ((currentStage - 1) / 1) % biomeList.Count;
             currentBiome = biomeList[biomeIndex];
 
             // UI 배경 이미지 교체

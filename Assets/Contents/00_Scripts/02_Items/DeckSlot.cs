@@ -21,6 +21,8 @@ public class DeckSlot : MonoBehaviour
     [Header("특수 주사위용 이미지 (추가)")]
     public Sprite oddDiceSprite;       // 홀수 주사위 아이콘
     public Sprite evenDiceSprite;      // 짝수 주사위 아이콘
+    public Sprite highRollerSprite;    // 하이롤러 전용 아이콘
+    public Sprite lowRollerSprite;     // 로우롤러 전용 아이콘 
     public Sprite[] fixedNumberSprites; // 고정 주사위용 1~6 아라비아 숫자 이미지
 
 
@@ -47,6 +49,21 @@ public class DeckSlot : MonoBehaviour
                 diceIcon.sprite = fixedNumberSprites[val - 1];
             }
 
+            else if (data.customDiceShell != null)
+            {
+                diceIcon.sprite = data.customDiceShell;
+            }
+
+            // 하이롤러, 로우롤러 아이콘 판별 로직 추가
+            else if (!string.IsNullOrEmpty(data.diceName) && data.diceName.Contains("하이롤러") && highRollerSprite != null)
+            {
+                diceIcon.sprite = highRollerSprite;
+            }
+            else if (!string.IsNullOrEmpty(data.diceName) && data.diceName.Contains("로우롤러") && lowRollerSprite != null)
+            {
+                diceIcon.sprite = lowRollerSprite;
+            }
+
             else if (!string.IsNullOrEmpty(data.diceName) && data.diceName.Contains("홀수") && oddDiceSprite != null)
             {
                 diceIcon.sprite = oddDiceSprite;
@@ -55,6 +72,7 @@ public class DeckSlot : MonoBehaviour
             {
                 diceIcon.sprite = evenDiceSprite;
             }
+
             else
             {
                 // 일반 주사위이거나 코팅된 주사위라면 기존 코팅 타입별 이미지 사용

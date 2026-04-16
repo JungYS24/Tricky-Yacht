@@ -47,7 +47,18 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         if (isKept) return;
         myData = data;
 
-        // [수정] 고정 주사위이거나, 이름에 '홀수' 또는 '짝수'가 들어가면 숫자 이미지를 사용하도록 설정
+        // 만약 데이터에 커스텀 눈금이 있다면 그것을 사용하고, 없다면 기본 스프라이트를 사용
+        if (myData.customFaceSprites != null && myData.customFaceSprites.Length > 0)
+        {
+            // Dice 스크립트의 diceFaceSprites 배열을 커스텀 이미지로 교체
+            this.diceFaceSprites = myData.customFaceSprites;
+        }
+        if (myData.customDiceShell != null)
+        {
+            spriteRenderer.sprite = myData.customDiceShell;
+        }
+
+        // 고정 주사위이거나, 이름에 '홀수' 또는 '짝수'가 들어가면 숫자 이미지를 사용하도록 설정
         bool isFixed = myData.faceValues.All(f => f == myData.faceValues[0]);
         bool isOddEven = !string.IsNullOrEmpty(myData.diceName) &&
                          (myData.diceName.Contains("홀수") || myData.diceName.Contains("짝수"));

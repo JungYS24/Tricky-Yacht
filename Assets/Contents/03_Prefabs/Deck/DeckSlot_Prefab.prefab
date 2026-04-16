@@ -213,6 +213,8 @@ MonoBehaviour:
   iceSprite: {fileID: -9197614001361547850, guid: a2ecfc610dedda948a2af4a0daa2cfc1, type: 3}
   oddDiceSprite: {fileID: 21300000, guid: 530d105a15c14d6459ffada9fad79886, type: 3}
   evenDiceSprite: {fileID: 21300000, guid: aa0a775608c986c409cdb3f873ed8d4c, type: 3}
+  highRollerSprite: {fileID: 7639011778785402666, guid: b7856cef957638b458dd0b7586796e22, type: 3}
+  lowRollerSprite: {fileID: 131089859552241205, guid: 9adc9f285439a314da09483be4d9fb80, type: 3}
   fixedNumberSprites:
   - {fileID: 21300000, guid: 530d105a15c14d6459ffada9fad79886, type: 3}
   - {fileID: 21300000, guid: aa0a775608c986c409cdb3f873ed8d4c, type: 3}
