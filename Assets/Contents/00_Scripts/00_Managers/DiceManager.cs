@@ -226,7 +226,10 @@ public class DiceManager : MonoBehaviour
         CalculateHandData(keptDice.Select(d => d.currentValue).ToList(), out float comboMultiplier, out string handName);
         handVFXManager?.PlayHandVFX(handName);
 
-        if (comboMultiplier >= 2.0f) SlowMotion.Instance.PlaySlowMotion(0.2f, 0.2f);
+        if (comboMultiplier >= 2.0f)
+        {
+            SlowMotion.Instance?.PlaySlowMotion(0.2f, 0.2f);
+        }
 
         float finalMultiplier = comboMultiplier + snackBonusMult;
         int currentSimulatedHP = enemy.CurrentHP;
