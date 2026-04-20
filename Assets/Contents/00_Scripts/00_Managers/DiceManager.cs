@@ -33,6 +33,11 @@ public class DiceManager : MonoBehaviour
     public int maxRerolls = 2;
     public int currentRerolls;
 
+    [Header("페퍼민트 포획 연출")]
+    public PeppermintCaptureEffect peppermintCaptureEffect;
+    public Transform peppermintCaptureCenter;
+    public GameObject peppermintVisualPrefab;
+
     [Header("맵(생물군계) 설정")]
     public SpriteRenderer biomeBackgroundImage; // Canvas에 있는 Biome_Image 연결
     public List<BiomeDataSO> biomeList;               // 만들어둔 Biome 데이터들 (숲, 화산 등)
@@ -57,6 +62,7 @@ public class DiceManager : MonoBehaviour
 
     private List<Dice> activeDiceList = new List<Dice>();
     private Dice[] keepSlotOccupants;
+    private bool pendingPeppermintSuccess = false;
 
     void Awake()
     {
@@ -113,6 +119,7 @@ public class DiceManager : MonoBehaviour
         pandaBonusRerolls = 0;
         //페퍼민트 효과 초기화
         isPeppermintActive = false;
+        pendingPeppermintSuccess = false;
         //가니쉬 효과 초기화
         snackBonusFigureDropRate = 0f;
         //2스테이지마다 바이옴(맵) 변경 로직
@@ -134,10 +141,10 @@ public class DiceManager : MonoBehaviour
         {
             // 혹시 맵 데이터를 안 넣었을 경우를 대비한 안전 장치
             Debug.LogWarning("DiceManager에 Biome List가 비어있습니다!");
-            enemy.Initialize(currentStage, null); 
+            enemy.Initialize(currentStage, null);
         }
 
-        
+
 
         drawPile = new List<DiceData1>(masterDeck);
         discardPile.Clear();
@@ -159,7 +166,7 @@ public class DiceManager : MonoBehaviour
     void StartNewRound()
     {
         ui?.HideResult();
-        currentRerolls = 0;             
+        currentRerolls = 0;
         snackBonusMult = 0f;
         snackBonusChips = 0;
         snackBonusRerolls = 0;
@@ -226,7 +233,10 @@ public class DiceManager : MonoBehaviour
         CalculateHandData(keptDice.Select(d => d.currentValue).ToList(), out float comboMultiplier, out string handName);
         handVFXManager?.PlayHandVFX(handName);
 
-        if (comboMultiplier >= 2.0f) SlowMotion.Instance.PlaySlowMotion(0.2f, 0.2f);
+        if (comboMultiplier >= 2.0f)
+        {
+            SlowMotion.Instance?.PlaySlowMotion(0.2f, 0.2f);
+        }
 
         float finalMultiplier = comboMultiplier + snackBonusMult;
         int currentSimulatedHP = enemy.CurrentHP;
@@ -287,9 +297,55 @@ public class DiceManager : MonoBehaviour
 
         int damage = Mathf.FloorToInt((baseSum + iceBonusChips + snackBonusChips) * finalMultiplier);
 
-        enemy.TakeDamage(damage, () => ProcessStageClear(false));
+        // 페퍼민트 성공 여부를 먼저 굴림
+        pendingPeppermintSuccess = false;
+
+        if (isPeppermintActive)
+        {
+            float dropChance = enemy.baseDropRate + snackBonusFigureDropRate;
+
+            if (enemy.dropFigureData != null &&
+                InventoryManager.Instance.HasEmptyFigureSlot() &&
+                UnityEngine.Random.value <= dropChance)
+            {
+                pendingPeppermintSuccess = true;
+            }
+        }
+
+        // 성공할 때만 외부 포획 연출 사용
+        enemy.useExternalDeathSequence = pendingPeppermintSuccess;
+        enemy.TakeDamage(damage, OnEnemyKilled);
 
         StartCoroutine(ProcessTurnResult(handName));
+    }
+
+    private void OnEnemyKilled()
+    {
+        if (pendingPeppermintSuccess &&
+            peppermintCaptureEffect != null &&
+            peppermintCaptureCenter != null &&
+            peppermintVisualPrefab != null &&
+            enemy != null)
+        {
+            StartCoroutine(PlayPeppermintCaptureThenClear());
+        }
+        else
+        {
+            ProcessStageClear(false);
+        }
+    }
+
+    private IEnumerator PlayPeppermintCaptureThenClear()
+    {
+        yield return StartCoroutine(
+            peppermintCaptureEffect.PlayCapture(
+                enemy.transform,
+                peppermintCaptureCenter.position,
+                peppermintVisualPrefab
+            )
+        );
+
+        ProcessStageClear(false);
     }
 
     // --- 스테이지 클리어 공통 시스템 ---
@@ -306,18 +362,12 @@ public class DiceManager : MonoBehaviour
 
         string clearMessage = $"스테이지 클리어!\n<size=80%><color=#FFD700>+{baseClearReward} 코인 획득!</color></size>";
         if (figureBonusGold > 0) clearMessage += $"\n<size=60%><color=#FFA500>피규어 보너스 +{figureBonusGold}G</color></size>";
-        if (isPeppermintActive)
+        if (pendingPeppermintSuccess)
         {
-           
-            float dropChance = enemy.baseDropRate + snackBonusFigureDropRate;
-
-            if (enemy.dropFigureData != null && UnityEngine.Random.value <= dropChance)
+            if (enemy.dropFigureData != null)
             {
-                if (InventoryManager.Instance.HasEmptyFigureSlot())
-                {
-                    InventoryManager.Instance.AddItem(enemy.dropFigureData);
-                    clearMessage += $"\n<size=70%><color=#00FFFF>전리품: {enemy.dropFigureData.itemName} 박제 성공! (페퍼민트 효과)</color></size>";
-                }
+                InventoryManager.Instance.AddItem(enemy.dropFigureData);
+                clearMessage += $"\n<size=70%><color=#00FFFF>전리품: {enemy.dropFigureData.itemName} 박제 성공! (페퍼민트 효과)</color></size>";
             }
         }
 

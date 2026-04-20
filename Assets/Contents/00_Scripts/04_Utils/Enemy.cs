@@ -38,23 +38,27 @@ public class Enemy : MonoBehaviour
     [HideInInspector] public FigureItemSO dropFigureData;
     [HideInInspector] public float baseDropRate = 0.5f;
 
-   
+
     public int MaxHP { get; private set; }
     public int CurrentHP { get; private set; }
     public bool IsDead { get; private set; } = false;
 
     private Material monsterRuntimeMat;
     private Vector3 originalScale;
+    private Vector3 originalPosition;
+    public bool useExternalDeathSequence = false;
     private Coroutine hitEffectCoroutine;
     private Coroutine hpCoroutine;
+
     //최초 크기는 무조건 Awake에서 딱 한 번만 저장!
     void Awake()
     {
         originalScale = transform.localScale;
+        originalPosition = transform.position;
 
         if (enemyHPSlider == null)
         {
-            GameObject sliderObj = GameObject.Find("EnemyHPSlider"); 
+            GameObject sliderObj = GameObject.Find("EnemyHPSlider");
             if (sliderObj != null)
             {
                 enemyHPSlider = sliderObj.GetComponent<Slider>();
@@ -70,6 +74,7 @@ public class Enemy : MonoBehaviour
     {
         currentMonsterIndex = 0;
     }
+
     public void Initialize(int currentStage, List<MonsterDataSO> currentBiomeMonsters)
     {
         // 1. 만약의 사태를 대비한 기본 체력 (리스트가 비어있을 때 등)
@@ -114,8 +119,10 @@ public class Enemy : MonoBehaviour
         MaxHP = finalMaxHP;
         CurrentHP = finalMaxHP;
         IsDead = false;
+        useExternalDeathSequence = false;
 
         // 3. 시각적 초기화 (크기, 색상, 디졸브 등)
+        transform.position = originalPosition;
         transform.localScale = originalScale;
 
         if (monsterImage != null)
@@ -157,7 +164,15 @@ public class Enemy : MonoBehaviour
         if (CurrentHP <= 0)
         {
             IsDead = true;
-            StartCoroutine(MonsterDeathRoutine(onDeathCallback));
+
+            if (useExternalDeathSequence)
+            {
+                onDeathCallback?.Invoke();
+            }
+            else
+            {
+                StartCoroutine(MonsterDeathRoutine(onDeathCallback));
+            }
         }
     }
 

@@ -35,6 +35,8 @@ public class HandVFXManager : MonoBehaviour
                 break;
 
             case "파이브 카드":
+            case "Yacht":
+            case "요트":
                 targetPrefab = fiveCardVFX;
                 break;
         }
