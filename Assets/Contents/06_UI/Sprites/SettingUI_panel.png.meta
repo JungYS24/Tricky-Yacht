@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: abc735c2a00f2964a8089d5f0221feaf
+guid: 3445ad4c0af45114984251324691c4fc
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6971869639635863879
-    second: Deck_Panel_0
+      213: 2551312604531173929
+    second: SettingUI_panel_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Deck_Panel_0
+      name: SettingUI_panel_0
       rect:
         serializedVersion: 2
-        x: 268
-        y: 57
-        width: 878
-        height: 656
+        x: 191
+        y: 62
+        width: 1026
+        height: 644
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 74983daaf7e01c060800000000000000
-      internalID: 6971869639635863879
+      spriteID: 92aae00eb45186320800000000000000
+      internalID: 2551312604531173929
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Deck_Panel_0: 6971869639635863879
+      SettingUI_panel_0: 2551312604531173929
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

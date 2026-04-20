@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: b31a215b57a552d4aad4181731ff6c6c
+guid: a9fe135e192cac04eafedec8f6282971
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8431786552862564097
-    second: volcano_Biom_0
+      213: 2947181643851045139
+    second: SettingBTN_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: volcano_Biom_0
+      name: SettingBTN_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1212
-        height: 780
+        x: 14
+        y: 18
+        width: 135
+        height: 140
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ff026bebdc64cfa80800000000000000
-      internalID: -8431786552862564097
+      spriteID: 3191b4a171e76e820800000000000000
+      internalID: 2947181643851045139
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      volcano_Biom_0: -8431786552862564097
+      SettingBTN_0: 2947181643851045139
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
