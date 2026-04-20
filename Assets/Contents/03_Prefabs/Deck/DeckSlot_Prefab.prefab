@@ -173,7 +173,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.23921569}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -211,10 +211,6 @@ MonoBehaviour:
   goldSprite: {fileID: 21300000, guid: bf5e455349b9da14697cf42ce9a863b5, type: 3}
   blackSprite: {fileID: 21300000, guid: 3eee32ef40695be4bbf7427d319bdcd1, type: 3}
   iceSprite: {fileID: -9197614001361547850, guid: a2ecfc610dedda948a2af4a0daa2cfc1, type: 3}
-  oddDiceSprite: {fileID: 21300000, guid: 530d105a15c14d6459ffada9fad79886, type: 3}
-  evenDiceSprite: {fileID: 21300000, guid: aa0a775608c986c409cdb3f873ed8d4c, type: 3}
-  highRollerSprite: {fileID: 7639011778785402666, guid: b7856cef957638b458dd0b7586796e22, type: 3}
-  lowRollerSprite: {fileID: 131089859552241205, guid: 9adc9f285439a314da09483be4d9fb80, type: 3}
   fixedNumberSprites:
   - {fileID: 21300000, guid: 530d105a15c14d6459ffada9fad79886, type: 3}
   - {fileID: 21300000, guid: aa0a775608c986c409cdb3f873ed8d4c, type: 3}

@@ -93,6 +93,9 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
         if (manager.PurchaseItem(currentData))
         {
+
+            // 사운드 구매 성공 소리 재생 (코인 지불하는 소리 등)
+
             isPurchased = true;
             isAnimating = false; //아이템을 구매하면 즉시 애니메이션 연산을 정지
 

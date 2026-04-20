@@ -124,8 +124,9 @@ public class DiceManager : MonoBehaviour
         snackBonusFigureDropRate = 0f;
         //2스테이지마다 바이옴(맵) 변경 로직
         if (biomeList.Count > 0)
-        {
-            int biomeIndex = ((currentStage - 1) / 1) % biomeList.Count;
+        { 
+           
+            int biomeIndex = ((currentStage - 1) / /*여기 바꾸면 맵 바뀜*/5) % biomeList.Count;
             currentBiome = biomeList[biomeIndex];
 
             // UI 배경 이미지 교체
@@ -205,10 +206,12 @@ public class DiceManager : MonoBehaviour
             activeDiceList.Add(d);
         }
     }
-
+    
     public void OnRollButtonClick()
     {
         if (currentRerolls >= (maxRerolls + snackBonusRerolls + pandaBonusRerolls) || ShopManager.IsShopOpen) return;
+
+        //리롤 버튼 클릭 및 주사위 굴러가는 소리
 
         CameraShake.Instance.Shake(0.1f, 0.1f);
 
@@ -225,12 +228,18 @@ public class DiceManager : MonoBehaviour
     public void OnFinishButtonClick()
     {
         if (ShopManager.IsShopOpen || enemy.IsDead) return;
+
+        // 사운드 끝내기 버튼 클릭 소리 재생
+
+
         CameraShake.Instance.Shake(0.2f, 0.15f);
 
         var keptDice = activeDiceList.Where(d => d != null && d.isKept).ToList();
         int baseSum = keptDice.Sum(d => d.currentValue);
-
         CalculateHandData(keptDice.Select(d => d.currentValue).ToList(), out float comboMultiplier, out string handName);
+
+        // 사운드 족보 달성 및 데미지 가하는 소리 재생
+
         handVFXManager?.PlayHandVFX(handName);
 
         if (comboMultiplier >= 2.0f)
@@ -349,8 +358,12 @@ public class DiceManager : MonoBehaviour
     }
 
     // --- 스테이지 클리어 공통 시스템 ---
+
+    
     private void ProcessStageClear(bool fromPeppermint)
     {
+
+        // 사운드 스테이지 클리어 축하 소리 재생
         int baseClearReward = 500;
         int figureBonusGold = InventoryManager.Instance.ApplyAllFigurePassives(this, shopManager);
 
