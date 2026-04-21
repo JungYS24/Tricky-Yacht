@@ -126,7 +126,7 @@ public class DiceManager : MonoBehaviour
         if (biomeList.Count > 0)
         { 
            
-            int biomeIndex = ((currentStage - 1) / /*여기 바꾸면 맵 바뀜*/5) % biomeList.Count;
+            int biomeIndex = ((currentStage - 1) / /*여기 바꾸면 맵 바뀜*/2) % biomeList.Count;
             currentBiome = biomeList[biomeIndex];
 
             // UI 배경 이미지 교체
@@ -136,7 +136,7 @@ public class DiceManager : MonoBehaviour
             }
 
             //Enemy를 초기화할 때, 현재 맵에 맞는 몬스터 리스트를 같이 넘겨줌!
-            enemy.Initialize(currentStage, currentBiome.biomeMonsters);
+            enemy.Initialize(currentStage, currentBiome);
         }
         else
         {

@@ -75,23 +75,36 @@ public class Enemy : MonoBehaviour
         currentMonsterIndex = 0;
     }
 
-    public void Initialize(int currentStage, List<MonsterDataSO> currentBiomeMonsters)
+    public void Initialize(int currentStage, BiomeDataSO currentBiome)
     {
         // 1. 만약의 사태를 대비한 기본 체력 (리스트가 비어있을 때 등)
         int finalMaxHP = 40;
+        MonsterDataSO nextMonsterData = null;
 
-        if (currentBiomeMonsters != null && currentBiomeMonsters.Count > 0)
+        if (currentBiome != null)
         {
-            // 리스트에서 랜덤 몬스터 데이터를 가져옴
-            int randomIndex = UnityEngine.Random.Range(0, currentBiomeMonsters.Count);
-            MonsterDataSO nextMonsterData = currentBiomeMonsters[randomIndex];
+            // 5의 배수 스테이지(5, 10, 15...)이고 보스 데이터가 있다면 보스 출현!
+            if (currentStage % 2 == 0 && currentBiome.bossMonster != null)
+            {
+                nextMonsterData = currentBiome.bossMonster;
+                Debug.Log($"[{currentStage} 스테이지] 보스 출현: {nextMonsterData.monsterName}");
+            }
+            //그 외의 일반 스테이지는 기존처럼 리스트에서 랜덤 출현
+            else if (currentBiome.biomeMonsters != null && currentBiome.biomeMonsters.Count > 0)
+            {
+                int randomIndex = UnityEngine.Random.Range(0, currentBiome.biomeMonsters.Count);
+                nextMonsterData = currentBiome.biomeMonsters[randomIndex];
+                Debug.Log($"[{currentStage} 스테이지] 등장 몬스터: {nextMonsterData.monsterName}");
+            }
+        }
 
-            // 이미지와 전리품 정보 덮어쓰기
+        // 선택된 몬스터(보스 혹은 일반)의 데이터를 덮어씌웁니다.
+        if (nextMonsterData != null)
+        {
             if (monsterAnimator != null && nextMonsterData.animatorController != null)
             {
                 monsterAnimator.runtimeAnimatorController = nextMonsterData.animatorController;
             }
-            // 전용 애니메이션이 없고 그냥 멈춰있는 이미지라면 애니메이터를 끄고 이미지만 교체
             else
             {
                 if (monsterAnimator != null) monsterAnimator.runtimeAnimatorController = null;
@@ -99,21 +112,12 @@ public class Enemy : MonoBehaviour
             }
             dropFigureData = nextMonsterData.dropFigureData;
             baseDropRate = nextMonsterData.dropRate;
-            Debug.Log($"[{currentStage} 스테이지] 등장 몬스터: {nextMonsterData.monsterName}");
 
-            // 애니메이션 커브로 체력 배율 계산
             float curveMultiplier = nextMonsterData.hpScalingCurve.Evaluate(currentStage);
-            //if (curveMultiplier <= 0f)
-            //{
-            //    curveMultiplier = 1f;
-            //}
-
-            // 최종 체력 계산해서 finalMaxHP에 저장
             finalMaxHP = Mathf.FloorToInt(nextMonsterData.baseHP * curveMultiplier);
-
-            // 다음 스테이지를 위해 인덱스 1 증가
             currentMonsterIndex++;
         }
+
 
         // 여기서 최종적으로 체력을 확정(덮어씌워지는 문제 해결)
         MaxHP = finalMaxHP;
