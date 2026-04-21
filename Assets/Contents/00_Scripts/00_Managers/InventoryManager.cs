@@ -187,7 +187,7 @@ public class InventoryManager : MonoBehaviour
         tooltipRect.pivot = new Vector2(0f, 0.5f);
         tooltipRect.position = slotRect.position;
         // x, y 값을 조절하여 마우스/슬롯을 가리지 않게 오프셋 부여
-        tooltipRect.localPosition += new Vector3(65f, -40f, 0f);
+        tooltipRect.localPosition += new Vector3(-160f, -50f, 0f);
     }
 
     //툴팁 숨김 함수

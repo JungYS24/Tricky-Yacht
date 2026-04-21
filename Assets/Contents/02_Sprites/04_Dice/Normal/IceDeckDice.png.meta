@@ -1,19 +1,10 @@
 fileFormatVersion: 2
-guid: 0f2b1cf9091c08846904f4e274322a56
+guid: 160f5b55454249b40856cf3da12d5f08
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1923161892961093280
-    second: Bear King_0
-  - first:
-      213: 7587063919037715191
-    second: Bear King_1
-  - first:
-      213: -3944079676998783705
-    second: Bear King_2
-  - first:
-      213: -2405670082166525582
-    second: Bear King_3
+      213: 3143735842892198136
+    second: IceDeckDice_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -60,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 55
+  spritePixelsToUnits: 80
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -81,7 +72,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 1024
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -107,7 +98,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: Android
-    maxTextureSize: 1024
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -122,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Bear King_0
+      name: IceDeckDice_0
       rect:
         serializedVersion: 2
-        x: 114
-        y: 112
-        width: 106
-        height: 158
+        x: 24
+        y: 51
+        width: 425
+        height: 462
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -137,74 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0a683836d8170ba10800000000000000
-      internalID: 1923161892961093280
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Bear King_1
-      rect:
-        serializedVersion: 2
-        x: 238
-        y: 111
-        width: 108
-        height: 158
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7f21d66bf6aaa4960800000000000000
-      internalID: 7587063919037715191
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Bear King_2
-      rect:
-        serializedVersion: 2
-        x: 362
-        y: 111
-        width: 134
-        height: 162
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 72d66ae2e60d349c0800000000000000
-      internalID: -3944079676998783705
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Bear King_3
-      rect:
-        serializedVersion: 2
-        x: 510
-        y: 112
-        width: 107
-        height: 158
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 271fda95ec75d9ed0800000000000000
-      internalID: -2405670082166525582
+      spriteID: 8f0b047c71bc0ab20800000000000000
+      internalID: 3143735842892198136
       vertices: []
       indices: 
       edges: []
@@ -223,10 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Bear King_0: 1923161892961093280
-      Bear King_1: 7587063919037715191
-      Bear King_2: -3944079676998783705
-      Bear King_3: -2405670082166525582
+      IceDeckDice_0: 3143735842892198136
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
