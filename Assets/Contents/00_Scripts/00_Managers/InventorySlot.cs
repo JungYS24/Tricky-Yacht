@@ -26,6 +26,8 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
         itemIcon.gameObject.SetActive(true);
     }
 
+
+
     public void ClearSlot()
     {
         currentItem = null;

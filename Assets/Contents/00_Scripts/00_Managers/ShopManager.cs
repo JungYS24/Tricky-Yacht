@@ -25,7 +25,11 @@ public class ShopManager : MonoBehaviour
     public int rerollCost = 100;
 
     [Header("상점 제어 버튼")]
-    public Button nextStageButton; 
+    public Button nextStageButton;
+
+    [Header("티켓 시스템 UI")]
+    public GameObject ticketSelectionPanel;
+    public Button[] ticketChoiceButtons;
 
     private void Awake()
     {
@@ -42,6 +46,10 @@ public class ShopManager : MonoBehaviour
 
         if (nextStageButton != null)
             nextStageButton.onClick.AddListener(CloseShopAndGoNext);
+
+        if (ticketSelectionPanel != null)
+            ticketSelectionPanel.SetActive(false);
+
 
         IsShopOpen = false;
     }
@@ -142,6 +150,28 @@ public class ShopManager : MonoBehaviour
         tooltipRect.position = slotRect.position;
         tooltipRect.localPosition += new Vector3(120f, -50f, 0f);
     }
+    public void ShowTicketSelection()
+    {
+        if (ticketSelectionPanel != null)
+        {
+            // 선택창을 켭니다.
+            ticketSelectionPanel.SetActive(true);
+
+            // 3개의 버튼에 '클릭 시 닫히는 기능(OnTicketSelected)'을 연결
+            foreach (Button btn in ticketChoiceButtons)
+            {
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() => OnTicketSelected(btn));
+            }
+        }
+    }
+
+    private void OnTicketSelected(Button selectedButton)
+    {
+        if (ticketSelectionPanel != null)
+            ticketSelectionPanel.SetActive(false);
+    }
+
 
     public void HideTooltip() => tooltipPanel.SetActive(false);
 }
