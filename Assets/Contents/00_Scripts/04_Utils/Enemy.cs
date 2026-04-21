@@ -113,7 +113,7 @@ public class Enemy : MonoBehaviour
             dropFigureData = nextMonsterData.dropFigureData;
             baseDropRate = nextMonsterData.dropRate;
 
-            float curveMultiplier = nextMonsterData.hpScalingCurve.Evaluate(currentStage);
+            float curveMultiplier = Mathf.Pow(nextMonsterData.growthRate, currentStage - 1);
             finalMaxHP = Mathf.FloorToInt(nextMonsterData.baseHP * curveMultiplier);
             currentMonsterIndex++;
         }

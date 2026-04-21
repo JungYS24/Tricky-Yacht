@@ -12,7 +12,7 @@ public class MonsterDataSO : ScriptableObject
 
     [Header("전투 스탯")]
     public int baseHP = 40;
-    public AnimationCurve hpScalingCurve = AnimationCurve.Linear(1, 1, 50, 10);
+    public float growthRate = 1.3f;
 
     [Header("전리품 (박제) 설정")]
     public FigureItemSO dropFigureData;
