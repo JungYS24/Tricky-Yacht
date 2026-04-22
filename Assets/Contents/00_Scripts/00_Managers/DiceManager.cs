@@ -95,18 +95,12 @@ public class DiceManager : MonoBehaviour
         for (int i = 0; i < 20; i++) masterDeck.Add(new DiceData1());
     }
 
-    public void ApplyRandomCoating(DiceType coatingType, float mult, Color color)
+
+    public List<DiceData1> GetRandomDiceForCoating(int count)
     {
-        var nonCoatedDice = masterDeck.Where(d => !d.isCoated).ToList();
-        if (nonCoatedDice.Count > 0)
-        {
-            DiceData1 selected = nonCoatedDice[UnityEngine.Random.Range(0, nonCoatedDice.Count)];
-            selected.isCoated = true;
-            selected.multiplier = mult;
-            selected.diceColor = color;
-            selected.type = coatingType;
-        }
+        return masterDeck.OrderBy(x => UnityEngine.Random.value).Take(count).ToList();
     }
+
 
     void StartNewStage()
     {

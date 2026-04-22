@@ -31,6 +31,9 @@ public class ShopManager : MonoBehaviour
     public GameObject ticketSelectionPanel;
     public Button[] ticketChoiceButtons;
 
+    [Header("코팅 선택 UI")]
+    public CoatingSelectionPanel coatingSelectionPanel;
+
     private void Awake()
     {
         if (tooltipRect == null && tooltipPanel != null)
@@ -92,6 +95,8 @@ public class ShopManager : MonoBehaviour
 
     public void RerollShop()
     {
+        if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return;//코팅 선택 중이면 작동 불가
+
         if (currentGold >= rerollCost)
         {
             currentGold -= rerollCost;
@@ -102,6 +107,9 @@ public class ShopManager : MonoBehaviour
 
     public void CloseShopAndGoNext()
     {
+        // 코팅 선택 중이면 다음 스테이지 넘어가기 불가
+        if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return;
+
         IsShopOpen = false;
         if (shopUI != null) shopUI.SetActive(false);
 
@@ -110,6 +118,9 @@ public class ShopManager : MonoBehaviour
 
     public bool PurchaseItem(BaseItemDataSO item)
     {
+        // 코팅 선택 중이면 리롤 불가
+        if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return false;
+
         if (currentGold >= item.price)
         {
             if (item is FigureItemSO || item is SnackItemSO)
@@ -170,6 +181,18 @@ public class ShopManager : MonoBehaviour
     {
         if (ticketSelectionPanel != null)
             ticketSelectionPanel.SetActive(false);
+    }
+
+    public void ShowCoatingSelection(DiceType type, float mult, Color color)
+    {
+        if (coatingSelectionPanel != null && diceManager != null)
+        {
+            coatingSelectionPanel.OpenSelection(diceManager, type, mult, color);
+        }
+        else
+        {
+            Debug.LogWarning("CoatingSelectionPanel 또는 DiceManager 연결이 누락되었습니다.");
+        }
     }
 
 
