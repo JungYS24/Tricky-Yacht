@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 78c0ae66c7f150c47b57bf097d8bbbbe
+guid: c307784d7cdc3db41accaaadff67d072
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2234016231399148099
-    second: renew_forest (1)_0
+      213: -595908759570360496
+    second: B10_Beach_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: renew_forest (1)_0
+      name: B10_Beach_0
       rect:
         serializedVersion: 2
         x: 0
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: db53ff8e21e2ff0e0800000000000000
-      internalID: -2234016231399148099
+      spriteID: 057d343f328eab7f0800000000000000
+      internalID: -595908759570360496
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      renew_forest (1)_0: -2234016231399148099
+      B10_Beach_0: -595908759570360496
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
