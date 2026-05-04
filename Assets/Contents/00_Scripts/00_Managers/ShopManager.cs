@@ -27,12 +27,15 @@ public class ShopManager : MonoBehaviour
     [Header("상점 제어 버튼")]
     public Button nextStageButton;
 
-    [Header("티켓 시스템 UI")]
-    public GameObject ticketSelectionPanel;
-    public Button[] ticketChoiceButtons;
 
     [Header("코팅 선택 UI")]
     public CoatingSelectionPanel coatingSelectionPanel;
+
+    [Header("티켓 시스템 설정")]
+    public GameObject ticketSelectionPanel;
+    public List<TicketItemSO> allTicketsPool; // 8개의 티켓을 미리 넣어둘 리스트
+    public TicketChoiceSlot[] ticketChoiceSlots; // 화면에 보일 3개의 버튼 슬롯
+
 
     private void Awake()
     {
@@ -156,28 +159,39 @@ public class ShopManager : MonoBehaviour
     {
         descText.text = desc;
         tooltipPanel.SetActive(true);
+
+        tooltipRect.SetAsLastSibling();
         tooltipRect.pivot = new Vector2(0f, 0.5f);
 
         tooltipRect.position = slotRect.position;
-        tooltipRect.localPosition += new Vector3(120f, -50f, 0f);
+        tooltipRect.localPosition += new Vector3(20f, -50f, 0f);
     }
+    // 티켓 선택창 열기 (티켓 아이템을 구매했을 때 호출됨)
     public void ShowTicketSelection()
     {
+        if (allTicketsPool.Count < 3) return;
+
         if (ticketSelectionPanel != null)
-        {
-            // 선택창을 켭니다.
             ticketSelectionPanel.SetActive(true);
 
-            // 3개의 버튼에 '클릭 시 닫히는 기능(OnTicketSelected)'을 연결
-            foreach (Button btn in ticketChoiceButtons)
-            {
-                btn.onClick.RemoveAllListeners();
-                btn.onClick.AddListener(() => OnTicketSelected(btn));
-            }
+        // 전체 티켓 풀을 셔플
+        List<TicketItemSO> shuffledTickets = new List<TicketItemSO>(allTicketsPool);
+        for (int i = 0; i < shuffledTickets.Count; i++)
+        {
+            int rnd = Random.Range(i, shuffledTickets.Count);
+            var temp = shuffledTickets[i];
+            shuffledTickets[i] = shuffledTickets[rnd];
+            shuffledTickets[rnd] = temp;
+        }
+
+        // 섞인 리스트 중 앞의 3개를 슬롯에 배치
+        for (int i = 0; i < ticketChoiceSlots.Length; i++)
+        {
+            ticketChoiceSlots[i].Setup(shuffledTickets[i], this);
         }
     }
 
-    private void OnTicketSelected(Button selectedButton)
+    public void CloseTicketSelection()
     {
         if (ticketSelectionPanel != null)
             ticketSelectionPanel.SetActive(false);

@@ -592,7 +592,7 @@ public class DiceManager : MonoBehaviour
 
     void CalculateHandData(List<int> values, out float multiplier, out string handName)
     {
-        // ⬇️ 숫자로 적혀있던 부분을 전부 mult변수로 교체합니다.
+        //숫자로 적혀있던 부분을 전부 mult변수로 교체합니다.
         multiplier = multHighCard; handName = "탑 (High Card)";
         int[] counts = new int[7]; foreach (int v in values) counts[v]++;
         List<int> sortedValues = new List<int>(values); sortedValues.Sort();
