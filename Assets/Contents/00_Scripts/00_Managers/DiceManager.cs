@@ -63,6 +63,20 @@ public class DiceManager : MonoBehaviour
     private List<Dice> activeDiceList = new List<Dice>();
     private Dice[] keepSlotOccupants;
     private bool pendingPeppermintSuccess = false;
+    private bool isRolling = false; // 주사위 굴러가는중 
+    private bool isCalculating = false; // 끝내기 버튼
+
+    //족보별 배수
+    [Header("족보 배수 설정")]
+    public float multHighCard = 1.0f;
+    public float multOnePair = 1.2f;
+    public float multTwoPair = 1.4f;
+    public float multTriple = 1.5f;
+    public float multFullHouse = 1.7f;
+    public float multFourOfAKind = 1.8f;
+    public float multStraight = 2.0f;
+    public float multYacht = 2.5f;
+
 
     void Awake()
     {
@@ -160,6 +174,8 @@ public class DiceManager : MonoBehaviour
 
     void StartNewRound()
     {
+        isCalculating = false;
+
         ui?.HideResult();
         currentRerolls = 0;
         snackBonusMult = 0f;
@@ -203,7 +219,11 @@ public class DiceManager : MonoBehaviour
     
     public void OnRollButtonClick()
     {
-        if (currentRerolls >= (maxRerolls + snackBonusRerolls + pandaBonusRerolls) || ShopManager.IsShopOpen) return;
+        if (isRolling || currentRerolls >= (maxRerolls + snackBonusRerolls + pandaBonusRerolls) || ShopManager.IsShopOpen) return;
+
+        isRolling = true; // 굴림 상태 켜기
+        ui?.SetRollButtonInteractable(false);   //즉시 버튼 비활성화
+        ui?.SetFinishButtonInteractable(false); //주사위가 굴러가는 동안 끝내기 버튼도 막기
 
         //리롤 버튼 클릭 및 주사위 굴러가는 소리
 
@@ -221,7 +241,11 @@ public class DiceManager : MonoBehaviour
 
     public void OnFinishButtonClick()
     {
-        if (ShopManager.IsShopOpen || enemy.IsDead) return;
+        if (isRolling || isCalculating || ShopManager.IsShopOpen || enemy.IsDead) return;
+
+        isCalculating = true; //결산 연출 시작
+        ui?.SetRollButtonInteractable(false);   //즉시 버튼 비활성화
+        ui?.SetFinishButtonInteractable(false); //즉시 버튼 비활성화
 
         // 사운드 끝내기 버튼 클릭 소리 재생
 
@@ -321,6 +345,21 @@ public class DiceManager : MonoBehaviour
 
         StartCoroutine(ProcessTurnResult(handName));
     }
+    //티켓 아이템 먹었을 때 호출할 함수
+    public void UpgradeHand(HandType handType, float amount)
+    {
+        switch (handType)
+        {
+            case HandType.HighCard: multHighCard *= amount; break;
+            case HandType.OnePair: multOnePair *= amount; break;
+            case HandType.TwoPair: multTwoPair *= amount; break;
+            case HandType.Triple: multTriple *= amount; break;
+            case HandType.FullHouse: multFullHouse *= amount; break;
+            case HandType.FourOfAKind: multFourOfAKind *= amount; break;
+            case HandType.Straight: multStraight *= amount; break;
+            case HandType.Yacht: multYacht *= amount; break;
+        }
+    }
 
     private void OnEnemyKilled()
     {
@@ -417,6 +456,8 @@ public class DiceManager : MonoBehaviour
 
     void HandleDiceChanged()
     {
+        isRolling = false;
+
         int keptCount = 0;
         bool hasDiceToRoll = false;
         foreach (var d in activeDiceList.Where(d => d != null))
@@ -533,6 +574,16 @@ public class DiceManager : MonoBehaviour
         isPeppermintActive = false;
         consumedCherryCount = 0;
         Debug.Log("게임이 완전히 초기화되었습니다. 다시 시작합니다.");
+        //6. 티켓으로 올렸던 배수를 다시 기본값으로 돌려줌
+        multHighCard = 1.0f;
+        multOnePair = 1.2f;
+        multTwoPair = 1.4f;
+        multTriple = 1.5f;
+        multFullHouse = 1.7f;
+        multFourOfAKind = 1.8f;
+        multStraight = 2.0f;
+        multYacht = 2.5f;
+
         //몬스터 초기화
         enemy.ResetMonsterIndex();
         // 6. 새로운 스테이지 시작
@@ -541,17 +592,21 @@ public class DiceManager : MonoBehaviour
 
     void CalculateHandData(List<int> values, out float multiplier, out string handName)
     {
-        multiplier = 1.0f; handName = "탑 (High Card)";
+        // ⬇️ 숫자로 적혀있던 부분을 전부 mult변수로 교체합니다.
+        multiplier = multHighCard; handName = "탑 (High Card)";
         int[] counts = new int[7]; foreach (int v in values) counts[v]++;
         List<int> sortedValues = new List<int>(values); sortedValues.Sort();
-        if (counts.Any(c => c == 5)) { multiplier = 2.5f; handName = "Yacht"; return; }
+
+        if (counts.Any(c => c == 5)) { multiplier = multYacht; handName = "Yacht"; return; }
+
         bool isStraight = true;
         for (int i = 0; i < sortedValues.Count - 1; i++) if (sortedValues[i] + 1 != sortedValues[i + 1]) { isStraight = false; break; }
-        if (isStraight) { multiplier = 2.0f; handName = "스트레이트"; return; }
-        if (counts.Any(c => c == 4)) { multiplier = 1.8f; handName = "포카드"; return; }
-        if (counts.Any(c => c == 3) && counts.Any(c => c == 2)) { multiplier = 1.7f; handName = "풀하우스"; return; }
-        if (counts.Any(c => c == 3)) { multiplier = 1.5f; handName = "트리플"; return; }
-        if (counts.Count(c => c == 2) == 2) { multiplier = 1.4f; handName = "투 페어"; return; }
-        if (counts.Any(c => c == 2)) { multiplier = 1.2f; handName = "원 페어"; return; }
+        if (isStraight) { multiplier = multStraight; handName = "스트레이트"; return; }
+
+        if (counts.Any(c => c == 4)) { multiplier = multFourOfAKind; handName = "포카드"; return; }
+        if (counts.Any(c => c == 3) && counts.Any(c => c == 2)) { multiplier = multFullHouse; handName = "풀하우스"; return; }
+        if (counts.Any(c => c == 3)) { multiplier = multTriple; handName = "트리플"; return; }
+        if (counts.Count(c => c == 2) == 2) { multiplier = multTwoPair; handName = "투 페어"; return; }
+        if (counts.Any(c => c == 2)) { multiplier = multOnePair; handName = "원 페어"; return; }
     }
 }
