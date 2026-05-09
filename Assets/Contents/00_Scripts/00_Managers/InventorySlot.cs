@@ -56,6 +56,11 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
                 // 사운드 스낵 먹는 소리 재생
 
                 snack.ApplyItemEffect(manager.diceManager);
+                if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+                {
+                    // 현재 아이템의 이름을 전달 (Peppermint, Garnish 등)
+                    TutorialManager.Instance.OnItemUsed(currentItem.itemName);
+                }
                 ClearSlot(); // 효과가 적용된 후에만 슬롯을 비웁니다.
                 manager.HideSellPopup();
                 manager.HideTooltip(); // 아이템을 먹어서 사라졌으니 툴팁도 닫아줍니다.

@@ -36,6 +36,8 @@ public class ShopManager : MonoBehaviour
     public List<TicketItemSO> allTicketsPool; // 8개의 티켓을 미리 넣어둘 리스트
     public TicketChoiceSlot[] ticketChoiceSlots; // 화면에 보일 3개의 버튼 슬롯
 
+   
+
 
     private void Awake()
     {
@@ -77,21 +79,53 @@ public class ShopManager : MonoBehaviour
     public void RefreshShop(bool isReroll)
     {
         List<BaseItemDataSO> shuffled = new List<BaseItemDataSO>(allItemsPool);
-        for (int i = 0; i < shuffled.Count; i++)
-        {
-            int rnd = Random.Range(i, shuffled.Count);
-            (shuffled[i], shuffled[rnd]) = (shuffled[rnd], shuffled[i]);
-        }
 
-        int dataIndex = 0;
-        for (int i = 0; i < shopSlots.Length; i++)
+        // 튜토리얼 중이고, 첫 번째 상점 방문(10~17단계 사이)일 때
+        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive && TutorialManager.Instance.currentStepIndex <= 17)
         {
-            if (isReroll && shopSlots[i].isPurchased) continue;
-
-            if (dataIndex < shuffled.Count)
+            // 상점 슬롯이 5개 이상이라고 가정하고 순서대로 꽂아 넣습니다.
+            if (shopSlots.Length >= 5)
             {
-                shopSlots[i].SetupSlot(shuffled[dataIndex], this);
-                dataIndex++;
+                shopSlots[0].SetupSlot(TutorialManager.Instance.tutFigure, this);
+                shopSlots[1].SetupSlot(TutorialManager.Instance.tutSnack, this);
+                shopSlots[2].SetupSlot(TutorialManager.Instance.tutCoating, this);
+                shopSlots[3].SetupSlot(TutorialManager.Instance.tutDice, this);
+                shopSlots[4].SetupSlot(TutorialManager.Instance.tutTicket, this);
+            }
+            // [두 번째 상점: 20단계 이후] 페퍼민트와 가니쉬만 진열
+            else if (TutorialManager.Instance.currentStepIndex >= 20)
+            {
+                if (shopSlots.Length >= 2)
+                {
+                    shopSlots[0].gameObject.SetActive(true);
+                    // .tutorialPeppermint 이름 확인!
+                    shopSlots[0].SetupSlot(TutorialManager.Instance.tutorialPeppermint, this);
+
+                    shopSlots[1].gameObject.SetActive(true);
+                    // .tutorialGarnish 이름 확인!
+                    shopSlots[1].SetupSlot(TutorialManager.Instance.tutorialGarnish, this);
+                }
+            }
+            return; // 튜토리얼 강제 진열 후 함수 종료          
+        }
+        else
+        {
+            for (int i = 0; i < shuffled.Count; i++)
+            {
+                int rnd = Random.Range(i, shuffled.Count);
+                (shuffled[i], shuffled[rnd]) = (shuffled[rnd], shuffled[i]);
+            }
+
+            int dataIndex = 0;
+            for (int i = 0; i < shopSlots.Length; i++)
+            {
+                if (isReroll && shopSlots[i].isPurchased) continue;
+
+                if (dataIndex < shuffled.Count)
+                {
+                    shopSlots[i].SetupSlot(shuffled[dataIndex], this);
+                    dataIndex++;
+                }
             }
         }
     }
@@ -132,6 +166,11 @@ public class ShopManager : MonoBehaviour
                 {
                     currentGold -= item.price;
                     if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
+
+                    if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+                    {
+                        TutorialManager.Instance.OnItemBought(item.itemName);
+                    }
                     return true;
                 }
                 else
@@ -142,15 +181,17 @@ public class ShopManager : MonoBehaviour
             }
             else
             {
-
                 item.ApplyItemEffect(diceManager);
-
                 currentGold -= item.price;
                 if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
+
+                if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+                {
+                    TutorialManager.Instance.OnItemBought(item.itemName);
+                }
                 return true;
             }
         }
-
         Debug.Log("골드가 부족합니다.");
         return false;
     }

@@ -60,7 +60,7 @@ public class DiceManager : MonoBehaviour
     //클락판다 스테이지 버프 활성화 여부
     [HideInInspector] public int pandaBonusRerolls = 0;
 
-    private List<Dice> activeDiceList = new List<Dice>();
+    public List<Dice> activeDiceList = new List<Dice>();
     private Dice[] keepSlotOccupants;
     private bool pendingPeppermintSuccess = false;
     private bool isRolling = false; // 주사위 굴러가는중 
@@ -212,6 +212,13 @@ public class DiceManager : MonoBehaviour
             Dice d = go.GetComponent<Dice>();
             d.rollPos = rollSlots[i].position;
             int initialVal = drawnData.faceValues[UnityEngine.Random.Range(0, 6)];
+            //튜토리얼 추가
+            if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+            {
+                int forcedVal = TutorialManager.Instance.GetForcedDiceValue(i);
+                if (forcedVal != -1) initialVal = forcedVal;
+            }
+
             d.SetData(drawnData, initialVal);
             activeDiceList.Add(d);
         }
@@ -232,6 +239,14 @@ public class DiceManager : MonoBehaviour
         foreach (var d in activeDiceList.Where(d => d != null && !d.isKept))
         {
             int finalResult = d.myData.faceValues[UnityEngine.Random.Range(0, 6)];
+            //튜토리얼 추가
+            if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+            {
+                int diceIndex = activeDiceList.IndexOf(d);
+                int forcedVal = TutorialManager.Instance.GetForcedDiceValue(diceIndex);
+                if (forcedVal != -1) finalResult = forcedVal;
+            }
+
             d.PlayRollEffect(finalResult);
         }
 

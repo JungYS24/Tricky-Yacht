@@ -197,10 +197,18 @@ public class Dice : MonoBehaviour, IPointerDownHandler
     {
         if (ShopManager.IsShopOpen) return;
 
+        // 튜토리얼 중 클릭 제한 로직 추가
+        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+        {
+            if (!TutorialManager.Instance.IsDiceClickable(this))
+            {
+                return; // 허락되지 않은 주사위면 여기서 클릭 취소
+            }
+        }
+
         isKept = !isKept;
         OnDiceStateChanged?.Invoke();
 
-        // 보관 시에는 고유 코팅 색상을 기준으로 어둡게 처리
         ApplyDiceColor();
     }
 
