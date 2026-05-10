@@ -29,6 +29,43 @@ public class UIManager : MonoBehaviour
     public void ShowShopChoice() => shopChoicePanel.SetActive(true);
     public void HideShopChoice() => shopChoicePanel.SetActive(false);
 
+    [Header("설정창(일시정지) UI")]
+    public GameObject settingsPanel;   // 설정창 전체 패널 (어두운 배경 포함)
+    public Button settingsOpenButton;  // 게임 화면 우측 상단의 톱니바퀴 버튼
+    public Button resumeButton;        // 설정창 안의 '계속하기' 버튼
+
+    private void Start()
+    {
+        // 시작할 때 버튼들에 함수를 자동으로 연결해 줍니다.
+        if (settingsOpenButton != null)
+            settingsOpenButton.onClick.AddListener(OpenSettings);
+
+        if (resumeButton != null)
+            resumeButton.onClick.AddListener(CloseSettings);
+
+        // 시작 시 설정창은 무조건 꺼두기
+        if (settingsPanel != null)
+            settingsPanel.SetActive(false);
+    }
+
+    // 톱니바퀴 버튼을 눌렀을 때 실행될 함수
+    public void OpenSettings()
+    {
+        if (settingsPanel != null)
+            settingsPanel.SetActive(true); // 설정창 켜기
+
+        Time.timeScale = 0f; //핵심: 게임 내 시간을 완전히 멈춤! (일시정지)
+    }
+
+    // 계속하기 버튼을 눌렀을 때 실행될 함수
+    public void CloseSettings()
+    {
+        if (settingsPanel != null)
+            settingsPanel.SetActive(false); // 설정창 끄기
+
+        Time.timeScale = 1f; // 💡 핵심: 게임 내 시간을 다시 정상 속도로 돌림! (재개)
+    }
+
     // 매개변수 끝자리에 combinedDamageText 하나만 받도록 수정
     public void UpdateGameUI(int stageNum, int currentHP, int maxHP, int playsMade, int maxPlays, int rerollsLeft, string combinedDamageText)
     {

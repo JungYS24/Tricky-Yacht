@@ -55,6 +55,21 @@ public class TutorialManager : MonoBehaviour
 
     private void Start()
     {
+
+        // 로비에서 저장한 값을 읽어옴 (기본값은 0)
+        int shouldRun = PlayerPrefs.GetInt("RunTutorial", 0);
+
+        if (shouldRun == 1)
+        {
+            isTutorialActive = true;
+            // ... 기존 튜토리얼 시작 로직 ...
+        }
+        else
+        {
+            isTutorialActive = false;
+            FinishTutorial(); // 튜토리얼 즉시 종료 및 UI 비활성화 함수 호출
+            return;
+        }
         if (isTutorialActive)
         {
             nextButton.onClick.AddListener(ProceedTutorial);
