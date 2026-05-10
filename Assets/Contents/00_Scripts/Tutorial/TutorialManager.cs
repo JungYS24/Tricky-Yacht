@@ -91,6 +91,16 @@ public class TutorialManager : MonoBehaviour
         darkOverlay.SetActive(true);
         ClearHighlight();
 
+        //if (step == 22)
+        //{
+        //    nextButton.gameObject.SetActive(false);
+        //    darkOverlay.SetActive(false);
+        //    uiManager.rollButton.interactable = true;
+        //    uiManager.finishButton.interactable = true;
+        //    if (diceManager != null) diceManager.snackBonusFigureDropRate += 1.0f;
+        //    StartCoroutine(WaitForMonsterDefeat());
+        //}
+
         if (step >= 10 && step <= 14)
         {
             SetShopSlotsInteractable(false);
@@ -230,16 +240,27 @@ public class TutorialManager : MonoBehaviour
 
     private void StartFreePlay()
     {
-        // 가림막 및 대사창 완전히 해제
+        // 1. 가장 중요: 튜토리얼 루트 자체를 꺼야 화면을 가로막는 투명 레이어가 완전히 사라집니다.
+        tutorialRoot.SetActive(false);
+
+        // 2. 가림막과 대사창 상태도 확실히 정리 (나중에 ShowStep(23)에서 다시 켤 때를 대비)
         SetDialogPanelVisible(false);
         darkOverlay.SetActive(false);
+
+        // 3. 게임 플레이를 위해 버튼들을 다시 활성화
+        // 주의: DiceManager의 HandleDiceChanged가 실행되면 게임 로직에 따라 다시 꺼질 수 있습니다.
         uiManager.rollButton.interactable = true;
         uiManager.finishButton.interactable = true;
 
-        // 이번 전투 무조건 100% 박제(포획)를 위한 강제 보정!
-        if (diceManager != null) diceManager.snackBonusFigureDropRate += 1.0f;
+        // 4. 이번 전투 무조건 100% 박제(포획)를 위한 강제 보정
+        if (diceManager != null)
+        {
+            diceManager.snackBonusFigureDropRate += 1.0f;
+            // 버튼 상태를 강제로 갱신하도록 호출 (버튼이 안 눌리는 현상 방지)
+            diceManager.ForceUpdateUI();
+        }
 
-        // 유저가 몬스터를 다 잡을 때까지 몰래 기다리는 코루틴 실행
+        // 5. 유저가 몬스터를 다 잡을 때까지 기다리는 코루틴 실행
         StartCoroutine(WaitForMonsterDefeat());
     }
 
