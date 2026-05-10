@@ -180,6 +180,13 @@ public class InventoryManager : MonoBehaviour
 
         descText.text = desc;
         tooltipPanel.SetActive(true);
+
+        // [추가] 툴팁이 다른 모든 UI(튜토리얼 가림막 포함)보다 앞에 오도록 설정
+        Canvas canvas = tooltipPanel.GetComponent<Canvas>();
+        if (canvas == null) canvas = tooltipPanel.AddComponent<Canvas>();
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = 101; // 아주 높은 숫자를 주어 최상단으로 올림
+
         // 툴팁 패널을 계층 구조의 맨 아래로 보내서 화면상 가장 앞에 오게 합니다.
         tooltipRect.SetAsLastSibling();
 

@@ -27,7 +27,6 @@ public class ShopManager : MonoBehaviour
     [Header("상점 제어 버튼")]
     public Button nextStageButton;
 
-
     [Header("코팅 선택 UI")]
     public CoatingSelectionPanel coatingSelectionPanel;
 
@@ -35,9 +34,6 @@ public class ShopManager : MonoBehaviour
     public GameObject ticketSelectionPanel;
     public List<TicketItemSO> allTicketsPool; // 8개의 티켓을 미리 넣어둘 리스트
     public TicketChoiceSlot[] ticketChoiceSlots; // 화면에 보일 3개의 버튼 슬롯
-
-   
-
 
     private void Awake()
     {
@@ -50,14 +46,13 @@ public class ShopManager : MonoBehaviour
             shopRerollButton.onClick.AddListener(RerollShop);
 
         if (rerollCostText != null)
-            rerollCostText.text = "리롤 : "+rerollCost + " G";
+            rerollCostText.text = "리롤 : " + rerollCost + " G";
 
         if (nextStageButton != null)
             nextStageButton.onClick.AddListener(CloseShopAndGoNext);
 
         if (ticketSelectionPanel != null)
             ticketSelectionPanel.SetActive(false);
-
 
         IsShopOpen = false;
     }
@@ -92,20 +87,6 @@ public class ShopManager : MonoBehaviour
                 shopSlots[3].SetupSlot(TutorialManager.Instance.tutDice, this);
                 shopSlots[4].SetupSlot(TutorialManager.Instance.tutTicket, this);
             }
-            // [두 번째 상점: 20단계 이후] 페퍼민트와 가니쉬만 진열
-            else if (TutorialManager.Instance.currentStepIndex >= 20)
-            {
-                if (shopSlots.Length >= 2)
-                {
-                    shopSlots[0].gameObject.SetActive(true);
-                    // .tutorialPeppermint 이름 확인!
-                    shopSlots[0].SetupSlot(TutorialManager.Instance.tutorialPeppermint, this);
-
-                    shopSlots[1].gameObject.SetActive(true);
-                    // .tutorialGarnish 이름 확인!
-                    shopSlots[1].SetupSlot(TutorialManager.Instance.tutorialGarnish, this);
-                }
-            }
             return; // 튜토리얼 강제 진열 후 함수 종료          
         }
         else
@@ -117,6 +98,40 @@ public class ShopManager : MonoBehaviour
             }
 
             int dataIndex = 0;
+
+            // [두 번째 상점: 20단계 이후] 페퍼민트와 가니쉬만 진열 -> 고정 + 나머지 랜덤으로 로직 수정
+            // (주의: 19단계에서 상점이 열리며 세팅되므로 조건을 19단계 이상으로 수정했습니다)
+            if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive && TutorialManager.Instance.currentStepIndex >= 19)
+            {
+                for (int i = 0; i < shopSlots.Length; i++)
+                {
+                    if (i == 0)
+                    {
+                        shopSlots[0].gameObject.SetActive(true);
+                        // .tutorialPeppermint 이름 확인!
+                        shopSlots[0].SetupSlot(TutorialManager.Instance.tutorialPeppermint, this);
+                    }
+                    else if (i == 1)
+                    {
+                        shopSlots[1].gameObject.SetActive(true);
+                        // .tutorialGarnish 이름 확인!
+                        shopSlots[1].SetupSlot(TutorialManager.Instance.tutorialGarnish, this);
+                    }
+                    else
+                    {
+                        // 남은 슬롯은 셔플된 아이템으로 채움
+                        if (dataIndex < shuffled.Count)
+                        {
+                            shopSlots[i].gameObject.SetActive(true);
+                            shopSlots[i].SetupSlot(shuffled[dataIndex], this);
+                            dataIndex++;
+                        }
+                    }
+                }
+                return; // 튜토리얼 강제 진열 후 함수 종료
+            }
+
+            // --- 일반적인 상점 리프레시 (튜토리얼이 아닐 때) ---
             for (int i = 0; i < shopSlots.Length; i++)
             {
                 if (isReroll && shopSlots[i].isPurchased) continue;
@@ -201,6 +216,12 @@ public class ShopManager : MonoBehaviour
         descText.text = desc;
         tooltipPanel.SetActive(true);
 
+        // [추가] 상점 툴팁도 최상단으로 강제 고정
+        Canvas canvas = tooltipPanel.GetComponent<Canvas>();
+        if (canvas == null) canvas = tooltipPanel.AddComponent<Canvas>();
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = 101;
+
         tooltipRect.SetAsLastSibling();
         tooltipRect.pivot = new Vector2(0f, 0.5f);
 
@@ -249,7 +270,6 @@ public class ShopManager : MonoBehaviour
             Debug.LogWarning("CoatingSelectionPanel 또는 DiceManager 연결이 누락되었습니다.");
         }
     }
-
 
     public void HideTooltip() => tooltipPanel.SetActive(false);
 }
