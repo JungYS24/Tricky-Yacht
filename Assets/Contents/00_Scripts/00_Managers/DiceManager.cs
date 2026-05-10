@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class DiceManager : MonoBehaviour
 {
@@ -134,7 +135,7 @@ public class DiceManager : MonoBehaviour
         if (biomeList.Count > 0)
         { 
            
-            int biomeIndex = ((currentStage - 1) / /*여기 바꾸면 맵 바뀜*/2) % biomeList.Count;
+            int biomeIndex = ((currentStage - 1) / /*여기 바꾸면 맵 바뀜*/10) % biomeList.Count;
             currentBiome = biomeList[biomeIndex];
 
             // UI 배경 이미지 교체
@@ -562,6 +563,62 @@ public class DiceManager : MonoBehaviour
     public void GoToShop() { ui?.HideShopChoice(); shopManager?.OpenShop(); }
     public void SkipShopAndNextStage() { ui?.HideShopChoice(); NextStage(); }
     public void NextStage() { currentStage++; enemyMaxHP += 30; StartNewStage(); }
+
+    public void GoToMainMenu()
+    {
+        // 1. 기본 스테이지 데이터 초기화
+        currentStage = 1;
+        enemyMaxHP = 40;
+
+        // 2. 덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 20개로)
+        InitializeMasterDeck();
+
+        // 3. 골드 초기화 (ShopManager 참조)
+        if (shopManager != null)
+        {
+            shopManager.currentGold = 2000; // 초기 소지금 (기획에 맞게 수정하세요)
+            ui?.UpdateGoldUI(shopManager.currentGold);
+        }
+
+        // 4. 인벤토리 초기화 (방금 만든 함수 호출)
+        InventoryManager.Instance?.ClearAllSlots();
+
+        // 5. 스낵 및 특수 상태 버프 초기화
+        snackBonusMult = 0f;
+        snackBonusChips = 0;
+        snackBonusRerolls = 0;
+        snackBonusFigureDropRate = 0f;
+        isPeppermintActive = false;
+        consumedCherryCount = 0;
+
+        // 6. 티켓으로 올렸던 배수를 다시 기본값으로 돌려줌
+        multHighCard = 1.0f;
+        multOnePair = 1.2f;
+        multTwoPair = 1.4f;
+        multTriple = 1.5f;
+        multFullHouse = 1.7f;
+        multFourOfAKind = 1.8f;
+        multStraight = 2.0f;
+        multYacht = 2.5f;
+
+        //몬스터 초기화
+        enemy.ResetMonsterIndex();
+
+        if (TutorialManager.Instance != null)
+        {
+            TutorialManager.Instance.isTutorialActive = false;
+            TutorialManager.Instance.tutorialRoot.SetActive(false);
+        }
+
+        if (shopManager != null && shopManager.shopUI != null)
+        {
+            shopManager.shopUI.SetActive(false);
+        }
+
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("Lobby");
+    }
+
     void RestartGame()
     {
         // 1. 기본 스테이지 데이터 초기화
@@ -574,7 +631,7 @@ public class DiceManager : MonoBehaviour
         // 3. 골드 초기화 (ShopManager 참조)
         if (shopManager != null)
         {
-            shopManager.currentGold = 3000; // 초기 소지금 (기획에 맞게 수정하세요)
+            shopManager.currentGold = 2000; // 초기 소지금 (기획에 맞게 수정하세요)
             ui?.UpdateGoldUI(shopManager.currentGold);
         }
 

@@ -73,53 +73,56 @@ public class ShopManager : MonoBehaviour
 
     public void RefreshShop(bool isReroll)
     {
+        // 1. 일반 상점을 위해 미리 모든 아이템을 섞어둡니다.
         List<BaseItemDataSO> shuffled = new List<BaseItemDataSO>(allItemsPool);
-
-        // 튜토리얼 중이고, 첫 번째 상점 방문(10~17단계 사이)일 때
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive && TutorialManager.Instance.currentStepIndex <= 17)
+        for (int i = 0; i < shuffled.Count; i++)
         {
-            // 상점 슬롯이 5개 이상이라고 가정하고 순서대로 꽂아 넣습니다.
-            if (shopSlots.Length >= 5)
-            {
-                shopSlots[0].SetupSlot(TutorialManager.Instance.tutFigure, this);
-                shopSlots[1].SetupSlot(TutorialManager.Instance.tutSnack, this);
-                shopSlots[2].SetupSlot(TutorialManager.Instance.tutCoating, this);
-                shopSlots[3].SetupSlot(TutorialManager.Instance.tutDice, this);
-                shopSlots[4].SetupSlot(TutorialManager.Instance.tutTicket, this);
-            }
-            return; // 튜토리얼 강제 진열 후 함수 종료          
+            int rnd = Random.Range(i, shuffled.Count);
+            (shuffled[i], shuffled[rnd]) = (shuffled[rnd], shuffled[i]);
         }
-        else
+
+        int dataIndex = 0;
+
+        // 2. 튜토리얼 중일 때의 상점 강제 진열 로직
+        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
-            for (int i = 0; i < shuffled.Count; i++)
+            int step = TutorialManager.Instance.currentStepIndex;
+
+            // [첫 번째 상점] 10~17단계 사이
+            if (step <= 17)
             {
-                int rnd = Random.Range(i, shuffled.Count);
-                (shuffled[i], shuffled[rnd]) = (shuffled[rnd], shuffled[i]);
+                if (shopSlots.Length >= 6)
+                {
+                    shopSlots[0].SetupSlot(TutorialManager.Instance.tutFigure, this);
+                    shopSlots[1].SetupSlot(TutorialManager.Instance.tutSnack, this);
+                    shopSlots[2].SetupSlot(TutorialManager.Instance.tutCoating, this);
+                    shopSlots[3].SetupSlot(TutorialManager.Instance.tutDice, this);
+                    shopSlots[4].SetupSlot(TutorialManager.Instance.tutTicket, this);
+
+                    if (TutorialManager.Instance.tutDummy != null)
+                        shopSlots[5].SetupSlot(TutorialManager.Instance.tutDummy, this);
+                }
+                return; // 첫 번째 상점 세팅 끝! (아래 코드는 실행 안 함)
             }
 
-            int dataIndex = 0;
-
-            // [두 번째 상점: 20단계 이후] 페퍼민트와 가니쉬만 진열 -> 고정 + 나머지 랜덤으로 로직 수정
-            // (주의: 19단계에서 상점이 열리며 세팅되므로 조건을 19단계 이상으로 수정했습니다)
-            if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive && TutorialManager.Instance.currentStepIndex >= 19)
+            // [두 번째 상점] 19단계 이상
+            if (step >= 19)
             {
                 for (int i = 0; i < shopSlots.Length; i++)
                 {
-                    if (i == 0)
+                    if (i == 0 && TutorialManager.Instance.tutorialPeppermint != null)
                     {
                         shopSlots[0].gameObject.SetActive(true);
-                        // .tutorialPeppermint 이름 확인!
                         shopSlots[0].SetupSlot(TutorialManager.Instance.tutorialPeppermint, this);
                     }
-                    else if (i == 1)
+                    else if (i == 1 && TutorialManager.Instance.tutorialGarnish != null)
                     {
                         shopSlots[1].gameObject.SetActive(true);
-                        // .tutorialGarnish 이름 확인!
                         shopSlots[1].SetupSlot(TutorialManager.Instance.tutorialGarnish, this);
                     }
                     else
                     {
-                        // 남은 슬롯은 셔플된 아이템으로 채움
+                        // 0번, 1번 슬롯을 제외한 나머지 칸은 랜덤 아이템으로 채우기
                         if (dataIndex < shuffled.Count)
                         {
                             shopSlots[i].gameObject.SetActive(true);
@@ -128,19 +131,20 @@ public class ShopManager : MonoBehaviour
                         }
                     }
                 }
-                return; // 튜토리얼 강제 진열 후 함수 종료
+                return; // 두 번째 상점 세팅 끝!
             }
+        }
 
-            // --- 일반적인 상점 리프레시 (튜토리얼이 아닐 때) ---
-            for (int i = 0; i < shopSlots.Length; i++)
+        // 3. 튜토리얼이 모두 끝났거나 일반 게임일 때 (완전 랜덤 상점)
+        for (int i = 0; i < shopSlots.Length; i++)
+        {
+            if (isReroll && shopSlots[i].isPurchased) continue;
+
+            if (dataIndex < shuffled.Count)
             {
-                if (isReroll && shopSlots[i].isPurchased) continue;
-
-                if (dataIndex < shuffled.Count)
-                {
-                    shopSlots[i].SetupSlot(shuffled[dataIndex], this);
-                    dataIndex++;
-                }
+                shopSlots[i].gameObject.SetActive(true);
+                shopSlots[i].SetupSlot(shuffled[dataIndex], this);
+                dataIndex++;
             }
         }
     }

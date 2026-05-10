@@ -37,14 +37,19 @@ public class TutorialManager : MonoBehaviour
     public BaseItemDataSO tutorialPeppermint;
     public BaseItemDataSO tutorialGarnish;
 
-    [Header("첫 번째 상점 강제 아이템 5종")]
+    [Header("첫 번째 상점 강제 아이템 6종")]
     public BaseItemDataSO tutFigure;
     public BaseItemDataSO tutSnack;
     public BaseItemDataSO tutCoating;
     public BaseItemDataSO tutDice;
     public BaseItemDataSO tutTicket;
+    public BaseItemDataSO tutDummy;
 
     private List<GameObject> highlightedObjects = new List<GameObject>();
+
+    // 주사위 하이라이트 관리용 변수
+    private List<Dice> highlightedDice = new List<Dice>();
+    private Dictionary<Dice, int> originalDiceSortingOrders = new Dictionary<Dice, int>();
 
     private void Awake() { Instance = this; }
 
@@ -91,15 +96,7 @@ public class TutorialManager : MonoBehaviour
         darkOverlay.SetActive(true);
         ClearHighlight();
 
-        //if (step == 22)
-        //{
-        //    nextButton.gameObject.SetActive(false);
-        //    darkOverlay.SetActive(false);
-        //    uiManager.rollButton.interactable = true;
-        //    uiManager.finishButton.interactable = true;
-        //    if (diceManager != null) diceManager.snackBonusFigureDropRate += 1.0f;
-        //    StartCoroutine(WaitForMonsterDefeat());
-        //}
+  
 
         if (step >= 10 && step <= 14)
         {
@@ -113,7 +110,11 @@ public class TutorialManager : MonoBehaviour
         else if (step == 15)
         {
             SetShopSlotsInteractable(false);
-            for (int i = 0; i < 5; i++) HighlightUI(shopManager.shopSlots[i].gameObject);
+            // 5라는 고정 숫자 대신 상점 슬롯의 전체 개수만큼 반복하도록 변경!
+            for (int i = 0; i < shopManager.shopSlots.Length; i++)
+            {
+                HighlightUI(shopManager.shopSlots[i].gameObject);
+            }
         }
         else if (step == 18)
         {
@@ -160,6 +161,29 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+
+    //주사위를 가림막 위로 튀어나오게 하는 함수
+    private void HighlightDice(Dice dice)
+    {
+        if (dice == null) return;
+
+        SpriteRenderer sr = dice.GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            // 원래 sortingOrder를 안전하게 저장
+            if (!originalDiceSortingOrders.ContainsKey(dice))
+            {
+                originalDiceSortingOrders[dice] = sr.sortingOrder;
+            }
+            // 가림막 위로 렌더링되도록 숫자를 대폭 올림!
+            sr.sortingOrder = 20000;
+        }
+
+        if (!highlightedDice.Contains(dice))
+        {
+            highlightedDice.Add(dice);
+        }
+    }
     public void ProceedTutorial()
     {
         if (NeedsActionToProceed(currentStepIndex))
@@ -201,16 +225,47 @@ public class TutorialManager : MonoBehaviour
                 HighlightUI(uiManager.rollButton.gameObject);
                 break;
             case 3:
+                SetDialogPanelVisible(false);
+                darkOverlay.SetActive(true); // 배경은 어둡게 유지
+                if (diceManager.activeDiceList.Count >= 2)
+                {
+                    // 첫 번째, 두 번째 주사위만 빛나게!
+                    HighlightDice(diceManager.activeDiceList[0]);
+                    HighlightDice(diceManager.activeDiceList[1]);
+                }
+                break;
             case 8:
-                darkOverlay.SetActive(false);
+                SetDialogPanelVisible(false);
+                darkOverlay.SetActive(true); // 배경은 어둡게 유지
+                foreach (var d in diceManager.activeDiceList)
+                {
+                    if (d != null && !d.isKept) HighlightDice(d);
+                }
                 break;
             case 6:
+                SetDialogPanelVisible(false);
+                darkOverlay.SetActive(true); // 가림막 유지
+                HighlightUI(uiManager.finishButton.gameObject);
+                // 아직 위로 안 올라간 주사위들도 같이 빛나게!
+                foreach (var d in diceManager.activeDiceList)
+                {
+                    if (d != null && !d.isKept) HighlightDice(d);
+                }
+                break;
+
             case 9:
-            case 19:
                 SetDialogPanelVisible(false);
                 darkOverlay.SetActive(true);
                 HighlightUI(uiManager.finishButton.gameObject);
                 break;
+
+            case 19:
+                SetDialogPanelVisible(false);
+                // 남은 주사위 3개를 마저 클릭할 수 있게 가림막을 끕니다!
+                darkOverlay.SetActive(false);
+                HighlightUI(uiManager.finishButton.gameObject);
+                break;
+
             case 16:
                 SetDialogPanelVisible(false);
                 darkOverlay.SetActive(true);
@@ -409,14 +464,34 @@ public class TutorialManager : MonoBehaviour
     public int GetForcedDiceValue(int diceIndex)
     {
         if (!isTutorialActive) return -1;
+
+        //2개를 킵하고 남은 3개를 굴리는 시점 (보통 4~5단계)
+        // 0, 1번 주사위는 킵되어 있으므로 2, 3, 4번 주사위의 결과값만 강제함
+        if (currentStepIndex == 4 || currentStepIndex == 5)
+        {
+            if (diceIndex == 2) return 1;
+            if (diceIndex == 3) return 2;
+            if (diceIndex == 4) return 3;
+        }
+
+        // 이후 단계 (족보 설명 등을 위해 다시 높은 숫자가 필요할 때)
         if (currentStepIndex >= 7 && currentStepIndex <= 9) return 5;
         if (currentStepIndex >= 17 && currentStepIndex <= 20) return 6;
+
         return -1;
     }
 
     public bool IsDiceClickable(Dice targetDice)
     {
         if (!isTutorialActive) return true;
+
+        //가림막이 켜져있더라도, '현재 하이라이트 된 주사위'라면 예외적으로 클릭 허용!
+        if (darkOverlay != null && darkOverlay.activeSelf)
+        {
+            if (highlightedDice.Contains(targetDice)) return true;
+            return false;
+        }
+
         int idx = diceManager.activeDiceList.IndexOf(targetDice);
         if (currentStepIndex == 3) return (idx == 0 || idx == 1);
         return true;
@@ -430,7 +505,7 @@ public class TutorialManager : MonoBehaviour
             var canvas = target.GetComponent<Canvas>();
             if (canvas == null) canvas = target.AddComponent<Canvas>();
             canvas.overrideSorting = true;
-            canvas.sortingOrder = 20000;
+            canvas.sortingOrder = 100;
 
             var raycaster = target.GetComponent<GraphicRaycaster>();
             if (raycaster == null) raycaster = target.AddComponent<GraphicRaycaster>();
@@ -441,10 +516,12 @@ public class TutorialManager : MonoBehaviour
 
     private void ClearHighlight()
     {
+        // 1. UI 버튼 하이라이트 해제 (이 부분이 지워졌을 가능성이 높습니다!)
         foreach (var obj in highlightedObjects)
         {
             if (obj != null)
             {
+                // 강제로 달아줬던 레이캐스터와 캔버스를 파괴해서 원래 자리로 돌려보냄
                 var raycaster = obj.GetComponent<GraphicRaycaster>();
                 if (raycaster != null) Destroy(raycaster);
 
@@ -453,6 +530,21 @@ public class TutorialManager : MonoBehaviour
             }
         }
         highlightedObjects.Clear();
+
+        // 2. 주사위 하이라이트 원상복구
+        foreach (var d in highlightedDice)
+        {
+            if (d != null)
+            {
+                SpriteRenderer sr = d.GetComponent<SpriteRenderer>();
+                if (sr != null && originalDiceSortingOrders.ContainsKey(d))
+                {
+                    sr.sortingOrder = originalDiceSortingOrders[d]; // 원래 레이어로 복구
+                }
+            }
+        }
+        highlightedDice.Clear();
+        originalDiceSortingOrders.Clear();
     }
 
     private void FinishTutorial()

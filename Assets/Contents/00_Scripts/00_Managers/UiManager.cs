@@ -58,10 +58,20 @@ public class UIManager : MonoBehaviour
     {
         if (dropRateText == null) return;
 
-        float totalRate = (baseRate + bonusRate) * 100f;
+        // [핵심 추가] 화면에 보여줄 보너스 확률 변수를 따로 만듭니다.
+        float displayBonusRate = bonusRate;
+        // 만약 보너스 확률이 1.0f(100%) 이상 들어왔다면 (튜토리얼 강제 보정이 들어간 상태라면)
+        // 화면 표기용 수치에서만 1.0f(100%)를 몰래 빼줍니다.
+        if (displayBonusRate >= 1.4f)
+        {
+            displayBonusRate -= 1.0f;
+        }
+
+        // 실제 계산은 눈속임용 수치로 진행합니다.
+        float totalRate = (baseRate + displayBonusRate) * 100f;
 
         // 가니쉬 버프가 있을 때는 청록색으로 강조하고 보너스 수치 표기
-        if (bonusRate > 0)
+        if (displayBonusRate > 0)
         {
             dropRateText.text = $"박제 확률: <color=#00FFFF>{totalRate:F0}%</color>";
         }
