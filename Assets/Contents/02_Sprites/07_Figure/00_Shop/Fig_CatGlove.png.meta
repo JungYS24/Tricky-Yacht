@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: e07c694572877744e8246cb85ae1bc73
+guid: 637a1da4d5f191141b9c4e43dc1e41a7
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 457328516956843684
-    second: Fig_Mushroom_0
+      213: 5924416765652159320
+    second: Fig_CatGlove_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Fig_Mushroom_0
+      name: Fig_CatGlove_0
       rect:
         serializedVersion: 2
-        x: 14
-        y: 6
-        width: 74
-        height: 85
+        x: 9
+        y: 8
+        width: 83
+        height: 82
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4ae6ed6fcd1c85600800000000000000
-      internalID: 457328516956843684
+      spriteID: 85bc012d8a1c73250800000000000000
+      internalID: 5924416765652159320
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Fig_Mushroom_0: 457328516956843684
+      Fig_CatGlove_0: 5924416765652159320
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

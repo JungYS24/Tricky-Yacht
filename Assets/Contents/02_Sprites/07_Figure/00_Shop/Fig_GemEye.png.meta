@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: e07c694572877744e8246cb85ae1bc73
+guid: 098a4f1c2fe881d40ba5b0551ea23f88
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 457328516956843684
-    second: Fig_Mushroom_0
+      213: 162031540374284795
+    second: Fig_GemEye_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Fig_Mushroom_0
+      name: Fig_GemEye_0
       rect:
         serializedVersion: 2
-        x: 14
-        y: 6
+        x: 13
+        y: 13
         width: 74
-        height: 85
+        height: 74
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4ae6ed6fcd1c85600800000000000000
-      internalID: 457328516956843684
+      spriteID: bf92b66d3d6af3200800000000000000
+      internalID: 162031540374284795
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Fig_Mushroom_0: 457328516956843684
+      Fig_GemEye_0: 162031540374284795
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
