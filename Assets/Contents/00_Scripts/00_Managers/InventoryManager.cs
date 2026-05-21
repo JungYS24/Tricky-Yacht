@@ -9,14 +9,19 @@ public class InventoryManager : MonoBehaviour
 
     [Header("참조")]
     public DiceManager diceManager;
+    public FigureDetailPanel figureDetailPanel; // 피규어 상세 정보 패널
 
     [Header("슬롯 배열")]
-    public InventorySlot[] figureSlots;
+    public Transform figureSlotParent; // 피규어가 생성될 부모 위치 (FigureSlotArea)
+    public GameObject figureSlotPrefab; // 피규어 슬롯 프리팹
     public InventorySlot[] snackSlots;
 
     [Header("인벤토리 용량 제한")]
-    public int maxFigureSlots = 6; // 피규어는 기존처럼 배열 크기만큼 허용
     public int maxSnackSlots = 5;   // 스낵칸 최대 5개로 제한
+
+    // 보유 중인 피규어 리스트 (무한 소지)
+    public List<FigureItemSO> ownedFigures = new List<FigureItemSO>();
+    private List<GameObject> activeFigureSlots = new List<GameObject>();
 
     [Header("판매 팝업 UI")]
     public GameObject sellPopupRoot;
@@ -37,7 +42,13 @@ public class InventoryManager : MonoBehaviour
     {
         Instance = this;
 
-        foreach (var slot in figureSlots) slot.Initialize(this);
+        // 에디터에서 실수로 꺼두었더라도 시작 시 자동으로 피규어 영역을 켜줌
+        if (figureSlotParent != null)
+        {
+            figureSlotParent.gameObject.SetActive(true);
+        }
+
+        // 스낵 슬롯 초기화
         foreach (var slot in snackSlots) slot.Initialize(this);
 
         if (sellButton != null) sellButton.onClick.AddListener(SellTargetItem);
@@ -55,15 +66,44 @@ public class InventoryManager : MonoBehaviour
 
     public void ClearAllSlots()
     {
-        foreach (var slot in figureSlots) slot.ClearSlot();
+        // 피규어 슬롯 파괴 및 리스트 초기화
+        foreach (var slotGo in activeFigureSlots)
+        {
+            Destroy(slotGo);
+        }
+        activeFigureSlots.Clear();
+        ownedFigures.Clear();
+
         foreach (var slot in snackSlots) slot.ClearSlot();
         Debug.Log("인벤토리의 모든 아이템이 초기화되었습니다.");
     }
 
     public bool AddItem(BaseItemDataSO item)
     {
-        if (item is FigureItemSO) return PlaceIntoEmptySlot(item, figureSlots, maxFigureSlots);
-        else if (item is SnackItemSO) return PlaceIntoEmptySlot(item, snackSlots, maxSnackSlots);
+        if (item is FigureItemSO figure)
+        {
+            // 중복 획득 방지
+            if (ownedFigures.Contains(figure))
+            {
+                Debug.Log("이미 보유한 피규어입니다.");
+                return false;
+            }
+
+            ownedFigures.Add(figure);
+
+            // 새 슬롯 생성
+            GameObject newSlotGo = Instantiate(figureSlotPrefab, figureSlotParent);
+            InventorySlot newSlot = newSlotGo.GetComponent<InventorySlot>();
+            newSlot.Initialize(this);
+            newSlot.SetItem(figure);
+
+            activeFigureSlots.Add(newSlotGo);
+            return true;
+        }
+        else if (item is SnackItemSO)
+        {
+            return PlaceIntoEmptySlot(item, snackSlots, maxSnackSlots);
+        }
         return false;
     }
 
@@ -128,47 +168,40 @@ public class InventoryManager : MonoBehaviour
 
         Debug.Log($"피규어 [{targetSellSlot.currentItem.itemName}] 판매 완료! +{sellPrice} G");
 
-        targetSellSlot.ClearSlot();
+        if (targetSellSlot.currentItem is FigureItemSO figure)
+        {
+            // 판매 시 리스트와 씬에서 삭제
+            ownedFigures.Remove(figure);
+            activeFigureSlots.Remove(targetSellSlot.gameObject);
+            Destroy(targetSellSlot.gameObject);
+        }
+        else
+        {
+            targetSellSlot.ClearSlot();
+        }
+
         HideSellPopup();
         HideTooltip(); //판매 후 툴팁 가리기
-    }
-
-    //피규어 슬롯에 빈자리가 있는지 확인
-    public bool HasEmptyFigureSlot()
-    {
-        int limit = Mathf.Min(figureSlots.Length, maxFigureSlots);
-        for (int i = 0; i < limit; i++)
-        {
-            if (figureSlots[i].isEmpty) return true;
-        }
-        return false;
     }
 
     //보유 중인 피규어들의 클리어 보너스 골드 총합 계산
     public int ApplyAllFigurePassives(DiceManager diceManager, ShopManager shopManager)
     {
         int totalGoldBonus = 0;
-        foreach (var slot in figureSlots)
+        foreach (var figure in ownedFigures)
         {
-            if (!slot.isEmpty && slot.currentItem is FigureItemSO figure)
-            {
-                figure.ApplyPassiveEffect(diceManager, shopManager);
-                if (figure.abilityType == FigureAbility.GoldBonus)
-                    totalGoldBonus += figure.abilityValue;
-            }
+            figure.ApplyPassiveEffect(diceManager, shopManager);
+            if (figure.abilityType == FigureAbility.GoldBonus)
+                totalGoldBonus += figure.abilityValue;
         }
         return totalGoldBonus;
     }
 
     public bool HasActiveFigureAbility(FigureAbility abilityType)
     {
-        int limit = Mathf.Min(figureSlots.Length, maxFigureSlots);
-        for (int i = 0; i < limit; i++)
+        foreach (var figure in ownedFigures)
         {
-            if (!figureSlots[i].isEmpty && figureSlots[i].currentItem is FigureItemSO figure)
-            {
-                if (figure.abilityType == abilityType) return true;
-            }
+            if (figure.abilityType == abilityType) return true;
         }
         return false;
     }

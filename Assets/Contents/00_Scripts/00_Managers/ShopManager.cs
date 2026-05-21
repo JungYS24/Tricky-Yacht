@@ -73,8 +73,20 @@ public class ShopManager : MonoBehaviour
 
     public void RefreshShop(bool isReroll)
     {
-        // 1. 일반 상점을 위해 미리 모든 아이템을 섞어둡니다.
-        List<BaseItemDataSO> shuffled = new List<BaseItemDataSO>(allItemsPool);
+        // 중복 획득 방지용 리스트 구성
+        List<BaseItemDataSO> validPool = new List<BaseItemDataSO>();
+        foreach (var item in allItemsPool)
+        {
+            // 이미 가지고 있는 피규어면 상점 풀에서 제외
+            if (item is FigureItemSO figure && InventoryManager.Instance.ownedFigures.Contains(figure))
+            {
+                continue;
+            }
+            validPool.Add(item);
+        }
+
+        // 1. 일반 상점을 위해 미리 모든 아이템을 섞어둡니다. (validPool 기준)
+        List<BaseItemDataSO> shuffled = new List<BaseItemDataSO>(validPool);
         for (int i = 0; i < shuffled.Count; i++)
         {
             int rnd = Random.Range(i, shuffled.Count);

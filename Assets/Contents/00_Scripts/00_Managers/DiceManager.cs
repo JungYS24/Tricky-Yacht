@@ -39,6 +39,10 @@ public class DiceManager : MonoBehaviour
     public Transform peppermintCaptureCenter;
     public GameObject peppermintVisualPrefab;
 
+    // 전리품 선택 패널 연결
+    [Header("전리품 시스템")]
+    public LootSelectionPanel lootSelectionPanel;
+
     [Header("맵(생물군계) 설정")]
     public SpriteRenderer biomeBackgroundImage; // Canvas에 있는 Biome_Image 연결
     public List<BiomeDataSO> biomeList;               // 만들어둔 Biome 데이터들 (숲, 화산 등)
@@ -227,7 +231,7 @@ public class DiceManager : MonoBehaviour
     
     public void OnRollButtonClick()
     {
-        if (isRolling || currentRerolls >= (maxRerolls + snackBonusRerolls + pandaBonusRerolls) || ShopManager.IsShopOpen) return;
+        if (isRolling || currentRerolls >= (maxRerolls + snackBonusRerolls + pandaBonusRerolls) || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return;
 
         isRolling = true; // 굴림 상태 켜기
         ui?.SetRollButtonInteractable(false);   //즉시 버튼 비활성화
@@ -257,7 +261,7 @@ public class DiceManager : MonoBehaviour
 
     public void OnFinishButtonClick()
     {
-        if (isRolling || isCalculating || ShopManager.IsShopOpen || enemy.IsDead) return;
+        if (isRolling || isCalculating || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || enemy.IsDead) return;
 
         isCalculating = true; //결산 연출 시작
         ui?.SetRollButtonInteractable(false);   //즉시 버튼 비활성화
@@ -347,9 +351,10 @@ public class DiceManager : MonoBehaviour
         {
             float dropChance = enemy.baseDropRate + snackBonusFigureDropRate;
 
-            if (enemy.dropFigureData != null &&
-                InventoryManager.Instance.HasEmptyFigureSlot() &&
-                UnityEngine.Random.value <= dropChance)
+            // 중복 획득 방지 조건 추가
+            bool canCapture = enemy.dropFigureData != null && !InventoryManager.Instance.ownedFigures.Contains(enemy.dropFigureData);
+
+            if (canCapture && UnityEngine.Random.value <= dropChance)
             {
                 pendingPeppermintSuccess = true;
             }
@@ -408,11 +413,9 @@ public class DiceManager : MonoBehaviour
 
     // --- 스테이지 클리어 공통 시스템 ---
 
-    
+
     private void ProcessStageClear(bool fromPeppermint)
     {
-
-        // 사운드 스테이지 클리어 축하 소리 재생
         int baseClearReward = 500;
         int figureBonusGold = InventoryManager.Instance.ApplyAllFigurePassives(this, shopManager);
 
@@ -434,7 +437,23 @@ public class DiceManager : MonoBehaviour
         }
 
         ui?.ShowResult("#00FF00", clearMessage);
-        Invoke(nameof(PromptShopChoice), 2.0f);
+        // 이제 보상을 먼저 골라야 하니 전리품 창을 띄우는 함수로 바꿉니다.
+        Invoke(nameof(ShowLootSelection), 2.0f);
+    }
+
+    public void ShowLootSelection()
+    {
+        ui?.HideResult(); // 클리어 축하 메세지 끄기
+
+        if (lootSelectionPanel != null)
+        {
+            lootSelectionPanel.OpenSelection(this);
+        }
+        else
+        {
+            // 에디터에서 패널 연결을 깜빡했다면 게임이 멈추지 않게 바로 상점으로 넘김
+            PromptShopChoice();
+        }
     }
 
     private void HideResultAfterFailure() { if (!ShopManager.IsShopOpen && !enemy.IsDead) ui?.HideResult(); }
@@ -559,7 +578,7 @@ public class DiceManager : MonoBehaviour
         if (d.currentKeepIndex != -1) { keepSlotOccupants[d.currentKeepIndex] = null; d.currentKeepIndex = -1; d.MoveToTarget(d.rollPos); }
     }
 
-    void PromptShopChoice() { ui?.HideResult(); ui?.ShowShopChoice(); }
+    public void PromptShopChoice() { ui?.HideResult(); ui?.ShowShopChoice(); }
     public void GoToShop() { ui?.HideShopChoice(); shopManager?.OpenShop(); }
     public void SkipShopAndNextStage() { ui?.HideShopChoice(); NextStage(); }
     public void NextStage() { currentStage++; enemyMaxHP += 30; StartNewStage(); }
