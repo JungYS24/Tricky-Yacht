@@ -10,10 +10,6 @@ public class MonsterDataSO : ScriptableObject
     //몬스터의 애니메이션을 통제하는 파일
     public RuntimeAnimatorController animatorController;
 
-    [Header("전투 스탯")]
-    public int baseHP = 40;
-    public float growthRate = 1.3f;
-
     [Header("전리품 (박제) 설정")]
     public FigureItemSO dropFigureData;
     [Range(0f, 1f)] public float dropRate = 0.5f;

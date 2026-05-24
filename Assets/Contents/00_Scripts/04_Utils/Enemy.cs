@@ -30,17 +30,17 @@ public class Enemy : MonoBehaviour
     public string edgeColorBProperty = "_EdgeColorB";
     public string edgeGlowPowerProperty = "_EdgeGlowPower";
 
-    // 몬스터 데이터베이스 관리
-    [Header("몬스터 출현 순서 리스트")]
-    private int currentMonsterIndex = 0; // 몇번 째 몬스터인지 체크
+    // 몬스터 출현 순서 리스트
+    // 몇번 째 몬스터인지 체크
+    private int currentMonsterIndex = 0;
 
     // 에디터 창에서는 숨기지만 DiceManager가 읽어갈 수 있도록 HideInInspector 처리
     [HideInInspector] public FigureItemSO dropFigureData;
     [HideInInspector] public float baseDropRate = 0.5f;
 
-
     public int MaxHP { get; private set; }
     public int CurrentHP { get; private set; }
+    public int AttackPower { get; private set; }
     public bool IsDead { get; private set; } = false;
 
     private Material monsterRuntimeMat;
@@ -63,10 +63,6 @@ public class Enemy : MonoBehaviour
             {
                 enemyHPSlider = sliderObj.GetComponent<Slider>();
             }
-            else
-            {
-                Debug.LogWarning("씬에 'EnemyHPSlider'라는 이름의 오브젝트가 없습니다!");
-            }
         }
     }
 
@@ -79,22 +75,21 @@ public class Enemy : MonoBehaviour
     {
         // 1. 만약의 사태를 대비한 기본 체력 (리스트가 비어있을 때 등)
         int finalMaxHP = 40;
+        int finalAttack = 10;
         MonsterDataSO nextMonsterData = null;
 
         if (currentBiome != null)
         {
             // 5의 배수 스테이지(5, 10, 15...)이고 보스 데이터가 있다면 보스 출현!
-            if (currentStage % 2 == 0 && currentBiome.bossMonster != null)
+            if (currentStage % 5 == 0 && currentBiome.bossMonster != null)
             {
                 nextMonsterData = currentBiome.bossMonster;
-                Debug.Log($"[{currentStage} 스테이지] 보스 출현: {nextMonsterData.monsterName}");
             }
             //그 외의 일반 스테이지는 기존처럼 리스트에서 랜덤 출현
             else if (currentBiome.biomeMonsters != null && currentBiome.biomeMonsters.Count > 0)
             {
                 int randomIndex = UnityEngine.Random.Range(0, currentBiome.biomeMonsters.Count);
                 nextMonsterData = currentBiome.biomeMonsters[randomIndex];
-                Debug.Log($"[{currentStage} 스테이지] 등장 몬스터: {nextMonsterData.monsterName}");
             }
         }
 
@@ -113,15 +108,26 @@ public class Enemy : MonoBehaviour
             dropFigureData = nextMonsterData.dropFigureData;
             baseDropRate = nextMonsterData.dropRate;
 
-            float curveMultiplier = Mathf.Pow(nextMonsterData.growthRate, currentStage - 1);
-            finalMaxHP = Mathf.FloorToInt(nextMonsterData.baseHP * curveMultiplier);
+            // 데이터 매니저가 있을 때만 데이터를 가져옵니다.
+            MonsterInfo jsonInfo = null;
+            if (MonsterDataManager.Instance != null)
+            {
+                jsonInfo = MonsterDataManager.Instance.GetMonsterInfo(nextMonsterData.monsterName);
+            }
+
+            if (jsonInfo != null)
+            {
+                finalMaxHP = jsonInfo.체력;
+                finalAttack = jsonInfo.공격력;
+            }
+
             currentMonsterIndex++;
         }
-
 
         // 여기서 최종적으로 체력을 확정(덮어씌워지는 문제 해결)
         MaxHP = finalMaxHP;
         CurrentHP = finalMaxHP;
+        AttackPower = finalAttack;
         IsDead = false;
         useExternalDeathSequence = false;
 
@@ -155,7 +161,8 @@ public class Enemy : MonoBehaviour
         if (IsDead) return;
 
         CurrentHP = Mathf.Max(0, CurrentHP - damage);
-        // [수정 3] 데미지를 입었으니 HP바 깎는 코루틴 실행!
+
+        // 데미지를 입었으니 HP바 깎는 코루틴 실행!
         if (hpCoroutine != null) StopCoroutine(hpCoroutine);
         hpCoroutine = StartCoroutine(ShrinkHPBarRoutine());
 
@@ -178,6 +185,41 @@ public class Enemy : MonoBehaviour
                 StartCoroutine(MonsterDeathRoutine(onDeathCallback));
             }
         }
+    }
+
+    public void PlayAttackAnim()
+    {
+        if (monsterAnimator != null)
+        {
+            monsterAnimator.SetTrigger("Attack");
+        }
+        else
+        {
+            StartCoroutine(SimpleAttackPunchRoutine());
+        }
+    }
+
+    private IEnumerator SimpleAttackPunchRoutine()
+    {
+        float duration = 0.1f;
+        float elapsed = 0f;
+        Vector3 targetPos = originalPosition + Vector3.down * 0.5f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            transform.position = Vector3.Lerp(originalPosition, targetPos, elapsed / duration);
+            yield return null;
+        }
+
+        elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            transform.position = Vector3.Lerp(targetPos, originalPosition, elapsed / duration);
+            yield return null;
+        }
+        transform.position = originalPosition;
     }
 
     private void UpdateHPBar(bool immediate)

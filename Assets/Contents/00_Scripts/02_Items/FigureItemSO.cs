@@ -1,9 +1,9 @@
 using UnityEngine;
 
-// [수정] 새로운 4가지 피규어 패시브 능력 추가
+// PlayBonus 삭제됨
 public enum FigureAbility
 {
-    GoldBonus, RerollBonus, PlayBonus,
+    GoldBonus, RerollBonus,
     PrismDamageBonus,     // 유니콘: 프리즘 코팅 개수 비례 대미지 배수 추가
     CherryChipBonus,      // 달마: 소모한 체리 개수 비례 칩 추가
     YachtGoldBonus,       // 복고양이: 요트(파이브 카드) 달성 시 코인 획득
@@ -19,7 +19,7 @@ public class FigureItemSO : BaseItemDataSO
 
     [Header("--- 피규어 패시브 능력 ---")]
     public FigureAbility abilityType;
-    public int abilityValue; // 수치 (골드 +2, 리롤 +1 등)
+    public int abilityValue;
 
     public override void ApplyItemEffect(DiceManager diceManager)
     {
@@ -31,13 +31,9 @@ public class FigureItemSO : BaseItemDataSO
         switch (abilityType)
         {
             case FigureAbility.GoldBonus:
-                // 즉시 추가가 필요하다면 shopManager.currentGold += abilityValue; 실행
                 break;
             case FigureAbility.RerollBonus:
                 diceManager.maxRerolls += abilityValue;
-                break;
-            case FigureAbility.PlayBonus:
-                diceManager.maxPlays += abilityValue;
                 break;
         }
     }

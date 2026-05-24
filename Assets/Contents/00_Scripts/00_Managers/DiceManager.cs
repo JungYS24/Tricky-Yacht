@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -27,12 +28,11 @@ public class DiceManager : MonoBehaviour
     public HandVFXManager handVFXManager;
 
     [Header("게임 데이터")]
-    public int enemyMaxHP = 40;
     public int currentStage = 1;
-    public int maxPlays = 3;
-    private int currentPlayNum;
     public int maxRerolls = 2;
     public int currentRerolls;
+    public int playerMaxHP = 100;
+    public int currentPlayerHP;
 
     [Header("페퍼민트 포획 연출")]
     public PeppermintCaptureEffect peppermintCaptureEffect;
@@ -45,11 +45,10 @@ public class DiceManager : MonoBehaviour
 
     [Header("맵(생물군계) 설정")]
     public SpriteRenderer biomeBackgroundImage; // Canvas에 있는 Biome_Image 연결
-    public List<BiomeDataSO> biomeList;               // 만들어둔 Biome 데이터들 (숲, 화산 등)
+    public List<BiomeDataSO> biomeList;                // 만들어둔 Biome 데이터들 (숲, 화산 등)
     private BiomeDataSO currentBiome;
 
     // --- 스낵 시스템용 변수 ---
-    private int defaultMaxPlays;
     private int defaultMaxRerolls;
     [HideInInspector] public float snackBonusMult = 0f;
     [HideInInspector] public int snackBonusChips = 0;
@@ -58,7 +57,6 @@ public class DiceManager : MonoBehaviour
 
     //페퍼민트를 먹었는지 체크하는 상태 변수 (스테이지 동안 유지)
     [HideInInspector] public bool isPeppermintActive = false;
-
 
     //달마 체리 체크
     [HideInInspector] public int consumedCherryCount = 0;
@@ -90,7 +88,6 @@ public class DiceManager : MonoBehaviour
         keepSlotOccupants = new Dice[keepSlots.Length];
         Dice.OnDiceStateChanged += HandleDiceChanged;
 
-        defaultMaxPlays = maxPlays;
         defaultMaxRerolls = maxRerolls;
 
         if (ui != null)
@@ -102,6 +99,7 @@ public class DiceManager : MonoBehaviour
 
     void Start()
     {
+        currentPlayerHP = playerMaxHP;
         InitializeMasterDeck();
         StartNewStage();
     }
@@ -114,7 +112,6 @@ public class DiceManager : MonoBehaviour
         for (int i = 0; i < 20; i++) masterDeck.Add(new DiceData1());
     }
 
-
     public List<DiceData1> GetRandomDiceForCoating(int count)
     {
         return masterDeck.OrderBy(x => UnityEngine.Random.value).Take(count).ToList();
@@ -123,10 +120,7 @@ public class DiceManager : MonoBehaviour
 
     void StartNewStage()
     {
-        currentPlayNum = 1;
         currentRerolls = 0;
-
-        maxPlays = defaultMaxPlays;
         maxRerolls = defaultMaxRerolls;
 
         pandaBonusRerolls = 0;
@@ -137,8 +131,7 @@ public class DiceManager : MonoBehaviour
         snackBonusFigureDropRate = 0f;
         //2스테이지마다 바이옴(맵) 변경 로직
         if (biomeList.Count > 0)
-        { 
-           
+        {
             int biomeIndex = ((currentStage - 1) / /*여기 바꾸면 맵 바뀜*/10) % biomeList.Count;
             currentBiome = biomeList[biomeIndex];
 
@@ -157,8 +150,6 @@ public class DiceManager : MonoBehaviour
             Debug.LogWarning("DiceManager에 Biome List가 비어있습니다!");
             enemy.Initialize(currentStage, null);
         }
-
-
 
         drawPile = new List<DiceData1>(masterDeck);
         discardPile.Clear();
@@ -186,7 +177,6 @@ public class DiceManager : MonoBehaviour
         snackBonusMult = 0f;
         snackBonusChips = 0;
         snackBonusRerolls = 0;
-        //snackBonusFigureDropRate = 0f;
 
         SpawnDice();
         HandleDiceChanged();
@@ -228,7 +218,7 @@ public class DiceManager : MonoBehaviour
             activeDiceList.Add(d);
         }
     }
-    
+
     public void OnRollButtonClick()
     {
         if (isRolling || currentRerolls >= (maxRerolls + snackBonusRerolls + pandaBonusRerolls) || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return;
@@ -366,6 +356,7 @@ public class DiceManager : MonoBehaviour
 
         StartCoroutine(ProcessTurnResult(handName));
     }
+
     //티켓 아이템 먹었을 때 호출할 함수
     public void UpgradeHand(HandType handType, float amount)
     {
@@ -412,7 +403,6 @@ public class DiceManager : MonoBehaviour
     }
 
     // --- 스테이지 클리어 공통 시스템 ---
-
 
     private void ProcessStageClear(bool fromPeppermint)
     {
@@ -462,16 +452,25 @@ public class DiceManager : MonoBehaviour
     {
         yield return new WaitForSeconds(0.4f);
         UpdateMainUI(handName);
+
         if (!enemy.IsDead)
         {
-            if (currentPlayNum >= maxPlays)
+            yield return new WaitForSeconds(0.6f);
+
+            enemy.PlayAttackAnim();
+            yield return new WaitForSeconds(0.2f);
+
+            currentPlayerHP -= enemy.AttackPower;
+            CameraShake.Instance.Shake(0.15f, 0.1f);
+            UpdateMainUI("적 공격!");
+
+            if (currentPlayerHP <= 0)
             {
                 ui?.ShowResult("#FF0000", "게임 오버");
                 Invoke(nameof(RestartGame), 1.5f);
             }
             else
             {
-                currentPlayNum++;
                 Invoke(nameof(StartNewRound), 0.5f);
             }
         }
@@ -561,7 +560,7 @@ public class DiceManager : MonoBehaviour
         string combinedText = $"{displayHand}\n{formula}\n<color=#FF5555>= {totalDamage} 대미지 예정</color>";
 
         int remainingRerolls = (maxRerolls + snackBonusRerolls + pandaBonusRerolls) - currentRerolls;
-        ui?.UpdateGameUI(currentStage, enemy.CurrentHP, enemy.MaxHP, currentPlayNum, maxPlays, remainingRerolls, combinedText);
+        ui?.UpdateGameUI(currentStage, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText);
 
         float currentEnemyDropRate = isPeppermintActive ? enemy.baseDropRate : 0f;
         ui?.UpdateDropRateUI(currentEnemyDropRate, snackBonusFigureDropRate);
@@ -581,13 +580,13 @@ public class DiceManager : MonoBehaviour
     public void PromptShopChoice() { ui?.HideResult(); ui?.ShowShopChoice(); }
     public void GoToShop() { ui?.HideShopChoice(); shopManager?.OpenShop(); }
     public void SkipShopAndNextStage() { ui?.HideShopChoice(); NextStage(); }
-    public void NextStage() { currentStage++; enemyMaxHP += 30; StartNewStage(); }
+    public void NextStage() { currentStage++; StartNewStage(); }
 
     public void GoToMainMenu()
     {
         // 1. 기본 스테이지 데이터 초기화
         currentStage = 1;
-        enemyMaxHP = 40;
+        currentPlayerHP = playerMaxHP;
 
         // 2. 덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 20개로)
         InitializeMasterDeck();
@@ -642,7 +641,7 @@ public class DiceManager : MonoBehaviour
     {
         // 1. 기본 스테이지 데이터 초기화
         currentStage = 1;
-        enemyMaxHP = 40;
+        currentPlayerHP = playerMaxHP;
 
         // 2. 덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 20개로)
         InitializeMasterDeck();

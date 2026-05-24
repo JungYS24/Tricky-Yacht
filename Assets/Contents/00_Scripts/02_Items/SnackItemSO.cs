@@ -30,7 +30,7 @@ public class SnackItemSO : BaseItemDataSO
 
             case SnackType.Steak:
                 // [스테이크] 엔딩(Finish) 기회 +1
-                diceManager.maxPlays++;
+                //diceManager.maxPlays++;
                 break;
             case SnackType.Garnish:
                 // [가니쉬] 이번 라운드 몬스터 박제(피규어) 확률 15% 증가 (원하시는 수치로 조절 가능)
