@@ -60,13 +60,19 @@ public class ShopManager : MonoBehaviour
     private void Start()
     {
         if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
+        if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
     }
 
     public void OpenShop()
     {
         IsShopOpen = true;
         if (shopUI != null) shopUI.SetActive(true);
+
+        // 정적 UI 업데이트를 먼저 처리하여 데이터 싱크를 맞추기
         if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
+
+        // 그 후 DoTween 연출을 실행해야 숫자가 꼬임 없이 부드럽게 표현
+        if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
 
         RefreshShop(false);
     }
@@ -171,6 +177,7 @@ public class ShopManager : MonoBehaviour
             if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
             RefreshShop(true);
         }
+        if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
     }
 
     public void CloseShopAndGoNext()
@@ -198,6 +205,8 @@ public class ShopManager : MonoBehaviour
                     currentGold -= item.price;
                     if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
 
+                    // 피규어/간식 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용
+                    if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
                     if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
                     {
                         TutorialManager.Instance.OnItemBought(item.itemName);
@@ -215,6 +224,9 @@ public class ShopManager : MonoBehaviour
                 item.ApplyItemEffect(diceManager);
                 currentGold -= item.price;
                 if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
+
+                // 그 외 소모품/티켓류 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용
+                if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
 
                 if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
                 {

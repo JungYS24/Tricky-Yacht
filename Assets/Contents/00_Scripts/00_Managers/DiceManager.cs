@@ -80,23 +80,40 @@ public class DiceManager : MonoBehaviour
     public float multStraight = 2.0f;
     public float multYacht = 2.5f;
 
+    // 전역 접근을 위한 싱글톤 인스턴스 선언 (클래스 상단 변수 선언부에 위치)
+    public static DiceManager Instance { get; private set; }
+
 
     void Awake()
     {
+        // --- [싱글톤 가드 및 인스턴스 할당] ---
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Debug.LogWarning($"[DiceManager] 중복된 매니저가 감지되어 파괴합니다. 오브젝트: {gameObject.name}");
+            Destroy(gameObject);
+            return;
+        }
         if (ui == null) ui = FindFirstObjectByType<UIManager>();
+
         InitializeSlots();
         keepSlotOccupants = new Dice[keepSlots.Length];
+
+        // 주사위 상태 변경 이벤트 구독 연동
         Dice.OnDiceStateChanged += HandleDiceChanged;
 
         defaultMaxRerolls = maxRerolls;
 
+        // UI 버튼 리스너 동적 할당 세팅
         if (ui != null)
         {
             ui.goShopButton?.onClick.AddListener(GoToShop);
             ui.nextStageButton?.onClick.AddListener(SkipShopAndNextStage);
         }
     }
-
     void Start()
     {
         currentPlayerHP = playerMaxHP;
@@ -286,7 +303,14 @@ public class DiceManager : MonoBehaviour
                 switch (d.myData.type)
                 {
                     case DiceType.Prism: finalMultiplier += (d.myData.multiplier - 1.0f); break;
-                    case DiceType.Gold: if (shopManager != null) shopManager.currentGold += d.currentValue; break;
+                    case DiceType.Gold:
+                        if (shopManager != null)
+                        {
+                            shopManager.currentGold += d.currentValue;
+                            // 골드 주사위 정산 즉시 카운팅 연출 실행
+                            if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
+                        }
+                        break;
                     case DiceType.Dark:
                         int drop = Mathf.FloorToInt(currentSimulatedHP * 0.1f);
                         darkDamageTotal += drop; currentSimulatedHP -= drop; break;
@@ -315,6 +339,8 @@ public class DiceManager : MonoBehaviour
             {
                 shopManager.currentGold += 10;
                 ui?.UpdateGoldUI(shopManager.currentGold);
+                // [추가] 복고양이 보너스 골드 카운팅 연출 실행
+                if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
                 Debug.Log("복고양이 발동: 요트 완성! +10 G");
             }
         }
@@ -413,6 +439,8 @@ public class DiceManager : MonoBehaviour
         {
             shopManager.currentGold += baseClearReward;
             ui?.UpdateGoldUI(shopManager.currentGold);
+            // [추가] 스테이지 클리어 기본 골드 카운팅 연출 실행
+            if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
         }
 
         string clearMessage = $"스테이지 클리어!\n<size=80%><color=#FFD700>+{baseClearReward} 코인 획득!</color></size>";
@@ -596,6 +624,8 @@ public class DiceManager : MonoBehaviour
         {
             shopManager.currentGold = 2000; // 초기 소지금 (기획에 맞게 수정하세요)
             ui?.UpdateGoldUI(shopManager.currentGold);
+            // [추가] 재시작 및 메인 이동 시 초기 소지금 카운팅 연출 실행 (또는 초기화용)
+            if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
         }
 
         // 4. 인벤토리 초기화 (방금 만든 함수 호출)
@@ -651,6 +681,8 @@ public class DiceManager : MonoBehaviour
         {
             shopManager.currentGold = 2000; // 초기 소지금 (기획에 맞게 수정하세요)
             ui?.UpdateGoldUI(shopManager.currentGold);
+            // [추가] 재시작 및 메인 이동 시 초기 소지금 카운팅 연출 실행 (또는 초기화용)
+            if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
         }
 
         // 4. 인벤토리 초기화 (방금 만든 함수 호출)
