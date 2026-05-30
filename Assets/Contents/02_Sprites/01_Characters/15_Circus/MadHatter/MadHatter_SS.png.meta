@@ -1,0 +1,1508 @@
+fileFormatVersion: 2
+guid: 14f0fa1e729cabb45bcb912732e1d168
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 799181782133669098
+    second: MadHatter_SS_0
+  - first:
+      213: 1860569570684742872
+    second: MadHatter_SS_1
+  - first:
+      213: 5213975809403812883
+    second: MadHatter_SS_2
+  - first:
+      213: 2167017824530471085
+    second: MadHatter_SS_3
+  - first:
+      213: 4339696758688545239
+    second: MadHatter_SS_4
+  - first:
+      213: -6090280025795832598
+    second: MadHatter_SS_5
+  - first:
+      213: -9040876118226728865
+    second: MadHatter_SS_6
+  - first:
+      213: 6980578633628384599
+    second: MadHatter_SS_7
+  - first:
+      213: 9070288759940165190
+    second: MadHatter_SS_8
+  - first:
+      213: -5299268284702133990
+    second: MadHatter_SS_9
+  - first:
+      213: 8315939943397367798
+    second: MadHatter_SS_10
+  - first:
+      213: -83340983141984983
+    second: MadHatter_SS_11
+  - first:
+      213: 6013114295096140295
+    second: MadHatter_SS_12
+  - first:
+      213: 2408117210678874812
+    second: MadHatter_SS_13
+  - first:
+      213: -5902161226197347086
+    second: MadHatter_SS_14
+  - first:
+      213: -3353706179919822154
+    second: MadHatter_SS_15
+  - first:
+      213: 2206015318230266178
+    second: MadHatter_SS_16
+  - first:
+      213: 4494296785340286450
+    second: MadHatter_SS_17
+  - first:
+      213: -339047946824551811
+    second: MadHatter_SS_18
+  - first:
+      213: -651695297283435070
+    second: MadHatter_SS_19
+  - first:
+      213: 6782076438274468579
+    second: MadHatter_SS_20
+  - first:
+      213: -714456544015148784
+    second: MadHatter_SS_21
+  - first:
+      213: 2121328689897499819
+    second: MadHatter_SS_22
+  - first:
+      213: 6383267604116143959
+    second: MadHatter_SS_23
+  - first:
+      213: -8654307575256462382
+    second: MadHatter_SS_24
+  - first:
+      213: 7706828913713585180
+    second: MadHatter_SS_25
+  - first:
+      213: 6535369873889589756
+    second: MadHatter_SS_26
+  - first:
+      213: -5708071073422978722
+    second: MadHatter_SS_27
+  - first:
+      213: -9038831657860766113
+    second: MadHatter_SS_28
+  - first:
+      213: -2124337873414467933
+    second: MadHatter_SS_29
+  - first:
+      213: 1945642955317474131
+    second: MadHatter_SS_30
+  - first:
+      213: -3038773149017080550
+    second: MadHatter_SS_31
+  - first:
+      213: 6140930144212917378
+    second: MadHatter_SS_32
+  - first:
+      213: -1214782584102601469
+    second: MadHatter_SS_33
+  - first:
+      213: 1062523524641457588
+    second: MadHatter_SS_34
+  - first:
+      213: -3522422920521988271
+    second: MadHatter_SS_35
+  - first:
+      213: 1922330812324763816
+    second: MadHatter_SS_36
+  - first:
+      213: -2588384135862769752
+    second: MadHatter_SS_37
+  - first:
+      213: 574215686125096002
+    second: MadHatter_SS_38
+  - first:
+      213: -8144461387126775846
+    second: MadHatter_SS_39
+  - first:
+      213: -5565223526529647667
+    second: MadHatter_SS_40
+  - first:
+      213: -6076944354146977910
+    second: MadHatter_SS_41
+  - first:
+      213: -5436056210311819060
+    second: MadHatter_SS_42
+  - first:
+      213: -4940731557054555251
+    second: MadHatter_SS_43
+  - first:
+      213: 8490881457927412611
+    second: MadHatter_SS_44
+  - first:
+      213: 1837163883631213312
+    second: MadHatter_SS_45
+  - first:
+      213: -4199604876612149917
+    second: MadHatter_SS_46
+  - first:
+      213: -3799393585481527311
+    second: MadHatter_SS_47
+  - first:
+      213: 4733389583628057419
+    second: MadHatter_SS_48
+  - first:
+      213: 8131256434976117638
+    second: MadHatter_SS_49
+  - first:
+      213: 7784010224311765997
+    second: MadHatter_SS_50
+  - first:
+      213: -5677798748640394399
+    second: MadHatter_SS_51
+  - first:
+      213: 4739922862969163326
+    second: MadHatter_SS_52
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: MadHatter_SS_0
+      rect:
+        serializedVersion: 2
+        x: 88
+        y: 382
+        width: 234
+        height: 359
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aec7a0bb893471b00800000000000000
+      internalID: 799181782133669098
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_1
+      rect:
+        serializedVersion: 2
+        x: 439
+        y: 382
+        width: 238
+        height: 359
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8dca094ba2212d910800000000000000
+      internalID: 1860569570684742872
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_2
+      rect:
+        serializedVersion: 2
+        x: 788
+        y: 382
+        width: 242
+        height: 359
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31c7ef2bf53cb5840800000000000000
+      internalID: 5213975809403812883
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_3
+      rect:
+        serializedVersion: 2
+        x: 982
+        y: 730
+        width: 15
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da81415ea3bc21e10800000000000000
+      internalID: 2167017824530471085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_4
+      rect:
+        serializedVersion: 2
+        x: 1128
+        y: 382
+        width: 244
+        height: 359
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d97b869533b93c30800000000000000
+      internalID: 4339696758688545239
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_5
+      rect:
+        serializedVersion: 2
+        x: 1119
+        y: 651
+        width: 15
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae458cf859afa7ba0800000000000000
+      internalID: -6090280025795832598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_6
+      rect:
+        serializedVersion: 2
+        x: 1110
+        y: 636
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5888c2321b588280800000000000000
+      internalID: -9040876118226728865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_7
+      rect:
+        serializedVersion: 2
+        x: 1096
+        y: 614
+        width: 16
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75df918584fffd060800000000000000
+      internalID: 6980578633628384599
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_8
+      rect:
+        serializedVersion: 2
+        x: 1125
+        y: 610
+        width: 18
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64ea37a129320ed70800000000000000
+      internalID: 9070288759940165190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_9
+      rect:
+        serializedVersion: 2
+        x: 1112
+        y: 593
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a11f5d062973576b0800000000000000
+      internalID: -5299268284702133990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_10
+      rect:
+        serializedVersion: 2
+        x: 1105
+        y: 563
+        width: 20
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ff9eab9157286370800000000000000
+      internalID: 8315939943397367798
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_11
+      rect:
+        serializedVersion: 2
+        x: 76
+        y: 0
+        width: 238
+        height: 367
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 925179041d9e7def0800000000000000
+      internalID: -83340983141984983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_12
+      rect:
+        serializedVersion: 2
+        x: 407
+        y: 347
+        width: 9
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7026701b79fd27350800000000000000
+      internalID: 6013114295096140295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_13
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 4
+        width: 268
+        height: 364
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cb2d40828d95b6120800000000000000
+      internalID: 2408117210678874812
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_14
+      rect:
+        serializedVersion: 2
+        x: 481
+        y: 360
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f45c61c2af471ea0800000000000000
+      internalID: -5902161226197347086
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_15
+      rect:
+        serializedVersion: 2
+        x: 730
+        y: 347
+        width: 15
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b2c8d08ffd3571d0800000000000000
+      internalID: -3353706179919822154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_16
+      rect:
+        serializedVersion: 2
+        x: 783
+        y: 0
+        width: 274
+        height: 367
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2417f247e375d9e10800000000000000
+      internalID: 2206015318230266178
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_17
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 358
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2f5436d4d13fe5e30800000000000000
+      internalID: 4494296785340286450
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_18
+      rect:
+        serializedVersion: 2
+        x: 1140
+        y: 2
+        width: 223
+        height: 365
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7272bf40b57b4bf0800000000000000
+      internalID: -339047946824551811
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_19
+      rect:
+        serializedVersion: 2
+        x: 422
+        y: 330
+        width: 24
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c5d0a77496b4f6f0800000000000000
+      internalID: -651695297283435070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_20
+      rect:
+        serializedVersion: 2
+        x: 771
+        y: 333
+        width: 14
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ea65ee6696ce1e50800000000000000
+      internalID: 6782076438274468579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_21
+      rect:
+        serializedVersion: 2
+        x: 381
+        y: 273
+        width: 51
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 019168efe8db516f0800000000000000
+      internalID: -714456544015148784
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_22
+      rect:
+        serializedVersion: 2
+        x: 413
+        y: 312
+        width: 14
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bac6f254439707d10800000000000000
+      internalID: 2121328689897499819
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_23
+      rect:
+        serializedVersion: 2
+        x: 438
+        y: 315
+        width: 16
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75ff991e01ce59850800000000000000
+      internalID: 6383267604116143959
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_24
+      rect:
+        serializedVersion: 2
+        x: 730
+        y: 306
+        width: 23
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2dbcddfdc19b5e780800000000000000
+      internalID: -8654307575256462382
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_25
+      rect:
+        serializedVersion: 2
+        x: 756
+        y: 308
+        width: 26
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c1c9b92801824fa60800000000000000
+      internalID: 7706828913713585180
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_26
+      rect:
+        serializedVersion: 2
+        x: 59
+        y: 297
+        width: 14
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf97af0464c42ba50800000000000000
+      internalID: 6535369873889589756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_27
+      rect:
+        serializedVersion: 2
+        x: 427
+        y: 288
+        width: 15
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e51d0f3f99bd8c0b0800000000000000
+      internalID: -5708071073422978722
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_28
+      rect:
+        serializedVersion: 2
+        x: 750
+        y: 280
+        width: 37
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5667a83f7e9f8280800000000000000
+      internalID: -9038831657860766113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_29
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 280
+        width: 11
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3aec83895f5d482e0800000000000000
+      internalID: -2124337873414467933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_30
+      rect:
+        serializedVersion: 2
+        x: 382
+        y: 272
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 353707b95ff400b10800000000000000
+      internalID: 1945642955317474131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_31
+      rect:
+        serializedVersion: 2
+        x: 724
+        y: 278
+        width: 14
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1d77dbcbeb14d5d0800000000000000
+      internalID: -3038773149017080550
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_32
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 255
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28c9c4c1e67f83550800000000000000
+      internalID: 6140930144212917378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_33
+      rect:
+        serializedVersion: 2
+        x: 356
+        y: 260
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30dbb3b0da9342fe0800000000000000
+      internalID: -1214782584102601469
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_34
+      rect:
+        serializedVersion: 2
+        x: 398
+        y: 262
+        width: 16
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b500c32487debe00800000000000000
+      internalID: 1062523524641457588
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_35
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 262
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 157c7913407dd1fc0800000000000000
+      internalID: -3522422920521988271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_36
+      rect:
+        serializedVersion: 2
+        x: 762
+        y: 255
+        width: 15
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a8d76950bd7daa10800000000000000
+      internalID: 1922330812324763816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_37
+      rect:
+        serializedVersion: 2
+        x: 779
+        y: 255
+        width: 23
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a7a4af9756341cd0800000000000000
+      internalID: -2588384135862769752
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_38
+      rect:
+        serializedVersion: 2
+        x: 37
+        y: 245
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24c81fbcf1608f700800000000000000
+      internalID: 574215686125096002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_39
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 233
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: adf5c65058f09fe80800000000000000
+      internalID: -8144461387126775846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_40
+      rect:
+        serializedVersion: 2
+        x: 369
+        y: 235
+        width: 26
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dcbbd8d30ba54c2b0800000000000000
+      internalID: -5565223526529647667
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_41
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 246
+        width: 11
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a87f0439e4b5aaba0800000000000000
+      internalID: -6076944354146977910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_42
+      rect:
+        serializedVersion: 2
+        x: 407
+        y: 228
+        width: 20
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc0de4d9daf3f84b0800000000000000
+      internalID: -5436056210311819060
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_43
+      rect:
+        serializedVersion: 2
+        x: 742
+        y: 246
+        width: 11
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8b533373defe6bb0800000000000000
+      internalID: -4940731557054555251
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_44
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 225
+        width: 14
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38bd6b903bba5d570800000000000000
+      internalID: 8490881457927412611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_45
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 238
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00bf30681daee7910800000000000000
+      internalID: 1837163883631213312
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_46
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 216
+        width: 16
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36dd88c7d9108b5c0800000000000000
+      internalID: -4199604876612149917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_47
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 209
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ffc97ff9a7d54bc0800000000000000
+      internalID: -3799393585481527311
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_48
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 204
+        width: 16
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b4b3fab6fb060b140800000000000000
+      internalID: 4733389583628057419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_49
+      rect:
+        serializedVersion: 2
+        x: 28
+        y: 199
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6835c5875a608d070800000000000000
+      internalID: 8131256434976117638
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_50
+      rect:
+        serializedVersion: 2
+        x: 369
+        y: 191
+        width: 15
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: deb8c1cbe0c560c60800000000000000
+      internalID: 7784010224311765997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_51
+      rect:
+        serializedVersion: 2
+        x: 393
+        y: 176
+        width: 14
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 163c121de186431b0800000000000000
+      internalID: -5677798748640394399
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MadHatter_SS_52
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 161
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3e870e0bb697c140800000000000000
+      internalID: 4739922862969163326
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      MadHatter_SS_0: 799181782133669098
+      MadHatter_SS_1: 1860569570684742872
+      MadHatter_SS_10: 8315939943397367798
+      MadHatter_SS_11: -83340983141984983
+      MadHatter_SS_12: 6013114295096140295
+      MadHatter_SS_13: 2408117210678874812
+      MadHatter_SS_14: -5902161226197347086
+      MadHatter_SS_15: -3353706179919822154
+      MadHatter_SS_16: 2206015318230266178
+      MadHatter_SS_17: 4494296785340286450
+      MadHatter_SS_18: -339047946824551811
+      MadHatter_SS_19: -651695297283435070
+      MadHatter_SS_2: 5213975809403812883
+      MadHatter_SS_20: 6782076438274468579
+      MadHatter_SS_21: -714456544015148784
+      MadHatter_SS_22: 2121328689897499819
+      MadHatter_SS_23: 6383267604116143959
+      MadHatter_SS_24: -8654307575256462382
+      MadHatter_SS_25: 7706828913713585180
+      MadHatter_SS_26: 6535369873889589756
+      MadHatter_SS_27: -5708071073422978722
+      MadHatter_SS_28: -9038831657860766113
+      MadHatter_SS_29: -2124337873414467933
+      MadHatter_SS_3: 2167017824530471085
+      MadHatter_SS_30: 1945642955317474131
+      MadHatter_SS_31: -3038773149017080550
+      MadHatter_SS_32: 6140930144212917378
+      MadHatter_SS_33: -1214782584102601469
+      MadHatter_SS_34: 1062523524641457588
+      MadHatter_SS_35: -3522422920521988271
+      MadHatter_SS_36: 1922330812324763816
+      MadHatter_SS_37: -2588384135862769752
+      MadHatter_SS_38: 574215686125096002
+      MadHatter_SS_39: -8144461387126775846
+      MadHatter_SS_4: 4339696758688545239
+      MadHatter_SS_40: -5565223526529647667
+      MadHatter_SS_41: -6076944354146977910
+      MadHatter_SS_42: -5436056210311819060
+      MadHatter_SS_43: -4940731557054555251
+      MadHatter_SS_44: 8490881457927412611
+      MadHatter_SS_45: 1837163883631213312
+      MadHatter_SS_46: -4199604876612149917
+      MadHatter_SS_47: -3799393585481527311
+      MadHatter_SS_48: 4733389583628057419
+      MadHatter_SS_49: 8131256434976117638
+      MadHatter_SS_5: -6090280025795832598
+      MadHatter_SS_50: 7784010224311765997
+      MadHatter_SS_51: -5677798748640394399
+      MadHatter_SS_52: 4739922862969163326
+      MadHatter_SS_6: -9040876118226728865
+      MadHatter_SS_7: 6980578633628384599
+      MadHatter_SS_8: 9070288759940165190
+      MadHatter_SS_9: -5299268284702133990
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
