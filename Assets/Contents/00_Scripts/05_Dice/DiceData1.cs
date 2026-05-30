@@ -1,5 +1,14 @@
 using UnityEngine;
 
+public enum SpecialDieEffect
+{
+    None,
+    Coin,
+    Heart,
+    Odd,
+    Even
+}
+
 public enum DiceType
 {
     Normal,
@@ -20,12 +29,15 @@ public class DiceData1
     public Color diceColor = Color.white;
     public DiceType type = DiceType.Normal;
 
+    public SpecialDieEffect specialEffect = SpecialDieEffect.None;
+
     public Sprite customDiceShell;
     public Sprite[] customFaceSprites;
 
     //public int minRoll = 1;
     //public int maxRoll = 6;
     public int[] faceValues = new int[6] { 1, 2, 3, 4, 5, 6 };
+
     public DiceData1()
     {
         diceName = "기본 주사위";
@@ -33,11 +45,11 @@ public class DiceData1
         multiplier = 1f;
         diceColor = Color.white;
         type = DiceType.Normal;
+        specialEffect = SpecialDieEffect.None;
 
         // 6개 면의 기본값을 1~6으로 설정
         faceValues = new int[6] { 1, 2, 3, 4, 5, 6 };
     }
-
 
     // 특수 주사위 생성을 위한 생성자 (선택 사항)
     public DiceData1(string name, int[] faces)

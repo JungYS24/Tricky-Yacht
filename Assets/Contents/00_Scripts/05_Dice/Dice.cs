@@ -61,8 +61,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
         // 고정 주사위이거나, 이름에 '홀수' 또는 '짝수'가 들어가면 숫자 이미지를 사용하도록 설정
         bool isFixed = myData.faceValues.All(f => f == myData.faceValues[0]);
-        bool isOddEven = !string.IsNullOrEmpty(myData.diceName) &&
-                         (myData.diceName.Contains("홀수") || myData.diceName.Contains("짝수"));
+        bool isOddEven = myData.specialEffect == SpecialDieEffect.Odd || myData.specialEffect == SpecialDieEffect.Even;
 
         useNumberSprite = isFixed || isOddEven;
 

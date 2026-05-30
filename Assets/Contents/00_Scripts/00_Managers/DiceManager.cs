@@ -316,6 +316,22 @@ public class DiceManager : MonoBehaviour
 
         foreach (var d in keptDice)
         {
+            switch (d.myData.specialEffect)
+            {
+                case SpecialDieEffect.Coin:
+                    if (shopManager != null)
+                    {
+                        shopManager.currentGold += d.currentValue;
+                        ui?.UpdateGoldUI(shopManager.currentGold);
+                        if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
+                    }
+                    break;
+                case SpecialDieEffect.Heart:
+                    currentPlayerHP += d.currentValue;
+                    if (currentPlayerHP > playerMaxHP) currentPlayerHP = playerMaxHP;
+                    break;
+            }
+
             if (d.myData.isCoated)
             {
                 switch (d.myData.type)
@@ -563,10 +579,21 @@ public class DiceManager : MonoBehaviour
 
         float finalMult = baseMult + snackBonusMult;
         int darkDamageTotal = 0, iceBonusChips = 0;
+        int expectedGold = 0, expectedHeal = 0;
         int currentSimulatedHP = (enemy != null) ? enemy.CurrentHP : 0;
 
         foreach (var d in targetDice)
         {
+            switch (d.myData.specialEffect)
+            {
+                case SpecialDieEffect.Coin:
+                    expectedGold += d.currentValue;
+                    break;
+                case SpecialDieEffect.Heart:
+                    expectedHeal += d.currentValue;
+                    break;
+            }
+
             if (d.myData.isCoated)
             {
                 if (d.myData.type == DiceType.Prism) finalMult += (d.myData.multiplier - 1.0f);
@@ -603,6 +630,9 @@ public class DiceManager : MonoBehaviour
 
         if (snackBonusChips > 0) displayHand += $" <color=#FFA500>+{snackBonusChips}(스낵)</color>";
         if (figureBonusChips > 0) displayHand += $" <color=#FF69B4>+{figureBonusChips}(달마)</color>";
+
+        if (expectedGold > 0) displayHand += $" <color=#FFFF00>+{expectedGold}(코인)</color>";
+        if (expectedHeal > 0) displayHand += $" <color=#FF5555>+{expectedHeal}(회복)</color>";
 
         string formula = $"{finalBaseSum} x {finalMult:F1}배" + (darkDamageTotal > 0 ? $" + {darkDamageTotal}(다크)" : "");
         string combinedText = $"{displayHand}\n{formula}\n<color=#FF5555>= {totalDamage} 대미지 예정</color>";
@@ -701,7 +731,7 @@ public class DiceManager : MonoBehaviour
         {
             shopManager.currentGold = 2000; // 초기 소지금 (기획에 맞게 수정하세요)
             ui?.UpdateGoldUI(shopManager.currentGold);
-            // [추가] 재시작 및 메인 이동 시 초기 소지금 카운팅 연출 실행 (또는 초기화용)
+            // 재시작 및 메인 이동 시 초기 소지금 카운팅 연출 실행 (또는 초기화용)
             if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
         }
 

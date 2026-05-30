@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Linq;
 
 public class DeckSlot : MonoBehaviour
 {
@@ -31,11 +30,16 @@ public class DeckSlot : MonoBehaviour
     public GameObject prismVFXPrefab;
 
     [Header("VFX 위치 및 크기 보정")]
-    public Vector3 vfxLocalOffset = new Vector3(0f, 0f, -50f); // UI에서 파티클이 묻히지 않게 Z축을 확실히 앞으로 당김
-    public float vfxScale = 100f; // ★ UI에서는 1이 1픽셀이므로 기본 크기를 100배로 확 키움!
+    // ★ Z축을 양수(+50)로 설정해야 UI 뒤로 들어갑니다!
+    public Vector3 vfxLocalOffset = new Vector3(0f, 0f, 50f);
+    public float vfxScale = 2.5f;
 
     private DiceData1 currentData;
-    private int[] animFaces;
+
+    // LINQ 대체 및 배열 재할당 방지를 위한 고정 배열
+    private int[] animFaces = new int[6];
+    private int animUniqueCount = 0;
+
     private Sprite[] animSprites;
     private int currentAnimIndex;
     private float animTimer;
@@ -47,8 +51,8 @@ public class DeckSlot : MonoBehaviour
     private bool isUsedState = false;
 
     private int exactFaceValue = -1;
-    private GameObject currentVFX; // 현재 띄워진 파티클 저장용
-    private DiceType lastVFXType = DiceType.Normal; // 최적화: 현재 띄워진 파티클의 종류 기억
+    private GameObject currentVFX;
+    private DiceType lastVFXType = DiceType.Normal;
 
     public void SetEmpty()
     {
@@ -76,40 +80,43 @@ public class DeckSlot : MonoBehaviour
         animTimer = 0f;
         currentAnimIndex = 0;
 
-        // LINQ 최적화: 중복 제거 및 애니메이션 여부 판단
+        // ★ LINQ 제거 및 단일 반복문 최적화
+        int minVal = data.faceValues[0];
+        int maxVal = data.faceValues[0];
         bool isFixed = true;
-        int firstFace = data.faceValues[0];
-        int uniqueCount = 1;
-        animFaces = new int[6]; // 최대 6개
-        animFaces[0] = firstFace;
+
+        animFaces[0] = data.faceValues[0];
+        animUniqueCount = 1;
 
         for (int i = 1; i < data.faceValues.Length; i++)
         {
-            if (data.faceValues[i] != firstFace) isFixed = false;
+            int val = data.faceValues[i];
 
-            // 중복되지 않은 숫자 찾기 (Distinct 대체)
+            if (val < minVal) minVal = val;
+            if (val > maxVal) maxVal = val;
+
+            if (val != data.faceValues[0]) isFixed = false;
+
             bool isUnique = true;
-            for (int j = 0; j < uniqueCount; j++)
+            for (int j = 0; j < animUniqueCount; j++)
             {
-                if (animFaces[j] == data.faceValues[i])
+                if (animFaces[j] == val)
                 {
                     isUnique = false;
                     break;
                 }
             }
+
             if (isUnique)
             {
-                animFaces[uniqueCount] = data.faceValues[i];
-                uniqueCount++;
+                animFaces[animUniqueCount] = val;
+                animUniqueCount++;
             }
         }
 
-        System.Array.Resize(ref animFaces, uniqueCount); // 실제 고유 숫자 개수만큼 배열 자르기
-
-        isAnimating = uniqueCount > 1 && uniqueCount < 6;
+        isAnimating = animUniqueCount > 1 && animUniqueCount < 6;
         bool isSpecialDie = isAnimating || isFixed || data.customDiceShell != null;
 
-        // 코팅 색상 보정 로직 (파티클과 별개로 주사위 색상도 맞춤)
         if (data.isCoated)
         {
             if (data.type == DiceType.Prism)
@@ -136,7 +143,7 @@ public class DeckSlot : MonoBehaviour
             UpdateStaticDisplay(data, isFixed);
         }
 
-        // 최적화: 코팅 종류가 바뀌었을 때만 파티클 새로 고침
+        // 파티클 재활용 최적화
         if (data.isCoated)
         {
             if (currentVFX == null || lastVFXType != data.type)
@@ -152,15 +159,6 @@ public class DeckSlot : MonoBehaviour
 
         if (descText != null)
         {
-            // LINQ 최적화: Min, Max 직접 계산
-            int minVal = data.faceValues[0];
-            int maxVal = data.faceValues[0];
-            for (int i = 1; i < data.faceValues.Length; i++)
-            {
-                if (data.faceValues[i] < minVal) minVal = data.faceValues[i];
-                if (data.faceValues[i] > maxVal) maxVal = data.faceValues[i];
-            }
-
             if (minVal == maxVal)
                 descText.text = minVal.ToString();
             else
@@ -182,17 +180,19 @@ public class DeckSlot : MonoBehaviour
 
         if (targetPrefab == null) return;
 
-        // diceIcon을 부모로 삼아 UI 위치에 생성
-        currentVFX = Instantiate(targetPrefab, diceIcon.transform);
+        // ★ [핵심 최적화 & 순서 수정] diceIcon의 부모(filledVisual) 아래에 생성
+        currentVFX = Instantiate(targetPrefab, filledVisual.transform);
 
-        // Z축만 살짝 앞으로 당기고, 크기는 인스펙터의 vfxScale 변수를 따르도록 수정
-        currentVFX.transform.localPosition = new Vector3(0f, 0f, -50f);
+        // 위치를 diceIcon과 동일하게 맞춘 후, Z축을 양수(+50)로 밀어서 뒤로 보냄
+        currentVFX.transform.localPosition = diceIcon.transform.localPosition + vfxLocalOffset;
         currentVFX.transform.localRotation = Quaternion.identity;
-        currentVFX.transform.localScale = Vector3.one * vfxScale; // 100 고정 삭제!
+        currentVFX.transform.localScale = Vector3.one * vfxScale;
+
+        // ★ 하이라키 상에서 무조건 첫 번째(맨 위)로 올려서 렌더링 순서를 가장 뒤(주사위 밑)로 깔아버림
+        currentVFX.transform.SetAsFirstSibling();
 
         lastVFXType = type;
 
-        // 생성된 파티클과 그 자식들의 레이어를 모두 'UI'로 변경
         int uiLayer = LayerMask.NameToLayer("UI");
         Transform[] allChildren = currentVFX.GetComponentsInChildren<Transform>(true);
         foreach (var child in allChildren)
@@ -200,7 +200,6 @@ public class DeckSlot : MonoBehaviour
             child.gameObject.layer = uiLayer;
         }
 
-        // 파티클이 UI 슬롯(Canvas) 크기에 맞춰서 얌전히 작아지도록 Hierarchy 모드로 강제
         ParticleSystem[] particleSystems = currentVFX.GetComponentsInChildren<ParticleSystem>(true);
         foreach (var ps in particleSystems)
         {
@@ -208,12 +207,16 @@ public class DeckSlot : MonoBehaviour
             main.scalingMode = ParticleSystemScalingMode.Hierarchy;
         }
 
-        // 파티클이 UI 창(Canvas) 뒤로 숨지 않게 렌더링 순서만 끌어올림
+        // ★ 캔버스를 마구 추가하던 최악의 로직을 삭제하고, 부모 캔버스의 Sorting Order를 그대로 따라가게 얌전하게 설정
+        Canvas parentCanvas = GetComponentInParent<Canvas>();
+        int order = parentCanvas != null ? parentCanvas.sortingOrder : 0;
+        string layerName = parentCanvas != null ? parentCanvas.sortingLayerName : "UI";
+
         ParticleSystemRenderer[] renderers = currentVFX.GetComponentsInChildren<ParticleSystemRenderer>(true);
         foreach (var r in renderers)
         {
-            r.sortingLayerName = "UI";
-            r.sortingOrder = 30000;
+            r.sortingLayerName = layerName;
+            r.sortingOrder = order; // 캔버스와 동일한 순서를 주면, 위에서 설정한 Hierarchy(SetAsFirstSibling)와 Z축(+50)이 작동해서 완벽하게 뒤로 감!
         }
     }
 
@@ -230,7 +233,7 @@ public class DeckSlot : MonoBehaviour
                 DestroyImmediate(currentVFX);
             }
             currentVFX = null;
-            lastVFXType = DiceType.Normal; // 타입 초기화
+            lastVFXType = DiceType.Normal;
         }
     }
 
@@ -249,7 +252,7 @@ public class DeckSlot : MonoBehaviour
             if (animTimer >= animInterval)
             {
                 animTimer = 0;
-                currentAnimIndex = (currentAnimIndex + 1) % animFaces.Length;
+                currentAnimIndex = (currentAnimIndex + 1) % animUniqueCount;
                 UpdateDisplaySprite();
             }
         }
@@ -298,7 +301,6 @@ public class DeckSlot : MonoBehaviour
         }
         else if (defaultFaceSprites != null && defaultFaceSprites.Length >= 6)
         {
-            // VFX가 덧씌워질 것이므로 배경은 항상 투명한 기본 주사위 눈금을 씀
             diceIcon.sprite = defaultFaceSprites[faceToShow - 1];
         }
     }

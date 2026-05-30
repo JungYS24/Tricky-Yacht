@@ -230,7 +230,7 @@ MonoBehaviour:
   goldVFXPrefab: {fileID: 762384880629784995, guid: bb52cdaddc210b44bb80aa4bf1b2129e, type: 3}
   prismVFXPrefab: {fileID: 4376018025336615863, guid: bd528d959e80e6e4c8f891586427750a, type: 3}
   vfxLocalOffset: {x: 0, y: 0, z: -10}
-  vfxScale: 33
+  vfxScale: 39
 --- !u!95 &2481910166647783194
 Animator:
   serializedVersion: 7
