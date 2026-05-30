@@ -1,31 +1,31 @@
 fileFormatVersion: 2
-guid: dddf51c321174c24ca07886d3a9eb4a5
+guid: 5c3bdf7354425564792b06d6bbeeecc9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2084360603125888710
-    second: Ash Gray_0
+      213: 2842270950466042512
+    second: Undertaker_SA_0
   - first:
-      213: -3033252384984912064
-    second: Ash Gray_1
+      213: 4693592217145364173
+    second: Undertaker_SA_1
   - first:
-      213: -7108354549077809381
-    second: Ash Gray_2
+      213: 3952687507027481678
+    second: Undertaker_SA_2
   - first:
-      213: -5748825080762258272
-    second: Ash Gray_3
+      213: -1097679635147983404
+    second: Undertaker_SA_3
   - first:
-      213: 53606620391276634
-    second: Ash Gray_4
+      213: 776079055129015790
+    second: Undertaker_SA_4
   - first:
-      213: 2269058040161816861
-    second: Ash Gray_5
+      213: -3365951689448507119
+    second: Undertaker_SA_5
   - first:
-      213: 1454491826390056966
-    second: Ash Gray_6
+      213: -4892754542453023432
+    second: Undertaker_SA_6
   - first:
-      213: 6821601987272919865
-    second: Ash Gray_7
+      213: -2879331244709810107
+    second: Undertaker_SA_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 35
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -134,13 +134,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Ash Gray_0
+      name: Undertaker_SA_0
       rect:
         serializedVersion: 2
-        x: 67
-        y: 309
-        width: 92
-        height: 88
+        x: 27
+        y: 394
+        width: 309
+        height: 303
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -149,20 +149,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a39ccda231dd213e0800000000000000
-      internalID: -2084360603125888710
+      spriteID: 09ab0f5de56c17720800000000000000
+      internalID: 2842270950466042512
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_1
+      name: Undertaker_SA_1
       rect:
         serializedVersion: 2
-        x: 162
-        y: 309
-        width: 93
-        height: 89
+        x: 370
+        y: 394
+        width: 315
+        height: 303
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -171,20 +171,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 04f2ed6d609b7e5d0800000000000000
-      internalID: -3033252384984912064
+      spriteID: dcecc77f04df22140800000000000000
+      internalID: 4693592217145364173
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_2
+      name: Undertaker_SA_2
       rect:
         serializedVersion: 2
-        x: 258
-        y: 308
-        width: 95
-        height: 90
+        x: 717
+        y: 394
+        width: 314
+        height: 303
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -193,20 +193,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b176fa4033d0a5d90800000000000000
-      internalID: -7108354549077809381
+      spriteID: e445f7c6854cad630800000000000000
+      internalID: 3952687507027481678
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_3
+      name: Undertaker_SA_3
       rect:
         serializedVersion: 2
-        x: 353
-        y: 308
-        width: 94
-        height: 90
+        x: 1062
+        y: 403
+        width: 292
+        height: 294
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -215,20 +215,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0ac2f413c021830b0800000000000000
-      internalID: -5748825080762258272
+      spriteID: 4d5f2d5003244c0f0800000000000000
+      internalID: -1097679635147983404
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_4
+      name: Undertaker_SA_4
       rect:
         serializedVersion: 2
-        x: 64
-        y: 114
-        width: 95
-        height: 96
+        x: 38
+        y: 30
+        width: 287
+        height: 303
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -237,20 +237,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a50080eefe27eb000800000000000000
-      internalID: 53606620391276634
+      spriteID: ee5f59ee9cf25ca00800000000000000
+      internalID: 776079055129015790
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_5
+      name: Undertaker_SA_5
       rect:
         serializedVersion: 2
-        x: 160
-        y: 114
-        width: 95
-        height: 95
+        x: 382
+        y: 30
+        width: 289
+        height: 304
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -259,20 +259,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d11d69af3405d7f10800000000000000
-      internalID: 2269058040161816861
+      spriteID: 119bb43a5ccb941d0800000000000000
+      internalID: -3365951689448507119
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_6
+      name: Undertaker_SA_6
       rect:
         serializedVersion: 2
-        x: 256
-        y: 114
-        width: 96
-        height: 95
+        x: 729
+        y: 30
+        width: 283
+        height: 304
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -281,20 +281,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 60040b02c946f2410800000000000000
-      internalID: 1454491826390056966
+      spriteID: 83d98e3aaa1791cb0800000000000000
+      internalID: -4892754542453023432
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_7
+      name: Undertaker_SA_7
       rect:
         serializedVersion: 2
-        x: 352
-        y: 114
-        width: 96
-        height: 96
+        x: 1062
+        y: 30
+        width: 286
+        height: 304
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -303,8 +303,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 93b40827dd23bae50800000000000000
-      internalID: 6821601987272919865
+      spriteID: 54073600d7f8a08d0800000000000000
+      internalID: -2879331244709810107
       vertices: []
       indices: 
       edges: []
@@ -323,14 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Ash Gray_0: -2084360603125888710
-      Ash Gray_1: -3033252384984912064
-      Ash Gray_2: -7108354549077809381
-      Ash Gray_3: -5748825080762258272
-      Ash Gray_4: 53606620391276634
-      Ash Gray_5: 2269058040161816861
-      Ash Gray_6: 1454491826390056966
-      Ash Gray_7: 6821601987272919865
+      Undertaker_SA_0: 2842270950466042512
+      Undertaker_SA_1: 4693592217145364173
+      Undertaker_SA_2: 3952687507027481678
+      Undertaker_SA_3: -1097679635147983404
+      Undertaker_SA_4: 776079055129015790
+      Undertaker_SA_5: -3365951689448507119
+      Undertaker_SA_6: -4892754542453023432
+      Undertaker_SA_7: -2879331244709810107
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

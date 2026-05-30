@@ -1,31 +1,25 @@
 fileFormatVersion: 2
-guid: dddf51c321174c24ca07886d3a9eb4a5
+guid: aacf3b4970266664b90182b32043bd69
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2084360603125888710
-    second: Ash Gray_0
+      213: 6454347432483053075
+    second: HeartDice_SS_0
   - first:
-      213: -3033252384984912064
-    second: Ash Gray_1
+      213: -834582622536515918
+    second: HeartDice_SS_1
   - first:
-      213: -7108354549077809381
-    second: Ash Gray_2
+      213: 701285855910388456
+    second: HeartDice_SS_2
   - first:
-      213: -5748825080762258272
-    second: Ash Gray_3
+      213: -623235422116112890
+    second: HeartDice_SS_3
   - first:
-      213: 53606620391276634
-    second: Ash Gray_4
+      213: 4640456805837861720
+    second: HeartDice_SS_4
   - first:
-      213: 2269058040161816861
-    second: Ash Gray_5
-  - first:
-      213: 1454491826390056966
-    second: Ash Gray_6
-  - first:
-      213: 6821601987272919865
-    second: Ash Gray_7
+      213: 2122503598220713933
+    second: HeartDice_SS_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,7 +66,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 35
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -134,13 +128,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Ash Gray_0
+      name: HeartDice_SS_0
       rect:
         serializedVersion: 2
-        x: 67
-        y: 309
-        width: 92
-        height: 88
+        x: 50
+        y: 883
+        width: 329
+        height: 338
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -149,20 +143,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a39ccda231dd213e0800000000000000
-      internalID: -2084360603125888710
+      spriteID: 31e5b121bc2729950800000000000000
+      internalID: 6454347432483053075
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_1
+      name: HeartDice_SS_1
       rect:
         serializedVersion: 2
-        x: 162
-        y: 309
-        width: 93
-        height: 89
+        x: 469
+        y: 883
+        width: 329
+        height: 338
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -171,20 +165,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 04f2ed6d609b7e5d0800000000000000
-      internalID: -3033252384984912064
+      spriteID: 2be3fffc687fa64f0800000000000000
+      internalID: -834582622536515918
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_2
+      name: HeartDice_SS_2
       rect:
         serializedVersion: 2
-        x: 258
-        y: 308
-        width: 95
-        height: 90
+        x: 51
+        y: 472
+        width: 328
+        height: 341
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -193,20 +187,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b176fa4033d0a5d90800000000000000
-      internalID: -7108354549077809381
+      spriteID: 8e26b8735c77bb900800000000000000
+      internalID: 701285855910388456
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_3
+      name: HeartDice_SS_3
       rect:
         serializedVersion: 2
-        x: 353
-        y: 308
-        width: 94
-        height: 90
+        x: 469
+        y: 472
+        width: 329
+        height: 341
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -215,20 +209,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0ac2f413c021830b0800000000000000
-      internalID: -5748825080762258272
+      spriteID: 60614558fa2d957f0800000000000000
+      internalID: -623235422116112890
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_4
+      name: HeartDice_SS_4
       rect:
         serializedVersion: 2
-        x: 64
-        y: 114
-        width: 95
-        height: 96
+        x: 50
+        y: 61
+        width: 329
+        height: 342
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -237,20 +231,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a50080eefe27eb000800000000000000
-      internalID: 53606620391276634
+      spriteID: 8537283f0e6366040800000000000000
+      internalID: 4640456805837861720
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_5
+      name: HeartDice_SS_5
       rect:
         serializedVersion: 2
-        x: 160
-        y: 114
-        width: 95
-        height: 95
+        x: 469
+        y: 61
+        width: 328
+        height: 342
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -259,52 +253,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d11d69af3405d7f10800000000000000
-      internalID: 2269058040161816861
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Ash Gray_6
-      rect:
-        serializedVersion: 2
-        x: 256
-        y: 114
-        width: 96
-        height: 95
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 60040b02c946f2410800000000000000
-      internalID: 1454491826390056966
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Ash Gray_7
-      rect:
-        serializedVersion: 2
-        x: 352
-        y: 114
-        width: 96
-        height: 96
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 93b40827dd23bae50800000000000000
-      internalID: 6821601987272919865
+      spriteID: dcf1f6ee6c5a47d10800000000000000
+      internalID: 2122503598220713933
       vertices: []
       indices: 
       edges: []
@@ -323,14 +273,12 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Ash Gray_0: -2084360603125888710
-      Ash Gray_1: -3033252384984912064
-      Ash Gray_2: -7108354549077809381
-      Ash Gray_3: -5748825080762258272
-      Ash Gray_4: 53606620391276634
-      Ash Gray_5: 2269058040161816861
-      Ash Gray_6: 1454491826390056966
-      Ash Gray_7: 6821601987272919865
+      HeartDice_SS_0: 6454347432483053075
+      HeartDice_SS_1: -834582622536515918
+      HeartDice_SS_2: 701285855910388456
+      HeartDice_SS_3: -623235422116112890
+      HeartDice_SS_4: 4640456805837861720
+      HeartDice_SS_5: 2122503598220713933
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

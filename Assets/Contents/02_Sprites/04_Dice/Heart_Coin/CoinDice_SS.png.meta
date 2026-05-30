@@ -1,31 +1,25 @@
 fileFormatVersion: 2
-guid: dddf51c321174c24ca07886d3a9eb4a5
+guid: 236a5a6623a5b2b489f7c4b51414a517
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2084360603125888710
-    second: Ash Gray_0
+      213: 8066959083524236513
+    second: CoinDice_SS_0
   - first:
-      213: -3033252384984912064
-    second: Ash Gray_1
+      213: -7414221777594581807
+    second: CoinDice_SS_1
   - first:
-      213: -7108354549077809381
-    second: Ash Gray_2
+      213: -7738011609060927955
+    second: CoinDice_SS_2
   - first:
-      213: -5748825080762258272
-    second: Ash Gray_3
+      213: 7453760724211168763
+    second: CoinDice_SS_3
   - first:
-      213: 53606620391276634
-    second: Ash Gray_4
+      213: 8481627583809092357
+    second: CoinDice_SS_4
   - first:
-      213: 2269058040161816861
-    second: Ash Gray_5
-  - first:
-      213: 1454491826390056966
-    second: Ash Gray_6
-  - first:
-      213: 6821601987272919865
-    second: Ash Gray_7
+      213: -6209686449909653958
+    second: CoinDice_SS_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,7 +66,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 35
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -134,13 +128,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Ash Gray_0
+      name: CoinDice_SS_0
       rect:
         serializedVersion: 2
-        x: 67
-        y: 309
-        width: 92
-        height: 88
+        x: 50
+        y: 882
+        width: 329
+        height: 339
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -149,20 +143,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a39ccda231dd213e0800000000000000
-      internalID: -2084360603125888710
+      spriteID: 1e4a21fbb8893ff60800000000000000
+      internalID: 8066959083524236513
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_1
+      name: CoinDice_SS_1
       rect:
         serializedVersion: 2
-        x: 162
-        y: 309
-        width: 93
-        height: 89
+        x: 469
+        y: 883
+        width: 329
+        height: 338
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -171,20 +165,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 04f2ed6d609b7e5d0800000000000000
-      internalID: -3033252384984912064
+      spriteID: 1dc728453946b1990800000000000000
+      internalID: -7414221777594581807
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_2
+      name: CoinDice_SS_2
       rect:
         serializedVersion: 2
-        x: 258
-        y: 308
-        width: 95
-        height: 90
+        x: 50
+        y: 472
+        width: 329
+        height: 341
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -193,20 +187,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b176fa4033d0a5d90800000000000000
-      internalID: -7108354549077809381
+      spriteID: d261316707f0d9490800000000000000
+      internalID: -7738011609060927955
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_3
+      name: CoinDice_SS_3
       rect:
         serializedVersion: 2
-        x: 353
-        y: 308
-        width: 94
-        height: 90
+        x: 469
+        y: 472
+        width: 329
+        height: 341
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -215,20 +209,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0ac2f413c021830b0800000000000000
-      internalID: -5748825080762258272
+      spriteID: bf57d5f03e3117760800000000000000
+      internalID: 7453760724211168763
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_4
+      name: CoinDice_SS_4
       rect:
         serializedVersion: 2
-        x: 64
-        y: 114
-        width: 95
-        height: 96
+        x: 50
+        y: 61
+        width: 329
+        height: 342
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -237,20 +231,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a50080eefe27eb000800000000000000
-      internalID: 53606620391276634
+      spriteID: 50b7812995bc4b570800000000000000
+      internalID: 8481627583809092357
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_5
+      name: CoinDice_SS_5
       rect:
         serializedVersion: 2
-        x: 160
-        y: 114
-        width: 95
-        height: 95
+        x: 469
+        y: 61
+        width: 329
+        height: 342
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -259,52 +253,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d11d69af3405d7f10800000000000000
-      internalID: 2269058040161816861
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Ash Gray_6
-      rect:
-        serializedVersion: 2
-        x: 256
-        y: 114
-        width: 96
-        height: 95
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 60040b02c946f2410800000000000000
-      internalID: 1454491826390056966
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Ash Gray_7
-      rect:
-        serializedVersion: 2
-        x: 352
-        y: 114
-        width: 96
-        height: 96
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 93b40827dd23bae50800000000000000
-      internalID: 6821601987272919865
+      spriteID: a3e149af213c2d9a0800000000000000
+      internalID: -6209686449909653958
       vertices: []
       indices: 
       edges: []
@@ -323,14 +273,12 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Ash Gray_0: -2084360603125888710
-      Ash Gray_1: -3033252384984912064
-      Ash Gray_2: -7108354549077809381
-      Ash Gray_3: -5748825080762258272
-      Ash Gray_4: 53606620391276634
-      Ash Gray_5: 2269058040161816861
-      Ash Gray_6: 1454491826390056966
-      Ash Gray_7: 6821601987272919865
+      CoinDice_SS_0: 8066959083524236513
+      CoinDice_SS_1: -7414221777594581807
+      CoinDice_SS_2: -7738011609060927955
+      CoinDice_SS_3: 7453760724211168763
+      CoinDice_SS_4: 8481627583809092357
+      CoinDice_SS_5: -6209686449909653958
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,31 +1,31 @@
 fileFormatVersion: 2
-guid: dddf51c321174c24ca07886d3a9eb4a5
+guid: c9710f15286c3f54ebed3b62a3bfab87
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2084360603125888710
-    second: Ash Gray_0
+      213: 9014926472985512893
+    second: SkeletonHorse_SS_0
   - first:
-      213: -3033252384984912064
-    second: Ash Gray_1
+      213: 5761538700799510305
+    second: SkeletonHorse_SS_1
   - first:
-      213: -7108354549077809381
-    second: Ash Gray_2
+      213: -2909960966672304237
+    second: SkeletonHorse_SS_2
   - first:
-      213: -5748825080762258272
-    second: Ash Gray_3
+      213: -7104870648511912446
+    second: SkeletonHorse_SS_3
   - first:
-      213: 53606620391276634
-    second: Ash Gray_4
+      213: 6226923765778707697
+    second: SkeletonHorse_SS_4
   - first:
-      213: 2269058040161816861
-    second: Ash Gray_5
+      213: -7920392704836537663
+    second: SkeletonHorse_SS_5
   - first:
-      213: 1454491826390056966
-    second: Ash Gray_6
+      213: 2109846835182911196
+    second: SkeletonHorse_SS_6
   - first:
-      213: 6821601987272919865
-    second: Ash Gray_7
+      213: 8122970184620602203
+    second: SkeletonHorse_SS_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 35
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -134,13 +134,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Ash Gray_0
+      name: SkeletonHorse_SS_0
       rect:
         serializedVersion: 2
-        x: 67
-        y: 309
-        width: 92
-        height: 88
+        x: 29
+        y: 386
+        width: 309
+        height: 325
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -149,20 +149,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a39ccda231dd213e0800000000000000
-      internalID: -2084360603125888710
+      spriteID: dbb01923dd37b1d70800000000000000
+      internalID: 9014926472985512893
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_1
+      name: SkeletonHorse_SS_1
       rect:
         serializedVersion: 2
-        x: 162
-        y: 309
-        width: 93
-        height: 89
+        x: 376
+        y: 386
+        width: 311
+        height: 325
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -171,20 +171,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 04f2ed6d609b7e5d0800000000000000
-      internalID: -3033252384984912064
+      spriteID: 12702d42ce815ff40800000000000000
+      internalID: 5761538700799510305
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_2
+      name: SkeletonHorse_SS_2
       rect:
         serializedVersion: 2
-        x: 258
-        y: 308
-        width: 95
-        height: 90
+        x: 723
+        y: 386
+        width: 316
+        height: 318
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -193,20 +193,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b176fa4033d0a5d90800000000000000
-      internalID: -7108354549077809381
+      spriteID: 397be3f1bedbd97d0800000000000000
+      internalID: -2909960966672304237
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_3
+      name: SkeletonHorse_SS_3
       rect:
         serializedVersion: 2
-        x: 353
-        y: 308
-        width: 94
-        height: 90
+        x: 1063
+        y: 386
+        width: 323
+        height: 320
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -215,20 +215,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0ac2f413c021830b0800000000000000
-      internalID: -5748825080762258272
+      spriteID: 2062954d9cd666d90800000000000000
+      internalID: -7104870648511912446
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_4
+      name: SkeletonHorse_SS_4
       rect:
         serializedVersion: 2
-        x: 64
-        y: 114
-        width: 95
-        height: 96
+        x: 27
+        y: 19
+        width: 316
+        height: 312
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -237,20 +237,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a50080eefe27eb000800000000000000
-      internalID: 53606620391276634
+      spriteID: 1f47dae5c2a7a6650800000000000000
+      internalID: 6226923765778707697
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_5
+      name: SkeletonHorse_SS_5
       rect:
         serializedVersion: 2
-        x: 160
-        y: 114
-        width: 95
-        height: 95
+        x: 369
+        y: 19
+        width: 321
+        height: 290
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -259,20 +259,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d11d69af3405d7f10800000000000000
-      internalID: 2269058040161816861
+      spriteID: 1c27f9a8ccc151290800000000000000
+      internalID: -7920392704836537663
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_6
+      name: SkeletonHorse_SS_6
       rect:
         serializedVersion: 2
-        x: 256
-        y: 114
-        width: 96
-        height: 95
+        x: 717
+        y: 14
+        width: 323
+        height: 328
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -281,20 +281,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 60040b02c946f2410800000000000000
-      internalID: 1454491826390056966
+      spriteID: cde3f85a48ea74d10800000000000000
+      internalID: 2109846835182911196
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_7
+      name: SkeletonHorse_SS_7
       rect:
         serializedVersion: 2
-        x: 352
-        y: 114
-        width: 96
-        height: 96
+        x: 1070
+        y: 14
+        width: 316
+        height: 322
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -303,8 +303,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 93b40827dd23bae50800000000000000
-      internalID: 6821601987272919865
+      spriteID: b53766778569ab070800000000000000
+      internalID: 8122970184620602203
       vertices: []
       indices: 
       edges: []
@@ -323,14 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Ash Gray_0: -2084360603125888710
-      Ash Gray_1: -3033252384984912064
-      Ash Gray_2: -7108354549077809381
-      Ash Gray_3: -5748825080762258272
-      Ash Gray_4: 53606620391276634
-      Ash Gray_5: 2269058040161816861
-      Ash Gray_6: 1454491826390056966
-      Ash Gray_7: 6821601987272919865
+      SkeletonHorse_SS_0: 9014926472985512893
+      SkeletonHorse_SS_1: 5761538700799510305
+      SkeletonHorse_SS_2: -2909960966672304237
+      SkeletonHorse_SS_3: -7104870648511912446
+      SkeletonHorse_SS_4: 6226923765778707697
+      SkeletonHorse_SS_5: -7920392704836537663
+      SkeletonHorse_SS_6: 2109846835182911196
+      SkeletonHorse_SS_7: 8122970184620602203
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

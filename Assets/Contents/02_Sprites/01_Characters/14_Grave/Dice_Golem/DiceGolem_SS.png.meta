@@ -1,31 +1,31 @@
 fileFormatVersion: 2
-guid: dddf51c321174c24ca07886d3a9eb4a5
+guid: 88fd423faa60645428f464a64bcee670
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2084360603125888710
-    second: Ash Gray_0
+      213: 1162278102174808712
+    second: DiceGolem_SS_0
   - first:
-      213: -3033252384984912064
-    second: Ash Gray_1
+      213: -113654318470842927
+    second: DiceGolem_SS_1
   - first:
-      213: -7108354549077809381
-    second: Ash Gray_2
+      213: -6907544243066260448
+    second: DiceGolem_SS_2
   - first:
-      213: -5748825080762258272
-    second: Ash Gray_3
+      213: -3266466887613363064
+    second: DiceGolem_SS_3
   - first:
-      213: 53606620391276634
-    second: Ash Gray_4
+      213: -2895220672453276818
+    second: DiceGolem_SS_4
   - first:
-      213: 2269058040161816861
-    second: Ash Gray_5
+      213: -5227313191702108771
+    second: DiceGolem_SS_5
   - first:
-      213: 1454491826390056966
-    second: Ash Gray_6
+      213: 95372088674186578
+    second: DiceGolem_SS_6
   - first:
-      213: 6821601987272919865
-    second: Ash Gray_7
+      213: -8694071659550519764
+    second: DiceGolem_SS_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 35
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -134,13 +134,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Ash Gray_0
+      name: DiceGolem_SS_0
       rect:
         serializedVersion: 2
-        x: 67
-        y: 309
-        width: 92
-        height: 88
+        x: 18
+        y: 418
+        width: 307
+        height: 282
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -149,20 +149,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a39ccda231dd213e0800000000000000
-      internalID: -2084360603125888710
+      spriteID: 88a3852a6cd312010800000000000000
+      internalID: 1162278102174808712
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_1
+      name: DiceGolem_SS_1
       rect:
         serializedVersion: 2
-        x: 162
-        y: 309
-        width: 93
-        height: 89
+        x: 368
+        y: 418
+        width: 307
+        height: 282
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -171,20 +171,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 04f2ed6d609b7e5d0800000000000000
-      internalID: -3033252384984912064
+      spriteID: 1d53b50eff73c6ef0800000000000000
+      internalID: -113654318470842927
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_2
+      name: DiceGolem_SS_2
       rect:
         serializedVersion: 2
-        x: 258
-        y: 308
-        width: 95
-        height: 90
+        x: 706
+        y: 418
+        width: 328
+        height: 282
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -193,20 +193,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b176fa4033d0a5d90800000000000000
-      internalID: -7108354549077809381
+      spriteID: 024bdb1db197320a0800000000000000
+      internalID: -6907544243066260448
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_3
+      name: DiceGolem_SS_3
       rect:
         serializedVersion: 2
-        x: 353
-        y: 308
-        width: 94
-        height: 90
+        x: 1056
+        y: 418
+        width: 325
+        height: 282
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -215,20 +215,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0ac2f413c021830b0800000000000000
-      internalID: -5748825080762258272
+      spriteID: 88cca351cad2ba2d0800000000000000
+      internalID: -3266466887613363064
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_4
+      name: DiceGolem_SS_4
       rect:
         serializedVersion: 2
-        x: 64
-        y: 114
-        width: 95
-        height: 96
+        x: 22
+        y: 38
+        width: 323
+        height: 282
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -237,20 +237,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a50080eefe27eb000800000000000000
-      internalID: 53606620391276634
+      spriteID: e6b0e00532c12d7d0800000000000000
+      internalID: -2895220672453276818
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_5
+      name: DiceGolem_SS_5
       rect:
         serializedVersion: 2
-        x: 160
-        y: 114
-        width: 95
-        height: 95
+        x: 369
+        y: 38
+        width: 307
+        height: 282
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -259,20 +259,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d11d69af3405d7f10800000000000000
-      internalID: 2269058040161816861
+      spriteID: d95e1eef85ad477b0800000000000000
+      internalID: -5227313191702108771
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_6
+      name: DiceGolem_SS_6
       rect:
         serializedVersion: 2
-        x: 256
-        y: 114
-        width: 96
-        height: 95
+        x: 715
+        y: 38
+        width: 306
+        height: 282
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -281,20 +281,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 60040b02c946f2410800000000000000
-      internalID: 1454491826390056966
+      spriteID: 25579eac864d25100800000000000000
+      internalID: 95372088674186578
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_7
+      name: DiceGolem_SS_7
       rect:
         serializedVersion: 2
-        x: 352
-        y: 114
-        width: 96
-        height: 96
+        x: 1060
+        y: 38
+        width: 307
+        height: 282
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -303,8 +303,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 93b40827dd23bae50800000000000000
-      internalID: 6821601987272919865
+      spriteID: c2e43b883e3785780800000000000000
+      internalID: -8694071659550519764
       vertices: []
       indices: 
       edges: []
@@ -323,14 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Ash Gray_0: -2084360603125888710
-      Ash Gray_1: -3033252384984912064
-      Ash Gray_2: -7108354549077809381
-      Ash Gray_3: -5748825080762258272
-      Ash Gray_4: 53606620391276634
-      Ash Gray_5: 2269058040161816861
-      Ash Gray_6: 1454491826390056966
-      Ash Gray_7: 6821601987272919865
+      DiceGolem_SS_0: 1162278102174808712
+      DiceGolem_SS_1: -113654318470842927
+      DiceGolem_SS_2: -6907544243066260448
+      DiceGolem_SS_3: -3266466887613363064
+      DiceGolem_SS_4: -2895220672453276818
+      DiceGolem_SS_5: -5227313191702108771
+      DiceGolem_SS_6: 95372088674186578
+      DiceGolem_SS_7: -8694071659550519764
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
