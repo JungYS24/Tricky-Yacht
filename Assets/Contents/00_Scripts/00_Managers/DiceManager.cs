@@ -83,6 +83,8 @@ public class DiceManager : MonoBehaviour
     // 전역 접근을 위한 싱글톤 인스턴스 선언 (클래스 상단 변수 선언부에 위치)
     public static DiceManager Instance { get; private set; }
 
+    public static event System.Action OnDeckUpdateNeeded;//덱 주사위 실시간 변경 변수
+
 
     void Awake()
     {
@@ -126,7 +128,7 @@ public class DiceManager : MonoBehaviour
     void InitializeMasterDeck()
     {
         masterDeck.Clear();
-        for (int i = 0; i < 20; i++) masterDeck.Add(new DiceData1());
+        for (int i = 0; i < 12; i++) masterDeck.Add(new DiceData1()); // 주사위 12개로 수정
     }
 
     public List<DiceData1> GetRandomDiceForCoating(int count)
@@ -207,15 +209,27 @@ public class DiceManager : MonoBehaviour
         activeDiceList.Clear();
         Array.Clear(keepSlotOccupants, 0, keepSlotOccupants.Length);
 
+        // 덱에 주사위가 5개 미만으로 남았고, 버린 주사위가 있다면 다시 덱에 섞어 넣음
+        if (drawPile.Count < 5 && discardPile.Count > 0)
+        {
+            drawPile.AddRange(discardPile);
+            discardPile.Clear();
+            ShufflePile(drawPile);
+        }
+
         for (int i = 0; i < rollSlots.Length; i++)
         {
             if (drawPile.Count == 0)
             {
-                drawPile = new List<DiceData1>(discardPile);
-                discardPile.Clear();
-                ShufflePile(drawPile);
+                if (discardPile.Count > 0)
+                {
+                    drawPile = new List<DiceData1>(discardPile);
+                    discardPile.Clear();
+                    ShufflePile(drawPile);
+                }
                 if (drawPile.Count == 0) break;
             }
+
             DiceData1 drawnData = drawPile[0];
             drawPile.RemoveAt(0);
             discardPile.Add(drawnData);
@@ -224,6 +238,7 @@ public class DiceManager : MonoBehaviour
             Dice d = go.GetComponent<Dice>();
             d.rollPos = rollSlots[i].position;
             int initialVal = drawnData.faceValues[UnityEngine.Random.Range(0, 6)];
+
             //튜토리얼 추가
             if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
             {
@@ -263,8 +278,11 @@ public class DiceManager : MonoBehaviour
         }
 
         currentRerolls++;
+
         StartCoroutine(HandleDiceChangedDelayed());
     }
+
+
 
     public void OnFinishButtonClick()
     {
@@ -530,6 +548,8 @@ public class DiceManager : MonoBehaviour
         UpdateMainUI("없음");
         ui?.SetRollButtonInteractable((currentRerolls < maxRerolls + snackBonusRerolls + pandaBonusRerolls) && hasDiceToRoll);
         ui?.SetFinishButtonInteractable(keptCount == keepSlots.Length);
+
+        OnDeckUpdateNeeded?.Invoke();
     }
 
     void UpdateMainUI(string handName)

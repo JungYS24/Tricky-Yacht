@@ -207,6 +207,13 @@ MonoBehaviour:
   filledVisual: {fileID: 503993234126385096}
   diceIcon: {fileID: 445989346094941115}
   descText: {fileID: 0}
+  defaultFaceSprites:
+  - {fileID: 21300000, guid: e6d4349e6942c9344957fae0a557fc9e, type: 3}
+  - {fileID: 4277651623651152253, guid: 4a4761681d308864e86310e4a393d6f5, type: 3}
+  - {fileID: 8572930375631895552, guid: 797b33bba0f315f4ea1961eb5d6ce62c, type: 3}
+  - {fileID: 6584158007040453875, guid: 73cca03ad1f597441bbc9c999b86a0a7, type: 3}
+  - {fileID: 7099116345629502920, guid: bbf80e8244d1aca46a021ba395282516, type: 3}
+  - {fileID: -7865692014833397383, guid: b1e83609a1defef46b845a44bb9ba73a, type: 3}
   normalSprite: {fileID: 21300000, guid: 69eac61b23e6477428ac787638480632, type: 3}
   prismSprite: {fileID: 21300000, guid: 8bbf01b9f97145746b67e7c0093af7ac, type: 3}
   goldSprite: {fileID: 21300000, guid: bf5e455349b9da14697cf42ce9a863b5, type: 3}
@@ -219,6 +226,12 @@ MonoBehaviour:
   - {fileID: 21300000, guid: c57f507212de77548b0b579ca62f806c, type: 3}
   - {fileID: 21300000, guid: 474b239e507e45246a28cd1689d621f6, type: 3}
   - {fileID: 21300000, guid: b7e10860d6dcb124abf517433ca2cfde, type: 3}
+  iceVFXPrefab: {fileID: 8305203530629180466, guid: 4ebf1839c56a6e44ea9e249325f9d1ca, type: 3}
+  darkVFXPrefab: {fileID: 3394135717981710326, guid: ec67f2afd8c944f4faf1625fb57e32cf, type: 3}
+  goldVFXPrefab: {fileID: 762384880629784995, guid: bb52cdaddc210b44bb80aa4bf1b2129e, type: 3}
+  prismVFXPrefab: {fileID: 4376018025336615863, guid: bd528d959e80e6e4c8f891586427750a, type: 3}
+  vfxLocalOffset: {x: 0, y: 0, z: -10}
+  vfxScale: 7
 --- !u!95 &2481910166647783194
 Animator:
   serializedVersion: 7
