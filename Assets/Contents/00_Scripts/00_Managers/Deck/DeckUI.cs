@@ -1,9 +1,12 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 
 public class DeckUI : MonoBehaviour
 {
+    public static bool IsPanelOpen { get; private set; } = false;
+
     public DiceManager diceManager;
     public GameObject deckPanel;
 
@@ -11,8 +14,28 @@ public class DeckUI : MonoBehaviour
     public Transform slotParent;
     public GameObject deckSlotPrefab;
 
+    [Header("버튼 설정")]
+    public Button closeButton;
+    public Button sortButton;
+
     private List<DeckSlot> slotList = new List<DeckSlot>();
     private bool isInitialized = false;
+
+    private void Awake()
+    {
+        if (closeButton != null) closeButton.onClick.AddListener(CloseDeckPanel);
+        if (sortButton != null) sortButton.onClick.AddListener(SortDeck);
+        IsPanelOpen = false;
+    }
+    private void Start()
+    {
+        // 에디터에서 팝업창을 켜둔 채로 시작하더라도, 게임 시작 시 강제로 닫아서 코드와 상태를 일치시킵니다.
+        if (deckPanel != null && deckPanel.activeSelf)
+        {
+            deckPanel.SetActive(false);
+            IsPanelOpen = false;
+        }
+    }
 
     private void OnEnable()
     {
@@ -50,6 +73,7 @@ public class DeckUI : MonoBehaviour
             isInitialized = true;
         }
 
+        IsPanelOpen = true;
         UpdateDeckUI();
         deckPanel.SetActive(true);
     }
@@ -101,6 +125,20 @@ public class DeckUI : MonoBehaviour
 
     public void CloseDeckPanel()
     {
+        IsPanelOpen = false;
         deckPanel.SetActive(false);
+    }
+
+    public void SortDeck()
+    {
+        if (diceManager == null || diceManager.masterDeck == null) return;
+
+        diceManager.masterDeck = diceManager.masterDeck
+            .OrderByDescending(d => d.isCoated)
+            .ThenBy(d => d.type)
+            .ThenBy(d => d.diceName)
+            .ToList();
+
+        UpdateDeckUI();
     }
 }
