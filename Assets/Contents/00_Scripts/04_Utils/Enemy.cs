@@ -11,6 +11,11 @@ public class Enemy : MonoBehaviour
     public Animator monsterAnimator;
     public GameObject deathParticlePrefab;
 
+    //데미지 텍스트
+    [Header("데미지 텍스트 설정")]
+    public GameObject damageTextPrefab;
+    public Canvas uiCanvas; // 데미지 텍스트가 생성될 부모 캔버스
+
     [Header("피격 효과")]
     public Color hitColor = Color.red;
     public float hitEffectDuration = 0.18f;
@@ -56,12 +61,22 @@ public class Enemy : MonoBehaviour
         originalScale = transform.localScale;
         originalPosition = transform.position;
 
+        // 기존 체력바 자동 할당 코드
         if (enemyHPSlider == null)
         {
             GameObject sliderObj = GameObject.Find("EnemyHPSlider");
             if (sliderObj != null)
             {
                 enemyHPSlider = sliderObj.GetComponent<Slider>();
+            }
+        }
+
+        if (uiCanvas == null)
+        {
+            GameObject canvasObj = GameObject.Find("Canvas");
+            if (canvasObj != null)
+            {
+                uiCanvas = canvasObj.GetComponent<Canvas>();
             }
         }
     }
@@ -170,6 +185,10 @@ public class Enemy : MonoBehaviour
         {
             if (hitEffectCoroutine != null) StopCoroutine(hitEffectCoroutine);
             hitEffectCoroutine = StartCoroutine(HitEffectRoutine());
+
+            // ===== 데미지 텍스트 생성 호출 =====
+            ShowDamageText(damage);
+
         }
 
         if (CurrentHP <= 0)
@@ -184,6 +203,27 @@ public class Enemy : MonoBehaviour
             {
                 StartCoroutine(MonsterDeathRoutine(onDeathCallback));
             }
+        }
+    }
+
+    // 데미지 텍스트 생성 함수
+    private void ShowDamageText(int damage)
+    {
+        if (damageTextPrefab == null || uiCanvas == null) return;
+
+        // 몬스터의 약간 위쪽에 생성되도록 오프셋 추가
+        Vector3 spawnPosition = transform.position + new Vector3(0, 1f, 0);
+
+        // 텍스트를 담을 캔버스(uiCanvas)의 자식으로 생성
+        GameObject textObj = Instantiate(damageTextPrefab, spawnPosition, Quaternion.identity, uiCanvas.transform);
+        DamageText dmgTextScript = textObj.GetComponent<DamageText>();
+
+        if (dmgTextScript != null)
+        {
+            // 데미지 수치에 따라 크기 배율 결정
+            // 예: 기준 데미지를 20으로 잡고, 데미지가 클수록 배율 증가
+            float sizeMultiplier = 1f + (damage / 20f) * 0.5f;
+            dmgTextScript.Setup(damage, sizeMultiplier);
         }
     }
 

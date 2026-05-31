@@ -21,10 +21,14 @@ public class DiceManager : MonoBehaviour
     private Transform[] keepSlots;
     private Transform[] rollSlots;
 
+    [Header("몬스터 소환 설정")]
+    public Enemy enemyPrefab;        // 프로젝트 창에 있는 몬스터 프리팹
+    public Transform enemySpawnPoint;// 몬스터가 소환될 위치 지정용 빈 오브젝트
+
     [Header("참조 설정")]
     public UIManager ui;
     public ShopManager shopManager;
-    public Enemy enemy;
+    [HideInInspector] public Enemy enemy;
     public HandVFXManager handVFXManager;
 
     [Header("게임 데이터")]
@@ -38,6 +42,9 @@ public class DiceManager : MonoBehaviour
     public PeppermintCaptureEffect peppermintCaptureEffect;
     public Transform peppermintCaptureCenter;
     public GameObject peppermintVisualPrefab;
+
+    [Header("광대 이벤트 시스템")]
+    public ClownEventPanel clownEventPanel;
 
     // 전리품 선택 패널 연결
     [Header("전리품 시스템")]
@@ -100,6 +107,11 @@ public class DiceManager : MonoBehaviour
             return;
         }
         if (ui == null) ui = FindFirstObjectByType<UIManager>();
+
+        if (enemyPrefab != null && enemySpawnPoint != null)
+        {
+            enemy = Instantiate(enemyPrefab, enemySpawnPoint.position, Quaternion.identity);
+        }
 
         InitializeSlots();
         keepSlotOccupants = new Dice[keepSlots.Length];
@@ -473,7 +485,7 @@ public class DiceManager : MonoBehaviour
         {
             shopManager.currentGold += baseClearReward;
             ui?.UpdateGoldUI(shopManager.currentGold);
-            // [추가] 스테이지 클리어 기본 골드 카운팅 연출 실행
+            //스테이지 클리어 기본 골드 카운팅 연출 실행
             if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
         }
 
@@ -489,21 +501,34 @@ public class DiceManager : MonoBehaviour
         }
 
         ui?.ShowResult("#00FF00", clearMessage);
-        // 이제 보상을 먼저 골라야 하니 전리품 창을 띄우는 함수로 바꿉니다.
-        Invoke(nameof(ShowLootSelection), 2.0f);
+
+        // 이제 보상을 먼저 골라야 하니 광대 이벤트를 띄우는 함수로 바꿉니다.
+        Invoke(nameof(ShowClownEvent), 2.0f);
+    }
+
+    public void ShowClownEvent()
+    {
+        ui?.HideResult(); // 클리어 축하 메세지 끄기
+
+        if (clownEventPanel != null)
+        {
+            clownEventPanel.StartEvent();
+        }
+        else
+        {
+            // 에디터에서 패널 연결을 깜빡했다면 게임이 멈추지 않게 바로 전리품 선택 창으로 넘김
+            ShowLootSelection();
+        }
     }
 
     public void ShowLootSelection()
     {
-        ui?.HideResult(); // 클리어 축하 메세지 끄기
-
         if (lootSelectionPanel != null)
         {
             lootSelectionPanel.OpenSelection(this);
         }
         else
         {
-            // 에디터에서 패널 연결을 깜빡했다면 게임이 멈추지 않게 바로 상점으로 넘김
             PromptShopChoice();
         }
     }
@@ -674,7 +699,7 @@ public class DiceManager : MonoBehaviour
         {
             shopManager.currentGold = 2000; // 초기 소지금 (기획에 맞게 수정하세요)
             ui?.UpdateGoldUI(shopManager.currentGold);
-            // [추가] 재시작 및 메인 이동 시 초기 소지금 카운팅 연출 실행 (또는 초기화용)
+            //재시작 및 메인 이동 시 초기 소지금 카운팅 연출 실행 (또는 초기화용)
             if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
         }
 
