@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: ebbe6bff744f7974b9273ff9b612e72b
+guid: 541ebd282a0992749a45dbc434d65b25
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7715017331872492260
-    second: Fig_flowerCoin_0
+      213: -6298415422612778026
+    second: Fig_GoldCrown_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Fig_flowerCoin_0
+      name: Fig_GoldCrown_0
       rect:
         serializedVersion: 2
-        x: 11
-        y: 11
-        width: 79
-        height: 79
+        x: 13
+        y: 14
+        width: 74
+        height: 73
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c1512c1dc90cee490800000000000000
-      internalID: -7715017331872492260
+      spriteID: 6d3d2572b888798a0800000000000000
+      internalID: -6298415422612778026
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Fig_flowerCoin_0: -7715017331872492260
+      Fig_GoldCrown_0: -6298415422612778026
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

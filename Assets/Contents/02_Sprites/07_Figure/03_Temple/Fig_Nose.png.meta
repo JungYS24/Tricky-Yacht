@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: ebbe6bff744f7974b9273ff9b612e72b
+guid: 3c0f4e25d75a0ce45893671e8331b51f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7715017331872492260
-    second: Fig_flowerCoin_0
+      213: 4860208338050876170
+    second: Fig_Nose_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Fig_flowerCoin_0
+      name: Fig_Nose_0
       rect:
         serializedVersion: 2
-        x: 11
-        y: 11
-        width: 79
-        height: 79
+        x: 24
+        y: 16
+        width: 52
+        height: 61
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c1512c1dc90cee490800000000000000
-      internalID: -7715017331872492260
+      spriteID: a030ae3abbde27340800000000000000
+      internalID: 4860208338050876170
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Fig_flowerCoin_0: -7715017331872492260
+      Fig_Nose_0: 4860208338050876170
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
