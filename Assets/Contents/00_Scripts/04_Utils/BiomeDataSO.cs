@@ -8,6 +8,10 @@ public class BiomeDataSO : ScriptableObject
     public string biomeName = "새로운 생물군계";
     public Sprite backgroundImage;
 
+    // 바이옴 전용 배경음악
+    [Header("사운드 설정")]
+    public AudioClip biomeBGM;
+
     [Header("이 맵에 등장하는 일반 몬스터 목록")]
     public List<MonsterDataSO> biomeMonsters;
 

@@ -6,36 +6,35 @@ public class BGMManager : MonoBehaviour
 {
     public static BGMManager Instance;
 
-    [System.Serializable]
-    public struct BiomeBGM
-    {
-        public string biomeName; // "Forest", "Glitch", "Desert" 등
-        public AudioClip clip;
-    }
-
-    public List<BiomeBGM> biomeBgmList; // 인스펙터에서 바이옴별로 세팅
     private AudioSource audioSource;
+    private Coroutine fadeCoroutine;
+
+    public float maxVolume = 1.0f;
     public float fadeSpeed = 0.5f;
 
     void Awake()
     {
-        if (Instance == null) Instance = this;
-        audioSource = GetComponent<AudioSource>();
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            audioSource = GetComponent<AudioSource>();
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
-    // 외부에서 BGMManager.Instance.ChangeBGM("Forest"); 로 호출
-    public void ChangeBGM(string biomeName)
+    // 외부에서 BGMManager.Instance.ChangeBGM(클립); 으로 호출
+    public void ChangeBGM(AudioClip nextClip)
     {
-        foreach (var bgm in biomeBgmList)
-        {
-            if (bgm.biomeName == biomeName)
-            {
-                if (audioSource.clip == bgm.clip) return; // 이미 재생 중이면 무시
-                StartCoroutine(FadeAndPlay(bgm.clip));
-                return;
-            }
-        }
-        Debug.LogWarning(biomeName + " 바이옴의 BGM이 설정되지 않았습니다.");
+        if (nextClip == null) return;
+        if (audioSource.clip == nextClip) return; // 이미 재생 중이면 무시
+
+        if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
+
+        fadeCoroutine = StartCoroutine(FadeAndPlay(nextClip));
     }
 
     IEnumerator FadeAndPlay(AudioClip nextClip)
@@ -52,10 +51,12 @@ public class BGMManager : MonoBehaviour
         audioSource.Play();
 
         // 3. 새 음악 페이드 인
-        while (audioSource.volume < 1.0f)
+        while (audioSource.volume < maxVolume)
         {
             audioSource.volume += Time.deltaTime * fadeSpeed;
             yield return null;
         }
+
+        audioSource.volume = maxVolume;
     }
 }

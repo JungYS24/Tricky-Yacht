@@ -171,6 +171,12 @@ public class DiceManager : MonoBehaviour
             {
                 biomeBackgroundImage.sprite = currentBiome.backgroundImage;
             }
+            //바이옴 BGM 재생 =====
+            if (BGMManager.Instance != null && currentBiome.biomeBGM != null)
+            {
+                BGMManager.Instance.ChangeBGM(currentBiome.biomeBGM);
+            }
+
 
             //Enemy를 초기화할 때, 현재 맵에 맞는 몬스터 리스트를 같이 넘겨줌!
             enemy.Initialize(currentStage, currentBiome);
