@@ -62,13 +62,12 @@ public class DiceManager : MonoBehaviour
     [HideInInspector] public int snackBonusRerolls = 0;
     [HideInInspector] public float snackBonusFigureDropRate = 0f;
 
+    //피규어로 얻은 1회성 리롤 추가 버프
+    [HideInInspector] public int figureBonusRerolls = 0;
+
     //페퍼민트를 먹었는지 체크하는 상태 변수 (스테이지 동안 유지)
     [HideInInspector] public bool isPeppermintActive = false;
 
-    //달마 체리 체크
-    [HideInInspector] public int consumedCherryCount = 0;
-    //클락판다 스테이지 버프 활성화 여부
-    [HideInInspector] public int pandaBonusRerolls = 0;
 
     public List<Dice> activeDiceList = new List<Dice>();
     private Dice[] keepSlotOccupants;
@@ -153,8 +152,6 @@ public class DiceManager : MonoBehaviour
     {
         currentRerolls = 0;
         maxRerolls = defaultMaxRerolls;
-
-        pandaBonusRerolls = 0;
         //페퍼민트 효과 초기화
         isPeppermintActive = false;
         pendingPeppermintSuccess = false;
@@ -271,7 +268,7 @@ public class DiceManager : MonoBehaviour
 
     public void OnRollButtonClick()
     {
-        if (isRolling || currentRerolls >= (maxRerolls + snackBonusRerolls + pandaBonusRerolls) || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return;
+        if (isRolling || currentRerolls >= (maxRerolls + snackBonusRerolls + figureBonusRerolls) || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return; 
 
         isRolling = true; // 굴림 상태 켜기
         ui?.SetRollButtonInteractable(false);   //즉시 버튼 비활성화
@@ -306,6 +303,8 @@ public class DiceManager : MonoBehaviour
     {
         if (isRolling || isCalculating || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || enemy.IsDead) return;
 
+        figureBonusRerolls = 0;
+
         isCalculating = true; //결산 연출 시작
         ui?.SetRollButtonInteractable(false);   //즉시 버튼 비활성화
         ui?.SetFinishButtonInteractable(false); //즉시 버튼 비활성화
@@ -327,6 +326,9 @@ public class DiceManager : MonoBehaviour
         {
             SlowMotion.Instance?.PlaySlowMotion(0.2f, 0.2f);
         }
+
+        List<int> finalDiceValues = keptDice.Select(d => d.currentValue).ToList();
+        InventoryManager.Instance.EvaluateTurnEndTriggers(finalDiceValues, handName, this, shopManager);
 
         float finalMultiplier = comboMultiplier + snackBonusMult;
         int currentSimulatedHP = enemy.CurrentHP;
@@ -371,42 +373,6 @@ public class DiceManager : MonoBehaviour
             }
         }
 
-        //유니콘: 프리즘 개수 * 0.2배
-        int prismCount = keptDice.Count(d => d.myData.isCoated && d.myData.type == DiceType.Prism);
-        if (InventoryManager.Instance.HasActiveFigureAbility(FigureAbility.PrismDamageBonus))
-        {
-            finalMultiplier += (prismCount * 0.2f);
-        }
-
-        //달마: 먹은 체리 개수 * 10칩
-        if (InventoryManager.Instance.HasActiveFigureAbility(FigureAbility.CherryChipBonus))
-        {
-            iceBonusChips += (consumedCherryCount * 10);
-        }
-
-        // 복고양이: 파이브 카드(요트) 달성 시 10골드 획득
-        if (handName == "Yacht" && InventoryManager.Instance.HasActiveFigureAbility(FigureAbility.YachtGoldBonus))
-        {
-            if (shopManager != null)
-            {
-                shopManager.currentGold += 10;
-                ui?.UpdateGoldUI(shopManager.currentGold);
-                // [추가] 복고양이 보너스 골드 카운팅 연출 실행
-                if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
-                Debug.Log("복고양이 발동: 요트 완성! +10 G");
-            }
-        }
-
-        // 클락판다: 3눈금이 3개 이상일 때 리롤 1회 반환
-        int threeFaceCount = keptDice.Count(d => d.currentValue == 3);
-        if (threeFaceCount >= 3 && InventoryManager.Instance.HasActiveFigureAbility(FigureAbility.ThreeDiceRerollBonus))
-        {
-            if (pandaBonusRerolls == 0) // 아직 버프가 활성화되지 않았을 때만 실행
-            {
-                pandaBonusRerolls = 1;
-                Debug.Log("클락판다 효과 발동: 이번 스테이지 동안 리롤 기회가 1회 늘어납니다!");
-            }
-        }
 
         if (darkDamageTotal > 0) enemy.TakeDamage(darkDamageTotal, null);
 
@@ -485,8 +451,6 @@ public class DiceManager : MonoBehaviour
     private void ProcessStageClear(bool fromPeppermint)
     {
         int baseClearReward = 500;
-        int figureBonusGold = InventoryManager.Instance.ApplyAllFigurePassives(this, shopManager);
-
         if (shopManager != null)
         {
             shopManager.currentGold += baseClearReward;
@@ -496,7 +460,6 @@ public class DiceManager : MonoBehaviour
         }
 
         string clearMessage = $"스테이지 클리어!\n<size=80%><color=#FFD700>+{baseClearReward} 코인 획득!</color></size>";
-        if (figureBonusGold > 0) clearMessage += $"\n<size=60%><color=#FFA500>피규어 보너스 +{figureBonusGold}G</color></size>";
         if (pendingPeppermintSuccess)
         {
             if (enemy.dropFigureData != null)
@@ -593,7 +556,7 @@ public class DiceManager : MonoBehaviour
             else { if (d.currentKeepIndex != -1) ReleaseFromKeepSlot(d); hasDiceToRoll = true; }
         }
         UpdateMainUI("없음");
-        ui?.SetRollButtonInteractable((currentRerolls < maxRerolls + snackBonusRerolls + pandaBonusRerolls) && hasDiceToRoll);
+        ui?.SetRollButtonInteractable((currentRerolls < maxRerolls + snackBonusRerolls + figureBonusRerolls) && hasDiceToRoll);
         ui?.SetFinishButtonInteractable(keptCount == keepSlots.Length);
 
         OnDeckUpdateNeeded?.Invoke();
@@ -635,21 +598,9 @@ public class DiceManager : MonoBehaviour
                 }
                 else if (d.myData.type == DiceType.Ice) iceBonusChips += 10;
             }
-        }
+        }        
 
-        int prismCount = targetDice.Count(d => d.myData.isCoated && d.myData.type == DiceType.Prism);
-        if (InventoryManager.Instance.HasActiveFigureAbility(FigureAbility.PrismDamageBonus))
-        {
-            finalMult += (prismCount * 0.2f);
-        }
-
-        int figureBonusChips = 0;
-        if (InventoryManager.Instance.HasActiveFigureAbility(FigureAbility.CherryChipBonus))
-        {
-            figureBonusChips = consumedCherryCount * 10;
-        }
-
-        int finalBaseSum = baseSum + iceBonusChips + snackBonusChips + figureBonusChips;
+        int finalBaseSum = baseSum + iceBonusChips + snackBonusChips;
         int totalDamage = Mathf.FloorToInt(finalBaseSum * finalMult) + darkDamageTotal;
 
         string displayHand = $"<color=#FFD700>{handName}</color>";
@@ -660,7 +611,6 @@ public class DiceManager : MonoBehaviour
         }
 
         if (snackBonusChips > 0) displayHand += $" <color=#FFA500>+{snackBonusChips}(스낵)</color>";
-        if (figureBonusChips > 0) displayHand += $" <color=#FF69B4>+{figureBonusChips}(달마)</color>";
 
         if (expectedGold > 0) displayHand += $" <color=#FFFF00>+{expectedGold}(코인)</color>";
         if (expectedHeal > 0) displayHand += $" <color=#FF5555>+{expectedHeal}(회복)</color>";
@@ -668,7 +618,8 @@ public class DiceManager : MonoBehaviour
         string formula = $"{finalBaseSum} x {finalMult:F1}배" + (darkDamageTotal > 0 ? $" + {darkDamageTotal}(다크)" : "");
         string combinedText = $"{displayHand}\n{formula}\n<color=#FF5555>= {totalDamage} 대미지 예정</color>";
 
-        int remainingRerolls = (maxRerolls + snackBonusRerolls + pandaBonusRerolls) - currentRerolls;
+        //남은 굴리기 초기화
+        int remainingRerolls = (maxRerolls + snackBonusRerolls + figureBonusRerolls) - currentRerolls;
         ui?.UpdateGameUI(currentStage, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText);
 
         float currentEnemyDropRate = isPeppermintActive ? enemy.baseDropRate : 0f;
@@ -718,7 +669,6 @@ public class DiceManager : MonoBehaviour
         snackBonusRerolls = 0;
         snackBonusFigureDropRate = 0f;
         isPeppermintActive = false;
-        consumedCherryCount = 0;
 
         // 6. 티켓으로 올렸던 배수를 다시 기본값으로 돌려줌
         multHighCard = 1.0f;
@@ -775,7 +725,6 @@ public class DiceManager : MonoBehaviour
         snackBonusRerolls = 0;
         snackBonusFigureDropRate = 0f;
         isPeppermintActive = false;
-        consumedCherryCount = 0;
         Debug.Log("게임이 완전히 초기화되었습니다. 다시 시작합니다.");
         //6. 티켓으로 올렸던 배수를 다시 기본값으로 돌려줌
         multHighCard = 1.0f;

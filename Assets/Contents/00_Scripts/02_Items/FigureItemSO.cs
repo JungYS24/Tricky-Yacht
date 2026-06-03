@@ -1,14 +1,5 @@
 using UnityEngine;
-
-// PlayBonus 삭제됨
-public enum FigureAbility
-{
-    GoldBonus, RerollBonus,
-    PrismDamageBonus,     // 유니콘: 프리즘 코팅 개수 비례 대미지 배수 추가
-    CherryChipBonus,      // 달마: 소모한 체리 개수 비례 칩 추가
-    YachtGoldBonus,       // 복고양이: 요트(파이브 카드) 달성 시 코인 획득
-    ThreeDiceRerollBonus  // 클락판다: 3눈금이 3개 이상일 때 리롤 +1회
-}
+using System.Collections.Generic;
 
 [CreateAssetMenu(fileName = "NewFigure", menuName = "Shop/Items/Figure")]
 public class FigureItemSO : BaseItemDataSO
@@ -17,24 +8,12 @@ public class FigureItemSO : BaseItemDataSO
     public bool isPermanent = true;
     public int requiredSlots = 1;
 
-    [Header("--- 피규어 패시브 능력 ---")]
-    public FigureAbility abilityType;
-    public int abilityValue;
+    [Header("--- 피규어 노드 데이터 ---")]
+    // 에디터에서 원인과 보상을 자유롭게 조립할 수 있는 리스트[cite: 1]
+    public List<FigureNode> figureNodes = new List<FigureNode>();
 
     public override void ApplyItemEffect(DiceManager diceManager)
     {
-        Debug.Log($"{itemName} 피규어 배치! 슬롯 {requiredSlots} 소모");
-    }
-
-    public void ApplyPassiveEffect(DiceManager diceManager, ShopManager shopManager)
-    {
-        switch (abilityType)
-        {
-            case FigureAbility.GoldBonus:
-                break;
-            case FigureAbility.RerollBonus:
-                diceManager.maxRerolls += abilityValue;
-                break;
-        }
+        Debug.Log($"{itemName} 피규어 획득! 슬롯 {requiredSlots} 소모");
     }
 }
