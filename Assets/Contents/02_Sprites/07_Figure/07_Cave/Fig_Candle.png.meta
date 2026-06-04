@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 11880e997fa19864e888e64009cf3956
+guid: d72da5a8b398ce14dabd23dab02848cd
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4312547995628729084
-    second: Fig_ObsiCube_0
+      213: 6441386602489907948
+    second: Fig_Candle_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Fig_ObsiCube_0
+      name: Fig_Candle_0
       rect:
         serializedVersion: 2
-        x: 15
-        y: 16
-        width: 69
-        height: 69
+        x: 25
+        y: 14
+        width: 50
+        height: 71
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 40d0ab36270c624c0800000000000000
-      internalID: -4312547995628729084
+      spriteID: cea0f5eacf6646950800000000000000
+      internalID: 6441386602489907948
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Fig_ObsiCube_0: -4312547995628729084
+      Fig_Candle_0: 6441386602489907948
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

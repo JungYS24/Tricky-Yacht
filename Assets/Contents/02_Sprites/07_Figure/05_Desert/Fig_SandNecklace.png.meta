@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 11880e997fa19864e888e64009cf3956
+guid: 8e8463105657f584d9c6c208eb44b78a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4312547995628729084
-    second: Fig_ObsiCube_0
+      213: 4463405212722871969
+    second: Fig_SandNecklace_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Fig_ObsiCube_0
+      name: Fig_SandNecklace_0
       rect:
         serializedVersion: 2
-        x: 15
+        x: 19
         y: 16
-        width: 69
-        height: 69
+        width: 62
+        height: 65
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 40d0ab36270c624c0800000000000000
-      internalID: -4312547995628729084
+      spriteID: 1ae39f0946331fd30800000000000000
+      internalID: 4463405212722871969
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Fig_ObsiCube_0: -4312547995628729084
+      Fig_SandNecklace_0: 4463405212722871969
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

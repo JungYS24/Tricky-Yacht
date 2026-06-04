@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 11880e997fa19864e888e64009cf3956
+guid: 19778dcd6efa7be438ed39c5321dc516
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4312547995628729084
-    second: Fig_ObsiCube_0
+      213: -1252679969417541830
+    second: Fig_Zombie_Mushroom_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Fig_ObsiCube_0
+      name: Fig_Zombie_Mushroom_0
       rect:
         serializedVersion: 2
-        x: 15
-        y: 16
+        x: 16
+        y: 13
         width: 69
-        height: 69
+        height: 71
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 40d0ab36270c624c0800000000000000
-      internalID: -4312547995628729084
+      spriteID: a37ce9d64369d9ee0800000000000000
+      internalID: -1252679969417541830
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Fig_ObsiCube_0: -4312547995628729084
+      Fig_Zombie_Mushroom_0: -1252679969417541830
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
