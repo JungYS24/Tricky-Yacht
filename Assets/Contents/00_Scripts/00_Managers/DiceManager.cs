@@ -129,12 +129,146 @@ public class DiceManager : MonoBehaviour
     }
     void Start()
     {
-        currentPlayerHP = playerMaxHP;
-        InitializeMasterDeck();
-        StartNewStage();
+        // 세이브 파일이 있고, 로비에서 이어하기(1)를 눌렀다면 세이브를 불러옴
+        if (PlayerPrefs.GetInt("LoadGame", 0) == 1 && PlayerPrefs.HasKey("TrickYacht_Save") && GameSaveManager.Instance != null)
+        {
+            LoadSavedGame();
+        }
+        else
+        {
+            currentPlayerHP = playerMaxHP;
+            InitializeMasterDeck();
+            StartNewStage();
+        }
     }
 
     void OnDestroy() => Dice.OnDiceStateChanged -= HandleDiceChanged;
+
+    void LoadSavedGame()
+    {
+        SaveData data = GameSaveManager.Instance.LoadSaveData();
+        if (data == null) return;
+
+        currentStage = data.currentStage;
+        currentPlayerHP = data.currentPlayerHP;
+
+        if (shopManager != null)
+        {
+            shopManager.currentGold = data.currentGold;
+            ui?.UpdateGoldUI(shopManager.currentGold);
+            if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
+        }
+
+        multHighCard = data.multHighCard; multOnePair = data.multOnePair;
+        multTwoPair = data.multTwoPair; multTriple = data.multTriple;
+        multFullHouse = data.multFullHouse; multFourOfAKind = data.multFourOfAKind;
+        multStraight = data.multStraight; multYacht = data.multYacht;
+
+        // 덱 복구 (코팅 정보 복원 포함)
+        masterDeck.Clear();
+        foreach (var dData in data.deckDiceList)
+        {
+            DiceData1 newDice = null;
+
+            if (dData.diceName == "기본 주사위")
+            {
+                newDice = new DiceData1();
+                masterDeck.Add(newDice);
+            }
+            else
+            {
+                DiceItemSO diceSO = GameSaveManager.Instance.FindItemByName(dData.diceName) as DiceItemSO;
+                if (diceSO != null)
+                {
+                    diceSO.ApplyItemEffect(this);
+                    newDice = masterDeck[masterDeck.Count - 1]; // 방금 추가된 주사위를 가져옴
+                }
+            }
+
+            // 세이브 파일에 있던 코팅 상태를 덮어씌움
+            if (newDice != null && dData.isCoated)
+            {
+                newDice.isCoated = dData.isCoated;
+                newDice.type = (DiceType)dData.type;
+                newDice.multiplier = dData.multiplier;
+                newDice.diceColor = dData.diceColor;
+            }
+        }
+        InventoryManager.Instance.ClearAllSlots();
+        foreach (string fName in data.ownedFigureNames)
+        {
+            var item = GameSaveManager.Instance.FindItemByName(fName);
+            if (item != null) InventoryManager.Instance.AddItem(item);
+        }
+        foreach (string sName in data.ownedSnackNames)
+        {
+            var item = GameSaveManager.Instance.FindItemByName(sName);
+            if (item != null) InventoryManager.Instance.AddItem(item);
+        }
+        foreach (string tName in data.ownedTicketNames)
+        {
+            var item = GameSaveManager.Instance.FindItemByName(tName);
+            if (item != null) InventoryManager.Instance.AddItem(item);
+        }
+
+        //환경(바이옴, BGM) 복구
+        currentRerolls = 0;
+        maxRerolls = defaultMaxRerolls;
+        pendingPeppermintSuccess = false;
+        //무조건 0으로 끄는 대신, 저장된 버프 수치를 그대로 가져옵니다!
+        snackBonusMult = data.snackBonusMult;
+        snackBonusChips = data.snackBonusChips;
+        snackBonusRerolls = data.snackBonusRerolls;
+        snackBonusFigureDropRate = data.snackBonusFigureDropRate;
+        figureBonusRerolls = data.figureBonusRerolls;
+        isPeppermintActive = data.isPeppermintActive;
+
+        if (biomeList.Count > 0)
+        {
+            int biomeIndex = ((currentStage - 1) / 10) % biomeList.Count;
+            currentBiome = biomeList[biomeIndex];
+            if (biomeBackgroundImage != null && currentBiome.backgroundImage != null)
+                biomeBackgroundImage.sprite = currentBiome.backgroundImage;
+            if (BGMManager.Instance != null && currentBiome.biomeBGM != null)
+                BGMManager.Instance.ChangeBGM(currentBiome.biomeBGM);
+        }
+
+        // 싸우던 몬스터 복구
+        if (!string.IsNullOrEmpty(data.savedMonsterName))
+        {
+            MonsterDataSO savedMonster = GetMonsterDataByName(data.savedMonsterName);
+            if (savedMonster != null)
+            {
+                enemy.RestoreMonster(savedMonster, data.savedMonsterHP, data.savedMonsterMaxHP, data.savedMonsterAttack, data.savedMonsterIndex);
+            }
+            else enemy.Initialize(currentStage, currentBiome); // 에러 방지용 안전장치
+        }
+        else
+        {
+            enemy.Initialize(currentStage, currentBiome);
+        }
+
+        // 덱 섞기 및 이번 턴 시작 (StartNewStage() 대신 호출)
+        drawPile = new List<DiceData1>(masterDeck);
+        discardPile.Clear();
+        ShufflePile(drawPile);
+        StartNewRound();
+    }
+
+    // 저장된 몬스터 이름으로 바이옴 리스트를 뒤져서 진짜 데이터를 찾아주는 탐지기 함수
+    private MonsterDataSO GetMonsterDataByName(string mName)
+    {
+        foreach (var biome in biomeList)
+        {
+            if (biome.bossMonster != null && biome.bossMonster.monsterName == mName)
+                return biome.bossMonster;
+            foreach (var monster in biome.biomeMonsters)
+            {
+                if (monster != null && monster.monsterName == mName) return monster;
+            }
+        }
+        return null;
+    }
 
     void InitializeMasterDeck()
     {
@@ -522,11 +656,19 @@ public class DiceManager : MonoBehaviour
 
             if (currentPlayerHP <= 0)
             {
+                //게임 오버가 되면 기존 세이브 파일을 지워버림
+                if (GameSaveManager.Instance != null) GameSaveManager.Instance.DeleteSave();
+
                 ui?.ShowResult("#FF0000", "게임 오버");
                 Invoke(nameof(RestartGame), 1.5f);
             }
             else
             {
+                if (GameSaveManager.Instance != null)
+                {
+                    GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
+                }
+
                 Invoke(nameof(StartNewRound), 0.5f);
             }
         }
@@ -640,58 +782,78 @@ public class DiceManager : MonoBehaviour
     public void PromptShopChoice() { ui?.HideResult(); ui?.ShowShopChoice(); }
     public void GoToShop() { ui?.HideShopChoice(); shopManager?.OpenShop(); }
     public void SkipShopAndNextStage() { ui?.HideShopChoice(); NextStage(); }
-    public void NextStage() { currentStage++; StartNewStage(); }
+    public void NextStage()
+    {
+        currentStage++;
+        StartNewStage();
+
+        if (GameSaveManager.Instance != null)
+        {
+            GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
+        }
+    }
+
+    //public void GoToMainMenu()
+    //{
+    //    // 1. 기본 스테이지 데이터 초기화
+    //    currentStage = 1;
+    //    currentPlayerHP = playerMaxHP;
+
+    //    // 2. 덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 20개로)
+    //    InitializeMasterDeck();
+
+    //    // 3. 골드 초기화 (ShopManager 참조)
+    //    if (shopManager != null)
+    //    {
+    //        shopManager.currentGold = 2000; // 초기 소지금 (기획에 맞게 수정하세요)
+    //        ui?.UpdateGoldUI(shopManager.currentGold);
+    //        //재시작 및 메인 이동 시 초기 소지금 카운팅 연출 실행 (또는 초기화용)
+    //        if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
+    //    }
+
+    //    // 4. 인벤토리 초기화 (방금 만든 함수 호출)
+    //    InventoryManager.Instance?.ClearAllSlots();
+
+    //    // 5. 스낵 및 특수 상태 버프 초기화
+    //    snackBonusMult = 0f;
+    //    snackBonusChips = 0;
+    //    snackBonusRerolls = 0;
+    //    snackBonusFigureDropRate = 0f;
+    //    isPeppermintActive = false;
+
+    //    // 6. 티켓으로 올렸던 배수를 다시 기본값으로 돌려줌
+    //    multHighCard = 1.0f;
+    //    multOnePair = 1.2f;
+    //    multTwoPair = 1.4f;
+    //    multTriple = 1.5f;
+    //    multFullHouse = 1.7f;
+    //    multFourOfAKind = 1.8f;
+    //    multStraight = 2.0f;
+    //    multYacht = 2.5f;
+
+    //    //몬스터 초기화
+    //    enemy.ResetMonsterIndex();
+
+    //    if (TutorialManager.Instance != null)
+    //    {
+    //        TutorialManager.Instance.isTutorialActive = false;
+    //        TutorialManager.Instance.tutorialRoot.SetActive(false);
+    //    }
+
+    //    if (shopManager != null && shopManager.shopUI != null)
+    //    {
+    //        shopManager.shopUI.SetActive(false);
+    //    }
+
+    //    Time.timeScale = 1f;
+    //    SceneManager.LoadScene("Lobby");
+    //}
 
     public void GoToMainMenu()
     {
-        // 1. 기본 스테이지 데이터 초기화
-        currentStage = 1;
-        currentPlayerHP = playerMaxHP;
-
-        // 2. 덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 20개로)
-        InitializeMasterDeck();
-
-        // 3. 골드 초기화 (ShopManager 참조)
-        if (shopManager != null)
+        if (GameSaveManager.Instance != null)
         {
-            shopManager.currentGold = 2000; // 초기 소지금 (기획에 맞게 수정하세요)
-            ui?.UpdateGoldUI(shopManager.currentGold);
-            //재시작 및 메인 이동 시 초기 소지금 카운팅 연출 실행 (또는 초기화용)
-            if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
-        }
-
-        // 4. 인벤토리 초기화 (방금 만든 함수 호출)
-        InventoryManager.Instance?.ClearAllSlots();
-
-        // 5. 스낵 및 특수 상태 버프 초기화
-        snackBonusMult = 0f;
-        snackBonusChips = 0;
-        snackBonusRerolls = 0;
-        snackBonusFigureDropRate = 0f;
-        isPeppermintActive = false;
-
-        // 6. 티켓으로 올렸던 배수를 다시 기본값으로 돌려줌
-        multHighCard = 1.0f;
-        multOnePair = 1.2f;
-        multTwoPair = 1.4f;
-        multTriple = 1.5f;
-        multFullHouse = 1.7f;
-        multFourOfAKind = 1.8f;
-        multStraight = 2.0f;
-        multYacht = 2.5f;
-
-        //몬스터 초기화
-        enemy.ResetMonsterIndex();
-
-        if (TutorialManager.Instance != null)
-        {
-            TutorialManager.Instance.isTutorialActive = false;
-            TutorialManager.Instance.tutorialRoot.SetActive(false);
-        }
-
-        if (shopManager != null && shopManager.shopUI != null)
-        {
-            shopManager.shopUI.SetActive(false);
+            GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
         }
 
         Time.timeScale = 1f;
@@ -700,14 +862,14 @@ public class DiceManager : MonoBehaviour
 
     void RestartGame()
     {
-        // 1. 기본 스테이지 데이터 초기화
+        //기본 스테이지 데이터 초기화
         currentStage = 1;
         currentPlayerHP = playerMaxHP;
 
-        // 2. 덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 20개로)
+        //덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 20개로)
         InitializeMasterDeck();
 
-        // 3. 골드 초기화 (ShopManager 참조)
+        //골드 초기화 (ShopManager 참조)
         if (shopManager != null)
         {
             shopManager.currentGold = 2000; // 초기 소지금 (기획에 맞게 수정하세요)
@@ -716,17 +878,17 @@ public class DiceManager : MonoBehaviour
             if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
         }
 
-        // 4. 인벤토리 초기화 (방금 만든 함수 호출)
+        //인벤토리 초기화 (방금 만든 함수 호출)
         InventoryManager.Instance?.ClearAllSlots();
 
-        // 5. 스낵 및 특수 상태 버프 초기화
+        //스낵 및 특수 상태 버프 초기화
         snackBonusMult = 0f;
         snackBonusChips = 0;
         snackBonusRerolls = 0;
         snackBonusFigureDropRate = 0f;
         isPeppermintActive = false;
         Debug.Log("게임이 완전히 초기화되었습니다. 다시 시작합니다.");
-        //6. 티켓으로 올렸던 배수를 다시 기본값으로 돌려줌
+        //티켓으로 올렸던 배수를 다시 기본값으로 돌려줌
         multHighCard = 1.0f;
         multOnePair = 1.2f;
         multTwoPair = 1.4f;
@@ -738,7 +900,7 @@ public class DiceManager : MonoBehaviour
 
         //몬스터 초기화
         enemy.ResetMonsterIndex();
-        // 6. 새로운 스테이지 시작
+        // 새로운 스테이지 시작
         StartNewStage();
     }
 

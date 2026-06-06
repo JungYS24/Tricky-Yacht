@@ -40,6 +40,10 @@ public class Enemy : MonoBehaviour
     public string edgeColorBProperty = "_EdgeColorB";
     public string edgeGlowPowerProperty = "_EdgeGlowPower";
 
+    // 세이브를 위해 몬스터가 자기 이름을 기억하게 함
+    public string CurrentMonsterName { get; private set; }
+    public int CurrentMonsterIndex { get { return currentMonsterIndex; } }
+
     // 몬스터 출현 순서 리스트
     // 몇번 째 몬스터인지 체크
     private int currentMonsterIndex = 0;
@@ -126,6 +130,8 @@ public class Enemy : MonoBehaviour
         // 선택된 몬스터(보스 혹은 일반)의 데이터를 덮어씌웁니다.
         if (nextMonsterData != null)
         {
+            //이름 기억하기
+            CurrentMonsterName = nextMonsterData.monsterName;
             if (monsterAnimator != null && nextMonsterData.animatorController != null)
             {
                 monsterAnimator.runtimeAnimatorController = nextMonsterData.animatorController;
@@ -352,5 +358,46 @@ public class Enemy : MonoBehaviour
             yield return null;
         }
         enemyHPSlider.value = CurrentHP;
+    }
+
+    public void RestoreMonster(MonsterDataSO monsterData, int hp, int maxHp, int attack, int index)
+    {
+        CurrentMonsterName = monsterData.monsterName;
+        currentMonsterIndex = index;
+
+        if (monsterAnimator != null && monsterData.animatorController != null)
+            monsterAnimator.runtimeAnimatorController = monsterData.animatorController;
+        else
+        {
+            if (monsterAnimator != null) monsterAnimator.runtimeAnimatorController = null;
+            if (monsterImage != null) monsterImage.sprite = monsterData.monsterSprite;
+        }
+
+        dropFigureData = monsterData.dropFigureData;
+        baseDropRate = monsterData.dropRate;
+
+        MaxHP = maxHp;
+        CurrentHP = hp;
+        AttackPower = attack;
+        IsDead = false;
+        useExternalDeathSequence = false;
+
+        transform.position = originalPosition;
+        transform.localScale = originalScale;
+
+        if (monsterImage != null)
+        {
+            gameObject.SetActive(true);
+            monsterImage.color = Color.white;
+            if (monsterRuntimeMat == null)
+            {
+                monsterRuntimeMat = Instantiate(monsterImage.material);
+                monsterImage.material = monsterRuntimeMat;
+            }
+            monsterRuntimeMat.SetFloat(dissolveProperty, 0f);
+        }
+
+        if (attackPowerText != null) attackPowerText.text = $"공격력: {AttackPower}";
+        UpdateHPBar(true);
     }
 }

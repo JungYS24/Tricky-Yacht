@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using UnityEngine.UI;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -8,16 +9,45 @@ public class LobbyManager : MonoBehaviour
     public AudioSource sfxSource;    
     public AudioClip glitchSound;
 
+    [Header("이어하기 버튼")]
+    public Button continueButton; // 이어하기 버튼 연결용
+
     //public void OnStartButtonClick()
     //{
     //    StopAllCoroutines();
     //    StartCoroutine(GlitchAndLoad());
     //}
 
+    private void Start()
+    {
+        // 세이브 파일이 없으면 이어하기 버튼을 클릭 불가능하게 막음
+        if (continueButton != null)
+        {
+            continueButton.interactable = PlayerPrefs.HasKey("TrickYacht_Save");
+        }
+    }
+
     public void OnStartButtonClick()
     {
         // 본 게임 시작 시에는 튜토리얼을 끄도록 설정 (PlayerPrefs 활용)
         PlayerPrefs.SetInt("RunTutorial", 0);
+
+        //새 게임이므로 기존 세이브 파일 삭제 및 Load 플래그 0 부여
+        PlayerPrefs.DeleteKey("TrickYacht_Save");
+        PlayerPrefs.SetInt("LoadGame", 0);
+
+        StopAllCoroutines();
+        StartCoroutine(GlitchAndLoad("SampleScene"));
+    }
+
+    //이어하기 전용 클릭 이벤트
+    public void OnContinueButtonClick()
+    {
+        PlayerPrefs.SetInt("RunTutorial", 0);
+
+        // [추가] 저장된 걸 불러오라는 Load 플래그 1 부여
+        PlayerPrefs.SetInt("LoadGame", 1);
+
         StopAllCoroutines();
         StartCoroutine(GlitchAndLoad("SampleScene"));
     }
