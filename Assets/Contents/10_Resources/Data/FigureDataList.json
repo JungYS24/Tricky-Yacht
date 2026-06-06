@@ -1,0 +1,914 @@
+{
+  "FigureDataList": {
+    "Fig_Ball": {
+      "itemName": "끈끈이 공",
+      "price": 150,
+      "icon": "Fig_Ball",
+      "description": "상시 지속으로 차례 정산 시 최종 칩수를 10 획득합니다",
+      "triggerType": "Passive",
+      "effectType": "Add Chips",
+      "effectValue": 10,
+      "optionalItem": "None"
+    },
+    "Fig_Mushroom": {
+      "itemName": "버섯",
+      "price": 150,
+      "icon": "Fig_Mushroom",
+      "description": "주사위 결산 시 2의 눈금이 3개 이상이면 체력을 5 회복합니다",
+      "triggerType": "Three Of 2",
+      "effectType": "Heal HP",
+      "effectValue": 5,
+      "optionalItem": "None"
+    },
+    "Fig_Goiblin_Shield": {
+      "itemName": "고블린 방패",
+      "price": 200,
+      "icon": "Fig_Goiblin_Shield",
+      "description": "주사위 족보가 원 페어 달성 시 최종 칩수를 15 획득합니다",
+      "triggerType": "One Pair",
+      "effectType": "Add Chips",
+      "effectValue": 15,
+      "optionalItem": "None"
+    },
+    "Fig_Arrowhead": {
+      "itemName": "화살통",
+      "price": 200,
+      "icon": "Fig_Arrowhead",
+      "description": "주사위 족보가 스트레이트 달성 시 적에게 데미지를 25 줍니다",
+      "triggerType": "Straight",
+      "effectType": "Damage Enemy",
+      "effectValue": 25,
+      "optionalItem": "None"
+    },
+    "Fig_StoneAx": {
+      "itemName": "돌도끼",
+      "price": 400,
+      "icon": "Fig_StoneAx",
+      "description": "주사위 결산 시 5의 눈금이 3개 이상이면 적에게 데미지를 40 줍니다",
+      "triggerType": "Three Of 5",
+      "effectType": "Damage Enemy",
+      "effectValue": 40,
+      "optionalItem": "None"
+    },
+    "Fig_Emerald": {
+      "itemName": "에메랄드",
+      "price": 250,
+      "icon": "Fig_Emerald",
+      "description": "주사위 족보가 트리플 달성 시 코인을 30 획득합니다",
+      "triggerType": "Triple",
+      "effectType": "Add Gold",
+      "effectValue": 30,
+      "optionalItem": "None"
+    },
+    "Fig_Shell": {
+      "itemName": "거북 등껍질",
+      "price": 200,
+      "icon": "Fig_Shell",
+      "description": "플레이어 체력이 감소할 때마다 최종 칩수를 12 획득합니다",
+      "triggerType": "On HP Lost",
+      "effectType": "Add Chips",
+      "effectValue": 12,
+      "optionalItem": "None"
+    },
+    "Fig_BladeScale": {
+      "itemName": "칼날 비늘",
+      "price": 220,
+      "icon": "Fig_BladeScale",
+      "description": "주사위 결산 시 1의 눈금이 3개 이상이면 적에게 데미지를 18 줍니다",
+      "triggerType": "Three Of 1",
+      "effectType": "Damage Enemy",
+      "effectValue": 18,
+      "optionalItem": "None"
+    },
+    "Fig_Sash": {
+      "itemName": "투기의 머리띠",
+      "price": 250,
+      "icon": "Fig_Sash",
+      "description": "플레이어 체력이 감소할 때마다 최종 배수를 2 획득합니다",
+      "triggerType": "On HP Lost",
+      "effectType": "Add Multiplier",
+      "effectValue": 2,
+      "optionalItem": "None"
+    },
+    "Fig_Hoof": {
+      "itemName": "번개 편자",
+      "price": 350,
+      "icon": "Fig_Hoof",
+      "description": "주사위 족보가 투 페어 달성 시 굴리기 횟수를 1 추가합니다",
+      "triggerType": "Two Pair",
+      "effectType": "Add Reroll",
+      "effectValue": 1,
+      "optionalItem": "None"
+    },
+    "Fig_SolgasEye": {
+      "itemName": "솔가의 눈",
+      "price": 500,
+      "icon": "Fig_SolgasEye",
+      "description": "상시 지속으로 최종 배수를 4 획득합니다",
+      "triggerType": "Passive",
+      "effectType": "Add Multiplier",
+      "effectValue": 4,
+      "optionalItem": "None"
+    },
+    "Fig_Clay_Acolyte": {
+      "itemName": "찰흙 동자승",
+      "price": 180,
+      "icon": "Fig_Clay_Acolyte",
+      "description": "주사위 결산 시 3의 눈금이 3개 이상이면 체력을 6 회복합니다",
+      "triggerType": "Three Of 3",
+      "effectType": "Heal HP",
+      "effectValue": 6,
+      "optionalItem": "None"
+    },
+    "Fig_Buddha_Nose": {
+      "itemName": "불상의 코",
+      "price": 200,
+      "icon": "Fig_Buddha_Nose",
+      "description": "주사위 족보가 트리플 달성 시 최종 칩수를 25 획득합니다",
+      "triggerType": "Triple",
+      "effectType": "Add Chips",
+      "effectValue": 25,
+      "optionalItem": "None"
+    },
+    "Fig_Old_Rosary": {
+      "itemName": "오래된 염주",
+      "price": 220,
+      "icon": "Fig_Old_Rosary",
+      "description": "스낵 아이템을 사용할 때마다 최종 배수를 1.5 획득합니다",
+      "triggerType": "On Snack Used",
+      "effectType": "Add Multiplier",
+      "effectValue": 1.5,
+      "optionalItem": "None"
+    },
+    "Fig_Ash_Censer": {
+      "itemName": "재의 향로",
+      "price": 240,
+      "icon": "Fig_Ash_Censer",
+      "description": "주사위 결산 시 4의 눈금이 3개 이상이면 코인을 20 획득합니다",
+      "triggerType": "Three Of 4",
+      "effectType": "Add Gold",
+      "effectValue": 20,
+      "optionalItem": "None"
+    },
+    "Fig_Lotus_Seed": {
+      "itemName": "연꽃 종자",
+      "price": 210,
+      "icon": "Fig_Lotus_Seed",
+      "description": "주사위 족보가 원 페어 달성 시 체력을 4 회복합니다",
+      "triggerType": "One Pair",
+      "effectType": "Heal HP",
+      "effectValue": 4,
+      "optionalItem": "None"
+    },
+    "Fig_Guanyin_Crown": {
+      "itemName": "관음 왕관",
+      "price": 450,
+      "icon": "Fig_Guanyin_Crown",
+      "description": "주사위 족보가 풀하우스 달성 시 최종 배수를 5 획득합니다",
+      "triggerType": "Full House",
+      "effectType": "Add Multiplier",
+      "effectValue": 5,
+      "optionalItem": "None"
+    },
+    "Fig_Leopard_Doll": {
+      "itemName": "표범 인형",
+      "price": 320,
+      "icon": "Fig_Leopard_Doll",
+      "description": "주사위 족보가 스트레이트 달성 시 굴리기 횟수를 1 추가합니다",
+      "triggerType": "Straight",
+      "effectType": "Add Reroll",
+      "effectValue": 1,
+      "optionalItem": "None"
+    },
+    "Fig_Mangrove_Msh": {
+      "itemName": "맹그로브 버섯",
+      "price": 190,
+      "icon": "Fig_Mangrove_Msh",
+      "description": "스낵 아이템을 사용할 때마다 체력을 5 회복합니다",
+      "triggerType": "On Snack Used",
+      "effectType": "Heal HP",
+      "effectValue": 5,
+      "optionalItem": "None"
+    },
+    "Fig_Butterfly_Ring": {
+      "itemName": "나비 반지",
+      "price": 200,
+      "icon": "Fig_Butterfly_Ring",
+      "description": "주사위 족보가 투 페어 달성 시 최종 칩수를 20 획득합니다",
+      "triggerType": "Two Pair",
+      "effectType": "Add Chips",
+      "effectValue": 20,
+      "optionalItem": "None"
+    },
+    "Fig_Banana": {
+      "itemName": "바나나",
+      "price": 150,
+      "icon": "Fig_Banana",
+      "description": "스낵 아이템을 사용할 때마다 코인을 15 획득합니다",
+      "triggerType": "On Snack Used",
+      "effectType": "Add Gold",
+      "effectValue": 15,
+      "optionalItem": "None"
+    },
+    "Fig_Vine_Mask": {
+      "itemName": "덩굴 가면",
+      "price": 300,
+      "icon": "Fig_Vine_Mask",
+      "description": "주사위 결산 시 6의 눈금이 3개 이상이면 적에게 데미지를 28 줍니다",
+      "triggerType": "Three Of 6",
+      "effectType": "Damage Enemy",
+      "effectValue": 28,
+      "optionalItem": "None"
+    },
+    "Fig_Banana_Crown": {
+      "itemName": "바나나 왕관",
+      "price": 450,
+      "icon": "Fig_Banana_Crown",
+      "description": "주사위 족보가 포카드 달성 시 체력을 25 회복합니다",
+      "triggerType": "Four Of A Kind",
+      "effectType": "Heal HP",
+      "effectValue": 25,
+      "optionalItem": "None"
+    },
+    "Fig_Fox_Tail": {
+      "itemName": "사막여우 꼬리",
+      "price": 180,
+      "icon": "Fig_Fox_Tail",
+      "description": "주사위 족보가 원 페어 달성 시 굴리기 횟수를 1 추가합니다",
+      "triggerType": "One Pair",
+      "effectType": "Add Reroll",
+      "effectValue": 1,
+      "optionalItem": "None"
+    },
+    "Fig_Sand_Shield": {
+      "itemName": "모래 방패",
+      "price": 220,
+      "icon": "Fig_Sand_Shield",
+      "description": "플레이어 체력이 감소할 때마다 코인을 25 획득합니다",
+      "triggerType": "On HP Lost",
+      "effectType": "Add Gold",
+      "effectValue": 25,
+      "optionalItem": "None"
+    },
+    "Fig_Sand_Necklace": {
+      "itemName": "모래 목걸이",
+      "price": 200,
+      "icon": "Fig_Sand_Necklace",
+      "description": "상시 지속으로 최종 칩수를 15 획득합니다",
+      "triggerType": "Passive",
+      "effectType": "Add Chips",
+      "effectValue": 15,
+      "optionalItem": "None"
+    },
+    "Fig_Cactus_Pot": {
+      "itemName": "선인장 화분",
+      "price": 310,
+      "icon": "Fig_Cactus_Pot",
+      "description": "주사위 결산 시 3의 눈금이 3개 이상이면 적에게 데미지를 24 줍니다",
+      "triggerType": "Three Of 3",
+      "effectType": "Damage Enemy",
+      "effectValue": 24,
+      "optionalItem": "None"
+    },
+    "Fig_Mirage_Bottle": {
+      "itemName": "유리병 속 신기루",
+      "price": 230,
+      "icon": "Fig_Mirage_Bottle",
+      "description": "주사위 족보가 투 페어 달성 시 체력을 7 회복합니다",
+      "triggerType": "Two Pair",
+      "effectType": "Heal HP",
+      "effectValue": 7,
+      "optionalItem": "None"
+    },
+    "Fig_Sandworm_Doll": {
+      "itemName": "모래벌레 인형",
+      "price": 210,
+      "icon": "Fig_Sandworm_Doll",
+      "description": "주사위 결산 시 1의 눈금이 3개 이상이면 최종 칩수를 22 획득합니다",
+      "triggerType": "Three Of 1",
+      "effectType": "Add Chips",
+      "effectValue": 22,
+      "optionalItem": "None"
+    },
+    "Fig_Hourglass": {
+      "itemName": "모래시계",
+      "price": 250,
+      "icon": "Fig_Hourglass",
+      "description": "주사위 족보가 트리플 달성 시 굴리기 횟수를 1 추가합니다",
+      "triggerType": "Triple",
+      "effectType": "Add Reroll",
+      "effectValue": 1,
+      "optionalItem": "None"
+    },
+    "Fig_Tutankhamun": {
+      "itemName": "투탕카멘",
+      "price": 500,
+      "icon": "Fig_Tutankhamun",
+      "description": "주사위 족보가 야추 달성 시 코인을 200 획득합니다",
+      "triggerType": "Yacht",
+      "effectType": "Add Gold",
+      "effectValue": 200,
+      "optionalItem": "None"
+    },
+    "Fig_Sages_Stone": {
+      "itemName": "현자의 돌",
+      "price": 260,
+      "icon": "Fig_Sages_Stone",
+      "description": "주사위 족보가 스트레이트 달성 시 최종 배수를 3 획득합니다",
+      "triggerType": "Straight",
+      "effectType": "Add Multiplier",
+      "effectValue": 3,
+      "optionalItem": "None"
+    },
+    "Fig_Gargoyle_Dice": {
+      "itemName": "가고일 주사위",
+      "price": 240,
+      "icon": "Fig_Gargoyle_Dice",
+      "description": "주사위 결산 시 6의 눈금이 3개 이상이면 최종 칩수를 30 획득합니다",
+      "triggerType": "Three Of 6",
+      "effectType": "Add Chips",
+      "effectValue": 30,
+      "optionalItem": "None"
+    },
+    "Fig_Dart_Dice": {
+      "itemName": "다트 주사위",
+      "price": 220,
+      "icon": "Fig_Dart_Dice",
+      "description": "주사위 결산 시 2의 눈금이 3개 이상이면 적에게 데미지를 16 줍니다",
+      "triggerType": "Three Of 2",
+      "effectType": "Damage Enemy",
+      "effectValue": 16,
+      "optionalItem": "None"
+    },
+    "Fig_Gilded_Skull": {
+      "itemName": "황금 해골",
+      "price": 380,
+      "icon": "Fig_Gilded_Skull",
+      "description": "주사위 족보가 풀하우스 달성 시 코인을 70 획득합니다",
+      "triggerType": "Full House",
+      "effectType": "Add Gold",
+      "effectValue": 70,
+      "optionalItem": "None"
+    },
+    "Fig_Treasure_Chest": {
+      "itemName": "보물상자",
+      "price": 250,
+      "icon": "Fig_Treasure_Chest",
+      "description": "주사위 족보가 트리플 달성 시 코인을 35 획득합니다",
+      "triggerType": "Triple",
+      "effectType": "Add Gold",
+      "effectValue": 35,
+      "optionalItem": "None"
+    },
+    "Fig_Tormentor_Sign": {
+      "itemName": "거신의 징표",
+      "price": 480,
+      "icon": "Fig_Tormentor_Sign",
+      "description": "주사위 족보가 포카드 달성 시 적에게 데미지를 60 줍니다",
+      "triggerType": "Four Of A Kind",
+      "effectType": "Damage Enemy",
+      "effectValue": 60,
+      "optionalItem": "None"
+    },
+    "Fig_Safety_Helmet": {
+      "itemName": "안전모",
+      "price": 170,
+      "icon": "Fig_Safety_Helmet",
+      "description": "플레이어 체력이 감소할 때마다 체력을 4 회복합니다",
+      "triggerType": "On HP Lost",
+      "effectType": "Heal HP",
+      "effectValue": 4,
+      "optionalItem": "None"
+    },
+    "Fig_Candle": {
+      "itemName": "양초",
+      "price": 160,
+      "icon": "Fig_Candle",
+      "description": "주사위 결산 시 1의 눈금이 3개 이상이면 체력을 5 회복합니다",
+      "triggerType": "Three Of 1",
+      "effectType": "Heal HP",
+      "effectValue": 5,
+      "optionalItem": "None"
+    },
+    "Fig_Obsidian_Cube": {
+      "itemName": "흑요석 큐브",
+      "price": 330,
+      "icon": "Fig_Obsidian_Cube",
+      "description": "주사위 결산 시 4의 눈금이 3개 이상이면 적에게 데미지를 32 줍니다",
+      "triggerType": "Three Of 4",
+      "effectType": "Damage Enemy",
+      "effectValue": 32,
+      "optionalItem": "None"
+    },
+    "Fig_Bat_Dice": {
+      "itemName": "박쥐 주사위",
+      "price": 200,
+      "icon": "Fig_Bat_Dice",
+      "description": "주사위 족보가 원 페어 달성 시 최종 배수를 1 획득합니다",
+      "triggerType": "One Pair",
+      "effectType": "Add Multiplier",
+      "effectValue": 1,
+      "optionalItem": "None"
+    },
+    "Fig_Ancient_Rune": {
+      "itemName": "고대의 룬",
+      "price": 460,
+      "icon": "Fig_Ancient_Rune",
+      "description": "주사위 족보가 야추 달성 시 최종 배수를 10 획득합니다",
+      "triggerType": "Yacht",
+      "effectType": "Add Multiplier",
+      "effectValue": 10,
+      "optionalItem": "None"
+    },
+    "Fig_Hellhound_Fang": {
+      "itemName": "지옥견 송곳니",
+      "price": 240,
+      "icon": "Fig_Hellhound_Fang",
+      "description": "주사위 결산 시 5의 눈금이 3개 이상이면 적에게 데미지를 26 줍니다",
+      "triggerType": "Three Of 5",
+      "effectType": "Damage Enemy",
+      "effectValue": 26,
+      "optionalItem": "None"
+    },
+    "Fig_Magma_Jelly": {
+      "itemName": "용암 젤리",
+      "price": 210,
+      "icon": "Fig_Magma_Jelly",
+      "description": "스낵 아이템을 사용할 때마다 최종 칩수를 18 획득합니다",
+      "triggerType": "On Snack Used",
+      "effectType": "Add Chips",
+      "effectValue": 18,
+      "optionalItem": "None"
+    },
+    "Fig_Flame_Collar": {
+      "itemName": "화염 목줄",
+      "price": 230,
+      "icon": "Fig_Flame_Collar",
+      "description": "주사위 족보가 투 페어 달성 시 적에게 데미지를 15 줍니다",
+      "triggerType": "Two Pair",
+      "effectType": "Damage Enemy",
+      "effectValue": 15,
+      "optionalItem": "None"
+    },
+    "Fig_Lava_Mask": {
+      "itemName": "용암 가면",
+      "price": 470,
+      "icon": "Fig_Lava_Mask",
+      "description": "주사위 족보가 포카드 달성 시 최종 배수를 6 획득합니다",
+      "triggerType": "Four Of A Kind",
+      "effectType": "Add Multiplier",
+      "effectValue": 6,
+      "optionalItem": "None"
+    },
+    "Fig_Bumpy_Helmet": {
+      "itemName": "울퉁불퉁 헬멧",
+      "price": 220,
+      "icon": "Fig_Bumpy_Helmet",
+      "description": "플레이어 체력이 감소할 때마다 적에게 데미지를 12 줍니다",
+      "triggerType": "On HP Lost",
+      "effectType": "Damage Enemy",
+      "effectValue": 12,
+      "optionalItem": "None"
+    },
+    "Fig_Phoenix_Feather": {
+      "itemName": "불사조 깃털",
+      "price": 360,
+      "icon": "Fig_Phoenix_Feather",
+      "description": "플레이어 체력이 감소할 때마다 굴리기 횟수를 1 추가합니다",
+      "triggerType": "On HP Lost",
+      "effectType": "Add Reroll",
+      "effectValue": 1,
+      "optionalItem": "None"
+    },
+    "Fig_Volcano_Web": {
+      "itemName": "화산 거미줄",
+      "price": 210,
+      "icon": "Fig_Volcano_Web",
+      "description": "주사위 결산 시 2의 눈금이 3개 이상이면 최종 배수를 1.8 획득합니다",
+      "triggerType": "Three Of 2",
+      "effectType": "Add Multiplier",
+      "effectValue": 1.8,
+      "optionalItem": "None"
+    },
+    "Fig_Drake_Egg": {
+      "itemName": "아룡의 알",
+      "price": 340,
+      "icon": "Fig_Drake_Egg",
+      "description": "주사위 족보가 트리플 달성 시 임의의 스낵(스테이크)을 1개 획득합니다",
+      "triggerType": "Triple",
+      "effectType": "Get Snack",
+      "effectValue": 1,
+      "optionalItem": "스테이크"
+    },
+    "Fig_Zombie_Msh": {
+      "itemName": "좀비 버섯",
+      "price": 180,
+      "icon": "Fig_Zombie_Msh",
+      "description": "주사위 결산 시 3의 눈금이 3개 이상이면 최종 배수를 1.5 획득합니다",
+      "triggerType": "Three Of 3",
+      "effectType": "Add Multiplier",
+      "effectValue": 1.5,
+      "optionalItem": "None"
+    },
+    "Fig_Witch_Lantern": {
+      "itemName": "마녀의 랜턴",
+      "price": 250,
+      "icon": "Fig_Witch_Lantern",
+      "description": "주사위 족보가 스트레이트 달성 시 코인을 40 획득합니다",
+      "triggerType": "Straight",
+      "effectType": "Add Gold",
+      "effectValue": 40,
+      "optionalItem": "None"
+    },
+    "Fig_Lizard_Tail": {
+      "itemName": "도마뱀 꼬리",
+      "price": 300,
+      "icon": "Fig_Lizard_Tail",
+      "description": "주사위 결산 시 5의 눈금이 3개 이상이면 최종 칩수를 35 획득합니다",
+      "triggerType": "Three Of 5",
+      "effectType": "Add Chips",
+      "effectValue": 35,
+      "optionalItem": "None"
+    },
+    "Fig_Hydra_Doll": {
+      "itemName": "히드라 인형",
+      "price": 500,
+      "icon": "Fig_Hydra_Doll",
+      "description": "주사위 족보가 야추 달성 시 적에게 데미지를 100 줍니다",
+      "triggerType": "Yacht",
+      "effectType": "Damage Enemy",
+      "effectValue": 100,
+      "optionalItem": "None"
+    },
+    "Fig_Sandcastle": {
+      "itemName": "모래성",
+      "price": 190,
+      "icon": "Fig_Sandcastle",
+      "description": "주사위 결산 시 4의 눈금이 3개 이상이면 최종 칩수를 24 획득합니다",
+      "triggerType": "Three Of 4",
+      "effectType": "Add Chips",
+      "effectValue": 24,
+      "optionalItem": "None"
+    },
+    "Fig_Coconut_Helmet": {
+      "itemName": "코코넛 헬멧",
+      "price": 320,
+      "icon": "Fig_Coconut_Helmet",
+      "description": "주사위 족보가 원 페어 달성 시 임의의 스낵(라임주스)을 1개 획득합니다",
+      "triggerType": "One Pair",
+      "effectType": "Get Snack",
+      "effectValue": 1,
+      "optionalItem": "라임주스"
+    },
+    "Fig_Crayfish_doll": {
+      "itemName": "가재 인형",
+      "price": 180,
+      "icon": "Fig_Crayfish_doll",
+      "description": "주사위 족보가 투 페어 달성 시 코인을 22 획득합니다",
+      "triggerType": "Two Pair",
+      "effectType": "Add Gold",
+      "effectValue": 22,
+      "optionalItem": "None"
+    },
+    "Fig_Letter": {
+      "itemName": "남겨진 편지",
+      "price": 200,
+      "icon": "Fig_Letter",
+      "description": "주사위 결산 시 1의 눈금이 3개 이상이면 굴리기 횟수를 1 추가합니다",
+      "triggerType": "Three Of 1",
+      "effectType": "Add Reroll",
+      "effectValue": 1,
+      "optionalItem": "None"
+    },
+    "Fig_Clam": {
+      "itemName": "조개 껍질",
+      "price": 210,
+      "icon": "Fig_Clam",
+      "description": "주사위 결산 시 3의 눈금이 3개 이상이면 코인을 25 획득합니다",
+      "triggerType": "Three Of 3",
+      "effectType": "Add Gold",
+      "effectValue": 25,
+      "optionalItem": "None"
+    },
+    "Fig_Captains_Hat": {
+      "itemName": "선장의 모자",
+      "price": 460,
+      "icon": "Fig_Captains_Hat",
+      "description": "주사위 족보가 풀하우스 달성 시 적에게 데미지를 45 줍니다",
+      "triggerType": "Full House",
+      "effectType": "Damage Enemy",
+      "effectValue": 45,
+      "optionalItem": "None"
+    },
+    "Fig_Octopus_Dice": {
+      "itemName": "문어 다이스",
+      "price": 350,
+      "icon": "Fig_Octopus_Dice",
+      "description": "주사위 족보가 포카드 달성 시 최종 칩수를 80 획득합니다",
+      "triggerType": "Four Of A Kind",
+      "effectType": "Add Chips",
+      "effectValue": 80,
+      "optionalItem": "None"
+    },
+    "Fig_Frigate_Dice": {
+      "itemName": "가오리 다이스",
+      "price": 230,
+      "icon": "Fig_Frigate_Dice",
+      "description": "주사위 족보가 스트레이트 달성 시 체력을 12 회복합니다",
+      "triggerType": "Straight",
+      "effectType": "Heal HP",
+      "effectValue": 12,
+      "optionalItem": "None"
+    },
+    "Fig_Whirlpool_Trophy": {
+      "itemName": "소용돌이 트로피",
+      "price": 260,
+      "icon": "Fig_Whirlpool_Trophy",
+      "description": "주사위 결산 시 6의 눈금이 3개 이상이면 최종 배수를 2.5 획득합니다",
+      "triggerType": "Three Of 6",
+      "effectType": "Add Multiplier",
+      "effectValue": 2.5,
+      "optionalItem": "None"
+    },
+    "Fig_Shark_Dice": {
+      "itemName": "상어 다이스",
+      "price": 480,
+      "icon": "Fig_Shark_Dice",
+      "description": "주사위 족보가 풀하우스 달성 시 최종 칩수를 90 획득합니다",
+      "triggerType": "Full House",
+      "effectType": "Add Chips",
+      "effectValue": 90,
+      "optionalItem": "None"
+    },
+    "Fig_Bone": {
+      "itemName": "뼈다구",
+      "price": 310,
+      "icon": "Fig_Bone",
+      "description": "플레이어 체력이 감소할 때마다 임의의 스낵(체리)을 1개 획득합니다",
+      "triggerType": "On HP Lost",
+      "effectType": "Get Snack",
+      "effectValue": 1,
+      "optionalItem": "체리"
+    },
+    "Fig_Abyssal_Pupil": {
+      "itemName": "심연의 동공",
+      "price": 340,
+      "icon": "Fig_Abyssal_Pupil",
+      "description": "주사위 족보가 투 페어 달성 시 최종 배수를 2.2 획득합니다",
+      "triggerType": "Two Pair",
+      "effectType": "Add Multiplier",
+      "effectValue": 2.2,
+      "optionalItem": "None"
+    },
+    "Fig_Angler_Doll": {
+      "itemName": "아귀 인형",
+      "price": 330,
+      "icon": "Fig_Angler_Doll",
+      "description": "주사위 결산 시 5의 눈금이 3개 이상이면 코인을 45 획득합니다",
+      "triggerType": "Three Of 5",
+      "effectType": "Add Gold",
+      "effectValue": 45,
+      "optionalItem": "None"
+    },
+    "Fig_Starfish": {
+      "itemName": "불가사리",
+      "price": 500,
+      "icon": "Fig_Starfish",
+      "description": "주사위 족보가 야추 달성 시 최종 칩수를 150 획득합니다",
+      "triggerType": "Yacht",
+      "effectType": "Add Chips",
+      "effectValue": 150,
+      "optionalItem": "None"
+    },
+    "Fig_Snowflake": {
+      "itemName": "눈꽃 결정",
+      "price": 200,
+      "icon": "Fig_Snowflake",
+      "description": "주사위 결산 시 2의 눈금이 3개 이상이면 최종 칩수를 20 획득합니다",
+      "triggerType": "Three Of 2",
+      "effectType": "Add Chips",
+      "effectValue": 20,
+      "optionalItem": "None"
+    },
+    "Fig_Icy_Dice": {
+      "itemName": "만년설 다이스",
+      "price": 220,
+      "icon": "Fig_Icy_Dice",
+      "description": "상시 지속으로 최종 배수를 2 획득합니다",
+      "triggerType": "Passive",
+      "effectType": "Add Multiplier",
+      "effectValue": 2,
+      "optionalItem": "None"
+    },
+    "Fig_ice_crystal": {
+      "itemName": "얼음 수정",
+      "price": 320,
+      "icon": "Fig_ice_crystal",
+      "description": "주사위 족보가 트리플 달성 시 체력을 10 회복합니다",
+      "triggerType": "Triple",
+      "effectType": "Heal HP",
+      "effectValue": 10,
+      "optionalItem": "None"
+    },
+    "Fig_cudgel": {
+      "itemName": "예티의 방망이",
+      "price": 470,
+      "icon": "Fig_cudgel",
+      "description": "주사위 족보가 풀하우스 달성 시 적에게 데미지를 50 줍니다",
+      "triggerType": "Full House",
+      "effectType": "Damage Enemy",
+      "effectValue": 50,
+      "optionalItem": "None"
+    },
+    "Fig_Frozen_Heart": {
+      "itemName": "얼어붙은 심장",
+      "price": 250,
+      "icon": "Fig_Frozen_Heart",
+      "description": "플레이어 체력이 감소할 때마다 최종 배수를 1.8 획득합니다",
+      "triggerType": "On HP Lost",
+      "effectType": "Add Multiplier",
+      "effectValue": 1.8,
+      "optionalItem": "None"
+    },
+    "Fig_Ash_Dust": {
+      "itemName": "잿가루",
+      "price": 170,
+      "icon": "Fig_Ash_Dust",
+      "description": "주사위 결산 시 4의 눈금이 3개 이상이면 최종 배수를 1.2 획득합니다",
+      "triggerType": "Three Of 4",
+      "effectType": "Add Multiplier",
+      "effectValue": 1.2,
+      "optionalItem": "None"
+    },
+    "Fig_Undertaker_Scythe": {
+      "itemName": "장의사의 낫",
+      "price": 400,
+      "icon": "Fig_Undertaker_Scythe",
+      "description": "주사위 결산 시 4의 눈금이 3개 이상이면 적에게 데미지를 14 줍니다",
+      "triggerType": "Three Of 4",
+      "effectType": "Damage Enemy",
+      "effectValue": 14,
+      "optionalItem": "None"
+    },
+    "Fig_Skull": {
+      "itemName": "두개골",
+      "price": 210,
+      "icon": "Fig_Skull",
+      "description": "주사위 결산 시 6의 눈금이 3개 이상이면 코인을 28 획득합니다",
+      "triggerType": "Three Of 6",
+      "effectType": "Add Gold",
+      "effectValue": 28,
+      "optionalItem": "None"
+    },
+    "Fig_GolemDice": {
+      "itemName": "사눈 다이스",
+      "price": 490,
+      "icon": "Fig_GolemDice",
+      "description": "주사위 족보가 포카드 달성 시 코인을 120 획득합니다",
+      "triggerType": "Four Of A Kind",
+      "effectType": "Add Gold",
+      "effectValue": 120,
+      "optionalItem": "None"
+    },
+    "Fig_Moon_Moustache": {
+      "itemName": "콧수염 초승달",
+      "price": 190,
+      "icon": "Fig_Moon_Moustache",
+      "description": "주사위 족보가 원 페어 달성 시 코인을 18 획득합니다",
+      "triggerType": "One Pair",
+      "effectType": "Add Gold",
+      "effectValue": 18,
+      "optionalItem": "None"
+    },
+    "Fig_Jack_Box": {
+      "itemName": "깜짝 상자",
+      "price": 230,
+      "icon": "Fig_Jack_Box",
+      "description": "주사위 결산 시 3의 눈금이 3개 이상이면 굴리기 횟수를 1 추가합니다",
+      "triggerType": "Three Of 3",
+      "effectType": "Add Reroll",
+      "effectValue": 1,
+      "optionalItem": "None"
+    },
+    "Fig_Clown_Tear": {
+      "itemName": "광대의 눈물",
+      "price": 210,
+      "icon": "Fig_Clown_Tear",
+      "description": "플레이어 체력이 감소할 때마다 굴리기 횟수를 1 추가합니다",
+      "triggerType": "On HP Lost",
+      "effectType": "Add Reroll",
+      "effectValue": 1,
+      "optionalItem": "None"
+    },
+    "Fig_Mad_Hat": {
+      "itemName": "이상한 모자",
+      "price": 330,
+      "icon": "Fig_Mad_Hat",
+      "description": "주사위 족보가 스트레이트 달성 시 최종 칩수를 50 획득합니다",
+      "triggerType": "Straight",
+      "effectType": "Add Chips",
+      "effectValue": 50,
+      "optionalItem": "None"
+    },
+    "Fig_Spade_King": {
+      "itemName": "스페이드 킹",
+      "price": 480,
+      "icon": "Fig_Spade_King",
+      "description": "주사위 족보가 포카드 달성 시 굴리기 횟수를 2 추가합니다",
+      "triggerType": "Four Of A Kind",
+      "effectType": "Add Reroll",
+      "effectValue": 2,
+      "optionalItem": "None"
+    },
+    "Fig_Devil_Dice": {
+      "itemName": "악마의 주사위",
+      "price": 600,
+      "icon": "Fig_Devil_Dice",
+      "description": "주사위 족보가 야추 달성 시 적에게 데미지를 150 줍니다",
+      "triggerType": "Yacht",
+      "effectType": "Damage Enemy",
+      "effectValue": 150,
+      "optionalItem": "None"
+    },
+    "Fig_CatGlove": {
+      "itemName": "냥이 솜털 손",
+      "price": 250,
+      "icon": "Fig_CatGlove",
+      "description": "스낵 아이템을 사용할 때마다 임의의 스낵(팬케이크)을 1개 획득합니다",
+      "triggerType": "On Snack Used",
+      "effectType": "Get Snack",
+      "effectValue": 1,
+      "optionalItem": "팬케이크"
+    },
+    "Fig_Comb": {
+      "itemName": "그루밍 빗",
+      "price": 250,
+      "icon": "Fig_Comb",
+      "description": "스낵 아이템을 사용할 때마다 굴리기 횟수를 1 추가합니다",
+      "triggerType": "On Snack Used",
+      "effectType": "Add Reroll",
+      "effectValue": 1,
+      "optionalItem": "None"
+    },
+    "Fig_GemEye": {
+      "itemName": "고양이 눈",
+      "price": 300,
+      "icon": "Fig_GemEye",
+      "description": "주사위 족보가 트리플 달성 시 최종 배수를 2.5 획득합니다",
+      "triggerType": "Triple",
+      "effectType": "Add Multiplier",
+      "effectValue": 2.5,
+      "optionalItem": "None"
+    },
+    "Fig_GoldBell": {
+      "itemName": "황금 종",
+      "price": 350,
+      "icon": "Fig_GoldBell",
+      "description": "상시 지속으로 코인을 50 획득합니다",
+      "triggerType": "Passive",
+      "effectType": "Add Gold",
+      "effectValue": 50,
+      "optionalItem": "None"
+    },
+    "Fig_SilverBell": {
+      "itemName": "은색 종",
+      "price": 250,
+      "icon": "Fig_SilverBell",
+      "description": "상시 지속으로 코인을 30 획득합니다",
+      "triggerType": "Passive",
+      "effectType": "Add Gold",
+      "effectValue": 30,
+      "optionalItem": "None"
+    },
+    "Fig_GoldSkein": {
+      "itemName": "황금 털뭉치",
+      "price": 400,
+      "icon": "Fig_GoldSkein",
+      "description": "주사위 족보가 풀하우스 달성 시 최종 칩수를 65 획득합니다",
+      "triggerType": "Full House",
+      "effectType": "Add Chips",
+      "effectValue": 65,
+      "optionalItem": "None"
+    },
+    "Fig_RedSkein": {
+      "itemName": "붉은 털뭉치",
+      "price": 300,
+      "icon": "Fig_RedSkein",
+      "description": "주사위 족보가 투 페어 달성 시 최종 배수를 2 획득합니다",
+      "triggerType": "Two Pair",
+      "effectType": "Add Multiplier",
+      "effectValue": 2,
+      "optionalItem": "None"
+    },
+    "Fig_LuckCat": {
+      "itemName": "복고양이",
+      "price": 500,
+      "icon": "Fig_LuckCat",
+      "description": "상시 지속으로 코인을 40 획득하고 체력을 10 회복합니다",
+      "triggerType": "Passive",
+      "effectType": "Add Gold",
+      "effectValue": 40,
+      "optionalItem": "None"
+    }
+  }
+}
