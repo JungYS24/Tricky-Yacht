@@ -10,6 +10,7 @@ public class ClownEventPanel : MonoBehaviour
 
     [Header("전체 화면 및 대화 UI")]
     public GameObject fullScreenBackground; // 전체 화면을 덮는 광대 배경 이미지
+    public Animator clownAnimator;
     public GameObject dialogueRoot;         // 화면 하단의 대화창 루트
     public TextMeshProUGUI dialogueText;    // 대화 텍스트
     public Button nextDialogueButton;       // 다음 대화로 넘어가는 버튼
@@ -56,6 +57,11 @@ public class ClownEventPanel : MonoBehaviour
 
         dialogueIndex = 0;
 
+        if (clownAnimator != null)
+        {
+            clownAnimator.speed = 1f;
+        }
+
         // 이벤트가 시작되면 전체 화면 배경과 대화창을 켭니다.
         if (fullScreenBackground != null) fullScreenBackground.SetActive(true);
         if (dialogueRoot != null) dialogueRoot.SetActive(true);
@@ -88,6 +94,13 @@ public class ClownEventPanel : MonoBehaviour
 
     private void ShowChoices()
     {
+
+        //애니메이션을 첫 프레임으로 되돌리고 속도를 0으로 만들어 정지시킴
+        if (clownAnimator != null)
+        {
+            clownAnimator.Play("AC_Clown_SS", 0, 0f); 
+            clownAnimator.speed = 0f; 
+        }
         // 랜덤 조건 생성
         choice1HPCost = Random.Range(30, 41);
         choice1GoldReward = Random.Range(1500, 2501);
