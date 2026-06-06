@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic; // List를 사용하기 위해 추가
+using TMPro;
 
 public class Enemy : MonoBehaviour
 {
@@ -15,6 +16,10 @@ public class Enemy : MonoBehaviour
     [Header("데미지 텍스트 설정")]
     public GameObject damageTextPrefab;
     public Canvas uiCanvas; // 데미지 텍스트가 생성될 부모 캔버스
+
+    //몬스터 공격력을 표시할 텍스트 UI 연결용 변수
+    [Header("공격력 텍스트 설정")]
+    public TextMeshProUGUI attackPowerText;
 
     [Header("피격 효과")]
     public Color hitColor = Color.red;
@@ -71,6 +76,16 @@ public class Enemy : MonoBehaviour
             }
         }
 
+        //공격력 텍스트 자동 할당 코드
+        if (attackPowerText == null)
+        {
+            GameObject attackTextObj = GameObject.Find("AttackPowerText");
+            if (attackTextObj != null)
+            {
+                attackPowerText = attackTextObj.GetComponent<TextMeshProUGUI>();
+            }
+        }
+
         if (uiCanvas == null)
         {
             GameObject canvasObj = GameObject.Find("Canvas");
@@ -88,7 +103,7 @@ public class Enemy : MonoBehaviour
 
     public void Initialize(int currentStage, BiomeDataSO currentBiome)
     {
-        // 1. 만약의 사태를 대비한 기본 체력 (리스트가 비어있을 때 등)
+        //만약의 사태를 대비한 기본 체력 (리스트가 비어있을 때 등)
         int finalMaxHP = 40;
         int finalAttack = 10;
         MonsterDataSO nextMonsterData = null;
@@ -146,7 +161,13 @@ public class Enemy : MonoBehaviour
         IsDead = false;
         useExternalDeathSequence = false;
 
-        // 3. 시각적 초기화 (크기, 색상, 디졸브 등)
+        //몬스터가 등장할 때(초기화될 때) 공격력 텍스트를 업데이트
+        if (attackPowerText != null)
+        {
+            attackPowerText.text = $"공격력: {AttackPower}";
+        }
+
+        //시각적 초기화 (크기, 색상, 디졸브 등)
         transform.position = originalPosition;
         transform.localScale = originalScale;
 
