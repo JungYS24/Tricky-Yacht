@@ -53,7 +53,7 @@ public class DiceManager : MonoBehaviour
     [Header("맵(생물군계) 설정")]
     public SpriteRenderer biomeBackgroundImage; // Canvas에 있는 Biome_Image 연결
     public List<BiomeDataSO> biomeList;                // 만들어둔 Biome 데이터들 (숲, 화산 등)
-    private BiomeDataSO currentBiome;
+    public BiomeDataSO currentBiome;
 
     public BiomeSelectionPanel biomeSelectionPanel;
     private BiomeNavigator biomeNavigator = new BiomeNavigator();
@@ -231,9 +231,10 @@ public class DiceManager : MonoBehaviour
 
         if (biomeList.Count > 0)
         {
-            //여기도 같이 고쳐야됨
-            int biomeIndex = ((currentStage - 1) / 3) % biomeList.Count;
-            currentBiome = biomeList[biomeIndex];
+            currentBiome = biomeList.Find(b => (int)b.biomeType == data.savedBiomeType);
+
+            if (currentBiome == null) currentBiome = biomeList[0];
+
             if (biomeBackgroundImage != null && currentBiome.backgroundImage != null)
                 biomeBackgroundImage.sprite = currentBiome.backgroundImage;
             if (BGMManager.Instance != null && currentBiome.biomeBGM != null)

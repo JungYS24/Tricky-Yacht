@@ -26,6 +26,8 @@ public class SaveData
     public int figureBonusRerolls;
     public bool isPeppermintActive;
 
+    public int savedBiomeType; // 바이옴 저장
+
     //싸우던 몬스터 상태 저장
     public string savedMonsterName;
     public int savedMonsterHP;
@@ -79,6 +81,12 @@ public class GameSaveManager : MonoBehaviour
         data.snackBonusFigureDropRate = dice.snackBonusFigureDropRate;
         data.figureBonusRerolls = dice.figureBonusRerolls;
         data.isPeppermintActive = dice.isPeppermintActive;
+
+        if (dice.currentBiome != null)
+        {
+            data.savedBiomeType = (int)dice.currentBiome.biomeType;
+        }
+
 
         data.currentStage = dice.currentStage;
         data.currentPlayerHP = dice.currentPlayerHP;
