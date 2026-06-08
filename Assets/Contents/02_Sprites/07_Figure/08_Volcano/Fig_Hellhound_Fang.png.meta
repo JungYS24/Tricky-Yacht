@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 1b2b412c26171af48ab21395071a881c
+guid: 82b009132d3734948b3381e6f4f198c8
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5606424807440292115
-    second: Fig_GolemMask_0
+      213: -7509098614906459306
+    second: Fig_Canine_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Fig_GolemMask_0
+      name: Fig_Canine_0
       rect:
         serializedVersion: 2
         x: 18
-        y: 12
-        width: 65
-        height: 76
+        y: 14
+        width: 67
+        height: 77
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: de6659c775af132b0800000000000000
-      internalID: -5606424807440292115
+      spriteID: 65b6f1b38925ac790800000000000000
+      internalID: -7509098614906459306
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Fig_GolemMask_0: -5606424807440292115
+      Fig_Canine_0: -7509098614906459306
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
