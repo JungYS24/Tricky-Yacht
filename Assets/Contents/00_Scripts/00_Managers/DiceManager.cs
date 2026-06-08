@@ -55,6 +55,9 @@ public class DiceManager : MonoBehaviour
     public List<BiomeDataSO> biomeList;                // 만들어둔 Biome 데이터들 (숲, 화산 등)
     private BiomeDataSO currentBiome;
 
+    public BiomeSelectionPanel biomeSelectionPanel;
+    private BiomeNavigator biomeNavigator = new BiomeNavigator();
+
     // --- 스낵 시스템용 변수 ---
     private int defaultMaxRerolls;
     [HideInInspector] public float snackBonusMult = 0f;
@@ -138,6 +141,9 @@ public class DiceManager : MonoBehaviour
         {
             currentPlayerHP = playerMaxHP;
             InitializeMasterDeck();
+
+            // 첫 시작은 무조건 숲(Forest)으로 고정
+            currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
             StartNewStage();
         }
     }
@@ -225,7 +231,8 @@ public class DiceManager : MonoBehaviour
 
         if (biomeList.Count > 0)
         {
-            int biomeIndex = ((currentStage - 1) / 10) % biomeList.Count;
+            //여기도 같이 고쳐야됨
+            int biomeIndex = ((currentStage - 1) / 3) % biomeList.Count;
             currentBiome = biomeList[biomeIndex];
             if (biomeBackgroundImage != null && currentBiome.backgroundImage != null)
                 biomeBackgroundImage.sprite = currentBiome.backgroundImage;
@@ -291,31 +298,23 @@ public class DiceManager : MonoBehaviour
         pendingPeppermintSuccess = false;
         //가니쉬 효과 초기화
         snackBonusFigureDropRate = 0f;
-        //2스테이지마다 바이옴(맵) 변경 로직
-        if (biomeList.Count > 0)
-        {
-            int biomeIndex = ((currentStage - 1) / /*여기 바꾸면 맵 바뀜*/10) % biomeList.Count;
-            currentBiome = biomeList[biomeIndex];
 
-            // UI 배경 이미지 교체
+        if (currentBiome != null)
+        {
             if (biomeBackgroundImage != null && currentBiome.backgroundImage != null)
             {
                 biomeBackgroundImage.sprite = currentBiome.backgroundImage;
             }
-            //바이옴 BGM 재생 =====
             if (BGMManager.Instance != null && currentBiome.biomeBGM != null)
             {
                 BGMManager.Instance.ChangeBGM(currentBiome.biomeBGM);
             }
 
-
-            //Enemy를 초기화할 때, 현재 맵에 맞는 몬스터 리스트를 같이 넘겨줌!
             enemy.Initialize(currentStage, currentBiome);
         }
         else
         {
-            // 혹시 맵 데이터를 안 넣었을 경우를 대비한 안전 장치
-            Debug.LogWarning("DiceManager에 Biome List가 비어있습니다!");
+            Debug.LogWarning("현재 설정된 바이옴이 없습니다!");
             enemy.Initialize(currentStage, null);
         }
 
@@ -785,6 +784,38 @@ public class DiceManager : MonoBehaviour
     public void NextStage()
     {
         currentStage++;
+
+        // 방금 클리어한 곳이 5스테이지 단위(보스)였다면, 다음 스테이지 시작 전 바이옴 선택창 띄우기
+        if ((currentStage - 1) % 3 == 0 && currentStage <= 90)
+        {
+            ui?.HideShopChoice();
+
+            List<BiomeType> nextOptions = biomeNavigator.GetNextBiomeOptions(currentBiome.biomeType, currentStage - 1);
+            biomeSelectionPanel.OpenPanel(this, nextOptions);
+        }
+        else if (currentStage > 90)
+        {
+            // 90스테이지 이후 비차원(Void) 강제 진입
+            ui?.HideShopChoice();
+            ApplySelectedBiome(BiomeType.Void);
+        }
+        else
+        {
+            // 일반 스테이지는 그대로 진행
+            StartNewStage();
+            if (GameSaveManager.Instance != null)
+            {
+                GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
+            }
+        }
+    }
+
+    // 바이옴 선택 버튼을 눌렀을 때 실행될 함수
+    public void ApplySelectedBiome(BiomeType selectedType)
+    {
+        if (biomeSelectionPanel != null) biomeSelectionPanel.ClosePanel();
+
+        currentBiome = biomeList.Find(b => b.biomeType == selectedType);
         StartNewStage();
 
         if (GameSaveManager.Instance != null)
@@ -793,61 +824,6 @@ public class DiceManager : MonoBehaviour
         }
     }
 
-    //public void GoToMainMenu()
-    //{
-    //    // 1. 기본 스테이지 데이터 초기화
-    //    currentStage = 1;
-    //    currentPlayerHP = playerMaxHP;
-
-    //    // 2. 덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 20개로)
-    //    InitializeMasterDeck();
-
-    //    // 3. 골드 초기화 (ShopManager 참조)
-    //    if (shopManager != null)
-    //    {
-    //        shopManager.currentGold = 2000; // 초기 소지금 (기획에 맞게 수정하세요)
-    //        ui?.UpdateGoldUI(shopManager.currentGold);
-    //        //재시작 및 메인 이동 시 초기 소지금 카운팅 연출 실행 (또는 초기화용)
-    //        if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
-    //    }
-
-    //    // 4. 인벤토리 초기화 (방금 만든 함수 호출)
-    //    InventoryManager.Instance?.ClearAllSlots();
-
-    //    // 5. 스낵 및 특수 상태 버프 초기화
-    //    snackBonusMult = 0f;
-    //    snackBonusChips = 0;
-    //    snackBonusRerolls = 0;
-    //    snackBonusFigureDropRate = 0f;
-    //    isPeppermintActive = false;
-
-    //    // 6. 티켓으로 올렸던 배수를 다시 기본값으로 돌려줌
-    //    multHighCard = 1.0f;
-    //    multOnePair = 1.2f;
-    //    multTwoPair = 1.4f;
-    //    multTriple = 1.5f;
-    //    multFullHouse = 1.7f;
-    //    multFourOfAKind = 1.8f;
-    //    multStraight = 2.0f;
-    //    multYacht = 2.5f;
-
-    //    //몬스터 초기화
-    //    enemy.ResetMonsterIndex();
-
-    //    if (TutorialManager.Instance != null)
-    //    {
-    //        TutorialManager.Instance.isTutorialActive = false;
-    //        TutorialManager.Instance.tutorialRoot.SetActive(false);
-    //    }
-
-    //    if (shopManager != null && shopManager.shopUI != null)
-    //    {
-    //        shopManager.shopUI.SetActive(false);
-    //    }
-
-    //    Time.timeScale = 1f;
-    //    SceneManager.LoadScene("Lobby");
-    //}
 
     public void GoToMainMenu()
     {

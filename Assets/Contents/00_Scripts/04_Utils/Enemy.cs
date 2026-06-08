@@ -115,7 +115,7 @@ public class Enemy : MonoBehaviour
         if (currentBiome != null)
         {
             // 5의 배수 스테이지(5, 10, 15...)이고 보스 데이터가 있다면 보스 출현!
-            if (currentStage % 5 == 0 && currentBiome.bossMonster != null)
+            if (currentStage % 3 == 0 && currentBiome.bossMonster != null)
             {
                 nextMonsterData = currentBiome.bossMonster;
             }
