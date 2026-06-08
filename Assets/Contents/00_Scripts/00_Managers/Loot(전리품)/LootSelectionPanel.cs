@@ -47,17 +47,26 @@ public class LootSelectionPanel : MonoBehaviour
         panelRoot.SetActive(true);
     }
 
-    // OnLootSelected 함수는 기존 코드와 동일합니다.
     public void OnLootSelected(BaseItemDataSO selectedLoot)
     {
         if (selectedLoot is SnackItemSO snack)
         {
             bool added = InventoryManager.Instance.AddItem(snack);
-            if (!added) Debug.Log("스낵 인벤토리가 꽉 차서 받을 수 없습니다!");
+            if (!added)
+            {
+                Debug.Log("스낵 인벤토리가 꽉 차서 받을 수 없습니다!");
+                return; // 꽉 차서 안 들어가면 리턴하여 단계가 넘어가지 않도록 방지
+            }
         }
         else if (selectedLoot is DiceItemSO dice)
         {
             dice.ApplyItemEffect(diceManager);
+        }
+
+        //튜토리얼 상태일 때 전리품 선택 완료를 매니저에게 알림
+        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+        {
+            TutorialManager.Instance.OnLootSelectedComplete();
         }
 
         ClosePanelAndProceed();

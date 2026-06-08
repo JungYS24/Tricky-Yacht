@@ -101,13 +101,13 @@ public class ShopManager : MonoBehaviour
 
         int dataIndex = 0;
 
-        // 2. 튜토리얼 중일 때의 상점 강제 진열 로직
+        // 튜토리얼 강제 진열 로직 분기 수정
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
             int step = TutorialManager.Instance.currentStepIndex;
 
-            // [첫 번째 상점] 10~17단계 사이
-            if (step <= 17)
+            // [첫 번째 상점] 13~20단계 사이 (아이템 설명 및 하이롤러/피규어 구매)
+            if (step <= 20)
             {
                 if (shopSlots.Length >= 6)
                 {
@@ -120,36 +120,35 @@ public class ShopManager : MonoBehaviour
                     if (TutorialManager.Instance.tutDummy != null)
                         shopSlots[5].SetupSlot(TutorialManager.Instance.tutDummy, this);
                 }
-                return; // 첫 번째 상점 세팅 끝! (아래 코드는 실행 안 함)
+                return;
             }
 
-            // [두 번째 상점] 19단계 이상
-            if (step >= 19)
+            // [두 번째 상점] 23단계 (네 가지 특정 아이템 진열 강제)
+            if (step == 23)
             {
                 for (int i = 0; i < shopSlots.Length; i++)
                 {
+                    shopSlots[i].gameObject.SetActive(true);
+
                     if (i == 0 && TutorialManager.Instance.tutorialPeppermint != null)
-                    {
-                        shopSlots[0].gameObject.SetActive(true);
                         shopSlots[0].SetupSlot(TutorialManager.Instance.tutorialPeppermint, this);
-                    }
                     else if (i == 1 && TutorialManager.Instance.tutorialGarnish != null)
-                    {
-                        shopSlots[1].gameObject.SetActive(true);
                         shopSlots[1].SetupSlot(TutorialManager.Instance.tutorialGarnish, this);
-                    }
+                    else if (i == 2 && TutorialManager.Instance.tutorialHeartDice != null)
+                        shopSlots[2].SetupSlot(TutorialManager.Instance.tutorialHeartDice, this);
+                    else if (i == 3 && TutorialManager.Instance.tutorialCoating != null)
+                        shopSlots[3].SetupSlot(TutorialManager.Instance.tutorialCoating, this);
                     else
                     {
-                        // 0번, 1번 슬롯을 제외한 나머지 칸은 랜덤 아이템으로 채우기
+                        // 남는 슬롯이 있다면 랜덤으로 채우기
                         if (dataIndex < shuffled.Count)
                         {
-                            shopSlots[i].gameObject.SetActive(true);
                             shopSlots[i].SetupSlot(shuffled[dataIndex], this);
                             dataIndex++;
                         }
                     }
                 }
-                return; // 두 번째 상점 세팅 끝!
+                return;
             }
         }
 
