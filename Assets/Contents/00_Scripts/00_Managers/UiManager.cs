@@ -66,15 +66,15 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    public void UpdateGameUI(int stageNum, int currentHP, int maxHP, int playerHP, int playerMaxHP, int rerollsLeft, string combinedDamageText)
+    public void UpdateGameUI(string stageName, int currentHP, int maxHP, int playerHP, int playerMaxHP, int rerollsLeft, string combinedDamageText)
     {
-        stageText.text = $"스테이지: {stageNum}";
+        stageText.text = stageName;
+
         targetScoreText.text = $"<color=#FF5555>{currentHP}/{maxHP}</color>";
         cumulativeScoreText.text = "";
 
         roundPlaysText.text = $"남은 굴리기: {rerollsLeft}";
 
-        // 플레이어 체력 텍스트 업데이트 (예: 100/100)
         if (heartText != null)
         {
             heartText.text = $"{playerHP}/{playerMaxHP}";

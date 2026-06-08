@@ -760,8 +760,16 @@ public class DiceManager : MonoBehaviour
         string combinedText = $"{displayHand}\n{formula}\n<color=#FF5555>= {totalDamage} 대미지 예정</color>";
 
         //남은 굴리기 초기화
+        // 남은 굴리기 계산
         int remainingRerolls = (maxRerolls + snackBonusRerolls + figureBonusRerolls) - currentRerolls;
-        ui?.UpdateGameUI(currentStage, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText);
+
+        //현재 바이옴의 이름을 가져옴
+        string bName = (currentBiome != null) ? currentBiome.biomeName : "Stage";
+
+        // 5스테이지마다 보스가 나오므로, 현재 바이옴에서의 구역 진행도(1~5)를 계산함
+        int localStage = ((currentStage - 1) % 3) + 1;
+        string stageDisplayName = $"{bName} {localStage}";
+        ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText);
 
         float currentEnemyDropRate = isPeppermintActive ? enemy.baseDropRate : 0f;
         ui?.UpdateDropRateUI(currentEnemyDropRate, snackBonusFigureDropRate);
@@ -876,6 +884,13 @@ public class DiceManager : MonoBehaviour
 
         //몬스터 초기화
         enemy.ResetMonsterIndex();
+
+        // 바이옴을 첫 번째 맵(숲)으로 강제 초기화
+        if (biomeList != null && biomeList.Count > 0)
+        {
+            currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
+        }
+
         // 새로운 스테이지 시작
         StartNewStage();
     }
