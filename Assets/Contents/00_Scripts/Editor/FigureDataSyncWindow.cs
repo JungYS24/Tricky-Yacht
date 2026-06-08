@@ -1,18 +1,18 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
 
 public class FigureDataSyncWindow : EditorWindow
 {
-    [MenuItem("Studio 10&6/ÇÇ±Ô¾î µ¥ÀÌÅÍ µ¿±âÈ­")]
+    [MenuItem("Studio 10&6/í”¼ê·œì–´ ë°ì´í„° ë™ê¸°í™”")]
     public static void SyncFigureData()
     {
         string jsonPath = Path.Combine(Application.dataPath, "Contents/10_Resources/Data/FigureDataList.json");
 
         if (!File.Exists(jsonPath))
         {
-            Debug.LogError($"[Studio 10&6] JSON ÆÄÀÏÀ» Ã£À» ¼ö ¾ø½À´Ï´Ù: {jsonPath}");
+            Debug.LogError($"[Studio 10&6] JSON íŒŒì¼ì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤: {jsonPath}");
             return;
         }
 
@@ -21,7 +21,7 @@ public class FigureDataSyncWindow : EditorWindow
         int startIndex = jsonText.IndexOf("\"FigureDataList\": {");
         if (startIndex == -1)
         {
-            Debug.LogError("[Studio 10&6] JSON ·çÆ® Å° 'FigureDataList'¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogError("[Studio 10&6] JSON ë£¨íŠ¸ í‚¤ 'FigureDataList'ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
             return;
         }
 
@@ -75,13 +75,13 @@ public class FigureDataSyncWindow : EditorWindow
                 isNew = true;
             }
 
-            // --- µ¥ÀÌÅÍ Á÷·ÄÈ­ µ¿±âÈ­ ---
+            // --- ë°ì´í„° ì§ë ¬í™” ë™ê¸°í™” ---
             asset.itemID = currentID;
             asset.itemName = data.itemName;
             asset.price = data.price;
             asset.description = data.description;
 
-            // [±¸Á¶ ¼öÁ¤] ÀÚ½Ä Å¬·¡½ºÀÇ iconSprite ´ë½Å ºÎ¸ğ Å¬·¡½º(BaseItemDataSO)¿¡ ±¸ÇöµÈ ¿ø·¡ 'icon' ÇÊµå¿¡ Á÷Á¢ Å¸°ÙÆÃÇÕ´Ï´Ù.
+            // [êµ¬ì¡° ìˆ˜ì •] ìì‹ í´ë˜ìŠ¤ì˜ iconSprite ëŒ€ì‹  ë¶€ëª¨ í´ë˜ìŠ¤(BaseItemDataSO)ì— êµ¬í˜„ëœ ì›ë˜ 'icon' í•„ë“œì— ì§ì ‘ íƒ€ê²ŸíŒ…í•©ë‹ˆë‹¤.
             string fullSpritePath = $"{spriteRootPath}/{data.biomeFolder}/{data.icon}.png";
             Sprite targetSprite = AssetDatabase.LoadAssetAtPath<Sprite>(fullSpritePath);
 
@@ -91,7 +91,7 @@ public class FigureDataSyncWindow : EditorWindow
             }
             else
             {
-                Debug.LogWarning($"[Studio 10&6] ½ºÇÁ¶óÀÌÆ® ·Îµå ½ÇÆĞ. °æ·Î¸¦ È®ÀÎÇÏ¼¼¿ä: {fullSpritePath}");
+                Debug.LogWarning($"[Studio 10&6] ìŠ¤í”„ë¼ì´íŠ¸ ë¡œë“œ ì‹¤íŒ¨. ê²½ë¡œë¥¼ í™•ì¸í•˜ì„¸ìš”: {fullSpritePath}");
             }
 
             asset.figureNodes = new List<FigureNode>();
@@ -125,7 +125,7 @@ public class FigureDataSyncWindow : EditorWindow
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"[Studio 10&6] ºÎ¸ğ ¼Ó¼º µ¿±âÈ­ ¿Ï·á! {targetFolderPath}¿¡ {syncCount}°³ÀÇ ±ò²ûÇÑ ÇÇ±Ô¾î SO¸¦ ºôµåÇß½À´Ï´Ù.");
+        Debug.Log($"[Studio 10&6] ë¶€ëª¨ ì†ì„± ë™ê¸°í™” ì™„ë£Œ! {targetFolderPath}ì— {syncCount}ê°œì˜ ê¹”ë”í•œ í”¼ê·œì–´ SOë¥¼ ë¹Œë“œí–ˆìŠµë‹ˆë‹¤.");
     }
 }
 

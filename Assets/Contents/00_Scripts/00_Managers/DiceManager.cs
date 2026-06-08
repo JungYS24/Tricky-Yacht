@@ -300,6 +300,9 @@ public class DiceManager : MonoBehaviour
         //가니쉬 효과 초기화
         snackBonusFigureDropRate = 0f;
 
+
+       
+
         if (currentBiome != null)
         {
             if (biomeBackgroundImage != null && currentBiome.backgroundImage != null)

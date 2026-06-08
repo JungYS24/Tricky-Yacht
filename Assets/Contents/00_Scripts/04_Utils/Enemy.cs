@@ -112,7 +112,13 @@ public class Enemy : MonoBehaviour
         int finalAttack = 10;
         MonsterDataSO nextMonsterData = null;
 
-        if (currentBiome != null)
+        // 튜토리얼 중이라면 매니저에서 튜토리얼용 데이터를 가져옵니다 ---
+        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+        {
+            nextMonsterData = TutorialManager.Instance.GetTutorialMonster(currentStage);
+        }
+
+        else if (currentBiome != null)
         {
             // 5의 배수 스테이지(5, 10, 15...)이고 보스 데이터가 있다면 보스 출현!
             if (currentStage % 3 == 0 && currentBiome.bossMonster != null)

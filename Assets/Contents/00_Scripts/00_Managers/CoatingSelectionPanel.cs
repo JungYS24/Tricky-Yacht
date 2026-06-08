@@ -62,6 +62,12 @@ public class CoatingSelectionPanel : MonoBehaviour
 
         Debug.Log($"{selectedDice.diceName}에 {pendingCoatingType} 코팅 적용 완료!");
 
+        // 튜토리얼 중일 때 코팅 처리가 끝났음을 알림
+        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+        {
+            TutorialManager.Instance.OnCoatingAppliedComplete();
+        }
+
         ClosePanel();
     }
 

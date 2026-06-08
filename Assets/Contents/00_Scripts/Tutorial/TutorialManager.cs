@@ -22,20 +22,34 @@ public class TutorialManager : MonoBehaviour
     public ShopManager shopManager;
     public UIManager uiManager;
 
+    [Header("새로운 패널 참조")]
+    public LootSelectionPanel lootSelectionPanel;
+    public CoatingSelectionPanel coatingSelectionPanel;
+    public BiomeSelectionPanel biomeSelectionPanel;
+
     // 상점 및 아이템 체크용 변수
     private bool boughtHighRoller = false;
     private bool boughtFigure = false;
     private bool boughtPeppermint = false;
     private bool boughtGarnish = false;
+    private bool boughtHeartDice = false; // [추가] 하트 주사위 구매 체크
+    private bool boughtCoating = false;   // [추가] 주사위 코팅 구매 체크
     private bool usedPeppermint = false;
     private bool usedGarnish = false;
-    private bool hasTransitionedTo22 = false; // 중복 스킵 방지용
+    private bool hasTransitionedTo22 = false; // 중복 스킵 방지용 (기존 변수 유지)
 
     [Header("튜토리얼 강제 아이템 설정")]
     public BaseItemDataSO tutorialHighRollerDice;
     public BaseItemDataSO tutorialFigure;
     public BaseItemDataSO tutorialPeppermint;
     public BaseItemDataSO tutorialGarnish;
+    public BaseItemDataSO tutorialHeartDice; // 하트 주사위 데이터
+    public BaseItemDataSO tutorialCoating;   // 코팅 데이터
+
+    [Header("튜토리얼 강제 몬스터 설정")]
+    public MonsterDataSO tutorialMonster1;
+    public MonsterDataSO tutorialMonster2;
+    public MonsterDataSO tutorialBossMonster;
 
     [Header("첫 번째 상점 강제 아이템 6종")]
     public BaseItemDataSO tutFigure;
@@ -55,21 +69,14 @@ public class TutorialManager : MonoBehaviour
 
     private void Start()
     {
-
-        // 로비에서 저장한 값을 읽어옴 (기본값은 0)
+        // [수정] 에디터에서 테스트 중이거나, 튜토리얼 씬이라면 강제로 켜줍니다.
+#if UNITY_EDITOR
+        isTutorialActive = true;
+#else
         int shouldRun = PlayerPrefs.GetInt("RunTutorial", 0);
+        isTutorialActive = (shouldRun == 1);
+#endif
 
-        if (shouldRun == 1)
-        {
-            isTutorialActive = true;
-            // ... 기존 튜토리얼 시작 로직 ...
-        }
-        else
-        {
-            isTutorialActive = false;
-            FinishTutorial(); // 튜토리얼 즉시 종료 및 UI 비활성화 함수 호출
-            return;
-        }
         if (isTutorialActive)
         {
             nextButton.onClick.AddListener(ProceedTutorial);
@@ -84,6 +91,10 @@ public class TutorialManager : MonoBehaviour
                 FixTooltipSorting(InventoryManager.Instance.tooltipPanel);
 
             ShowStep(1);
+        }
+        else
+        {
+            FinishTutorial();
         }
     }
 
@@ -111,18 +122,17 @@ public class TutorialManager : MonoBehaviour
         darkOverlay.SetActive(true);
         ClearHighlight();
 
-  
-
-        if (step >= 10 && step <= 14)
+        // 신규 대사 시트 인덱스 기준으로 하이라이트 분기 수정
+        if (step >= 13 && step <= 17)
         {
             SetShopSlotsInteractable(false);
-            if (step == 10) HighlightUI(shopManager.shopSlots[0].gameObject);
-            else if (step == 11) HighlightUI(shopManager.shopSlots[1].gameObject);
-            else if (step == 12) HighlightUI(shopManager.shopSlots[2].gameObject);
-            else if (step == 13) HighlightUI(shopManager.shopSlots[4].gameObject);
-            else if (step == 14) HighlightUI(shopManager.shopSlots[3].gameObject);
+            if (step == 13) HighlightUI(shopManager.shopSlots[0].gameObject);      // 피규어
+            else if (step == 14) HighlightUI(shopManager.shopSlots[1].gameObject); // 스낵
+            else if (step == 15) HighlightUI(shopManager.shopSlots[2].gameObject); // 코팅
+            else if (step == 16) HighlightUI(shopManager.shopSlots[4].gameObject); // 티켓
+            else if (step == 17) HighlightUI(shopManager.shopSlots[3].gameObject); // 주사위 구매
         }
-        else if (step == 15)
+        else if (step == 18)
         {
             SetShopSlotsInteractable(false);
             // 5라는 고정 숫자 대신 상점 슬롯의 전체 개수만큼 반복하도록 변경!
@@ -131,10 +141,12 @@ public class TutorialManager : MonoBehaviour
                 HighlightUI(shopManager.shopSlots[i].gameObject);
             }
         }
-        else if (step == 18)
-        {
-            StartCoroutine(ForceSpawnTutorialDice());
-        }
+        //else if (step == 21)
+        //{
+        //    StartCoroutine(ForceSpawnTutorialDice());
+        //    //피규어 상세 팝업을 열고 닫을 때까지 기다리는 코루틴 실행
+        //    StartCoroutine(WaitForFigurePopupClose());
+        //}
     }
 
     private IEnumerator ForceSpawnTutorialDice()
@@ -176,6 +188,17 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    // [추가] 피규어 팝업이 뜨고 닫기 버튼을 누를 때까지 이벤트를 감시하는 코루틴
+    private IEnumerator WaitForFigurePopupClose()
+    {
+        nextButton.gameObject.SetActive(false);
+        // 피규어 상세 패널이 열릴 때까지 대기
+        while (!FigureDetailPanel.IsPanelOpen) yield return null;
+        // 피규어 상세 패널이 닫힐 때까지 대기
+        while (FigureDetailPanel.IsPanelOpen) yield return null;
+
+        nextButton.gameObject.SetActive(true);
+    }
 
     //주사위를 가림막 위로 튀어나오게 하는 함수
     private void HighlightDice(Dice dice)
@@ -199,6 +222,7 @@ public class TutorialManager : MonoBehaviour
             highlightedDice.Add(dice);
         }
     }
+
     public void ProceedTutorial()
     {
         if (NeedsActionToProceed(currentStepIndex))
@@ -207,25 +231,36 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
-        // 22번 대사("자 이제 자유롭게...")를 읽고 '다음'을 누르면 자유 플레이 진입!
-        if (currentStepIndex == 22)
+        // 보스 스테이지 클리어 후 자유 모드 진입 조건 (신규 인덱스 기준 반영)
+        if (currentStepIndex == 28)
+        {
+            ShowStep(29);
+            return;
+        }
+        if (currentStepIndex == 29)
+        {
+            ShowStep(30);
+            return;
+        }
+        if (currentStepIndex == 31)
         {
             StartFreePlay();
             return;
         }
 
-        // 24번 대사까지 읽고 다음을 누르면 튜토리얼 종료
-        if (currentStepIndex >= 24) { FinishTutorial(); return; }
+        if (currentStepIndex >= 33) { FinishTutorial(); return; }
 
         ShowStep(currentStepIndex + 1);
     }
 
     private bool NeedsActionToProceed(int step)
     {
-        // 22, 23, 24번은 대사만 읽고 '다음'을 누르는 구조이므로 여기 포함시키지 않습니다.
+        // 신규 추가된 기믹들의 액션 단계 예외 처리 추가
         return step == 2 || step == 3 || step == 4 || step == 6 ||
-               step == 7 || step == 8 || step == 9 || step == 16 ||
-               step == 17 || step == 19 || step == 20 || step == 21;
+               step == 7 || step == 8 || step == 9 || step == 11 ||
+               step == 12 || step == 21 ||
+               step == 19 || step == 20 || step == 22 ||
+               step == 23 || step == 24 || step == 27 || step == 30 || step == 33;
     }
 
     private void StartWaitAction(int step)
@@ -274,37 +309,123 @@ public class TutorialManager : MonoBehaviour
                 HighlightUI(uiManager.finishButton.gameObject);
                 break;
 
-            case 19:
+            //전리품 선택창 등장 및 첫 번째 슬롯 강요
+            case 11:
                 SetDialogPanelVisible(false);
-                // 남은 주사위 3개를 마저 클릭할 수 있게 가림막을 끕니다!
-                darkOverlay.SetActive(false);
-                HighlightUI(uiManager.finishButton.gameObject);
+                darkOverlay.SetActive(true);
+                if (lootSelectionPanel != null && lootSelectionPanel.choiceSlots.Length > 0)
+                {
+                    HighlightUI(lootSelectionPanel.choiceSlots[0].gameObject);
+                }
                 break;
 
-            case 16:
+            // [추가 기믹] 전리품 획득 후 상점 이동 유도
+            case 12:
+                SetDialogPanelVisible(false);
+                darkOverlay.SetActive(true);
+                if (uiManager.goShopButton != null) HighlightUI(uiManager.goShopButton.gameObject);
+                break;
+
+            case 19:
                 SetDialogPanelVisible(false);
                 darkOverlay.SetActive(true);
                 HighlightUI(shopManager.shopSlots[0].gameObject);
                 HighlightUI(shopManager.shopSlots[3].gameObject);
                 EnableSpecificShopSlots(0, 3);
                 break;
-            case 17:
-                SetDialogPanelVisible(false);
-                darkOverlay.SetActive(true);
-                HighlightUI(shopManager.nextStageButton.gameObject);
-                break;
             case 20:
                 SetDialogPanelVisible(false);
                 darkOverlay.SetActive(true);
-                HighlightUI(shopManager.shopSlots[0].gameObject);
-                HighlightUI(shopManager.shopSlots[1].gameObject);
-                EnableSpecificShopSlots(0, 1);
-                break;
-            case 21:
-                SetDialogPanelVisible(false);
-                darkOverlay.SetActive(true);
                 HighlightUI(shopManager.nextStageButton.gameObject);
                 break;
+            case 21:             
+                    StartCoroutine(ForceSpawnTutorialDice());
+                    //피규어 상세 팝업을 열고 닫을 때까지 기다리는 코루틴 실행
+                    StartCoroutine(WaitForFigurePopupClose());
+                break;
+                
+
+            case 22:
+                SetDialogPanelVisible(false);
+                darkOverlay.SetActive(false);
+                HighlightUI(uiManager.finishButton.gameObject);
+                break;
+
+            //두 번째 상점: 4개 아이템 동시 활성화 및 코팅 마지막 구매 강요
+            case 23:
+                SetDialogPanelVisible(false);
+                UpdateShop2PurchaseState();
+                break;
+
+            // 주사위 코팅 선택창 연출 및 다음 스테이지 버튼 유도
+            case 24:
+                SetDialogPanelVisible(false);
+                darkOverlay.SetActive(true);
+                if (coatingSelectionPanel != null && coatingSelectionPanel.panelRoot.activeSelf)
+                {
+                    HighlightUI(coatingSelectionPanel.panelRoot);
+                }
+                else
+                {
+                    HighlightUI(shopManager.nextStageButton.gameObject);
+                }
+                break;
+
+            //  보스전 주사위 고정 결과 후 끝내기 유도
+            case 27:
+                SetDialogPanelVisible(false);
+                darkOverlay.SetActive(true);
+                HighlightUI(uiManager.finishButton.gameObject);
+                break;
+
+            case 30:
+                SetDialogPanelVisible(false);
+                darkOverlay.SetActive(true);
+                // 인벤토리의 페퍼민트와 가니쉬 스낵 슬롯만 밝게 하이라이트!
+                if (InventoryManager.Instance != null && InventoryManager.Instance.snackSlots.Length >= 2)
+                {
+                    HighlightUI(InventoryManager.Instance.snackSlots[0].gameObject);
+                    HighlightUI(InventoryManager.Instance.snackSlots[1].gameObject);
+                }
+                break;
+
+            //바이옴 선택 패널 활성화
+            case 33:
+                SetDialogPanelVisible(false);
+                darkOverlay.SetActive(true);
+                if (biomeSelectionPanel != null)
+                {
+                    foreach (var slot in biomeSelectionPanel.choiceSlots)
+                    {
+                        if (slot.gameObject.activeSelf) HighlightUI(slot.gameObject);
+                    }
+                }
+                break;
+        }
+    }
+
+    // 두 번째 상점에서 구매 상태에 따라 버튼의 Interactable과 하이라이트를 실시간 제어하는 함수
+    private void UpdateShop2PurchaseState()
+    {
+        SetShopSlotsInteractable(false);
+        ClearHighlight();
+        darkOverlay.SetActive(true);
+
+        // 페퍼민트, 가니쉬, 하트주사위가 다 구매되었을 때만 코팅 슬롯(3번 슬롯) 구매 활성화
+        bool clearBasicItems = boughtPeppermint && boughtGarnish && boughtHeartDice;
+
+        if (!boughtPeppermint) HighlightUI(shopManager.shopSlots[0].gameObject);
+        if (!boughtGarnish) HighlightUI(shopManager.shopSlots[1].gameObject);
+        if (!boughtHeartDice) HighlightUI(shopManager.shopSlots[2].gameObject);
+
+        shopManager.shopSlots[0].buyButton.interactable = !boughtPeppermint;
+        shopManager.shopSlots[1].buyButton.interactable = !boughtGarnish;
+        shopManager.shopSlots[2].buyButton.interactable = !boughtHeartDice;
+
+        if (clearBasicItems)
+        {
+            HighlightUI(shopManager.shopSlots[3].gameObject);
+            shopManager.shopSlots[3].buyButton.interactable = !boughtCoating;
         }
     }
 
@@ -313,7 +434,7 @@ public class TutorialManager : MonoBehaviour
         // 1. 가장 중요: 튜토리얼 루트 자체를 꺼야 화면을 가로막는 투명 레이어가 완전히 사라집니다.
         tutorialRoot.SetActive(false);
 
-        // 2. 가림막과 대사창 상태도 확실히 정리 (나중에 ShowStep(23)에서 다시 켤 때를 대비)
+        // 2. 가림막과 대사창 상태도 확실히 정리 (나중에 ShowStep에서 다시 켤 때를 대비)
         SetDialogPanelVisible(false);
         darkOverlay.SetActive(false);
 
@@ -330,7 +451,7 @@ public class TutorialManager : MonoBehaviour
             diceManager.ForceUpdateUI();
         }
 
-        // 5. 유저가 몬스터를 다 잡을 때까지 기다리는 코루틴 실행
+        // 5. 유저가 보스 몬스터를 다 잡을 때까지 기다리는 코루틴 실행
         StartCoroutine(WaitForMonsterDefeat());
     }
 
@@ -345,8 +466,8 @@ public class TutorialManager : MonoBehaviour
         // 몬스터가 죽고, 박제 연출이 모두 끝날 때까지 여유롭게 대기 (3.5초)
         yield return new WaitForSeconds(3.5f);
 
-        // 23번 대사 띄우기
-        ShowStep(23);
+        // 32번 대사 띄우기 (적 박제 완료 대사 안내)
+        ShowStep(32);
     }
 
     private void SetDialogPanelVisible(bool isVisible)
@@ -399,18 +520,53 @@ public class TutorialManager : MonoBehaviour
         if (!isTutorialActive) return;
 
         if (currentStepIndex == 6) ShowStep(7);
-        else if (currentStepIndex == 9 || currentStepIndex == 19)
+        else if (currentStepIndex == 9)
         {
             ClearHighlight();
-            StartCoroutine(WaitAndHighlightShop());
+            if (diceManager.enemy != null)
+            {
+                diceManager.enemy.TakeDamage(99999, null); // 9번스텝에서 확정 처치 연출 실행
+            }
+            StartCoroutine(WaitAndOpenLootPanel());
+        }
+        else if (currentStepIndex == 22)
+        {
+            ClearHighlight();
+            StartCoroutine(WaitAndOpenShop2());
+        }
+        else if (currentStepIndex == 27)
+        {
+            ClearHighlight();
+            ShowStep(28); // 보스 반격 이벤트 대사로 연결
         }
     }
 
-    private IEnumerator WaitAndHighlightShop()
+    // [추가] 9번 스텝 종료 후 몬스터 사망 및 전리품 UI 등장 코루틴
+    private IEnumerator WaitAndOpenLootPanel()
+    {
+        yield return new WaitForSeconds(2.5f);
+        if (lootSelectionPanel != null)
+        {
+            lootSelectionPanel.OpenSelection(diceManager);
+            ShowStep(10);
+        }
+    }
+
+    // [추가] 전리품 선택 완료 시 호출될 훅 함수 (LootSelectionPanel이나 LootChoiceSlot에서 연동)
+    public void OnLootSelectedComplete()
+    {
+        if (!isTutorialActive) return;
+        if (currentStepIndex == 11)
+        {
+            ShowStep(12);
+        }
+    }
+
+    private IEnumerator WaitAndOpenShop2()
     {
         yield return new WaitForSeconds(3.0f);
-        if (uiManager.nextStageButton != null) uiManager.nextStageButton.gameObject.SetActive(false);
-        if (uiManager.goShopButton != null) HighlightUI(uiManager.goShopButton.gameObject);
+        if (uiManager.goShopButton != null) uiManager.goShopButton.gameObject.SetActive(true);
+        ShowStep(23);
     }
 
     private void OnGoShopClicked()
@@ -420,25 +576,33 @@ public class TutorialManager : MonoBehaviour
         ClearHighlight();
         if (uiManager.nextStageButton != null) uiManager.nextStageButton.gameObject.SetActive(true);
 
-        if (currentStepIndex == 9) ShowStep(10);
-        if (currentStepIndex == 19) ShowStep(20);
+        if (currentStepIndex == 12) ShowStep(13);
     }
 
     public void OnItemBought(string itemName)
     {
         if (!isTutorialActive) return;
 
-        if (currentStepIndex == 16)
+        if (currentStepIndex == 19)
         {
             if (itemName == tutorialHighRollerDice.itemName) boughtHighRoller = true;
             if (itemName == tutorialFigure.itemName) boughtFigure = true;
-            if (boughtHighRoller && boughtFigure) ShowStep(17);
+            if (boughtHighRoller && boughtFigure) ShowStep(20);
         }
-        else if (currentStepIndex == 20)
+        else if (currentStepIndex == 23)
         {
             if (itemName == tutorialPeppermint.itemName) boughtPeppermint = true;
             if (itemName == tutorialGarnish.itemName) boughtGarnish = true;
-            if (boughtPeppermint && boughtGarnish) ShowStep(21);
+            if (itemName == tutorialHeartDice.itemName) boughtHeartDice = true;
+            if (itemName == tutorialCoating.itemName) boughtCoating = true;
+
+            // 실시간 상태 업데이트 적용 및 코팅 마지막 선택 강제화
+            UpdateShop2PurchaseState();
+
+            if (boughtPeppermint && boughtGarnish && boughtHeartDice && boughtCoating)
+            {
+                ShowStep(24);
+            }
         }
     }
 
@@ -446,24 +610,26 @@ public class TutorialManager : MonoBehaviour
     {
         if (!isTutorialActive) return;
 
-        if (currentStepIndex == 17) ShowStep(18);
-        else if (currentStepIndex == 21)
+        if (currentStepIndex == 20) ShowStep(21);
+        else if (currentStepIndex == 24) ShowStep(25); // 보스 몬스터 조우(25)로 전환
+        else if (currentStepIndex == 30)
         {
             ClearHighlight();
             darkOverlay.SetActive(true);
-
-            // 인벤토리의 페퍼민트와 가니쉬 스낵 슬롯만 밝게 하이라이트!
-            if (InventoryManager.Instance != null && InventoryManager.Instance.snackSlots.Length >= 2)
-            {
-                HighlightUI(InventoryManager.Instance.snackSlots[0].gameObject);
-                HighlightUI(InventoryManager.Instance.snackSlots[1].gameObject);
-            }
         }
+    }
+
+    // [추가] 주사위 코팅 처리가 완전히 끝났을 때 연동되는 함수
+    public void OnCoatingAppliedComplete()
+    {
+        if (!isTutorialActive || currentStepIndex != 24) return;
+        ClearHighlight();
+        HighlightUI(shopManager.nextStageButton.gameObject);
     }
 
     public void OnItemUsed(string itemName)
     {
-        if (!isTutorialActive || currentStepIndex != 21) return;
+        if (!isTutorialActive || currentStepIndex != 30) return;
 
         if (itemName == tutorialPeppermint.itemName) usedPeppermint = true;
         if (itemName == tutorialGarnish.itemName) usedGarnish = true;
@@ -472,7 +638,7 @@ public class TutorialManager : MonoBehaviour
         {
             hasTransitionedTo22 = true;
             ClearHighlight(); // 슬롯 하이라이트 해제
-            ShowStep(22);     // 바로 22번 대사("자 이제 자유롭게...") 출력
+            ShowStep(31);     // 자유 전투(31) 시작 안내로 변경
         }
     }
 
@@ -491,7 +657,17 @@ public class TutorialManager : MonoBehaviour
 
         // 이후 단계 (족보 설명 등을 위해 다시 높은 숫자가 필요할 때)
         if (currentStepIndex >= 7 && currentStepIndex <= 9) return 5;
-        if (currentStepIndex >= 17 && currentStepIndex <= 20) return 6;
+        if (currentStepIndex >= 17 && currentStepIndex <= 22) return 6;
+
+        // [추가 기믹] 27단계 보스 조우 씬 진입 시 주사위 강제 2, 2, 2, 4, 5 설계
+        if (currentStepIndex == 27)
+        {
+            if (diceIndex == 0) return 2;
+            if (diceIndex == 1) return 2;
+            if (diceIndex == 2) return 2;
+            if (diceIndex == 3) return 4;
+            if (diceIndex == 4) return 5;
+        }
 
         return -1;
     }
@@ -569,5 +745,17 @@ public class TutorialManager : MonoBehaviour
         darkOverlay.SetActive(false);
         ClearHighlight();
         Debug.Log("튜토리얼 종료! 이제 자유롭게 플레이하세요.");
+    }
+
+    // 현재 스테이지(라운드) 번호를 받아서 그에 맞는 튜토리얼용 몬스터를 반환합니다.
+    public MonsterDataSO GetTutorialMonster(int stageIndex)
+    {
+        if (!isTutorialActive) return null;
+
+        if (stageIndex == 1) return tutorialMonster1;
+        if (stageIndex == 2) return tutorialMonster2;
+        if (stageIndex == 3) return tutorialBossMonster;
+
+        return null;
     }
 }
