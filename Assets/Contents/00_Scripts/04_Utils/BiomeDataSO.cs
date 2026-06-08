@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public class BiomeDataSO : ScriptableObject
 {
     [Header("맵 설정")]
+    public BiomeType biomeType; //인스펙터에서 Forest, Meadow 등을 매핑
     public string biomeName = "새로운 생물군계";
     public Sprite backgroundImage;
 
