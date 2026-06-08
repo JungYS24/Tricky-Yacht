@@ -18,8 +18,8 @@ public class FigureDataSyncWindow : EditorWindow
 
         string jsonText = File.ReadAllText(jsonPath);
 
-        int dataStartIndex = jsonText.IndexOf("\"FigureDataList\": {");
-        if (dataStartIndex == -1)
+        int startIndex = jsonText.IndexOf("\"FigureDataList\": {");
+        if (startIndex == -1)
         {
             Debug.LogError("[Studio 10&6] JSON 루트 키 'FigureDataList'를 찾을 수 없습니다.");
             return;
@@ -31,12 +31,14 @@ public class FigureDataSyncWindow : EditorWindow
             Directory.CreateDirectory(targetFolderPath);
         }
 
+        string spriteRootPath = "Assets/Contents/02_Sprites/07_Figure";
         string[] splitData = jsonText.Split(new string[] { "}," }, System.StringSplitOptions.RemoveEmptyEntries);
         int syncCount = 0;
 
         foreach (string block in splitData)
         {
             if (!block.Contains("\"itemName\"")) continue;
+
             int idStartIndex = block.IndexOf("\"Fig_");
             if (idStartIndex == -1) continue;
             int idEndIndex = block.IndexOf("\"", idStartIndex + 1);
@@ -47,36 +49,22 @@ public class FigureDataSyncWindow : EditorWindow
 
             string pureJson = block.Substring(contentStartIndex).Trim();
 
-            // 끝자리 괄호 보정 문법 에러 제어
-            if (!pureJson.EndsWith("}"))
-            {
-                pureJson += "}";
-            }
-            // 전체 json 닫는 부분 잔여물 괄호 정리
-            if (pureJson.Contains("} }"))
-            {
-                pureJson = pureJson.Replace("} }", "}");
-            }
-            if (pureJson.EndsWith("}}"))
-            {
-                pureJson = pureJson.Substring(0, pureJson.Length - 1);
-            }
+            if (!pureJson.EndsWith("}")) pureJson += "}";
+            if (pureJson.Contains("} }")) pureJson = pureJson.Replace("} }", "}");
+            if (pureJson.EndsWith("}}")) pureJson = pureJson.Substring(0, pureJson.Length - 1);
 
             JsonFigureItem data = null;
             try
             {
                 data = JsonUtility.FromJson<JsonFigureItem>(pureJson);
             }
-            catch (System.Exception e)
+            catch (System.Exception)
             {
-                // 에러가 나는 특정 항목이 있다면 패스하고 로그 출력
-                Debug.LogWarning($"[Studio 10&6] {currentID} 블록 파싱 스킵 (포맷팅 교정 중): {e.Message}");
                 continue;
             }
 
             if (data == null) continue;
 
-            // 에셋 경로 설정 및 매핑
             string assetPath = $"{targetFolderPath}/{currentID}.asset";
             FigureItemSO asset = AssetDatabase.LoadAssetAtPath<FigureItemSO>(assetPath);
 
@@ -87,15 +75,27 @@ public class FigureDataSyncWindow : EditorWindow
                 isNew = true;
             }
 
-            // --- 데이터 인스펙터 동기화 할당 ---
+            // --- 데이터 직렬화 동기화 ---
             asset.itemID = currentID;
             asset.itemName = data.itemName;
             asset.price = data.price;
             asset.description = data.description;
 
+            // [구조 수정] 자식 클래스의 iconSprite 대신 부모 클래스(BaseItemDataSO)에 구현된 원래 'icon' 필드에 직접 타겟팅합니다.
+            string fullSpritePath = $"{spriteRootPath}/{data.biomeFolder}/{data.icon}.png";
+            Sprite targetSprite = AssetDatabase.LoadAssetAtPath<Sprite>(fullSpritePath);
+
+            if (targetSprite != null)
+            {
+                asset.icon = targetSprite;
+            }
+            else
+            {
+                Debug.LogWarning($"[Studio 10&6] 스프라이트 로드 실패. 경로를 확인하세요: {fullSpritePath}");
+            }
+
             asset.figureNodes = new List<FigureNode>();
 
-            // 공백 처리 호환 Enum 파싱
             System.Enum.TryParse(data.triggerType.Replace(" ", ""), out FigureTriggerType parsedTrigger);
             System.Enum.TryParse(data.effectType.Replace(" ", ""), out FigureEffectType parsedEffect);
 
@@ -109,7 +109,6 @@ public class FigureDataSyncWindow : EditorWindow
 
             newNode.effects.Add(effectNode);
             asset.figureNodes.Add(newNode);
-            // ---------------------------------
 
             if (isNew)
             {
@@ -126,7 +125,7 @@ public class FigureDataSyncWindow : EditorWindow
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"[Studio 10&6] 파싱 교정 완료! {targetFolderPath} 폴더에 {syncCount}개의 노드형 피규어 SO 에셋 빌드를 마쳤습니다.");
+        Debug.Log($"[Studio 10&6] 부모 속성 동기화 완료! {targetFolderPath}에 {syncCount}개의 깔끔한 피규어 SO를 빌드했습니다.");
     }
 }
 
@@ -141,4 +140,5 @@ public class JsonFigureItem
     public string effectType;
     public float effectValue;
     public string optionalItem;
+    public string biomeFolder;
 }

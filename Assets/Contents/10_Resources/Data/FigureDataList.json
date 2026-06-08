@@ -8,7 +8,8 @@
       "triggerType": "Passive",
       "effectType": "Add Chips",
       "effectValue": 10,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "01_Forest"
     },
     "Fig_Mushroom": {
       "itemName": "버섯",
@@ -18,7 +19,8 @@
       "triggerType": "Three Of 2",
       "effectType": "Heal HP",
       "effectValue": 5,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "01_Forest"
     },
     "Fig_Goiblin_Shield": {
       "itemName": "고블린 방패",
@@ -28,7 +30,8 @@
       "triggerType": "One Pair",
       "effectType": "Add Chips",
       "effectValue": 15,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "01_Forest"
     },
     "Fig_Arrowhead": {
       "itemName": "화살통",
@@ -38,7 +41,8 @@
       "triggerType": "Straight",
       "effectType": "Damage Enemy",
       "effectValue": 25,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "01_Forest"
     },
     "Fig_StoneAx": {
       "itemName": "돌도끼",
@@ -48,7 +52,8 @@
       "triggerType": "Three Of 5",
       "effectType": "Damage Enemy",
       "effectValue": 40,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "01_Forest"
     },
     "Fig_Emerald": {
       "itemName": "에메랄드",
@@ -58,7 +63,8 @@
       "triggerType": "Triple",
       "effectType": "Add Gold",
       "effectValue": 30,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "02_Meadow"
     },
     "Fig_Shell": {
       "itemName": "거북 등껍질",
@@ -68,7 +74,8 @@
       "triggerType": "On HP Lost",
       "effectType": "Add Chips",
       "effectValue": 12,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "02_Meadow"
     },
     "Fig_BladeScale": {
       "itemName": "칼날 비늘",
@@ -78,7 +85,8 @@
       "triggerType": "Three Of 1",
       "effectType": "Damage Enemy",
       "effectValue": 18,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "02_Meadow"
     },
     "Fig_Sash": {
       "itemName": "투기의 머리띠",
@@ -88,7 +96,8 @@
       "triggerType": "On HP Lost",
       "effectType": "Add Multiplier",
       "effectValue": 2,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "02_Meadow"
     },
     "Fig_Hoof": {
       "itemName": "번개 편자",
@@ -98,7 +107,8 @@
       "triggerType": "Two Pair",
       "effectType": "Add Reroll",
       "effectValue": 1,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "02_Meadow"
     },
     "Fig_SolgasEye": {
       "itemName": "솔가의 눈",
@@ -108,7 +118,8 @@
       "triggerType": "Passive",
       "effectType": "Add Multiplier",
       "effectValue": 4,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "02_Meadow"
     },
     "Fig_Clay_Acolyte": {
       "itemName": "찰흙 동자승",
@@ -118,17 +129,19 @@
       "triggerType": "Three Of 3",
       "effectType": "Heal HP",
       "effectValue": 6,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "03_Temple"
     },
-    "Fig_Buddha_Nose": {
+    "Fig_Nose": {
       "itemName": "불상의 코",
       "price": 200,
-      "icon": "Fig_Buddha_Nose",
+      "icon": "Fig_Nose",
       "description": "주사위 족보가 트리플 달성 시 최종 칩수를 25 획득합니다",
       "triggerType": "Triple",
       "effectType": "Add Chips",
       "effectValue": 25,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "03_Temple"
     },
     "Fig_Old_Rosary": {
       "itemName": "오래된 염주",
@@ -138,47 +151,52 @@
       "triggerType": "On Snack Used",
       "effectType": "Add Multiplier",
       "effectValue": 1.5,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "03_Temple"
     },
     "Fig_Ash_Censer": {
       "itemName": "재의 향로",
       "price": 240,
-      "icon": "Fig_Ash_Censer",
+      "icon": "Fig_Incense",
       "description": "주사위 결산 시 4의 눈금이 3개 이상이면 코인을 20 획득합니다",
       "triggerType": "Three Of 4",
       "effectType": "Add Gold",
       "effectValue": 20,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "03_Temple"
     },
     "Fig_Lotus_Seed": {
-      "itemName": "연꽃 종자",
+      "itemName": "붉은 연꽃",
       "price": 210,
-      "icon": "Fig_Lotus_Seed",
+      "icon": "Fig_RedLotus",
       "description": "주사위 족보가 원 페어 달성 시 체력을 4 회복합니다",
       "triggerType": "One Pair",
       "effectType": "Heal HP",
       "effectValue": 4,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "03_Temple"
     },
-    "Fig_Guanyin_Crown": {
+    "Fig_GoldCrown": {
       "itemName": "관음 왕관",
       "price": 450,
-      "icon": "Fig_Guanyin_Crown",
+      "icon": "Fig_GoldCrown",
       "description": "주사위 족보가 풀하우스 달성 시 최종 배수를 5 획득합니다",
       "triggerType": "Full House",
       "effectType": "Add Multiplier",
       "effectValue": 5,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "03_Temple"
     },
     "Fig_Leopard_Doll": {
-      "itemName": "표범 인형",
+      "itemName": "재규어 인형",
       "price": 320,
-      "icon": "Fig_Leopard_Doll",
+      "icon": "Fig_Jaguar_doll",
       "description": "주사위 족보가 스트레이트 달성 시 굴리기 횟수를 1 추가합니다",
       "triggerType": "Straight",
       "effectType": "Add Reroll",
       "effectValue": 1,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "04_Jungle"
     },
     "Fig_Mangrove_Msh": {
       "itemName": "맹그로브 버섯",
@@ -188,7 +206,8 @@
       "triggerType": "On Snack Used",
       "effectType": "Heal HP",
       "effectValue": 5,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "04_Jungle"
     },
     "Fig_Butterfly_Ring": {
       "itemName": "나비 반지",
@@ -198,7 +217,8 @@
       "triggerType": "Two Pair",
       "effectType": "Add Chips",
       "effectValue": 20,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "04_Jungle"
     },
     "Fig_Banana": {
       "itemName": "바나나",
@@ -208,7 +228,8 @@
       "triggerType": "On Snack Used",
       "effectType": "Add Gold",
       "effectValue": 15,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "04_Jungle"
     },
     "Fig_Vine_Mask": {
       "itemName": "덩굴 가면",
@@ -218,7 +239,8 @@
       "triggerType": "Three Of 6",
       "effectType": "Damage Enemy",
       "effectValue": 28,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "04_Jungle"
     },
     "Fig_Banana_Crown": {
       "itemName": "바나나 왕관",
@@ -228,37 +250,41 @@
       "triggerType": "Four Of A Kind",
       "effectType": "Heal HP",
       "effectValue": 25,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "04_Jungle"
     },
     "Fig_Fox_Tail": {
       "itemName": "사막여우 꼬리",
       "price": 180,
-      "icon": "Fig_Fox_Tail",
+      "icon": "Fig_Foxtail",
       "description": "주사위 족보가 원 페어 달성 시 굴리기 횟수를 1 추가합니다",
       "triggerType": "One Pair",
       "effectType": "Add Reroll",
       "effectValue": 1,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "05_Desert"
     },
     "Fig_Sand_Shield": {
       "itemName": "모래 방패",
       "price": 220,
-      "icon": "Fig_Sand_Shield",
+      "icon": "Fig_SandShield",
       "description": "플레이어 체력이 감소할 때마다 코인을 25 획득합니다",
       "triggerType": "On HP Lost",
       "effectType": "Add Gold",
       "effectValue": 25,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "05_Desert"
     },
     "Fig_Sand_Necklace": {
       "itemName": "모래 목걸이",
       "price": 200,
-      "icon": "Fig_Sand_Necklace",
+      "icon": "Fig_SandNecklace",
       "description": "상시 지속으로 최종 칩수를 15 획득합니다",
       "triggerType": "Passive",
       "effectType": "Add Chips",
       "effectValue": 15,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "05_Desert"
     },
     "Fig_Cactus_Pot": {
       "itemName": "선인장 화분",
@@ -268,17 +294,19 @@
       "triggerType": "Three Of 3",
       "effectType": "Damage Enemy",
       "effectValue": 24,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "05_Desert"
     },
     "Fig_Mirage_Bottle": {
       "itemName": "유리병 속 신기루",
       "price": 230,
-      "icon": "Fig_Mirage_Bottle",
+      "icon": "Fig_WispinBottle",
       "description": "주사위 족보가 투 페어 달성 시 체력을 7 회복합니다",
       "triggerType": "Two Pair",
       "effectType": "Heal HP",
       "effectValue": 7,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "05_Desert"
     },
     "Fig_Sandworm_Doll": {
       "itemName": "모래벌레 인형",
@@ -288,7 +316,8 @@
       "triggerType": "Three Of 1",
       "effectType": "Add Chips",
       "effectValue": 22,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "05_Desert"
     },
     "Fig_Hourglass": {
       "itemName": "모래시계",
@@ -298,7 +327,8 @@
       "triggerType": "Triple",
       "effectType": "Add Reroll",
       "effectValue": 1,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "05_Desert"
     },
     "Fig_Tutankhamun": {
       "itemName": "투탕카멘",
@@ -308,7 +338,8 @@
       "triggerType": "Yacht",
       "effectType": "Add Gold",
       "effectValue": 200,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "05_Desert"
     },
     "Fig_Sages_Stone": {
       "itemName": "현자의 돌",
@@ -318,7 +349,8 @@
       "triggerType": "Straight",
       "effectType": "Add Multiplier",
       "effectValue": 3,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "06_Ruins"
     },
     "Fig_Gargoyle_Dice": {
       "itemName": "가고일 주사위",
@@ -328,7 +360,8 @@
       "triggerType": "Three Of 6",
       "effectType": "Add Chips",
       "effectValue": 30,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "06_Ruins"
     },
     "Fig_Dart_Dice": {
       "itemName": "다트 주사위",
@@ -338,37 +371,41 @@
       "triggerType": "Three Of 2",
       "effectType": "Damage Enemy",
       "effectValue": 16,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "06_Ruins"
     },
     "Fig_Gilded_Skull": {
       "itemName": "황금 해골",
       "price": 380,
-      "icon": "Fig_Gilded_Skull",
+      "icon": "Fig_GoldSkull",
       "description": "주사위 족보가 풀하우스 달성 시 코인을 70 획득합니다",
       "triggerType": "Full House",
       "effectType": "Add Gold",
       "effectValue": 70,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "06_Ruins"
     },
     "Fig_Treasure_Chest": {
       "itemName": "보물상자",
       "price": 250,
-      "icon": "Fig_Treasure_Chest",
+      "icon": "Fig_Mimic",
       "description": "주사위 족보가 트리플 달성 시 코인을 35 획득합니다",
       "triggerType": "Triple",
       "effectType": "Add Gold",
       "effectValue": 35,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "06_Ruins"
     },
     "Fig_Tormentor_Sign": {
       "itemName": "거신의 징표",
       "price": 480,
-      "icon": "Fig_Tormentor_Sign",
+      "icon": "Fig_Tormentor_Symbol",
       "description": "주사위 족보가 포카드 달성 시 적에게 데미지를 60 줍니다",
       "triggerType": "Four Of A Kind",
       "effectType": "Damage Enemy",
       "effectValue": 60,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "06_Ruins"
     },
     "Fig_Safety_Helmet": {
       "itemName": "안전모",
@@ -378,7 +415,8 @@
       "triggerType": "On HP Lost",
       "effectType": "Heal HP",
       "effectValue": 4,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "06_Ruins"
     },
     "Fig_Candle": {
       "itemName": "양초",
@@ -388,7 +426,8 @@
       "triggerType": "Three Of 1",
       "effectType": "Heal HP",
       "effectValue": 5,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "07_Cave"
     },
     "Fig_Obsidian_Cube": {
       "itemName": "흑요석 큐브",
@@ -398,7 +437,8 @@
       "triggerType": "Three Of 4",
       "effectType": "Damage Enemy",
       "effectValue": 32,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "07_Cave"
     },
     "Fig_Bat_Dice": {
       "itemName": "박쥐 주사위",
@@ -408,17 +448,19 @@
       "triggerType": "One Pair",
       "effectType": "Add Multiplier",
       "effectValue": 1,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "07_Cave"
     },
     "Fig_Ancient_Rune": {
       "itemName": "고대의 룬",
       "price": 460,
-      "icon": "Fig_Ancient_Rune",
+      "icon": "Fig_Rune",
       "description": "주사위 족보가 야추 달성 시 최종 배수를 10 획득합니다",
       "triggerType": "Yacht",
       "effectType": "Add Multiplier",
       "effectValue": 10,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "07_Cave"
     },
     "Fig_Hellhound_Fang": {
       "itemName": "지옥견 송곳니",
@@ -428,7 +470,8 @@
       "triggerType": "Three Of 5",
       "effectType": "Damage Enemy",
       "effectValue": 26,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "08_Volcano"
     },
     "Fig_Magma_Jelly": {
       "itemName": "용암 젤리",
@@ -438,7 +481,8 @@
       "triggerType": "On Snack Used",
       "effectType": "Add Chips",
       "effectValue": 18,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "08_Volcano"
     },
     "Fig_Flame_Collar": {
       "itemName": "화염 목줄",
@@ -448,7 +492,8 @@
       "triggerType": "Two Pair",
       "effectType": "Damage Enemy",
       "effectValue": 15,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "08_Volcano"
     },
     "Fig_Lava_Mask": {
       "itemName": "용암 가면",
@@ -458,7 +503,8 @@
       "triggerType": "Four Of A Kind",
       "effectType": "Add Multiplier",
       "effectValue": 6,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "08_Volcano"
     },
     "Fig_Bumpy_Helmet": {
       "itemName": "울퉁불퉁 헬멧",
@@ -468,7 +514,8 @@
       "triggerType": "On HP Lost",
       "effectType": "Damage Enemy",
       "effectValue": 12,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "08_Volcano"
     },
     "Fig_Phoenix_Feather": {
       "itemName": "불사조 깃털",
@@ -478,7 +525,8 @@
       "triggerType": "On HP Lost",
       "effectType": "Add Reroll",
       "effectValue": 1,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "08_Volcano"
     },
     "Fig_Volcano_Web": {
       "itemName": "화산 거미줄",
@@ -488,7 +536,8 @@
       "triggerType": "Three Of 2",
       "effectType": "Add Multiplier",
       "effectValue": 1.8,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "08_Volcano"
     },
     "Fig_Drake_Egg": {
       "itemName": "아룡의 알",
@@ -498,7 +547,8 @@
       "triggerType": "Triple",
       "effectType": "Get Snack",
       "effectValue": 1,
-      "optionalItem": "스테이크"
+      "optionalItem": "스테이크",
+      "biomeFolder": "08_Volcano"
     },
     "Fig_Zombie_Msh": {
       "itemName": "좀비 버섯",
@@ -508,7 +558,8 @@
       "triggerType": "Three Of 3",
       "effectType": "Add Multiplier",
       "effectValue": 1.5,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "09_Swamp"
     },
     "Fig_Witch_Lantern": {
       "itemName": "마녀의 랜턴",
@@ -518,7 +569,8 @@
       "triggerType": "Straight",
       "effectType": "Add Gold",
       "effectValue": 40,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "09_Swamp"
     },
     "Fig_Lizard_Tail": {
       "itemName": "도마뱀 꼬리",
@@ -528,7 +580,8 @@
       "triggerType": "Three Of 5",
       "effectType": "Add Chips",
       "effectValue": 35,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "09_Swamp"
     },
     "Fig_Hydra_Doll": {
       "itemName": "히드라 인형",
@@ -538,17 +591,19 @@
       "triggerType": "Yacht",
       "effectType": "Damage Enemy",
       "effectValue": 100,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "09_Swamp"
     },
     "Fig_Sandcastle": {
       "itemName": "모래성",
       "price": 190,
-      "icon": "Fig_Sandcastle",
+      "icon": "Fig_SandCastle",
       "description": "주사위 결산 시 4의 눈금이 3개 이상이면 최종 칩수를 24 획득합니다",
       "triggerType": "Three Of 4",
       "effectType": "Add Chips",
       "effectValue": 24,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "10_Beach"
     },
     "Fig_Coconut_Helmet": {
       "itemName": "코코넛 헬멧",
@@ -558,7 +613,8 @@
       "triggerType": "One Pair",
       "effectType": "Get Snack",
       "effectValue": 1,
-      "optionalItem": "라임주스"
+      "optionalItem": "라임주스",
+      "biomeFolder": "10_Beach"
     },
     "Fig_Crayfish_doll": {
       "itemName": "가재 인형",
@@ -568,7 +624,8 @@
       "triggerType": "Two Pair",
       "effectType": "Add Gold",
       "effectValue": 22,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "10_Beach"
     },
     "Fig_Letter": {
       "itemName": "남겨진 편지",
@@ -578,7 +635,8 @@
       "triggerType": "Three Of 1",
       "effectType": "Add Reroll",
       "effectValue": 1,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "10_Beach"
     },
     "Fig_Clam": {
       "itemName": "조개 껍질",
@@ -588,7 +646,8 @@
       "triggerType": "Three Of 3",
       "effectType": "Add Gold",
       "effectValue": 25,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "10_Beach"
     },
     "Fig_Captains_Hat": {
       "itemName": "선장의 모자",
@@ -598,7 +657,8 @@
       "triggerType": "Full House",
       "effectType": "Damage Enemy",
       "effectValue": 45,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "10_Beach"
     },
     "Fig_Octopus_Dice": {
       "itemName": "문어 다이스",
@@ -608,7 +668,8 @@
       "triggerType": "Four Of A Kind",
       "effectType": "Add Chips",
       "effectValue": 80,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "11_Ocean"
     },
     "Fig_Frigate_Dice": {
       "itemName": "가오리 다이스",
@@ -618,7 +679,8 @@
       "triggerType": "Straight",
       "effectType": "Heal HP",
       "effectValue": 12,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "11_Ocean"
     },
     "Fig_Whirlpool_Trophy": {
       "itemName": "소용돌이 트로피",
@@ -628,7 +690,8 @@
       "triggerType": "Three Of 6",
       "effectType": "Add Multiplier",
       "effectValue": 2.5,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "11_Ocean"
     },
     "Fig_Shark_Dice": {
       "itemName": "상어 다이스",
@@ -638,7 +701,8 @@
       "triggerType": "Full House",
       "effectType": "Add Chips",
       "effectValue": 90,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "11_Ocean"
     },
     "Fig_Bone": {
       "itemName": "뼈다구",
@@ -648,7 +712,8 @@
       "triggerType": "On HP Lost",
       "effectType": "Get Snack",
       "effectValue": 1,
-      "optionalItem": "체리"
+      "optionalItem": "체리",
+      "biomeFolder": "12_Abyss"
     },
     "Fig_Abyssal_Pupil": {
       "itemName": "심연의 동공",
@@ -658,7 +723,8 @@
       "triggerType": "Two Pair",
       "effectType": "Add Multiplier",
       "effectValue": 2.2,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "12_Abyss"
     },
     "Fig_Angler_Doll": {
       "itemName": "아귀 인형",
@@ -668,7 +734,8 @@
       "triggerType": "Three Of 5",
       "effectType": "Add Gold",
       "effectValue": 45,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "12_Abyss"
     },
     "Fig_Starfish": {
       "itemName": "불가사리",
@@ -678,7 +745,8 @@
       "triggerType": "Yacht",
       "effectType": "Add Chips",
       "effectValue": 150,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "12_Abyss"
     },
     "Fig_Snowflake": {
       "itemName": "눈꽃 결정",
@@ -688,7 +756,8 @@
       "triggerType": "Three Of 2",
       "effectType": "Add Chips",
       "effectValue": 20,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "13_Snow"
     },
     "Fig_Icy_Dice": {
       "itemName": "만년설 다이스",
@@ -698,27 +767,30 @@
       "triggerType": "Passive",
       "effectType": "Add Multiplier",
       "effectValue": 2,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "13_Snow"
     },
     "Fig_ice_crystal": {
       "itemName": "얼음 수정",
       "price": 320,
-      "icon": "Fig_ice_crystal",
+      "icon": "Fig_Ice_crystal",
       "description": "주사위 족보가 트리플 달성 시 체력을 10 회복합니다",
       "triggerType": "Triple",
       "effectType": "Heal HP",
       "effectValue": 10,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "13_Snow"
     },
     "Fig_cudgel": {
       "itemName": "예티의 방망이",
       "price": 470,
-      "icon": "Fig_cudgel",
+      "icon": "Fig_Cudgel",
       "description": "주사위 족보가 풀하우스 달성 시 적에게 데미지를 50 줍니다",
       "triggerType": "Full House",
       "effectType": "Damage Enemy",
       "effectValue": 50,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "13_Snow"
     },
     "Fig_Frozen_Heart": {
       "itemName": "얼어붙은 심장",
@@ -728,7 +800,8 @@
       "triggerType": "On HP Lost",
       "effectType": "Add Multiplier",
       "effectValue": 1.8,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "13_Snow"
     },
     "Fig_Ash_Dust": {
       "itemName": "잿가루",
@@ -738,17 +811,19 @@
       "triggerType": "Three Of 4",
       "effectType": "Add Multiplier",
       "effectValue": 1.2,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "14_Grave"
     },
     "Fig_Undertaker_Scythe": {
       "itemName": "장의사의 낫",
       "price": 400,
-      "icon": "Fig_Undertaker_Scythe",
+      "icon": "Fig_Scythe",
       "description": "주사위 결산 시 4의 눈금이 3개 이상이면 적에게 데미지를 14 줍니다",
       "triggerType": "Three Of 4",
       "effectType": "Damage Enemy",
       "effectValue": 14,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "14_Grave"
     },
     "Fig_Skull": {
       "itemName": "두개골",
@@ -758,7 +833,8 @@
       "triggerType": "Three Of 6",
       "effectType": "Add Gold",
       "effectValue": 28,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "14_Grave"
     },
     "Fig_GolemDice": {
       "itemName": "사눈 다이스",
@@ -768,17 +844,19 @@
       "triggerType": "Four Of A Kind",
       "effectType": "Add Gold",
       "effectValue": 120,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "14_Grave"
     },
     "Fig_Moon_Moustache": {
       "itemName": "콧수염 초승달",
       "price": 190,
-      "icon": "Fig_Moon_Moustache",
+      "icon": "Fig_Moon",
       "description": "주사위 족보가 원 페어 달성 시 코인을 18 획득합니다",
       "triggerType": "One Pair",
       "effectType": "Add Gold",
       "effectValue": 18,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "15_Circus"
     },
     "Fig_Jack_Box": {
       "itemName": "깜짝 상자",
@@ -788,7 +866,8 @@
       "triggerType": "Three Of 3",
       "effectType": "Add Reroll",
       "effectValue": 1,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "15_Circus"
     },
     "Fig_Clown_Tear": {
       "itemName": "광대의 눈물",
@@ -798,7 +877,8 @@
       "triggerType": "On HP Lost",
       "effectType": "Add Reroll",
       "effectValue": 1,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "15_Circus"
     },
     "Fig_Mad_Hat": {
       "itemName": "이상한 모자",
@@ -808,27 +888,30 @@
       "triggerType": "Straight",
       "effectType": "Add Chips",
       "effectValue": 50,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "15_Circus"
     },
     "Fig_Spade_King": {
       "itemName": "스페이드 킹",
       "price": 480,
-      "icon": "Fig_Spade_King",
+      "icon": "Fig_SpadeKing",
       "description": "주사위 족보가 포카드 달성 시 굴리기 횟수를 2 추가합니다",
       "triggerType": "Four Of A Kind",
       "effectType": "Add Reroll",
       "effectValue": 2,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "15_Circus"
     },
     "Fig_Devil_Dice": {
-      "itemName": "악마의 주사위",
+      "itemName": "저주받은 석관",
       "price": 600,
-      "icon": "Fig_Devil_Dice",
-      "description": "주사위 족보가 야추 달성 시 적에게 데미지를 150 줍니다",
+      "icon": "Fig_Sarcophagus",
+      "description": "주사위 족보가 야추 달성 시 적에게 데미지를 666 줍니다",
       "triggerType": "Yacht",
       "effectType": "Damage Enemy",
-      "effectValue": 150,
-      "optionalItem": "None"
+      "effectValue": 666,
+      "optionalItem": "None",
+      "biomeFolder": "16_Void"
     },
     "Fig_CatGlove": {
       "itemName": "냥이 솜털 손",
@@ -838,7 +921,8 @@
       "triggerType": "On Snack Used",
       "effectType": "Get Snack",
       "effectValue": 1,
-      "optionalItem": "팬케이크"
+      "optionalItem": "팬케이크",
+      "biomeFolder": "00_Shop"
     },
     "Fig_Comb": {
       "itemName": "그루밍 빗",
@@ -848,7 +932,8 @@
       "triggerType": "On Snack Used",
       "effectType": "Add Reroll",
       "effectValue": 1,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "00_Shop"
     },
     "Fig_GemEye": {
       "itemName": "고양이 눈",
@@ -858,7 +943,8 @@
       "triggerType": "Triple",
       "effectType": "Add Multiplier",
       "effectValue": 2.5,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "00_Shop"
     },
     "Fig_GoldBell": {
       "itemName": "황금 종",
@@ -868,7 +954,8 @@
       "triggerType": "Passive",
       "effectType": "Add Gold",
       "effectValue": 50,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "00_Shop"
     },
     "Fig_SilverBell": {
       "itemName": "은색 종",
@@ -878,7 +965,8 @@
       "triggerType": "Passive",
       "effectType": "Add Gold",
       "effectValue": 30,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "00_Shop"
     },
     "Fig_GoldSkein": {
       "itemName": "황금 털뭉치",
@@ -888,7 +976,8 @@
       "triggerType": "Full House",
       "effectType": "Add Chips",
       "effectValue": 65,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "00_Shop"
     },
     "Fig_RedSkein": {
       "itemName": "붉은 털뭉치",
@@ -898,17 +987,19 @@
       "triggerType": "Two Pair",
       "effectType": "Add Multiplier",
       "effectValue": 2,
-      "optionalItem": "None"
+      "optionalItem": "None",
+      "biomeFolder": "00_Shop"
     },
     "Fig_LuckCat": {
       "itemName": "복고양이",
       "price": 500,
       "icon": "Fig_LuckCat",
-      "description": "상시 지속으로 코인을 40 획득하고 체력을 10 회복합니다",
-      "triggerType": "Passive",
+      "description": "주사위 족보가 트리플 달성 시 코인을 70 획득합니다",
+      "triggerType": "Triple",
       "effectType": "Add Gold",
-      "effectValue": 40,
-      "optionalItem": "None"
+      "effectValue": 30,
+      "optionalItem": "None",
+      "biomeFolder": "00_Shop"
     }
   }
 }

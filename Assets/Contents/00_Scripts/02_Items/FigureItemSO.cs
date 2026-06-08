@@ -1,19 +1,19 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 
 [CreateAssetMenu(fileName = "NewFigure", menuName = "Shop/Items/Figure")]
 public class FigureItemSO : BaseItemDataSO
 {
-    [Header("--- ÇÇ±Ô¾î Àü¿ë ½ºÆå ---")]
+
+    [Header("--- í”¼ê·œì–´ ê³ ìœ  ì‚¬ì–‘ ---")]
     public bool isPermanent = true;
     public int requiredSlots = 1;
 
-    [Header("--- ÇÇ±Ô¾î ³ëµå µ¥ÀÌÅÍ ---")]
-    // ¿¡µğÅÍ¿¡¼­ ¿øÀÎ°ú º¸»óÀ» ÀÚÀ¯·Ó°Ô Á¶¸³ÇÒ ¼ö ÀÖ´Â ¸®½ºÆ®[cite: 1]
+    [Header("--- í”¼ê·œì–´ ë…¸ë“œ ë°ì´í„° ---")]
     public List<FigureNode> figureNodes = new List<FigureNode>();
 
     public override void ApplyItemEffect(DiceManager diceManager)
     {
-        Debug.Log($"{itemName} ÇÇ±Ô¾î È¹µæ! ½½·Ô {requiredSlots} ¼Ò¸ğ");
+        Debug.Log($"{itemName} í”¼ê·œì–´ íšë“! ìŠ¬ë¡¯ {requiredSlots} ì†Œëª¨");
     }
 }
