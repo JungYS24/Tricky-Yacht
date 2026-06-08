@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: feb9ba3cab9d3214cb5f4247511d55e1
+guid: 0727a39bc5671d14a941639f99a12498
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1005499014915444406
-    second: Fig_Volcano_Jelly_0
+      213: 1714150757109077246
+    second: Fig_Net_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Fig_Volcano_Jelly_0
+      name: Fig_Net_0
       rect:
         serializedVersion: 2
-        x: 16
-        y: 14
-        width: 69
-        height: 70
+        x: 10
+        y: 10
+        width: 80
+        height: 81
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6be4a06d60044fd00800000000000000
-      internalID: 1005499014915444406
+      spriteID: ef414f81803e9c710800000000000000
+      internalID: 1714150757109077246
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Fig_Volcano_Jelly_0: 1005499014915444406
+      Fig_Net_0: 1714150757109077246
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

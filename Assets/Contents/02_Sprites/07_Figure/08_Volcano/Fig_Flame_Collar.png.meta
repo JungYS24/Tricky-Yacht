@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: ec89ede7fac60f54081b41c95403febf
+guid: a54b21c346f3a2b46980f38c450d1c46
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8207970744365161508
-    second: Fig_Philosopher's stone_0
+      213: -1118957746132974603
+    second: Fig_Leash_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Fig_Philosopher's stone_0
+      name: Fig_Leash_0
       rect:
         serializedVersion: 2
-        x: 21
-        y: 16
-        width: 58
-        height: 68
+        x: 10
+        y: 20
+        width: 80
+        height: 65
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 42c1fa087e198e170800000000000000
-      internalID: 8207970744365161508
+      spriteID: 5f3821fbbd9a870f0800000000000000
+      internalID: -1118957746132974603
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Fig_Philosopher's stone_0: 8207970744365161508
+      Fig_Leash_0: -1118957746132974603
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
