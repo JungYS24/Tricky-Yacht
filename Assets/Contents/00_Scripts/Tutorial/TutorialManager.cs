@@ -43,13 +43,13 @@ public class TutorialManager : MonoBehaviour
     public BaseItemDataSO tutorialFigure;
     public BaseItemDataSO tutorialPeppermint;
     public BaseItemDataSO tutorialGarnish;
-    public BaseItemDataSO tutorialHeartDice; // [추가] 하트 주사위 데이터
-    public BaseItemDataSO tutorialCoating;   // [추가] 코팅 데이터
+    public BaseItemDataSO tutorialHeartDice; // 하트 주사위 데이터
+    public BaseItemDataSO tutorialCoating;   // 코팅 데이터
 
     [Header("튜토리얼 강제 몬스터 설정")]
-    public GameObject tutorialMonster1; // 1스테이지 강제 몬스터
-    public GameObject tutorialMonster2; // 2스테이지 강제 몬스터
-    public GameObject tutorialBossMonster; // 3스테이지 강제 보스 몬스터
+    public MonsterDataSO tutorialMonster1;
+    public MonsterDataSO tutorialMonster2;
+    public MonsterDataSO tutorialBossMonster;
 
     [Header("첫 번째 상점 강제 아이템 6종")]
     public BaseItemDataSO tutFigure;
@@ -69,20 +69,14 @@ public class TutorialManager : MonoBehaviour
 
     private void Start()
     {
-        // 로비에서 저장한 값을 읽어옴 (기본값은 0)
+        // [수정] 에디터에서 테스트 중이거나, 튜토리얼 씬이라면 강제로 켜줍니다.
+#if UNITY_EDITOR
+        isTutorialActive = true;
+#else
         int shouldRun = PlayerPrefs.GetInt("RunTutorial", 0);
+        isTutorialActive = (shouldRun == 1);
+#endif
 
-        if (shouldRun == 1)
-        {
-            isTutorialActive = true;
-            // ... 기존 튜토리얼 시작 로직 ...
-        }
-        else
-        {
-            isTutorialActive = false;
-            FinishTutorial(); // 튜토리얼 즉시 종료 및 UI 비활성화 함수 호출
-            return;
-        }
         if (isTutorialActive)
         {
             nextButton.onClick.AddListener(ProceedTutorial);
@@ -97,6 +91,10 @@ public class TutorialManager : MonoBehaviour
                 FixTooltipSorting(InventoryManager.Instance.tooltipPanel);
 
             ShowStep(1);
+        }
+        else
+        {
+            FinishTutorial();
         }
     }
 
@@ -143,12 +141,12 @@ public class TutorialManager : MonoBehaviour
                 HighlightUI(shopManager.shopSlots[i].gameObject);
             }
         }
-        else if (step == 21)
-        {
-            StartCoroutine(ForceSpawnTutorialDice());
-            // [기능 추가] 피규어 상세 팝업을 열고 닫을 때까지 기다리는 코루틴 실행
-            StartCoroutine(WaitForFigurePopupClose());
-        }
+        //else if (step == 21)
+        //{
+        //    StartCoroutine(ForceSpawnTutorialDice());
+        //    //피규어 상세 팝업을 열고 닫을 때까지 기다리는 코루틴 실행
+        //    StartCoroutine(WaitForFigurePopupClose());
+        //}
     }
 
     private IEnumerator ForceSpawnTutorialDice()
@@ -260,7 +258,8 @@ public class TutorialManager : MonoBehaviour
         // 신규 추가된 기믹들의 액션 단계 예외 처리 추가
         return step == 2 || step == 3 || step == 4 || step == 6 ||
                step == 7 || step == 8 || step == 9 || step == 11 ||
-               step == 12 || step == 19 || step == 20 || step == 22 ||
+               step == 12 || step == 21 ||
+               step == 19 || step == 20 || step == 22 ||
                step == 23 || step == 24 || step == 27 || step == 30 || step == 33;
     }
 
@@ -310,7 +309,7 @@ public class TutorialManager : MonoBehaviour
                 HighlightUI(uiManager.finishButton.gameObject);
                 break;
 
-            // [추가 기믹] 전리품 선택창 등장 및 첫 번째 슬롯 강요
+            //전리품 선택창 등장 및 첫 번째 슬롯 강요
             case 11:
                 SetDialogPanelVisible(false);
                 darkOverlay.SetActive(true);
@@ -339,6 +338,12 @@ public class TutorialManager : MonoBehaviour
                 darkOverlay.SetActive(true);
                 HighlightUI(shopManager.nextStageButton.gameObject);
                 break;
+            case 21:             
+                    StartCoroutine(ForceSpawnTutorialDice());
+                    //피규어 상세 팝업을 열고 닫을 때까지 기다리는 코루틴 실행
+                    StartCoroutine(WaitForFigurePopupClose());
+                break;
+                
 
             case 22:
                 SetDialogPanelVisible(false);
@@ -346,13 +351,13 @@ public class TutorialManager : MonoBehaviour
                 HighlightUI(uiManager.finishButton.gameObject);
                 break;
 
-            // [추가 기믹] 두 번째 상점: 4개 아이템 동시 활성화 및 코팅 마지막 구매 강요
+            //두 번째 상점: 4개 아이템 동시 활성화 및 코팅 마지막 구매 강요
             case 23:
                 SetDialogPanelVisible(false);
                 UpdateShop2PurchaseState();
                 break;
 
-            // [추가 기믹] 주사위 코팅 선택창 연출 및 다음 스테이지 버튼 유도
+            // 주사위 코팅 선택창 연출 및 다음 스테이지 버튼 유도
             case 24:
                 SetDialogPanelVisible(false);
                 darkOverlay.SetActive(true);
@@ -366,7 +371,7 @@ public class TutorialManager : MonoBehaviour
                 }
                 break;
 
-            // [추가 기믹] 보스전 주사위 고정 결과 후 끝내기 유도
+            //  보스전 주사위 고정 결과 후 끝내기 유도
             case 27:
                 SetDialogPanelVisible(false);
                 darkOverlay.SetActive(true);
@@ -384,7 +389,7 @@ public class TutorialManager : MonoBehaviour
                 }
                 break;
 
-            // [추가 기믹] 바이옴 선택 패널 활성화
+            //바이옴 선택 패널 활성화
             case 33:
                 SetDialogPanelVisible(false);
                 darkOverlay.SetActive(true);
@@ -399,7 +404,7 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    // [추가] 두 번째 상점에서 구매 상태에 따라 버튼의 Interactable과 하이라이트를 실시간 제어하는 함수
+    // 두 번째 상점에서 구매 상태에 따라 버튼의 Interactable과 하이라이트를 실시간 제어하는 함수
     private void UpdateShop2PurchaseState()
     {
         SetShopSlotsInteractable(false);
@@ -743,7 +748,7 @@ public class TutorialManager : MonoBehaviour
     }
 
     // 현재 스테이지(라운드) 번호를 받아서 그에 맞는 튜토리얼용 몬스터를 반환합니다.
-    public GameObject GetTutorialMonster(int stageIndex)
+    public MonsterDataSO GetTutorialMonster(int stageIndex)
     {
         if (!isTutorialActive) return null;
 

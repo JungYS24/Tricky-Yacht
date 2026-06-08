@@ -301,19 +301,7 @@ public class DiceManager : MonoBehaviour
         snackBonusFigureDropRate = 0f;
 
 
-        // 튜토리얼 전용 몬스터 강제 스폰 로직 ---
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-        {
-            GameObject tutMonsterPrefab = TutorialManager.Instance.GetTutorialMonster(currentStage);
-            if (tutMonsterPrefab != null && enemySpawnPoint != null)
-            {
-                // 기존에 있던 몬스터 오브젝트를 파괴하고 새로 지정된 프리팹으로 교체
-                if (enemy != null) Destroy(enemy.gameObject);
-
-                GameObject enemyObj = Instantiate(tutMonsterPrefab, enemySpawnPoint.position, Quaternion.identity);
-                enemy = enemyObj.GetComponent<Enemy>();
-            }
-        }
+       
 
         if (currentBiome != null)
         {
