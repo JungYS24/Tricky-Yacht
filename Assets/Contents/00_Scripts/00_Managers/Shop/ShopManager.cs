@@ -116,7 +116,6 @@ public class ShopManager : MonoBehaviour
                     shopSlots[2].SetupSlot(TutorialManager.Instance.tutCoating, this);
                     shopSlots[3].SetupSlot(TutorialManager.Instance.tutDice, this);
                     shopSlots[4].SetupSlot(TutorialManager.Instance.tutTicket, this);
-
                     if (TutorialManager.Instance.tutDummy != null)
                         shopSlots[5].SetupSlot(TutorialManager.Instance.tutDummy, this);
                 }
@@ -124,7 +123,7 @@ public class ShopManager : MonoBehaviour
             }
 
             // [두 번째 상점] 23단계 (네 가지 특정 아이템 진열 강제)
-            if (step == 23)
+            if (step == 22 || step == 23)
             {
                 for (int i = 0; i < shopSlots.Length; i++)
                 {

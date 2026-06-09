@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BiomeSelectionPanel : MonoBehaviour
 {
     public GameObject panelRoot;
     public BiomeChoiceSlot[] choiceSlots; // 3개의 버튼 슬롯 연결
-
+    public Button mainMenuButton; //메인 메뉴로 돌아가는 버튼
     public void OpenPanel(DiceManager manager, List<BiomeType> nextBiomes)
     {
         for (int i = 0; i < choiceSlots.Length; i++)
@@ -25,6 +26,12 @@ public class BiomeSelectionPanel : MonoBehaviour
                 choiceSlots[i].gameObject.SetActive(false);
             }
         }
+
+        if (mainMenuButton != null)
+        {
+            mainMenuButton.gameObject.SetActive(false);
+        }
+
         panelRoot.SetActive(true);
     }
 

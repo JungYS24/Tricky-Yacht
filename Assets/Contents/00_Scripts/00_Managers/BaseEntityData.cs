@@ -32,12 +32,6 @@ public class CoatingData : BaseEntityData
     public float Effect_Value;
 }
 
-[Serializable]
-public class MonsterData : BaseEntityData
-{
-    public int HP;
-    public int ATK;
-}
 
 [Serializable]
 public class GameDataWrapper<T>

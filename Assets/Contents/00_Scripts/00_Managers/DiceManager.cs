@@ -369,6 +369,54 @@ public class DiceManager : MonoBehaviour
             ShufflePile(drawPile);
         }
 
+        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+        {
+            // 2스테이지 첫 진입 시 하이롤러 주사위 확정 스폰!
+            // 버튼 실행 순서에 상관없이 currentStage가 2가 되면 처음부터 무조건 발동!
+            if (currentStage == 2 && drawPile.Count >= 5)
+            {
+                string hrName = TutorialManager.Instance.tutorialHighRollerDice.itemName;
+                int hrIdx = drawPile.FindIndex(d => d.diceName == hrName);
+                if (hrIdx != -1)
+                {
+                    var temp = drawPile[0];
+                    drawPile[0] = drawPile[hrIdx];
+                    drawPile[hrIdx] = temp;
+                }
+            }
+            // 3스테이지 보스 반격 후 체력 회복 튜토리얼 (하트 주사위 확정)
+            else if (currentStage == 3 && TutorialManager.Instance.currentStepIndex >= 28 && TutorialManager.Instance.currentStepIndex <= 30)
+            {
+                int heartIdx = drawPile.FindIndex(d => d.specialEffect == SpecialDieEffect.Heart);
+                if (heartIdx == -1)
+                {
+                    int discardIdx = discardPile.FindIndex(d => d.specialEffect == SpecialDieEffect.Heart);
+                    if (discardIdx != -1)
+                    {
+                        drawPile.Insert(0, discardPile[discardIdx]);
+                        discardPile.RemoveAt(discardIdx);
+                    }
+                }
+                else
+                {
+                    var temp = drawPile[0];
+                    drawPile[0] = drawPile[heartIdx];
+                    drawPile[heartIdx] = temp;
+                }
+            }
+            // 3스테이지 보스전 첫 번째 턴 (코팅 주사위 확정)
+            else if (currentStage == 3 && TutorialManager.Instance.currentStepIndex >= 25 && TutorialManager.Instance.currentStepIndex <= 27)
+            {
+                int coatedIdx = drawPile.FindIndex(d => d.isCoated);
+                if (coatedIdx != -1)
+                {
+                    var temp = drawPile[0];
+                    drawPile[0] = drawPile[coatedIdx];
+                    drawPile[coatedIdx] = temp;
+                }
+            }
+        }
+
         for (int i = 0; i < rollSlots.Length; i++)
         {
             if (drawPile.Count == 0)
@@ -616,13 +664,20 @@ public class DiceManager : MonoBehaviour
     {
         ui?.HideResult(); // 클리어 축하 메세지 끄기
 
+        // 튜토리얼 중에는 광대 이벤트를 아예 스킵하고 무조건 전리품으로 감.
+        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+        {
+            if (currentStage == 3) return; // 3스테이지(보스전)는 아무것도 안 띄우고 종료
+            ShowLootSelection();
+            return;
+        }
+
         if (clownEventPanel != null)
         {
             clownEventPanel.StartEvent();
         }
         else
         {
-            // 에디터에서 패널 연결을 깜빡했다면 게임이 멈추지 않게 바로 전리품 선택 창으로 넘김
             ShowLootSelection();
         }
     }
@@ -776,6 +831,15 @@ public class DiceManager : MonoBehaviour
         ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText);
 
         float currentEnemyDropRate = isPeppermintActive ? enemy.baseDropRate : 0f;
+
+        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+        {
+            if (currentStage == 3 && isPeppermintActive)
+            {
+                currentEnemyDropRate = 0.3f; // 인스펙터 수치가 꼬여도 무조건 30%로 덮어쓰기
+            }
+        }
+
         ui?.UpdateDropRateUI(currentEnemyDropRate, snackBonusFigureDropRate);
     }
 

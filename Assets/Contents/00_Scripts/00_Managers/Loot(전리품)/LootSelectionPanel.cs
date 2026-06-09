@@ -19,7 +19,6 @@ public class LootSelectionPanel : MonoBehaviour
     {
         IsPanelOpen = false; // 시작할 때 초기화
     }
-
     public void OpenSelection(DiceManager manager)
     {
         diceManager = manager;
@@ -30,8 +29,7 @@ public class LootSelectionPanel : MonoBehaviour
             ClosePanelAndProceed();
             return;
         }
-
-        // 스낵 2개, 주사위 1개 뽑기 로직 (생략: 기존 코드와 동일)
+        // 스낵 2개, 주사위 1개 뽑기
         List<SnackItemSO> shuffledSnacks = new List<SnackItemSO>(snackPool);
         ShuffleList(shuffledSnacks);
 
@@ -41,7 +39,6 @@ public class LootSelectionPanel : MonoBehaviour
         choiceSlots[0].Setup(shuffledSnacks[0], this);
         choiceSlots[1].Setup(shuffledSnacks[1], this);
         choiceSlots[2].Setup(shuffledDice[0], this);
-
         //패널이 열렸다고 상태 변경
         IsPanelOpen = true;
         panelRoot.SetActive(true);

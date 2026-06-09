@@ -150,18 +150,8 @@ public class Enemy : MonoBehaviour
             dropFigureData = nextMonsterData.dropFigureData;
             baseDropRate = nextMonsterData.dropRate;
 
-            // 데이터 매니저가 있을 때만 데이터를 가져옵니다.
-            MonsterInfo jsonInfo = null;
-            if (MonsterDataManager.Instance != null)
-            {
-                jsonInfo = MonsterDataManager.Instance.GetMonsterInfo(nextMonsterData.monsterName);
-            }
-
-            if (jsonInfo != null)
-            {
-                finalMaxHP = jsonInfo.체력;
-                finalAttack = jsonInfo.공격력;
-            }
+            finalMaxHP = nextMonsterData.maxHp;
+            finalAttack = nextMonsterData.baseAtk;
 
             currentMonsterIndex++;
         }

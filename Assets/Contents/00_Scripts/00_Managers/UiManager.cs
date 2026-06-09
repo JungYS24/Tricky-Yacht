@@ -101,7 +101,7 @@ public class UIManager : MonoBehaviour
         if (dropRateText == null) return;
 
         float displayBonusRate = bonusRate;
-        if (displayBonusRate >= 1.4f)
+        if (displayBonusRate >= 1.0f)
         {
             displayBonusRate -= 1.0f;
         }
