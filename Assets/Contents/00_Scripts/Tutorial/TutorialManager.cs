@@ -188,16 +188,25 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    // [추가] 피규어 팝업이 뜨고 닫기 버튼을 누를 때까지 이벤트를 감시하는 코루틴
+    //피규어 팝업이 뜨고 닫기 버튼을 누를 때까지 이벤트를 감시하는 코루틴
     private IEnumerator WaitForFigurePopupClose()
     {
         nextButton.gameObject.SetActive(false);
+
         // 피규어 상세 패널이 열릴 때까지 대기
         while (!FigureDetailPanel.IsPanelOpen) yield return null;
+
+        // 팝업이 열리면 슬롯의 하이라이트는 끄고, 피규어 팝업창 자체를 가림막 위로 끌어올림!
+        ClearHighlight();
+        if (InventoryManager.Instance != null && InventoryManager.Instance.figureDetailPanel != null)
+        {
+            HighlightUI(InventoryManager.Instance.figureDetailPanel.panelRoot);
+        }
+
         // 피규어 상세 패널이 닫힐 때까지 대기
         while (FigureDetailPanel.IsPanelOpen) yield return null;
 
-        nextButton.gameObject.SetActive(true);
+        ShowStep(22);
     }
 
     //주사위를 가림막 위로 튀어나오게 하는 함수
@@ -338,12 +347,20 @@ public class TutorialManager : MonoBehaviour
                 darkOverlay.SetActive(true);
                 HighlightUI(shopManager.nextStageButton.gameObject);
                 break;
-            case 21:             
-                    StartCoroutine(ForceSpawnTutorialDice());
-                    //피규어 상세 팝업을 열고 닫을 때까지 기다리는 코루틴 실행
-                    StartCoroutine(WaitForFigurePopupClose());
+            case 21:
+                SetDialogPanelVisible(false);
+                darkOverlay.SetActive(true);
+
+                StartCoroutine(ForceSpawnTutorialDice());
+                if (InventoryManager.Instance != null && InventoryManager.Instance.figureSlotParent != null && InventoryManager.Instance.figureSlotParent.childCount > 0)
+                {
+                    HighlightUI(InventoryManager.Instance.figureSlotParent.GetChild(0).gameObject);
+                }
+
+                //피규어 상세 팝업을 열고 닫을 때까지 기다리는 코루틴 실행
+                StartCoroutine(WaitForFigurePopupClose());
                 break;
-                
+
 
             case 22:
                 SetDialogPanelVisible(false);
