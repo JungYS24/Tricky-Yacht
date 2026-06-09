@@ -405,7 +405,7 @@ public class DiceManager : MonoBehaviour
                 }
             }
             // 3스테이지 보스전 첫 번째 턴 (코팅 주사위 확정)
-            else if (currentStage == 3 && TutorialManager.Instance.currentStepIndex >= 25 && TutorialManager.Instance.currentStepIndex <= 27)
+            else if (currentStage == 3 && TutorialManager.Instance.currentStepIndex >= 24 && TutorialManager.Instance.currentStepIndex <= 27)
             {
                 int coatedIdx = drawPile.FindIndex(d => d.isCoated);
                 if (coatedIdx != -1)

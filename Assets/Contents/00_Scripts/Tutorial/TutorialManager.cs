@@ -174,44 +174,7 @@ public class TutorialManager : MonoBehaviour
         }
         }
 
-    private IEnumerator ForceSpawnTutorialDice()
-    {
-        yield return new WaitForSeconds(0.2f);
-
-        if (tutorialHighRollerDice is DiceItemSO hrData && diceManager.activeDiceList.Count >= 5)
-        {
-            int highRollerCount = 0;
-
-            for (int i = 0; i < 5; i++)
-            {
-                Dice d = diceManager.activeDiceList[i];
-                if (d == null) continue;
-
-                if (d.myData.diceName == hrData.itemName)
-                {
-                    highRollerCount++;
-                    if (highRollerCount > 1) d.SetData(diceManager.masterDeck[0], 6);
-                    else d.SetData(d.myData, 6);
-                }
-            }
-
-            if (highRollerCount == 0)
-            {
-                Dice targetDice = diceManager.activeDiceList[0];
-                DiceData1 hrDiceData = new DiceData1(hrData.itemName, hrData.customFaces);
-                hrDiceData.customDiceShell = hrData.customDiceShell;
-                hrDiceData.customFaceSprites = hrData.customFaceSprites;
-                targetDice.SetData(hrDiceData, 6);
-            }
-
-            foreach (var d in diceManager.activeDiceList)
-            {
-                if (d != null) d.SetData(d.myData, 6);
-            }
-
-            diceManager.ForceUpdateUI();
-        }
-    }
+    
 
     //피규어 팝업이 뜨고 닫기 버튼을 누를 때까지 이벤트를 감시하는 코루틴
     private IEnumerator WaitForFigurePopupClose()

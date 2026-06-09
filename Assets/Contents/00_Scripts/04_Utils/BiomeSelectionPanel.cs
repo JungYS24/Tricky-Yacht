@@ -5,8 +5,8 @@ using UnityEngine.UI;
 public class BiomeSelectionPanel : MonoBehaviour
 {
     public GameObject panelRoot;
-    public BiomeChoiceSlot[] choiceSlots; // 3개의 버튼 슬롯 연결
-    public Button mainMenuButton; //메인 메뉴로 돌아가는 버튼
+    public BiomeChoiceSlot[] choiceSlots;
+    public Button mainMenuButton;
     public void OpenPanel(DiceManager manager, List<BiomeType> nextBiomes)
     {
         for (int i = 0; i < choiceSlots.Length; i++)

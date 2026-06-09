@@ -15,8 +15,8 @@ public class TicketDetailPanel : MonoBehaviour
     [Header("버튼 연결")]
     public Button closeButton;
     public Button backgroundCloseButton;
-    public Button leftButton;  // [추가] 왼쪽 넘기기 버튼
-    public Button rightButton; // [추가] 오른쪽 넘기기 버튼
+    public Button leftButton;  
+    public Button rightButton; 
 
     private List<TicketItemSO> currentTicketList;
     private int currentIndex = 0;
@@ -32,8 +32,6 @@ public class TicketDetailPanel : MonoBehaviour
 
         IsPanelOpen = false;
     }
-
-    // 여길 수정했습니다: 리스트 전체와 현재 클릭한 티켓을 같이 받습니다.
     public void OpenPanel(List<TicketItemSO> tickets, TicketItemSO initialTicket)
     {
         if (tickets == null || tickets.Count == 0 || initialTicket == null) return;

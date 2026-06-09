@@ -40,8 +40,9 @@ public class LootSelectionPanel : MonoBehaviour
         choiceSlots[1].Setup(shuffledSnacks[1], this);
         choiceSlots[2].Setup(shuffledDice[0], this);
         //패널이 열렸다고 상태 변경
-        IsPanelOpen = true;
         panelRoot.SetActive(true);
+        IsPanelOpen = true;
+       
     }
 
     public void OnLootSelected(BaseItemDataSO selectedLoot)
