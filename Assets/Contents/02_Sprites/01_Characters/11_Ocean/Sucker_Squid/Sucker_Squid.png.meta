@@ -1,31 +1,34 @@
 fileFormatVersion: 2
-guid: 647bcb0eb889db94a9906bfaa1c9dd39
+guid: bd1a075b5dfbd20458cf41c8fb7b4417
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 849243328960101068
-    second: Sucker_Squid_0
+      213: 8860566440624255847
+    second: Octopus_SS_0
   - first:
-      213: -5761088107028975153
-    second: Sucker_Squid_1
+      213: -3075913001508133076
+    second: Octopus_SS_1
   - first:
-      213: 8743969086349142476
-    second: Sucker_Squid_2
+      213: 11733339198930796
+    second: Octopus_SS_2
   - first:
-      213: -5834557203447516259
-    second: Sucker_Squid_3
+      213: 3303241107555316702
+    second: Octopus_SS_3
   - first:
-      213: 5599448010786749860
-    second: Sucker_Squid_4
+      213: 9139500787534259958
+    second: Octopus_SS_4
   - first:
-      213: -9000295970066900076
-    second: Sucker_Squid_5
+      213: 6144993934490481793
+    second: Octopus_SS_5
   - first:
-      213: 405333995974313053
-    second: Sucker_Squid_6
+      213: 6571509992139008795
+    second: Octopus_SS_6
   - first:
-      213: -5390696573842679537
-    second: Sucker_Squid_7
+      213: 949827255832183702
+    second: Octopus_SS_7
+  - first:
+      213: -1881132880451804636
+    second: Octopus_SS_8
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,7 +75,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 120
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -117,17 +120,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Sucker_Squid_0
+      name: Octopus_SS_0
       rect:
         serializedVersion: 2
-        x: 11
-        y: 164
-        width: 90
-        height: 96
+        x: 12
+        y: 688
+        width: 620
+        height: 482
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -136,20 +152,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cca7986ee4e19cb00800000000000000
-      internalID: 849243328960101068
+      spriteID: 763f7228b3e07fa70800000000000000
+      internalID: 8860566440624255847
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sucker_Squid_1
+      name: Octopus_SS_1
       rect:
         serializedVersion: 2
-        x: 115
-        y: 164
-        width: 91
-        height: 96
+        x: 641
+        y: 685
+        width: 628
+        height: 496
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -158,20 +174,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fc17fc4e3e08c00b0800000000000000
-      internalID: -5761088107028975153
+      spriteID: c272a190c692055d0800000000000000
+      internalID: -3075913001508133076
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sucker_Squid_2
+      name: Octopus_SS_2
       rect:
         serializedVersion: 2
-        x: 218
-        y: 164
-        width: 91
-        height: 94
+        x: 745
+        y: 1157
+        width: 25
+        height: 31
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -180,20 +196,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cc966d67e81d85970800000000000000
-      internalID: 8743969086349142476
+      spriteID: c6f3bfae86fa92000800000000000000
+      internalID: 11733339198930796
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sucker_Squid_3
+      name: Octopus_SS_3
       rect:
         serializedVersion: 2
-        x: 325
-        y: 164
-        width: 92
-        height: 96
+        x: 1284
+        y: 695
+        width: 630
+        height: 598
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -202,20 +218,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d9370d2e22d770fa0800000000000000
-      internalID: -5834557203447516259
+      spriteID: ed37d47394877dd20800000000000000
+      internalID: 3303241107555316702
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sucker_Squid_4
+      name: Octopus_SS_4
       rect:
         serializedVersion: 2
-        x: 431
-        y: 164
-        width: 91
-        height: 94
+        x: 1923
+        y: 675
+        width: 629
+        height: 574
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -224,20 +240,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4ad36357c4c35bd40800000000000000
-      internalID: 5599448010786749860
+      spriteID: 6f6e1690b8706de70800000000000000
+      internalID: 9139500787534259958
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sucker_Squid_5
+      name: Octopus_SS_5
       rect:
         serializedVersion: 2
-        x: 537
-        y: 164
-        width: 91
-        height: 94
+        x: 3
+        y: 0
+        width: 633
+        height: 654
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -246,20 +262,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 49b58c63086881380800000000000000
-      internalID: -9000295970066900076
+      spriteID: 1843c340d67674550800000000000000
+      internalID: 6144993934490481793
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sucker_Squid_6
+      name: Octopus_SS_6
       rect:
         serializedVersion: 2
-        x: 644
-        y: 164
-        width: 90
-        height: 96
+        x: 641
+        y: 0
+        width: 635
+        height: 553
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -268,20 +284,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d54407d2f1900a500800000000000000
-      internalID: 405333995974313053
+      spriteID: b1b206f3581b23b50800000000000000
+      internalID: 6571509992139008795
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sucker_Squid_7
+      name: Octopus_SS_7
       rect:
         serializedVersion: 2
-        x: 748
-        y: 164
-        width: 91
-        height: 94
+        x: 1286
+        y: 15
+        width: 631
+        height: 533
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -290,8 +306,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f091138f6066035b0800000000000000
-      internalID: -5390696573842679537
+      spriteID: 6938cd55bd67e2d00800000000000000
+      internalID: 949827255832183702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Octopus_SS_8
+      rect:
+        serializedVersion: 2
+        x: 1923
+        y: 4
+        width: 635
+        height: 509
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 422ec55ac9fd4e5e0800000000000000
+      internalID: -1881132880451804636
       vertices: []
       indices: 
       edges: []
@@ -310,14 +348,15 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Sucker_Squid_0: 849243328960101068
-      Sucker_Squid_1: -5761088107028975153
-      Sucker_Squid_2: 8743969086349142476
-      Sucker_Squid_3: -5834557203447516259
-      Sucker_Squid_4: 5599448010786749860
-      Sucker_Squid_5: -9000295970066900076
-      Sucker_Squid_6: 405333995974313053
-      Sucker_Squid_7: -5390696573842679537
+      Octopus_SS_0: 8860566440624255847
+      Octopus_SS_1: -3075913001508133076
+      Octopus_SS_2: 11733339198930796
+      Octopus_SS_3: 3303241107555316702
+      Octopus_SS_4: 9139500787534259958
+      Octopus_SS_5: 6144993934490481793
+      Octopus_SS_6: 6571509992139008795
+      Octopus_SS_7: 949827255832183702
+      Octopus_SS_8: -1881132880451804636
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

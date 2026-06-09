@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Audio;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -9,6 +10,9 @@ public class BGMManager : MonoBehaviour
     private AudioSource audioSource;
     private Coroutine fadeCoroutine;
 
+    [Header("Audio Mixer Settings")]
+    public AudioMixerGroup bgmMixerGroup;
+
     public float maxVolume = 1.0f;
     public float fadeSpeed = 0.5f;
 
@@ -18,7 +22,13 @@ public class BGMManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
             audioSource = GetComponent<AudioSource>();
+
+            if (audioSource != null && bgmMixerGroup != null)
+            {
+                audioSource.outputAudioMixerGroup = bgmMixerGroup;
+            }
         }
         else
         {
