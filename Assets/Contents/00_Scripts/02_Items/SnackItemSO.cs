@@ -28,9 +28,14 @@ public class SnackItemSO : BaseItemDataSO
                 break;
 
             case SnackType.Steak:
-                // [스테이크] 엔딩(Finish) 기회 +1
-                //diceManager.maxPlays++;
+                // [스테이크] 체력 10 회복
+                diceManager.currentPlayerHP += 10;
+                if (diceManager.currentPlayerHP > diceManager.playerMaxHP)
+                {
+                    diceManager.currentPlayerHP = diceManager.playerMaxHP;
+                }
                 break;
+
             case SnackType.Garnish:
                 // [가니쉬] 이번 라운드 몬스터 박제(피규어) 확률 15% 증가 (원하시는 수치로 조절 가능)
                 diceManager.snackBonusFigureDropRate += 0.15f;

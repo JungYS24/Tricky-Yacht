@@ -32,10 +32,10 @@ public class BiomeNavigator
 
     public List<BiomeType> GetNextBiomeOptions(BiomeType currentBiome, int currentStage)
     {
-        // 90스테이지 클리어 시 무조건 비차원(Void) 고정
-        if (currentStage >= 90)
+        //100스테이지(바이옴 10개) 클리어 시 무조건 공허(Void) 3개로 고정하여 선택지에 띄움
+        if (currentStage >= 100)
         {
-            return new List<BiomeType> { BiomeType.Void };
+            return new List<BiomeType> { BiomeType.Void, BiomeType.Void, BiomeType.Void };
         }
 
         return BiomeRoutes.ContainsKey(currentBiome) ? BiomeRoutes[currentBiome] : new List<BiomeType>();

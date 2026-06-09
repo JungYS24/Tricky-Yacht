@@ -17,6 +17,6 @@ public class BiomeDataSO : ScriptableObject
     public List<MonsterDataSO> biomeMonsters;
 
     // 5스테이지마다 등장할 보스 몬스터를 넣는 칸
-    [Header("보스 몬스터 (5스테이지마다 등장)")]
+    [Header("보스 몬스터 (10스테이지마다 등장)")]
     public MonsterDataSO bossMonster;
 }

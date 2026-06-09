@@ -55,6 +55,11 @@ public class DiceManager : MonoBehaviour
     public List<BiomeDataSO> biomeList;                // 만들어둔 Biome 데이터들 (숲, 화산 등)
     public BiomeDataSO currentBiome;
 
+    [Header("엔딩 UI 설정")]
+    public GameObject gameClearPanel;
+    public Button mainFromClearButton;
+    public TMPro.TextMeshProUGUI gameClearText;
+
     public BiomeSelectionPanel biomeSelectionPanel;
     private BiomeNavigator biomeNavigator = new BiomeNavigator();
 
@@ -122,6 +127,10 @@ public class DiceManager : MonoBehaviour
         Dice.OnDiceStateChanged += HandleDiceChanged;
 
         defaultMaxRerolls = maxRerolls;
+
+        // Awake() 내부 기존 리스너 할당하는 부분 근처에 추가해 주세요.
+        if (mainFromClearButton != null)
+            mainFromClearButton.onClick.AddListener(OnGameClearMainButtonClick);
 
         // UI 버튼 리스너 동적 할당 세팅
         if (ui != null)
@@ -633,36 +642,39 @@ public class DiceManager : MonoBehaviour
 
     // --- 스테이지 클리어 공통 시스템 ---
 
+   
     private void ProcessStageClear(bool fromPeppermint)
     {
+        // 공허 바이옴에서 보스를 잡았다면 최종 게임 클리어 처리
+        if (currentBiome != null && currentBiome.biomeType == BiomeType.Void)
+        {
+            ShowGameClear();
+            return;
+        }
+
         int baseClearReward = 500;
         if (shopManager != null)
         {
             shopManager.currentGold += baseClearReward;
             ui?.UpdateGoldUI(shopManager.currentGold);
             //스테이지 클리어 기본 골드 카운팅 연출 실행
+
             if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
         }
 
-        string clearMessage = $"스테이지 클리어!\n<size=80%><color=#FFD700>+{baseClearReward} 코인 획득!</color></size>";
         if (pendingPeppermintSuccess)
         {
             if (enemy.dropFigureData != null)
             {
                 InventoryManager.Instance.AddItem(enemy.dropFigureData);
-                clearMessage += $"\n<size=70%><color=#00FFFF>전리품: {enemy.dropFigureData.itemName} 박제 성공! (페퍼민트 효과)</color></size>";
             }
         }
 
-        ui?.ShowResult("#00FF00", clearMessage);
-
-        // 이제 보상을 먼저 골라야 하니 광대 이벤트를 띄우는 함수로 바꿉니다.
-        Invoke(nameof(ShowClownEvent), 2.0f);
+        Invoke(nameof(ShowClownEvent), 1.0f);
     }
 
     public void ShowClownEvent()
     {
-        ui?.HideResult(); // 클리어 축하 메세지 끄기
 
         // 튜토리얼 중에는 광대 이벤트를 아예 스킵하고 무조건 전리품으로 감.
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
@@ -672,14 +684,41 @@ public class DiceManager : MonoBehaviour
             return;
         }
 
-        if (clownEventPanel != null)
+        // 10스테이지마다(보스 클리어 시) 광대 이벤트 등장!
+        if (currentStage % 10 == 0 && clownEventPanel != null)
         {
             clownEventPanel.StartEvent();
         }
         else
         {
+            // 그 외의 일반 스테이지(1~9 등)는 광대 없이 바로 전리품 선택으로 넘어갑니다.
             ShowLootSelection();
         }
+    }
+
+    private void ShowGameClear()
+    {
+        if (gameClearPanel != null)
+        {
+            gameClearPanel.SetActive(true);
+        }
+
+        if (gameClearText != null)
+        {
+            gameClearText.text = "<color=#00FF00>GAME CLEAR!</color>\n\n축하합니다!\n모든 시련을 이겨내고 공허를 정복했습니다!";
+        }
+
+        // 게임을 완전히 클리어했으므로 기존 세이브 데이터는 초기화(삭제)
+        if (GameSaveManager.Instance != null)
+        {
+            GameSaveManager.Instance.DeleteSave();
+        }
+    }
+
+    private void OnGameClearMainButtonClick()
+    {
+        Time.timeScale = 1f;
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Lobby");
     }
 
     public void ShowLootSelection()
@@ -826,7 +865,7 @@ public class DiceManager : MonoBehaviour
         string bName = (currentBiome != null) ? currentBiome.biomeName : "Stage";
 
         // 5스테이지마다 보스가 나오므로, 현재 바이옴에서의 구역 진행도(1~5)를 계산함
-        int localStage = ((currentStage - 1) % 5) + 1;
+        int localStage = ((currentStage - 1) % 10) + 1;
         string stageDisplayName = $"{bName} {localStage}";
         ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText);
 
@@ -862,19 +901,14 @@ public class DiceManager : MonoBehaviour
         currentStage++;
 
         // 방금 클리어한 곳이 5스테이지 단위(보스)였다면, 다음 스테이지 시작 전 바이옴 선택창 띄우기
-        if ((currentStage - 1) % 5 == 0 && currentStage <= 90)
+        if ((currentStage - 1) % 10 == 0 && currentStage <= 90)
         {
             ui?.HideShopChoice();
 
             List<BiomeType> nextOptions = biomeNavigator.GetNextBiomeOptions(currentBiome.biomeType, currentStage - 1);
             biomeSelectionPanel.OpenPanel(this, nextOptions);
         }
-        else if (currentStage > 90)
-        {
-            // 90스테이지 이후 비차원(Void) 강제 진입
-            ui?.HideShopChoice();
-            ApplySelectedBiome(BiomeType.Void);
-        }
+
         else
         {
             // 일반 스테이지는 그대로 진행

@@ -20,7 +20,6 @@ public class UIManager : MonoBehaviour
     [Header("버튼 및 패널")]
     public Button rollButton;
     public Button finishButton;
-    public GameObject resultPanel;
     public TextMeshProUGUI resultDescription;
     public GameObject shopChoicePanel;
     public Button goShopButton;
@@ -30,6 +29,9 @@ public class UIManager : MonoBehaviour
     [Header("확률 표시 UI")]
     public TextMeshProUGUI dropRateText;
 
+    [Header("결과창 설정")]
+    public TMPro.TextMeshProUGUI resultText;
+    public GameObject resultPanel;
     public void ShowShopChoice() => shopChoicePanel.SetActive(true);
     public void HideShopChoice() => shopChoicePanel.SetActive(false);
 
@@ -90,10 +92,18 @@ public class UIManager : MonoBehaviour
     public void SetRollButtonInteractable(bool state) => rollButton.interactable = state;
     public void SetFinishButtonInteractable(bool state) => finishButton.interactable = state;
 
-    public void ShowResult(string colorHex, string description)
+    public void ShowResult(string colorHex, string message)
     {
-        resultPanel.SetActive(true);
-        resultDescription.text = $"<color={colorHex}></color>\n{description}";
+        if (resultPanel != null)
+        {
+            resultPanel.SetActive(true);
+        }
+
+        if (resultText != null)
+        {
+            // DiceManager가 보내준 색상(Hex)과 문구("게임 오버")를 서치해서 반영해줍니다.
+            resultText.text = $"<color={colorHex}>{message}</color>";
+        }
     }
 
     public void UpdateDropRateUI(float baseRate, float bonusRate)
