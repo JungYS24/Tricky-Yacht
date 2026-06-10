@@ -1,31 +1,31 @@
 fileFormatVersion: 2
-guid: d73014901116db34f8d832864b6a8cf0
+guid: 7129c76bd822da742b5cc4a83efa96a9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 9145461626874818929
-    second: GoblinWarrior_0
+      213: -2791132784824272032
+    second: Baby_Goblin_0
   - first:
-      213: 1157899665151367932
-    second: GoblinWarrior_1
+      213: -718890341267610739
+    second: Baby_Goblin_1
   - first:
-      213: 3869269026943664770
-    second: GoblinWarrior_2
+      213: -6699411082640915228
+    second: Baby_Goblin_2
   - first:
-      213: -3658240931879583930
-    second: GoblinWarrior_3
+      213: -9128469921001886688
+    second: Baby_Goblin_3
   - first:
-      213: 9073463072930381383
-    second: GoblinWarrior_4
+      213: -7779368332378127254
+    second: Baby_Goblin_4
   - first:
-      213: -7114790607201676900
-    second: GoblinWarrior_5
+      213: -4772462166487921312
+    second: Baby_Goblin_5
   - first:
-      213: -1277737941436335820
-    second: GoblinWarrior_6
+      213: -346285051981498665
+    second: Baby_Goblin_6
   - first:
-      213: 4592036709901762503
-    second: GoblinWarrior_7
+      213: -3598369591917157969
+    second: Baby_Goblin_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 190
+  spritePixelsToUnits: 180
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -134,13 +134,101 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: GoblinWarrior_0
+      name: Baby_Goblin_0
       rect:
         serializedVersion: 2
-        x: 82
-        y: 687
+        x: 15
+        y: 595
+        width: 502
+        height: 534
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06b3a9f2587e349d0800000000000000
+      internalID: -2791132784824272032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Baby_Goblin_1
+      rect:
+        serializedVersion: 2
+        x: 562
+        y: 595
+        width: 494
+        height: 521
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d83e8402b0df506f0800000000000000
+      internalID: -718890341267610739
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Baby_Goblin_2
+      rect:
+        serializedVersion: 2
+        x: 1100
+        y: 595
+        width: 496
+        height: 531
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e48fd68d19e603a0800000000000000
+      internalID: -6699411082640915228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Baby_Goblin_3
+      rect:
+        serializedVersion: 2
+        x: 1644
+        y: 595
+        width: 489
+        height: 528
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02c28d7b8f8215180800000000000000
+      internalID: -9128469921001886688
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Baby_Goblin_4
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 26
         width: 500
-        height: 599
+        height: 500
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -149,20 +237,42 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 171f6d815e43bee70800000000000000
-      internalID: 9145461626874818929
+      spriteID: a64cda3f7b12a0490800000000000000
+      internalID: -7779368332378127254
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: GoblinWarrior_1
+      name: Baby_Goblin_5
       rect:
         serializedVersion: 2
-        x: 712
-        y: 687
+        x: 563
+        y: 26
+        width: 502
+        height: 511
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06d0f76f1fec4cdb0800000000000000
+      internalID: -4772462166487921312
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Baby_Goblin_6
+      rect:
+        serializedVersion: 2
+        x: 1098
+        y: 26
         width: 510
-        height: 567
+        height: 535
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -171,64 +281,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cfa14e25c9fa11010800000000000000
-      internalID: 1157899665151367932
+      spriteID: 7d67d95749fb13bf0800000000000000
+      internalID: -346285051981498665
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: GoblinWarrior_2
+      name: Baby_Goblin_7
       rect:
         serializedVersion: 2
-        x: 1347
-        y: 687
-        width: 512
-        height: 669
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 28206630ea762b530800000000000000
-      internalID: 3869269026943664770
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: GoblinWarrior_3
-      rect:
-        serializedVersion: 2
-        x: 1990
-        y: 687
-        width: 509
-        height: 630
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 64ff58031415b3dc0800000000000000
-      internalID: -3658240931879583930
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: GoblinWarrior_4
-      rect:
-        serializedVersion: 2
-        x: 78
-        y: 15
+        x: 1635
+        y: 25
         width: 511
-        height: 631
+        height: 530
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -237,74 +303,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 74eb3a0779a6bed70800000000000000
-      internalID: 9073463072930381383
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: GoblinWarrior_5
-      rect:
-        serializedVersion: 2
-        x: 716
-        y: 15
-        width: 511
-        height: 621
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c91557673af234d90800000000000000
-      internalID: -7114790607201676900
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: GoblinWarrior_6
-      rect:
-        serializedVersion: 2
-        x: 1355
-        y: 15
-        width: 508
-        height: 631
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 439f5acac10944ee0800000000000000
-      internalID: -1277737941436335820
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: GoblinWarrior_7
-      rect:
-        serializedVersion: 2
-        x: 1996
-        y: 15
-        width: 510
-        height: 631
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7cf7f39de013abf30800000000000000
-      internalID: 4592036709901762503
+      spriteID: fa1e53fcbe5001ec0800000000000000
+      internalID: -3598369591917157969
       vertices: []
       indices: 
       edges: []
@@ -323,14 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      GoblinWarrior_0: 9145461626874818929
-      GoblinWarrior_1: 1157899665151367932
-      GoblinWarrior_2: 3869269026943664770
-      GoblinWarrior_3: -3658240931879583930
-      GoblinWarrior_4: 9073463072930381383
-      GoblinWarrior_5: -7114790607201676900
-      GoblinWarrior_6: -1277737941436335820
-      GoblinWarrior_7: 4592036709901762503
+      Baby_Goblin_0: -2791132784824272032
+      Baby_Goblin_1: -718890341267610739
+      Baby_Goblin_2: -6699411082640915228
+      Baby_Goblin_3: -9128469921001886688
+      Baby_Goblin_4: -7779368332378127254
+      Baby_Goblin_5: -4772462166487921312
+      Baby_Goblin_6: -346285051981498665
+      Baby_Goblin_7: -3598369591917157969
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

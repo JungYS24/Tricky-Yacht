@@ -1,25 +1,28 @@
 fileFormatVersion: 2
-guid: 758ad3b56952482448314c1464aa1f2d
+guid: efa1efc858013cf42b01e1463a8ff276
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -272971243525888354
-    second: Sprite Echo Cactus_0
+      213: 8222156059753457988
+    second: Echo_Catus_0
   - first:
-      213: -2410388344641188400
-    second: Sprite Echo Cactus_1
+      213: 5400359945554756554
+    second: Echo_Catus_1
   - first:
-      213: 9058906984308908578
-    second: Sprite Echo Cactus_2
+      213: 3152658754635751700
+    second: Echo_Catus_2
   - first:
-      213: -8559302912319744213
-    second: Sprite Echo Cactus_3
+      213: 745381292177900119
+    second: Echo_Catus_3
   - first:
-      213: 2111145532869693954
-    second: Sprite Echo Cactus_4
+      213: 1923066700539671065
+    second: Echo_Catus_4
   - first:
-      213: -5969573320718794734
-    second: Sprite Echo Cactus_5
+      213: -6207168475796942283
+    second: Echo_Catus_5
+  - first:
+      213: -6468709630498165833
+    second: Echo_Catus_6
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -66,7 +69,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 40
+  spritePixelsToUnits: 170
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -128,13 +131,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Sprite Echo Cactus_0
+      name: Echo_Catus_0
       rect:
         serializedVersion: 2
-        x: 140
-        y: 289
-        width: 84
-        height: 93
+        x: 49
+        y: 598
+        width: 451
+        height: 514
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,20 +146,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e962ebba916363cf0800000000000000
-      internalID: -272971243525888354
+      spriteID: 4492e6d9f57fa1270800000000000000
+      internalID: 8222156059753457988
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite Echo Cactus_1
+      name: Echo_Catus_1
       rect:
         serializedVersion: 2
-        x: 232
-        y: 288
-        width: 75
-        height: 92
+        x: 597
+        y: 597
+        width: 448
+        height: 510
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -165,20 +168,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0dd8be242949c8ed0800000000000000
-      internalID: -2410388344641188400
+      spriteID: ac30a0612cee1fa40800000000000000
+      internalID: 5400359945554756554
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite Echo Cactus_2
+      name: Echo_Catus_2
       rect:
         serializedVersion: 2
-        x: 314
-        y: 289
-        width: 83
-        height: 92
+        x: 1127
+        y: 597
+        width: 471
+        height: 522
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -187,20 +190,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 222a905f7e3b7bd70800000000000000
-      internalID: 9058906984308908578
+      spriteID: 411e6101f6e70cb20800000000000000
+      internalID: 3152658754635751700
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite Echo Cactus_3
+      name: Echo_Catus_3
       rect:
         serializedVersion: 2
-        x: 141
-        y: 159
-        width: 84
-        height: 100
+        x: 1657
+        y: 598
+        width: 495
+        height: 532
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -209,20 +212,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b271732b95f373980800000000000000
-      internalID: -8559302912319744213
+      spriteID: 7524c760650285a00800000000000000
+      internalID: 745381292177900119
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite Echo Cactus_4
+      name: Echo_Catus_4
       rect:
         serializedVersion: 2
-        x: 230
-        y: 156
-        width: 77
-        height: 107
+        x: 595
+        y: 0
+        width: 472
+        height: 532
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -231,20 +234,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 202d9d34dab4c4d10800000000000000
-      internalID: 2111145532869693954
+      spriteID: 912bc0da9fa10ba10800000000000000
+      internalID: 1923066700539671065
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sprite Echo Cactus_5
+      name: Echo_Catus_5
       rect:
         serializedVersion: 2
-        x: 313
-        y: 156
-        width: 84
-        height: 97
+        x: 1131
+        y: 0
+        width: 473
+        height: 532
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -253,8 +256,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 21048e561b0d72da0800000000000000
-      internalID: -5969573320718794734
+      spriteID: 532de138825bbd9a0800000000000000
+      internalID: -6207168475796942283
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Echo_Catus_6
+      rect:
+        serializedVersion: 2
+        x: 1667
+        y: 0
+        width: 474
+        height: 532
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7bb220f1dd68a36a0800000000000000
+      internalID: -6468709630498165833
       vertices: []
       indices: 
       edges: []
@@ -273,12 +298,13 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Sprite Echo Cactus_0: -272971243525888354
-      Sprite Echo Cactus_1: -2410388344641188400
-      Sprite Echo Cactus_2: 9058906984308908578
-      Sprite Echo Cactus_3: -8559302912319744213
-      Sprite Echo Cactus_4: 2111145532869693954
-      Sprite Echo Cactus_5: -5969573320718794734
+      Echo_Catus_0: 8222156059753457988
+      Echo_Catus_1: 5400359945554756554
+      Echo_Catus_2: 3152658754635751700
+      Echo_Catus_3: 745381292177900119
+      Echo_Catus_4: 1923066700539671065
+      Echo_Catus_5: -6207168475796942283
+      Echo_Catus_6: -6468709630498165833
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

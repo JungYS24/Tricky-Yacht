@@ -1,31 +1,34 @@
 fileFormatVersion: 2
-guid: 9ee8b77ce2e617048925f0c4a8cbb528
+guid: 014853cd262fd5d40aa7d11817bb0c24
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7327619365794497060
-    second: Baby MushRoom_0
+      213: 1581557225149464310
+    second: BabyMushroom_0
   - first:
-      213: -4044643557211894681
-    second: Baby MushRoom_1
+      213: -7595274374517569730
+    second: BabyMushroom_1
   - first:
-      213: -320934218882808631
-    second: Baby MushRoom_2
+      213: -6720876895871521618
+    second: BabyMushroom_2
   - first:
-      213: 965086111471764205
-    second: Baby MushRoom_3
+      213: 5694943402489207292
+    second: BabyMushroom_3
   - first:
-      213: 1583159798778848216
-    second: Baby MushRoom_4
+      213: 1687324242066454659
+    second: BabyMushroom_4
   - first:
-      213: 8996750793282175661
-    second: Baby MushRoom_5
+      213: -558753540638081522
+    second: BabyMushroom_5
   - first:
-      213: -5621965984373118110
-    second: Baby MushRoom_6
+      213: 691672439241209428
+    second: BabyMushroom_6
   - first:
-      213: -5258845602876553092
-    second: Baby MushRoom_7
+      213: -2329189315824677434
+    second: BabyMushroom_7
+  - first:
+      213: -6094286177635166776
+    second: BabyMushroom_8
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,7 +75,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 55
+  spritePixelsToUnits: 200
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -93,7 +96,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 1024
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -119,7 +122,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: Android
-    maxTextureSize: 1024
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -134,13 +137,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Baby MushRoom_0
+      name: BabyMushroom_0
       rect:
         serializedVersion: 2
-        x: 97
-        y: 303
-        width: 105
-        height: 123
+        x: 60
+        y: 617
+        width: 420
+        height: 496
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -149,20 +152,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 42244736dfee0b560800000000000000
-      internalID: 7327619365794497060
+      spriteID: 6fe7cf4bae1d2f510800000000000000
+      internalID: 1581557225149464310
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Baby MushRoom_1
+      name: BabyMushroom_1
       rect:
         serializedVersion: 2
-        x: 255
-        y: 303
-        width: 107
-        height: 123
+        x: 607
+        y: 617
+        width: 413
+        height: 496
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -171,20 +174,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 76c00593d1a8ed7c0800000000000000
-      internalID: -4044643557211894681
+      spriteID: e37c047a23a289690800000000000000
+      internalID: -7595274374517569730
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Baby MushRoom_2
+      name: BabyMushroom_2
       rect:
         serializedVersion: 2
-        x: 413
-        y: 304
-        width: 102
-        height: 116
+        x: 1139
+        y: 617
+        width: 415
+        height: 512
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -193,20 +196,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9c4093f3700db8bf0800000000000000
-      internalID: -320934218882808631
+      spriteID: eaca27a6216aab2a0800000000000000
+      internalID: -6720876895871521618
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Baby MushRoom_3
+      name: BabyMushroom_3
       rect:
         serializedVersion: 2
-        x: 567
-        y: 303
-        width: 104
-        height: 123
+        x: 1679
+        y: 906
+        width: 414
+        height: 261
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -215,20 +218,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: de200f384bca46d00800000000000000
-      internalID: 965086111471764205
+      spriteID: cf9d259f9d0880f40800000000000000
+      internalID: 5694943402489207292
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Baby MushRoom_4
+      name: BabyMushroom_4
       rect:
         serializedVersion: 2
-        x: 97
-        y: 86
-        width: 105
-        height: 120
+        x: 1707
+        y: 617
+        width: 367
+        height: 314
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -237,20 +240,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8d364e4f27388f510800000000000000
-      internalID: 1583159798778848216
+      spriteID: 388b64555749a6710800000000000000
+      internalID: 1687324242066454659
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Baby MushRoom_5
+      name: BabyMushroom_5
       rect:
         serializedVersion: 2
-        x: 255
-        y: 86
-        width: 104
-        height: 120
+        x: 68
+        y: 42
+        width: 404
+        height: 484
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -259,20 +262,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: da24c4efd21eadc70800000000000000
-      internalID: 8996750793282175661
+      spriteID: e0e764d7d98ee38f0800000000000000
+      internalID: -558753540638081522
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Baby MushRoom_6
+      name: BabyMushroom_6
       rect:
         serializedVersion: 2
-        x: 413
-        y: 87
-        width: 101
-        height: 117
+        x: 608
+        y: 42
+        width: 404
+        height: 483
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -281,20 +284,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 26b6c1249b3caf1b0800000000000000
-      internalID: -5621965984373118110
+      spriteID: 45676e93b60599900800000000000000
+      internalID: 691672439241209428
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Baby MushRoom_7
+      name: BabyMushroom_7
       rect:
         serializedVersion: 2
-        x: 567
-        y: 86
-        width: 104
-        height: 120
+        x: 1148
+        y: 42
+        width: 404
+        height: 483
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -303,8 +306,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c780be769c3d407b0800000000000000
-      internalID: -5258845602876553092
+      spriteID: 6cd82a768ae0dafd0800000000000000
+      internalID: -2329189315824677434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BabyMushroom_8
+      rect:
+        serializedVersion: 2
+        x: 1688
+        y: 41
+        width: 405
+        height: 484
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c59b76a20fbc6ba0800000000000000
+      internalID: -6094286177635166776
       vertices: []
       indices: 
       edges: []
@@ -323,14 +348,15 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Baby MushRoom_0: 7327619365794497060
-      Baby MushRoom_1: -4044643557211894681
-      Baby MushRoom_2: -320934218882808631
-      Baby MushRoom_3: 965086111471764205
-      Baby MushRoom_4: 1583159798778848216
-      Baby MushRoom_5: 8996750793282175661
-      Baby MushRoom_6: -5621965984373118110
-      Baby MushRoom_7: -5258845602876553092
+      BabyMushroom_0: 1581557225149464310
+      BabyMushroom_1: -7595274374517569730
+      BabyMushroom_2: -6720876895871521618
+      BabyMushroom_3: 5694943402489207292
+      BabyMushroom_4: 1687324242066454659
+      BabyMushroom_5: -558753540638081522
+      BabyMushroom_6: 691672439241209428
+      BabyMushroom_7: -2329189315824677434
+      BabyMushroom_8: -6094286177635166776
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

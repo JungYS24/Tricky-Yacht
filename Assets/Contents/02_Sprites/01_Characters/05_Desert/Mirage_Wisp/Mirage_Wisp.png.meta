@@ -3,17 +3,38 @@ guid: 515fc0a2fdabff041b02ae97d237fbdb
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6412259536335854916
-    second: Mirage Wisp_0
+      213: -2231653968633874881
+    second: Mirage_Wisp_0
   - first:
-      213: -3041397604785945945
-    second: Mirage Wisp_1
+      213: -1801829788052911190
+    second: Mirage_Wisp_1
   - first:
-      213: 3247941289080194728
-    second: Mirage Wisp_2
+      213: -6486725364325591287
+    second: Mirage_Wisp_2
   - first:
-      213: -8745666354881387431
-    second: Mirage Wisp_3
+      213: 6739597369199635220
+    second: Mirage_Wisp_3
+  - first:
+      213: 7129112006102771755
+    second: Mirage_Wisp_4
+  - first:
+      213: -4135058883180891195
+    second: Mirage_Wisp_5
+  - first:
+      213: 2629524742078095301
+    second: Mirage_Wisp_6
+  - first:
+      213: -8742356177865848419
+    second: Mirage_Wisp_7
+  - first:
+      213: -6442766814993091254
+    second: Mirage_Wisp_8
+  - first:
+      213: -4865888899804703101
+    second: Mirage_Wisp_9
+  - first:
+      213: 6753872529215959078
+    second: Mirage_Wisp_10
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -60,7 +81,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 40
+  spritePixelsToUnits: 180
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -122,13 +143,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Mirage Wisp_0
+      name: Mirage_Wisp_0
       rect:
         serializedVersion: 2
         x: 60
-        y: 210
-        width: 85
-        height: 89
+        y: 613
+        width: 419
+        height: 529
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -137,20 +158,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 44dd8ee131cecf850800000000000000
-      internalID: 6412259536335854916
+      spriteID: f36bcf11a829701e0800000000000000
+      internalID: -2231653968633874881
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Mirage Wisp_1
+      name: Mirage_Wisp_1
       rect:
         serializedVersion: 2
-        x: 162
-        y: 209
-        width: 65
-        height: 85
+        x: 595
+        y: 613
+        width: 412
+        height: 524
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -159,20 +180,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7a282021ef8cac5d0800000000000000
-      internalID: -3041397604785945945
+      spriteID: aab8361ba5d9ef6e0800000000000000
+      internalID: -1801829788052911190
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Mirage Wisp_2
+      name: Mirage_Wisp_2
       rect:
         serializedVersion: 2
-        x: 259
-        y: 208
-        width: 74
-        height: 95
+        x: 1136
+        y: 613
+        width: 431
+        height: 466
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -181,20 +202,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8a603f2e461031d20800000000000000
-      internalID: 3247941289080194728
+      spriteID: 9075bd736a58af5a0800000000000000
+      internalID: -6486725364325591287
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Mirage Wisp_3
+      name: Mirage_Wisp_3
       rect:
         serializedVersion: 2
-        x: 366
-        y: 210
-        width: 65
-        height: 85
+        x: 1356
+        y: 1078
+        width: 54
+        height: 23
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -203,8 +224,162 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 954a53969c621a680800000000000000
-      internalID: -8745666354881387431
+      spriteID: 41b2d40791cd78d50800000000000000
+      internalID: 6739597369199635220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mirage_Wisp_4
+      rect:
+        serializedVersion: 2
+        x: 1680
+        y: 613
+        width: 432
+        height: 497
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b286abf0991bfe260800000000000000
+      internalID: 7129112006102771755
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mirage_Wisp_5
+      rect:
+        serializedVersion: 2
+        x: 1003
+        y: 881
+        width: 22
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5c3fdaeaad15d96c0800000000000000
+      internalID: -4135058883180891195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mirage_Wisp_6
+      rect:
+        serializedVersion: 2
+        x: 1553
+        y: 899
+        width: 19
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5cf5aa332d2fd7420800000000000000
+      internalID: 2629524742078095301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mirage_Wisp_7
+      rect:
+        serializedVersion: 2
+        x: 61
+        y: 51
+        width: 433
+        height: 517
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d994d5e0069eca680800000000000000
+      internalID: -8742356177865848419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mirage_Wisp_8
+      rect:
+        serializedVersion: 2
+        x: 727
+        y: 42
+        width: 393
+        height: 499
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4579ad87b1b696a0800000000000000
+      internalID: -6442766814993091254
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mirage_Wisp_9
+      rect:
+        serializedVersion: 2
+        x: 1202
+        y: 50
+        width: 365
+        height: 472
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 386df9283d3e87cb0800000000000000
+      internalID: -4865888899804703101
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mirage_Wisp_10
+      rect:
+        serializedVersion: 2
+        x: 1656
+        y: 40
+        width: 461
+        height: 496
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 620bf2228439abd50800000000000000
+      internalID: 6753872529215959078
       vertices: []
       indices: 
       edges: []
@@ -223,10 +398,17 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Mirage Wisp_0: 6412259536335854916
-      Mirage Wisp_1: -3041397604785945945
-      Mirage Wisp_2: 3247941289080194728
-      Mirage Wisp_3: -8745666354881387431
+      Mirage_Wisp_0: -2231653968633874881
+      Mirage_Wisp_1: -1801829788052911190
+      Mirage_Wisp_10: 6753872529215959078
+      Mirage_Wisp_2: -6486725364325591287
+      Mirage_Wisp_3: 6739597369199635220
+      Mirage_Wisp_4: 7129112006102771755
+      Mirage_Wisp_5: -4135058883180891195
+      Mirage_Wisp_6: 2629524742078095301
+      Mirage_Wisp_7: -8742356177865848419
+      Mirage_Wisp_8: -6442766814993091254
+      Mirage_Wisp_9: -4865888899804703101
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

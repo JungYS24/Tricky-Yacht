@@ -3,8 +3,32 @@ guid: d80d338d7c14c7d4294534a97646c300
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8609740755151222952
-    second: Bugbear_1_0
+      213: -2978474461790176122
+    second: Bugbear_0
+  - first:
+      213: 2735620767794088987
+    second: Bugbear_1
+  - first:
+      213: 634466151838234964
+    second: Bugbear_2
+  - first:
+      213: 1210727487306584689
+    second: Bugbear_3
+  - first:
+      213: 1178641140583647182
+    second: Bugbear_4
+  - first:
+      213: 151901807432579811
+    second: Bugbear_5
+  - first:
+      213: -2647581188014508805
+    second: Bugbear_6
+  - first:
+      213: -3272330791956375290
+    second: Bugbear_7
+  - first:
+      213: -1576868359893910409
+    second: Bugbear_8
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,12 +70,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 85
+  spritePixelsToUnits: 140
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -72,7 +96,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 512
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -113,13 +137,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Bugbear_1_0
+      name: Bugbear_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 3
-        width: 265
-        height: 257
+        x: 14
+        y: 620
+        width: 474
+        height: 497
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +152,184 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8a8fdf6b991fb7770800000000000000
-      internalID: 8609740755151222952
+      spriteID: 68c7c64f1455aa6d0800000000000000
+      internalID: -2978474461790176122
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bugbear_1
+      rect:
+        serializedVersion: 2
+        x: 558
+        y: 623
+        width: 428
+        height: 517
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b1c4c882890e6f520800000000000000
+      internalID: 2735620767794088987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bugbear_2
+      rect:
+        serializedVersion: 2
+        x: 1099
+        y: 623
+        width: 465
+        height: 543
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 459b3528a931ec800800000000000000
+      internalID: 634466151838234964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bugbear_3
+      rect:
+        serializedVersion: 2
+        x: 1617
+        y: 631
+        width: 464
+        height: 472
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 172d5b82c3e5dc010800000000000000
+      internalID: 1210727487306584689
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bugbear_4
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 34
+        width: 484
+        height: 538
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec746266fdf5b5010800000000000000
+      internalID: 1178641140583647182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bugbear_5
+      rect:
+        serializedVersion: 2
+        x: 613
+        y: 34
+        width: 455
+        height: 489
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ea32c893e9ab1200800000000000000
+      internalID: 151901807432579811
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bugbear_6
+      rect:
+        serializedVersion: 2
+        x: 1054
+        y: 70
+        width: 22
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bf4736edfe6e14bd0800000000000000
+      internalID: -2647581188014508805
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bugbear_7
+      rect:
+        serializedVersion: 2
+        x: 1092
+        y: 39
+        width: 468
+        height: 478
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6091ed57b785692d0800000000000000
+      internalID: -3272330791956375290
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bugbear_8
+      rect:
+        serializedVersion: 2
+        x: 1648
+        y: 30
+        width: 488
+        height: 494
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 77c78fec496dd1ae0800000000000000
+      internalID: -1576868359893910409
       vertices: []
       indices: 
       edges: []
@@ -138,7 +338,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +348,15 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Bugbear_1_0: 8609740755151222952
+      Bugbear_0: -2978474461790176122
+      Bugbear_1: 2735620767794088987
+      Bugbear_2: 634466151838234964
+      Bugbear_3: 1210727487306584689
+      Bugbear_4: 1178641140583647182
+      Bugbear_5: 151901807432579811
+      Bugbear_6: -2647581188014508805
+      Bugbear_7: -3272330791956375290
+      Bugbear_8: -1576868359893910409
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 37
+  spritePixelsToUnits: 130
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -137,10 +137,10 @@ TextureImporter:
       name: Sphinx_0
       rect:
         serializedVersion: 2
-        x: 125
-        y: 295
-        width: 98
-        height: 95
+        x: 60
+        y: 587
+        width: 421
+        height: 481
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -159,10 +159,10 @@ TextureImporter:
       name: Sphinx_1
       rect:
         serializedVersion: 2
-        x: 251
-        y: 295
-        width: 98
-        height: 95
+        x: 571
+        y: 587
+        width: 472
+        height: 481
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -181,10 +181,10 @@ TextureImporter:
       name: Sphinx_2
       rect:
         serializedVersion: 2
-        x: 373
-        y: 295
-        width: 98
-        height: 95
+        x: 1113
+        y: 587
+        width: 479
+        height: 473
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -203,10 +203,10 @@ TextureImporter:
       name: Sphinx_3
       rect:
         serializedVersion: 2
-        x: 496
-        y: 295
-        width: 98
-        height: 95
+        x: 1643
+        y: 596
+        width: 481
+        height: 481
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -225,10 +225,10 @@ TextureImporter:
       name: Sphinx_4
       rect:
         serializedVersion: 2
-        x: 125
-        y: 122
-        width: 99
-        height: 94
+        x: 55
+        y: 39
+        width: 433
+        height: 503
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -247,10 +247,10 @@ TextureImporter:
       name: Sphinx_5
       rect:
         serializedVersion: 2
-        x: 251
-        y: 122
-        width: 98
-        height: 94
+        x: 567
+        y: 39
+        width: 453
+        height: 491
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -269,10 +269,10 @@ TextureImporter:
       name: Sphinx_6
       rect:
         serializedVersion: 2
-        x: 373
-        y: 122
-        width: 98
-        height: 94
+        x: 1105
+        y: 52
+        width: 480
+        height: 491
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -291,10 +291,10 @@ TextureImporter:
       name: Sphinx_7
       rect:
         serializedVersion: 2
-        x: 496
-        y: 122
-        width: 98
-        height: 94
+        x: 1615
+        y: 40
+        width: 514
+        height: 395
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
