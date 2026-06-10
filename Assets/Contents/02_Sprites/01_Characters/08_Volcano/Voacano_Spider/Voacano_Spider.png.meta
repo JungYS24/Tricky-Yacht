@@ -3,23 +3,29 @@ guid: 632d015e8ab26ac45926ac97c998a71b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5433455908079762577
-    second: Volcano  spider_0
+      213: -8931382897290474885
+    second: Voacano_Spider_0
   - first:
-      213: -3342041840234502055
-    second: Volcano  spider_1
+      213: 8745061800116113622
+    second: Voacano_Spider_1
   - first:
-      213: -2388807263922991138
-    second: Volcano  spider_2
+      213: 3748912282084547207
+    second: Voacano_Spider_2
   - first:
-      213: 173415589459378850
-    second: Volcano  spider_3
+      213: 4122522967502637194
+    second: Voacano_Spider_3
   - first:
-      213: -7332012116447971703
-    second: Volcano  spider_4
+      213: 2401748075041961819
+    second: Voacano_Spider_4
   - first:
-      213: -6140497444778159964
-    second: Volcano  spider_5
+      213: -8483629267425220814
+    second: Voacano_Spider_5
+  - first:
+      213: -4443132979885033434
+    second: Voacano_Spider_6
+  - first:
+      213: 8379969740495755334
+    second: Voacano_Spider_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -66,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 40
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -111,30 +117,17 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Volcano  spider_0
+      name: Voacano_Spider_0
       rect:
         serializedVersion: 2
-        x: 89
-        y: 292
-        width: 108
-        height: 90
+        x: 43
+        y: 424
+        width: 309
+        height: 208
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,20 +136,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 19c77d75c53876b40800000000000000
-      internalID: 5433455908079762577
+      spriteID: b7a800e439a5d0480800000000000000
+      internalID: -8931382897290474885
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Volcano  spider_1
+      name: Voacano_Spider_1
       rect:
         serializedVersion: 2
-        x: 202
-        y: 300
-        width: 94
-        height: 76
+        x: 371
+        y: 426
+        width: 329
+        height: 223
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -165,20 +158,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 958645837aeae91d0800000000000000
-      internalID: -3342041840234502055
+      spriteID: 6d052c6bf53bc5970800000000000000
+      internalID: 8745061800116113622
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Volcano  spider_2
+      name: Voacano_Spider_2
       rect:
         serializedVersion: 2
-        x: 300
-        y: 298
-        width: 122
-        height: 88
+        x: 714
+        y: 427
+        width: 321
+        height: 258
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -187,20 +180,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: edf4ffc237049ded0800000000000000
-      internalID: -2388807263922991138
+      spriteID: 78a9fb3abdfc60430800000000000000
+      internalID: 3748912282084547207
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Volcano  spider_3
+      name: Voacano_Spider_3
       rect:
         serializedVersion: 2
-        x: 88
-        y: 154
-        width: 106
-        height: 86
+        x: 1058
+        y: 427
+        width: 307
+        height: 260
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -209,20 +202,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2a2cd305f88186200800000000000000
-      internalID: 173415589459378850
+      spriteID: a8842600cc4263930800000000000000
+      internalID: 4122522967502637194
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Volcano  spider_4
+      name: Voacano_Spider_4
       rect:
         serializedVersion: 2
-        x: 196
-        y: 154
-        width: 105
-        height: 86
+        x: 63
+        y: 97
+        width: 299
+        height: 256
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -231,20 +224,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9863246a3d57f3a90800000000000000
-      internalID: -7332012116447971703
+      spriteID: b57bad43629b45120800000000000000
+      internalID: 2401748075041961819
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Volcano  spider_5
+      name: Voacano_Spider_5
       rect:
         serializedVersion: 2
-        x: 302
-        y: 154
-        width: 115
-        height: 86
+        x: 392
+        y: 89
+        width: 315
+        height: 235
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -253,8 +246,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4a0ddc39b1298caa0800000000000000
-      internalID: -6140497444778159964
+      spriteID: 23723052128144a80800000000000000
+      internalID: -8483629267425220814
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Voacano_Spider_6
+      rect:
+        serializedVersion: 2
+        x: 719
+        y: 81
+        width: 316
+        height: 232
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62831247812d652c0800000000000000
+      internalID: -4443132979885033434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Voacano_Spider_7
+      rect:
+        serializedVersion: 2
+        x: 1067
+        y: 84
+        width: 293
+        height: 218
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 64895ca7412ab4470800000000000000
+      internalID: 8379969740495755334
       vertices: []
       indices: 
       edges: []
@@ -273,12 +310,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Volcano  spider_0: 5433455908079762577
-      Volcano  spider_1: -3342041840234502055
-      Volcano  spider_2: -2388807263922991138
-      Volcano  spider_3: 173415589459378850
-      Volcano  spider_4: -7332012116447971703
-      Volcano  spider_5: -6140497444778159964
+      Voacano_Spider_0: -8931382897290474885
+      Voacano_Spider_1: 8745061800116113622
+      Voacano_Spider_2: 3748912282084547207
+      Voacano_Spider_3: 4122522967502637194
+      Voacano_Spider_4: 2401748075041961819
+      Voacano_Spider_5: -8483629267425220814
+      Voacano_Spider_6: -4443132979885033434
+      Voacano_Spider_7: 8379969740495755334
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

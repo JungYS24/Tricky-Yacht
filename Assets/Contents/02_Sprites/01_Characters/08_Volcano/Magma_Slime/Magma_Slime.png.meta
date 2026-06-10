@@ -3,41 +3,23 @@ guid: 0a235f44b4fadd345a9a238f42311dd6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3926644511340628357
-    second: magma slime_0
+      213: 5278715009281348423
+    second: Magma_Slime_0
   - first:
-      213: 3766973961055470498
-    second: magma slime_1
+      213: -5335869051106074744
+    second: Magma_Slime_1
   - first:
-      213: -7812953945747196554
-    second: magma slime_2
+      213: 3217560233335078865
+    second: Magma_Slime_2
   - first:
-      213: -191262628344839595
-    second: magma slime_3
+      213: 4664755710504732033
+    second: Magma_Slime_3
   - first:
-      213: 9218443079074194332
-    second: magma slime_4
+      213: -1878368035491760449
+    second: Magma_Slime_4
   - first:
-      213: 4194021920003356177
-    second: magma slime_5
-  - first:
-      213: 7208075698811919588
-    second: magma slime_6
-  - first:
-      213: 8090947217850401970
-    second: magma slime_7
-  - first:
-      213: 2754650119231740290
-    second: magma slime_8
-  - first:
-      213: -665868425008530466
-    second: magma slime_9
-  - first:
-      213: -8464546703923232116
-    second: magma slime_10
-  - first:
-      213: -187394315032339358
-    second: magma slime_11
+      213: 9015213256631721070
+    second: Magma_Slime_5
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -84,7 +66,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 40
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -129,30 +111,17 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: magma slime_0
+      name: Magma_Slime_0
       rect:
         serializedVersion: 2
-        x: 25
-        y: 303
-        width: 69
-        height: 63
+        x: 92
+        y: 444
+        width: 246
+        height: 223
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -161,20 +130,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b76fd460f91c189c0800000000000000
-      internalID: -3926644511340628357
+      spriteID: 743dcb64553c14940800000000000000
+      internalID: 5278715009281348423
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: magma slime_1
+      name: Magma_Slime_1
       rect:
         serializedVersion: 2
-        x: 96
-        y: 303
-        width: 69
-        height: 64
+        x: 418
+        y: 444
+        width: 247
+        height: 225
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -183,20 +152,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2a38bdafbdaf64430800000000000000
-      internalID: 3766973961055470498
+      spriteID: 88f52d06e5f23f5b0800000000000000
+      internalID: -5335869051106074744
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: magma slime_2
+      name: Magma_Slime_2
       rect:
         serializedVersion: 2
-        x: 167
-        y: 303
-        width: 69
-        height: 64
+        x: 738
+        y: 444
+        width: 258
+        height: 241
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -205,20 +174,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6757049f7cfc29390800000000000000
-      internalID: -7812953945747196554
+      spriteID: 1df3c5f1cf117ac20800000000000000
+      internalID: 3217560233335078865
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: magma slime_3
+      name: Magma_Slime_3
       rect:
         serializedVersion: 2
-        x: 238
-        y: 303
-        width: 69
-        height: 64
+        x: 1069
+        y: 444
+        width: 247
+        height: 223
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -227,20 +196,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 552c2b227af785df0800000000000000
-      internalID: -191262628344839595
+      spriteID: 1850c909a9a8cb040800000000000000
+      internalID: 4664755710504732033
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: magma slime_4
+      name: Magma_Slime_4
       rect:
         serializedVersion: 2
-        x: 310
-        y: 303
-        width: 69
-        height: 64
+        x: 417
+        y: 83
+        width: 247
+        height: 223
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -249,20 +218,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c932066932d7eef70800000000000000
-      internalID: 9218443079074194332
+      spriteID: fb6b0174932bee5e0800000000000000
+      internalID: -1878368035491760449
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: magma slime_5
+      name: Magma_Slime_5
       rect:
         serializedVersion: 2
-        x: 381
-        y: 303
-        width: 69
-        height: 63
+        x: 744
+        y: 83
+        width: 246
+        height: 223
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -271,140 +240,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 116700227b8243a30800000000000000
-      internalID: 4194021920003356177
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: magma slime_6
-      rect:
-        serializedVersion: 2
-        x: 25
-        y: 145
-        width: 69
-        height: 63
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4ec5fc578aa380460800000000000000
-      internalID: 7208075698811919588
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: magma slime_7
-      rect:
-        serializedVersion: 2
-        x: 96
-        y: 145
-        width: 69
-        height: 63
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2b4886080a1d84070800000000000000
-      internalID: 8090947217850401970
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: magma slime_8
-      rect:
-        serializedVersion: 2
-        x: 167
-        y: 145
-        width: 69
-        height: 63
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2899b4d40bb7a3620800000000000000
-      internalID: 2754650119231740290
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: magma slime_9
-      rect:
-        serializedVersion: 2
-        x: 238
-        y: 145
-        width: 69
-        height: 63
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: edbb734023c52c6f0800000000000000
-      internalID: -665868425008530466
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: magma slime_10
-      rect:
-        serializedVersion: 2
-        x: 310
-        y: 145
-        width: 69
-        height: 63
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c82c3ffae93e78a80800000000000000
-      internalID: -8464546703923232116
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: magma slime_11
-      rect:
-        serializedVersion: 2
-        x: 381
-        y: 145
-        width: 69
-        height: 63
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 26cd1930ddd366df0800000000000000
-      internalID: -187394315032339358
+      spriteID: e6c1de731b87c1d70800000000000000
+      internalID: 9015213256631721070
       vertices: []
       indices: 
       edges: []
@@ -423,18 +260,12 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      magma slime_0: -3926644511340628357
-      magma slime_1: 3766973961055470498
-      magma slime_10: -8464546703923232116
-      magma slime_11: -187394315032339358
-      magma slime_2: -7812953945747196554
-      magma slime_3: -191262628344839595
-      magma slime_4: 9218443079074194332
-      magma slime_5: 4194021920003356177
-      magma slime_6: 7208075698811919588
-      magma slime_7: 8090947217850401970
-      magma slime_8: 2754650119231740290
-      magma slime_9: -665868425008530466
+      Magma_Slime_0: 5278715009281348423
+      Magma_Slime_1: -5335869051106074744
+      Magma_Slime_2: 3217560233335078865
+      Magma_Slime_3: 4664755710504732033
+      Magma_Slime_4: -1878368035491760449
+      Magma_Slime_5: 9015213256631721070
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

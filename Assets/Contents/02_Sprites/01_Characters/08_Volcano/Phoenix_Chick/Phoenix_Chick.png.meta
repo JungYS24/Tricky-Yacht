@@ -3,29 +3,62 @@ guid: 648b3dba45560124d8b4b16de5f55441
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7573532727527703209
-    second: phoenix chick_0
+      213: 1301059827013848177
+    second: Phoenix_Chick_0
   - first:
-      213: 8330843538279122269
-    second: phoenix chick_1
+      213: -5204646913984360252
+    second: Phoenix_Chick_1
   - first:
-      213: -2390987349296642899
-    second: phoenix chick_2
+      213: -1335045859964891869
+    second: Phoenix_Chick_2
   - first:
-      213: -309520133165103692
-    second: phoenix chick_3
+      213: -5179692710510160905
+    second: Phoenix_Chick_3
   - first:
-      213: -9134817877824733203
-    second: phoenix chick_4
+      213: 894086381839197846
+    second: Phoenix_Chick_4
   - first:
-      213: -5401897360904399346
-    second: phoenix chick_5
+      213: -567201513469200180
+    second: Phoenix_Chick_5
   - first:
-      213: -2768686274440367128
-    second: phoenix chick_6
+      213: -1787041491006177248
+    second: Phoenix_Chick_6
   - first:
-      213: 5199539048002404395
-    second: phoenix chick_7
+      213: 9078439053328404995
+    second: Phoenix_Chick_7
+  - first:
+      213: -5027695272489112098
+    second: Phoenix_Chick_8
+  - first:
+      213: -1773104282151573556
+    second: Phoenix_Chick_9
+  - first:
+      213: -4508432043103084262
+    second: Phoenix_Chick_10
+  - first:
+      213: 8119573977895633730
+    second: Phoenix_Chick_11
+  - first:
+      213: -2372515701964318802
+    second: Phoenix_Chick_12
+  - first:
+      213: 5082753839812913809
+    second: Phoenix_Chick_13
+  - first:
+      213: 3845677434343333184
+    second: Phoenix_Chick_14
+  - first:
+      213: -544259392309662643
+    second: Phoenix_Chick_15
+  - first:
+      213: 9181743819917536985
+    second: Phoenix_Chick_16
+  - first:
+      213: -4441575960291943904
+    second: Phoenix_Chick_17
+  - first:
+      213: 2697338587898633164
+    second: Phoenix_Chick_18
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,7 +105,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 40
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -117,30 +150,17 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: phoenix chick_0
+      name: Phoenix_Chick_0
       rect:
         serializedVersion: 2
-        x: 63
-        y: 266
-        width: 98
-        height: 115
+        x: 34
+        y: 414
+        width: 251
+        height: 280
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -149,20 +169,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 75d7ae05c1865e690800000000000000
-      internalID: -7573532727527703209
+      spriteID: 17c01b4f40b4e0210800000000000000
+      internalID: 1301059827013848177
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: phoenix chick_1
+      name: Phoenix_Chick_1
       rect:
         serializedVersion: 2
-        x: 169
-        y: 266
-        width: 98
-        height: 115
+        x: 372
+        y: 414
+        width: 268
+        height: 280
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -171,20 +191,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d554c723f0a1d9370800000000000000
-      internalID: 8330843538279122269
+      spriteID: 4c011a6053165c7b0800000000000000
+      internalID: -5204646913984360252
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: phoenix chick_2
+      name: Phoenix_Chick_2
       rect:
         serializedVersion: 2
-        x: 273
-        y: 266
-        width: 99
-        height: 115
+        x: 699
+        y: 414
+        width: 241
+        height: 280
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -193,20 +213,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: da488be7ca181ded0800000000000000
-      internalID: -2390987349296642899
+      spriteID: 32dcfed1dd6f87de0800000000000000
+      internalID: -1335045859964891869
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: phoenix chick_3
+      name: Phoenix_Chick_3
       rect:
         serializedVersion: 2
-        x: 378
-        y: 266
-        width: 99
-        height: 115
+        x: 975
+        y: 583
+        width: 17
+        height: 15
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -215,20 +235,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4b5ccdb241d54bbf0800000000000000
-      internalID: -309520133165103692
+      spriteID: 7f39c584ce80e18b0800000000000000
+      internalID: -5179692710510160905
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: phoenix chick_4
+      name: Phoenix_Chick_4
       rect:
         serializedVersion: 2
-        x: 59
-        y: 79
-        width: 99
-        height: 116
+        x: 1047
+        y: 414
+        width: 244
+        height: 280
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -237,20 +257,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: def7e58d98b9a3180800000000000000
-      internalID: -9134817877824733203
+      spriteID: 6962a04c3de686c00800000000000000
+      internalID: 894086381839197846
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: phoenix chick_5
+      name: Phoenix_Chick_5
       rect:
         serializedVersion: 2
-        x: 165
-        y: 79
-        width: 97
-        height: 116
+        x: 1320
+        y: 589
+        width: 9
+        height: 8
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -259,20 +279,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e065c2288fa9805b0800000000000000
-      internalID: -5401897360904399346
+      spriteID: cc8ba998a35e028f0800000000000000
+      internalID: -567201513469200180
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: phoenix chick_6
+      name: Phoenix_Chick_6
       rect:
         serializedVersion: 2
-        x: 271
-        y: 79
-        width: 98
-        height: 116
+        x: 1341
+        y: 595
+        width: 15
+        height: 11
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -281,20 +301,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8e37b75a086a399d0800000000000000
-      internalID: -2768686274440367128
+      spriteID: 02041b96b372337e0800000000000000
+      internalID: -1787041491006177248
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: phoenix chick_7
+      name: Phoenix_Chick_7
       rect:
         serializedVersion: 2
-        x: 377
-        y: 79
-        width: 99
-        height: 116
+        x: 936
+        y: 530
+        width: 77
+        height: 53
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -303,8 +323,250 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b20c4ff3739782840800000000000000
-      internalID: 5199539048002404395
+      spriteID: 3025ca828381dfd70800000000000000
+      internalID: 9078439053328404995
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phoenix_Chick_8
+      rect:
+        serializedVersion: 2
+        x: 1001
+        y: 577
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: edd206c99c90a3ab0800000000000000
+      internalID: -5027695272489112098
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phoenix_Chick_9
+      rect:
+        serializedVersion: 2
+        x: 1291
+        y: 530
+        width: 82
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc7a1a8bc0ba467e0800000000000000
+      internalID: -1773104282151573556
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phoenix_Chick_10
+      rect:
+        serializedVersion: 2
+        x: 44
+        y: 73
+        width: 253
+        height: 281
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a112ad881f4de61c0800000000000000
+      internalID: -4508432043103084262
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phoenix_Chick_11
+      rect:
+        serializedVersion: 2
+        x: 332
+        y: 256
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24389f773858ea070800000000000000
+      internalID: 8119573977895633730
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phoenix_Chick_12
+      rect:
+        serializedVersion: 2
+        x: 349
+        y: 246
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea751680a81231fd0800000000000000
+      internalID: -2372515701964318802
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phoenix_Chick_13
+      rect:
+        serializedVersion: 2
+        x: 388
+        y: 73
+        width: 254
+        height: 281
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 19a2dce00b1998640800000000000000
+      internalID: 5082753839812913809
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phoenix_Chick_14
+      rect:
+        serializedVersion: 2
+        x: 721
+        y: 73
+        width: 252
+        height: 281
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04d15c250479e5530800000000000000
+      internalID: 3845677434343333184
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phoenix_Chick_15
+      rect:
+        serializedVersion: 2
+        x: 1054
+        y: 73
+        width: 252
+        height: 281
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4c66bf57f66278f0800000000000000
+      internalID: -544259392309662643
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phoenix_Chick_16
+      rect:
+        serializedVersion: 2
+        x: 303
+        y: 211
+        width: 49
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9dea2d47b5b1c6f70800000000000000
+      internalID: 9181743819917536985
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phoenix_Chick_17
+      rect:
+        serializedVersion: 2
+        x: 358
+        y: 226
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02a52e3523a5c52c0800000000000000
+      internalID: -4441575960291943904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Phoenix_Chick_18
+      rect:
+        serializedVersion: 2
+        x: 331
+        y: 202
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ccbd6a2972fde6520800000000000000
+      internalID: 2697338587898633164
       vertices: []
       indices: 
       edges: []
@@ -323,14 +585,25 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      phoenix chick_0: -7573532727527703209
-      phoenix chick_1: 8330843538279122269
-      phoenix chick_2: -2390987349296642899
-      phoenix chick_3: -309520133165103692
-      phoenix chick_4: -9134817877824733203
-      phoenix chick_5: -5401897360904399346
-      phoenix chick_6: -2768686274440367128
-      phoenix chick_7: 5199539048002404395
+      Phoenix_Chick_0: 1301059827013848177
+      Phoenix_Chick_1: -5204646913984360252
+      Phoenix_Chick_10: -4508432043103084262
+      Phoenix_Chick_11: 8119573977895633730
+      Phoenix_Chick_12: -2372515701964318802
+      Phoenix_Chick_13: 5082753839812913809
+      Phoenix_Chick_14: 3845677434343333184
+      Phoenix_Chick_15: -544259392309662643
+      Phoenix_Chick_16: 9181743819917536985
+      Phoenix_Chick_17: -4441575960291943904
+      Phoenix_Chick_18: 2697338587898633164
+      Phoenix_Chick_2: -1335045859964891869
+      Phoenix_Chick_3: -5179692710510160905
+      Phoenix_Chick_4: 894086381839197846
+      Phoenix_Chick_5: -567201513469200180
+      Phoenix_Chick_6: -1787041491006177248
+      Phoenix_Chick_7: 9078439053328404995
+      Phoenix_Chick_8: -5027695272489112098
+      Phoenix_Chick_9: -1773104282151573556
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

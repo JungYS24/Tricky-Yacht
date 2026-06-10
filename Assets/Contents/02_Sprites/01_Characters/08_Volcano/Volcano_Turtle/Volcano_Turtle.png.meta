@@ -3,20 +3,32 @@ guid: eaf8528776b2f404585ce951f749cb22
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2199300502692692573
-    second: Valcano Turtle_0
+      213: -6491046869061325746
+    second: Volcano_Turtle_0
   - first:
-      213: 953050356566144762
-    second: Valcano Turtle_1
+      213: 7860168619409680144
+    second: Volcano_Turtle_1
   - first:
-      213: -8177783804718521007
-    second: Valcano Turtle_2
+      213: -8213705744890524732
+    second: Volcano_Turtle_2
   - first:
-      213: -7690117356746042051
-    second: Valcano Turtle_3
+      213: 6030156810470002133
+    second: Volcano_Turtle_3
   - first:
-      213: 2838372878630402779
-    second: Valcano Turtle_4
+      213: -4596596719909441009
+    second: Volcano_Turtle_4
+  - first:
+      213: 2887077232793804755
+    second: Volcano_Turtle_5
+  - first:
+      213: -4520202429141648884
+    second: Volcano_Turtle_6
+  - first:
+      213: 1016934800454020991
+    second: Volcano_Turtle_7
+  - first:
+      213: -5940760419786606614
+    second: Volcano_Turtle_8
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -63,7 +75,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 45
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -108,30 +120,17 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Valcano Turtle_0
+      name: Volcano_Turtle_0
       rect:
         serializedVersion: 2
-        x: 8
-        y: 242
-        width: 98
-        height: 92
+        x: 53
+        y: 455
+        width: 330
+        height: 246
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -140,20 +139,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3adf9ae58d38a71e0800000000000000
-      internalID: -2199300502692692573
+      spriteID: e4c203d734b2be5a0800000000000000
+      internalID: -6491046869061325746
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Valcano Turtle_1
+      name: Volcano_Turtle_1
       rect:
         serializedVersion: 2
-        x: 108
-        y: 242
-        width: 98
-        height: 92
+        x: 384
+        y: 455
+        width: 325
+        height: 246
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -162,20 +161,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: af63f24ff3ae93d00800000000000000
-      internalID: 953050356566144762
+      spriteID: 0172692e6bde41d60800000000000000
+      internalID: 7860168619409680144
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Valcano Turtle_2
+      name: Volcano_Turtle_2
       rect:
         serializedVersion: 2
-        x: 207
-        y: 242
-        width: 99
-        height: 92
+        x: 709
+        y: 442
+        width: 326
+        height: 259
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -184,20 +183,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1556fc515fca28e80800000000000000
-      internalID: -8177783804718521007
+      spriteID: 4cb0732a42e030e80800000000000000
+      internalID: -8213705744890524732
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Valcano Turtle_3
+      name: Volcano_Turtle_3
       rect:
         serializedVersion: 2
-        x: 307
-        y: 242
-        width: 98
-        height: 92
+        x: 1037
+        y: 563
+        width: 11
+        height: 12
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -206,20 +205,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d35161e0207374590800000000000000
-      internalID: -7690117356746042051
+      spriteID: 5dd87f38bab6fa350800000000000000
+      internalID: 6030156810470002133
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Valcano Turtle_4
+      name: Volcano_Turtle_4
       rect:
         serializedVersion: 2
-        x: 406
-        y: 242
-        width: 99
-        height: 92
+        x: 1039
+        y: 459
+        width: 317
+        height: 242
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -228,8 +227,96 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bda3ed2481de36720800000000000000
-      internalID: 2838372878630402779
+      spriteID: f02721613ab9530c0800000000000000
+      internalID: -4596596719909441009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Volcano_Turtle_5
+      rect:
+        serializedVersion: 2
+        x: 60
+        y: 103
+        width: 326
+        height: 254
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3dfdac36275f01820800000000000000
+      internalID: 2887077232793804755
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Volcano_Turtle_6
+      rect:
+        serializedVersion: 2
+        x: 387
+        y: 101
+        width: 331
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0a772af6d30541c0800000000000000
+      internalID: -4520202429141648884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Volcano_Turtle_7
+      rect:
+        serializedVersion: 2
+        x: 716
+        y: 102
+        width: 265
+        height: 255
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f7f6bc420d0ec1e00800000000000000
+      internalID: 1016934800454020991
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Volcano_Turtle_8
+      rect:
+        serializedVersion: 2
+        x: 1037
+        y: 104
+        width: 319
+        height: 253
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae73beaafdd2e8da0800000000000000
+      internalID: -5940760419786606614
       vertices: []
       indices: 
       edges: []
@@ -248,11 +335,15 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Valcano Turtle_0: -2199300502692692573
-      Valcano Turtle_1: 953050356566144762
-      Valcano Turtle_2: -8177783804718521007
-      Valcano Turtle_3: -7690117356746042051
-      Valcano Turtle_4: 2838372878630402779
+      Volcano_Turtle_0: -6491046869061325746
+      Volcano_Turtle_1: 7860168619409680144
+      Volcano_Turtle_2: -8213705744890524732
+      Volcano_Turtle_3: 6030156810470002133
+      Volcano_Turtle_4: -4596596719909441009
+      Volcano_Turtle_5: 2887077232793804755
+      Volcano_Turtle_6: -4520202429141648884
+      Volcano_Turtle_7: 1016934800454020991
+      Volcano_Turtle_8: -5940760419786606614
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
