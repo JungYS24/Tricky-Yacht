@@ -865,7 +865,7 @@ public class DiceManager : MonoBehaviour
         string bName = (currentBiome != null) ? currentBiome.biomeName : "Stage";
 
         // 5스테이지마다 보스가 나오므로, 현재 바이옴에서의 구역 진행도(1~5)를 계산함
-        int localStage = ((currentStage - 1) % 10) + 1;
+        int localStage = ((currentStage - 1) % 3) + 1;
         string stageDisplayName = $"{bName} {localStage}";
         ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText);
 
@@ -901,7 +901,7 @@ public class DiceManager : MonoBehaviour
         currentStage++;
 
         // 방금 클리어한 곳이 5스테이지 단위(보스)였다면, 다음 스테이지 시작 전 바이옴 선택창 띄우기
-        if ((currentStage - 1) % 10 == 0 && currentStage <= 90)
+        if ((currentStage - 1) %3 == 0 && currentStage <= 90)
         {
             ui?.HideShopChoice();
 

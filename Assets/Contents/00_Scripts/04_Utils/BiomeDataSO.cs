@@ -8,6 +8,7 @@ public class BiomeDataSO : ScriptableObject
     public BiomeType biomeType; //인스펙터에서 Forest, Meadow 등을 매핑
     public string biomeName = "새로운 생물군계";
     public Sprite backgroundImage;
+    public Sprite choiceBackgroundImaage;
 
     // 바이옴 전용 배경음악
     [Header("사운드 설정")]
