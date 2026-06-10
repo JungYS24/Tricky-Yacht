@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 717569ceb66ebb841bee45ba191f3c7a
+guid: 8565997518ededb40a092d23897df379
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6260431294757526338
-    second: Triple ticket_0
+      213: -3635403526209144928
+    second: DestroyDice_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,12 +46,12 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 155
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Triple ticket_0
+      name: DestroyDice_0
       rect:
         serializedVersion: 2
-        x: 6
-        y: 25
-        width: 88
-        height: 55
+        x: 8
+        y: 5
+        width: 84
+        height: 88
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: eb42d3718ea7e19a0800000000000000
-      internalID: -6260431294757526338
+      spriteID: 0a7f91d01c37c8dc0800000000000000
+      internalID: -3635403526209144928
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Triple ticket_0: -6260431294757526338
+      DestroyDice_0: -3635403526209144928
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

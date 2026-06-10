@@ -167,6 +167,9 @@ public class DiceManager : MonoBehaviour
         currentStage = data.currentStage;
         currentPlayerHP = data.currentPlayerHP;
 
+        //세이브에 값이 없으면 기본 100으로, 있으면 세이브된 값으로 덮어씌움
+        playerMaxHP = data.playerMaxHP > 0 ? data.playerMaxHP : 100;
+
         if (shopManager != null)
         {
             shopManager.currentGold = data.currentGold;
@@ -837,46 +840,102 @@ public class DiceManager : MonoBehaviour
                 }
                 else if (d.myData.type == DiceType.Ice) iceBonusChips += 10;
             }
-        }        
+        }
+        //피규어 발동 실시간 시뮬레이션
+        int figureBonusChips = 0;
+        float figureBonusMult = 0f;
+        List<string> activeFigureNames = new List<string>();
 
-        int finalBaseSum = baseSum + iceBonusChips + snackBonusChips;
-        int totalDamage = Mathf.FloorToInt(finalBaseSum * finalMult) + darkDamageTotal;
-
-        string displayHand = $"<color=#FFD700>{handName}</color>";
-
-        if (iceBonusChips > 0)
+        if (allValues.Count == 5) // 5개가 모였을 때만 피규어 발동 검사
         {
-            displayHand += $" <color=#00FFFF>+{iceBonusChips}</color>";
+            int[] diceCounts = new int[7];
+            foreach (int v in allValues) diceCounts[v]++;
+
+            foreach (var figure in InventoryManager.Instance.ownedFigures)
+            {
+                bool isTriggered = false;
+                float tempChips = 0;
+                float tempMult = 0;
+
+                foreach (var node in figure.figureNodes)
+                {
+                    bool nodeTriggered = false;
+                    switch (node.triggerType)
+                    {
+                        case FigureTriggerType.ThreeOf1: if (diceCounts[1] >= 3) nodeTriggered = true; break;
+                        case FigureTriggerType.ThreeOf2: if (diceCounts[2] >= 3) nodeTriggered = true; break;
+                        case FigureTriggerType.ThreeOf3: if (diceCounts[3] >= 3) nodeTriggered = true; break;
+                        case FigureTriggerType.ThreeOf4: if (diceCounts[4] >= 3) nodeTriggered = true; break;
+                        case FigureTriggerType.ThreeOf5: if (diceCounts[5] >= 3) nodeTriggered = true; break;
+                        case FigureTriggerType.ThreeOf6: if (diceCounts[6] >= 3) nodeTriggered = true; break;
+                        case FigureTriggerType.OnePair: if (handName == "원 페어") nodeTriggered = true; break;
+                        case FigureTriggerType.TwoPair: if (handName == "투 페어") nodeTriggered = true; break;
+                        case FigureTriggerType.Triple: if (handName == "트리플") nodeTriggered = true; break;
+                        case FigureTriggerType.Straight: if (handName == "스트레이트") nodeTriggered = true; break;
+                        case FigureTriggerType.FullHouse: if (handName == "풀하우스") nodeTriggered = true; break;
+                        case FigureTriggerType.FourOfAKind: if (handName == "포카드") nodeTriggered = true; break;
+                        case FigureTriggerType.Yacht: if (handName == "Yacht" || handName == "요트" || handName == "파이브 카드") nodeTriggered = true; break;
+                        case FigureTriggerType.Passive: nodeTriggered = true; break;
+                    }
+
+                    if (nodeTriggered)
+                    {
+                        isTriggered = true;
+                        foreach (var effect in node.effects)
+                        {
+                            if (effect.effectType == FigureEffectType.AddChips) tempChips += effect.effectValue;
+                            if (effect.effectType == FigureEffectType.AddMultiplier) tempMult += effect.effectValue;
+                        }
+                    }
+                }
+
+                if (isTriggered)
+                {
+                    if (!activeFigureNames.Contains(figure.itemName))
+                        activeFigureNames.Add(figure.itemName);
+                    figureBonusChips += (int)tempChips;
+                    figureBonusMult += tempMult;
+                }
+            }
         }
 
-        if (snackBonusChips > 0) displayHand += $" <color=#FFA500>+{snackBonusChips}(스낵)</color>";
 
+
+
+        // 텍스트 포매팅 (파란색 색상 적용)
+        // ==========================================
+        int finalBaseSum = baseSum + iceBonusChips + snackBonusChips + figureBonusChips;
+        float totalFinalMult = finalMult + figureBonusMult;
+        int totalDamage = Mathf.FloorToInt(finalBaseSum * totalFinalMult) + darkDamageTotal;
+
+        string displayHand = $"<color=#FFD700>{handName}</color>";
+        if (iceBonusChips > 0) displayHand += $" <color=#00FFFF>+{iceBonusChips}</color>";
+        if (snackBonusChips > 0) displayHand += $" <color=#FFA500>+{snackBonusChips}(스낵)</color>";
         if (expectedGold > 0) displayHand += $" <color=#FFFF00>+{expectedGold}(코인)</color>";
         if (expectedHeal > 0) displayHand += $" <color=#FF5555>+{expectedHeal}(회복)</color>";
 
-        string formula = $"{finalBaseSum} x {finalMult:F1}배" + (darkDamageTotal > 0 ? $" + {darkDamageTotal}(다크)" : "");
+        // 피규어로 칩이나 배수가 올랐다면 파란색(#00BFFF)으로, 아니면 기본색 유지
+        string chipsText = figureBonusChips > 0 ? $"<color=#00BFFF>{finalBaseSum}</color>" : finalBaseSum.ToString();
+        string multText = figureBonusMult > 0f ? $"<color=#00BFFF>{totalFinalMult:F1}배</color>" : $"{totalFinalMult:F1}배";
+
+        string formula = $"{chipsText} x {multText}" + (darkDamageTotal > 0 ? $" + {darkDamageTotal}(다크)" : "");
         string combinedText = $"{displayHand}\n{formula}\n<color=#FF5555>= {totalDamage} 대미지 예정</color>";
 
-        //남은 굴리기 초기화
-        // 남은 굴리기 계산
+        // 피규어 발동 명단 텍스트 조합
+        string activeFigStr = activeFigureNames.Count > 0 ? $"<color=#00BFFF> 발동 : {string.Join(", ", activeFigureNames)}</color>" : "";
+
         int remainingRerolls = (maxRerolls + snackBonusRerolls + figureBonusRerolls) - currentRerolls;
-
-        //현재 바이옴의 이름을 가져옴
         string bName = (currentBiome != null) ? currentBiome.biomeName : "Stage";
-
-        // 5스테이지마다 보스가 나오므로, 현재 바이옴에서의 구역 진행도(1~5)를 계산함
         int localStage = ((currentStage - 1) % 3) + 1;
         string stageDisplayName = $"{bName} {localStage}";
-        ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText);
+
+        // UI 업데이트 호출 (새로 만든 피규어 텍스트 파라미터 전달)
+        ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText, activeFigStr);
 
         float currentEnemyDropRate = isPeppermintActive ? enemy.baseDropRate : 0f;
-
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
-            if (currentStage == 3 && isPeppermintActive)
-            {
-                currentEnemyDropRate = 0.3f; // 인스펙터 수치가 꼬여도 무조건 30%로 덮어쓰기
-            }
+            if (currentStage == 3 && isPeppermintActive) currentEnemyDropRate = 0.3f;
         }
 
         ui?.UpdateDropRateUI(currentEnemyDropRate, snackBonusFigureDropRate);

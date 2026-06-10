@@ -12,6 +12,7 @@ public class UIManager : MonoBehaviour
 
     [Header("데미지 계산 UI (통합)")]
     public TextMeshProUGUI scoringFormulaText;
+    public TextMeshProUGUI activeFigureText; // 피규어 발동 텍스트변수
 
     [Header("플레이어 체력 UI")]
     //플레이어 체력
@@ -20,7 +21,7 @@ public class UIManager : MonoBehaviour
     [Header("버튼 및 패널")]
     public Button rollButton;
     public Button finishButton;
-    public TextMeshProUGUI resultDescription;
+    //public TextMeshProUGUI resultDescription;
     public GameObject shopChoicePanel;
     public Button goShopButton;
     public Button nextStageButton;
@@ -68,7 +69,7 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    public void UpdateGameUI(string stageName, int currentHP, int maxHP, int playerHP, int playerMaxHP, int rerollsLeft, string combinedDamageText)
+    public void UpdateGameUI(string stageName, int currentHP, int maxHP, int playerHP, int playerMaxHP, int rerollsLeft, string combinedDamageText, string activeFigureString = "")
     {
         stageText.text = stageName;
 
@@ -85,6 +86,11 @@ public class UIManager : MonoBehaviour
         if (scoringFormulaText != null)
         {
             scoringFormulaText.text = combinedDamageText;
+        }
+
+        if (activeFigureText != null)
+        {
+            activeFigureText.text = activeFigureString;
         }
     }
 

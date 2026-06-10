@@ -15,6 +15,7 @@ public class SaveData
 {
     public int currentStage;
     public int currentPlayerHP;
+    public int playerMaxHP;
     public int currentGold;
 
 
@@ -57,7 +58,7 @@ public class GameSaveManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    // [추가] 모바일 백그라운드로 가거나 창을 닫을 때 자동으로 실행됨
+    //모바일 백그라운드로 가거나 창을 닫을 때 자동으로 실행됨
     private void OnApplicationQuit() { AutoSave(); }
     private void OnApplicationPause(bool pauseStatus) { if (pauseStatus) AutoSave(); }
 
@@ -74,7 +75,9 @@ public class GameSaveManager : MonoBehaviour
     {
         SaveData data = new SaveData();
 
+
         //일회성 버프들도 잊지 말고 세이브 파일에 도장 찍기
+        data.playerMaxHP = dice.playerMaxHP;
         data.snackBonusMult = dice.snackBonusMult;
         data.snackBonusChips = dice.snackBonusChips;
         data.snackBonusRerolls = dice.snackBonusRerolls;

@@ -9,6 +9,9 @@ public class LootSelectionPanel : MonoBehaviour
     public GameObject panelRoot;
     public LootChoiceSlot[] choiceSlots;
 
+    [Header("고정 전리품 (1번 칸)")]
+    public MaxHPItemSO maxHpRewardItem; //영구 체력 증가
+
     [Header("전리품 풀 세팅")]
     public List<SnackItemSO> snackPool;
     public List<DiceItemSO> dicePool;
@@ -23,26 +26,29 @@ public class LootSelectionPanel : MonoBehaviour
     {
         diceManager = manager;
 
-        if (snackPool.Count < 2 || dicePool.Count < 1)
+        // 에러 방지: 스낵 1개, 주사위 1개, 그리고 고정 체력 아이템이 세팅되었는지 확인
+        if (snackPool.Count < 1 || dicePool.Count < 1 || maxHpRewardItem == null)
         {
-            Debug.LogWarning("전리품 풀에 스낵이 2개 미만이거나 주사위가 없습니다! 에디터 세팅을 확인하세요.");
+            Debug.LogWarning("전리품 풀에 아이템이 부족하거나 고정 체력 아이템이 누락되었습니다!");
             ClosePanelAndProceed();
             return;
         }
-        // 스낵 2개, 주사위 1개 뽑기
+
+        // 스낵 1개 뽑기
         List<SnackItemSO> shuffledSnacks = new List<SnackItemSO>(snackPool);
         ShuffleList(shuffledSnacks);
 
+        // 주사위 1개 뽑기
         List<DiceItemSO> shuffledDice = new List<DiceItemSO>(dicePool);
         ShuffleList(shuffledDice);
 
-        choiceSlots[0].Setup(shuffledSnacks[0], this);
-        choiceSlots[1].Setup(shuffledSnacks[1], this);
+        // 슬롯 세팅 (1번: 체력 아이템, 2번: 스낵, 3번: 주사위)
+        choiceSlots[0].Setup(maxHpRewardItem, this);
+        choiceSlots[1].Setup(shuffledSnacks[0], this);
         choiceSlots[2].Setup(shuffledDice[0], this);
-        //패널이 열렸다고 상태 변경
+
         panelRoot.SetActive(true);
         IsPanelOpen = true;
-       
     }
 
     public void OnLootSelected(BaseItemDataSO selectedLoot)
@@ -56,7 +62,13 @@ public class LootSelectionPanel : MonoBehaviour
                 return; // 꽉 차서 안 들어가면 리턴하여 단계가 넘어가지 않도록 방지
             }
         }
-        else if (selectedLoot is DiceItemSO dice)
+        else
+        {
+            // DiceItemSO 또는 MaxHPItemSO일 경우 인벤토리에 들어가지 않고 즉시 효과 발동
+            selectedLoot.ApplyItemEffect(diceManager);
+        }
+
+        if (selectedLoot is DiceItemSO dice)
         {
             dice.ApplyItemEffect(diceManager);
         }

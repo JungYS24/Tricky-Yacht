@@ -35,6 +35,9 @@ public class ShopManager : MonoBehaviour
     public List<TicketItemSO> allTicketsPool; // 8개의 티켓을 미리 넣어둘 리스트
     public TicketChoiceSlot[] ticketChoiceSlots; // 화면에 보일 3개의 버튼 슬롯
 
+    [Header("주사위 파괴 선택 UI")]
+    public DiceDestructionPanel diceDestructionPanel;
+
     private void Awake()
     {
         if (tooltipRect == null && tooltipPanel != null)
@@ -167,7 +170,9 @@ public class ShopManager : MonoBehaviour
 
     public void RerollShop()
     {
-        if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return;//코팅 선택 중이면 작동 불가
+        // 코팅 선택 중이거나 파괴 선택 중이면 작동 불가
+        if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return;
+        if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return;
 
         if (currentGold >= rerollCost)
         {
@@ -180,8 +185,9 @@ public class ShopManager : MonoBehaviour
 
     public void CloseShopAndGoNext()
     {
-        // 코팅 선택 중이면 다음 스테이지 넘어가기 불가
+        // 코팅 선택 중이거나 파괴 선택 중이면 다음 스테이지 넘어가기 불가
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return;
+        if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return;
 
         IsShopOpen = false;
         if (shopUI != null) shopUI.SetActive(false);
@@ -189,10 +195,24 @@ public class ShopManager : MonoBehaviour
         if (diceManager != null) diceManager.NextStage();
     }
 
+    // 주사위 파괴 선택창 열기 (파괴 아이템을 구매했을 때 호출됨)
+    public void ShowDiceDestructionSelection()
+    {
+        if (diceDestructionPanel != null && diceManager != null)
+        {
+            diceDestructionPanel.OpenSelection(diceManager);
+        }
+        else
+        {
+            Debug.LogWarning("DiceDestructionPanel 또는 DiceManager 연결이 누락되었습니다.");
+        }
+    }
+
     public bool PurchaseItem(BaseItemDataSO item)
     {
-        // 코팅 선택 중이면 리롤 불가
+        // 코팅 선택 중이거나 파괴 선택 중이면 구매 불가
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return false;
+        if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return false;
 
         if (currentGold >= item.price)
         {
