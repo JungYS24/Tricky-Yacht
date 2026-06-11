@@ -3,26 +3,32 @@ guid: 766b8eab761d35f45bca80e8c7787f78
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -458185587419916677
-    second: Wolf_0
+      213: 6069383233579238450
+    second: Ignis_Wolf_0
   - first:
-      213: -5547194825390550217
-    second: Wolf_1
+      213: 4178835210376389051
+    second: Ignis_Wolf_1
   - first:
-      213: 6891357095817125983
-    second: Wolf_2
+      213: 6545912814027357847
+    second: Ignis_Wolf_2
   - first:
-      213: 2672853027243246175
-    second: Wolf_3
+      213: -8939874897916254196
+    second: Ignis_Wolf_3
   - first:
-      213: -6079965141102547391
-    second: Wolf_4
+      213: 4857441144850893207
+    second: Ignis_Wolf_4
   - first:
-      213: -6983649135101308852
-    second: Wolf_5
+      213: -6432122838630921609
+    second: Ignis_Wolf_5
   - first:
-      213: 5184831053750644559
-    second: Wolf_6
+      213: 6309181508309986339
+    second: Ignis_Wolf_6
+  - first:
+      213: 8328571718445793493
+    second: Ignis_Wolf_7
+  - first:
+      213: -1053466805338522184
+    second: Ignis_Wolf_8
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -69,7 +75,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 35
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -90,7 +96,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 8192
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -114,30 +120,17 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Wolf_0
+      name: Ignis_Wolf_0
       rect:
         serializedVersion: 2
-        x: 176
-        y: 293
-        width: 99
-        height: 91
+        x: 29
+        y: 438
+        width: 336
+        height: 255
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -146,20 +139,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b76d1a4c2a234a9f0800000000000000
-      internalID: -458185587419916677
+      spriteID: 234c33bd4e7ca3450800000000000000
+      internalID: 6069383233579238450
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Wolf_1
+      name: Ignis_Wolf_1
       rect:
         serializedVersion: 2
-        x: 280
-        y: 292
-        width: 99
-        height: 91
+        x: 375
+        y: 426
+        width: 324
+        height: 272
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -168,20 +161,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 73316b452b76403b0800000000000000
-      internalID: -5547194825390550217
+      spriteID: bb12161cb743ef930800000000000000
+      internalID: 4178835210376389051
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Wolf_2
+      name: Ignis_Wolf_2
       rect:
         serializedVersion: 2
-        x: 382
-        y: 292
-        width: 97
-        height: 89
+        x: 700
+        y: 426
+        width: 325
+        height: 288
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -190,20 +183,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f502c8444c403af50800000000000000
-      internalID: 6891357095817125983
+      spriteID: 79e37cac501c7da50800000000000000
+      internalID: 6545912814027357847
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Wolf_3
+      name: Ignis_Wolf_3
       rect:
         serializedVersion: 2
-        x: 73
-        y: 111
-        width: 100
-        height: 83
+        x: 1027
+        y: 426
+        width: 355
+        height: 274
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -212,20 +205,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f5249a9baa1e71520800000000000000
-      internalID: 2672853027243246175
+      spriteID: c082545552f2fe380800000000000000
+      internalID: -8939874897916254196
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Wolf_4
+      name: Ignis_Wolf_4
       rect:
         serializedVersion: 2
-        x: 175
-        y: 111
-        width: 100
-        height: 83
+        x: 1235
+        y: 690
+        width: 15
+        height: 13
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -234,20 +227,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 14e23ddcaef9f9ba0800000000000000
-      internalID: -6079965141102547391
+      spriteID: 79944344cf8196340800000000000000
+      internalID: 4857441144850893207
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Wolf_5
+      name: Ignis_Wolf_5
       rect:
         serializedVersion: 2
-        x: 279
-        y: 111
-        width: 100
-        height: 83
+        x: 362
+        y: 578
+        width: 6
+        height: 6
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -256,20 +249,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c409252dc18151f90800000000000000
-      internalID: -6983649135101308852
+      spriteID: 77a0abb6b528cb6a0800000000000000
+      internalID: -6432122838630921609
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Wolf_6
+      name: Ignis_Wolf_6
       rect:
         serializedVersion: 2
-        x: 380
-        y: 111
-        width: 99
-        height: 83
+        x: 26
+        y: 55
+        width: 340
+        height: 292
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -278,8 +271,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f4fa83b7f5834f740800000000000000
-      internalID: 5184831053750644559
+      spriteID: 32ca7428727be8750800000000000000
+      internalID: 6309181508309986339
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ignis_Wolf_7
+      rect:
+        serializedVersion: 2
+        x: 367
+        y: 55
+        width: 338
+        height: 277
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d0835ce9d7059370800000000000000
+      internalID: 8328571718445793493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ignis_Wolf_8
+      rect:
+        serializedVersion: 2
+        x: 711
+        y: 55
+        width: 336
+        height: 267
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8bdb125a5855161f0800000000000000
+      internalID: -1053466805338522184
       vertices: []
       indices: 
       edges: []
@@ -298,13 +335,15 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Wolf_0: -458185587419916677
-      Wolf_1: -5547194825390550217
-      Wolf_2: 6891357095817125983
-      Wolf_3: 2672853027243246175
-      Wolf_4: -6079965141102547391
-      Wolf_5: -6983649135101308852
-      Wolf_6: 5184831053750644559
+      Ignis_Wolf_0: 6069383233579238450
+      Ignis_Wolf_1: 4178835210376389051
+      Ignis_Wolf_2: 6545912814027357847
+      Ignis_Wolf_3: -8939874897916254196
+      Ignis_Wolf_4: 4857441144850893207
+      Ignis_Wolf_5: -6432122838630921609
+      Ignis_Wolf_6: 6309181508309986339
+      Ignis_Wolf_7: 8328571718445793493
+      Ignis_Wolf_8: -1053466805338522184
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
