@@ -63,6 +63,10 @@ public class DiceManager : MonoBehaviour
     public BiomeSelectionPanel biomeSelectionPanel;
     private BiomeNavigator biomeNavigator = new BiomeNavigator();
 
+    [Header("사운드 설정")]
+    public AudioSource sfxSource; 
+    public AudioEvent playerHurtAudioEvent;
+
     // --- 스낵 시스템용 변수 ---
     private int defaultMaxRerolls;
     [HideInInspector] public float snackBonusMult = 0f;
@@ -753,8 +757,22 @@ public class DiceManager : MonoBehaviour
             enemy.PlayAttackAnim();
             yield return new WaitForSeconds(0.2f);
 
+            // 1. 플레이어 체력 감소 및 화면 흔들림
             currentPlayerHP -= enemy.AttackPower;
             CameraShake.Instance.Shake(0.15f, 0.1f);
+
+            // 2. 비네트 피격 연출 실행
+            if (HurtVignetteController.Instance != null)
+            {
+                HurtVignetteController.Instance.TriggerHurtEffect();
+            }
+
+            // 3.  플레이어 피격 효과음 재생!
+            if (sfxSource != null && playerHurtAudioEvent != null)
+            {
+                playerHurtAudioEvent.Play(sfxSource);
+            }
+
             UpdateMainUI("적 공격!");
 
             if (currentPlayerHP <= 0)
