@@ -63,6 +63,13 @@ public class DiceManager : MonoBehaviour
     public BiomeSelectionPanel biomeSelectionPanel;
     private BiomeNavigator biomeNavigator = new BiomeNavigator();
 
+    [Header("사운드 설정")]
+    public AudioSource sfxSource; 
+    public AudioEvent playerHurtAudioEvent;
+
+    [Header("게임 오버 UI 설정")]
+    public GameOverPanelController gameOverPanel;
+
     // --- 스낵 시스템용 변수 ---
     private int defaultMaxRerolls;
     [HideInInspector] public float snackBonusMult = 0f;
@@ -753,8 +760,22 @@ public class DiceManager : MonoBehaviour
             enemy.PlayAttackAnim();
             yield return new WaitForSeconds(0.2f);
 
+            // 1. 플레이어 체력 감소 및 화면 흔들림
             currentPlayerHP -= enemy.AttackPower;
             CameraShake.Instance.Shake(0.15f, 0.1f);
+
+            // 2. 비네트 피격 연출 실행
+            if (HurtVignetteController.Instance != null)
+            {
+                HurtVignetteController.Instance.TriggerHurtEffect();
+            }
+
+            // 3.  플레이어 피격 효과음 재생!
+            if (sfxSource != null && playerHurtAudioEvent != null)
+            {
+                playerHurtAudioEvent.Play(sfxSource);
+            }
+
             UpdateMainUI("적 공격!");
 
             if (currentPlayerHP <= 0)
@@ -764,6 +785,8 @@ public class DiceManager : MonoBehaviour
 
                 ui?.ShowResult("#FF0000", "게임 오버");
                 Invoke(nameof(RestartGame), 1.5f);
+
+                StartCoroutine(ShowGameOverPanelDelayed());
             }
             else
             {
@@ -930,7 +953,8 @@ public class DiceManager : MonoBehaviour
         int remainingRerolls = (maxRerolls + snackBonusRerolls + figureBonusRerolls) - currentRerolls;
         string bName = (currentBiome != null) ? currentBiome.biomeName : "Stage";
         int localStage = ((currentStage - 1) % 3) + 1;
-        string stageDisplayName = $"{bName} {localStage}";
+        //스테이지 이름만 표시
+        string stageDisplayName = $"{bName}";
 
         ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText, activeFigStr);
 
@@ -1007,7 +1031,7 @@ public class DiceManager : MonoBehaviour
         SceneManager.LoadScene("Lobby");
     }
 
-    void RestartGame()
+    public void RestartGame()
     {
         //기본 스테이지 데이터 초기화
         currentStage = 1;
@@ -1076,5 +1100,15 @@ public class DiceManager : MonoBehaviour
         if (counts.Any(c => c == 3)) { multiplier = multTriple; handName = "트리플"; return; }
         if (counts.Count(c => c == 2) == 2) { multiplier = multTwoPair; handName = "투 페어"; return; }
         if (counts.Any(c => c == 2)) { multiplier = multOnePair; handName = "원 페어"; return; }
+    }
+
+    private IEnumerator ShowGameOverPanelDelayed()
+    {
+        yield return new WaitForSeconds(1.2f); // "게임 오버"
+
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetupGameOver(currentStage);
+        }
     }
 }

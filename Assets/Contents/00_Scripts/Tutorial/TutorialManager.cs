@@ -391,8 +391,8 @@ public class TutorialManager : MonoBehaviour
                 darkOverlay.SetActive(true);
                 if (InventoryManager.Instance != null && InventoryManager.Instance.snackSlots.Length >= 4)
                 {
-                    HighlightUI(InventoryManager.Instance.snackSlots[2].gameObject);
-                    HighlightUI(InventoryManager.Instance.snackSlots[3].gameObject);
+                    HighlightUI(InventoryManager.Instance.snackSlots[0].gameObject);
+                    HighlightUI(InventoryManager.Instance.snackSlots[1].gameObject);
                 }
                 break;
             case 32:
@@ -534,7 +534,7 @@ public class TutorialManager : MonoBehaviour
             foreach (var d in diceManager.activeDiceList) if (d != null && d.isKept) keptCount++;
             if (keptCount >= 5) ShowStep(9);
         }
-        else if (currentStepIndex == 27) // [추가] 27번 스텝에서 주사위 5개를 다 킵하면 끝내기 버튼 활성화!
+        else if (currentStepIndex == 27) //27번 스텝에서 주사위 5개를 다 킵하면 끝내기 버튼 활성화!
         {
             int keptCount = 0;
             foreach (var d in diceManager.activeDiceList) if (d != null && d.isKept) keptCount++;
@@ -592,7 +592,7 @@ public class TutorialManager : MonoBehaviour
             // 수정한 코루틴 이름(HighlightButton)으로 적용
             StartCoroutine(HighlightButton(uiManager.goShopButton));
         }
-        else if (currentStepIndex == 32) // [추가] 보스 처치 전리품을 얻었을 때
+        else if (currentStepIndex == 32) // 보스 처치 전리품을 얻었을 때
         {
             ClearHighlight();
             darkOverlay.SetActive(true);

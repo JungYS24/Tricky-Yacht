@@ -195,9 +195,16 @@ public class Dice : MonoBehaviour, IPointerDownHandler
     public void OnPointerDown(PointerEventData eventData)
     {
         // 상점이 열려있거나 피규어 상세 패널이 열려있으면 클릭 취소
-        if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || DeckUI.IsPanelOpen) return;
+        if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || DeckUI.IsPanelOpen || TicketDetailPanel.IsPanelOpen) return;
 
-        // 튜토리얼 중 클릭 제한 로직 추가
+        //상점 선택 패널(상점/다음 스테이지) 또는 바이옴 선택 패널이 열려있을 때 클릭 차단
+        if (DiceManager.Instance != null)
+        {
+            if (DiceManager.Instance.ui != null && DiceManager.Instance.ui.shopChoicePanel.activeInHierarchy) return;
+            if (DiceManager.Instance.biomeSelectionPanel != null && DiceManager.Instance.biomeSelectionPanel.panelRoot.activeInHierarchy) return;
+        }
+
+        //튜토리얼 중 클릭 제한 로직
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
             if (!TutorialManager.Instance.IsDiceClickable(this))

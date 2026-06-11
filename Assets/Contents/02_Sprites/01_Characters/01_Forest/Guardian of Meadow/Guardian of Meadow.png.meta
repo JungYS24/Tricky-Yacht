@@ -20,6 +20,12 @@ TextureImporter:
   - first:
       213: 5434311978475005476
     second: Guardian of Meadow_5
+  - first:
+      213: 6870384906570288159
+    second: Guardian of Meadow_6
+  - first:
+      213: -2365307615217113660
+    second: Guardian of Meadow_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -66,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 40
+  spritePixelsToUnits: 170
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -113,7 +119,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: Android
-    maxTextureSize: 1024
+    maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
@@ -131,10 +137,10 @@ TextureImporter:
       name: Guardian of Meadow_0
       rect:
         serializedVersion: 2
-        x: 78
-        y: 139
-        width: 107
-        height: 97
+        x: 0
+        y: 711
+        width: 613
+        height: 598
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -153,10 +159,10 @@ TextureImporter:
       name: Guardian of Meadow_1
       rect:
         serializedVersion: 2
-        x: 202
-        y: 139
-        width: 108
-        height: 101
+        x: 638
+        y: 707
+        width: 559
+        height: 521
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -175,10 +181,10 @@ TextureImporter:
       name: Guardian of Meadow_2
       rect:
         serializedVersion: 2
-        x: 333
-        y: 139
-        width: 107
-        height: 97
+        x: 1227
+        y: 708
+        width: 557
+        height: 512
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -197,10 +203,10 @@ TextureImporter:
       name: Guardian of Meadow_3
       rect:
         serializedVersion: 2
-        x: 70
-        y: 29
-        width: 117
-        height: 109
+        x: 1793
+        y: 707
+        width: 607
+        height: 602
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -219,10 +225,10 @@ TextureImporter:
       name: Guardian of Meadow_4
       rect:
         serializedVersion: 2
-        x: 198
-        y: 29
-        width: 118
-        height: 109
+        x: 0
+        y: 0
+        width: 582
+        height: 640
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -241,10 +247,10 @@ TextureImporter:
       name: Guardian of Meadow_5
       rect:
         serializedVersion: 2
-        x: 331
-        y: 29
-        width: 118
-        height: 109
+        x: 627
+        y: 81
+        width: 535
+        height: 559
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -255,6 +261,50 @@ TextureImporter:
       bones: []
       spriteID: 42627a3c3fd8a6b40800000000000000
       internalID: 5434311978475005476
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Guardian of Meadow_6
+      rect:
+        serializedVersion: 2
+        x: 1211
+        y: 81
+        width: 533
+        height: 559
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1cc352fba2885f50800000000000000
+      internalID: 6870384906570288159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Guardian of Meadow_7
+      rect:
+        serializedVersion: 2
+        x: 1790
+        y: 81
+        width: 531
+        height: 559
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c52572814dbc2fd0800000000000000
+      internalID: -2365307615217113660
       vertices: []
       indices: 
       edges: []
@@ -279,6 +329,8 @@ TextureImporter:
       Guardian of Meadow_3: 8082493855462508908
       Guardian of Meadow_4: -4277304501656176763
       Guardian of Meadow_5: 5434311978475005476
+      Guardian of Meadow_6: 6870384906570288159
+      Guardian of Meadow_7: -2365307615217113660
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
