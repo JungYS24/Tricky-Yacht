@@ -23,6 +23,9 @@ TextureImporter:
   - first:
       213: -3248917731122812594
     second: lobster_6
+  - first:
+      213: -6352399155208346709
+    second: lobster_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -69,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 45
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -121,10 +124,10 @@ TextureImporter:
       name: lobster_0
       rect:
         serializedVersion: 2
-        x: 22
-        y: 307
-        width: 118
-        height: 101
+        x: 40
+        y: 646
+        width: 235
+        height: 197
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,10 +146,10 @@ TextureImporter:
       name: lobster_1
       rect:
         serializedVersion: 2
-        x: 143
-        y: 309
-        width: 121
-        height: 104
+        x: 283
+        y: 649
+        width: 239
+        height: 206
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -165,10 +168,10 @@ TextureImporter:
       name: lobster_2
       rect:
         serializedVersion: 2
-        x: 265
-        y: 310
-        width: 107
-        height: 89
+        x: 527
+        y: 650
+        width: 215
+        height: 176
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -187,10 +190,10 @@ TextureImporter:
       name: lobster_3
       rect:
         serializedVersion: 2
-        x: 375
-        y: 307
-        width: 118
-        height: 100
+        x: 750
+        y: 614
+        width: 233
+        height: 228
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -209,10 +212,10 @@ TextureImporter:
       name: lobster_4
       rect:
         serializedVersion: 2
-        x: 22
-        y: 69
-        width: 172
-        height: 99
+        x: 40
+        y: 167
+        width: 233
+        height: 195
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -231,10 +234,10 @@ TextureImporter:
       name: lobster_5
       rect:
         serializedVersion: 2
-        x: 258
-        y: 69
-        width: 117
-        height: 99
+        x: 278
+        y: 167
+        width: 232
+        height: 195
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -253,10 +256,10 @@ TextureImporter:
       name: lobster_6
       rect:
         serializedVersion: 2
-        x: 376
-        y: 69
-        width: 118
-        height: 99
+        x: 515
+        y: 167
+        width: 232
+        height: 195
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -267,6 +270,28 @@ TextureImporter:
       bones: []
       spriteID: e49e4fb798689e2d0800000000000000
       internalID: -3248917731122812594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: lobster_7
+      rect:
+        serializedVersion: 2
+        x: 751
+        y: 167
+        width: 233
+        height: 195
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba3a052ff9eb7d7a0800000000000000
+      internalID: -6352399155208346709
       vertices: []
       indices: 
       edges: []
@@ -292,6 +317,7 @@ TextureImporter:
       lobster_4: 3369447995093243020
       lobster_5: 1397423819436993094
       lobster_6: -3248917731122812594
+      lobster_7: -6352399155208346709
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

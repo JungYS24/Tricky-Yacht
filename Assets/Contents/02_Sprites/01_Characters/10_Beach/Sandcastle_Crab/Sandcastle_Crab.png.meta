@@ -17,6 +17,15 @@ TextureImporter:
   - first:
       213: 1007301688664329715
     second: Sandcastle_Crab_4
+  - first:
+      213: 6168464178913940594
+    second: Sandcastle_Crab_5
+  - first:
+      213: -1088104046131813954
+    second: Sandcastle_Crab_6
+  - first:
+      213: 5852898454913729911
+    second: Sandcastle_Crab_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -63,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 55
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -115,10 +124,10 @@ TextureImporter:
       name: Sandcastle_Crab_0
       rect:
         serializedVersion: 2
-        x: 20
-        y: 289
-        width: 103
-        height: 130
+        x: 40
+        y: 580
+        width: 204
+        height: 256
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -137,10 +146,10 @@ TextureImporter:
       name: Sandcastle_Crab_1
       rect:
         serializedVersion: 2
-        x: 140
-        y: 289
-        width: 106
-        height: 134
+        x: 280
+        y: 580
+        width: 211
+        height: 265
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -159,10 +168,10 @@ TextureImporter:
       name: Sandcastle_Crab_2
       rect:
         serializedVersion: 2
-        x: 390
-        y: 289
-        width: 103
-        height: 130
+        x: 543
+        y: 583
+        width: 193
+        height: 245
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -181,10 +190,10 @@ TextureImporter:
       name: Sandcastle_Crab_3
       rect:
         serializedVersion: 2
-        x: 17
-        y: 46
-        width: 109
-        height: 134
+        x: 780
+        y: 580
+        width: 204
+        height: 256
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -203,10 +212,10 @@ TextureImporter:
       name: Sandcastle_Crab_4
       rect:
         serializedVersion: 2
-        x: 387
-        y: 47
-        width: 109
-        height: 130
+        x: 35
+        y: 94
+        width: 215
+        height: 263
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -217,6 +226,72 @@ TextureImporter:
       bones: []
       spriteID: 3fd0d768c87aafd00800000000000000
       internalID: 1007301688664329715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sandcastle_Crab_5
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 97
+        width: 214
+        height: 255
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27413e12d79ca9550800000000000000
+      internalID: 6168464178913940594
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sandcastle_Crab_6
+      rect:
+        serializedVersion: 2
+        x: 529
+        y: 99
+        width: 214
+        height: 253
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb1e5a3922746e0f0800000000000000
+      internalID: -1088104046131813954
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Sandcastle_Crab_7
+      rect:
+        serializedVersion: 2
+        x: 775
+        y: 96
+        width: 215
+        height: 256
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 775c09f722ca93150800000000000000
+      internalID: 5852898454913729911
       vertices: []
       indices: 
       edges: []
@@ -240,6 +315,9 @@ TextureImporter:
       Sandcastle_Crab_2: 7713557874358147109
       Sandcastle_Crab_3: -4276646890525499685
       Sandcastle_Crab_4: 1007301688664329715
+      Sandcastle_Crab_5: 6168464178913940594
+      Sandcastle_Crab_6: -1088104046131813954
+      Sandcastle_Crab_7: 5852898454913729911
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

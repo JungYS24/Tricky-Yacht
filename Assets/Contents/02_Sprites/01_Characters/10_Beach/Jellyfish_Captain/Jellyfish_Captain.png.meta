@@ -20,6 +20,12 @@ TextureImporter:
   - first:
       213: -6778016409222450760
     second: Jellyfish_Captain_5
+  - first:
+      213: 3136747409223013374
+    second: Jellyfish_Captain_6
+  - first:
+      213: -1094727727147041723
+    second: Jellyfish_Captain_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -66,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 36
+  spritePixelsToUnits: 70
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -118,10 +124,10 @@ TextureImporter:
       name: Jellyfish_Captain_0
       rect:
         serializedVersion: 2
-        x: 42
-        y: 213
-        width: 145
-        height: 141
+        x: 79
+        y: 429
+        width: 287
+        height: 279
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -140,10 +146,10 @@ TextureImporter:
       name: Jellyfish_Captain_1
       rect:
         serializedVersion: 2
-        x: 201
-        y: 209
-        width: 145
-        height: 140
+        x: 402
+        y: 421
+        width: 286
+        height: 277
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -162,10 +168,10 @@ TextureImporter:
       name: Jellyfish_Captain_2
       rect:
         serializedVersion: 2
-        x: 359
-        y: 210
-        width: 147
-        height: 144
+        x: 718
+        y: 425
+        width: 294
+        height: 286
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -184,10 +190,10 @@ TextureImporter:
       name: Jellyfish_Captain_3
       rect:
         serializedVersion: 2
-        x: 518
-        y: 213
-        width: 144
-        height: 140
+        x: 1042
+        y: 429
+        width: 286
+        height: 278
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -206,10 +212,10 @@ TextureImporter:
       name: Jellyfish_Captain_4
       rect:
         serializedVersion: 2
-        x: 42
-        y: 30
-        width: 148
-        height: 146
+        x: 78
+        y: 57
+        width: 296
+        height: 292
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -228,10 +234,10 @@ TextureImporter:
       name: Jellyfish_Captain_5
       rect:
         serializedVersion: 2
-        x: 358
-        y: 30
-        width: 162
-        height: 146
+        x: 398
+        y: 57
+        width: 296
+        height: 292
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -242,6 +248,50 @@ TextureImporter:
       bones: []
       spriteID: 8b1f68ebcf5afe1a0800000000000000
       internalID: -6778016409222450760
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Jellyfish_Captain_6
+      rect:
+        serializedVersion: 2
+        x: 716
+        y: 58
+        width: 297
+        height: 291
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef35dd44627f78b20800000000000000
+      internalID: 3136747409223013374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Jellyfish_Captain_7
+      rect:
+        serializedVersion: 2
+        x: 1034
+        y: 57
+        width: 297
+        height: 292
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54c31a9aeeebec0f0800000000000000
+      internalID: -1094727727147041723
       vertices: []
       indices: 
       edges: []
@@ -266,6 +316,8 @@ TextureImporter:
       Jellyfish_Captain_3: 7786409075545496196
       Jellyfish_Captain_4: -3872718864236021710
       Jellyfish_Captain_5: -6778016409222450760
+      Jellyfish_Captain_6: 3136747409223013374
+      Jellyfish_Captain_7: -1094727727147041723
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

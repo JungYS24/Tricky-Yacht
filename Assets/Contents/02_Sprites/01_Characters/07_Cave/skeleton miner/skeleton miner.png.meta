@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 55
+  spritePixelsToUnits: 120
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -124,10 +124,10 @@ TextureImporter:
       name: skeleton miner_0
       rect:
         serializedVersion: 2
-        x: 41
-        y: 391
-        width: 134
-        height: 161
+        x: 16
+        y: 742
+        width: 295
+        height: 358
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -146,10 +146,10 @@ TextureImporter:
       name: skeleton miner_1
       rect:
         serializedVersion: 2
-        x: 177
-        y: 391
-        width: 136
-        height: 161
+        x: 323
+        y: 742
+        width: 300
+        height: 357
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -168,10 +168,10 @@ TextureImporter:
       name: skeleton miner_2
       rect:
         serializedVersion: 2
-        x: 312
-        y: 391
-        width: 135
-        height: 161
+        x: 626
+        y: 742
+        width: 298
+        height: 358
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -190,10 +190,10 @@ TextureImporter:
       name: skeleton miner_3
       rect:
         serializedVersion: 2
-        x: 449
-        y: 391
-        width: 137
-        height: 161
+        x: 934
+        y: 742
+        width: 303
+        height: 358
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -212,10 +212,10 @@ TextureImporter:
       name: skeleton miner_4
       rect:
         serializedVersion: 2
-        x: 41
-        y: 128
-        width: 134
-        height: 161
+        x: 16
+        y: 152
+        width: 295
+        height: 355
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -234,10 +234,10 @@ TextureImporter:
       name: skeleton miner_5
       rect:
         serializedVersion: 2
-        x: 177
-        y: 128
-        width: 137
-        height: 161
+        x: 323
+        y: 152
+        width: 300
+        height: 355
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -256,10 +256,10 @@ TextureImporter:
       name: skeleton miner_6
       rect:
         serializedVersion: 2
-        x: 312
-        y: 128
-        width: 135
-        height: 161
+        x: 626
+        y: 152
+        width: 298
+        height: 355
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -278,10 +278,10 @@ TextureImporter:
       name: skeleton miner_7
       rect:
         serializedVersion: 2
-        x: 449
-        y: 128
-        width: 137
-        height: 161
+        x: 934
+        y: 152
+        width: 303
+        height: 355
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

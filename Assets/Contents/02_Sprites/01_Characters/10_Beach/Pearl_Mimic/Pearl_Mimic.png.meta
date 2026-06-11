@@ -20,6 +20,9 @@ TextureImporter:
   - first:
       213: 1529423200236781947
     second: Pearl_Mimic_5
+  - first:
+      213: -4982023331015311499
+    second: Pearl_Mimic_6
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -66,7 +69,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 60
+  spritePixelsToUnits: 110
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -118,10 +121,10 @@ TextureImporter:
       name: Pearl_Mimic_0
       rect:
         serializedVersion: 2
-        x: 6
-        y: 287
-        width: 126
-        height: 124
+        x: 12
+        y: 642
+        width: 249
+        height: 246
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -140,10 +143,10 @@ TextureImporter:
       name: Pearl_Mimic_1
       rect:
         serializedVersion: 2
-        x: 132
-        y: 288
-        width: 124
-        height: 129
+        x: 262
+        y: 645
+        width: 247
+        height: 254
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -162,10 +165,10 @@ TextureImporter:
       name: Pearl_Mimic_2
       rect:
         serializedVersion: 2
-        x: 257
-        y: 287
-        width: 127
-        height: 141
+        x: 513
+        y: 642
+        width: 252
+        height: 277
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -184,10 +187,10 @@ TextureImporter:
       name: Pearl_Mimic_3
       rect:
         serializedVersion: 2
-        x: 384
-        y: 287
-        width: 124
-        height: 123
+        x: 766
+        y: 642
+        width: 246
+        height: 243
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -206,10 +209,10 @@ TextureImporter:
       name: Pearl_Mimic_4
       rect:
         serializedVersion: 2
-        x: 6
-        y: 19
-        width: 141
-        height: 127
+        x: 12
+        y: 106
+        width: 501
+        height: 252
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -228,10 +231,10 @@ TextureImporter:
       name: Pearl_Mimic_5
       rect:
         serializedVersion: 2
-        x: 256
-        y: 19
-        width: 127
-        height: 127
+        x: 510
+        y: 106
+        width: 253
+        height: 252
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -242,6 +245,28 @@ TextureImporter:
       bones: []
       spriteID: b71ca512c4a993510800000000000000
       internalID: 1529423200236781947
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Pearl_Mimic_6
+      rect:
+        serializedVersion: 2
+        x: 759
+        y: 106
+        width: 252
+        height: 252
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57fbf142d2c4cdab0800000000000000
+      internalID: -4982023331015311499
       vertices: []
       indices: 
       edges: []
@@ -266,6 +291,7 @@ TextureImporter:
       Pearl_Mimic_3: -6968619602180358390
       Pearl_Mimic_4: -818307743555498767
       Pearl_Mimic_5: 1529423200236781947
+      Pearl_Mimic_6: -4982023331015311499
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

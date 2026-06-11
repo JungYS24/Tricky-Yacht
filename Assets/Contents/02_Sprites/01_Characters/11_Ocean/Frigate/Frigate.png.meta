@@ -26,6 +26,12 @@ TextureImporter:
   - first:
       213: 3117884322772207440
     second: Frigate_7
+  - first:
+      213: -260161515372231921
+    second: Frigate_8
+  - first:
+      213: 7003982689269042496
+    second: Frigate_9
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,7 +78,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 45
+  spritePixelsToUnits: 50
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -124,9 +130,9 @@ TextureImporter:
       name: Frigate_0
       rect:
         serializedVersion: 2
-        x: 12
-        y: 156
-        width: 103
+        x: 13
+        y: 175
+        width: 101
         height: 93
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -147,9 +153,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 116
-        y: 156
-        width: 102
-        height: 92
+        y: 175
+        width: 101
+        height: 91
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -168,9 +174,9 @@ TextureImporter:
       name: Frigate_2
       rect:
         serializedVersion: 2
-        x: 218
-        y: 156
-        width: 103
+        x: 219
+        y: 175
+        width: 101
         height: 91
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -190,9 +196,9 @@ TextureImporter:
       name: Frigate_3
       rect:
         serializedVersion: 2
-        x: 321
-        y: 156
-        width: 102
+        x: 322
+        y: 175
+        width: 100
         height: 91
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -212,10 +218,10 @@ TextureImporter:
       name: Frigate_4
       rect:
         serializedVersion: 2
-        x: 428
-        y: 156
-        width: 103
-        height: 92
+        x: 408
+        y: 257
+        width: 12
+        height: 12
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -234,10 +240,10 @@ TextureImporter:
       name: Frigate_5
       rect:
         serializedVersion: 2
-        x: 532
-        y: 156
-        width: 102
-        height: 91
+        x: 429
+        y: 176
+        width: 101
+        height: 90
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -256,10 +262,10 @@ TextureImporter:
       name: Frigate_6
       rect:
         serializedVersion: 2
-        x: 634
-        y: 156
-        width: 102
-        height: 92
+        x: 533
+        y: 175
+        width: 100
+        height: 90
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -278,8 +284,8 @@ TextureImporter:
       name: Frigate_7
       rect:
         serializedVersion: 2
-        x: 736
-        y: 156
+        x: 634
+        y: 175
         width: 100
         height: 91
       alignment: 0
@@ -292,6 +298,50 @@ TextureImporter:
       bones: []
       spriteID: 057c895b543f44b20800000000000000
       internalID: 3117884322772207440
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Frigate_8
+      rect:
+        serializedVersion: 2
+        x: 736
+        y: 175
+        width: 99
+        height: 91
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f03c20cea78b36cf0800000000000000
+      internalID: -260161515372231921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Frigate_9
+      rect:
+        serializedVersion: 2
+        x: 822
+        y: 257
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04dcddea525233160800000000000000
+      internalID: 7003982689269042496
       vertices: []
       indices: 
       edges: []
@@ -318,6 +368,8 @@ TextureImporter:
       Frigate_5: -6400590849162114503
       Frigate_6: -2194139996743126198
       Frigate_7: 3117884322772207440
+      Frigate_8: -260161515372231921
+      Frigate_9: 7003982689269042496
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
