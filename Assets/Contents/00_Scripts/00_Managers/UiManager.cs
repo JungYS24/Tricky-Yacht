@@ -126,11 +126,11 @@ public class UIManager : MonoBehaviour
 
         if (displayBonusRate > 0)
         {
-            dropRateText.text = $"박제 확률: <color=#00FFFF>{totalRate:F0}%</color>";
+            dropRateText.text = $"<color=#00FFFF>{totalRate:F0}%</color>";
         }
         else
         {
-            dropRateText.text = $"박제 확률: {totalRate:F0}%";
+            dropRateText.text = $"{totalRate:F0}%";
         }
     }
 

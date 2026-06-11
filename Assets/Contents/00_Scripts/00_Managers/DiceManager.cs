@@ -952,7 +952,9 @@ public class DiceManager : MonoBehaviour
 
         int remainingRerolls = (maxRerolls + snackBonusRerolls + figureBonusRerolls) - currentRerolls;
         string bName = (currentBiome != null) ? currentBiome.biomeName : "Stage";
+
         int localStage = ((currentStage - 1) % 3) + 1;
+
         //스테이지 이름만 표시
         string stageDisplayName = $"{bName}";
 

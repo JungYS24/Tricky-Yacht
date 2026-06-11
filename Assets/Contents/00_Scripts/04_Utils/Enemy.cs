@@ -172,7 +172,7 @@ public class Enemy : MonoBehaviour
         //몬스터가 등장할 때(초기화될 때) 공격력 텍스트를 업데이트
         if (attackPowerText != null)
         {
-            attackPowerText.text = $"공격력: {AttackPower}";
+            attackPowerText.text = $"{AttackPower}";
         }
 
         //시각적 초기화 (크기, 색상, 디졸브 등)
@@ -399,7 +399,7 @@ public class Enemy : MonoBehaviour
             monsterRuntimeMat.SetFloat(dissolveProperty, 0f);
         }
 
-        if (attackPowerText != null) attackPowerText.text = $"공격력: {AttackPower}";
+        if (attackPowerText != null) attackPowerText.text = $"{AttackPower}";
         UpdateHPBar(true);
     }
 }
