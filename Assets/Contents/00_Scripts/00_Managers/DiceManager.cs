@@ -645,7 +645,7 @@ public class DiceManager : MonoBehaviour
 
     // --- 스테이지 클리어 공통 시스템 ---
 
-   
+
     private void ProcessStageClear(bool fromPeppermint)
     {
         // 공허 바이옴에서 보스를 잡았다면 최종 게임 클리어 처리
@@ -664,6 +664,9 @@ public class DiceManager : MonoBehaviour
 
             if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
         }
+
+        //스테이지 클리어 시 패시브(Passive) 피규어 효과 일괄 발동!
+        InventoryManager.Instance.EvaluateStageClearTriggers(this, shopManager);
 
         if (pendingPeppermintSuccess)
         {
@@ -841,6 +844,7 @@ public class DiceManager : MonoBehaviour
                 else if (d.myData.type == DiceType.Ice) iceBonusChips += 10;
             }
         }
+
         //피규어 발동 실시간 시뮬레이션
         int figureBonusChips = 0;
         float figureBonusMult = 0f;
@@ -875,7 +879,7 @@ public class DiceManager : MonoBehaviour
                         case FigureTriggerType.FullHouse: if (handName == "풀하우스") nodeTriggered = true; break;
                         case FigureTriggerType.FourOfAKind: if (handName == "포카드") nodeTriggered = true; break;
                         case FigureTriggerType.Yacht: if (handName == "Yacht" || handName == "요트" || handName == "파이브 카드") nodeTriggered = true; break;
-                        case FigureTriggerType.Passive: nodeTriggered = true; break;
+                        //case FigureTriggerType.Passive: nodeTriggered = true; break;
                     }
 
                     if (nodeTriggered)
@@ -899,18 +903,17 @@ public class DiceManager : MonoBehaviour
             }
         }
 
-
-
-
-        // 텍스트 포매팅 (파란색 색상 적용)
-        // ==========================================
-        int finalBaseSum = baseSum + iceBonusChips + snackBonusChips + figureBonusChips;
-        float totalFinalMult = finalMult + figureBonusMult;
+        int finalBaseSum = baseSum + iceBonusChips + snackBonusChips + (isCalculating ? 0 : figureBonusChips);
+        float totalFinalMult = finalMult + (isCalculating ? 0f : figureBonusMult);
         int totalDamage = Mathf.FloorToInt(finalBaseSum * totalFinalMult) + darkDamageTotal;
 
         string displayHand = $"<color=#FFD700>{handName}</color>";
         if (iceBonusChips > 0) displayHand += $" <color=#00FFFF>+{iceBonusChips}</color>";
-        if (snackBonusChips > 0) displayHand += $" <color=#FFA500>+{snackBonusChips}(스낵)</color>";
+
+        //피규어로 얻은 칩이 스낵 칩 표기로 둔갑하는 현상 방어
+        int displaySnackChips = isCalculating ? (snackBonusChips - figureBonusChips) : snackBonusChips;
+        if (displaySnackChips > 0) displayHand += $" <color=#FFA500>+{displaySnackChips}(스낵)</color>";
+
         if (expectedGold > 0) displayHand += $" <color=#FFFF00>+{expectedGold}(코인)</color>";
         if (expectedHeal > 0) displayHand += $" <color=#FF5555>+{expectedHeal}(회복)</color>";
 
@@ -929,7 +932,6 @@ public class DiceManager : MonoBehaviour
         int localStage = ((currentStage - 1) % 3) + 1;
         string stageDisplayName = $"{bName} {localStage}";
 
-        // UI 업데이트 호출 (새로 만든 피규어 텍스트 파라미터 전달)
         ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText, activeFigStr);
 
         float currentEnemyDropRate = isPeppermintActive ? enemy.baseDropRate : 0f;
@@ -959,8 +961,8 @@ public class DiceManager : MonoBehaviour
     {
         currentStage++;
 
-        // 방금 클리어한 곳이 5스테이지 단위(보스)였다면, 다음 스테이지 시작 전 바이옴 선택창 띄우기
-        if ((currentStage - 1) %3 == 0 && currentStage <= 90)
+        // 여기서 보스 바꾸기 
+        if ((currentStage - 1) %3 == 0 && currentStage <= 100)
         {
             ui?.HideShopChoice();
 

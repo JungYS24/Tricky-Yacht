@@ -251,6 +251,7 @@ public class InventoryManager : MonoBehaviour
     }
 
     // 주사위 결산
+    // 주사위 결산
     public void EvaluateTurnEndTriggers(List<int> finalDiceValues, string handName, DiceManager diceManager, ShopManager shopManager)
     {
         //주사위 눈금 개수 카운팅
@@ -290,6 +291,40 @@ public class InventoryManager : MonoBehaviour
                 }
             }
         }
+    }
+    // 스테이지가 끝났을 때 패시브 피규어들을 발동시킵니다.
+    public void EvaluateStageClearTriggers(DiceManager diceManager, ShopManager shopManager)
+    {
+        foreach (var figure in ownedFigures)
+        {
+            foreach (var node in figure.figureNodes)
+            {
+                if (node.triggerType == FigureTriggerType.Passive)
+                {
+                    Debug.Log($"[피규어 스테이지 클리어 발동] {figure.itemName} 패시브 효과 달성!");
+                    ApplyFigureEffects(node.effects, diceManager, shopManager);
+                }
+            }
+        }
+    }
+
+    // 스낵을 사용했을 때 OnSnackUsed 피규어들을 발동
+    public void EvaluateSnackUsedTriggers(DiceManager diceManager, ShopManager shopManager)
+    {
+        foreach (var figure in ownedFigures)
+        {
+            foreach (var node in figure.figureNodes)
+            {
+                if (node.triggerType == FigureTriggerType.OnSnackUsed)
+                {
+                    Debug.Log($"[피규어 스낵 사용 발동] {figure.itemName} 효과 달성!");
+                    ApplyFigureEffects(node.effects, diceManager, shopManager);
+                }
+            }
+        }
+
+        // 리롤 횟수 등 UI에 즉각적인 변화가 생겼으므로 화면을 강제 갱신
+        diceManager.ForceUpdateUI();
     }
 
     // 조건 만족 시 실질적인 인게임 변화(보상)를 주는 함수
