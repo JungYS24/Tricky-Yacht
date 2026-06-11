@@ -121,7 +121,7 @@ public class Enemy : MonoBehaviour
         else if (currentBiome != null)
         {
             //보스 여기서 바꾸면 됨
-            if (currentStage % 3 == 0 && currentBiome.bossMonster != null)
+            if (currentStage % 10 == 0 && currentBiome.bossMonster != null)
             {
                 nextMonsterData = currentBiome.bossMonster;
             }
