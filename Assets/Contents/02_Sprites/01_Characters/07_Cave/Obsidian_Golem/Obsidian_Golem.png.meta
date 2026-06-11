@@ -3,17 +3,29 @@ guid: 7e1236f81df02ed41a8136042759d455
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6971162631709915545
-    second: Obsidian Golem_0
+      213: -224736231983021440
+    second: Obsidian_Golem_0
   - first:
-      213: -7180278193584387226
-    second: Obsidian Golem_1
+      213: -4806129176417339320
+    second: Obsidian_Golem_1
   - first:
-      213: 8221218812714444371
-    second: Obsidian Golem_2
+      213: -8120530832396111327
+    second: Obsidian_Golem_2
   - first:
-      213: 2608215317787587494
-    second: Obsidian Golem_3
+      213: 7580633678082979771
+    second: Obsidian_Golem_3
+  - first:
+      213: 6148676070212838932
+    second: Obsidian_Golem_4
+  - first:
+      213: 1727206803098302566
+    second: Obsidian_Golem_5
+  - first:
+      213: 8692694904072639831
+    second: Obsidian_Golem_6
+  - first:
+      213: 5092826476816202842
+    second: Obsidian_Golem_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -60,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 30
+  spritePixelsToUnits: 160
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -122,13 +134,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Obsidian Golem_0
+      name: Obsidian_Golem_0
       rect:
         serializedVersion: 2
-        x: 9
-        y: 199
-        width: 109
-        height: 114
+        x: 20
+        y: 742
+        width: 549
+        height: 537
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -137,20 +149,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 999fb8e8a7b8eb060800000000000000
-      internalID: 6971162631709915545
+      spriteID: 0820e74769391ecf0800000000000000
+      internalID: -224736231983021440
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Obsidian Golem_1
+      name: Obsidian_Golem_1
       rect:
         serializedVersion: 2
-        x: 139
-        y: 200
-        width: 107
-        height: 113
+        x: 673
+        y: 742
+        width: 548
+        height: 537
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -159,20 +171,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 66b4be296078a5c90800000000000000
-      internalID: -7180278193584387226
+      spriteID: 848f00f5af23d4db0800000000000000
+      internalID: -4806129176417339320
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Obsidian Golem_2
+      name: Obsidian_Golem_2
       rect:
         serializedVersion: 2
-        x: 266
-        y: 199
-        width: 108
-        height: 114
+        x: 1326
+        y: 742
+        width: 553
+        height: 537
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -181,20 +193,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3566a98c3f2a71270800000000000000
-      internalID: 8221218812714444371
+      spriteID: 1223c6b7b341e4f80800000000000000
+      internalID: -8120530832396111327
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Obsidian Golem_3
+      name: Obsidian_Golem_3
       rect:
         serializedVersion: 2
-        x: 394
-        y: 199
-        width: 108
-        height: 114
+        x: 1982
+        y: 742
+        width: 548
+        height: 537
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -203,8 +215,96 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6a3367a330e323420800000000000000
-      internalID: 2608215317787587494
+      spriteID: bb7bf729a22d33960800000000000000
+      internalID: 7580633678082979771
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Obsidian_Golem_4
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 82
+        width: 555
+        height: 529
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4162bfb0f4c745550800000000000000
+      internalID: 6148676070212838932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Obsidian_Golem_5
+      rect:
+        serializedVersion: 2
+        x: 691
+        y: 82
+        width: 550
+        height: 529
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 668ff40bf6548f710800000000000000
+      internalID: 1727206803098302566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Obsidian_Golem_6
+      rect:
+        serializedVersion: 2
+        x: 1331
+        y: 82
+        width: 550
+        height: 529
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 755191a95f7a2a870800000000000000
+      internalID: 8692694904072639831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Obsidian_Golem_7
+      rect:
+        serializedVersion: 2
+        x: 1982
+        y: 80
+        width: 551
+        height: 531
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5c755d92ba5da640800000000000000
+      internalID: 5092826476816202842
       vertices: []
       indices: 
       edges: []
@@ -223,10 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Obsidian Golem_0: 6971162631709915545
-      Obsidian Golem_1: -7180278193584387226
-      Obsidian Golem_2: 8221218812714444371
-      Obsidian Golem_3: 2608215317787587494
+      Obsidian_Golem_0: -224736231983021440
+      Obsidian_Golem_1: -4806129176417339320
+      Obsidian_Golem_2: -8120530832396111327
+      Obsidian_Golem_3: 7580633678082979771
+      Obsidian_Golem_4: 6148676070212838932
+      Obsidian_Golem_5: 1727206803098302566
+      Obsidian_Golem_6: 8692694904072639831
+      Obsidian_Golem_7: 5092826476816202842
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
