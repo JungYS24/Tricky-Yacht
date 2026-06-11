@@ -26,15 +26,6 @@ TextureImporter:
   - first:
       213: 6389104651977260019
     second: Lava_Golem_7
-  - first:
-      213: -5955282354707055728
-    second: Lava_Golem_8
-  - first:
-      213: -7650450510458900201
-    second: Lava_Golem_9
-  - first:
-      213: -4297354663546607787
-    second: Lava_Golem_10
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -81,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 150
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -126,6 +117,19 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -133,10 +137,10 @@ TextureImporter:
       name: Lava_Golem_0
       rect:
         serializedVersion: 2
-        x: 68
-        y: 411
-        width: 265
-        height: 267
+        x: 102
+        y: 1031
+        width: 575
+        height: 585
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -155,10 +159,10 @@ TextureImporter:
       name: Lava_Golem_1
       rect:
         serializedVersion: 2
-        x: 390
-        y: 411
-        width: 264
-        height: 267
+        x: 704
+        y: 1027
+        width: 560
+        height: 584
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -177,10 +181,10 @@ TextureImporter:
       name: Lava_Golem_2
       rect:
         serializedVersion: 2
-        x: 624
-        y: 548
-        width: 41
-        height: 57
+        x: 1305
+        y: 1031
+        width: 559
+        height: 589
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -199,10 +203,10 @@ TextureImporter:
       name: Lava_Golem_3
       rect:
         serializedVersion: 2
-        x: 646
-        y: 596
-        width: 13
-        height: 20
+        x: 1919
+        y: 1027
+        width: 558
+        height: 581
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -221,10 +225,10 @@ TextureImporter:
       name: Lava_Golem_4
       rect:
         serializedVersion: 2
-        x: 702
-        y: 411
-        width: 294
-        height: 267
+        x: 102
+        y: 37
+        width: 576
+        height: 590
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -243,10 +247,10 @@ TextureImporter:
       name: Lava_Golem_5
       rect:
         serializedVersion: 2
-        x: 1027
-        y: 411
-        width: 308
-        height: 267
+        x: 704
+        y: 37
+        width: 560
+        height: 583
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -265,10 +269,10 @@ TextureImporter:
       name: Lava_Golem_6
       rect:
         serializedVersion: 2
-        x: 1330
-        y: 568
-        width: 10
-        height: 10
+        x: 1305
+        y: 37
+        width: 559
+        height: 589
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -287,10 +291,10 @@ TextureImporter:
       name: Lava_Golem_7
       rect:
         serializedVersion: 2
-        x: 84
-        y: 89
-        width: 311
-        height: 267
+        x: 1918
+        y: 37
+        width: 558
+        height: 583
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -301,72 +305,6 @@ TextureImporter:
       bones: []
       spriteID: 3fb76ed74d8aaa850800000000000000
       internalID: 6389104651977260019
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Lava_Golem_8
-      rect:
-        serializedVersion: 2
-        x: 390
-        y: 252
-        width: 9
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 09bb88630469a5da0800000000000000
-      internalID: -5955282354707055728
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Lava_Golem_9
-      rect:
-        serializedVersion: 2
-        x: 409
-        y: 89
-        width: 245
-        height: 266
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 71134686bc324d590800000000000000
-      internalID: -7650450510458900201
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Lava_Golem_10
-      rect:
-        serializedVersion: 2
-        x: 721
-        y: 89
-        width: 246
-        height: 267
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 557af6da3babc54c0800000000000000
-      internalID: -4297354663546607787
       vertices: []
       indices: 
       edges: []
@@ -387,15 +325,12 @@ TextureImporter:
     nameFileIdTable:
       Lava_Golem_0: -6537986965702431091
       Lava_Golem_1: -4094014483479347876
-      Lava_Golem_10: -4297354663546607787
       Lava_Golem_2: -1848829524337932645
       Lava_Golem_3: 8094737093935783265
       Lava_Golem_4: -7858107342180611539
       Lava_Golem_5: -5063761831484966673
       Lava_Golem_6: 560186776842188458
       Lava_Golem_7: 6389104651977260019
-      Lava_Golem_8: -5955282354707055728
-      Lava_Golem_9: -7650450510458900201
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

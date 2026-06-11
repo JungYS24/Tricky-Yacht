@@ -3,29 +3,29 @@ guid: dddf51c321174c24ca07886d3a9eb4a5
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2084360603125888710
-    second: Ash Gray_0
+      213: 5264636544973947501
+    second: Ash_Gray_0
   - first:
-      213: -3033252384984912064
-    second: Ash Gray_1
+      213: 7636722539430084492
+    second: Ash_Gray_1
   - first:
-      213: -7108354549077809381
-    second: Ash Gray_2
+      213: -1568915420517178391
+    second: Ash_Gray_2
   - first:
-      213: -5748825080762258272
-    second: Ash Gray_3
+      213: -151183105155168631
+    second: Ash_Gray_3
   - first:
-      213: 53606620391276634
-    second: Ash Gray_4
+      213: 3379966955449876011
+    second: Ash_Gray_4
   - first:
-      213: 2269058040161816861
-    second: Ash Gray_5
+      213: -2988218442849457425
+    second: Ash_Gray_5
   - first:
-      213: 1454491826390056966
-    second: Ash Gray_6
+      213: -877655633881377881
+    second: Ash_Gray_6
   - first:
-      213: 6821601987272919865
-    second: Ash Gray_7
+      213: 5632944352388111623
+    second: Ash_Gray_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 35
+  spritePixelsToUnits: 150
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -134,13 +134,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Ash Gray_0
+      name: Ash_Gray_0
       rect:
         serializedVersion: 2
-        x: 67
-        y: 309
-        width: 92
-        height: 88
+        x: 174
+        y: 1214
+        width: 513
+        height: 489
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -149,20 +149,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a39ccda231dd213e0800000000000000
-      internalID: -2084360603125888710
+      spriteID: d6246be5b0fbf0940800000000000000
+      internalID: 5264636544973947501
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_1
+      name: Ash_Gray_1
       rect:
         serializedVersion: 2
-        x: 162
-        y: 309
-        width: 93
-        height: 89
+        x: 718
+        y: 1214
+        width: 521
+        height: 492
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -171,20 +171,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 04f2ed6d609b7e5d0800000000000000
-      internalID: -3033252384984912064
+      spriteID: c8ff2f240b61bf960800000000000000
+      internalID: 7636722539430084492
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_2
+      name: Ash_Gray_2
       rect:
         serializedVersion: 2
-        x: 258
-        y: 308
-        width: 95
-        height: 90
+        x: 1265
+        y: 1211
+        width: 528
+        height: 485
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -193,20 +193,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b176fa4033d0a5d90800000000000000
-      internalID: -7108354549077809381
+      spriteID: 9e3e07dccb71a3ae0800000000000000
+      internalID: -1568915420517178391
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_3
+      name: Ash_Gray_3
       rect:
         serializedVersion: 2
-        x: 353
-        y: 308
-        width: 94
-        height: 90
+        x: 1813
+        y: 1211
+        width: 524
+        height: 486
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -215,20 +215,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0ac2f413c021830b0800000000000000
-      internalID: -5748825080762258272
+      spriteID: 9868f2154c3e6edf0800000000000000
+      internalID: -151183105155168631
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_4
+      name: Ash_Gray_4
       rect:
         serializedVersion: 2
-        x: 64
-        y: 114
-        width: 95
-        height: 96
+        x: 157
+        y: 101
+        width: 533
+        height: 533
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -237,20 +237,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a50080eefe27eb000800000000000000
-      internalID: 53606620391276634
+      spriteID: b2ef524c90e08ee20800000000000000
+      internalID: 3379966955449876011
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_5
+      name: Ash_Gray_5
       rect:
         serializedVersion: 2
-        x: 160
-        y: 114
-        width: 95
-        height: 95
+        x: 707
+        y: 100
+        width: 532
+        height: 532
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -259,20 +259,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d11d69af3405d7f10800000000000000
-      internalID: 2269058040161816861
+      spriteID: feaefa29827b786d0800000000000000
+      internalID: -2988218442849457425
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_6
+      name: Ash_Gray_6
       rect:
         serializedVersion: 2
-        x: 256
-        y: 114
-        width: 96
-        height: 95
+        x: 1259
+        y: 100
+        width: 534
+        height: 532
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -281,20 +281,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 60040b02c946f2410800000000000000
-      internalID: 1454491826390056966
+      spriteID: 7a3516bd9d0f1d3f0800000000000000
+      internalID: -877655633881377881
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Ash Gray_7
+      name: Ash_Gray_7
       rect:
         serializedVersion: 2
-        x: 352
-        y: 114
-        width: 96
-        height: 96
+        x: 1808
+        y: 101
+        width: 534
+        height: 532
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -303,8 +303,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 93b40827dd23bae50800000000000000
-      internalID: 6821601987272919865
+      spriteID: 70dd2ab3b0d3c2e40800000000000000
+      internalID: 5632944352388111623
       vertices: []
       indices: 
       edges: []
@@ -323,14 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Ash Gray_0: -2084360603125888710
-      Ash Gray_1: -3033252384984912064
-      Ash Gray_2: -7108354549077809381
-      Ash Gray_3: -5748825080762258272
-      Ash Gray_4: 53606620391276634
-      Ash Gray_5: 2269058040161816861
-      Ash Gray_6: 1454491826390056966
-      Ash Gray_7: 6821601987272919865
+      Ash_Gray_0: 5264636544973947501
+      Ash_Gray_1: 7636722539430084492
+      Ash_Gray_2: -1568915420517178391
+      Ash_Gray_3: -151183105155168631
+      Ash_Gray_4: 3379966955449876011
+      Ash_Gray_5: -2988218442849457425
+      Ash_Gray_6: -877655633881377881
+      Ash_Gray_7: 5632944352388111623
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
