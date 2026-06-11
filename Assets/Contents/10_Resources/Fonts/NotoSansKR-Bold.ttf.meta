@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 48c8bbd1404db8c459959c08ca5a4304
+guid: 81964f95b10cdba439f6c0be22e1c5da
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Sam3KRFont
+  - Noto Sans KR
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
