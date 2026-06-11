@@ -953,12 +953,8 @@ public class DiceManager : MonoBehaviour
         int remainingRerolls = (maxRerolls + snackBonusRerolls + figureBonusRerolls) - currentRerolls;
         string bName = (currentBiome != null) ? currentBiome.biomeName : "Stage";
 
-        int localStage = ((currentStage - 1) % 3) + 1;
-
-        //스테이지 이름만 표시
-        string stageDisplayName = $"{bName}";
-
-        ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText, activeFigStr);
+        string stageDisplayName = $"{bName} {currentStage}";
+        ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText);
 
         float currentEnemyDropRate = isPeppermintActive ? enemy.baseDropRate : 0f;
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
