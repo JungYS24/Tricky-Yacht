@@ -180,6 +180,14 @@ public class ShopManager : MonoBehaviour
             if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
             RefreshShop(true);
         }
+        else
+        {
+            // [추가] 리롤 비용이 부족할 때 토스트 팝업 강제 출력
+            if (ToastPopupController.Instance != null)
+            {
+                ToastPopupController.Instance.ShowToast("골드가 부족합니다.");
+            }
+        }
         if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
     }
 
@@ -233,7 +241,11 @@ public class ShopManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("인벤토리가 꽉 차서 구매할 수 없습니다!");
+                    // 🚨 [추가] 인벤토리가 꽉 찼을 때도 토스트 팝업으로 피드백 제공
+                    if (ToastPopupController.Instance != null)
+                    {
+                        ToastPopupController.Instance.ShowToast("인벤토리가 가득 찼습니다.");
+                    }
                     return false;
                 }
             }
@@ -253,7 +265,11 @@ public class ShopManager : MonoBehaviour
                 return true;
             }
         }
-        Debug.Log("골드가 부족합니다.");
+        // 아이템 구매 비용이 부족할 때 토스트 팝업 띄우기
+        if (ToastPopupController.Instance != null)
+        {
+            ToastPopupController.Instance.ShowToast("골드가 부족합니다.");
+        }
         return false;
     }
 
