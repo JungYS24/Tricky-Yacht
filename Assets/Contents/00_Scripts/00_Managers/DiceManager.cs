@@ -1030,7 +1030,7 @@ public class DiceManager : MonoBehaviour
         SceneManager.LoadScene("Lobby");
     }
 
-    void RestartGame()
+    public void RestartGame()
     {
         //기본 스테이지 데이터 초기화
         currentStage = 1;
