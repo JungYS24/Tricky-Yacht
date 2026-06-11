@@ -9,8 +9,8 @@ public class LootSelectionPanel : MonoBehaviour
     public GameObject panelRoot;
     public LootChoiceSlot[] choiceSlots;
 
-    [Header("고정 전리품 (1번 칸)")]
-    public MaxHPItemSO maxHpRewardItem; //영구 체력 증가
+    [Header("1번 칸 랜덤 전리품 풀 (체력, 골드, 티켓팩)")]
+    public List<BaseItemDataSO> firstSlotPool;
 
     [Header("전리품 풀 세팅")]
     public List<SnackItemSO> snackPool;
@@ -22,17 +22,21 @@ public class LootSelectionPanel : MonoBehaviour
     {
         IsPanelOpen = false; // 시작할 때 초기화
     }
+
     public void OpenSelection(DiceManager manager)
     {
         diceManager = manager;
 
         // 에러 방지: 스낵 1개, 주사위 1개, 그리고 고정 체력 아이템이 세팅되었는지 확인
-        if (snackPool.Count < 1 || dicePool.Count < 1 || maxHpRewardItem == null)
+        if (snackPool.Count < 1 || dicePool.Count < 1 || firstSlotPool.Count < 1)
         {
-            Debug.LogWarning("전리품 풀에 아이템이 부족하거나 고정 체력 아이템이 누락되었습니다!");
+            Debug.LogWarning("전리품 풀에 아이템이 부족하거나 1번 칸 아이템이 누락되었습니다!");
             ClosePanelAndProceed();
             return;
         }
+
+        // 1번 칸 아이템 1개 랜덤 뽑기
+        BaseItemDataSO selectedFirstSlotItem = firstSlotPool[Random.Range(0, firstSlotPool.Count)];
 
         // 스낵 1개 뽑기
         List<SnackItemSO> shuffledSnacks = new List<SnackItemSO>(snackPool);
@@ -43,7 +47,7 @@ public class LootSelectionPanel : MonoBehaviour
         ShuffleList(shuffledDice);
 
         // 슬롯 세팅 (1번: 체력 아이템, 2번: 스낵, 3번: 주사위)
-        choiceSlots[0].Setup(maxHpRewardItem, this);
+        choiceSlots[0].Setup(selectedFirstSlotItem, this);
         choiceSlots[1].Setup(shuffledSnacks[0], this);
         choiceSlots[2].Setup(shuffledDice[0], this);
 

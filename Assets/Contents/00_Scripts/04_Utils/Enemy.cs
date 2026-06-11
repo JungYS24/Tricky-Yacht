@@ -120,7 +120,7 @@ public class Enemy : MonoBehaviour
 
         else if (currentBiome != null)
         {
-            // 1의 배수 스테이지(1, 0, 15...)이고 보스 데이터가 있다면 보스 출현!
+            //보스 여기서 바꾸면 됨
             if (currentStage % 3 == 0 && currentBiome.bossMonster != null)
             {
                 nextMonsterData = currentBiome.bossMonster;
@@ -158,6 +158,9 @@ public class Enemy : MonoBehaviour
         //스테이지당 몬스터 배수 설정
         float hpMultiplier = Mathf.Pow(1.05f, currentStage - 1);
         finalMaxHP = Mathf.RoundToInt(finalMaxHP * hpMultiplier);
+
+        //2스테이지당 몬스터 공격력 1 증가 (2스테이지=+1, 4스테이지=+2 ...)
+        finalAttack += (currentStage / 2);
 
         // 여기서 최종적으로 체력을 확정(덮어씌워지는 문제 해결)
         MaxHP = finalMaxHP;
