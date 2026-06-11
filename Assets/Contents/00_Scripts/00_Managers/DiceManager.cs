@@ -67,6 +67,9 @@ public class DiceManager : MonoBehaviour
     public AudioSource sfxSource; 
     public AudioEvent playerHurtAudioEvent;
 
+    [Header("게임 오버 UI 설정")]
+    public GameOverPanelController gameOverPanel;
+
     // --- 스낵 시스템용 변수 ---
     private int defaultMaxRerolls;
     [HideInInspector] public float snackBonusMult = 0f;
@@ -782,6 +785,8 @@ public class DiceManager : MonoBehaviour
 
                 ui?.ShowResult("#FF0000", "게임 오버");
                 Invoke(nameof(RestartGame), 1.5f);
+
+                StartCoroutine(ShowGameOverPanelDelayed());
             }
             else
             {
@@ -1094,5 +1099,15 @@ public class DiceManager : MonoBehaviour
         if (counts.Any(c => c == 3)) { multiplier = multTriple; handName = "트리플"; return; }
         if (counts.Count(c => c == 2) == 2) { multiplier = multTwoPair; handName = "투 페어"; return; }
         if (counts.Any(c => c == 2)) { multiplier = multOnePair; handName = "원 페어"; return; }
+    }
+
+    private IEnumerator ShowGameOverPanelDelayed()
+    {
+        yield return new WaitForSeconds(1.2f); // "게임 오버"
+
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetupGameOver(currentStage);
+        }
     }
 }
