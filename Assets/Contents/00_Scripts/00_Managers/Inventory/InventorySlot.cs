@@ -71,6 +71,12 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
     {
         if (isEmpty) return;
 
+        //몬스터가 죽어있는 상태(전투 종료 및 연출 대기 중)라면 인벤토리 상호작용 차단!
+        if (manager.diceManager != null && manager.diceManager.enemy != null && manager.diceManager.enemy.IsDead)
+        {
+            return;
+        }
+
         // 좌클릭: 스낵 먹기 또는 피규어 상세 보기
         if (eventData.button == PointerEventData.InputButton.Left)
         {
