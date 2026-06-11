@@ -22,6 +22,7 @@ public class CoatingSelectionPanel : MonoBehaviour
         pendingMultiplier = mult;
         pendingColor = color;
 
+
         //(GetRandomDiceForCoating »£√‚)
         List<DiceData1> options = dm.GetRandomDiceForCoating(5);
 

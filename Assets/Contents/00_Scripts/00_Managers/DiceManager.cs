@@ -688,7 +688,7 @@ public class DiceManager : MonoBehaviour
         }
 
         // 10스테이지마다(보스 클리어 시) 광대 이벤트 등장!
-        if (currentStage % 10 == 0 && clownEventPanel != null)
+        if (currentStage % 30 == 0 && clownEventPanel != null)
         {
             clownEventPanel.StartEvent();
         }

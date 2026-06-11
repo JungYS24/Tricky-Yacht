@@ -159,6 +159,9 @@ public class Enemy : MonoBehaviour
         float hpMultiplier = Mathf.Pow(1.05f, currentStage - 1);
         finalMaxHP = Mathf.RoundToInt(finalMaxHP * hpMultiplier);
 
+        //2스테이지당 몬스터 공격력 1 증가 (2스테이지=+1, 4스테이지=+2 ...)
+        finalAttack += (currentStage / 2);
+
         // 여기서 최종적으로 체력을 확정(덮어씌워지는 문제 해결)
         MaxHP = finalMaxHP;
         CurrentHP = finalMaxHP;
