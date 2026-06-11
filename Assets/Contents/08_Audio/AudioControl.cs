@@ -1,5 +1,5 @@
-using UnityEngine;
-using UnityEngine.Audio; 
+ï»¿using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.UI;
 
 public class AudioControl : MonoBehaviour
@@ -8,63 +8,62 @@ public class AudioControl : MonoBehaviour
     public AudioMixer masterMixer;
 
     [Header("Volume Sliders")]
-    public Slider masterSlider; // ¸¶½ºÅÍ º¼·ı
-    public Slider bgmSlider;    // ¹è°æÀ½¾Ç º¼·ı
-    public Slider sfxSlider;    // È¿°úÀ½ º¼·ı
+    public Slider masterSlider;
+    public Slider bgmSlider;
+    public Slider sfxSlider;
 
     private void Start()
     {
-        // °ÔÀÓ ½ÃÀÛ ½Ã, ±âÁ¸¿¡ À¯Àú°¡ ¼³Á¤Çß´ø º¼·ı °ªÀÌ ÀÖ´Ù¸é ·ÎµåÇÏ°í ½½¶óÀÌ´õ¿¡ ¹İ¿µ
-        // ÀúÀåµÈ °ªÀÌ ¾ø´Ù¸é ±âº»°ªÀÎ 0f(ÃÖ´ë º¼·ı)¸¦ »ç¿ë
+        // ì”¬ì´ ì¼œì§ˆ ë•Œë§ˆë‹¤ ì €ì¥ëœ ë°ì´í„°(PlayerPrefs)ë¥¼ ì½ì–´ì™€ì„œ ìê¸° ìŠ¬ë¼ì´ë”ì™€ ë¯¹ì„œë¥¼ ë§ì¶¤
         if (masterSlider != null)
         {
-            masterSlider.value = PlayerPrefs.GetFloat("MasterVol", 0f);
+            masterSlider.onValueChanged.RemoveAllListeners();
+            masterSlider.minValue = 0.0001f;
+            masterSlider.maxValue = 1f;
+            masterSlider.value = PlayerPrefs.GetFloat("MasterVol", 1f);
             masterSlider.onValueChanged.AddListener(SetMasterVolume);
             SetMasterVolume(masterSlider.value);
         }
 
         if (bgmSlider != null)
         {
-            bgmSlider.value = PlayerPrefs.GetFloat("BGMVol", 0f);
+            bgmSlider.onValueChanged.RemoveAllListeners();
+            bgmSlider.minValue = 0.0001f;
+            bgmSlider.maxValue = 1f;
+            bgmSlider.value = PlayerPrefs.GetFloat("BGMVol", 1f);
             bgmSlider.onValueChanged.AddListener(SetBGMVolume);
             SetBGMVolume(bgmSlider.value);
         }
 
         if (sfxSlider != null)
         {
-            sfxSlider.value = PlayerPrefs.GetFloat("SFXVol", 0f);
+            sfxSlider.onValueChanged.RemoveAllListeners();
+            sfxSlider.minValue = 0.0001f;
+            sfxSlider.maxValue = 1f;
+            sfxSlider.value = PlayerPrefs.GetFloat("SFXVol", 1f);
             sfxSlider.onValueChanged.AddListener(SetSFXVolume);
             SetSFXVolume(sfxSlider.value);
         }
     }
 
-    // 1. ÀüÃ¼ º¼·ı Á¦¾î (±âÁ¸ À¯Áö)
     public void SetMasterVolume(float volume)
     {
-        masterMixer.SetFloat("MasterVol", volume);
-
-        if (volume <= -40f) masterMixer.SetFloat("MasterVol", -80f);
-
+        float dbValue = Mathf.Log10(Mathf.Max(0.0001f, volume)) * 20f;
+        masterMixer.SetFloat("MasterVol", dbValue);
         PlayerPrefs.SetFloat("MasterVol", volume);
     }
 
-    // 2. ¹è°æÀ½¾Ç º¼·ı Á¦¾î (Ãß°¡)
     public void SetBGMVolume(float volume)
     {
-        masterMixer.SetFloat("BGMVol", volume);
-
-        if (volume <= -40f) masterMixer.SetFloat("BGMVol", -80f);
-
+        float dbValue = Mathf.Log10(Mathf.Max(0.0001f, volume)) * 20f;
+        masterMixer.SetFloat("BGMVol", dbValue);
         PlayerPrefs.SetFloat("BGMVol", volume);
     }
 
-    // 3. È¿°úÀ½ º¼·ı Á¦¾î (Ãß°¡)
     public void SetSFXVolume(float volume)
     {
-        masterMixer.SetFloat("SFXVol", volume);
-
-        if (volume <= -40f) masterMixer.SetFloat("SFXVol", -80f);
-
+        float dbValue = Mathf.Log10(Mathf.Max(0.0001f, volume)) * 20f;
+        masterMixer.SetFloat("SFXVol", dbValue);
         PlayerPrefs.SetFloat("SFXVol", volume);
     }
 }
