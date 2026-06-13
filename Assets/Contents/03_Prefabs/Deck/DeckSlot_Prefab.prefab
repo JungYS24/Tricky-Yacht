@@ -207,7 +207,7 @@ MonoBehaviour:
   diceIcon: {fileID: 445989346094941115}
   descText: {fileID: 0}
   defaultFaceSprites:
-  - {fileID: 21300000, guid: e6d4349e6942c9344957fae0a557fc9e, type: 3}
+  - {fileID: 5114336044013623915, guid: 57f9f46b2ef5d2e438f888f896ac2db4, type: 3}
   - {fileID: 4277651623651152253, guid: 4a4761681d308864e86310e4a393d6f5, type: 3}
   - {fileID: 8572930375631895552, guid: 797b33bba0f315f4ea1961eb5d6ce62c, type: 3}
   - {fileID: 6584158007040453875, guid: 73cca03ad1f597441bbc9c999b86a0a7, type: 3}
