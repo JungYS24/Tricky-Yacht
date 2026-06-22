@@ -698,7 +698,7 @@ public class DiceManager : MonoBehaviour
         }
 
         // 10스테이지마다(보스 클리어 시) 광대 이벤트 등장!
-        if (currentStage % 30 == 0 && clownEventPanel != null)
+        if (currentStage % 7 == 0 && clownEventPanel != null)
         {
             clownEventPanel.StartEvent();
         }
@@ -975,7 +975,8 @@ public class DiceManager : MonoBehaviour
         if (d.currentKeepIndex != -1) { keepSlotOccupants[d.currentKeepIndex] = null; d.currentKeepIndex = -1; d.MoveToTarget(d.rollPos); }
     }
 
-    public void PromptShopChoice() { ui?.HideResult(); ui?.ShowShopChoice(); }
+
+        public void PromptShopChoice() { ui?.HideResult(); ui?.ShowShopChoice(); }
     public void GoToShop() { ui?.HideShopChoice(); shopManager?.OpenShop(); }
     public void SkipShopAndNextStage() { ui?.HideShopChoice(); NextStage(); }
     public void NextStage()
@@ -983,7 +984,7 @@ public class DiceManager : MonoBehaviour
         currentStage++;
 
         // 여기서 보스 바꾸기 
-        if ((currentStage - 1) %10 == 0 && currentStage <= 100)
+        if ((currentStage - 1) %1 == 0 && currentStage <= 100)
         {
             ui?.HideShopChoice();
 

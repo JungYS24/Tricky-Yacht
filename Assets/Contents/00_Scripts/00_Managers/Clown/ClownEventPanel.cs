@@ -23,6 +23,12 @@ public class ClownEventPanel : MonoBehaviour
     public TextMeshProUGUI choice2Text;
     public Button skipButton;               // 그냥 넘기기 버튼
 
+    [Header("광대 이벤트 수치 조절")]
+    public int minGold = 1500;
+    public int maxGold = 2501;
+    public int minHpCost = 30;
+    public int maxHpCost = 41;
+
     private int dialogueIndex = 0;
     private string[] currentDialogues = new string[]
     {
@@ -102,10 +108,10 @@ public class ClownEventPanel : MonoBehaviour
             clownAnimator.speed = 0f; 
         }
         // 랜덤 조건 생성
-        choice1HPCost = Random.Range(30, 41);
-        choice1GoldReward = Random.Range(1500, 2501);
+        choice1HPCost = Random.Range(minHpCost, maxHpCost);
+        choice1GoldReward = Random.Range(minGold, maxGold);
 
-        choice2HPCost = Random.Range(30, 51);
+        choice2HPCost = Random.Range(minHpCost, maxHpCost);
 
         List<FigureItemSO> availableFigures = new List<FigureItemSO>();
         if (diceManager.shopManager != null && diceManager.shopManager.allItemsPool != null)
