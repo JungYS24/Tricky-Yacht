@@ -2,6 +2,7 @@
 using UnityEngine.Audio;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class AudioControl : MonoBehaviour
 {
@@ -28,7 +29,7 @@ public class AudioControl : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        ApplySavedVolumes();
+        //ApplySavedVolumes();
     }
 
     private void OnEnable()
@@ -46,6 +47,7 @@ public class AudioControl : MonoBehaviour
 
     private void Start()
     {
+        StartCoroutine(ApplyVolumeNextFrame());
         SyncAudioSettings();
     }
 
@@ -54,12 +56,19 @@ public class AudioControl : MonoBehaviour
         // 씬이 이동하며 UI가 파괴될 때, 찌그러진 값이 저장되는 것을 원천 차단
         isReady = false;
     }
+    
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // 씬이 이동할 때도 믹서가 잠시 기절하므로, 코루틴으로 깨우고 값을 넣습니다.
+        StartCoroutine(ApplyVolumeNextFrame());
         SyncAudioSettings();
     }
-
+    private IEnumerator ApplyVolumeNextFrame()
+    {
+        yield return new WaitForSecondsRealtime(0.05f);
+        ApplySavedVolumes();
+    }
     private void ApplySavedVolumes()
     {
         SetMasterVolume(PlayerPrefs.GetFloat("MasterVol", 1f));

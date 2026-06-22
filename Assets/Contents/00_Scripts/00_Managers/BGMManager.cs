@@ -77,7 +77,10 @@ public class BGMManager : MonoBehaviour
     {
         if (nextClip == null) return;
         if (audioSource == null) audioSource = GetComponent<AudioSource>();
-        if (audioSource.clip == nextClip) return; // 이미 재생 중이면 무시
+
+        //같은 클립이더라도 현재 재생 중이 아니거나 볼륨이 0이면 무시하지 않고 다시 틈
+        if (audioSource.clip == nextClip && audioSource.isPlaying && audioSource.volume > 0)
+            return;
 
         if (fadeCoroutine != null) StopCoroutine(fadeCoroutine);
 
@@ -91,6 +94,7 @@ public class BGMManager : MonoBehaviour
         {
             audioSource.Stop();
             audioSource.volume = 0f;
+            audioSource.clip = null; // 클립을 완전히 비워둬서 다음번 재생 시 무시되는 걸 방지
         }
     }
 
@@ -99,7 +103,7 @@ public class BGMManager : MonoBehaviour
         // 1. 기존 음악 페이드 아웃
         while (audioSource.volume > 0)
         {
-            audioSource.volume -= Time.deltaTime * fadeSpeed;
+            audioSource.volume -= Time.unscaledDeltaTime * fadeSpeed;
             yield return null;
         }
 
@@ -110,7 +114,7 @@ public class BGMManager : MonoBehaviour
         // 3. 새 음악 페이드 인
         while (audioSource.volume < maxVolume)
         {
-            audioSource.volume += Time.deltaTime * fadeSpeed;
+            audioSource.volume += Time.unscaledDeltaTime * fadeSpeed;
             yield return null;
         }
 

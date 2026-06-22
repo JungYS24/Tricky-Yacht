@@ -162,6 +162,13 @@ public class DiceManager : MonoBehaviour
             currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
             StartNewStage();
         }
+
+        //튜토리얼 종료 후 메인 게임 진입 시, 현재 설정된 1스테이지(숲) 바이옴의 브금을 강제로 재생!
+        if (BGMManager.Instance != null && currentBiome != null)
+        {
+
+            BGMManager.Instance.ChangeBGM(currentBiome.biomeBGM);
+        }
     }
 
     void OnDestroy() => Dice.OnDiceStateChanged -= HandleDiceChanged;
@@ -979,12 +986,17 @@ public class DiceManager : MonoBehaviour
         public void PromptShopChoice() { ui?.HideResult(); ui?.ShowShopChoice(); }
     public void GoToShop() { ui?.HideShopChoice(); shopManager?.OpenShop(); }
     public void SkipShopAndNextStage() { ui?.HideShopChoice(); NextStage(); }
+
+    //발표용 떄문에 튜토리얼 수정
     public void NextStage()
     {
+
+        //튜토리얼을 진행 중인지 확인하는 변수
+        bool isTutorial = TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive;
         currentStage++;
 
         // 여기서 보스 바꾸기 
-        if ((currentStage - 1) %1 == 0 && currentStage <= 100)
+        if (!isTutorial&&(currentStage - 1) %1 == 0 && currentStage <= 100)
         {
             ui?.HideShopChoice();
 
@@ -994,6 +1006,8 @@ public class DiceManager : MonoBehaviour
 
         else
         {
+            // 튜토리얼 중이거나, 바이옴 넘어갈 타이밍이 아닐 때는 그대로 게임 진행
+            ui?.HideShopChoice(); // 혹시 켜져 있을 샵 UI 닫기
             // 일반 스테이지는 그대로 진행
             StartNewStage();
             if (GameSaveManager.Instance != null)
