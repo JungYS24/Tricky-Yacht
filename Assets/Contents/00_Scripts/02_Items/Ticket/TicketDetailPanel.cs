@@ -52,6 +52,12 @@ public class TicketDetailPanel : MonoBehaviour
         TicketItemSO ticket = currentTicketList[currentIndex];
 
         ticketIcon.sprite = ticket.icon;
+
+        if (ticketNameText != null)
+        {
+            ticketNameText.text = ticket.itemName;
+        }
+
         ticketNameText.text = ticket.itemName;
         ticketDescText.text = ticket.description;
 

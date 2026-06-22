@@ -943,9 +943,8 @@ public class DiceManager : MonoBehaviour
         //피규어로 얻은 칩이 스낵 칩 표기로 둔갑하는 현상 방어
         int displaySnackChips = isCalculating ? (snackBonusChips - figureBonusChips) : snackBonusChips;
         if (displaySnackChips > 0) displayHand += $" <color=#FFA500>+{displaySnackChips}(스낵)</color>";
-
-        if (expectedGold > 0) displayHand += $" <color=#FFFF00>+{expectedGold}(코인)</color>";
-        if (expectedHeal > 0) displayHand += $" <color=#FF5555>+{expectedHeal}(회복)</color>";
+        if (expectedGold > 0) displayHand += $" <color=#FFFF00>+{expectedGold}</color>";
+        if (expectedHeal > 0) displayHand += $" <color=#FF5555>+{expectedHeal}</color>";
 
         // 피규어로 칩이나 배수가 올랐다면 파란색(#00BFFF)으로, 아니면 기본색 유지
         string chipsText = figureBonusChips > 0 ? $"<color=#00BFFF>{finalBaseSum}</color>" : finalBaseSum.ToString();
