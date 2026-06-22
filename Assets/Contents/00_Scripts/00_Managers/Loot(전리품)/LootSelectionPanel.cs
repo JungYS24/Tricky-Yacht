@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class LootSelectionPanel : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class LootSelectionPanel : MonoBehaviour
     public List<BaseItemDataSO> firstSlotPool;
 
     [Header("전리품 풀 세팅")]
-    public List<SnackItemSO> snackPool;
+    public List<SnackItemSO> snackPool; 
     public List<DiceItemSO> dicePool;
 
     private DiceManager diceManager;
@@ -88,11 +89,20 @@ public class LootSelectionPanel : MonoBehaviour
 
     private void ClosePanelAndProceed()
     {
-        //패널이 닫혔다고 상태 변경
+        // 패널 닫기
         IsPanelOpen = false;
         panelRoot.SetActive(false);
 
-        diceManager.PromptShopChoice();
+        // 튜토리얼 11번 스텝(첫 번째 전리품)일 때는 0.5초 대기 없이 그냥 넘김
+        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive && TutorialManager.Instance.currentStepIndex == 11)
+        {
+            // 아무것도 안 함 (TutorialManager에서 12번 대사를 띄우고 다음 버튼을 기다림)
+        }
+        else
+        {
+            // 메인 게임이거나 튜토리얼 두 번째 전리품(22번)일 때는 DiceManager를 통해 0.5초 코루틴 실행
+            diceManager.StartCoroutine(WaitAndOpenShopRoutine());
+        }
     }
 
     private void ShuffleList<T>(List<T> list)
@@ -105,4 +115,31 @@ public class LootSelectionPanel : MonoBehaviour
             list[rnd] = temp;
         }
     }
+    // 0.2초 뒤 상점을 여는 코루틴
+    private IEnumerator WaitAndOpenShopRoutine()
+    {
+        yield return new WaitForSeconds(0.2f);
+
+        // 티켓 팩을 골라서 티켓 선택 창이 열려있다면, 유저가 고를 때까지 무한 대기!
+        if (diceManager.shopManager != null && diceManager.shopManager.ticketSelectionPanel != null)
+        {
+            while (diceManager.shopManager.ticketSelectionPanel.activeSelf)
+            {
+                yield return null; // 티켓 선택 창이 닫힐 때까지 대기
+            }
+        }
+
+        // 티켓 선택이 끝났거나(창이 닫힘) 애초에 안 열렸다면 드디어 상점 열기
+        if (diceManager.shopManager != null)
+        {
+            diceManager.shopManager.OpenShop();
+        }
+
+        // 튜토리얼 두 번째 상점 진입일 경우 자동으로 23번 대사로 넘김
+        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+        {
+            TutorialManager.Instance.OnAutoShopEntered();
+        }
+    }
+
 }

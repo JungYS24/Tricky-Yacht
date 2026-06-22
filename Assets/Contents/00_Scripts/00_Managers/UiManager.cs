@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 
 public class UIManager : MonoBehaviour
 {
@@ -12,7 +13,6 @@ public class UIManager : MonoBehaviour
 
     [Header("데미지 계산 UI (통합)")]
     public TextMeshProUGUI scoringFormulaText;
-    public TextMeshProUGUI activeFigureText; // 피규어 발동 텍스트변수
 
     [Header("플레이어 체력 UI")]
     //플레이어 체력
@@ -29,6 +29,9 @@ public class UIManager : MonoBehaviour
 
     [Header("확률 표시 UI")]
     public TextMeshProUGUI dropRateText;
+
+    [Header("피규어 발동 아이콘 UI")]
+    public Image[] activeFigureIcons; // 유니티 에디터에서 띄워줄 이미지 UI들을 연결할 배열
 
     [Header("결과창 설정")]
     public TMPro.TextMeshProUGUI resultText;
@@ -69,13 +72,12 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    public void UpdateGameUI(string stageName, int currentHP, int maxHP, int playerHP, int playerMaxHP, int rerollsLeft, string combinedDamageText, string activeFigureString = "")
+    // 매개변수 맨 끝에 List<Sprite> activeSprites = null 을 추가해 줍니다.
+    public void UpdateGameUI(string stageName, int currentHP, int maxHP, int playerHP, int playerMaxHP, int rerollsLeft, string combinedDamageText, string activeFigureString = "", List<Sprite> activeSprites = null)
     {
         stageText.text = stageName;
-
         targetScoreText.text = $"<color=#FF5555>{currentHP}/{maxHP}</color>";
         cumulativeScoreText.text = "";
-
         roundPlaysText.text = $"남은 굴리기: {rerollsLeft}";
 
         if (heartText != null)
@@ -88,9 +90,28 @@ public class UIManager : MonoBehaviour
             scoringFormulaText.text = combinedDamageText;
         }
 
-        if (activeFigureText != null)
+
+        //발동된 피규어 아이콘 표시 로직
+        if (activeFigureIcons != null)
         {
-            activeFigureText.text = activeFigureString;
+            // 1. 매번 갱신할 때마다 일단 모든 아이콘을 숨깁니다.
+            foreach (var icon in activeFigureIcons)
+            {
+                if (icon != null) icon.gameObject.SetActive(false);
+            }
+
+            // 전달받은 발동 피규어 아이콘이 있다면 앞에서부터 순서대로 켬
+            if (activeSprites != null)
+            {
+                for (int i = 0; i < activeSprites.Count && i < activeFigureIcons.Length; i++)
+                {
+                    if (activeFigureIcons[i] != null)
+                    {
+                        activeFigureIcons[i].sprite = activeSprites[i];
+                        activeFigureIcons[i].gameObject.SetActive(true);
+                    }
+                }
+            }
         }
     }
 

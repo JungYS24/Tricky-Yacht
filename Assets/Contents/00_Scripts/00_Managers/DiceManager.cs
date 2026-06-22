@@ -869,9 +869,11 @@ public class DiceManager : MonoBehaviour
         }
 
         //피규어 발동 실시간 시뮬레이션
+        // 피규어 발동 실시간 시뮬레이션
         int figureBonusChips = 0;
         float figureBonusMult = 0f;
         List<string> activeFigureNames = new List<string>();
+        List<Sprite> activeFigureSprites = new List<Sprite>(); // [추가된 줄] 피규어 아이콘 담을 리스트
 
         if (allValues.Count == 5) // 5개가 모였을 때만 피규어 발동 검사
         {
@@ -902,7 +904,6 @@ public class DiceManager : MonoBehaviour
                         case FigureTriggerType.FullHouse: if (handName == "풀하우스") nodeTriggered = true; break;
                         case FigureTriggerType.FourOfAKind: if (handName == "포카드") nodeTriggered = true; break;
                         case FigureTriggerType.Yacht: if (handName == "Yacht" || handName == "요트" || handName == "파이브 카드") nodeTriggered = true; break;
-                        //case FigureTriggerType.Passive: nodeTriggered = true; break;
                     }
 
                     if (nodeTriggered)
@@ -919,7 +920,10 @@ public class DiceManager : MonoBehaviour
                 if (isTriggered)
                 {
                     if (!activeFigureNames.Contains(figure.itemName))
+                    {
                         activeFigureNames.Add(figure.itemName);
+                        activeFigureSprites.Add(figure.icon); // [추가된 줄] 발동된 피규어의 아이콘 저장
+                    }
                     figureBonusChips += (int)tempChips;
                     figureBonusMult += tempMult;
                 }
@@ -933,6 +937,9 @@ public class DiceManager : MonoBehaviour
         string displayHand = $"<color=#FFD700>{handName}</color>";
         if (iceBonusChips > 0) displayHand += $" <color=#00FFFF>+{iceBonusChips}</color>";
 
+        // 다크 주사위 텍스트 위치 (이전에 수정한 부분)
+        if (darkDamageTotal > 0) displayHand += $" <color=#A9A9A9>+{darkDamageTotal}</color>";
+
         //피규어로 얻은 칩이 스낵 칩 표기로 둔갑하는 현상 방어
         int displaySnackChips = isCalculating ? (snackBonusChips - figureBonusChips) : snackBonusChips;
         if (displaySnackChips > 0) displayHand += $" <color=#FFA500>+{displaySnackChips}(스낵)</color>";
@@ -944,25 +951,18 @@ public class DiceManager : MonoBehaviour
         string chipsText = figureBonusChips > 0 ? $"<color=#00BFFF>{finalBaseSum}</color>" : finalBaseSum.ToString();
         string multText = figureBonusMult > 0f ? $"<color=#00BFFF>{totalFinalMult:F1}배</color>" : $"{totalFinalMult:F1}배";
 
-        string formula = $"{chipsText} x {multText}" + (darkDamageTotal > 0 ? $" + {darkDamageTotal}(다크)" : "");
+        // 다크 주사위 계산식 분리로 수식 깔끔하게 처리 (이전에 수정한 부분)
+        string formula = $"{chipsText} x {multText}";
         string combinedText = $"{displayHand}\n{formula}\n<color=#FF5555>= {totalDamage} 대미지 예정</color>";
-
-        // 피규어 발동 명단 텍스트 조합
-        string activeFigStr = activeFigureNames.Count > 0 ? $"<color=#00BFFF> 발동 : {string.Join(", ", activeFigureNames)}</color>" : "";
 
         int remainingRerolls = (maxRerolls + snackBonusRerolls + figureBonusRerolls) - currentRerolls;
         string bName = (currentBiome != null) ? currentBiome.biomeName : "Stage";
 
         string stageDisplayName = $"{bName} {currentStage}";
-        ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText);
+
+        ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText, "", activeFigureSprites);
 
         float currentEnemyDropRate = isPeppermintActive ? enemy.baseDropRate : 0f;
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-        {
-            if (currentStage == 3 && isPeppermintActive) currentEnemyDropRate = 0.3f;
-        }
-
-        ui?.UpdateDropRateUI(currentEnemyDropRate, snackBonusFigureDropRate);
     }
 
     void AssignToKeepSlot(Dice d)

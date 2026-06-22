@@ -228,7 +228,15 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
-        // 보스 스테이지 클리어 후 자유 모드 진입 조건 (신규 인덱스 기준 반영)
+        // [추가] 12번 대사에서 '다음' 버튼을 누르면 상점이 열리고 13번 대사로 넘어감
+        if (currentStepIndex == 12)
+        {
+            if (shopManager != null) shopManager.OpenShop();
+            ShowStep(13);
+            return;
+        }
+
+        // --- 기존 로직 유지 ---
         if (currentStepIndex == 28)
         {
             ShowStep(29);
@@ -252,11 +260,10 @@ public class TutorialManager : MonoBehaviour
 
     private bool NeedsActionToProceed(int step)
     {
-        // 신규 추가된 기믹들의 액션 단계 예외 처리 추가
+        // 12가 빠져야 12번 대사에서 다음 버튼이 보입니다.
         return step == 2 || step == 3 || step == 4 || step == 6 ||
                step == 7 || step == 8 || step == 9 || step == 11 ||
-               step == 12 || step == 21 ||
-               step == 19 || step == 20 || step == 22 ||
+               step == 21 || step == 19 || step == 20 || step == 22 ||
                step == 23 || step == 24 || step == 27 || step == 30;
     }
 
@@ -583,24 +590,37 @@ public class TutorialManager : MonoBehaviour
 
         if (currentStepIndex == 11)
         {
+            // 첫 번째 전리품: 12번 대사 띄우기 (다음 버튼 기다림)
             ShowStep(12);
         }
         else if (currentStepIndex == 22)
         {
+            // 두 번째 전리품: 0.5초 뒤 자동 이동이므로 하이라이트 없이 가림막만 유지
             ClearHighlight();
             darkOverlay.SetActive(true);
-            // 수정한 코루틴 이름(HighlightButton)으로 적용
-            StartCoroutine(HighlightButton(uiManager.goShopButton));
         }
-        else if (currentStepIndex == 32) // 보스 처치 전리품을 얻었을 때
+        else if (currentStepIndex == 32)
         {
+            // 보스 처치 후: 다음 스테이지 버튼 유도 유지
             ClearHighlight();
             darkOverlay.SetActive(true);
-            // 상점이 아니라 다음 스테이지 버튼을 강제 유도
             StartCoroutine(HighlightButton(uiManager.nextStageButton));
         }
     }
 
+    // 상점 자동 입장 시 튜토리얼 스텝을 자연스럽게 넘겨줄 새 함수 추가
+    public void OnAutoShopEntered()
+    {
+        if (!isTutorialActive) return;
+
+        ClearHighlight();
+
+        // 22번 스텝에서 전리품을 먹고 0.5초 뒤 상점으로 진입했으므로 23번 대사 출력
+        if (currentStepIndex == 22)
+        {
+            ShowStep(23);
+        }
+    }
     private IEnumerator WaitForSecondLootPanel()
     {
         // 전리품 패널이 열릴 때까지 대기
