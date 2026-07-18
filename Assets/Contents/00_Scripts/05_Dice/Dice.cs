@@ -80,6 +80,16 @@ public class Dice : MonoBehaviour, IPointerDownHandler
     {
         if (spriteRenderer == null || value <= 0) return;
 
+        //값이 0 이하일 때(가짜 주사위)의 처리
+        if (value <= 0)
+        {
+            if (myData != null && myData.customFaceSprites != null && myData.customFaceSprites.Length > 0)
+            {
+                spriteRenderer.sprite = myData.customFaceSprites[0];
+            }
+            return;
+        }
+
         // 판별된 결과에 따라 숫자 스프라이트 또는 눈금 스프라이트를 선택
         if (useNumberSprite && fixedNumberSprites != null && value <= fixedNumberSprites.Length)
         {

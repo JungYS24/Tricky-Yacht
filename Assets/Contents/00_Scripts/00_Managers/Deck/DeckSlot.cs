@@ -80,7 +80,7 @@ public class DeckSlot : MonoBehaviour
         animTimer = 0f;
         currentAnimIndex = 0;
 
-        // ★ LINQ 제거 및 단일 반복문 최적화
+        //LINQ 제거 및 단일 반복문 최적화
         int minVal = data.faceValues[0];
         int maxVal = data.faceValues[0];
         bool isFixed = true;
@@ -159,10 +159,10 @@ public class DeckSlot : MonoBehaviour
 
         if (descText != null)
         {
-            if (minVal == maxVal)
-                descText.text = minVal.ToString();
-            else
-                descText.text = $"{minVal}~{maxVal}";
+            //가짜 주사위 일 떄 숫자 대신 Fake 출력
+            if (data.diceName == "가짜 주사위") descText.text = "Fake";
+            else if (minVal == maxVal) descText.text = minVal.ToString();
+            else descText.text = $"{minVal}~{maxVal}";
         }
     }
 
@@ -289,9 +289,16 @@ public class DeckSlot : MonoBehaviour
         if (diceIcon == null) return;
 
         int faceToShow = exactFaceValue != -1 ? exactFaceValue : data.faceValues[UnityEngine.Random.Range(0, data.faceValues.Length)];
-        faceToShow = Mathf.Clamp(faceToShow, 1, 6);
+        //하한선을 1에서 0으로 변경
+        faceToShow = Mathf.Clamp(faceToShow, 0, 6);
 
-        if (isFixed && fixedNumberSprites != null && fixedNumberSprites.Length >= 6)
+        //0일 때 가짜 이미지 띄우기
+        if (faceToShow == 0 && data.customFaceSprites != null && data.customFaceSprites.Length > 0)
+        {
+            diceIcon.sprite = data.customFaceSprites[0];
+        }
+
+        else if (isFixed && fixedNumberSprites != null && fixedNumberSprites.Length >= 6 && faceToShow > 0)
         {
             diceIcon.sprite = fixedNumberSprites[faceToShow - 1];
         }

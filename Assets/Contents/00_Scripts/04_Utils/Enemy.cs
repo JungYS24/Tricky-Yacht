@@ -40,6 +40,10 @@ public class Enemy : MonoBehaviour
     public string edgeColorBProperty = "_EdgeColorB";
     public string edgeGlowPowerProperty = "_EdgeGlowPower";
 
+
+    //현재 몬스터의 능력
+    public BossAbilityType CurrentBossAbility { get; private set; }
+
     // 세이브를 위해 몬스터가 자기 이름을 기억하게 함
     public string CurrentMonsterName { get; private set; }
     public int CurrentMonsterIndex { get { return currentMonsterIndex; } }
@@ -121,7 +125,7 @@ public class Enemy : MonoBehaviour
         else if (currentBiome != null)
         {
             //보스 여기서 바꾸면 됨
-            if (currentStage % 10 == 0 && currentBiome.bossMonster != null)
+            if (currentStage % 2 == 0 && currentBiome.bossMonster != null)
             {
                 nextMonsterData = currentBiome.bossMonster;
             }
@@ -138,6 +142,9 @@ public class Enemy : MonoBehaviour
         {
             //이름 기억하기
             CurrentMonsterName = nextMonsterData.monsterName;
+            //초기화할 때 몬스터의 능력 기억
+            CurrentBossAbility = nextMonsterData.bossAbility;
+
             if (monsterAnimator != null && nextMonsterData.animatorController != null)
             {
                 monsterAnimator.runtimeAnimatorController = nextMonsterData.animatorController;
@@ -366,6 +373,9 @@ public class Enemy : MonoBehaviour
     {
         CurrentMonsterName = monsterData.monsterName;
         currentMonsterIndex = index;
+
+        //세이브 파일에서 불러올 때도 능력 기억하기
+        CurrentBossAbility = monsterData.bossAbility;
 
         if (monsterAnimator != null && monsterData.animatorController != null)
             monsterAnimator.runtimeAnimatorController = monsterData.animatorController;

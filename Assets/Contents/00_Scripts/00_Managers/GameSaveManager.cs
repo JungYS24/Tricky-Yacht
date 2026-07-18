@@ -108,6 +108,15 @@ public class GameSaveManager : MonoBehaviour
         // 주사위 코팅 정보까지 전부 추출해서 저장
         foreach (var d in dice.masterDeck)
         {
+            DiceData1 targetToSave = d;
+
+            //가짜 주사위라면 원본 주사위를 대신 저장시킴!
+            if (d.diceName == "가짜 주사위" && dice.originalBossDice != null)
+            {
+                targetToSave = dice.originalBossDice;
+            }
+
+
             SavedDiceData sdd = new SavedDiceData();
             sdd.diceName = d.diceName;
             sdd.isCoated = d.isCoated;

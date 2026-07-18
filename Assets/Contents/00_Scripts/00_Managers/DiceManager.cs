@@ -70,6 +70,13 @@ public class DiceManager : MonoBehaviour
     [Header("게임 오버 UI 설정")]
     public GameOverPanelController gameOverPanel;
 
+    [Header("보스전 가짜 주사위")]
+    public Sprite fakeDiceShell; // 가짜 주사위 외곽선 이미지 (인스펙터에서 할당)
+    public Sprite fakeDiceFace;  // 가짜 주사위 눈금 이미지 (X 표시 등)
+
+    [HideInInspector] public DiceData1 originalBossDice = null;
+    [HideInInspector] public int fakeDiceIndex = -1;
+
     // --- 스낵 시스템용 변수 ---
     private int defaultMaxRerolls;
     [HideInInspector] public float snackBonusMult = 0f;
@@ -282,6 +289,12 @@ public class DiceManager : MonoBehaviour
             enemy.Initialize(currentStage, currentBiome);
         }
 
+        //세이브 로드 시에도 적 능력을 체크해서 다시 발동
+        if (enemy.CurrentBossAbility == BossAbilityType.FakeDice)
+        {
+            ApplyFakeDice();
+        }
+
         // 덱 섞기 및 이번 턴 시작 (StartNewStage() 대신 호출)
         drawPile = new List<DiceData1>(masterDeck);
         discardPile.Clear();
@@ -318,16 +331,14 @@ public class DiceManager : MonoBehaviour
 
     void StartNewStage()
     {
+        //기존에 가짜 주사위 기믹이 남아있다면 원상복구
+        RestoreFakeDice();
+
         currentRerolls = 0;
         maxRerolls = defaultMaxRerolls;
-        //페퍼민트 효과 초기화
         isPeppermintActive = false;
         pendingPeppermintSuccess = false;
-        //가니쉬 효과 초기화
         snackBonusFigureDropRate = 0f;
-
-
-       
 
         if (currentBiome != null)
         {
@@ -339,13 +350,17 @@ public class DiceManager : MonoBehaviour
             {
                 BGMManager.Instance.ChangeBGM(currentBiome.biomeBGM);
             }
-
             enemy.Initialize(currentStage, currentBiome);
         }
         else
         {
             Debug.LogWarning("현재 설정된 바이옴이 없습니다!");
             enemy.Initialize(currentStage, null);
+        }
+
+        if (enemy.CurrentBossAbility == BossAbilityType.FakeDice)
+        {
+            ApplyFakeDice();
         }
 
         drawPile = new List<DiceData1>(masterDeck);
@@ -662,6 +677,10 @@ public class DiceManager : MonoBehaviour
 
     private void ProcessStageClear(bool fromPeppermint)
     {
+
+        // 보스를 잡자마자 가장 먼저 가짜 주사위 원상 복구 (상점/이벤트 가기 전 덱 정상화)
+        RestoreFakeDice();
+
         // 공허 바이옴에서 보스를 잡았다면 최종 게임 클리어 처리
         if (currentBiome != null && currentBiome.biomeType == BiomeType.Void)
         {
@@ -750,6 +769,39 @@ public class DiceManager : MonoBehaviour
         else
         {
             PromptShopChoice();
+        }
+    }
+
+
+    public void ApplyFakeDice()
+    {
+        if (masterDeck.Count == 0) return;
+
+        fakeDiceIndex = UnityEngine.Random.Range(0, masterDeck.Count);
+        originalBossDice = masterDeck[fakeDiceIndex];
+
+        DiceData1 fakeDice = new DiceData1("가짜 주사위", new int[] { 0, 0, 0, 0, 0, 0 });
+        fakeDice.customDiceShell = fakeDiceShell;
+        fakeDice.customFaceSprites = new Sprite[] { fakeDiceFace, fakeDiceFace, fakeDiceFace, fakeDiceFace, fakeDiceFace, fakeDiceFace };
+
+        fakeDice.isCoated = false;
+        fakeDice.type = DiceType.Normal;
+        fakeDice.specialEffect = SpecialDieEffect.None; // 하트/코인 효과 등 완전 삭제
+        fakeDice.diceColor = Color.white;               // 원래 주사위 색상 지우기
+        fakeDice.multiplier = 1.0f;                     // 배수 초기화
+
+        masterDeck[fakeDiceIndex] = fakeDice;
+        Debug.Log($"<color=red>[보스 기믹]</color> {originalBossDice.diceName}이(가) 가짜 주사위로 변했습니다!");
+    }
+
+    public void RestoreFakeDice()
+    {
+        if (originalBossDice != null && fakeDiceIndex >= 0 && fakeDiceIndex < masterDeck.Count)
+        {
+            masterDeck[fakeDiceIndex] = originalBossDice;
+            Debug.Log($"<color=green>[기믹 해제]</color> 주사위가 {originalBossDice.diceName}(으)로 복구되었습니다.");
+            originalBossDice = null;
+            fakeDiceIndex = -1;
         }
     }
 
@@ -996,7 +1048,7 @@ public class DiceManager : MonoBehaviour
         currentStage++;
 
         // 여기서 보스 바꾸기 
-        if (!isTutorial&&(currentStage - 1) %1 == 0 && currentStage <= 100)
+        if (!isTutorial&&(currentStage - 1) %2 == 0 && currentStage <= 100)
         {
             ui?.HideShopChoice();
 
@@ -1045,6 +1097,10 @@ public class DiceManager : MonoBehaviour
 
     public void RestartGame()
     {
+
+        //재시작시 가짜 주사위 참조 안전하게 비우기
+        originalBossDice = null;
+        fakeDiceIndex = -1;
         //기본 스테이지 데이터 초기화
         currentStage = 1;
         currentPlayerHP = playerMaxHP;
@@ -1104,7 +1160,25 @@ public class DiceManager : MonoBehaviour
         if (counts.Any(c => c == 5)) { multiplier = multYacht; handName = "Yacht"; return; }
 
         bool isStraight = true;
-        for (int i = 0; i < sortedValues.Count - 1; i++) if (sortedValues[i] + 1 != sortedValues[i + 1]) { isStraight = false; break; }
+
+        //가짜 주사위(0)가 껴있으면 애초에 스트레이트 탈락 처리
+        if (sortedValues.Contains(0))
+        {
+            isStraight = false;
+        }
+        else
+        {
+            //0이 없을 때만 정상적으로 스트레이트 검사
+            for (int i = 0; i < sortedValues.Count - 1; i++)
+            {
+                if (sortedValues[i] + 1 != sortedValues[i + 1])
+                {
+                    isStraight = false;
+                    break;
+                }
+            }
+        }
+
         if (isStraight) { multiplier = multStraight; handName = "스트레이트"; return; }
 
         if (counts.Any(c => c == 4)) { multiplier = multFourOfAKind; handName = "포카드"; return; }

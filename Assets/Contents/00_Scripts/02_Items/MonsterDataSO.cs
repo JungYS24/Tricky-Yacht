@@ -1,6 +1,15 @@
 ﻿using UnityEngine;
 
+//보스 능력을 정의하는 Enum 추가 (앞으로 다른 능력도 여기에 추가하면 됨)
+public enum BossAbilityType
+{
+    None,       // 일반 몬스터 또는 능력 없음
+    FakeDice    // 가짜 주사위 변이 능력
+}
+
 [CreateAssetMenu(fileName = "NewMonsterData", menuName = "ScriptableObjects/MonsterData")]
+
+
 public class MonsterDataSO : ScriptableObject
 {
     [Header("Monster Base Info")]
@@ -22,4 +31,8 @@ public class MonsterDataSO : ScriptableObject
     [Range(0f, 1f)] public float dropRate = 0.5f;
 
     public FigureItemSO dropFigureData;
+
+    // 보스 능력 변수 추가
+    [Header("Boss Ability (보스 전용 능력)")]
+    public BossAbilityType bossAbility = BossAbilityType.None;
 }
