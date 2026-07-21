@@ -10,6 +10,11 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public TextMeshProUGUI priceText;
     public Button buyButton;
 
+    // [자물쇠 아이콘
+    [Header("잠금 UI")]
+    public GameObject lockUI;
+    public bool isLocked = false;
+
     private BaseItemDataSO currentData;
     private ShopManager manager;
 
@@ -29,6 +34,11 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         manager = shopMgr;
         isPurchased = false;
         isAnimating = false; // 새로운 아이템이 들어올 때 애니메이션 초기화
+
+        //정상적으로 아이템이 들어올 때는 자물쇠를 끄고 잠금 해제
+        isLocked = false;
+        if (lockUI != null) lockUI.SetActive(false);
+
 
         // 아이콘 색상 초기화
         if (itemIcon != null) itemIcon.color = Color.white;
@@ -108,9 +118,25 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         }
     }
 
+    //슬롯을 자물쇠 모드로 만드는 전용 함수
+    public void SetLockedSlot()
+    {
+        isLocked = true;
+        isPurchased = false;
+        isAnimating = false;
+
+        if (lockUI != null) lockUI.SetActive(true); // 자물쇠 아이콘 켜기
+        if (itemIcon != null) itemIcon.color = Color.clear; // 아이템 아이콘 투명하게 숨김
+        if (priceText != null) priceText.text = "???";
+
+        buyButton.interactable = false; // 버튼 클릭 방지
+        buyButton.onClick.RemoveAllListeners();
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (currentData != null && !isPurchased)
+        if (isLocked) return; // 잠겨있는 슬롯은 툴팁 안 띄움
+        if (currentData != null && !isPurchased && manager != null)
         {
             manager.ShowTooltip(currentData.description, GetComponent<RectTransform>());
         }
@@ -118,6 +144,9 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        manager.HideTooltip();
+        if (manager != null)
+        {
+            manager.HideTooltip();
+        }
     }
 }

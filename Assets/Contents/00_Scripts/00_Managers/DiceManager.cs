@@ -1048,7 +1048,7 @@ public class DiceManager : MonoBehaviour
         currentStage++;
 
         // 여기서 보스 바꾸기 
-        if (!isTutorial&&(currentStage - 1) %2 == 0 && currentStage <= 100)
+        if (!isTutorial&&(currentStage - 1) %10 == 0 && currentStage <= 100)
         {
             ui?.HideShopChoice();
 

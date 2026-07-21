@@ -104,12 +104,12 @@ public class ShopManager : MonoBehaviour
 
         int dataIndex = 0;
 
-        // 튜토리얼 강제 진열 로직 분기 수정
+        // 2. 튜토리얼 강제 진열 로직 분기
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
             int step = TutorialManager.Instance.currentStepIndex;
 
-            // [첫 번째 상점] 13~20단계 사이 (아이템 설명 및 하이롤러/피규어 구매)
+            // [첫 번째 상점] 13~20단계 사이
             if (step <= 20)
             {
                 if (shopSlots.Length >= 6)
@@ -122,10 +122,10 @@ public class ShopManager : MonoBehaviour
                     if (TutorialManager.Instance.tutDummy != null)
                         shopSlots[5].SetupSlot(TutorialManager.Instance.tutDummy, this);
                 }
-                return;
+                return; // 튜토리얼이면 여기서 함수 종료!
             }
 
-            // [두 번째 상점] 23단계 (네 가지 특정 아이템 진열 강제)
+            // [두 번째 상점] 23단계
             if (step == 22 || step == 23)
             {
                 for (int i = 0; i < shopSlots.Length; i++)
@@ -150,20 +150,42 @@ public class ShopManager : MonoBehaviour
                         }
                     }
                 }
-                return;
+                return; // 튜토리얼이면 여기서 함수 종료!
             }
         }
 
         // 3. 튜토리얼이 모두 끝났거나 일반 게임일 때 (완전 랜덤 상점)
+
+        // 스테이지에 따른 슬롯 해금 개수 계산 (기본 2개 + 2스테이지마다 1개씩 추가)
+        int unlockedCount = 2 + (diceManager.currentStage - 1) / 2;
+        unlockedCount = Mathf.Clamp(unlockedCount, 2, shopSlots.Length); // 최소 2개, 최대 6개(Length)로 고정
+
+        // 주의: 이 for문 아래에 기존 for문이 또 남아있으면 안 됩니다!
         for (int i = 0; i < shopSlots.Length; i++)
         {
+            // 일단 슬롯 자체는 무조건 켭니다 (자물쇠 UI를 보여줘야 하므로)
+            shopSlots[i].gameObject.SetActive(true);
+
+            // 1. 아직 해금되지 않은 칸은 '자물쇠 모드'로 만듦
+            if (i >= unlockedCount)
+            {
+                shopSlots[i].SetLockedSlot();
+                continue; // 자물쇠로 잠갔으니 이번 칸은 여기서 끝내고 다음 칸으로 넘어감
+            }
+
+            // 2. 리롤을 눌렀을 때, 이미 구매한 슬롯은 상품을 바꾸지 않고 건너뜁니다.
             if (isReroll && shopSlots[i].isPurchased) continue;
 
+            // 3. 해금된 슬롯에 정상적으로 아이템 배치
             if (dataIndex < shuffled.Count)
             {
-                shopSlots[i].gameObject.SetActive(true);
                 shopSlots[i].SetupSlot(shuffled[dataIndex], this);
                 dataIndex++;
+            }
+            else if (!isReroll || !shopSlots[i].isPurchased)
+            {
+                // 상점 풀의 아이템이 다 떨어졌을 때를 대비한 안전장치
+                shopSlots[i].gameObject.SetActive(false);
             }
         }
     }
