@@ -105,6 +105,10 @@ public class InventoryManager : MonoBehaviour
 
             ownedFigures.Add(figure);
 
+            // 도감 영구 해금 기록
+            PlayerPrefs.SetInt("Collection_Unlocked_" + figure.itemName, 1);
+            PlayerPrefs.Save();
+
             // 새 슬롯 생성
             GameObject newSlotGo = Instantiate(figureSlotPrefab, figureSlotParent);
             InventorySlot newSlot = newSlotGo.GetComponent<InventorySlot>();

@@ -13,6 +13,9 @@ public class FigureDetailPanel : MonoBehaviour
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI descText;
 
+    [Header("µµ°¨¿ë UI")]
+    public TextMeshProUGUI locationText;
+
     public Button leftButton;
     public Button rightButton;
     public Button closeButton;
