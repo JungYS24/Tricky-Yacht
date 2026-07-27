@@ -1,40 +1,46 @@
 fileFormatVersion: 2
-guid: 7eb24498de87e494bb7c5340f8cf0eca
+guid: d6f2e58e8571837478f273d6ab5cc9b5
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6573862752603071749
-    second: Black seahorse_0
+      213: 1532897884692481026
+    second: Dodo__0
   - first:
-      213: -5657540827532653852
-    second: Black seahorse_1
+      213: 5329962410666399715
+    second: Dodo__1
   - first:
-      213: 2881821953257725642
-    second: Black seahorse_2
+      213: -8089153932666180047
+    second: Dodo__2
   - first:
-      213: 8637925179312307779
-    second: Black seahorse_3
+      213: 399267810031503181
+    second: Dodo__3
   - first:
-      213: 1286697253501690068
-    second: Black seahorse_4
+      213: -4788884264687071126
+    second: Dodo__4
   - first:
-      213: -2423248913906468445
-    second: Black seahorse_5
+      213: -6548165279508031385
+    second: Dodo__5
   - first:
-      213: -5194297513097306540
-    second: Black seahorse_6
+      213: 8643006962506059799
+    second: Dodo__6
   - first:
-      213: -6987615819596089272
-    second: Black seahorse_7
+      213: 2692966373135456723
+    second: Dodo__7
   - first:
-      213: 5403621510546467114
-    second: Black seahorse_8
+      213: 3063136407513086434
+    second: Dodo__8
   - first:
-      213: -2258093220105775665
-    second: Black seahorse_9
+      213: 7255482824171371071
+    second: Dodo__9
   - first:
-      213: -8407323429520623360
-    second: Black seahorse_10
+      213: 8056977017743483245
+    second: Dodo__10
+  - first:
+      213: -2725304180877157733
+    second: Dodo__11
+  - first:
+      213: -4203275363592306229
+    second: Dodo__12
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -81,7 +87,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 150
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -127,7 +133,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: WebGL
+    buildTarget: Android
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -143,13 +149,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Black seahorse_0
+      name: Dodo__0
       rect:
         serializedVersion: 2
-        x: 115
-        y: 395
-        width: 262
-        height: 303
+        x: 86
+        y: 693
+        width: 467
+        height: 590
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -158,20 +164,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bfa1ce408a2f4c4a0800000000000000
-      internalID: -6573862752603071749
+      spriteID: 2040b062182f54510800000000000000
+      internalID: 1532897884692481026
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Black seahorse_1
+      name: Dodo__1
       rect:
         serializedVersion: 2
-        x: 422
-        y: 396
-        width: 259
-        height: 302
+        x: 650
+        y: 940
+        width: 11
+        height: 29
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -180,20 +186,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4ea85a0a7906c71b0800000000000000
-      internalID: -5657540827532653852
+      spriteID: 3e794f9b294d7f940800000000000000
+      internalID: 5329962410666399715
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Black seahorse_2
+      name: Dodo__2
       rect:
         serializedVersion: 2
-        x: 729
-        y: 396
-        width: 258
-        height: 304
+        x: 663
+        y: 902
+        width: 25
+        height: 84
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -202,20 +208,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ace59d54cc94ef720800000000000000
-      internalID: 2881821953257725642
+      spriteID: 13e6afd3b5d8dbf80800000000000000
+      internalID: -8089153932666180047
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Black seahorse_3
+      name: Dodo__3
       rect:
         serializedVersion: 2
-        x: 1034
-        y: 397
-        width: 259
-        height: 306
+        x: 689
+        y: 692
+        width: 479
+        height: 592
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -224,20 +230,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 34eff455f2310e770800000000000000
-      internalID: 8637925179312307779
+      spriteID: d470d2335fb7a8500800000000000000
+      internalID: 399267810031503181
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Black seahorse_4
+      name: Dodo__4
       rect:
         serializedVersion: 2
-        x: 113
-        y: 68
-        width: 274
-        height: 310
+        x: 1328
+        y: 692
+        width: 519
+        height: 597
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -246,20 +252,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4d06078b5544bd110800000000000000
-      internalID: 1286697253501690068
+      spriteID: a609ed442277a8db0800000000000000
+      internalID: -4788884264687071126
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Black seahorse_5
+      name: Dodo__5
       rect:
         serializedVersion: 2
-        x: 420
-        y: 68
-        width: 298
-        height: 309
+        x: 2007
+        y: 692
+        width: 483
+        height: 592
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -268,20 +274,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3a9f044a3f3ee5ed0800000000000000
-      internalID: -2423248913906468445
+      spriteID: 76890683f5e3025a0800000000000000
+      internalID: -6548165279508031385
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Black seahorse_6
+      name: Dodo__6
       rect:
         serializedVersion: 2
-        x: 727
-        y: 66
-        width: 255
-        height: 308
+        x: 93
+        y: 81
+        width: 472
+        height: 585
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -290,20 +296,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 45ed322bee52ae7b0800000000000000
-      internalID: -5194297513097306540
+      spriteID: 710d66f2a0122f770800000000000000
+      internalID: 8643006962506059799
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Black seahorse_7
+      name: Dodo__7
       rect:
         serializedVersion: 2
-        x: 979
-        y: 249
-        width: 49
-        height: 41
+        x: 754
+        y: 83
+        width: 476
+        height: 583
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -312,20 +318,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 848331e1f60070f90800000000000000
-      internalID: -6987615819596089272
+      spriteID: 3d99fcef5a65f5520800000000000000
+      internalID: 2692966373135456723
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Black seahorse_8
+      name: Dodo__8
       rect:
         serializedVersion: 2
-        x: 988
-        y: 285
-        width: 10
-        height: 10
+        x: 1298
+        y: 497
+        width: 84
+        height: 72
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -334,20 +340,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a2928cc52258dfa40800000000000000
-      internalID: 5403621510546467114
+      spriteID: 2e9326c5552728a20800000000000000
+      internalID: 3063136407513086434
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Black seahorse_9
+      name: Dodo__9
       rect:
         serializedVersion: 2
-        x: 999
-        y: 288
-        width: 13
-        height: 12
+        x: 1324
+        y: 458
+        width: 52
+        height: 44
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -356,20 +362,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fc590e12e24a9a0e0800000000000000
-      internalID: -2258093220105775665
+      spriteID: f3abea8ff27a0b460800000000000000
+      internalID: 7255482824171371071
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Black seahorse_10
+      name: Dodo__10
       rect:
         serializedVersion: 2
-        x: 1035
-        y: 66
-        width: 261
-        height: 307
+        x: 1383
+        y: 81
+        width: 474
+        height: 584
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -378,8 +384,52 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 009ba9f72ef235b80800000000000000
-      internalID: -8407323429520623360
+      spriteID: d612612f8e120df60800000000000000
+      internalID: 8056977017743483245
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dodo__11
+      rect:
+        serializedVersion: 2
+        x: 2007
+        y: 80
+        width: 476
+        height: 585
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9a1ee96946cd2ad0800000000000000
+      internalID: -2725304180877157733
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Dodo__12
+      rect:
+        serializedVersion: 2
+        x: 722
+        y: 106
+        width: 62
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc10ee3a357faa5c0800000000000000
+      internalID: -4203275363592306229
       vertices: []
       indices: 
       edges: []
@@ -398,17 +448,19 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Black seahorse_0: -6573862752603071749
-      Black seahorse_1: -5657540827532653852
-      Black seahorse_10: -8407323429520623360
-      Black seahorse_2: 2881821953257725642
-      Black seahorse_3: 8637925179312307779
-      Black seahorse_4: 1286697253501690068
-      Black seahorse_5: -2423248913906468445
-      Black seahorse_6: -5194297513097306540
-      Black seahorse_7: -6987615819596089272
-      Black seahorse_8: 5403621510546467114
-      Black seahorse_9: -2258093220105775665
+      Dodo__0: 1532897884692481026
+      Dodo__1: 5329962410666399715
+      Dodo__10: 8056977017743483245
+      Dodo__11: -2725304180877157733
+      Dodo__12: -4203275363592306229
+      Dodo__2: -8089153932666180047
+      Dodo__3: 399267810031503181
+      Dodo__4: -4788884264687071126
+      Dodo__5: -6548165279508031385
+      Dodo__6: 8643006962506059799
+      Dodo__7: 2692966373135456723
+      Dodo__8: 3063136407513086434
+      Dodo__9: 7255482824171371071
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

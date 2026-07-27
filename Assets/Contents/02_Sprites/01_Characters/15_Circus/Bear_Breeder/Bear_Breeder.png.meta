@@ -1,31 +1,31 @@
 fileFormatVersion: 2
-guid: f7319bfc5b3468c40a2f5e03fdc99786
+guid: d4c3599ae6a8c064f851adda260047bc
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6615618612063850105
-    second: Dodo_0
+      213: 5080308854560308266
+    second: Bear_Breeder_0
   - first:
-      213: -2521770677888160591
-    second: Dodo_1
+      213: 1867206941352244778
+    second: Bear_Breeder_1
   - first:
-      213: 6629207659859647522
-    second: Dodo_2
+      213: -5106769241093287497
+    second: Bear_Breeder_2
   - first:
-      213: 8403017864371970700
-    second: Dodo_3
+      213: 2795718685553894154
+    second: Bear_Breeder_3
   - first:
-      213: -8485006280592343194
-    second: Dodo_4
+      213: 5949081659359210981
+    second: Bear_Breeder_4
   - first:
-      213: -1081867318266537847
-    second: Dodo_5
+      213: -5502796088270269214
+    second: Bear_Breeder_5
   - first:
-      213: 3565543953598902933
-    second: Dodo_6
+      213: 5862437527930106899
+    second: Bear_Breeder_6
   - first:
-      213: -1719889815402689896
-    second: Dodo_7
+      213: 3697124529057636890
+    second: Bear_Breeder_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 150
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -118,7 +118,7 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: WebGL
+    buildTarget: Android
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
@@ -134,13 +134,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Dodo_0
+      name: Bear_Breeder_0
       rect:
         serializedVersion: 2
-        x: 90
-        y: 420
-        width: 248
-        height: 202
+        x: 56
+        y: 730
+        width: 551
+        height: 548
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -149,20 +149,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 97e478d93166fcb50800000000000000
-      internalID: 6615618612063850105
+      spriteID: a2cb6519cf1e08640800000000000000
+      internalID: 5080308854560308266
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Dodo_1
+      name: Bear_Breeder_1
       rect:
         serializedVersion: 2
-        x: 411
-        y: 420
-        width: 261
-        height: 213
+        x: 680
+        y: 732
+        width: 582
+        height: 551
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -171,20 +171,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1bcea7bedeed00dd0800000000000000
-      internalID: -2521770677888160591
+      spriteID: a26b17df1d6a9e910800000000000000
+      internalID: 1867206941352244778
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Dodo_2
+      name: Bear_Breeder_2
       rect:
         serializedVersion: 2
-        x: 735
-        y: 402
-        width: 264
-        height: 255
+        x: 1303
+        y: 734
+        width: 588
+        height: 544
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -193,20 +193,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 22c9b3c5e3daffb50800000000000000
-      internalID: 6629207659859647522
+      spriteID: 7b15eba9e6c1129b0800000000000000
+      internalID: -5106769241093287497
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Dodo_3
+      name: Bear_Breeder_3
       rect:
         serializedVersion: 2
-        x: 1061
-        y: 420
-        width: 257
-        height: 227
+        x: 1932
+        y: 745
+        width: 593
+        height: 528
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -215,20 +215,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c82272ff9348d9470800000000000000
-      internalID: 8403017864371970700
+      spriteID: a03ac5805536cc620800000000000000
+      internalID: 2795718685553894154
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Dodo_4
+      name: Bear_Breeder_4
       rect:
         serializedVersion: 2
-        x: 112
-        y: 111
-        width: 248
-        height: 207
+        x: 130
+        y: 53
+        width: 450
+        height: 586
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -237,20 +237,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 66fb5584eb33f3a80800000000000000
-      internalID: -8485006280592343194
+      spriteID: 5eda5e5ef326f8250800000000000000
+      internalID: 5949081659359210981
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Dodo_5
+      name: Bear_Breeder_5
       rect:
         serializedVersion: 2
-        x: 422
-        y: 111
-        width: 250
-        height: 218
+        x: 765
+        y: 48
+        width: 444
+        height: 607
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -259,20 +259,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9885e90f76f6cf0f0800000000000000
-      internalID: -1081867318266537847
+      spriteID: 2e4dd3fdc1422a3b0800000000000000
+      internalID: -5502796088270269214
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Dodo_6
+      name: Bear_Breeder_6
       rect:
         serializedVersion: 2
-        x: 731
-        y: 111
-        width: 251
-        height: 190
+        x: 1389
+        y: 42
+        width: 453
+        height: 597
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -281,20 +281,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 592fd41b55b5b7130800000000000000
-      internalID: 3565543953598902933
+      spriteID: 31471320fdf8b5150800000000000000
+      internalID: 5862437527930106899
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Dodo_7
+      name: Bear_Breeder_7
       rect:
         serializedVersion: 2
-        x: 1043
-        y: 111
-        width: 249
-        height: 207
+        x: 1959
+        y: 47
+        width: 552
+        height: 544
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -303,8 +303,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 89a4c144359b128e0800000000000000
-      internalID: -1719889815402689896
+      spriteID: a122dd4cb23de4330800000000000000
+      internalID: 3697124529057636890
       vertices: []
       indices: 
       edges: []
@@ -323,14 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Dodo_0: 6615618612063850105
-      Dodo_1: -2521770677888160591
-      Dodo_2: 6629207659859647522
-      Dodo_3: 8403017864371970700
-      Dodo_4: -8485006280592343194
-      Dodo_5: -1081867318266537847
-      Dodo_6: 3565543953598902933
-      Dodo_7: -1719889815402689896
+      Bear_Breeder_0: 5080308854560308266
+      Bear_Breeder_1: 1867206941352244778
+      Bear_Breeder_2: -5106769241093287497
+      Bear_Breeder_3: 2795718685553894154
+      Bear_Breeder_4: 5949081659359210981
+      Bear_Breeder_5: -5502796088270269214
+      Bear_Breeder_6: 5862437527930106899
+      Bear_Breeder_7: 3697124529057636890
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
