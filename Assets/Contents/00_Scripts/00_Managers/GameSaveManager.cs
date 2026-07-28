@@ -159,4 +159,18 @@ public class GameSaveManager : MonoBehaviour
     }
 
     public void DeleteSave() { PlayerPrefs.DeleteKey("TrickYacht_Save"); }
+
+    //public void ResetCollectionData()
+    //{
+    //    foreach (var item in masterItemDatabase)
+    //    {
+    //        if (item is FigureItemSO)
+    //        {
+    //            PlayerPrefs.DeleteKey("Collection_Unlocked_" + item.itemName);
+    //            PlayerPrefs.DeleteKey("Collection_Encountered_" + item.itemName);
+    //        }
+    //    }
+    //    PlayerPrefs.Save();
+    //    Debug.Log("도감 데이터가 완전히 초기화되었습니다.");
+    //}
 }

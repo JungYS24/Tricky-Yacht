@@ -751,6 +751,7 @@ public class DiceManager : MonoBehaviour
         if (GameSaveManager.Instance != null)
         {
             GameSaveManager.Instance.DeleteSave();
+            //GameSaveManager.Instance.ResetCollectionData(); //클리어 시에도 도감 초기화
         }
     }
 
@@ -1104,6 +1105,12 @@ public class DiceManager : MonoBehaviour
         //기본 스테이지 데이터 초기화
         currentStage = 1;
         currentPlayerHP = playerMaxHP;
+
+        ////도감도 같이 초기화
+        //if (GameSaveManager.Instance != null)
+        //{
+        //    GameSaveManager.Instance.ResetCollectionData();
+        //}
 
         //덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 20개로)
         InitializeMasterDeck();

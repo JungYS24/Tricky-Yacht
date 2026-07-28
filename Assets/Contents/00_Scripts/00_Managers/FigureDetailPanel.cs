@@ -46,19 +46,117 @@ public class FigureDetailPanel : MonoBehaviour
         panelRoot.SetActive(true);
     }
 
+    private string GetBiomeKoreanName(BiomeType biome)
+    {
+        switch (biome)
+        {
+            case BiomeType.Forest: return "숲";
+            case BiomeType.Meadow: return "초원";
+            case BiomeType.Temple: return "신전";
+            case BiomeType.Jungle: return "정글";
+            case BiomeType.Desert: return "사막";
+            case BiomeType.Ruins: return "유적";
+            case BiomeType.Cave: return "동굴";
+            case BiomeType.Volcano: return "화산";
+            case BiomeType.Swamp: return "늪";
+            case BiomeType.Beach: return "해변";
+            case BiomeType.Ocean: return "바다";
+            case BiomeType.Abyss: return "심연";
+            case BiomeType.Snow: return "설원";
+            case BiomeType.Grave: return "무덤";
+            case BiomeType.Circus: return "서커스";
+            case BiomeType.Void: return "공허";
+            default: return "알 수 없음";
+        }
+    }
+
+
     private void UpdateUI()
     {
         if (currentIndex < 0 || currentIndex >= currentOwnedFigures.Count) return;
 
         FigureItemSO currentFigure = currentOwnedFigures[currentIndex];
+        bool isUnlocked = PlayerPrefs.GetInt("Collection_Unlocked_" + currentFigure.itemName, 0) == 1;
+        bool isEncountered = PlayerPrefs.GetInt("Collection_Encountered_" + currentFigure.itemName, 0) == 1;
 
-        if (figureImage != null) figureImage.sprite = currentFigure.icon;
-        if (nameText != null) nameText.text = currentFigure.itemName;
-        if (descText != null) descText.text = currentFigure.description;
+        string biomeText = $"획득 바이옴 : {GetBiomeKoreanName(currentFigure.sourceBiome)}";
 
-        // 첫 번째거나 마지막 피규어면 화살표 비활성화
-        leftButton.interactable = (currentIndex > 0);
-        rightButton.interactable = (currentIndex < currentOwnedFigures.Count - 1);
+        if (isUnlocked)
+        {
+            if (figureImage != null)
+            {
+                figureImage.sprite = currentFigure.icon;
+                figureImage.color = Color.white;
+            }
+            if (nameText != null)
+            {
+                nameText.text = currentFigure.itemName;
+                nameText.color = Color.white;
+            }
+            if (descText != null)
+            {
+                descText.text = currentFigure.description;
+                descText.color = Color.white;
+            }
+            if (locationText != null)
+            {
+                locationText.text = biomeText;
+                locationText.color = Color.green;
+            }
+        }
+        else if (isEncountered)
+        {
+            if (figureImage != null)
+            {
+                figureImage.sprite = currentFigure.icon;
+                figureImage.color = Color.gray;
+            }
+            if (nameText != null)
+            {
+                nameText.text = currentFigure.itemName;
+                nameText.color = Color.green;
+            }
+            if (descText != null)
+            {
+                descText.text = currentFigure.description;
+                descText.color = Color.white;
+            }
+            if (locationText != null)
+            {
+                locationText.text = biomeText;
+                locationText.color = Color.green;
+            }
+        }
+        else
+        {
+            if (figureImage != null)
+            {
+                figureImage.sprite = currentFigure.icon;
+                figureImage.color = new Color(0f, 0f, 0f, 0.7f);
+            }
+            if (nameText != null)
+            {
+                nameText.text = "???";
+                nameText.color = new Color(0.4f, 0.4f, 0.4f, 1f);
+            }
+            if (descText != null)
+            {
+                descText.text = "???";
+                descText.color = new Color(0.4f, 0.4f, 0.4f, 1f);
+            }
+            if (locationText != null)
+            {
+                locationText.text = biomeText;
+                locationText.color = new Color(0.4f, 0.4f, 0.4f, 1f);
+            }
+        }
+
+        // 첫 번째거나 마지막 피규어면 화살표 비활성화 (버튼이 있을 때만 실행)
+        if (leftButton != null)
+            leftButton.interactable = (currentIndex > 0);
+
+        if (rightButton != null)
+            rightButton.interactable = (currentIndex < currentOwnedFigures.Count - 1);
     }
 
     // 이전 피규어 보기

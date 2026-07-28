@@ -15,11 +15,13 @@ public class CollectionSlot : MonoBehaviour
     private FigureItemSO currentFigure;
     private CollectionBookManager manager;
     private bool isUnlocked;
+    private bool isEncountered;
 
-    public void Setup(FigureItemSO figureData, bool unlocked, CollectionBookManager mgr)
+    public void Setup(FigureItemSO figureData, bool unlocked, bool encountered, CollectionBookManager mgr)
     {
         currentFigure = figureData;
         isUnlocked = unlocked;
+        isEncountered = encountered;
         manager = mgr;
 
         slotButton.onClick.RemoveAllListeners();
@@ -30,18 +32,27 @@ public class CollectionSlot : MonoBehaviour
             figureIcon.sprite = figureData.icon;
             figureIcon.color = Color.white;
             nameText.text = figureData.itemName;
+            nameText.color = Color.white;
+        }
+        else if (isEncountered)
+        {
+            figureIcon.sprite = figureData.icon;
+            figureIcon.color = Color.gray;
+            nameText.text = figureData.itemName;
+            nameText.color = Color.green;
         }
         else
         {
             figureIcon.sprite = unknownQuestionSprite != null ? unknownQuestionSprite : figureData.icon;
             figureIcon.color = unknownQuestionSprite != null ? Color.white : lockedColor;
             nameText.text = "???";
+            nameText.color = new Color(0.4f, 0.4f, 0.4f, 1f);
         }
     }
 
     private void OnSlotClicked()
     {
-        if (isUnlocked && manager != null)
+        if (manager != null)
         {
             manager.OpenFigureDetail(currentFigure);
         }

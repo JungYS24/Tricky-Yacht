@@ -154,8 +154,15 @@ public class Enemy : MonoBehaviour
                 if (monsterAnimator != null) monsterAnimator.runtimeAnimatorController = null;
                 if (monsterImage != null) monsterImage.sprite = nextMonsterData.monsterSprite;
             }
+
             dropFigureData = nextMonsterData.dropFigureData;
             baseDropRate = nextMonsterData.dropRate;
+
+            if (dropFigureData != null)
+            {
+                PlayerPrefs.SetInt("Collection_Encountered_" + dropFigureData.itemName, 1);
+                PlayerPrefs.Save();
+            }
 
             finalMaxHP = nextMonsterData.maxHp;
             finalAttack = nextMonsterData.baseAtk;
@@ -387,6 +394,12 @@ public class Enemy : MonoBehaviour
 
         dropFigureData = monsterData.dropFigureData;
         baseDropRate = monsterData.dropRate;
+
+        if (dropFigureData != null)
+        {
+            PlayerPrefs.SetInt("Collection_Encountered_" + dropFigureData.itemName, 1);
+            PlayerPrefs.Save();
+        }
 
         MaxHP = maxHp;
         CurrentHP = hp;

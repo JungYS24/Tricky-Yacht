@@ -10,7 +10,6 @@ public class FigureItemSO : BaseItemDataSO
 
     [Header("--- 도감(Collection) 정보 ---")]
     public BiomeType sourceBiome = BiomeType.Forest;
-    public string acquisitionLocation = "숲 바이옴에서 획득 가능";
 
     [Header("--- 피규어 노드 데이터 ---")]
     public List<FigureNode> figureNodes = new List<FigureNode>();

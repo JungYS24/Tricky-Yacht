@@ -42,6 +42,11 @@ public class CollectionBookManager : MonoBehaviour
 
     public void CloseCollectionBook()
     {
+        if (detailPanel != null)
+        {
+            detailPanel.ClosePanel();
+        }
+
         collectionPanelRoot.SetActive(false);
     }
 
@@ -69,12 +74,13 @@ public class CollectionBookManager : MonoBehaviour
 
         foreach (var figure in masterFigureDatabase)
         {
-            // 1. 바이옴 필터 검사
+            // 바이옴 필터 검사
             if (currentBiomeFilter != CollectionBiomeFilter.All && figure.sourceBiome != (BiomeType)currentBiomeFilter)
                 continue;
 
-            // 2. 해금 상태 검사
+            // 해금 상태 검사
             bool isUnlocked = PlayerPrefs.GetInt("Collection_Unlocked_" + figure.itemName, 0) == 1;
+            bool isEncountered = PlayerPrefs.GetInt("Collection_Encountered_" + figure.itemName, 0) == 1;
 
             if (currentStatusFilter == CollectionStatusFilter.Unlocked && !isUnlocked) continue;
             if (currentStatusFilter == CollectionStatusFilter.Locked && isUnlocked) continue;
@@ -82,7 +88,7 @@ public class CollectionBookManager : MonoBehaviour
             // 조건에 맞는 피규어 슬롯 생성
             GameObject slotGo = Instantiate(collectionSlotPrefab, gridContentParent);
             CollectionSlot slot = slotGo.GetComponent<CollectionSlot>();
-            slot.Setup(figure, isUnlocked, this);
+            slot.Setup(figure, isUnlocked, isEncountered, this);
             activeSlots.Add(slotGo);
             currentFilteredList.Add(figure);
 

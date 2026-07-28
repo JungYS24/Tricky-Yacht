@@ -36,6 +36,12 @@ public class LobbyManager : MonoBehaviour
         PlayerPrefs.DeleteKey("TrickYacht_Save");
         PlayerPrefs.SetInt("LoadGame", 0);
 
+        ////도감 초기화
+        //if (GameSaveManager.Instance != null)
+        //{
+        //    GameSaveManager.Instance.ResetCollectionData();
+        //}
+
         StopAllCoroutines();
         StartCoroutine(GlitchAndLoad("SampleScene"));
     }
@@ -45,7 +51,7 @@ public class LobbyManager : MonoBehaviour
     {
         PlayerPrefs.SetInt("RunTutorial", 0);
 
-        // [추가] 저장된 걸 불러오라는 Load 플래그 1 부여
+        //저장된 걸 불러오라는 Load 플래그 1 부여
         PlayerPrefs.SetInt("LoadGame", 1);
 
         StopAllCoroutines();
