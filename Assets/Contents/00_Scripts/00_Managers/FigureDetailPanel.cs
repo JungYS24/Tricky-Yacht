@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System.Linq;
 
 public class FigureDetailPanel : MonoBehaviour
 {
@@ -66,6 +67,7 @@ public class FigureDetailPanel : MonoBehaviour
             case BiomeType.Grave: return "π´¥˝";
             case BiomeType.Circus: return "º≠ƒøΩ∫";
             case BiomeType.Void: return "∞¯«„";
+            case BiomeType.Shop: return "ªÛ¡°";
             default: return "æÀ ºˆ æ¯¿Ω";
         }
     }
@@ -79,7 +81,8 @@ public class FigureDetailPanel : MonoBehaviour
         bool isUnlocked = PlayerPrefs.GetInt("Collection_Unlocked_" + currentFigure.itemName, 0) == 1;
         bool isEncountered = PlayerPrefs.GetInt("Collection_Encountered_" + currentFigure.itemName, 0) == 1;
 
-        string biomeText = $"»πµÊ πŸ¿Ãø» : {GetBiomeKoreanName(currentFigure.sourceBiome)}";
+        string biomeNames = string.Join(", ", currentFigure.sourceBiomes.Select(b => GetBiomeKoreanName(b)));
+        string biomeText = $"»πµÊ πŸ¿Ãø» : {biomeNames}";
 
         if (isUnlocked)
         {

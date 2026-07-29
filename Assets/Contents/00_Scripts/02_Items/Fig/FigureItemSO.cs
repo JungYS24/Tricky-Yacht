@@ -9,7 +9,7 @@ public class FigureItemSO : BaseItemDataSO
     public int requiredSlots = 1;
 
     [Header("--- 도감(Collection) 정보 ---")]
-    public BiomeType sourceBiome = BiomeType.Forest;
+    public List<BiomeType> sourceBiomes = new List<BiomeType> { BiomeType.Forest };
 
     [Header("--- 피규어 노드 데이터 ---")]
     public List<FigureNode> figureNodes = new List<FigureNode>();

@@ -5,7 +5,7 @@ public enum BiomeType
     Forest, Meadow, Temple, Jungle,
     Desert, Ruins, Cave, Volcano,
     Swamp, Beach, Ocean, Abyss,
-    Snow, Grave, Circus, Void
+    Snow, Grave, Circus, Void,Shop
 }
 
 public class BiomeNavigator

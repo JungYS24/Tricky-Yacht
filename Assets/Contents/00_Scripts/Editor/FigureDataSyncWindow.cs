@@ -81,6 +81,31 @@ public class FigureDataSyncWindow : EditorWindow
             asset.price = data.price;
             asset.description = data.description;
 
+            // --- 바이옴 리스트 동기화 (추가된 부분) ---
+            if (asset.sourceBiomes == null) asset.sourceBiomes = new List<BiomeType>();
+            asset.sourceBiomes.Clear();
+
+            // JSON 배열에 바이옴 값이 정상적으로 들어있다면 Enum으로 변환해서 넣기
+            if (data.sourceBiomes != null && data.sourceBiomes.Count > 0)
+            {
+                foreach (string biomeStr in data.sourceBiomes)
+                {
+                    if (System.Enum.TryParse(biomeStr.Trim(), out BiomeType parsedBiome))
+                    {
+                        asset.sourceBiomes.Add(parsedBiome);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[Studio 10&6] '{currentID}'의 알 수 없는 바이옴 이름입니다: {biomeStr}");
+                    }
+                }
+            }
+            else
+            {
+                // JSON에 값이 아예 없을 경우를 대비한 안전장치 (기본값 숲 부여)
+                asset.sourceBiomes.Add(BiomeType.Forest);
+            }
+
             // [구조 수정] 자식 클래스의 iconSprite 대신 부모 클래스(BaseItemDataSO)에 구현된 원래 'icon' 필드에 직접 타겟팅합니다.
             string fullSpritePath = $"{spriteRootPath}/{data.biomeFolder}/{data.icon}.png";
             Sprite targetSprite = AssetDatabase.LoadAssetAtPath<Sprite>(fullSpritePath);
@@ -141,4 +166,6 @@ public class JsonFigureItem
     public float effectValue;
     public string optionalItem;
     public string biomeFolder;
+
+    public List<string> sourceBiomes;
 }
