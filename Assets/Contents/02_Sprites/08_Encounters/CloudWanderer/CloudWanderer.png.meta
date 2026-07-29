@@ -1,0 +1,936 @@
+fileFormatVersion: 2
+guid: fd7070bea78af4741b5d773df59c33ad
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4394728191416981283
+    second: CloudWanderer_0
+  - first:
+      213: -2544428056661337282
+    second: CloudWanderer_1
+  - first:
+      213: 3805884992180356136
+    second: CloudWanderer_2
+  - first:
+      213: -7162715627187382159
+    second: CloudWanderer_3
+  - first:
+      213: -1822578736214308129
+    second: CloudWanderer_4
+  - first:
+      213: -2588972639553391294
+    second: CloudWanderer_5
+  - first:
+      213: 163053640425860303
+    second: CloudWanderer_6
+  - first:
+      213: -715278412407500564
+    second: CloudWanderer_7
+  - first:
+      213: 2164350890945501935
+    second: CloudWanderer_8
+  - first:
+      213: 6144368188341310511
+    second: CloudWanderer_9
+  - first:
+      213: 2996508765317457113
+    second: CloudWanderer_10
+  - first:
+      213: -5235033809717602114
+    second: CloudWanderer_11
+  - first:
+      213: -5176587623072845004
+    second: CloudWanderer_12
+  - first:
+      213: -4428171618439166121
+    second: CloudWanderer_13
+  - first:
+      213: 7184727003833596442
+    second: CloudWanderer_14
+  - first:
+      213: 1310567794983787413
+    second: CloudWanderer_15
+  - first:
+      213: -2952063118241230622
+    second: CloudWanderer_16
+  - first:
+      213: -1642031635284354171
+    second: CloudWanderer_17
+  - first:
+      213: -6072052236094560393
+    second: CloudWanderer_18
+  - first:
+      213: 1808277252740501900
+    second: CloudWanderer_19
+  - first:
+      213: 3583855642911398039
+    second: CloudWanderer_20
+  - first:
+      213: 4901529266507821546
+    second: CloudWanderer_21
+  - first:
+      213: -5360097681760673926
+    second: CloudWanderer_22
+  - first:
+      213: -5947046976860352023
+    second: CloudWanderer_23
+  - first:
+      213: -6048902719921204222
+    second: CloudWanderer_24
+  - first:
+      213: 643197252243868902
+    second: CloudWanderer_25
+  - first:
+      213: -7645318240737527816
+    second: CloudWanderer_26
+  - first:
+      213: -1442921398897840969
+    second: CloudWanderer_27
+  - first:
+      213: 6530181572396329403
+    second: CloudWanderer_28
+  - first:
+      213: -7301030733993539668
+    second: CloudWanderer_29
+  - first:
+      213: -1183002906306871829
+    second: CloudWanderer_30
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: CloudWanderer_0
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 390
+        width: 290
+        height: 343
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd822328ef9c203c0800000000000000
+      internalID: -4394728191416981283
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_1
+      rect:
+        serializedVersion: 2
+        x: 382
+        y: 396
+        width: 273
+        height: 319
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e3bd926d92060bcd0800000000000000
+      internalID: -2544428056661337282
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_2
+      rect:
+        serializedVersion: 2
+        x: 734
+        y: 713
+        width: 23
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82486e66c3831d430800000000000000
+      internalID: 3805884992180356136
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_3
+      rect:
+        serializedVersion: 2
+        x: 786
+        y: 695
+        width: 36
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1785b56361ce89c90800000000000000
+      internalID: -7162715627187382159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_4
+      rect:
+        serializedVersion: 2
+        x: 848
+        y: 675
+        width: 41
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fda04ccbb46e4b6e0800000000000000
+      internalID: -1822578736214308129
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_5
+      rect:
+        serializedVersion: 2
+        x: 713
+        y: 671
+        width: 36
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 245f63ee91f121cd0800000000000000
+      internalID: -2588972639553391294
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_6
+      rect:
+        serializedVersion: 2
+        x: 754
+        y: 426
+        width: 272
+        height: 275
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fcceaec0c68434200800000000000000
+      internalID: 163053640425860303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_7
+      rect:
+        serializedVersion: 2
+        x: 1127
+        y: 675
+        width: 22
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce012f8d212d216f0800000000000000
+      internalID: -715278412407500564
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_8
+      rect:
+        serializedVersion: 2
+        x: 1164
+        y: 660
+        width: 36
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fea5b180ba1590e10800000000000000
+      internalID: 2164350890945501935
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_9
+      rect:
+        serializedVersion: 2
+        x: 1209
+        y: 681
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f245b43205e254550800000000000000
+      internalID: 6144368188341310511
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_10
+      rect:
+        serializedVersion: 2
+        x: 1137
+        y: 655
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d4671b88dcb59920800000000000000
+      internalID: 2996508765317457113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_11
+      rect:
+        serializedVersion: 2
+        x: 1203
+        y: 648
+        width: 20
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb85f988c7c6957b0800000000000000
+      internalID: -5235033809717602114
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_12
+      rect:
+        serializedVersion: 2
+        x: 1227
+        y: 642
+        width: 31
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4333f0acbf01928b0800000000000000
+      internalID: -5176587623072845004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_13
+      rect:
+        serializedVersion: 2
+        x: 1068
+        y: 420
+        width: 316
+        height: 216
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 757877edf59fb82c0800000000000000
+      internalID: -4428171618439166121
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_14
+      rect:
+        serializedVersion: 2
+        x: 1097
+        y: 634
+        width: 17
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1a78a7c42745b360800000000000000
+      internalID: 7184727003833596442
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_15
+      rect:
+        serializedVersion: 2
+        x: 1158
+        y: 625
+        width: 24
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59b53124772103210800000000000000
+      internalID: 1310567794983787413
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_16
+      rect:
+        serializedVersion: 2
+        x: 1197
+        y: 593
+        width: 26
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e013b21c3a2807d0800000000000000
+      internalID: -2952063118241230622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_17
+      rect:
+        serializedVersion: 2
+        x: 748
+        y: 610
+        width: 24
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 58b1ce47de45639e0800000000000000
+      internalID: -1642031635284354171
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_18
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 341
+        width: 21
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 777a7f199acbbbba0800000000000000
+      internalID: -6072052236094560393
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_19
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 337
+        width: 45
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c815409a49a481910800000000000000
+      internalID: 1808277252740501900
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_20
+      rect:
+        serializedVersion: 2
+        x: 146
+        y: 329
+        width: 30
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 798530a18b96cb130800000000000000
+      internalID: 3583855642911398039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_21
+      rect:
+        serializedVersion: 2
+        x: 179
+        y: 323
+        width: 33
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae1316206eab50440800000000000000
+      internalID: 4901529266507821546
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_22
+      rect:
+        serializedVersion: 2
+        x: 405
+        y: 74
+        width: 279
+        height: 269
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7f9245be8b1d95b0800000000000000
+      internalID: -5360097681760673926
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_23
+      rect:
+        serializedVersion: 2
+        x: 1112
+        y: 27
+        width: 228
+        height: 316
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e19da98848d77da0800000000000000
+      internalID: -5947046976860352023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_24
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 317
+        width: 21
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 204d332560bfd0ca0800000000000000
+      internalID: -6048902719921204222
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_25
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 73
+        width: 270
+        height: 244
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ecc08c3e781de800800000000000000
+      internalID: 643197252243868902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_26
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 306
+        width: 17
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f77602119f56e590800000000000000
+      internalID: -7645318240737527816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_27
+      rect:
+        serializedVersion: 2
+        x: 114
+        y: 311
+        width: 22
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7bc62e3f1a6b9fbe0800000000000000
+      internalID: -1442921398897840969
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_28
+      rect:
+        serializedVersion: 2
+        x: 212
+        y: 311
+        width: 14
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb92c7daa8ddf9a50800000000000000
+      internalID: 6530181572396329403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_29
+      rect:
+        serializedVersion: 2
+        x: 393
+        y: 285
+        width: 27
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca70b1eda378daa90800000000000000
+      internalID: -7301030733993539668
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: CloudWanderer_30
+      rect:
+        serializedVersion: 2
+        x: 730
+        y: 42
+        width: 302
+        height: 272
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bedf251ef11259fe0800000000000000
+      internalID: -1183002906306871829
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      CloudWanderer_0: -4394728191416981283
+      CloudWanderer_1: -2544428056661337282
+      CloudWanderer_10: 2996508765317457113
+      CloudWanderer_11: -5235033809717602114
+      CloudWanderer_12: -5176587623072845004
+      CloudWanderer_13: -4428171618439166121
+      CloudWanderer_14: 7184727003833596442
+      CloudWanderer_15: 1310567794983787413
+      CloudWanderer_16: -2952063118241230622
+      CloudWanderer_17: -1642031635284354171
+      CloudWanderer_18: -6072052236094560393
+      CloudWanderer_19: 1808277252740501900
+      CloudWanderer_2: 3805884992180356136
+      CloudWanderer_20: 3583855642911398039
+      CloudWanderer_21: 4901529266507821546
+      CloudWanderer_22: -5360097681760673926
+      CloudWanderer_23: -5947046976860352023
+      CloudWanderer_24: -6048902719921204222
+      CloudWanderer_25: 643197252243868902
+      CloudWanderer_26: -7645318240737527816
+      CloudWanderer_27: -1442921398897840969
+      CloudWanderer_28: 6530181572396329403
+      CloudWanderer_29: -7301030733993539668
+      CloudWanderer_3: -7162715627187382159
+      CloudWanderer_30: -1183002906306871829
+      CloudWanderer_4: -1822578736214308129
+      CloudWanderer_5: -2588972639553391294
+      CloudWanderer_6: 163053640425860303
+      CloudWanderer_7: -715278412407500564
+      CloudWanderer_8: 2164350890945501935
+      CloudWanderer_9: 6144368188341310511
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

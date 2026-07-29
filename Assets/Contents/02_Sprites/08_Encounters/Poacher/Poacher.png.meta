@@ -1,0 +1,468 @@
+fileFormatVersion: 2
+guid: 474ecb8e92aeae24caed298326e31811
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8059230906558695232
+    second: Poacher_0
+  - first:
+      213: -3738972704111680741
+    second: Poacher_1
+  - first:
+      213: -3022240265729516843
+    second: Poacher_2
+  - first:
+      213: -8096535488001305904
+    second: Poacher_3
+  - first:
+      213: 2858640901490228867
+    second: Poacher_4
+  - first:
+      213: 4443710576121014081
+    second: Poacher_5
+  - first:
+      213: -5759395780825514896
+    second: Poacher_6
+  - first:
+      213: 1306091398037374372
+    second: Poacher_7
+  - first:
+      213: 262825169667597619
+    second: Poacher_8
+  - first:
+      213: -509613741970703255
+    second: Poacher_9
+  - first:
+      213: 7102482110357756739
+    second: Poacher_10
+  - first:
+      213: -428385408611943116
+    second: Poacher_11
+  - first:
+      213: 6311016070683373551
+    second: Poacher_12
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Poacher_0
+      rect:
+        serializedVersion: 2
+        x: 125
+        y: 723
+        width: 439
+        height: 602
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c838bba03cd72090800000000000000
+      internalID: -8059230906558695232
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poacher_1
+      rect:
+        serializedVersion: 2
+        x: 749
+        y: 722
+        width: 444
+        height: 603
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b13aa82b2208c1cc0800000000000000
+      internalID: -3738972704111680741
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poacher_2
+      rect:
+        serializedVersion: 2
+        x: 1378
+        y: 723
+        width: 444
+        height: 602
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5da5f47ad78de06d0800000000000000
+      internalID: -3022240265729516843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poacher_3
+      rect:
+        serializedVersion: 2
+        x: 2008
+        y: 723
+        width: 449
+        height: 602
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d29656fed353af80800000000000000
+      internalID: -8096535488001305904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poacher_4
+      rect:
+        serializedVersion: 2
+        x: 119
+        y: 46
+        width: 439
+        height: 597
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38e3ab111ceeba720800000000000000
+      internalID: 2858640901490228867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poacher_5
+      rect:
+        serializedVersion: 2
+        x: 211
+        y: 558
+        width: 33
+        height: 96
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 147e656a93b3bad30800000000000000
+      internalID: 4443710576121014081
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poacher_6
+      rect:
+        serializedVersion: 2
+        x: 744
+        y: 52
+        width: 502
+        height: 591
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07cf20b4d048210b0800000000000000
+      internalID: -5759395780825514896
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poacher_7
+      rect:
+        serializedVersion: 2
+        x: 829
+        y: 555
+        width: 33
+        height: 94
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a50630e43b202210800000000000000
+      internalID: 1306091398037374372
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poacher_8
+      rect:
+        serializedVersion: 2
+        x: 1376
+        y: 541
+        width: 28
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 335a11c691eb5a300800000000000000
+      internalID: 262825169667597619
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poacher_9
+      rect:
+        serializedVersion: 2
+        x: 1378
+        y: 46
+        width: 433
+        height: 597
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96cbd21700d7de8f0800000000000000
+      internalID: -509613741970703255
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poacher_10
+      rect:
+        serializedVersion: 2
+        x: 1465
+        y: 562
+        width: 32
+        height: 92
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34bd07b49d5119260800000000000000
+      internalID: 7102482110357756739
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poacher_11
+      rect:
+        serializedVersion: 2
+        x: 1997
+        y: 46
+        width: 445
+        height: 597
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43d79b49db11e0af0800000000000000
+      internalID: -428385408611943116
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poacher_12
+      rect:
+        serializedVersion: 2
+        x: 2077
+        y: 556
+        width: 32
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fef2dd8ddab359750800000000000000
+      internalID: 6311016070683373551
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Poacher_0: -8059230906558695232
+      Poacher_1: -3738972704111680741
+      Poacher_10: 7102482110357756739
+      Poacher_11: -428385408611943116
+      Poacher_12: 6311016070683373551
+      Poacher_2: -3022240265729516843
+      Poacher_3: -8096535488001305904
+      Poacher_4: 2858640901490228867
+      Poacher_5: 4443710576121014081
+      Poacher_6: -5759395780825514896
+      Poacher_7: 1306091398037374372
+      Poacher_8: 262825169667597619
+      Poacher_9: -509613741970703255
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
