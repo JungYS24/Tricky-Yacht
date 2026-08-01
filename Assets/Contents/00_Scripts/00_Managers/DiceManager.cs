@@ -43,9 +43,6 @@ public class DiceManager : MonoBehaviour
     public Transform peppermintCaptureCenter;
     public GameObject peppermintVisualPrefab;
 
-    [Header("광대 이벤트 시스템")]
-    public ClownEventPanel clownEventPanel;
-
     // 전리품 선택 패널 연결
     [Header("전리품 시스템")]
     public LootSelectionPanel lootSelectionPanel;
@@ -73,6 +70,18 @@ public class DiceManager : MonoBehaviour
     [Header("보스전 가짜 주사위")]
     public Sprite fakeDiceShell; // 가짜 주사위 외곽선 이미지 (인스펙터에서 할당)
     public Sprite fakeDiceFace;  // 가짜 주사위 눈금 이미지 (X 표시 등)
+
+    [Header("조우자 이벤트 시스템")]
+    // 기존 ClownEventPanel 대신 확장된 EncounterEventPanel을 연결합니다.
+    public EncounterEventPanel encounterEventPanel;
+
+
+    [Header("조우자 특수 효과 상태 (임시 저장용)")]
+    // 조우자 선택지 중 다음 전투에 영향을 미치는 효과들을 추적하기 위한 변수
+    [HideInInspector] public bool isNextEnemyHPBoosted = false; // 눈먼 점술가 패널티
+    [HideInInspector] public bool isNextCombatHPTiedToOne = false; // 숙원의 방랑자 패널티
+    [HideInInspector] public int extraShopSlots = 0; // 녹슨 닻의 선장 상점 슬롯 영구 확장
+    [HideInInspector] public int perfumerWeaknessTurns = 0; // 조향사 시련 턴 수
 
     [HideInInspector] public DiceData1 originalBossDice = null;
     [HideInInspector] public int fakeDiceIndex = -1;
@@ -714,8 +723,7 @@ public class DiceManager : MonoBehaviour
 
     public void ShowClownEvent()
     {
-
-        // 튜토리얼 중에는 광대 이벤트를 아예 스킵하고 무조건 전리품으로 감.
+        // 튜토리얼 중에는 조우자 이벤트를 아예 스킵하고 무조건 전리품으로 감.
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
             if (currentStage == 3) return; // 3스테이지(보스전)는 아무것도 안 띄우고 종료
@@ -723,14 +731,16 @@ public class DiceManager : MonoBehaviour
             return;
         }
 
-        // 10스테이지마다(보스 클리어 시) 광대 이벤트 등장!
-        if (currentStage % 7 == 0 && clownEventPanel != null)
+        //7, 17, 27, 37... 등 10라운드 주기로 끝자리가 7인 스테이지 클리어 시 조우자 등장
+        // currentStage % 10 == 7 조건으로 7, 17, 27 라운드를 정확히 잡아냄
+        if (currentStage % 10 == 1 && encounterEventPanel != null)
         {
-            clownEventPanel.StartEvent();
+            // 조우자 이벤트를 시작할 때 현재 바이옴 타입을 넘겨주어 등장 가능한 조우자만 필터링
+            encounterEventPanel.StartEvent(currentBiome.biomeType);
         }
         else
         {
-            // 그 외의 일반 스테이지(1~9 등)는 광대 없이 바로 전리품 선택으로 넘어갑니다.
+            // 그 외의 일반 스테이지는 조우자 없이 바로 전리품 선택으로 넘어감
             ShowLootSelection();
         }
     }

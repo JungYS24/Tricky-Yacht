@@ -254,6 +254,17 @@ public class InventoryManager : MonoBehaviour
         if (tooltipPanel != null) tooltipPanel.SetActive(false);
     }
 
+    // 심연의 딜러 조우자 이벤트를 위한 티켓 완전 초기화 함수
+    public void ClearAllTickets()
+    {
+        foreach (var slotGo in activeTicketSlots)
+        {
+            if (slotGo != null) Destroy(slotGo);
+        }
+        activeTicketSlots.Clear();
+        ownedTickets.Clear();
+    }
+
     // 주사위 결산
     // 주사위 결산
     public void EvaluateTurnEndTriggers(List<int> finalDiceValues, string handName, DiceManager diceManager, ShopManager shopManager)
