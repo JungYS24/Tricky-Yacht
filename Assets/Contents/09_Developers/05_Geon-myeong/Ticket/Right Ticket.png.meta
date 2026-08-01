@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 290d45f6d91d0c94bb8e7940e163247a
+guid: 2747cd70c62b8394c9f79fa37d20035f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1504498018151985291
-    second: "\uCEA1\uCC98111_0"
+      213: -6089921556196739325
+    second: Right Ticket_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -97,19 +97,6 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
-    buildTarget: Android
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
     buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -126,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\uCEA1\uCC98111_0"
+      name: Right Ticket_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 129
-        height: 145
+        x: 28
+        y: 33
+        width: 275
+        height: 363
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 57f85ce0603fe1be0800000000000000
-      internalID: -1504498018151985291
+      spriteID: 30736e44c904c7ba0800000000000000
+      internalID: -6089921556196739325
       vertices: []
       indices: 
       edges: []
@@ -161,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "\uCEA1\uCC98111_0": -1504498018151985291
+      Right Ticket_0: -6089921556196739325
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
