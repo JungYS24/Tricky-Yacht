@@ -5,14 +5,14 @@ using DG.Tweening;
 public class CoreEvolutionController : MonoBehaviour
 {
     [Header("오브젝트 참조 (UI Image)")]
-    [SerializeField] private RectTransform coreTarget; // 빛나는 구체 (Core)
+    [SerializeField] private RectTransform coreTarget;
 
     [Header("연출 상세 설정 (3단계: 등장 & 확대)")]
-    [SerializeField] private float appearDuration = 0.5f;     // 등장 시간
-    [SerializeField] private float pulseStrength = 1.1f;       // 심장 박동 강조 비율
-    [SerializeField] private float expansionDuration = 0.8f;  // 거대화 확장 시간
-    [SerializeField] private float expandedScale = 15f;       // 거대해질 크기 배율
-    [SerializeField] private float fadeOutDuration = 0.4f;   // 사라지는 시간 (추가됨!)
+    [SerializeField] private float appearDuration = 0.5f;
+    [SerializeField] private float pulseStrength = 1.1f;
+    [SerializeField] private float expansionDuration = 0.8f;
+    [SerializeField] private float expandedScale = 15f;
+    [SerializeField] private float fadeOutDuration = 0.4f;
 
     private Vector3 originalScale = Vector3.one;
     private Tween pulseTween;
@@ -26,7 +26,6 @@ public class CoreEvolutionController : MonoBehaviour
         {
             coreTarget.localScale = Vector3.zero;
 
-            // CanvasGroup 컴포넌트 가져오기 (없으면 자동으로 붙여줌)
             canvasGroup = coreTarget.GetComponent<CanvasGroup>();
             if (canvasGroup == null)
             {
@@ -49,7 +48,7 @@ public class CoreEvolutionController : MonoBehaviour
 
         Sequence evolutionSeq = DOTween.Sequence();
 
-        // 1. 등장 (Scale 0 -> 1)
+        // 1. 등장
         evolutionSeq.Append(coreTarget.DOScale(originalScale, appearDuration).SetEase(Ease.OutBack));
 
         // 2. 강조 (맥동)
@@ -58,20 +57,27 @@ public class CoreEvolutionController : MonoBehaviour
             .SetLoops(2, LoopType.Yoyo);
         evolutionSeq.Append(pulseTween);
 
-        // 3. 거대화 확장 (Scale 1 -> 15)
+        // 3. 거대화 확장
         evolutionSeq.Append(coreTarget.DOScale(Vector3.one * expandedScale, expansionDuration).SetEase(Ease.InExpo));
 
-        // 4. [신규 추가] 거대해지면서 스르륵 사라지기 (Fade Out)
+        // 4. 사라지기 (Fade Out)
         if (canvasGroup != null)
         {
             evolutionSeq.Append(canvasGroup.DOFade(0f, fadeOutDuration).SetEase(Ease.OutQuad));
         }
 
-        // 5. 연출 끝난 후 오브젝트 완전히 끄기
+        // ★ [핵심] 구체 연출이 완료되면 카드 3장 플립 연출 시작! ★
         evolutionSeq.OnComplete(() =>
         {
             coreTarget.gameObject.SetActive(false);
-            Debug.Log("<color=green>[Core] 연출 완료 및 사라짐!</color>");
+            Debug.Log("<color=green>[Core] 구체 연출 완료 -> 카드 플립 연출 시작!</color>");
+
+            // 카드 매니저를 찾아서 4단계 실행
+            CardFlipManager flipManager = FindObjectOfType<CardFlipManager>();
+            if (flipManager != null)
+            {
+                flipManager.PlayCardFlipSequence();
+            }
         });
     }
 
@@ -87,7 +93,7 @@ public class CoreEvolutionController : MonoBehaviour
 
         if (canvasGroup != null)
         {
-            canvasGroup.alpha = 1f; // 투명도 원복
+            canvasGroup.alpha = 1f;
         }
     }
 }
