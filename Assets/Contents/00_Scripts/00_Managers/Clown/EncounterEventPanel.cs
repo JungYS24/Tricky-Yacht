@@ -44,7 +44,7 @@ public class EncounterEventPanel : MonoBehaviour
     public GameObject dialogueRoot;
     public TextMeshProUGUI dialogueText;
     public Button nextDialogueButton;
-    public SpriteRenderer encounterSpriteRenderer;
+    public Image encounterSpriteRenderer;
 
 
     [Header("º±≈√¡ˆ UI")]
@@ -174,7 +174,6 @@ public class EncounterEventPanel : MonoBehaviour
                 {
                     d.isCoated = true;
                     d.type = DiceType.Dark;
-
                     d.diceColor = new Color32(43, 42, 26, 255);
                     d.multiplier = 1.0f;
                 }
@@ -239,10 +238,10 @@ public class EncounterEventPanel : MonoBehaviour
 
                     switch (d.type)
                     {
-                        case DiceType.Prism: d.diceColor = Color.white; break;
-                        case DiceType.Gold: d.diceColor = Color.yellow; break;
+                        case DiceType.Prism: d.diceColor = new Color32(255, 182, 193, 255); break;
+                        case DiceType.Gold: d.diceColor = new Color32(188, 176, 43, 255); break;
                         case DiceType.Dark: d.diceColor = new Color32(43, 42, 26, 255); break;
-                        case DiceType.Ice: d.diceColor = Color.cyan; break;
+                        case DiceType.Ice: d.diceColor = new Color32(0, 230, 245, 255); break;
                     }
                 }
                 diceManager.shopManager.currentGold += 3000;               

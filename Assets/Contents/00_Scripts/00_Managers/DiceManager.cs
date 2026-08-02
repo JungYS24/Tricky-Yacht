@@ -343,6 +343,13 @@ public class DiceManager : MonoBehaviour
         //기존에 가짜 주사위 기믹이 남아있다면 원상복구
         RestoreFakeDice();
 
+        //(숙원의 방랑자 패널티 적용)
+        if (isNextCombatHPTiedToOne)
+        {
+            currentPlayerHP = 1; // 플레이어 체력을 1로 고정
+            isNextCombatHPTiedToOne = false; // 적용했으니 스위치를 다시 끔
+        }
+
         currentRerolls = 0;
         maxRerolls = defaultMaxRerolls;
         isPeppermintActive = false;

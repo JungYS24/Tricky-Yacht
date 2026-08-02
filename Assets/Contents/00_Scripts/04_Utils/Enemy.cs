@@ -173,6 +173,13 @@ public class Enemy : MonoBehaviour
         float hpMultiplier = Mathf.Pow(1.05f, currentStage - 1);
         finalMaxHP = Mathf.RoundToInt(finalMaxHP * hpMultiplier);
 
+        //(눈먼 점술가 패널티 적용)
+        if (DiceManager.Instance != null && DiceManager.Instance.isNextEnemyHPBoosted)
+        {
+            finalMaxHP *= 2; // 적 체력을 2배(100% 증가)로 만듬
+            DiceManager.Instance.isNextEnemyHPBoosted = false; // 적용했으니 스위치를 다시 끔
+        }
+
         //2스테이지당 몬스터 공격력 1 증가 (2스테이지=+1, 4스테이지=+2 ...)
         finalAttack += (currentStage / 2);
 
