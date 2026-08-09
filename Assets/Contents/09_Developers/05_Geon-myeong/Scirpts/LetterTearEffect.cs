@@ -1,31 +1,35 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 
 public class LetterTearEffect : MonoBehaviour
 {
-    [Header("¿ÀºêÁ§Æ® ÂüÁ¶")]
-    [SerializeField] private GameObject originalLetter; // ¿øº» ¿ÂÀüÇÑ ÆíÁö (Image)
-    [SerializeField] private GameObject piecesGroup;    // Âõ¾îÁø Á¶°¢µé ºÎ¸ğ (Letter_Pieces)
-    [SerializeField] private RectTransform leftPiece;   // ¿ŞÂÊ Á¶°¢ (Image_Left)
-    [SerializeField] private RectTransform rightPiece;  // ¿À¸¥ÂÊ Á¶°¢ (Image_Right)
+    [Header("ì˜¤ë¸Œì íŠ¸ ì°¸ì¡° (ë¯¸ì—°ê²° ì‹œ ì½˜ì†”ì— ê²½ê³  í‘œì‹œ)")]
+    [SerializeField] private GameObject originalLetter; // ì›ë³¸ ì˜¨ì „í•œ í¸ì§€ (Image)
+    [SerializeField] private GameObject piecesGroup;    // ì°¢ì–´ì§„ ì¡°ê°ë“¤ ë¶€ëª¨ (Letter_Pieces)
+    [SerializeField] private RectTransform leftPiece;   // ì™¼ìª½ ì¡°ê° (Image_Left)
+    [SerializeField] private RectTransform rightPiece;  // ì˜¤ë¥¸ìª½ ì¡°ê° (Image_Right)
 
-    [Header("ÆÄÆ¼Å¬ ÀÌÆåÆ®")]
-    [SerializeField] private ParticleSystem confettiParticle; // ÄÁÆäÆ¼ ÆÄÆ¼Å¬ (ConfettiFX)
+    [Header("ë‹¤ìŒ ì—°ì¶œ ìŠ¤í¬ë¦½íŠ¸ ì—°ê²° (CardFlipManager)")]
+    [SerializeField] private CardFlipManager flipManager;
 
-    [Header("¿¬Ãâ »ó¼¼ ¼³Á¤")]
-    [SerializeField] private float duration = 0.6f;     // Âõ¾îÁö¸ç ÆÛÁö´Â ½Ã°£
-    [SerializeField] private float moveDistance = 120f; // ¹Ù±ùÂÊÀ¸·Î ³¯¾Æ°¥ °Å¸®
-    [SerializeField] private float targetScale = 1.25f; // Ä¿Áú Å©±â ºñÀ²
+    [Header("íŒŒí‹°í´ ì´í™íŠ¸")]
+    [SerializeField] private ParticleSystem confettiParticle; // ì»¨í˜í‹° íŒŒí‹°í´ (ConfettiFX)
+
+    [Header("ì—°ì¶œ ìƒì„¸ ì„¤ì •")]
+    [SerializeField] private float duration = 0.6f;     // ì°¢ì–´ì§€ë©° í¼ì§€ëŠ” ì‹œê°„
+    [SerializeField] private float moveDistance = 120f; // ë°”ê¹¥ìª½ìœ¼ë¡œ ë‚ ì•„ê°ˆ ê±°ë¦¬
+    [SerializeField] private float targetScale = 1.25f; // ì»¤ì§ˆ í¬ê¸° ë¹„ìœ¨
 
     private Image leftImage;
     private Image rightImage;
     private Vector2 leftOriginPos;
     private Vector2 rightOriginPos;
 
-    // Awake´Â ´Ü ÇÏ³ª¸¸ Á¸ÀçÇØ¾ß ÇÕ´Ï´Ù!
     private void Awake()
     {
+        CheckReferences();
+
         if (leftPiece != null)
         {
             leftImage = leftPiece.GetComponent<Image>();
@@ -37,28 +41,50 @@ public class LetterTearEffect : MonoBehaviour
             rightImage = rightPiece.GetComponent<Image>();
             rightOriginPos = rightPiece.anchoredPosition;
         }
+
+        if (flipManager == null)
+        {
+            flipManager = FindObjectOfType<CardFlipManager>();
+        }
+    }
+
+    private void CheckReferences()
+    {
+        if (originalLetter == null) Debug.LogWarning("âš ï¸ [LetterTear] 'originalLetter'ê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤! í¸ì§€ê°€ ì•ˆ ìˆ¨ê²¨ì§ˆ ìˆ˜ ìˆìŠµë‹ˆë‹¤.");
+        if (piecesGroup == null) Debug.LogWarning("âš ï¸ [LetterTear] 'piecesGroup'ì´ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
+        if (leftPiece == null) Debug.LogWarning("âš ï¸ [LetterTear] 'leftPiece'ê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
+        if (rightPiece == null) Debug.LogWarning("âš ï¸ [LetterTear] 'rightPiece'ê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
+        if (confettiParticle == null) Debug.LogWarning("âš ï¸ [LetterTear] 'confettiParticle'ì´ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤! íŒŒí‹°í´ì´ ì•ˆ ë‚˜ì˜µë‹ˆë‹¤.");
     }
 
     [ContextMenu("Play Tear Effect")]
     public void PlayTearEffect()
     {
-        // 1. »óÅÂ ¿ÏÀü ¸®¼Â
         ResetTear();
 
-        // 2. ¿øº» ÆíÁö´Â ²ô°í, Âõ¾îÁø Á¶°¢µé ÄÑ±â
-        if (originalLetter != null) originalLetter.SetActive(false);
-        if (piecesGroup != null) piecesGroup.SetActive(true);
-
-        // 3. ÄÁÆäÆ¼ Á¾ÀÌ °¡·ç ÆÎ!
-        if (confettiParticle != null)
+        // 1. ì›ë³¸ í¸ì§€ëŠ” ìˆ¨ê¸°ê¸°
+        if (originalLetter != null)
         {
-            confettiParticle.Play();
+            originalLetter.SetActive(false);
         }
 
-        // 4. DOTween ¿¬Ãâ ÁøÇà
+        // 2. ì¡°ê° ê·¸ë£¹ ì¼œê¸°
+        if (piecesGroup != null)
+        {
+            piecesGroup.SetActive(true);
+        }
+
+        // 3. íŒŒí‹°í´ ì¬ìƒ
+        if (confettiParticle != null)
+        {
+            confettiParticle.gameObject.SetActive(true);
+            confettiParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            confettiParticle.Play(true);
+        }
+
+        // 4. ì¡°ê° ì• ë‹ˆë©”ì´ì…˜
         Sequence seq = DOTween.Sequence();
 
-        // [¿ŞÂÊ Á¶°¢] ´ë°¢¼± ¿ŞÂÊ À§·Î ³¯¾Æ°¡¸ç + È®´ë + Fade Out
         if (leftPiece != null)
         {
             seq.Join(leftPiece.DOAnchorPos(leftOriginPos + new Vector2(-moveDistance, 40f), duration).SetEase(Ease.OutCubic));
@@ -66,7 +92,6 @@ public class LetterTearEffect : MonoBehaviour
             if (leftImage != null) seq.Join(leftImage.DOFade(0f, duration));
         }
 
-        // [¿À¸¥ÂÊ Á¶°¢] ´ë°¢¼± ¿À¸¥ÂÊ ¾Æ·¡·Î ³¯¾Æ°¡¸ç + È®´ë + Fade Out
         if (rightPiece != null)
         {
             seq.Join(rightPiece.DOAnchorPos(rightOriginPos + new Vector2(moveDistance, -40f), duration).SetEase(Ease.OutCubic));
@@ -74,21 +99,25 @@ public class LetterTearEffect : MonoBehaviour
             if (rightImage != null) seq.Join(rightImage.DOFade(0f, duration));
         }
 
-        // 5. ¿¬Ãâ ³¡³­ ÈÄ Á¶°¢ ±×·ì ¼û±â±â
+        // 5. ì™„ë£Œ í›„ ì¹´ë“œ ë“±ì¥
         seq.OnComplete(() =>
         {
             if (piecesGroup != null) piecesGroup.SetActive(false);
+
+            if (flipManager == null) flipManager = FindObjectOfType<CardFlipManager>();
+
+            if (flipManager != null)
+            {
+                flipManager.PlayCardFlipSequence();
+            }
         });
     }
 
     public void ResetTear()
     {
-        if (originalLetter != null) originalLetter.SetActive(true);
-        if (piecesGroup != null) piecesGroup.SetActive(false);
-
-        // À§Ä¡, ½ºÄÉÀÏ, Åõ¸íµµ ¿øº¹
         if (leftPiece != null)
         {
+            leftPiece.DOKill();
             leftPiece.anchoredPosition = leftOriginPos;
             leftPiece.localScale = Vector3.one;
             if (leftImage != null)
@@ -100,6 +129,7 @@ public class LetterTearEffect : MonoBehaviour
 
         if (rightPiece != null)
         {
+            rightPiece.DOKill();
             rightPiece.anchoredPosition = rightOriginPos;
             rightPiece.localScale = Vector3.one;
             if (rightImage != null)
@@ -107,11 +137,6 @@ public class LetterTearEffect : MonoBehaviour
                 Color c = rightImage.color;
                 rightImage.color = new Color(c.r, c.g, c.b, 1f);
             }
-        }
-
-        if (confettiParticle != null)
-        {
-            confettiParticle.Stop();
         }
     }
 }

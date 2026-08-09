@@ -1,180 +1,289 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 
 public class CardFlipManager : MonoBehaviour
 {
-    [Header("HierarchyÀÇ Ä«µå 8°³ ¸ğµÎ µî·Ï")]
-    [SerializeField] private List<CardUI> allCardUIList = new List<CardUI>();
+    [Header("ì—°ë™í•  ìš”ì†Œ")]
+    [SerializeField] private Button triggerButton;                  // ì‹œì‘ ë²„íŠ¼
+    [SerializeField] private LetterShakeController letterController; // í¸ì§€ í”ë“¤ê¸° ì»¨íŠ¸ë¡¤ëŸ¬
 
-    [Header("5´Ü°è ¿¬Ãâ »ó¼¼ ¼³Á¤")]
-    [SerializeField] private float appearanceInterval = 0.18f; // Ä«µå°£ µîÀå ½ÃÂ÷ (00:06~00:09 Å¸ÀÌ¹Ö)
-    [SerializeField] private float duration = 0.5f;           // È¸Àü ¹× ½ºÄÉÀÏ ¹Ù¿î½º ÀüÃ¼ ½Ã°£
-    [SerializeField] private float popScale = 1.25f;          // ¹Ù¿î½º ½Ã »ìÂ¦ ³ÑÄ¡´Â ½ºÄÉÀÏ ºñÀ²
+    [Header("Project ì°½ì˜ í‹°ì¼“/ì´ë¯¸ì§€ íŒŒì¼ë“¤")]
+    [SerializeField] private List<Object> allTicketDataList = new List<Object>();
 
-    private List<CardUI> selectedCards = new List<CardUI>();
-    private Dictionary<CardUI, Vector3> originalScaleMap = new Dictionary<CardUI, Vector3>();
-    private RectTransform parentLayoutRect;
+    [Header("ì¹´ë“œ ìƒì„± ìœ„ì¹˜ ë° í”„ë¦¬íŒ¹ ì„¤ì •")]
+    [SerializeField] private RectTransform cardSpawnParent;
+    [SerializeField] private GameObject cardPrefab;
+
+    [Header("ì—°ì¶œ ë° ë°°ì¹˜ ìƒì„¸ ì„¤ì •")]
+    [SerializeField] private float appearanceInterval = 0.18f;
+    [SerializeField] private float duration = 0.5f;
+    [SerializeField] private float cardSpacing = 220f;
+
+    private List<CardUI> generatedCardUIList = new List<CardUI>();
+    private Sequence cardSequence;
+    private bool isPlayingSequence = false; // ì¤‘ë³µ ì‹¤í–‰ ë°©ì§€ í”Œë˜ê·¸
 
     private void Awake()
     {
         DOTween.Init();
 
-        if (allCardUIList.Count > 0 && allCardUIList[0] != null)
+        if (cardSpawnParent == null)
         {
-            parentLayoutRect = allCardUIList[0].transform.parent as RectTransform;
+            cardSpawnParent = GetComponent<RectTransform>();
         }
 
-        InitCardScales();
+        if (triggerButton != null)
+        {
+            triggerButton.onClick.RemoveAllListeners();
+            triggerButton.onClick.AddListener(OnClickStartButton);
+        }
     }
 
-    private void InitCardScales()
+    // â­ ë²„íŠ¼ í´ë¦­ ì‹œ í˜¸ì¶œ (í¸ì§€ ê·¸ë£¹ ìë™ í™œì„±í™” + ì—°ì¶œ ì‹œì‘)
+    public void OnClickStartButton()
     {
-        originalScaleMap.Clear();
+        if (isPlayingSequence) return; // ì´ë¯¸ ì‹¤í–‰ ì¤‘ì´ë©´ ë¬´ì‹œ
+        isPlayingSequence = true;
 
-        foreach (var cardUI in allCardUIList)
+        if (triggerButton != null)
         {
-            if (cardUI == null) continue;
+            triggerButton.gameObject.SetActive(false);
+        }
 
-            RectTransform rect = cardUI.GetComponent<RectTransform>();
-            if (rect != null)
-            {
-                if (!originalScaleMap.ContainsKey(cardUI))
-                {
-                    Vector3 localScale = rect.localScale;
-                    originalScaleMap.Add(cardUI, localScale == Vector3.zero ? Vector3.one : localScale);
-                }
-
-                rect.localScale = Vector3.zero;
-                rect.localRotation = Quaternion.Euler(0f, -90f, 0f);
-            }
-            cardUI.StopAuraEffect();
-            cardUI.gameObject.SetActive(false);
+        if (letterController != null)
+        {
+            // í¸ì§€ ê·¸ë£¹ì´ êº¼ì ¸ìˆì–´ë„ ìë™ìœ¼ë¡œ ì¼œì£¼ê³  ì—°ì¶œ ì‹œì‘!
+            letterController.gameObject.SetActive(true);
+            letterController.StartLetterShake();
+        }
+        else
+        {
+            // í¸ì§€ê°€ ì—†ì„ ë•Œë§Œ ì˜ˆì™¸ì ìœ¼ë¡œ ë°”ë¡œ ì¹´ë“œ ìƒì„±
+            PlayCardFlipSequence();
         }
     }
 
+    // â­ í¸ì§€ê°€ ë‹¤ ì°¢ì–´ì§„ í›„ í˜¸ì¶œë˜ëŠ” ì¹´ë“œ ë“±ì¥ í•¨ìˆ˜
     [ContextMenu("Play Random Card Flip")]
     public void PlayCardFlipSequence()
     {
-        ResetCards();
+        Debug.Log("<color=cyan>[CardFlip] ì¹´ë“œ ë“±ì¥ ì—°ì¶œ ì‹¤í–‰!</color>");
 
-        List<CardUI> validCards = new List<CardUI>();
-        foreach (var card in allCardUIList)
+        if (cardSpawnParent != null)
         {
-            if (card != null) validCards.Add(card);
+            cardSpawnParent.gameObject.SetActive(true);
+            cardSpawnParent.SetAsLastSibling();
         }
 
-        if (validCards.Count == 0) return;
+        // ê¸°ì¡´ì— ë‚¨ì•„ìˆë˜ ì¹´ë“œ ì™„ë²½ ì‚­ì œ
+        ClearGeneratedCards();
 
-        int countToPick = Mathf.Min(3, validCards.Count);
-        selectedCards = GetRandomElements(validCards, countToPick);
+        if (allTicketDataList.Count == 0)
+        {
+            isPlayingSequence = false;
+            return;
+        }
 
-        Sequence cardSeq = DOTween.Sequence();
+        int countToPick = Mathf.Min(3, allTicketDataList.Count);
+        List<Object> selectedData = GetRandomElements(allTicketDataList, countToPick);
 
-        for (int i = 0; i < selectedCards.Count; i++)
+        cardSequence = DOTween.Sequence();
+        float startX = -((countToPick - 1) * cardSpacing) / 2f;
+
+        for (int i = 0; i < selectedData.Count; i++)
         {
             int index = i;
-            CardUI cardUI = selectedCards[index];
+            Object data = selectedData[index];
 
+            CardUI cardUI = CreateCardUIObject(data);
             if (cardUI == null) continue;
-            RectTransform cardRect = cardUI.GetComponent<RectTransform>();
-            if (cardRect == null) continue;
 
-            if (cardUI.ticketData != null)
-            {
-                cardUI.SetupCard(cardUI.ticketData);
-            }
+            generatedCardUIList.Add(cardUI);
+            RectTransform cardRect = cardUI.GetComponent<RectTransform>();
+
+            Vector2 targetPos = new Vector2(startX + (index * cardSpacing), 0f);
+            cardRect.anchoredPosition = targetPos;
+
+            cardRect.localScale = Vector3.zero;
+            cardRect.localRotation = Quaternion.Euler(0f, -90f, 0f);
+            cardUI.gameObject.SetActive(false);
 
             float startTime = index * appearanceInterval;
 
-            // 1. Ä«µå È°¼ºÈ­ ¹× ·¹ÀÌ¾Æ¿ô ÀçÁ¤·Ä
-            cardSeq.InsertCallback(startTime, () =>
+            cardSequence.InsertCallback(startTime, () =>
             {
-                if (cardUI != null)
-                {
-                    cardUI.gameObject.SetActive(true);
-
-                    if (parentLayoutRect != null)
-                    {
-                        LayoutRebuilder.ForceRebuildLayoutImmediate(parentLayoutRect);
-                    }
-                }
+                if (cardUI != null) cardUI.gameObject.SetActive(true);
             });
 
-            Vector3 originalScale = Vector3.one;
-            if (originalScaleMap.ContainsKey(cardUI))
-            {
-                originalScale = originalScaleMap[cardUI];
-            }
-
-            // 2.  [5´Ü°è ¿¬Ãâ] Ease.OutBack ¹Ù¿î½º ½ºÄÉÀÏ¸µ
-            // 0¿¡¼­ ¿øº» Å©±âÀÇ 1.25¹è±îÁö »ìÂ¦ Æ¨°å´Ù°¡ ¿øº» Å©±â·Î ¹¬Á÷ÇÏ°Ô ¾ÈÂø!
-            cardSeq.Insert(startTime,
-                cardRect.DOScale(originalScale, duration)
-                    .SetEase(Ease.OutBack)
+            cardSequence.Insert(startTime,
+                cardRect.DOScale(Vector3.one, duration).SetEase(Ease.OutBack)
             );
 
-            // 3. YÃà Flip È¸Àü (-90µµ -> 0µµ)
-            cardSeq.Insert(startTime,
-                cardRect.DOLocalRotate(Vector3.zero, duration, RotateMode.FastBeyond360)
-                    .SetEase(Ease.OutCubic)
+            cardSequence.Insert(startTime,
+                cardRect.DOLocalRotate(Vector3.zero, duration, RotateMode.FastBeyond360).SetEase(Ease.OutCubic)
             );
 
-            // 4.  [5´Ü°è ¿¬Ãâ] Ä«µå°¡ µü Á¤¸éÀ» ¹Ù¶óº¸´Â Å¸ÀÌ¹Ö(¾à 60% ÁöÁ¡)¿¡ ÈÄ±¤/ÆÄÆ¼Å¬ Æø¹ß!
-            cardSeq.InsertCallback(startTime + (duration * 0.4f), () =>
+            cardSequence.InsertCallback(startTime + (duration * 0.4f), () =>
             {
-                if (cardUI != null)
-                {
-                    cardUI.PlayAuraEffect();
-                }
+                if (cardUI != null) cardUI.PlayAuraEffect();
             });
         }
 
-        cardSeq.OnComplete(() =>
+        cardSequence.OnComplete(() =>
         {
-            Debug.Log($"<color=cyan>[CardFlip] 5´Ü°è: µî±Ş ¿¬Ãâ ¹× ÆÄÆ¼Å¬ ¾ÈÂø ¿Ï·á!</color>");
+            isPlayingSequence = false; // ì—°ì¶œ ì™„ë£Œ í›„ ì ê¸ˆ í•´ì œ
         });
     }
 
-    public void ResetCards()
+    private CardUI CreateCardUIObject(Object data)
     {
-        for (int i = 0; i < allCardUIList.Count; i++)
+        GameObject newCardObj = null;
+
+        if (cardPrefab != null)
         {
-            if (allCardUIList[i] != null)
+            newCardObj = Instantiate(cardPrefab, cardSpawnParent);
+        }
+        else if (data is GameObject go)
+        {
+            newCardObj = Instantiate(go, cardSpawnParent);
+        }
+        else
+        {
+            newCardObj = new GameObject($"CardUI_{data.name}", typeof(RectTransform), typeof(Image), typeof(CardUI));
+            newCardObj.transform.SetParent(cardSpawnParent, false);
+
+            RectTransform rect = newCardObj.GetComponent<RectTransform>();
+            rect.sizeDelta = new Vector2(160f, 220f);
+        }
+
+        CardUI cardUI = newCardObj.GetComponent<CardUI>();
+
+        if (cardUI != null && data != null)
+        {
+            TrySetupCardUI(cardUI, data);
+        }
+
+        return cardUI;
+    }
+
+    private void TrySetupCardUI(CardUI cardUI, Object data)
+    {
+        System.Type cardType = cardUI.GetType();
+        string[] candidateMethods = { "SetupCard", "Setup", "SetData", "Init", "Initialize", "SetTicket" };
+
+        foreach (string methodName in candidateMethods)
+        {
+            MethodInfo method = cardType.GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            if (method != null)
             {
-                RectTransform rect = allCardUIList[i].GetComponent<RectTransform>();
-                if (rect != null)
+                ParameterInfo[] parameters = method.GetParameters();
+                if (parameters.Length == 1 && parameters[0].ParameterType.IsAssignableFrom(data.GetType()))
                 {
-                    rect.localScale = Vector3.zero;
-                    rect.localRotation = Quaternion.Euler(0f, -90f, 0f);
+                    method.Invoke(cardUI, new object[] { data });
+                    return;
                 }
-                allCardUIList[i].StopAuraEffect();
-                allCardUIList[i].gameObject.SetActive(false);
             }
         }
-        selectedCards.Clear();
 
-        if (parentLayoutRect != null)
+        Sprite sprite = ExtractSpriteFromObject(data);
+        Image img = cardUI.GetComponent<Image>();
+        if (img != null && sprite != null)
         {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(parentLayoutRect);
+            img.sprite = sprite;
+            img.color = Color.white;
+            img.preserveAspect = true;
         }
+    }
+
+    private Sprite ExtractSpriteFromObject(Object data)
+    {
+        if (data is Sprite s) return s;
+
+        if (data is Texture2D tex)
+        {
+            return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+        }
+
+        if (data is ScriptableObject so)
+        {
+            System.Type type = so.GetType();
+
+            while (type != null && type != typeof(ScriptableObject) && type != typeof(Object))
+            {
+                var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                foreach (var field in fields)
+                {
+                    object val = field.GetValue(so);
+                    if (val == null) continue;
+
+                    if (val is Sprite spriteVal) return spriteVal;
+
+                    if (val is Texture2D subTex)
+                    {
+                        return Sprite.Create(subTex, new Rect(0, 0, subTex.width, subTex.height), new Vector2(0.5f, 0.5f));
+                    }
+
+                    if (!field.FieldType.IsPrimitive && !field.FieldType.IsEnum && field.FieldType != typeof(string))
+                    {
+                        var subFields = field.FieldType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                        foreach (var sf in subFields)
+                        {
+                            object subVal = sf.GetValue(val);
+                            if (subVal is Sprite subSprite) return subSprite;
+                            if (subVal is Texture2D subTexture)
+                            {
+                                return Sprite.Create(subTexture, new Rect(0, 0, subTexture.width, subTexture.height), new Vector2(0.5f, 0.5f));
+                            }
+                        }
+                    }
+                }
+                type = type.BaseType;
+            }
+        }
+
+        return null;
+    }
+
+    private void ClearGeneratedCards()
+    {
+        if (cardSequence != null && cardSequence.IsActive()) cardSequence.Kill();
+
+        if (cardSpawnParent != null)
+        {
+            foreach (Transform child in cardSpawnParent)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        foreach (var card in generatedCardUIList)
+        {
+            if (card != null)
+            {
+                card.transform.DOKill();
+                Destroy(card.gameObject);
+            }
+        }
+        generatedCardUIList.Clear();
     }
 
     private List<T> GetRandomElements<T>(List<T> sourceList, int countToPick)
     {
-        List<T> tempPickPool = new List<T>(sourceList);
-        List<T> resultList = new List<T>();
+        List<T> tempPool = new List<T>(sourceList);
+        List<T> result = new List<T>();
 
         for (int i = 0; i < countToPick; i++)
         {
-            if (tempPickPool.Count == 0) break;
-            int randomIndex = Random.Range(0, tempPickPool.Count);
-            resultList.Add(tempPickPool[randomIndex]);
-            tempPickPool.RemoveAt(randomIndex);
+            if (tempPool.Count == 0) break;
+            int randIndex = Random.Range(0, tempPool.Count);
+            result.Add(tempPool[randIndex]);
+            tempPool.RemoveAt(randIndex);
         }
 
-        return resultList;
+        return result;
     }
 }

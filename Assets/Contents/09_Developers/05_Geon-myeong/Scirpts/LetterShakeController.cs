@@ -1,22 +1,22 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using DG.Tweening;
 
 public class LetterShakeController : MonoBehaviour
 {
-    [Header("Èçµé UI ´ë»ó (Canvas ¾ÈÀÇ Image)")]
+    [Header("í”ë“¤ UI ëŒ€ìƒ (Canvas ì•ˆì˜ Image)")]
     [SerializeField] private RectTransform letterTarget;
 
-    [Header("½ºÆÄÅ© ÆÄÆ¼Å¬ (¾øÀ¸¸é ºñ¿öµÎ¼¼¿ä)")]
+    [Header("ë‹¤ìŒ ì—°ì¶œ ìŠ¤í¬ë¦½íŠ¸ ì—°ê²° (LetterTearEffect)")]
+    [SerializeField] private LetterTearEffect tearEffect;
+
+    [Header("ìŠ¤íŒŒí¬ íŒŒí‹°í´ (ì„ íƒì‚¬í•­)")]
     [SerializeField] private ParticleSystem sparkParticle;
 
-    [Header("Shake »ó¼¼ ¼³Á¤ (Å¸°İ°¨ ÃÖÀûÈ­)")]
-    [SerializeField] private float duration = 0.6f;      // ÀüÃ¼ Èçµé¸®´Â ½Ã°£
-    [SerializeField] private float posStrength = 20.0f;   // À§Ä¡ Èçµé¸² °­µµ (È­²öÇÏ°Ô Æ¨±è)
-    [SerializeField] private float rotStrength = 12.0f;   // È¸Àü Èçµé¸² °­µµ
-    [SerializeField] private int vibrato = 20;            // ÀûÀıÇÑ Áøµ¿¼ö (30Àº ²÷°Ü º¸ÀÌ°í, 20ÀÌ µü ÂËµæÇÔ)
-
-    private Tween posTween;
-    private Tween rotTween;
+    [Header("Shake ìƒì„¸ ì„¤ì •")]
+    [SerializeField] private float duration = 0.6f;
+    [SerializeField] private float posStrength = 20.0f;
+    [SerializeField] private float rotStrength = 12.0f;
+    [SerializeField] private int vibrato = 20;
 
     private Vector2 originalAnchoredPosition;
     private Quaternion originalRotation;
@@ -31,70 +31,81 @@ public class LetterShakeController : MonoBehaviour
             originalAnchoredPosition = letterTarget.anchoredPosition;
             originalRotation = letterTarget.localRotation;
             isInitialized = true;
-        }
-    }
 
-    private void Start()
-    {
-        StartLetterShake();
+            // â­ [í•µì‹¬] ê²Œì„ ì‹œì‘ ì‹œ í™”ë©´ì— ì•ˆ ë³´ì´ë„ë¡ ì¦‰ì‹œ ìˆ¨ê¹€!
+            letterTarget.gameObject.SetActive(false);
+        }
+
+        if (tearEffect == null)
+        {
+            tearEffect = GetComponent<LetterTearEffect>();
+        }
     }
 
     [ContextMenu("Play Shake")]
     public void StartLetterShake()
     {
-        if (!isInitialized && letterTarget != null)
+        if (letterTarget == null)
         {
-            originalAnchoredPosition = letterTarget.anchoredPosition;
-            originalRotation = letterTarget.localRotation;
-            isInitialized = true;
+            OnShakeComplete();
+            return;
         }
+
+        // â­ ë²„íŠ¼ì„ ëˆŒëŸ¬ í”ë“¤ê¸°ê°€ ì‹œì‘ë  ë•Œë§Œ ì§ ! í•˜ê³  ì¼œê¸°
+        letterTarget.gameObject.SetActive(true);
 
         StopAndReset();
 
         if (sparkParticle != null)
         {
+            sparkParticle.gameObject.SetActive(true);
+            sparkParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             sparkParticle.Play();
         }
 
-        if (letterTarget == null) return;
+        Sequence shakeSeq = DOTween.Sequence();
 
-        // [ÇÙ½É] DOShake ¹æ½Ä ¿øº¹ + fadeOut: true·Î ·º Çö»ó¸¸ Á¦°Å
-        posTween = letterTarget.DOShakeAnchorPos(
+        shakeSeq.Join(letterTarget.DOShakeAnchorPos(
             duration: duration,
             strength: new Vector2(posStrength, posStrength),
             vibrato: vibrato,
             randomness: 90f,
             fadeOut: true
-        ).SetUpdate(true);
+        ));
 
-        rotTween = letterTarget.DOShakeRotation(
+        shakeSeq.Join(letterTarget.DOShakeRotation(
             duration: duration,
             strength: new Vector3(0f, 0f, rotStrength),
             vibrato: vibrato,
             randomness: 90f,
             fadeOut: true
-        ).SetUpdate(true);
+        ));
 
-        // Èçµé¸² ¿Ï·á ÈÄ Âõ¾îÁö±â ¿¬Ãâ
-        posTween.OnComplete(() =>
+        shakeSeq.OnComplete(OnShakeComplete);
+    }
+
+    private void OnShakeComplete()
+    {
+        if (tearEffect == null)
         {
-            LetterTearEffect tearEffect = GetComponent<LetterTearEffect>();
-            if (tearEffect != null)
-            {
-                tearEffect.PlayTearEffect();
-            }
-        });
+            tearEffect = GetComponent<LetterTearEffect>();
+            if (tearEffect == null) tearEffect = FindObjectOfType<LetterTearEffect>();
+        }
+
+        if (tearEffect != null)
+        {
+            tearEffect.PlayTearEffect();
+        }
     }
 
     public void StopAndReset()
     {
-        if (posTween != null && posTween.IsActive()) posTween.Kill();
-        if (rotTween != null && rotTween.IsActive()) rotTween.Kill();
-
         if (letterTarget != null && isInitialized)
         {
+            letterTarget.DOKill();
             letterTarget.anchoredPosition = originalAnchoredPosition;
             letterTarget.localRotation = originalRotation;
+            letterTarget.gameObject.SetActive(true);
         }
 
         if (sparkParticle != null)
