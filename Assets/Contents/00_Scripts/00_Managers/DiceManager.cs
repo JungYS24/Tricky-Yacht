@@ -80,8 +80,9 @@ public class DiceManager : MonoBehaviour
     // 조우자 선택지 중 다음 전투에 영향을 미치는 효과들을 추적하기 위한 변수
     [HideInInspector] public bool isNextEnemyHPBoosted = false; // 눈먼 점술가 패널티
     [HideInInspector] public bool isNextCombatHPTiedToOne = false; // 숙원의 방랑자 패널티
-    [HideInInspector] public int extraShopSlots = 0; // 녹슨 닻의 선장 상점 슬롯 영구 확장
+    [HideInInspector] public int extraShopSlots = 0; //  슬롯 영구 확장
     [HideInInspector] public int perfumerWeaknessTurns = 0; // 조향사 시련 턴 수
+    [HideInInspector] public bool isNextShopFree = false; //녹슨 닻의 선장 무료 상점
 
     [HideInInspector] public DiceData1 originalBossDice = null;
     [HideInInspector] public int fakeDiceIndex = -1;

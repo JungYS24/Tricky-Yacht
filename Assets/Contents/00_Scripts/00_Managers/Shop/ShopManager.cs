@@ -224,7 +224,12 @@ public class ShopManager : MonoBehaviour
         IsShopOpen = false;
         if (shopUI != null) shopUI.SetActive(false);
 
-        if (diceManager != null) diceManager.NextStage();
+        if (diceManager != null)
+        {
+            //무료 스위치 끄기
+            diceManager.isNextShopFree = false;
+            diceManager.NextStage();
+        }
     }
 
     // 주사위 파괴 선택창 열기 (파괴 아이템을 구매했을 때 호출됨)
@@ -246,13 +251,16 @@ public class ShopManager : MonoBehaviour
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return false;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return false;
 
-        if (currentGold >= item.price)
+        //실제 계산될 가격 판별 로직 추가
+        int actualPrice = diceManager.isNextShopFree ? 0 : item.price;
+
+        if (currentGold >= actualPrice)
         {
             if (item is FigureItemSO || item is SnackItemSO)
             {
                 if (InventoryManager.Instance.AddItem(item))
                 {
-                    currentGold -= item.price;
+                    currentGold -= actualPrice;
                     if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
 
                     // 피규어/간식 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용
@@ -265,7 +273,7 @@ public class ShopManager : MonoBehaviour
                 }
                 else
                 {
-                    // 🚨 [추가] 인벤토리가 꽉 찼을 때도 토스트 팝업으로 피드백 제공
+                    //인벤토리가 꽉 찼을 때도 토스트 팝업으로 피드백 제공
                     if (ToastPopupController.Instance != null)
                     {
                         ToastPopupController.Instance.ShowToast("인벤토리가 가득 찼습니다.");
@@ -276,7 +284,7 @@ public class ShopManager : MonoBehaviour
             else
             {
                 item.ApplyItemEffect(diceManager);
-                currentGold -= item.price;
+                currentGold -= actualPrice;
                 if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
 
                 // 그 외 소모품/티켓류 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용

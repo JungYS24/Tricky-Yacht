@@ -74,7 +74,8 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         }
 
         // 가격 및 버튼 설정
-        if (priceText != null) priceText.text = data.price + " G";
+        int displayPrice = manager.diceManager.isNextShopFree ? 0 : data.price;
+        if (priceText != null) priceText.text = displayPrice + " G";
 
         buyButton.interactable = true;
         buyButton.onClick.RemoveAllListeners();
