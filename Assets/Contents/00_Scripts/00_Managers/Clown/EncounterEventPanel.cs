@@ -35,6 +35,12 @@ public class EncounterEventPanel : MonoBehaviour
     [Header("참조 설정")]
     public DiceManager diceManager;
 
+    [Header("특수 보상 아이템 (ScriptableObject)")]
+    public DiceItemSO eightyEightDiceSO;     // 88주사위 데이터
+    public FigureItemSO sacrificedGirlFigureSO;    // 제물소녀 전용 피규어
+    public FigureItemSO wishWandererFigureSO;      // 방랑자 전용 피규어
+
+
     [Header("조우자 데이터베이스")]
     public List<EncounterData> encounterDatabase = new List<EncounterData>();
     private EncounterData currentEncounter;
@@ -148,6 +154,9 @@ public class EncounterEventPanel : MonoBehaviour
         choiceAButton.interactable = CheckChoiceACondition(currentEncounter.type);
         choiceBButton.interactable = true;
 
+        if (choiceAButton != null) choiceAButton.gameObject.SetActive(true);
+        if (choiceBButton != null) choiceBButton.gameObject.SetActive(true);
+
         if (choiceRoot != null) choiceRoot.SetActive(true);
     }
 
@@ -163,6 +172,9 @@ public class EncounterEventPanel : MonoBehaviour
 
     private void OnChoiceASelected()
     {
+        if (choiceAButton != null) choiceAButton.gameObject.SetActive(false);
+        if (choiceBButton != null) choiceBButton.gameObject.SetActive(false);
+
         bool waitCoroutine = false; // 코루틴 대기를 위한 플래그
 
         switch (currentEncounter.type)
@@ -190,8 +202,37 @@ public class EncounterEventPanel : MonoBehaviour
             case EncounterType.BlindFortuneTeller:
                 // 다음 적 체력 100% 증가 플래그
                 diceManager.isNextEnemyHPBoosted = true;
-                // [TODO: 88주사위 ScriptableObject 완성 시 연동]
-                // InventoryManager.Instance.AddItem(EightyEightDiceSO); 
+                //88주사위 지급
+                if (eightyEightDiceSO != null)
+                {
+                    // 도감이나 인벤토리 UI에 표시하기 위해 추가
+                    InventoryManager.Instance.AddItem(eightyEightDiceSO);
+
+                    // 게임에서 실제로 굴러갈 주사위 데이터(DiceData1) 생성
+                    DiceData1 dice88 = new DiceData1();
+
+                    // 인스펙터(SO)에서 세팅한 6개의 눈금(88) 배열을 그대로 가져와 복사
+                    if (eightyEightDiceSO.customFaces != null && eightyEightDiceSO.customFaces.Length > 0)
+                    {
+                        dice88.faceValues = (int[])eightyEightDiceSO.customFaces.Clone();
+                    }
+                    else
+                    {
+                        dice88.faceValues = new int[] { 88, 88, 88, 88, 88, 88 };
+                    }
+                    dice88.type = DiceType.Normal;
+                    dice88.diceColor = Color.white;
+                    dice88.multiplier = 1.0f;
+
+                    dice88.customDiceShell = eightyEightDiceSO.customDiceShell;
+                    if (eightyEightDiceSO.customFaceSprites != null && eightyEightDiceSO.customFaceSprites.Length > 0)
+                    {
+                        dice88.customFaceSprites = eightyEightDiceSO.customFaceSprites;
+                    }
+
+                    // 내 덱에 완벽하게 추가
+                    diceManager.masterDeck.Add(dice88);
+                }
                 break;
 
             case EncounterType.RustyCaptain:
@@ -231,8 +272,9 @@ public class EncounterEventPanel : MonoBehaviour
                     diceManager.masterDeck.RemoveAt(Random.Range(0, diceManager.masterDeck.Count));
                     diceManager.masterDeck.RemoveAt(Random.Range(0, diceManager.masterDeck.Count));
                 }
-                // [TODO: 전용 피규어 즉시 획득]
-                // InventoryManager.Instance.AddItem(SacrificedGirlFigureSO);
+                // 제물소녀 전용 피규어 지급
+                if (sacrificedGirlFigureSO != null)
+                    InventoryManager.Instance.AddItem(sacrificedGirlFigureSO);
                 break;
 
             case EncounterType.Alchemist:
@@ -308,8 +350,12 @@ public class EncounterEventPanel : MonoBehaviour
 
             case EncounterType.WishWanderer:
                 diceManager.isNextCombatHPTiedToOne = true;
-                // [TODO: 전용 피규어 즉시 획득]
-                // InventoryManager.Instance.AddItem(WishWandererFigureSO);
+
+                //diceManager.currentPlayerHP = 1;
+
+                //방랑자 전용 피규어 지급
+                if (wishWandererFigureSO != null)
+                    InventoryManager.Instance.AddItem(wishWandererFigureSO);
                 break;
 
             case EncounterType.ForgottenExplorer:
@@ -346,8 +392,6 @@ public class EncounterEventPanel : MonoBehaviour
 
     private void OnChoiceBSelected()
     {
-        
-
         switch (currentEncounter.type)
         {
             case EncounterType.AbyssDealer:
@@ -393,20 +437,24 @@ public class EncounterEventPanel : MonoBehaviour
     // 어릿광대용 코팅 4번 띄우기 코루틴
     private IEnumerator ClownCoatingRoutine()
     {
-        // 상점에서처럼 유저가 직접 다크 코팅 대상을 4번 고르도록 띄움
         for (int i = 0; i < 4; i++)
         {
-            // 코팅창 열기 (다크, 배수 1배, 다크 색상)
+            // 1. 코팅창 열기
             diceManager.shopManager.ShowCoatingSelection(DiceType.Dark, 1.0f, new Color32(43, 42, 26, 255));
 
-            // 코팅창이 화면에 띄워져 있는 동안 다음 코드로 넘어가지 않고 무한 대기
+            // 패널이 활성화될 때까지 1프레임 대기
+            yield return null;
+
+            // 패널이 화면에 떠 있는 동안 무한 대기
             while (diceManager.shopManager.coatingSelectionPanel.panelRoot.activeSelf)
             {
                 yield return null;
             }
+
+            // 주사위를 선택해서 창이 닫힌 후 0.5초 대기
+            yield return new WaitForSeconds(0.2f);
         }
 
-        // 4번의 선택이 모두 끝났으므로 UI 갱신 및 이벤트 최종 종료
         UpdateUIAfterChoice();
         EndEvent();
     }

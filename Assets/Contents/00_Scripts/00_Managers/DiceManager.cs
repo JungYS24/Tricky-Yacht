@@ -956,7 +956,13 @@ public class DiceManager : MonoBehaviour
         if (allValues.Count == 5) // 5개가 모였을 때만 피규어 발동 검사
         {
             int[] diceCounts = new int[7];
-            foreach (int v in allValues) diceCounts[v]++;
+            foreach (int v in allValues)
+            {
+                if (v >= 0 && v <= 6)
+                {
+                    diceCounts[v]++;
+                }
+            }
 
             foreach (var figure in InventoryManager.Instance.ownedFigures)
             {
@@ -1179,7 +1185,15 @@ public class DiceManager : MonoBehaviour
     {
         //숫자로 적혀있던 부분을 전부 mult변수로 교체합니다.
         multiplier = multHighCard; handName = "탑 (High Card)";
-        int[] counts = new int[7]; foreach (int v in values) counts[v]++;
+
+        Dictionary<int, int> countDict = new Dictionary<int, int>();
+        foreach (int v in values)
+        {
+            if (countDict.ContainsKey(v)) countDict[v]++;
+            else countDict[v] = 1;
+        }
+        List<int> counts = countDict.Values.ToList();
+
         List<int> sortedValues = new List<int>(values); sortedValues.Sort();
 
         if (counts.Any(c => c == 5)) { multiplier = multYacht; handName = "Yacht"; return; }

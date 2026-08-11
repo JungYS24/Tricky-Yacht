@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public class CoatingSelectionPanel : MonoBehaviour
 {
+    public static bool IsPanelOpen { get; private set; } = false;
+
     public GameObject panelRoot;
     public Transform slotParent;
     public GameObject diceSlotPrefab;
@@ -17,6 +19,8 @@ public class CoatingSelectionPanel : MonoBehaviour
 
     public void OpenSelection(DiceManager dm, DiceType type, float mult, Color color)
     {
+        IsPanelOpen = true;
+
         diceManager = dm;
         pendingCoatingType = type;
         pendingMultiplier = mult;
@@ -74,6 +78,8 @@ public class CoatingSelectionPanel : MonoBehaviour
 
     public void ClosePanel()
     {
+        IsPanelOpen = false;
+
         panelRoot.SetActive(false);
         ClearSlots();
     }

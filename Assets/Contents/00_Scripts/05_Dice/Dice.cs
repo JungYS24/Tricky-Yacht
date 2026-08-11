@@ -78,9 +78,9 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
     private void UpdateSprite(int value)
     {
-        if (spriteRenderer == null || value <= 0) return;
+        if (spriteRenderer == null) return;
 
-        //값이 0 이하일 때(가짜 주사위)의 처리
+        // 1. 값이 0 이하일 때(가짜 주사위)의 처리
         if (value <= 0)
         {
             if (myData != null && myData.customFaceSprites != null && myData.customFaceSprites.Length > 0)
@@ -90,14 +90,27 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             return;
         }
 
-        // 판별된 결과에 따라 숫자 스프라이트 또는 눈금 스프라이트를 선택
-        if (useNumberSprite && fixedNumberSprites != null && value <= fixedNumberSprites.Length)
+        // 커스텀 이미지가 있는 경우 (88 주사위 완벽 대응)
+        if (myData != null && myData.customFaceSprites != null && myData.customFaceSprites.Length > 0)
         {
-            spriteRenderer.sprite = fixedNumberSprites[value - 1];
+            // 커스텀 이미지가 1장뿐이라면 무조건 0번을, 여러 장이라면 눈금에 맞게 안전하게 가져옵니다.
+            int safeIndex = (myData.customFaceSprites.Length == 1) ? 0 : Mathf.Clamp(value - 1, 0, myData.customFaceSprites.Length - 1);
+            spriteRenderer.sprite = myData.customFaceSprites[safeIndex];
+            return; // 여기서 바로 함수를 끝내서 에러를 차단합니다!
         }
-        else if (diceFaceSprites != null && value <= diceFaceSprites.Length)
+
+        //기존 1~6 일반 숫자/눈금 처리 (안전장치 추가)
+        int safeDefaultIndex = Mathf.Clamp(value - 1, 0, 5); // 0~5 범위를 벗어나지 못하도록 강제 고정
+
+        if (useNumberSprite && fixedNumberSprites != null && fixedNumberSprites.Length >= 6)
         {
-            spriteRenderer.sprite = diceFaceSprites[value - 1];
+            spriteRenderer.sprite = fixedNumberSprites[safeDefaultIndex];
+        }
+        else if (diceFaceSprites != null && diceFaceSprites.Length > 0)
+        {
+            // SetData에서 커스텀 이미지로 덮어씌워졌을 경우를 대비해 배열 길이에 맞게 안전하게 가져옴
+            int finalIndex = Mathf.Clamp(value - 1, 0, diceFaceSprites.Length - 1);
+            spriteRenderer.sprite = diceFaceSprites[finalIndex];
         }
     }
 
@@ -205,7 +218,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
     public void OnPointerDown(PointerEventData eventData)
     {
         // 상점이 열려있거나 피규어 상세 패널이 열려있으면 클릭 취소
-        if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || DeckUI.IsPanelOpen || TicketDetailPanel.IsPanelOpen) return;
+        if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || DeckUI.IsPanelOpen || TicketDetailPanel.IsPanelOpen || CoatingSelectionPanel.IsPanelOpen) return;
 
         //상점 선택 패널(상점/다음 스테이지) 또는 바이옴 선택 패널이 열려있을 때 클릭 차단
         if (DiceManager.Instance != null)

@@ -277,10 +277,12 @@ public class DeckSlot : MonoBehaviour
 
     private void UpdateDisplaySprite()
     {
-        if (diceIcon != null && animSprites != null)
+        if (diceIcon != null && animSprites != null && animSprites.Length > 0)
         {
             int faceValue = animFaces[currentAnimIndex];
-            diceIcon.sprite = animSprites[faceValue - 1];
+            // 배열 크기를 넘어서는 눈금(예: 88)이 들어와도 에러가 나지 않도록 안전하게 묶어줌
+            int safeIndex = Mathf.Clamp(faceValue - 1, 0, animSprites.Length - 1);
+            diceIcon.sprite = animSprites[safeIndex];
         }
     }
 
@@ -289,6 +291,18 @@ public class DeckSlot : MonoBehaviour
         if (diceIcon == null) return;
 
         int faceToShow = exactFaceValue != -1 ? exactFaceValue : data.faceValues[UnityEngine.Random.Range(0, data.faceValues.Length)];
+
+        //커스텀 이미지가 설정되어 있다면 무조건 최우선으로 띄워줌 (88 주사위 완벽 대응)
+        if (data.customFaceSprites != null && data.customFaceSprites.Length > 0)
+        {
+            // 커스텀 이미지가 1개밖에 없다면 무조건 0번째 이미지를 띄움 (에러 방지)
+            int safeIndex = (data.customFaceSprites.Length == 1) ? 0 : Mathf.Clamp(faceToShow - 1, 0, data.customFaceSprites.Length - 1);
+            diceIcon.sprite = data.customFaceSprites[safeIndex];
+            return; // 여기서 함수를 끝내서 숫자 6으로 바뀌는 현상을 막음
+        }
+
+        //기존 1~6 일반/고정 주사위 로직
+
         //하한선을 1에서 0으로 변경
         faceToShow = Mathf.Clamp(faceToShow, 0, 6);
 
@@ -297,16 +311,11 @@ public class DeckSlot : MonoBehaviour
         {
             diceIcon.sprite = data.customFaceSprites[0];
         }
-
         else if (isFixed && fixedNumberSprites != null && fixedNumberSprites.Length >= 6 && faceToShow > 0)
         {
             diceIcon.sprite = fixedNumberSprites[faceToShow - 1];
         }
-        else if (data.customFaceSprites != null && data.customFaceSprites.Length >= 6)
-        {
-            diceIcon.sprite = data.customFaceSprites[faceToShow - 1];
-        }
-        else if (defaultFaceSprites != null && defaultFaceSprites.Length >= 6)
+        else if (defaultFaceSprites != null && defaultFaceSprites.Length >= 6 && faceToShow > 0)
         {
             diceIcon.sprite = defaultFaceSprites[faceToShow - 1];
         }

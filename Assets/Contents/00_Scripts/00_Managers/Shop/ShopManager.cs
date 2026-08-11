@@ -358,6 +358,7 @@ public class ShopManager : MonoBehaviour
         if (coatingSelectionPanel != null && diceManager != null)
         {
             coatingSelectionPanel.OpenSelection(diceManager, type, mult, color);
+            Debug.Log("123123");
         }
         else
         {
