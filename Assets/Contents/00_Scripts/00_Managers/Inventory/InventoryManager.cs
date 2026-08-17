@@ -271,7 +271,13 @@ public class InventoryManager : MonoBehaviour
     {
         //주사위 눈금 개수 카운팅
         int[] diceCounts = new int[7];
-        foreach (int v in finalDiceValues) diceCounts[v]++;
+        foreach (int v in finalDiceValues)
+        {
+            if (v >= 0 && v <= 6)
+            {
+                diceCounts[v]++;
+            }
+        }
 
         foreach (var figure in ownedFigures)
         {

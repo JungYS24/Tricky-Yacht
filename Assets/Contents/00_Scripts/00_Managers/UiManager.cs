@@ -44,6 +44,9 @@ public class UIManager : MonoBehaviour
     public Button settingsOpenButton;
     public Button resumeButton;
 
+    //다이스 클릭방지
+    public static bool IsSettingsOpen = false;
+
     private void Start()
     {
         if (settingsOpenButton != null)
@@ -62,6 +65,9 @@ public class UIManager : MonoBehaviour
             settingsPanel.SetActive(true);
 
         Time.timeScale = 0f;
+        //Debug.Log("IsSettingsOpen");
+        IsSettingsOpen = true; // 이제 다른 스크립트가 설정창이 열렸다는 걸 알 수 있음
+        Debug.Log(IsSettingsOpen+" 아아");
     }
 
     public void CloseSettings()
@@ -70,6 +76,8 @@ public class UIManager : MonoBehaviour
             settingsPanel.SetActive(false);
 
         Time.timeScale = 1f;
+        Debug.Log("닫힘");
+        IsSettingsOpen = false; //설정창이 닫혔다고 알려줌
     }
 
     // 매개변수 맨 끝에 List<Sprite> activeSprites = null 을 추가해 줍니다.

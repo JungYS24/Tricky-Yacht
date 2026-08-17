@@ -72,6 +72,34 @@ public class BGMManager : MonoBehaviour
         }
     }
 
+    //볼륨 (Master) 조절
+    public void SetMasterVolume(float volume)
+    {
+        if (bgmMixerGroup == null || bgmMixerGroup.audioMixer == null) return;
+
+        if (volume <= -40f) bgmMixerGroup.audioMixer.SetFloat("Master", -80f);
+        else bgmMixerGroup.audioMixer.SetFloat("Master", volume);
+    }
+
+    //배경음악 (BGM) 조절
+    public void SetBGMVolume(float volume)
+    {
+        if (bgmMixerGroup == null || bgmMixerGroup.audioMixer == null) return;
+
+        if (volume <= -40f) bgmMixerGroup.audioMixer.SetFloat("BGM", -80f);
+        else bgmMixerGroup.audioMixer.SetFloat("BGM", volume);
+    }
+
+    //효과음 (SFX) 조절
+    public void SetSFXVolume(float volume)
+    {
+        if (bgmMixerGroup == null || bgmMixerGroup.audioMixer == null) return;
+
+        if (volume <= -40f) bgmMixerGroup.audioMixer.SetFloat("SFX", -80f);
+        else bgmMixerGroup.audioMixer.SetFloat("SFX", volume);
+    }
+
+
     // 외부에서 BGMManager.Instance.ChangeBGM(클립); 으로 호출
     public void ChangeBGM(AudioClip nextClip)
     {
