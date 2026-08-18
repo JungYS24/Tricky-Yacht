@@ -8,8 +8,8 @@ using DG.Tweening;
 public class CardFlipManager : MonoBehaviour
 {
     [Header("연동할 요소")]
-    [SerializeField] private Button triggerButton;                  // 시작 버튼
-    [SerializeField] private LetterShakeController letterController; // 편지 흔들기 컨트롤러
+    [SerializeField] private Button triggerButton;
+    [SerializeField] private LetterShakeController letterController;
 
     [Header("Project 창의 티켓/이미지 파일들")]
     [SerializeField] private List<Object> allTicketDataList = new List<Object>();
@@ -25,7 +25,8 @@ public class CardFlipManager : MonoBehaviour
 
     private List<CardUI> generatedCardUIList = new List<CardUI>();
     private Sequence cardSequence;
-    private bool isPlayingSequence = false; // 중복 실행 방지 플래그
+    private bool isPlayingSequence = false;
+    private bool isCardSelectable = false;
 
     private void Awake()
     {
@@ -43,11 +44,11 @@ public class CardFlipManager : MonoBehaviour
         }
     }
 
-    // ⭐ 버튼 클릭 시 호출 (편지 그룹 자동 활성화 + 연출 시작)
     public void OnClickStartButton()
     {
-        if (isPlayingSequence) return; // 이미 실행 중이면 무시
+        if (isPlayingSequence) return;
         isPlayingSequence = true;
+        isCardSelectable = false;
 
         if (triggerButton != null)
         {
@@ -56,18 +57,15 @@ public class CardFlipManager : MonoBehaviour
 
         if (letterController != null)
         {
-            // 편지 그룹이 꺼져있어도 자동으로 켜주고 연출 시작!
             letterController.gameObject.SetActive(true);
             letterController.StartLetterShake();
         }
         else
         {
-            // 편지가 없을 때만 예외적으로 바로 카드 생성
             PlayCardFlipSequence();
         }
     }
 
-    // ⭐ 편지가 다 찢어진 후 호출되는 카드 등장 함수
     [ContextMenu("Play Random Card Flip")]
     public void PlayCardFlipSequence()
     {
@@ -79,7 +77,6 @@ public class CardFlipManager : MonoBehaviour
             cardSpawnParent.SetAsLastSibling();
         }
 
-        // 기존에 남아있던 카드 완벽 삭제
         ClearGeneratedCards();
 
         if (allTicketDataList.Count == 0)
@@ -101,6 +98,8 @@ public class CardFlipManager : MonoBehaviour
 
             CardUI cardUI = CreateCardUIObject(data);
             if (cardUI == null) continue;
+
+            cardUI.SetSelectCallback(OnSelectCard);
 
             generatedCardUIList.Add(cardUI);
             RectTransform cardRect = cardUI.GetComponent<RectTransform>();
@@ -135,7 +134,58 @@ public class CardFlipManager : MonoBehaviour
 
         cardSequence.OnComplete(() =>
         {
-            isPlayingSequence = false; // 연출 완료 후 잠금 해제
+            isPlayingSequence = false;
+            isCardSelectable = true;
+
+            // ⭐ [핵심] 등장이 끝난 직후 카드들을 무한 둥실/흔들거리게 만듦
+            foreach (var card in generatedCardUIList)
+            {
+                if (card != null) card.StartIdleAnimation();
+            }
+        });
+    }
+
+    private void OnSelectCard(CardUI selectedCard)
+    {
+        if (!isCardSelectable) return;
+        isCardSelectable = false;
+
+        Debug.Log($"<color=yellow>[CardFlip] 선택 완료: {selectedCard.ticketData?.itemName ?? selectedCard.name}</color>");
+
+        Sequence selectSeq = DOTween.Sequence();
+
+        foreach (var card in generatedCardUIList)
+        {
+            if (card == null) continue;
+
+            // 선택 연출을 위해 다른 모든 카드의 흔들림도 정지
+            card.StopIdleAnimation();
+
+            RectTransform cardRect = card.GetComponent<RectTransform>();
+            CanvasGroup canvasGroup = card.GetComponent<CanvasGroup>();
+            if (canvasGroup == null) canvasGroup = card.gameObject.AddComponent<CanvasGroup>();
+
+            if (card == selectedCard)
+            {
+                // 선택된 카드는 강조
+                cardRect.SetAsLastSibling();
+                selectSeq.Join(cardRect.DOScale(Vector3.one * 1.25f, 0.3f).SetEase(Ease.OutBack));
+                selectSeq.Join(cardRect.DOLocalRotate(Vector3.zero, 0.2f)); // 원래 각도로 정렬
+            }
+            else
+            {
+                // 선택 안 된 카드는 숨김
+                selectSeq.Join(cardRect.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack));
+                selectSeq.Join(canvasGroup.DOFade(0f, 0.3f));
+            }
+        }
+
+        selectSeq.OnComplete(() =>
+        {
+            DOVirtual.DelayedCall(0.8f, () =>
+            {
+                ClearGeneratedCards();
+            });
         });
     }
 
@@ -264,6 +314,7 @@ public class CardFlipManager : MonoBehaviour
         {
             if (card != null)
             {
+                card.StopIdleAnimation();
                 card.transform.DOKill();
                 Destroy(card.gameObject);
             }
