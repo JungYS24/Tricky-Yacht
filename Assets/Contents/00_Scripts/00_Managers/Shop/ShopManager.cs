@@ -38,6 +38,9 @@ public class ShopManager : MonoBehaviour
     [Header("주사위 파괴 선택 UI")]
     public DiceDestructionPanel diceDestructionPanel;
 
+    [Header("위성 선택 UI")]
+    public SatelliteSelectionPanel satelliteSelectionPanel;
+
     private void Awake()
     {
         if (tooltipRect == null && tooltipPanel != null)
@@ -189,6 +192,15 @@ public class ShopManager : MonoBehaviour
                 // 상점 풀의 아이템이 다 떨어졌을 때를 대비한 안전장치
                 shopSlots[i].gameObject.SetActive(false);
             }
+        }
+    }
+
+    // 위성 선택창 열기 
+    public void ShowSatelliteSelection(SatelliteType type)
+    {
+        if (satelliteSelectionPanel != null && diceManager != null)
+        {
+            satelliteSelectionPanel.OpenSelection(diceManager, type);
         }
     }
 

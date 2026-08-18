@@ -10,6 +10,8 @@ public class SavedDiceData
     public int type;
     public float multiplier;
     public Color diceColor;
+
+    public List<int> activeSatellites = new List<int>();
 }
 public class SaveData
 {
@@ -123,6 +125,13 @@ public class GameSaveManager : MonoBehaviour
             sdd.type = (int)d.type;
             sdd.multiplier = d.multiplier;
             sdd.diceColor = d.diceColor;
+            // 위성 데이터 저장 
+            sdd.activeSatellites = new List<int>();
+            foreach (var sat in d.activeSatellites)
+            {
+                sdd.activeSatellites.Add((int)sat);
+            }
+
             data.deckDiceList.Add(sdd);
         }
         foreach (var f in inv.ownedFigures) data.ownedFigureNames.Add(f.itemName);

@@ -242,6 +242,17 @@ public class DiceManager : MonoBehaviour
                 newDice.multiplier = dData.multiplier;
                 newDice.diceColor = dData.diceColor;
             }
+
+            //세이브 파일에 있던 위성 상태를 덮어씌움
+            if (newDice != null && dData.activeSatellites != null)
+            {
+                newDice.activeSatellites.Clear();
+                foreach (int satInt in dData.activeSatellites)
+                {
+                    newDice.activeSatellites.Add((SatelliteType)satInt);
+                }
+            }
+
         }
         InventoryManager.Instance.ClearAllSlots();
         foreach (string fName in data.ownedFigureNames)
@@ -577,6 +588,10 @@ public class DiceManager : MonoBehaviour
         int currentSimulatedHP = enemy.CurrentHP;
         int darkDamageTotal = 0, iceBonusChips = 0;
 
+        // 위성용 변수 
+        int satelliteBonusChips = 0;
+        float satelliteBonusMult = 0f;
+
         foreach (var d in keptDice)
         {
             switch (d.myData.specialEffect)
@@ -614,12 +629,44 @@ public class DiceManager : MonoBehaviour
                     case DiceType.Ice: iceBonusChips += 10; break;
                 }
             }
+
+            // 위성 효과 연산 
+            if (d.myData.activeSatellites != null && d.myData.activeSatellites.Count > 0)
+            {
+                foreach (var sat in d.myData.activeSatellites)
+                {
+                    switch (sat)
+                    {
+                        case SatelliteType.Mercury: // 수성
+                            satelliteBonusChips += 15;
+                            break;
+                        case SatelliteType.Venus: // 금성
+                            if (shopManager != null)
+                            {
+                                shopManager.currentGold += 30;
+                                ui?.UpdateGoldUI(shopManager.currentGold);
+                                if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
+                            }
+                            break;
+                        case SatelliteType.Mars: // 화성
+                            satelliteBonusMult += 1.1f;
+                            break;
+                        case SatelliteType.Jupiter: // 목성
+                            currentPlayerHP += 2;
+                            if (currentPlayerHP > playerMaxHP) currentPlayerHP = playerMaxHP;
+                            break;
+                    }
+                }
+            }
+
         }
 
 
         if (darkDamageTotal > 0) enemy.TakeDamage(darkDamageTotal, null);
 
-        int damage = Mathf.FloorToInt((baseSum + iceBonusChips + snackBonusChips) * finalMultiplier);
+        //최종 데미지에 위성 효과 합산
+        float finalTotalMult = comboMultiplier + snackBonusMult + satelliteBonusMult;
+        int damage = Mathf.FloorToInt((baseSum + iceBonusChips + snackBonusChips + satelliteBonusChips) * finalTotalMult);
 
         // 페퍼민트 성공 여부를 먼저 굴림
         pendingPeppermintSuccess = false;
@@ -920,6 +967,10 @@ public class DiceManager : MonoBehaviour
         float finalMult = baseMult + snackBonusMult;
         int darkDamageTotal = 0, iceBonusChips = 0;
         int expectedGold = 0, expectedHeal = 0;
+        //위성용 변수
+        int satelliteBonusChips = 0;
+        float satelliteBonusMult = 0f;
+
         int currentSimulatedHP = (enemy != null) ? enemy.CurrentHP : 0;
 
         foreach (var d in targetDice)
@@ -944,6 +995,21 @@ public class DiceManager : MonoBehaviour
                 }
                 else if (d.myData.type == DiceType.Ice) iceBonusChips += 10;
             }
+
+            if (d.myData.activeSatellites != null && d.myData.activeSatellites.Count > 0)
+            {
+                foreach (var sat in d.myData.activeSatellites)
+                {
+                    switch (sat)
+                    {
+                        case SatelliteType.Mercury: satelliteBonusChips += 15; break;
+                        case SatelliteType.Venus: expectedGold += 30; break;
+                        case SatelliteType.Mars: satelliteBonusMult += 1.1f; break;
+                        case SatelliteType.Jupiter: expectedHeal += 2; break;
+                    }
+                }
+            }
+
         }
 
         //피규어 발동 실시간 시뮬레이션
@@ -951,7 +1017,7 @@ public class DiceManager : MonoBehaviour
         int figureBonusChips = 0;
         float figureBonusMult = 0f;
         List<string> activeFigureNames = new List<string>();
-        List<Sprite> activeFigureSprites = new List<Sprite>(); // [추가된 줄] 피규어 아이콘 담을 리스트
+        List<Sprite> activeFigureSprites = new List<Sprite>(); //피규어 아이콘 담을 리스트
 
         if (allValues.Count == 5) // 5개가 모였을 때만 피규어 발동 검사
         {
@@ -1014,8 +1080,8 @@ public class DiceManager : MonoBehaviour
             }
         }
 
-        int finalBaseSum = baseSum + iceBonusChips + snackBonusChips + (isCalculating ? 0 : figureBonusChips);
-        float totalFinalMult = finalMult + (isCalculating ? 0f : figureBonusMult);
+        int finalBaseSum = baseSum + iceBonusChips + snackBonusChips + satelliteBonusChips + (isCalculating ? 0 : figureBonusChips);
+        float totalFinalMult = finalMult + satelliteBonusMult + (isCalculating ? 0f : figureBonusMult);
         int totalDamage = Mathf.FloorToInt(finalBaseSum * totalFinalMult) + darkDamageTotal;
 
         string displayHand = $"<color=#FFD700>{handName}</color>";
@@ -1023,6 +1089,10 @@ public class DiceManager : MonoBehaviour
 
         // 다크 주사위 텍스트 위치 (이전에 수정한 부분)
         if (darkDamageTotal > 0) displayHand += $" <color=#A9A9A9>+{darkDamageTotal}</color>";
+
+        //위성칩
+        if (satelliteBonusChips > 0) displayHand += $" <color=#B19CD9>+{satelliteBonusChips}(위성)</color>";
+
 
         //피규어로 얻은 칩이 스낵 칩 표기로 둔갑하는 현상 방어
         int displaySnackChips = isCalculating ? (snackBonusChips - figureBonusChips) : snackBonusChips;

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum SpecialDieEffect
@@ -7,6 +8,14 @@ public enum SpecialDieEffect
     Heart,
     Odd,
     Even
+}
+
+public enum SatelliteType
+{
+    Mercury, 
+    Venus,  
+    Mars,    
+    Jupiter  
 }
 
 public enum DiceType
@@ -33,6 +42,7 @@ public class DiceData1
 
     public Sprite customDiceShell;
     public Sprite[] customFaceSprites;
+    public List<SatelliteType> activeSatellites = new List<SatelliteType>();//위성 리스트
 
     //public int minRoll = 1;
     //public int maxRoll = 6;
