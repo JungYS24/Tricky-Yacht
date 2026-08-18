@@ -4908,6 +4908,7 @@ GameObject:
   - component: {fileID: 420654394546865938}
   - component: {fileID: -6888208857438917302}
   - component: {fileID: 7708629646872671777}
+  - component: {fileID: 2056494654080462187}
   m_Layer: 0
   m_Name: Dice(1)
   m_TagString: Untagged
@@ -5015,6 +5016,7 @@ MonoBehaviour:
     specialEffect: 0
     customDiceShell: {fileID: 0}
     customFaceSprites: []
+    activeSatellites: 
     faceValues: 010000000200000003000000040000000500000006000000
   diceFaceSprites:
   - {fileID: 5114336044013623915, guid: 57f9f46b2ef5d2e438f888f896ac2db4, type: 3}
@@ -5122,3 +5124,30 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &2056494654080462187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6826951872689829596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8388296b63e08844b84c26e29745bce9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SatelliteVisualManager
+  mercurySprite: {fileID: 21300000, guid: 67abb938266ac3249860632181fe9a14, type: 3}
+  venusSprite: {fileID: 21300000, guid: 3706b231292352d4fb0e68207a96c28e, type: 3}
+  marsSprite: {fileID: 21300000, guid: 8123bcfdcf591af40bdcf0adf480039d, type: 3}
+  jupiterSprite: {fileID: 21300000, guid: e32e33171a20c784080908f6b23e286f, type: 3}
+  orbitSpeed: 3
+  orbitWidth: 0.85
+  orbitHeight: 0.1
+  centerOffset: {x: 0, y: 0, z: 0}
+  frontScale: 0.4
+  backScale: 0.4
+  backDarkness: 0.4
+  trailMaterial: {fileID: 0}
+  trailTime: 0.6
+  trailStartWidth: 0.3
+  trailEndWidth: 0
