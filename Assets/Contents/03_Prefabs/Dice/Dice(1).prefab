@@ -5140,14 +5140,14 @@ MonoBehaviour:
   venusSprite: {fileID: 21300000, guid: 3706b231292352d4fb0e68207a96c28e, type: 3}
   marsSprite: {fileID: 21300000, guid: 8123bcfdcf591af40bdcf0adf480039d, type: 3}
   jupiterSprite: {fileID: 21300000, guid: e32e33171a20c784080908f6b23e286f, type: 3}
-  orbitSpeed: 3
-  orbitWidth: 0.85
-  orbitHeight: 0.1
+  orbitSpeed: 3.3
+  orbitWidth: 0.83
+  orbitHeight: 0.12
   centerOffset: {x: 0, y: 0, z: 0}
-  frontScale: 0.4
-  backScale: 0.4
-  backDarkness: 0.4
+  frontScale: 0.38
+  backScale: 0.38
+  backDarkness: 0.38
   trailMaterial: {fileID: 0}
-  trailTime: 0.6
-  trailStartWidth: 0.3
-  trailEndWidth: 0
+  trailTime: 0.25
+  trailStartWidth: 0.2
+  trailEndWidth: 0.1

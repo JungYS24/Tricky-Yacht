@@ -231,6 +231,16 @@ MonoBehaviour:
   prismVFXPrefab: {fileID: 4376018025336615863, guid: bd528d959e80e6e4c8f891586427750a, type: 3}
   vfxLocalOffset: {x: 0, y: 0, z: -10}
   vfxScale: 39
+  mercurySprite: {fileID: 21300000, guid: 67abb938266ac3249860632181fe9a14, type: 3}
+  venusSprite: {fileID: 21300000, guid: 3706b231292352d4fb0e68207a96c28e, type: 3}
+  marsSprite: {fileID: 21300000, guid: 8123bcfdcf591af40bdcf0adf480039d, type: 3}
+  jupiterSprite: {fileID: 21300000, guid: e32e33171a20c784080908f6b23e286f, type: 3}
+  satOrbitSpeed: 3.3
+  satOrbitWidth: 50
+  satOrbitHeight: 14
+  satFrontScale: 0.27
+  satBackScale: 0.27
+  satBackDarkness: 0.27
 --- !u!95 &2481910166647783194
 Animator:
   serializedVersion: 7

@@ -156,7 +156,10 @@ public class SatelliteVisualManager : MonoBehaviour
             {
                 case SatelliteType.Mercury: break;
                 case SatelliteType.Venus:
-                    finalX = -y; finalY = x; break;
+                    // [방향 반전] 금성이 위에서 아래로 떨어지게 만듭니다
+                    finalX = 0f;
+                    finalY = -x;
+                    break;
                 case SatelliteType.Mars:
                     float cos45 = 0.7071f;
                     finalX = x * cos45 - y * cos45;
