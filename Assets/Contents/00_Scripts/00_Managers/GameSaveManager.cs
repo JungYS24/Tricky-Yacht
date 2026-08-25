@@ -40,6 +40,9 @@ public class SaveData
 
     public int savedFlameDamage;
 
+    public int savedMonsterCurrentTurn;//몬스터 턴개념 추가
+    public int savedMonsterMaxTurn;
+
     public List<SavedDiceData> deckDiceList = new List<SavedDiceData>();
 
     public List<string> ownedFigureNames = new List<string>();
@@ -109,6 +112,10 @@ public class GameSaveManager : MonoBehaviour
             data.savedMonsterIndex = dice.enemy.CurrentMonsterIndex;
             //싸우던 몬스터가 살아있다면 화염 스택도 같이 저장
             data.savedFlameDamage = dice.accumulatedFlameDamage;
+
+            // 현재 남은 턴 수와 최대 턴 수 저장
+            data.savedMonsterCurrentTurn = dice.enemy.CurrentAttackTurn;
+            data.savedMonsterMaxTurn = dice.enemy.MaxAttackTurn;
         }
 
         // 주사위 코팅 정보까지 전부 추출해서 저장

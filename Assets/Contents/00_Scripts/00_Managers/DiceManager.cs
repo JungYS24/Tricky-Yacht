@@ -304,7 +304,7 @@ public class DiceManager : MonoBehaviour
             MonsterDataSO savedMonster = GetMonsterDataByName(data.savedMonsterName);
             if (savedMonster != null)
             {
-                enemy.RestoreMonster(savedMonster, data.savedMonsterHP, data.savedMonsterMaxHP, data.savedMonsterAttack, data.savedMonsterIndex);
+                enemy.RestoreMonster(savedMonster, data.savedMonsterHP, data.savedMonsterMaxHP, data.savedMonsterAttack, data.savedMonsterIndex, data.savedMonsterCurrentTurn, data.savedMonsterMaxTurn);
             }
             else enemy.Initialize(currentStage, currentBiome); // 에러 방지용 안전장치
 
@@ -896,66 +896,63 @@ public class DiceManager : MonoBehaviour
         if (!enemy.IsDead)
         {
             // 일반 공격 후 화염 데미지가 0.3초후에 터짐
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.2f);
 
             if (flameDamage > 0)
             {
                 CameraShake.Instance.Shake(0.1f, 0.1f); // 가벼운 흔들림 연출
                 enemy.TakeDamage(flameDamage, OnEnemyKilled); // 화염 데미지 적용
-
-                //UI에 텍스트 깜빡임 + 정확한 데미지 수치 표기
                 UpdateMainUI($"화염 데미지! <color=#FF4500>-{flameDamage}</color>");
-
                 // 화염 데미지로 몬스터가 타죽었다면 적의 공격 캔슬
                 if (enemy.IsDead) yield break;
-
-                // 화염 폭발 후 적이 반격하기 전 템포 조절 (0.4초 대기)
-                yield return new WaitForSeconds(0.4f);
+                // 화염 폭발 후 적이 반격하기 전 템포 조절 (0.8초 대기)
+                yield return new WaitForSeconds(0.8f);
             }
             else
             {
                 // 화염 주사위가 없을 때는 0.4초만 대기 후 바로 반격
-                yield return new WaitForSeconds(0.4f);
+                yield return new WaitForSeconds(0.55f);
             }
 
-            enemy.PlayAttackAnim();
-            yield return new WaitForSeconds(0.2f);
+            enemy.DecreaseTurn();
 
-            // 플레이어 체력 감소 및 화면 흔들림
-            currentPlayerHP -= enemy.AttackPower;
-            CameraShake.Instance.Shake(0.15f, 0.1f);
-
-            // 비네트 피격 연출 실행
-            if (HurtVignetteController.Instance != null)
+            if (enemy.CurrentAttackTurn <= 0)
             {
-                HurtVignetteController.Instance.TriggerHurtEffect();
-            }
+                enemy.PlayAttackAnim();
+                yield return new WaitForSeconds(0.2f);
 
-            // 플레이어 피격 효과음 재생!
-            if (sfxSource != null && playerHurtAudioEvent != null)
-            {
-                playerHurtAudioEvent.Play(sfxSource);
-            }
+                // 플레이어 체력 감소 및 화면 흔들림
+                currentPlayerHP -= enemy.AttackPower;
+                CameraShake.Instance.Shake(0.15f, 0.1f);
 
-            if (currentPlayerHP <= 0)
-            {
-                //게임 오버가 되면 기존 세이브 파일을 지워버림
-                if (GameSaveManager.Instance != null) GameSaveManager.Instance.DeleteSave();
+                // 비네트 피격 연출 실행
+                if (HurtVignetteController.Instance != null) HurtVignetteController.Instance.TriggerHurtEffect();
+                // 플레이어 피격 효과음 재생!
+                if (sfxSource != null && playerHurtAudioEvent != null) playerHurtAudioEvent.Play(sfxSource);
 
-                ui?.ShowResult("#FF0000", "게임 오버");
-                Invoke(nameof(RestartGame), 1.5f);
+                enemy.ResetTurn(); // 공격을 했으므로 턴 카운트를 다시 원래대로(2) 되돌림
 
-                StartCoroutine(ShowGameOverPanelDelayed());
-            }
-            else
-            {
-                if (GameSaveManager.Instance != null)
+                if (currentPlayerHP <= 0)
                 {
-                    GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
-                }
+                    //게임 오버가 되면 기존 세이브 파일을 지워버림
+                    if (GameSaveManager.Instance != null) GameSaveManager.Instance.DeleteSave();
 
-                Invoke(nameof(StartNewRound), 0.5f);
+                    ui?.ShowResult("#FF0000", "게임 오버");
+                    Invoke(nameof(RestartGame), 1.5f);
+
+                    StartCoroutine(ShowGameOverPanelDelayed());
+
+                    //플레이어가 죽었다면 아래 세이브 및 다음 라운드 코드가 실행되지 않도록 강제 종료
+                    yield break;
+                }
             }
+
+            if (GameSaveManager.Instance != null)
+            {
+                GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
+            }
+
+            Invoke(nameof(StartNewRound), 0.5f);
         }
     }
 

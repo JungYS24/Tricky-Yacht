@@ -21,6 +21,9 @@ public class Enemy : MonoBehaviour
     [Header("공격력 텍스트 설정")]
     public TextMeshProUGUI attackPowerText;
 
+    [Header("몬스터 턴 UI")]
+    public TextMeshProUGUI turnText;
+
     [Header("피격 효과")]
     public Color hitColor = Color.red;
     public float hitEffectDuration = 0.18f;
@@ -56,10 +59,15 @@ public class Enemy : MonoBehaviour
     [HideInInspector] public FigureItemSO dropFigureData;
     [HideInInspector] public float baseDropRate = 0.5f;
 
+
     public int MaxHP { get; private set; }
     public int CurrentHP { get; private set; }
     public int AttackPower { get; private set; }
     public bool IsDead { get; private set; } = false;
+
+    //몬스터 턴 카운트 변수
+    public int MaxAttackTurn { get; private set; }
+    public int CurrentAttackTurn { get; private set; }
 
     private Material monsterRuntimeMat;
     private Vector3 originalScale;
@@ -100,6 +108,15 @@ public class Enemy : MonoBehaviour
             if (canvasObj != null)
             {
                 uiCanvas = canvasObj.GetComponent<Canvas>();
+            }
+        }
+
+        if (turnText == null)
+        {
+            GameObject turnTextObj = GameObject.Find("EnemyTurnText");
+            if (turnTextObj != null)
+            {
+                turnText = turnTextObj.GetComponent<TextMeshProUGUI>();
             }
         }
     }
@@ -190,6 +207,9 @@ public class Enemy : MonoBehaviour
         IsDead = false;
         useExternalDeathSequence = false;
 
+        MaxAttackTurn = 2;
+        CurrentAttackTurn = MaxAttackTurn;
+
         //몬스터가 등장할 때(초기화될 때) 공격력 텍스트를 업데이트
         if (attackPowerText != null)
         {
@@ -220,6 +240,7 @@ public class Enemy : MonoBehaviour
 
         UpdateHPBar(true);
     }
+
 
     public void TakeDamage(int damage, System.Action onDeathCallback)
     {
@@ -383,7 +404,7 @@ public class Enemy : MonoBehaviour
         enemyHPSlider.value = CurrentHP;
     }
 
-    public void RestoreMonster(MonsterDataSO monsterData, int hp, int maxHp, int attack, int index)
+    public void RestoreMonster(MonsterDataSO monsterData, int hp, int maxHp, int attack, int index, int currentTurn, int maxTurn)
     {
         CurrentMonsterName = monsterData.monsterName;
         currentMonsterIndex = index;
@@ -414,6 +435,10 @@ public class Enemy : MonoBehaviour
         IsDead = false;
         useExternalDeathSequence = false;
 
+        //세이브 파일에 턴이 없으면(옛날 세이브면) 기본 2로 복구
+        MaxAttackTurn = maxTurn > 0 ? maxTurn : 2;
+        CurrentAttackTurn = currentTurn > 0 ? currentTurn : 2;
+
         transform.position = originalPosition;
         transform.localScale = originalScale;
 
@@ -432,4 +457,27 @@ public class Enemy : MonoBehaviour
         if (attackPowerText != null) attackPowerText.text = $"{AttackPower}";
         UpdateHPBar(true);
     }
+
+
+    // 턴이 변할 때마다 화면의 글씨를 바꿔주는 함수
+    private void UpdateTurnUI()
+    {
+        if (turnText != null)
+        {
+            turnText.text = $"Turn : {CurrentAttackTurn}턴";
+        }
+    }
+
+    public void DecreaseTurn()
+    {
+        CurrentAttackTurn--;
+        UpdateTurnUI(); // 턴 깎일 때 UI 업데이트
+    }
+
+    public void ResetTurn()
+    {
+        CurrentAttackTurn = MaxAttackTurn;
+        UpdateTurnUI(); // 턴 초기화될 때 UI 업데이트
+    }
+
 }
