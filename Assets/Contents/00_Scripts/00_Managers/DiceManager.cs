@@ -100,6 +100,9 @@ public class DiceManager : MonoBehaviour
     //페퍼민트를 먹었는지 체크하는 상태 변수 (스테이지 동안 유지)
     [HideInInspector] public bool isPeppermintActive = false;
 
+    //화염 주사위 누적 데미지 스택
+    [HideInInspector] public int accumulatedFlameDamage = 0;
+
 
     public List<Dice> activeDiceList = new List<Dice>();
     private Dice[] keepSlotOccupants;
@@ -304,10 +307,13 @@ public class DiceManager : MonoBehaviour
                 enemy.RestoreMonster(savedMonster, data.savedMonsterHP, data.savedMonsterMaxHP, data.savedMonsterAttack, data.savedMonsterIndex);
             }
             else enemy.Initialize(currentStage, currentBiome); // 에러 방지용 안전장치
+
+            accumulatedFlameDamage = data.savedFlameDamage;
         }
         else
         {
             enemy.Initialize(currentStage, currentBiome);
+            accumulatedFlameDamage = 0; // 새로 시작할 땐 확실하게 0으로 초기화
         }
 
         //세이브 로드 시에도 적 능력을 체크해서 다시 발동
@@ -367,6 +373,9 @@ public class DiceManager : MonoBehaviour
         isPeppermintActive = false;
         pendingPeppermintSuccess = false;
         snackBonusFigureDropRate = 0f;
+
+        //화염 데미지 스택 초기화
+        accumulatedFlameDamage = 0;
 
         if (currentBiome != null)
         {
@@ -592,6 +601,8 @@ public class DiceManager : MonoBehaviour
         int satelliteBonusChips = 0;
         float satelliteBonusMult = 0f;
 
+        int flameDamageThisTurn = 0; // 이번 턴에 새로 추가할 화염 데미지
+
         foreach (var d in keptDice)
         {
             switch (d.myData.specialEffect)
@@ -607,6 +618,9 @@ public class DiceManager : MonoBehaviour
                 case SpecialDieEffect.Heart:
                     currentPlayerHP += d.currentValue;
                     if (currentPlayerHP > playerMaxHP) currentPlayerHP = playerMaxHP;
+                    break;
+                case SpecialDieEffect.Flame:
+                    flameDamageThisTurn += (d.currentValue * 2);
                     break;
             }
 
@@ -660,7 +674,7 @@ public class DiceManager : MonoBehaviour
             }
 
         }
-
+        accumulatedFlameDamage += flameDamageThisTurn;
 
         if (darkDamageTotal > 0) enemy.TakeDamage(darkDamageTotal, null);
 
@@ -688,7 +702,8 @@ public class DiceManager : MonoBehaviour
         enemy.useExternalDeathSequence = pendingPeppermintSuccess;
         enemy.TakeDamage(damage, OnEnemyKilled);
 
-        StartCoroutine(ProcessTurnResult(handName));
+        // 코루틴에 화염 데미지 값도 같이 넘겨줌
+        StartCoroutine(ProcessTurnResult(handName, accumulatedFlameDamage));
     }
 
     //티켓 아이템 먹었을 때 호출할 함수
@@ -873,35 +888,54 @@ public class DiceManager : MonoBehaviour
 
     private void HideResultAfterFailure() { if (!ShopManager.IsShopOpen && !enemy.IsDead) ui?.HideResult(); }
 
-    private IEnumerator ProcessTurnResult(string handName)
+    private IEnumerator ProcessTurnResult(string handName, int flameDamage)
     {
         yield return new WaitForSeconds(0.4f);
         UpdateMainUI(handName);
 
         if (!enemy.IsDead)
         {
-            yield return new WaitForSeconds(0.6f);
+            // 일반 공격 후 화염 데미지가 0.3초후에 터짐
+            yield return new WaitForSeconds(0.3f);
+
+            if (flameDamage > 0)
+            {
+                CameraShake.Instance.Shake(0.1f, 0.1f); // 가벼운 흔들림 연출
+                enemy.TakeDamage(flameDamage, OnEnemyKilled); // 화염 데미지 적용
+
+                //UI에 텍스트 깜빡임 + 정확한 데미지 수치 표기
+                UpdateMainUI($"화염 데미지! <color=#FF4500>-{flameDamage}</color>");
+
+                // 화염 데미지로 몬스터가 타죽었다면 적의 공격 캔슬
+                if (enemy.IsDead) yield break;
+
+                // 화염 폭발 후 적이 반격하기 전 템포 조절 (0.4초 대기)
+                yield return new WaitForSeconds(0.4f);
+            }
+            else
+            {
+                // 화염 주사위가 없을 때는 0.4초만 대기 후 바로 반격
+                yield return new WaitForSeconds(0.4f);
+            }
 
             enemy.PlayAttackAnim();
             yield return new WaitForSeconds(0.2f);
 
-            // 1. 플레이어 체력 감소 및 화면 흔들림
+            // 플레이어 체력 감소 및 화면 흔들림
             currentPlayerHP -= enemy.AttackPower;
             CameraShake.Instance.Shake(0.15f, 0.1f);
 
-            // 2. 비네트 피격 연출 실행
+            // 비네트 피격 연출 실행
             if (HurtVignetteController.Instance != null)
             {
                 HurtVignetteController.Instance.TriggerHurtEffect();
             }
 
-            // 3.  플레이어 피격 효과음 재생!
+            // 플레이어 피격 효과음 재생!
             if (sfxSource != null && playerHurtAudioEvent != null)
             {
                 playerHurtAudioEvent.Play(sfxSource);
             }
-
-            UpdateMainUI("적 공격!");
 
             if (currentPlayerHP <= 0)
             {
@@ -948,7 +982,7 @@ public class DiceManager : MonoBehaviour
             if (d.isKept) { if (d.currentKeepIndex == -1) AssignToKeepSlot(d); keptCount++; }
             else { if (d.currentKeepIndex != -1) ReleaseFromKeepSlot(d); hasDiceToRoll = true; }
         }
-        UpdateMainUI("없음");
+        UpdateMainUI("");
         ui?.SetRollButtonInteractable((currentRerolls < maxRerolls + snackBonusRerolls + figureBonusRerolls) && hasDiceToRoll);
         ui?.SetFinishButtonInteractable(keptCount == keepSlots.Length);
 
@@ -961,12 +995,23 @@ public class DiceManager : MonoBehaviour
         var allValues = targetDice.Select(d => d.currentValue).ToList();
         int baseSum = allValues.Count > 0 ? allValues.Sum() : 0;
         float baseMult = allValues.Count == 5 ? 0 : 1.0f;
-        if (allValues.Count == 5) CalculateHandData(allValues, out baseMult, out handName);
-        else if (allValues.Count > 0) handName = "계산 중...";
+
+        if (!isCalculating)
+        {
+            if (allValues.Count == 5) CalculateHandData(allValues, out baseMult, out handName);
+            else if (allValues.Count > 0) handName = "계산 중...";
+        }
+        else
+        {
+            // 결산 중에는 데미지 계산을 위해 배수(baseMult)만 몰래 가져오고, 이름(tempName)은 버립니다
+            string tempName;
+            if (allValues.Count == 5) CalculateHandData(allValues, out baseMult, out tempName);
+        }
 
         float finalMult = baseMult + snackBonusMult;
         int darkDamageTotal = 0, iceBonusChips = 0;
         int expectedGold = 0, expectedHeal = 0;
+        int expectedFlameDamage = 0; //예상 화염 데미지
         //위성용 변수
         int satelliteBonusChips = 0;
         float satelliteBonusMult = 0f;
@@ -1092,6 +1137,7 @@ public class DiceManager : MonoBehaviour
 
         //위성칩
         if (satelliteBonusChips > 0) displayHand += $" <color=#B19CD9>+{satelliteBonusChips}(위성)</color>";
+            
 
 
         //피규어로 얻은 칩이 스낵 칩 표기로 둔갑하는 현상 방어
@@ -1099,6 +1145,8 @@ public class DiceManager : MonoBehaviour
         if (displaySnackChips > 0) displayHand += $" <color=#FFA500>+{displaySnackChips}(스낵)</color>";
         if (expectedGold > 0) displayHand += $" <color=#FFFF00>+{expectedGold}</color>";
         if (expectedHeal > 0) displayHand += $" <color=#FF5555>+{expectedHeal}</color>";
+        if (expectedFlameDamage > 0) displayHand += $" <color=#FF4500>+{expectedFlameDamage}(화염)</color>"; //화염주사위
+
 
         // 피규어로 칩이나 배수가 올랐다면 파란색(#00BFFF)으로, 아니면 기본색 유지
         string chipsText = figureBonusChips > 0 ? $"<color=#00BFFF>{finalBaseSum}</color>" : finalBaseSum.ToString();

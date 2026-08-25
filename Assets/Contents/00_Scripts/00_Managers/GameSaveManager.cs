@@ -38,6 +38,8 @@ public class SaveData
     public int savedMonsterAttack;
     public int savedMonsterIndex;
 
+    public int savedFlameDamage;
+
     public List<SavedDiceData> deckDiceList = new List<SavedDiceData>();
 
     public List<string> ownedFigureNames = new List<string>();
@@ -105,6 +107,8 @@ public class GameSaveManager : MonoBehaviour
             data.savedMonsterMaxHP = dice.enemy.MaxHP;
             data.savedMonsterAttack = dice.enemy.AttackPower;
             data.savedMonsterIndex = dice.enemy.CurrentMonsterIndex;
+            //싸우던 몬스터가 살아있다면 화염 스택도 같이 저장
+            data.savedFlameDamage = dice.accumulatedFlameDamage;
         }
 
         // 주사위 코팅 정보까지 전부 추출해서 저장

@@ -7,7 +7,8 @@ public enum SpecialDieEffect
     Coin,
     Heart,
     Odd,
-    Even
+    Even,
+    Flame
 }
 
 public enum SatelliteType
