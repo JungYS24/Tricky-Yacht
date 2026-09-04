@@ -43,7 +43,7 @@ public class LobbyManager : MonoBehaviour
         //}
 
         StopAllCoroutines();
-        StartCoroutine(GlitchAndLoad("SampleScene"));
+        StartCoroutine(GlitchAndLoad("MainScene"));
     }
 
     //이어하기 전용 클릭 이벤트
@@ -55,7 +55,7 @@ public class LobbyManager : MonoBehaviour
         PlayerPrefs.SetInt("LoadGame", 1);
 
         StopAllCoroutines();
-        StartCoroutine(GlitchAndLoad("SampleScene"));
+        StartCoroutine(GlitchAndLoad("MainScene"));
     }
 
     public void OnTutorialButtonClick()
