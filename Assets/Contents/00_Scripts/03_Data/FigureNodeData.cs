@@ -1,18 +1,18 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-//16Á¾ ¿øÀÎ(Trigger)
+//16ì¢… ì›ì¸(Trigger)
 public enum FigureTriggerType
 {
     None,
-    ThreeOf1, ThreeOf2, ThreeOf3, ThreeOf4, ThreeOf5, ThreeOf6, // T-01 ~ T-06, ÁÖ»çÀ§ 3°³ ¼ıÀÚ°¡ °°À» ¶§
-    OnePair, TwoPair, Triple, Straight, FullHouse, FourOfAKind, Yacht, // T-07 ~ T-13 Á·º¸ Ã³¸®
-    OnSnackUsed, // T-14 ½º³¼ ¸Ô¾úÀ» ¶§
-    OnHPLost,    // T-15 hp Â÷°¨½Ã
+    ThreeOf1, ThreeOf2, ThreeOf3, ThreeOf4, ThreeOf5, ThreeOf6, // T-01 ~ T-06, ì£¼ì‚¬ìœ„ 3ê°œ ìˆ«ìê°€ ê°™ì„ ë•Œ
+    OnePair, TwoPair, Triple, Straight, FullHouse, FourOfAKind, Yacht, // T-07 ~ T-13 ì¡±ë³´ ì²˜ë¦¬
+    OnSnackUsed, // T-14 ìŠ¤ë‚µ ë¨¹ì—ˆì„ ë•Œ
+    OnHPLost,    // T-15 hp ì°¨ê°ì‹œ
     Passive      // T-16
 }
 
-//12Á¾ º¸»ó(Effect)
+//12ì¢… ë³´ìƒ(Effect)
 public enum FigureEffectType
 {
     None,
@@ -25,16 +25,16 @@ public enum FigureEffectType
     AddReroll
 }
 
-// º¸»ó ³ëµå µ¥ÀÌÅÍ ±¸Á¶
+// ë³´ìƒ ë…¸ë“œ ë°ì´í„° êµ¬ì¡°
 [System.Serializable]
 public struct FigureEffectNode
 {
     public FigureEffectType effectType;
-    public float effectValue; // ¿¡µğÅÍ¿¡¼­ Á¶ÀıÇÒ ¼öÄ¡ ÇÊµå
-    public BaseItemDataSO optionalItem; // Æ¯Á¤ ½º³¼ Áö±Ş µî ¾ÆÀÌÅÛ ¿¬µ¿¿ë
+    public float effectValue; // ì—ë””í„°ì—ì„œ ì¡°ì ˆí•  ìˆ˜ì¹˜ í•„ë“œ
+    public BaseItemDataSO optionalItem; // íŠ¹ì • ìŠ¤ë‚µ ì§€ê¸‰ ë“± ì•„ì´í…œ ì—°ë™ìš©
 }
 
-//¿øÀÎ ³ëµå µ¥ÀÌÅÍ ±¸Á¶ (1°³ÀÇ ¿øÀÎ¿¡ º¹¼öÀÇ º¸»ó ¿¬°á)
+//ì›ì¸ ë…¸ë“œ ë°ì´í„° êµ¬ì¡° (1ê°œì˜ ì›ì¸ì— ë³µìˆ˜ì˜ ë³´ìƒ ì—°ê²°)
 [System.Serializable]
 public class FigureNode
 {

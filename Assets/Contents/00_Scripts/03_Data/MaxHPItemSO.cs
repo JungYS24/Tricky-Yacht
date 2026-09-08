@@ -3,22 +3,22 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewMaxHPItem", menuName = "Shop/Items/MaxHP")]
 public class MaxHPItemSO : BaseItemDataSO
 {
-    [Header("Ã¼·Â Áõ°¡·®")]
+    [Header("ì²´ë ¥ ì¦ê°€ëŸ‰")]
     public int hpIncreaseAmount = 10;
 
     public override void ApplyItemEffect(DiceManager diceManager)
     {
         if (diceManager != null)
         {
-            // ÃÖ´ë Ã¼·Â Áõ°¡
+            // ìµœëŒ€ ì²´ë ¥ ì¦ê°€
             diceManager.playerMaxHP += hpIncreaseAmount;
-            //ÇöÀç Ã¼·Âµµ Áõ°¡
+            //í˜„ì¬ ì²´ë ¥ë„ ì¦ê°€
             diceManager.currentPlayerHP += hpIncreaseAmount;
 
-            // ¹Ù²ï Ã¼·ÂÀ» È­¸é UI¿¡ Áï½Ã ¹İ¿µ
+            // ë°”ë€ ì²´ë ¥ì„ í™”ë©´ UIì— ì¦‰ì‹œ ë°˜ì˜
             diceManager.ForceUpdateUI();
 
-            Debug.Log($"ÃÖ´ë Ã¼·ÂÀÌ {hpIncreaseAmount} Áõ°¡Çß½À´Ï´Ù! (ÇöÀç ÃÖ´ë Ã¼·Â: {diceManager.playerMaxHP})");
+            Debug.Log($"ìµœëŒ€ ì²´ë ¥ì´ {hpIncreaseAmount} ì¦ê°€í–ˆìŠµë‹ˆë‹¤! (í˜„ì¬ ìµœëŒ€ ì²´ë ¥: {diceManager.playerMaxHP})");
         }
     }
 }

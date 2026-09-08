@@ -6,7 +6,7 @@ using System.Linq;
 
 public class FigureDetailPanel : MonoBehaviour
 {
-    //´Ù¸¥ ½ºÅ©¸³Æ®(ÁÖ»çÀ§, ¸Å´ÏÀú µî)¿¡¼­ ÆĞ³Î ¿ÀÇÂ ¿©ºÎ¸¦ È®ÀÎÇÒ ¼ö ÀÖ´Â Á¤Àû º¯¼ö
+    //ë‹¤ë¥¸ ìŠ¤í¬ë¦½íŠ¸(ì£¼ì‚¬ìœ„, ë§¤ë‹ˆì € ë“±)ì—ì„œ íŒ¨ë„ ì˜¤í”ˆ ì—¬ë¶€ë¥¼ í™•ì¸í•  ìˆ˜ ìˆëŠ” ì •ì  ë³€ìˆ˜
     public static bool IsPanelOpen { get; private set; } = false;
 
     public GameObject panelRoot;
@@ -14,14 +14,14 @@ public class FigureDetailPanel : MonoBehaviour
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI descText;
 
-    [Header("µµ°¨¿ë UI")]
+    [Header("ë„ê°ìš© UI")]
     public TextMeshProUGUI locationText;
 
     public Button leftButton;
     public Button rightButton;
     public Button closeButton;
 
-    // º¸À¯ ÁßÀÎ ÇÇ±Ô¾î ¸®½ºÆ®¿Í ÇöÀç º¸°í ÀÖ´Â ÇÇ±Ô¾î ÀÎµ¦½º
+    // ë³´ìœ  ì¤‘ì¸ í”¼ê·œì–´ ë¦¬ìŠ¤íŠ¸ì™€ í˜„ì¬ ë³´ê³  ìˆëŠ” í”¼ê·œì–´ ì¸ë±ìŠ¤
     private List<FigureItemSO> currentOwnedFigures;
     private int currentIndex;
 
@@ -31,8 +31,8 @@ public class FigureDetailPanel : MonoBehaviour
         if (leftButton != null) leftButton.onClick.AddListener(ShowPrevious);
         if (rightButton != null) rightButton.onClick.AddListener(ShowNext);
 
-        panelRoot.SetActive(false); // ½ÃÀÛ ½Ã ÆĞ³Î ¼û±â±â
-        IsPanelOpen = false;        // »óÅÂ ÃÊ±âÈ­
+        panelRoot.SetActive(false); // ì‹œì‘ ì‹œ íŒ¨ë„ ìˆ¨ê¸°ê¸°
+        IsPanelOpen = false;        // ìƒíƒœ ì´ˆê¸°í™”
     }
 
     public void OpenPanel(List<FigureItemSO> ownedFigures, FigureItemSO selectedFigure)
@@ -42,7 +42,7 @@ public class FigureDetailPanel : MonoBehaviour
         currentOwnedFigures = ownedFigures;
         currentIndex = currentOwnedFigures.IndexOf(selectedFigure);
 
-        IsPanelOpen = true; // ÆĞ³ÎÀÌ ¿­·ÈÀ½À» ¾Ë¸² (ÁÖ»çÀ§/¹öÆ° Á¶ÀÛ Â÷´Ü ½ÃÀÛ)
+        IsPanelOpen = true; // íŒ¨ë„ì´ ì—´ë ¸ìŒì„ ì•Œë¦¼ (ì£¼ì‚¬ìœ„/ë²„íŠ¼ ì¡°ì‘ ì°¨ë‹¨ ì‹œì‘)
         UpdateUI();
         panelRoot.SetActive(true);
     }
@@ -51,24 +51,24 @@ public class FigureDetailPanel : MonoBehaviour
     {
         switch (biome)
         {
-            case BiomeType.Forest: return "½£";
-            case BiomeType.Meadow: return "ÃÊ¿ø";
-            case BiomeType.Temple: return "½ÅÀü";
-            case BiomeType.Jungle: return "Á¤±Û";
-            case BiomeType.Desert: return "»ç¸·";
-            case BiomeType.Ruins: return "À¯Àû";
-            case BiomeType.Cave: return "µ¿±¼";
-            case BiomeType.Volcano: return "È­»ê";
-            case BiomeType.Swamp: return "´Ë";
-            case BiomeType.Beach: return "ÇØº¯";
-            case BiomeType.Ocean: return "¹Ù´Ù";
-            case BiomeType.Abyss: return "½É¿¬";
-            case BiomeType.Snow: return "¼³¿ø";
-            case BiomeType.Grave: return "¹«´ı";
-            case BiomeType.Circus: return "¼­Ä¿½º";
-            case BiomeType.Void: return "°øÇã";
-            case BiomeType.Shop: return "»óÁ¡";
-            default: return "¾Ë ¼ö ¾øÀ½";
+            case BiomeType.Forest: return "ìˆ²";
+            case BiomeType.Meadow: return "ì´ˆì›";
+            case BiomeType.Temple: return "ì‹ ì „";
+            case BiomeType.Jungle: return "ì •ê¸€";
+            case BiomeType.Desert: return "ì‚¬ë§‰";
+            case BiomeType.Ruins: return "ìœ ì ";
+            case BiomeType.Cave: return "ë™êµ´";
+            case BiomeType.Volcano: return "í™”ì‚°";
+            case BiomeType.Swamp: return "ëŠª";
+            case BiomeType.Beach: return "í•´ë³€";
+            case BiomeType.Ocean: return "ë°”ë‹¤";
+            case BiomeType.Abyss: return "ì‹¬ì—°";
+            case BiomeType.Snow: return "ì„¤ì›";
+            case BiomeType.Grave: return "ë¬´ë¤";
+            case BiomeType.Circus: return "ì„œì»¤ìŠ¤";
+            case BiomeType.Void: return "ê³µí—ˆ";
+            case BiomeType.Shop: return "ìƒì ";
+            default: return "ì•Œ ìˆ˜ ì—†ìŒ";
         }
     }
 
@@ -82,7 +82,7 @@ public class FigureDetailPanel : MonoBehaviour
         bool isEncountered = PlayerPrefs.GetInt("Collection_Encountered_" + currentFigure.itemName, 0) == 1;
 
         string biomeNames = string.Join(", ", currentFigure.sourceBiomes.Select(b => GetBiomeKoreanName(b)));
-        string biomeText = $"È¹µæ ¹ÙÀÌ¿È : {biomeNames}";
+        string biomeText = $"íšë“ ë°”ì´ì˜´ : {biomeNames}";
 
         if (isUnlocked)
         {
@@ -154,7 +154,7 @@ public class FigureDetailPanel : MonoBehaviour
             }
         }
 
-        // Ã¹ ¹øÂ°°Å³ª ¸¶Áö¸· ÇÇ±Ô¾î¸é È­»ìÇ¥ ºñÈ°¼ºÈ­ (¹öÆ°ÀÌ ÀÖÀ» ¶§¸¸ ½ÇÇà)
+        // ì²« ë²ˆì§¸ê±°ë‚˜ ë§ˆì§€ë§‰ í”¼ê·œì–´ë©´ í™”ì‚´í‘œ ë¹„í™œì„±í™” (ë²„íŠ¼ì´ ìˆì„ ë•Œë§Œ ì‹¤í–‰)
         if (leftButton != null)
             leftButton.interactable = (currentIndex > 0);
 
@@ -162,7 +162,7 @@ public class FigureDetailPanel : MonoBehaviour
             rightButton.interactable = (currentIndex < currentOwnedFigures.Count - 1);
     }
 
-    // ÀÌÀü ÇÇ±Ô¾î º¸±â
+    // ì´ì „ í”¼ê·œì–´ ë³´ê¸°
     private void ShowPrevious()
     {
         if (currentIndex > 0)
@@ -172,7 +172,7 @@ public class FigureDetailPanel : MonoBehaviour
         }
     }
 
-    // ´ÙÀ½ ÇÇ±Ô¾î º¸±â
+    // ë‹¤ìŒ í”¼ê·œì–´ ë³´ê¸°
     private void ShowNext()
     {
         if (currentIndex < currentOwnedFigures.Count - 1)
@@ -184,7 +184,7 @@ public class FigureDetailPanel : MonoBehaviour
 
     public void ClosePanel()
     {
-        IsPanelOpen = false; // ÆĞ³ÎÀÌ ´İÇûÀ½À» ¾Ë¸² (Á¶ÀÛ Â÷´Ü ÇØÁ¦)
+        IsPanelOpen = false; // íŒ¨ë„ì´ ë‹«í˜”ìŒì„ ì•Œë¦¼ (ì¡°ì‘ ì°¨ë‹¨ í•´ì œ)
         panelRoot.SetActive(false);
     }
 }

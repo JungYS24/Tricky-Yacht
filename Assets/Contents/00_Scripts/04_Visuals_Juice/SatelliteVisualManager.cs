@@ -3,43 +3,43 @@ using System.Collections.Generic;
 
 public class SatelliteVisualManager : MonoBehaviour
 {
-    [Header("À§¼º ½ºÇÁ¶óÀÌÆ® (Çà¼º ÀÌ¹ÌÁö)")]
-    public Sprite mercurySprite; // ¼ö¼º
-    public Sprite venusSprite;   // ±İ¼º
-    public Sprite marsSprite;    // È­¼º
-    public Sprite jupiterSprite; // ¸ñ¼º
+    [Header("ìœ„ì„± ìŠ¤í”„ë¼ì´íŠ¸ (í–‰ì„± ì´ë¯¸ì§€)")]
+    public Sprite mercurySprite; // ìˆ˜ì„±
+    public Sprite venusSprite;   // ê¸ˆì„±
+    public Sprite marsSprite;    // í™”ì„±
+    public Sprite jupiterSprite; // ëª©ì„±
 
-    [Header("±Ëµµ ¼³Á¤")]
-    public float orbitSpeed = 3f;      // °øÀü ¼Óµµ
-    public float orbitWidth = 1.2f;    // ±Ëµµ °¡·ÎÆø
-    public float orbitHeight = 0.35f;  // ±Ëµµ ¼¼·ÎÆø
+    [Header("ê¶¤ë„ ì„¤ì •")]
+    public float orbitSpeed = 3f;      // ê³µì „ ì†ë„
+    public float orbitWidth = 1.2f;    // ê¶¤ë„ ê°€ë¡œí­
+    public float orbitHeight = 0.35f;  // ê¶¤ë„ ì„¸ë¡œí­
 
-    [Header("±Ëµµ Áß½É ¿µÁ¡ Á¶Àı")]
-    // ÁÖ»çÀ§ ÀÌ¹ÌÁöÀÇ ±âÁØÁ¡(Pivot) Â÷ÀÌ·Î ÀÎÇØ ±Ëµµ°¡ ½ò¸®´Â Çö»óÀ» º¸Á¤ÇÕ´Ï´Ù.
-    // ÀÎ½ºÆåÅÍ¿¡¼­ X, Y °ªÀ» Á¶±İ¾¿ Á¶ÀıÇÏ¸ç Á¤Áß¾ÓÀ» ¸ÂÃçº¸¼¼¿ä.
+    [Header("ê¶¤ë„ ì¤‘ì‹¬ ì˜ì  ì¡°ì ˆ")]
+    // ì£¼ì‚¬ìœ„ ì´ë¯¸ì§€ì˜ ê¸°ì¤€ì (Pivot) ì°¨ì´ë¡œ ì¸í•´ ê¶¤ë„ê°€ ì ë¦¬ëŠ” í˜„ìƒì„ ë³´ì •í•©ë‹ˆë‹¤.
+    // ì¸ìŠ¤í™í„°ì—ì„œ X, Y ê°’ì„ ì¡°ê¸ˆì”© ì¡°ì ˆí•˜ë©° ì •ì¤‘ì•™ì„ ë§ì¶°ë³´ì„¸ìš”.
     public Vector3 centerOffset = new Vector3(0f, 0.2f, 0f);
 
-    [Header("¿ø±Ù°¨(3D) ¼³Á¤")]
-    public float frontScale = 0.4f;    // ¾ÕÀ¸·Î ¿Ã ¶§ Å©±â
-    public float backScale = 0.2f;     // µÚ·Î °¥ ¶§ Å©±â
-    public float backDarkness = 0.4f;  // µÚ·Î °¥ ¶§ ¾îµÎ¿öÁö´Â Á¤µµ
+    [Header("ì›ê·¼ê°(3D) ì„¤ì •")]
+    public float frontScale = 0.4f;    // ì•ìœ¼ë¡œ ì˜¬ ë•Œ í¬ê¸°
+    public float backScale = 0.2f;     // ë’¤ë¡œ ê°ˆ ë•Œ í¬ê¸°
+    public float backDarkness = 0.4f;  // ë’¤ë¡œ ê°ˆ ë•Œ ì–´ë‘ì›Œì§€ëŠ” ì •ë„
 
-    [Header("²¿¸®(Æ®·¹ÀÏ) ÀÌÆåÆ® ¼³Á¤")]
-    public Material trailMaterial;     // ²¿¸®¿¡ ¾²ÀÏ ÀçÁú (ÀÎ½ºÆåÅÍ ÇÒ´ç ±ÇÀå)
-    public float trailTime = 0.4f;     // ²¿¸®°¡ À¯ÁöµÇ´Â ½Ã°£ (±æÀÌ)
-    public float trailStartWidth = 0.15f; // ²¿¸® ½ÃÀÛ µÎ²²
-    public float trailEndWidth = 0.0f;    // ²¿¸® ³¡ µÎ²²
+    [Header("ê¼¬ë¦¬(íŠ¸ë ˆì¼) ì´í™íŠ¸ ì„¤ì •")]
+    public Material trailMaterial;     // ê¼¬ë¦¬ì— ì“°ì¼ ì¬ì§ˆ (ì¸ìŠ¤í™í„° í• ë‹¹ ê¶Œì¥)
+    public float trailTime = 0.4f;     // ê¼¬ë¦¬ê°€ ìœ ì§€ë˜ëŠ” ì‹œê°„ (ê¸¸ì´)
+    public float trailStartWidth = 0.15f; // ê¼¬ë¦¬ ì‹œì‘ ë‘ê»˜
+    public float trailEndWidth = 0.0f;    // ê¼¬ë¦¬ ë ë‘ê»˜
 
     private Dice dice;
     private SpriteRenderer diceSpriteRenderer;
 
-    // À§¼º°ú ²¿¸® ÀÌÆåÆ®¸¦ ÇÔ²² ¹­¾î¼­ °ü¸®ÇÏ´Â Å¬·¡½º
+    // ìœ„ì„±ê³¼ ê¼¬ë¦¬ ì´í™íŠ¸ë¥¼ í•¨ê»˜ ë¬¶ì–´ì„œ ê´€ë¦¬í•˜ëŠ” í´ë˜ìŠ¤
     private class SatelliteInstance
     {
         public SatelliteType type;
         public GameObject go;
         public SpriteRenderer sr;
-        public TrailRenderer tr; // Æ®·¹ÀÏ ·»´õ·¯ Ãß°¡
+        public TrailRenderer tr; // íŠ¸ë ˆì¼ ë Œë”ëŸ¬ ì¶”ê°€
         public float angle;
     }
 
@@ -80,43 +80,43 @@ public class SatelliteVisualManager : MonoBehaviour
 
             GameObject satGo = new GameObject("Satellite_" + type.ToString());
             satGo.transform.SetParent(transform);
-            satGo.transform.localPosition = centerOffset; // ½ÃÀÛ À§Ä¡¸¦ ¿ÀÇÁ¼ÂÀ¸·Î ÁöÁ¤
+            satGo.transform.localPosition = centerOffset; // ì‹œì‘ ìœ„ì¹˜ë¥¼ ì˜¤í”„ì…‹ìœ¼ë¡œ ì§€ì •
 
-            // 1. ½ºÇÁ¶óÀÌÆ® ·»´õ·¯ ¼¼ÆÃ
+            // 1. ìŠ¤í”„ë¼ì´íŠ¸ ë Œë”ëŸ¬ ì„¸íŒ…
             SpriteRenderer sr = satGo.AddComponent<SpriteRenderer>();
-            Color satColor = Color.white; // ²¿¸® »ö»ó¿ë º¯¼ö
+            Color satColor = Color.white; // ê¼¬ë¦¬ ìƒ‰ìƒìš© ë³€ìˆ˜
 
             switch (type)
             {
                 case SatelliteType.Mercury:
                     sr.sprite = mercurySprite;
-                    satColor = new Color(0.3f, 0.8f, 1f); // ÇÏ´Ã»ö
+                    satColor = new Color(0.3f, 0.8f, 1f); // í•˜ëŠ˜ìƒ‰
                     break;
                 case SatelliteType.Venus:
                     sr.sprite = venusSprite;
-                    satColor = new Color(1f, 0.9f, 0.2f); // ³ë¶õ»ö
+                    satColor = new Color(1f, 0.9f, 0.2f); // ë…¸ë€ìƒ‰
                     break;
                 case SatelliteType.Mars:
                     sr.sprite = marsSprite;
-                    satColor = new Color(1f, 0.4f, 0.3f); // ºÓÀº»ö
+                    satColor = new Color(1f, 0.4f, 0.3f); // ë¶‰ì€ìƒ‰
                     break;
                 case SatelliteType.Jupiter:
                     sr.sprite = jupiterSprite;
-                    satColor = new Color(0.8f, 0.6f, 0.4f); // ÁÖÈ²/°¥»ö
+                    satColor = new Color(0.8f, 0.6f, 0.4f); // ì£¼í™©/ê°ˆìƒ‰
                     break;
             }
 
-            // 2. Æ®·¹ÀÏ ·»´õ·¯(²¿¸®) ¼¼ÆÃ
+            // 2. íŠ¸ë ˆì¼ ë Œë”ëŸ¬(ê¼¬ë¦¬) ì„¸íŒ…
             TrailRenderer tr = satGo.AddComponent<TrailRenderer>();
             tr.time = trailTime;
             tr.startWidth = trailStartWidth;
             tr.endWidth = trailEndWidth;
 
-            // ¸ÓÆ¼¸®¾óÀÌ ºñ¾îÀÖÀ¸¸é À¯´ÏÆ¼ ±âº» ½ºÇÁ¶óÀÌÆ® ÀçÁúÀ» »ç¿ë
+            // ë¨¸í‹°ë¦¬ì–¼ì´ ë¹„ì–´ìˆìœ¼ë©´ ìœ ë‹ˆí‹° ê¸°ë³¸ ìŠ¤í”„ë¼ì´íŠ¸ ì¬ì§ˆì„ ì‚¬ìš©
             if (trailMaterial != null) tr.material = trailMaterial;
             else tr.material = new Material(Shader.Find("Sprites/Default"));
 
-            // ²¿¸®ÀÇ »ö»óÀÌ ¼­¼­È÷ Åõ¸íÇØÁöµµ·Ï ±×¶óµğ¾ğÆ® Àû¿ë
+            // ê¼¬ë¦¬ì˜ ìƒ‰ìƒì´ ì„œì„œíˆ íˆ¬ëª…í•´ì§€ë„ë¡ ê·¸ë¼ë””ì–¸íŠ¸ ì ìš©
             Gradient gradient = new Gradient();
             gradient.SetKeys(
                 new GradientColorKey[] { new GradientColorKey(satColor, 0.0f), new GradientColorKey(satColor, 1.0f) },
@@ -156,7 +156,7 @@ public class SatelliteVisualManager : MonoBehaviour
             {
                 case SatelliteType.Mercury: break;
                 case SatelliteType.Venus:
-                    // [¹æÇâ ¹İÀü] ±İ¼ºÀÌ À§¿¡¼­ ¾Æ·¡·Î ¶³¾îÁö°Ô ¸¸µì´Ï´Ù
+                    // [ë°©í–¥ ë°˜ì „] ê¸ˆì„±ì´ ìœ„ì—ì„œ ì•„ë˜ë¡œ ë–¨ì–´ì§€ê²Œ ë§Œë“­ë‹ˆë‹¤
                     finalX = 0f;
                     finalY = -x;
                     break;
@@ -172,7 +172,7 @@ public class SatelliteVisualManager : MonoBehaviour
                     break;
             }
 
-            // °è»êµÈ ÃÖÁ¾ À§Ä¡¿¡ ¿µÁ¡(centerOffset)À» ´õÇØÁİ´Ï´Ù.
+            // ê³„ì‚°ëœ ìµœì¢… ìœ„ì¹˜ì— ì˜ì (centerOffset)ì„ ë”í•´ì¤ë‹ˆë‹¤.
             inst.go.transform.localPosition = new Vector3(finalX, finalY, 0f) + centerOffset;
 
             float depth01 = (depth + 1f) / 2f;
@@ -182,7 +182,7 @@ public class SatelliteVisualManager : MonoBehaviour
             float colorMult = Mathf.Lerp(1f, backDarkness, depth01);
             inst.sr.color = new Color(colorMult, colorMult, colorMult, 1f);
 
-            // ÁÖ»çÀ§ ±âÁØ ¾Õ/µÚ ·¹ÀÌ¾î ·»´õ¸µ Á¤·Ä (À§¼º º»Ã¼¿Í ²¿¸® µ¿½Ã Àû¿ë)
+            // ì£¼ì‚¬ìœ„ ê¸°ì¤€ ì•/ë’¤ ë ˆì´ì–´ ë Œë”ë§ ì •ë ¬ (ìœ„ì„± ë³¸ì²´ì™€ ê¼¬ë¦¬ ë™ì‹œ ì ìš©)
             if (depth > 0)
             {
                 inst.sr.sortingOrder = baseOrder - 1;

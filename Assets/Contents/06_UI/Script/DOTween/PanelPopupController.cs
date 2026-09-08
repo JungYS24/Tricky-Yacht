@@ -18,7 +18,7 @@ public class PanelPopupController : MonoBehaviour
     {
         if (targetPanel == null) return;
 
-        // 1. ÆĞ³Î È°¼ºÈ­
+        // 1. íŒ¨ë„ í™œì„±í™”
         targetPanel.SetActive(true);
 
         targetPanel.transform.localScale = Vector3.zero;
@@ -31,12 +31,12 @@ public class PanelPopupController : MonoBehaviour
 
         targetPanel.transform.DOScale(Vector3.zero, 0.2f)
             .SetEase(Ease.InBack)
-            .OnComplete(() => targetPanel.SetActive(false)); // ¿¬Ãâ ³¡³ª¸é ²ô±â
+            .OnComplete(() => targetPanel.SetActive(false)); // ì—°ì¶œ ëë‚˜ë©´ ë„ê¸°
     }
 
     void OnDestroy()
     {
-        // ¾À ÀüÈ¯ ½Ã È¤½Ã ³²¾ÆÀÖÀ»Áö ¸ğ¸£´Â µµÆ®À© ÀÜ¿© ¸Ş¸ğ¸® Å³
+        // ì”¬ ì „í™˜ ì‹œ í˜¹ì‹œ ë‚¨ì•„ìˆì„ì§€ ëª¨ë¥´ëŠ” ë„íŠ¸ìœˆ ì”ì—¬ ë©”ëª¨ë¦¬ í‚¬
         if (targetPanel != null)
         {
             targetPanel.transform.DOKill();

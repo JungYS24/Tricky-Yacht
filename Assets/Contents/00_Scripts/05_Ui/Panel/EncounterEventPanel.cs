@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-// Á¶¿ìÀÚ Á¾·ù¸¦ ±¸ºĞÇÏ±â À§ÇÑ Enum (µ¥ºí ´ÙÀÌ½º Á¦¿Ü)
+// ì¡°ìš°ì ì¢…ë¥˜ë¥¼ êµ¬ë¶„í•˜ê¸° ìœ„í•œ Enum (ë°ë¸” ë‹¤ì´ìŠ¤ ì œì™¸)
 public enum EncounterType
 {
     Clown, AbyssDealer, BlindFortuneTeller, Poacher,
@@ -13,39 +13,39 @@ public enum EncounterType
     MadHatter, RustyCaptain
 }
 
-// ÀÎ½ºÆåÅÍ¿¡¼­ Á¶¿ìÀÚ µ¥ÀÌÅÍ¸¦ ½±°Ô ¼¼ÆÃÇÏ±â À§ÇÑ Å¬·¡½º
+// ì¸ìŠ¤í™í„°ì—ì„œ ì¡°ìš°ì ë°ì´í„°ë¥¼ ì‰½ê²Œ ì„¸íŒ…í•˜ê¸° ìœ„í•œ í´ë˜ìŠ¤
 [System.Serializable]
 public class EncounterData
 {
     public EncounterType type;
     public string encounterName;
-    public List<BiomeType> appearBiomes; // µîÀå °¡´ÉÇÑ ¹ÙÀÌ¿È ¸®½ºÆ®
+    public List<BiomeType> appearBiomes; // ë“±ì¥ ê°€ëŠ¥í•œ ë°”ì´ì˜´ ë¦¬ìŠ¤íŠ¸
 
-    [Header("Á¶¿ìÀÚ ¿ÜÇü (ÀÌ¹ÌÁö & ¾Ö´Ï¸ŞÀÌ¼Ç)")]
-    public Sprite encounterSprite; // Á¶¿ìÀÚÀÇ ±âº» ÀÏ·¯½ºÆ®
-    public RuntimeAnimatorController animatorController; // Á¶¿ìÀÚ Àü¿ë ¾Ö´Ï¸ŞÀÌÅÍ ÄÁÆ®·Ñ·¯
+    [Header("ì¡°ìš°ì ì™¸í˜• (ì´ë¯¸ì§€ & ì• ë‹ˆë©”ì´ì…˜)")]
+    public Sprite encounterSprite; // ì¡°ìš°ìì˜ ê¸°ë³¸ ì¼ëŸ¬ìŠ¤íŠ¸
+    public RuntimeAnimatorController animatorController; // ì¡°ìš°ì ì „ìš© ì• ë‹ˆë©”ì´í„° ì»¨íŠ¸ë¡¤ëŸ¬
 
-    [TextArea(2, 4)] public string[] dialogues; // 3~4ÁÙÀÇ ´ë»ç ¹è¿­
-    public string choiceAText; // ÇÏÀÌ¸®½ºÅ© ÇÏÀÌ¸®ÅÏ ÅØ½ºÆ®
-    public string choiceBText; // ¾ÈÀü/°ÅÀı ÅØ½ºÆ®
+    [TextArea(2, 4)] public string[] dialogues; // 3~4ì¤„ì˜ ëŒ€ì‚¬ ë°°ì—´
+    public string choiceAText; // í•˜ì´ë¦¬ìŠ¤í¬ í•˜ì´ë¦¬í„´ í…ìŠ¤íŠ¸
+    public string choiceBText; // ì•ˆì „/ê±°ì ˆ í…ìŠ¤íŠ¸
 }
 
 public class EncounterEventPanel : MonoBehaviour
 {
-    [Header("ÂüÁ¶ ¼³Á¤")]
+    [Header("ì°¸ì¡° ì„¤ì •")]
     public DiceManager diceManager;
 
-    [Header("Æ¯¼ö º¸»ó ¾ÆÀÌÅÛ (ScriptableObject)")]
-    public DiceItemSO eightyEightDiceSO;     // 88ÁÖ»çÀ§ µ¥ÀÌÅÍ
-    public FigureItemSO sacrificedGirlFigureSO;    // Á¦¹°¼Ò³à Àü¿ë ÇÇ±Ô¾î
-    public FigureItemSO wishWandererFigureSO;      // ¹æ¶ûÀÚ Àü¿ë ÇÇ±Ô¾î
+    [Header("íŠ¹ìˆ˜ ë³´ìƒ ì•„ì´í…œ (ScriptableObject)")]
+    public DiceItemSO eightyEightDiceSO;     // 88ì£¼ì‚¬ìœ„ ë°ì´í„°
+    public FigureItemSO sacrificedGirlFigureSO;    // ì œë¬¼ì†Œë…€ ì „ìš© í”¼ê·œì–´
+    public FigureItemSO wishWandererFigureSO;      // ë°©ë‘ì ì „ìš© í”¼ê·œì–´
 
 
-    [Header("Á¶¿ìÀÚ µ¥ÀÌÅÍº£ÀÌ½º")]
+    [Header("ì¡°ìš°ì ë°ì´í„°ë² ì´ìŠ¤")]
     public List<EncounterData> encounterDatabase = new List<EncounterData>();
     private EncounterData currentEncounter;
 
-    [Header("ÀüÃ¼ È­¸é ¹× ´ëÈ­ UI")]
+    [Header("ì „ì²´ í™”ë©´ ë° ëŒ€í™” UI")]
     public GameObject fullScreenBackground;
     public Animator encounterAnimator;
     public GameObject dialogueRoot;
@@ -53,7 +53,7 @@ public class EncounterEventPanel : MonoBehaviour
     public Button nextDialogueButton;
     public SpriteRenderer encounterSpriteRenderer;
 
-    [Header("¼±ÅÃÁö UI")]
+    [Header("ì„ íƒì§€ UI")]
     public GameObject choiceRoot;
     public Button choiceAButton;
     public TextMeshProUGUI choiceAText;
@@ -78,24 +78,24 @@ public class EncounterEventPanel : MonoBehaviour
         gameObject.SetActive(true);
         dialogueIndex = 0;
 
-        // ÇöÀç ¹ÙÀÌ¿È¿¡ µîÀå °¡´ÉÇÑ Á¶¿ìÀÚµé¸¸ ÇÊÅÍ¸µ
+        // í˜„ì¬ ë°”ì´ì˜´ì— ë“±ì¥ ê°€ëŠ¥í•œ ì¡°ìš°ìë“¤ë§Œ í•„í„°ë§
         List<EncounterData> possibleEncounters = encounterDatabase
             .Where(e => e.appearBiomes.Contains(currentBiome))
             .ToList();
 
         if (possibleEncounters.Count > 0)
         {
-            // Á¶°Ç¿¡ ¸Â´Â Á¶¿ìÀÚ Áß ·£´ı 1¸í ¼±ÅÃ
+            // ì¡°ê±´ì— ë§ëŠ” ì¡°ìš°ì ì¤‘ ëœë¤ 1ëª… ì„ íƒ
             currentEncounter = possibleEncounters[Random.Range(0, possibleEncounters.Count)];
         }
         else
         {
-            Debug.LogWarning("ÇöÀç ¹ÙÀÌ¿È¿¡ µîÀå °¡´ÉÇÑ Á¶¿ìÀÚ°¡ ¾ø½À´Ï´Ù!");
+            Debug.LogWarning("í˜„ì¬ ë°”ì´ì˜´ì— ë“±ì¥ ê°€ëŠ¥í•œ ì¡°ìš°ìê°€ ì—†ìŠµë‹ˆë‹¤!");
             EndEvent();
             return;
         }
 
-        // ¼±ÅÃµÈ Á¶¿ìÀÚÀÇ ¿ÜÇüÀ¸·Î UI ±³Ã¼
+        // ì„ íƒëœ ì¡°ìš°ìì˜ ì™¸í˜•ìœ¼ë¡œ UI êµì²´
         if (encounterSpriteRenderer != null && currentEncounter.encounterSprite != null)
         {
             encounterSpriteRenderer.sprite = currentEncounter.encounterSprite;
@@ -105,14 +105,14 @@ public class EncounterEventPanel : MonoBehaviour
         {
             if (currentEncounter.animatorController != null)
             {
-                // Àü¿ë ¾Ö´Ï¸ŞÀÌ¼ÇÀÌ ÀÖ´Ù¸é ÄÁÆ®·Ñ·¯¸¦ °¥¾Æ³¢¿ì°í Àç»ı
+                // ì „ìš© ì• ë‹ˆë©”ì´ì…˜ì´ ìˆë‹¤ë©´ ì»¨íŠ¸ë¡¤ëŸ¬ë¥¼ ê°ˆì•„ë¼ìš°ê³  ì¬ìƒ
                 encounterAnimator.runtimeAnimatorController = currentEncounter.animatorController;
                 encounterAnimator.enabled = true;
                 encounterAnimator.speed = 1f;
             }
             else
             {
-                // Àü¿ë ¾Ö´Ï¸ŞÀÌ¼ÇÀÌ ¾ø´Ù¸é (Á¤Áö ÀÏ·¯½ºÆ®¶ó¸é) ¾Ö´Ï¸ŞÀÌÅÍ ²ô±â
+                // ì „ìš© ì• ë‹ˆë©”ì´ì…˜ì´ ì—†ë‹¤ë©´ (ì •ì§€ ì¼ëŸ¬ìŠ¤íŠ¸ë¼ë©´) ì• ë‹ˆë©”ì´í„° ë„ê¸°
                 encounterAnimator.enabled = false;
             }
         }
@@ -146,7 +146,7 @@ public class EncounterEventPanel : MonoBehaviour
     private void ShowChoices()
     {
         if (encounterAnimator != null && encounterAnimator.enabled)
-            encounterAnimator.speed = 0f; // ´ëÈ­°¡ ³¡³ª°í ¼±ÅÃÁö°¡ ³ª¿À¸é ¾Ö´Ï¸ŞÀÌ¼Ç Á¤Áö
+            encounterAnimator.speed = 0f; // ëŒ€í™”ê°€ ëë‚˜ê³  ì„ íƒì§€ê°€ ë‚˜ì˜¤ë©´ ì• ë‹ˆë©”ì´ì…˜ ì •ì§€
 
         if (choiceAText != null) choiceAText.text = currentEncounter.choiceAText;
         if (choiceBText != null) choiceBText.text = currentEncounter.choiceBText;
@@ -175,43 +175,43 @@ public class EncounterEventPanel : MonoBehaviour
         if (choiceAButton != null) choiceAButton.gameObject.SetActive(false);
         if (choiceBButton != null) choiceBButton.gameObject.SetActive(false);
 
-        bool waitCoroutine = false; // ÄÚ·çÆ¾ ´ë±â¸¦ À§ÇÑ ÇÃ·¡±×
+        bool waitCoroutine = false; // ì½”ë£¨í‹´ ëŒ€ê¸°ë¥¼ ìœ„í•œ í”Œë˜ê·¸
 
         switch (currentEncounter.type)
         {
             case EncounterType.Clown:
-                // Ã¼·Â 30% ÁöºÒ
+                // ì²´ë ¥ 30% ì§€ë¶ˆ
                 diceManager.currentPlayerHP -= Mathf.FloorToInt(diceManager.currentPlayerHP * 0.3f);
 
-                // ¼±ÅÃÃ¢À» 4¹ø ¿¬¼Ó ¶ç¿ì±â À§ÇØ ÄÚ·çÆ¾ ½ÇÇà
+                // ì„ íƒì°½ì„ 4ë²ˆ ì—°ì† ë„ìš°ê¸° ìœ„í•´ ì½”ë£¨í‹´ ì‹¤í–‰
                 waitCoroutine = true;
                 StartCoroutine(ClownCoatingRoutine());
                 break;
 
             case EncounterType.AbyssDealer:
-                // Á·º¸ ÃÊ±âÈ­ (±âº» ¹è¼ö·Î) ¹× °ñµå È¹µæ
+                // ì¡±ë³´ ì´ˆê¸°í™” (ê¸°ë³¸ ë°°ìˆ˜ë¡œ) ë° ê³¨ë“œ íšë“
                 diceManager.multHighCard = 1.0f; diceManager.multOnePair = 1.2f; diceManager.multTwoPair = 1.4f;
                 diceManager.multTriple = 1.5f; diceManager.multFullHouse = 1.7f; diceManager.multFourOfAKind = 1.8f;
                 diceManager.multStraight = 2.0f; diceManager.multYacht = 2.5f;
                 diceManager.shopManager.currentGold += (1000 * diceManager.currentStage);
 
-                // InventoryManager¿¡ Ãß°¡ÇÑ Æ¼ÄÏ ¹× UI ¿ÏÀü »èÁ¦ ÇÔ¼ö È£Ãâ
+                // InventoryManagerì— ì¶”ê°€í•œ í‹°ì¼“ ë° UI ì™„ì „ ì‚­ì œ í•¨ìˆ˜ í˜¸ì¶œ
                 if (InventoryManager.Instance != null) InventoryManager.Instance.ClearAllTickets();
                 break;
 
             case EncounterType.BlindFortuneTeller:
-                // ´ÙÀ½ Àû Ã¼·Â 100% Áõ°¡ ÇÃ·¡±×
+                // ë‹¤ìŒ ì  ì²´ë ¥ 100% ì¦ê°€ í”Œë˜ê·¸
                 diceManager.isNextEnemyHPBoosted = true;
-                //88ÁÖ»çÀ§ Áö±Ş
+                //88ì£¼ì‚¬ìœ„ ì§€ê¸‰
                 if (eightyEightDiceSO != null)
                 {
-                    // µµ°¨ÀÌ³ª ÀÎº¥Åä¸® UI¿¡ Ç¥½ÃÇÏ±â À§ÇØ Ãß°¡
+                    // ë„ê°ì´ë‚˜ ì¸ë²¤í† ë¦¬ UIì— í‘œì‹œí•˜ê¸° ìœ„í•´ ì¶”ê°€
                     InventoryManager.Instance.AddItem(eightyEightDiceSO);
 
-                    // °ÔÀÓ¿¡¼­ ½ÇÁ¦·Î ±¼·¯°¥ ÁÖ»çÀ§ µ¥ÀÌÅÍ(DiceData1) »ı¼º
+                    // ê²Œì„ì—ì„œ ì‹¤ì œë¡œ êµ´ëŸ¬ê°ˆ ì£¼ì‚¬ìœ„ ë°ì´í„°(DiceData1) ìƒì„±
                     DiceData1 dice88 = new DiceData1();
 
-                    // ÀÎ½ºÆåÅÍ(SO)¿¡¼­ ¼¼ÆÃÇÑ 6°³ÀÇ ´«±İ(88) ¹è¿­À» ±×´ë·Î °¡Á®¿Í º¹»ç
+                    // ì¸ìŠ¤í™í„°(SO)ì—ì„œ ì„¸íŒ…í•œ 6ê°œì˜ ëˆˆê¸ˆ(88) ë°°ì—´ì„ ê·¸ëŒ€ë¡œ ê°€ì ¸ì™€ ë³µì‚¬
                     if (eightyEightDiceSO.customFaces != null && eightyEightDiceSO.customFaces.Length > 0)
                     {
                         dice88.faceValues = (int[])eightyEightDiceSO.customFaces.Clone();
@@ -230,25 +230,25 @@ public class EncounterEventPanel : MonoBehaviour
                         dice88.customFaceSprites = eightyEightDiceSO.customFaceSprites;
                     }
 
-                    // ³» µ¦¿¡ ¿Ïº®ÇÏ°Ô Ãß°¡
+                    // ë‚´ ë±ì— ì™„ë²½í•˜ê²Œ ì¶”ê°€
                     diceManager.masterDeck.Add(dice88);
                 }
                 break;
 
             case EncounterType.RustyCaptain:
-                // ÃÖ´ë Ã¼·Â 20% ¿µ±¸ °¨¼Ò ¹× ´ÙÀ½ »óÁ¡ ¸ğµç ¾ÆÀÌÅÛ 0¿ø
+                // ìµœëŒ€ ì²´ë ¥ 20% ì˜êµ¬ ê°ì†Œ ë° ë‹¤ìŒ ìƒì  ëª¨ë“  ì•„ì´í…œ 0ì›
                 diceManager.playerMaxHP -= Mathf.FloorToInt(diceManager.playerMaxHP * 0.2f);
                 if (diceManager.currentPlayerHP > diceManager.playerMaxHP)
                     diceManager.currentPlayerHP = diceManager.playerMaxHP;
 
-                diceManager.isNextShopFree = true; // ¹öÇÁ È°¼ºÈ­
+                diceManager.isNextShopFree = true; // ë²„í”„ í™œì„±í™”
                 break;
 
             case EncounterType.Poacher:
-                // »óÁ¡ ½½·Ô 1°³ ¿µ±¸ ºÀ¼â
+                // ìƒì  ìŠ¬ë¡¯ 1ê°œ ì˜êµ¬ ë´‰ì‡„
                 diceManager.extraShopSlots -= 1;
 
-                // º¸À¯ÇÏÁö ¾ÊÀº ÇÇ±Ô¾î¸¸ ÇÊÅÍ¸µÇÏ¿© ·£´ı 3°³ Áö±Ş
+                // ë³´ìœ í•˜ì§€ ì•Šì€ í”¼ê·œì–´ë§Œ í•„í„°ë§í•˜ì—¬ ëœë¤ 3ê°œ ì§€ê¸‰
                 if (diceManager.shopManager != null && diceManager.shopManager.allItemsPool != null)
                 {
                     List<FigureItemSO> unownedFigures = diceManager.shopManager.allItemsPool
@@ -266,22 +266,22 @@ public class EncounterEventPanel : MonoBehaviour
                 break;
 
             case EncounterType.SacrificedGirl:
-                // µ¦¿¡¼­ ¹«ÀÛÀ§ ÁÖ»çÀ§ 2°³ ¼Ò¸ğ (ÄÚÆÃ ¿©ºÎ ¹«°ü)
+                // ë±ì—ì„œ ë¬´ì‘ìœ„ ì£¼ì‚¬ìœ„ 2ê°œ ì†Œëª¨ (ì½”íŒ… ì—¬ë¶€ ë¬´ê´€)
                 if (diceManager.masterDeck.Count >= 2)
                 {
                     diceManager.masterDeck.RemoveAt(Random.Range(0, diceManager.masterDeck.Count));
                     diceManager.masterDeck.RemoveAt(Random.Range(0, diceManager.masterDeck.Count));
                 }
-                // Á¦¹°¼Ò³à Àü¿ë ÇÇ±Ô¾î Áö±Ş
+                // ì œë¬¼ì†Œë…€ ì „ìš© í”¼ê·œì–´ ì§€ê¸‰
                 if (sacrificedGirlFigureSO != null)
                     InventoryManager.Instance.AddItem(sacrificedGirlFigureSO);
                 break;
 
             case EncounterType.Alchemist:
-                // ³» µ¦ÀÇ ¸ğµç ÁÖ»çÀ§¸¦ ÄÚÆÃ ¹× ´«±İ ¹«ÀÛÀ§ º¯È¯½ÃÅ°°í 3000°ñµå È¹µæ
+                // ë‚´ ë±ì˜ ëª¨ë“  ì£¼ì‚¬ìœ„ë¥¼ ì½”íŒ… ë° ëˆˆê¸ˆ ë¬´ì‘ìœ„ ë³€í™˜ì‹œí‚¤ê³  3000ê³¨ë“œ íšë“
                 foreach (var d in diceManager.masterDeck)
                 {
-                    // 1. ÄÚÆÃ ·£´ı
+                    // 1. ì½”íŒ… ëœë¤
                     d.isCoated = true;
                     d.type = (DiceType)Random.Range(1, 5); // 1:Prism, 2:Gold, 3:Dark, 4:Ice
 
@@ -293,55 +293,55 @@ public class EncounterEventPanel : MonoBehaviour
                         case DiceType.Ice: d.diceColor = Color.cyan; break;
                     }
 
-                    // 2. ÁÖ»çÀ§ ´«±İ Á¾·ù ·£´ı (·Î¿ì, ÇÏÀÌ, È¦¼ö, Â¦¼ö, °íÁ¤, ±âº»)
+                    // 2. ì£¼ì‚¬ìœ„ ëˆˆê¸ˆ ì¢…ë¥˜ ëœë¤ (ë¡œìš°, í•˜ì´, í™€ìˆ˜, ì§ìˆ˜, ê³ ì •, ê¸°ë³¸)
                     int diceStyle = Random.Range(0, 6);
                     switch (diceStyle)
                     {
-                        case 0: // ±âº» ÁÖ»çÀ§
+                        case 0: // ê¸°ë³¸ ì£¼ì‚¬ìœ„
                             d.faceValues = new int[] { 1, 2, 3, 4, 5, 6 };
                             d.specialEffect = SpecialDieEffect.None;
                             break;
-                        case 1: // ·Î¿ì ÁÖ»çÀ§
+                        case 1: // ë¡œìš° ì£¼ì‚¬ìœ„
                             d.faceValues = new int[] { 1, 1, 2, 2, 3, 3 };
                             d.specialEffect = SpecialDieEffect.None;
                             break;
-                        case 2: // ÇÏÀÌ ÁÖ»çÀ§
+                        case 2: // í•˜ì´ ì£¼ì‚¬ìœ„
                             d.faceValues = new int[] { 4, 4, 5, 5, 6, 6 };
                             d.specialEffect = SpecialDieEffect.None;
                             break;
-                        case 3: // Â¦¼ö ÁÖ»çÀ§
+                        case 3: // ì§ìˆ˜ ì£¼ì‚¬ìœ„
                             d.faceValues = new int[] { 2, 2, 4, 4, 6, 6 };
                             d.specialEffect = SpecialDieEffect.Even;
                             break;
-                        case 4: // È¦¼ö ÁÖ»çÀ§
+                        case 4: // í™€ìˆ˜ ì£¼ì‚¬ìœ„
                             d.faceValues = new int[] { 1, 1, 3, 3, 5, 5 };
                             d.specialEffect = SpecialDieEffect.Odd;
                             break;
-                        case 5: // °íÁ¤ ÁÖ»çÀ§
+                        case 5: // ê³ ì • ì£¼ì‚¬ìœ„
                             int fixedNum = Random.Range(1, 7);
                             d.faceValues = new int[] { fixedNum, fixedNum, fixedNum, fixedNum, fixedNum, fixedNum };
                             d.specialEffect = SpecialDieEffect.None;
                             break;
                     }
 
-                    // ±âÁ¸¿¡ ¾º¿öÁ®ÀÖ´ø ½ºÅ²(°¡Â¥ÁÖ»çÀ§ µî)ÀÌ ÀÖÀ¸¸é ¼ıÀÚ°¡ ¾È º¸ÀÏ ¼ö ÀÖÀ¸¹Ç·Î ÃÊ±âÈ­
+                    // ê¸°ì¡´ì— ì”Œì›Œì ¸ìˆë˜ ìŠ¤í‚¨(ê°€ì§œì£¼ì‚¬ìœ„ ë“±)ì´ ìˆìœ¼ë©´ ìˆ«ìê°€ ì•ˆ ë³´ì¼ ìˆ˜ ìˆìœ¼ë¯€ë¡œ ì´ˆê¸°í™”
                     d.customDiceShell = null;
                     d.customFaceSprites = null;
                 }
                 diceManager.shopManager.currentGold += 3000;
 
-                // ÇÊµå ÆÄÆ¼Å¬ °­Á¦ »õ·Î°íÄ§
+                // í•„ë“œ íŒŒí‹°í´ ê°•ì œ ìƒˆë¡œê³ ì¹¨
                 foreach (var activeDice in diceManager.activeDiceList)
                 {
                     if (activeDice != null && activeDice.myData != null)
                     {
-                        //¹Ù²ï ÁÖ»çÀ§ Å¸ÀÔ¿¡ ¸Â´Â »õ·Î¿î ´«±İ ÇÏ³ª¸¦ ·£´ıÀ¸·Î »ÌÀ½ (¿¹: ·Î¿ì ÁÖ»çÀ§°¡ µÆÀ¸¸é 1~3 Áß ÇÏ³ª)
+                        //ë°”ë€ ì£¼ì‚¬ìœ„ íƒ€ì…ì— ë§ëŠ” ìƒˆë¡œìš´ ëˆˆê¸ˆ í•˜ë‚˜ë¥¼ ëœë¤ìœ¼ë¡œ ë½‘ìŒ (ì˜ˆ: ë¡œìš° ì£¼ì‚¬ìœ„ê°€ ëìœ¼ë©´ 1~3 ì¤‘ í•˜ë‚˜)
                         int newValidValue = activeDice.myData.faceValues[Random.Range(0, 6)];
 
-                        // ¹Ù²ï µ¥ÀÌÅÍ¿Í »õ ´«±İÀ» ¹ÙÅÁÀ¸·Î ÇÊµå ÁÖ»çÀ§ÀÇ ÀÌ¹ÌÁö¸¦ Áï½Ã ´Ù½Ã ±×¸®µµ·Ï °­Á¦!
+                        // ë°”ë€ ë°ì´í„°ì™€ ìƒˆ ëˆˆê¸ˆì„ ë°”íƒ•ìœ¼ë¡œ í•„ë“œ ì£¼ì‚¬ìœ„ì˜ ì´ë¯¸ì§€ë¥¼ ì¦‰ì‹œ ë‹¤ì‹œ ê·¸ë¦¬ë„ë¡ ê°•ì œ!
                         activeDice.SetData(activeDice.myData, newValidValue);
 
-                        // ÆÄÆ¼Å¬ ÀÌÆåÆ® °»½Å
+                        // íŒŒí‹°í´ ì´í™íŠ¸ ê°±ì‹ 
                         DiceCoatingVFX vfx = activeDice.GetComponent<DiceCoatingVFX>();
                         if (vfx != null) vfx.ForceRefresh();
                     }
@@ -353,19 +353,19 @@ public class EncounterEventPanel : MonoBehaviour
 
                 //diceManager.currentPlayerHP = 1;
 
-                //¹æ¶ûÀÚ Àü¿ë ÇÇ±Ô¾î Áö±Ş
+                //ë°©ë‘ì ì „ìš© í”¼ê·œì–´ ì§€ê¸‰
                 if (wishWandererFigureSO != null)
                     InventoryManager.Instance.AddItem(wishWandererFigureSO);
                 break;
 
             case EncounterType.ForgottenExplorer:
-                // ½º³¼ ¸ğµÎ ÆÄ±« ¹× 5000°ñµå Áï½Ã È¹µæ
+                // ìŠ¤ë‚µ ëª¨ë‘ íŒŒê´´ ë° 5000ê³¨ë“œ ì¦‰ì‹œ íšë“
                 foreach (var slot in InventoryManager.Instance.snackSlots) slot.ClearSlot();
                 diceManager.shopManager.currentGold += 5000;
                 break;
 
             case EncounterType.MadHatter:
-                // ½º³¼ ½½·ÔÀ» ¿Ïº®È÷ Áö¿ì°í ½ºÅ×ÀÌÅ©/ÆÒÄÉÀÌÅ©·Î µ¤¾î¾º¿ò
+                // ìŠ¤ë‚µ ìŠ¬ë¡¯ì„ ì™„ë²½íˆ ì§€ìš°ê³  ìŠ¤í…Œì´í¬/íŒ¬ì¼€ì´í¬ë¡œ ë®ì–´ì”Œì›€
                 if (diceManager.shopManager != null && diceManager.shopManager.allItemsPool != null)
                 {
                     List<SnackItemSO> allSnacks = diceManager.shopManager.allItemsPool.OfType<SnackItemSO>().ToList();
@@ -374,7 +374,7 @@ public class EncounterEventPanel : MonoBehaviour
 
                     foreach (var slot in InventoryManager.Instance.snackSlots)
                     {
-                        slot.ClearSlot(); // ±âÁ¸ ½º³¼ ¿Ïº®ÇÏ°Ô ÆÄ±«
+                        slot.ClearSlot(); // ê¸°ì¡´ ìŠ¤ë‚µ ì™„ë²½í•˜ê²Œ íŒŒê´´
                         SnackItemSO randomSnack = (Random.value > 0.5f) ? steak : pancake;
                         if (randomSnack != null) slot.SetItem(randomSnack);
                     }
@@ -382,7 +382,7 @@ public class EncounterEventPanel : MonoBehaviour
                 break;
         }
 
-        // ÄÚ·çÆ¾À¸·Î ´ë±âÇØ¾ß ÇÏ´Â Á¶¿ìÀÚ(¾î¸´±¤´ë)°¡ ¾Æ´Ò ¶§¸¸ Áï½Ã UI °»½Å ¹× ÀÌº¥Æ® Á¾·á
+        // ì½”ë£¨í‹´ìœ¼ë¡œ ëŒ€ê¸°í•´ì•¼ í•˜ëŠ” ì¡°ìš°ì(ì–´ë¦¿ê´‘ëŒ€)ê°€ ì•„ë‹ ë•Œë§Œ ì¦‰ì‹œ UI ê°±ì‹  ë° ì´ë²¤íŠ¸ ì¢…ë£Œ
         if (!waitCoroutine)
         {
             UpdateUIAfterChoice();
@@ -404,16 +404,16 @@ public class EncounterEventPanel : MonoBehaviour
                 diceManager.shopManager.currentGold += (100 * diceManager.currentStage);
                 break;
             case EncounterType.RustyCaptain:
-                //ÀüÅõ ¾øÀÌ ±×³É ÀÌµ¿
+                //ì „íˆ¬ ì—†ì´ ê·¸ëƒ¥ ì´ë™
                 break;
             case EncounterType.Alchemist:
                 diceManager.currentPlayerHP += Mathf.FloorToInt((diceManager.playerMaxHP - diceManager.currentPlayerHP) * 0.1f);
                 break;
             case EncounterType.ForgottenExplorer:
-                // [TODO: °ñµå ÀÏºÎ ¼Ò¸ğ ÈÄ ÁÖ»çÀ§ ºÎÇ° È¹µæ ±¸Çö]
+                // [TODO: ê³¨ë“œ ì¼ë¶€ ì†Œëª¨ í›„ ì£¼ì‚¬ìœ„ ë¶€í’ˆ íšë“ êµ¬í˜„]
                 break;
             case EncounterType.MadHatter:
-                // ½º³¼ ½½·ÔÀ» ¿Ïº®È÷ Áö¿ì°í ÆäÆÛ¹ÎÆ®/Ã¼¸®·Î µ¤¾î¾º¿ò
+                // ìŠ¤ë‚µ ìŠ¬ë¡¯ì„ ì™„ë²½íˆ ì§€ìš°ê³  í˜í¼ë¯¼íŠ¸/ì²´ë¦¬ë¡œ ë®ì–´ì”Œì›€
                 if (diceManager.shopManager != null && diceManager.shopManager.allItemsPool != null)
                 {
                     List<SnackItemSO> allSnacks = diceManager.shopManager.allItemsPool.OfType<SnackItemSO>().ToList();
@@ -422,7 +422,7 @@ public class EncounterEventPanel : MonoBehaviour
 
                     foreach (var slot in InventoryManager.Instance.snackSlots)
                     {
-                        slot.ClearSlot(); // ±âÁ¸ ½º³¼ ¿Ïº®ÇÏ°Ô ÆÄ±«
+                        slot.ClearSlot(); // ê¸°ì¡´ ìŠ¤ë‚µ ì™„ë²½í•˜ê²Œ íŒŒê´´
                         SnackItemSO randomSnack = (Random.value > 0.5f) ? peppermint : cherry;
                         if (randomSnack != null) slot.SetItem(randomSnack);
                     }
@@ -434,24 +434,24 @@ public class EncounterEventPanel : MonoBehaviour
         EndEvent();
     }
 
-    // ¾î¸´±¤´ë¿ë ÄÚÆÃ 4¹ø ¶ç¿ì±â ÄÚ·çÆ¾
+    // ì–´ë¦¿ê´‘ëŒ€ìš© ì½”íŒ… 4ë²ˆ ë„ìš°ê¸° ì½”ë£¨í‹´
     private IEnumerator ClownCoatingRoutine()
     {
         for (int i = 0; i < 4; i++)
         {
-            // 1. ÄÚÆÃÃ¢ ¿­±â
+            // 1. ì½”íŒ…ì°½ ì—´ê¸°
             diceManager.shopManager.ShowCoatingSelection(DiceType.Dark, 1.0f, new Color32(43, 42, 26, 255));
 
-            // ÆĞ³ÎÀÌ È°¼ºÈ­µÉ ¶§±îÁö 1ÇÁ·¹ÀÓ ´ë±â
+            // íŒ¨ë„ì´ í™œì„±í™”ë  ë•Œê¹Œì§€ 1í”„ë ˆì„ ëŒ€ê¸°
             yield return null;
 
-            // ÆĞ³ÎÀÌ È­¸é¿¡ ¶° ÀÖ´Â µ¿¾È ¹«ÇÑ ´ë±â
+            // íŒ¨ë„ì´ í™”ë©´ì— ë–  ìˆëŠ” ë™ì•ˆ ë¬´í•œ ëŒ€ê¸°
             while (diceManager.shopManager.coatingSelectionPanel.panelRoot.activeSelf)
             {
                 yield return null;
             }
 
-            // ÁÖ»çÀ§¸¦ ¼±ÅÃÇØ¼­ Ã¢ÀÌ ´İÈù ÈÄ 0.5ÃÊ ´ë±â
+            // ì£¼ì‚¬ìœ„ë¥¼ ì„ íƒí•´ì„œ ì°½ì´ ë‹«íŒ í›„ 0.5ì´ˆ ëŒ€ê¸°
             yield return new WaitForSeconds(0.2f);
         }
 
