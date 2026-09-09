@@ -26,9 +26,31 @@ public enum FigureTriggerType
 //12종 보상(Effect)
 public enum FigureEffectType
 {
-    None, HealHP, AddGold, AddMultiplier, AddChips, DamageEnemy, AddReroll, ReduceDamageTaken, GetSnack, DestroySelf,
-    MultiplyCombatEndGold, IncreaseMaxHP, AddExtraAttack, NullifyEnemySkill, FixEnemyAttackToOne, DestroyDebuffDice,
-    OpenTicketSelection, OpenCoatingSelection, OpenSatelliteSelection
+    None,
+
+    // --- [공용 기본 보상 (만능 부품)] ---
+    HealHP,              // 현재 체력 회복 (EffectValue 만큼)
+    AddGold,             // 상점 소지금(골드) 즉시 획득
+    AddMultiplier,       // 이번 턴 결산 시 데미지 배수(x) 합연산 증가
+    AddChips,            // 이번 턴 결산 시 기본 데미지 칩(+) 합연산 증가
+    DamageEnemy,         // 몬스터에게 즉시 고정 피해 입힘 (EffectValue 만큼)
+    AddReroll,           // 주사위 굴리기(리롤) 남은 횟수 추가
+    ReduceDamageTaken,   // 몬스터에게 맞는 피해량 고정 수치 감소 (방어용)
+    GetSnack,            // 지정된 스낵(optionalItem)을 인벤토리에 획득
+    DestroySelf,         // 이 효과 발동 후 피규어 자신을 영구 파괴 (일회성 아이템용)
+
+    // --- [특수 기믹 (주로 1번 족보 카테고리 전용)] ---
+    MultiplyCombatEndGold, // [투탕카멘] 이번 전투 승리 시 얻는 기본 골드 보상 N배 뻥튀기
+    IncreaseMaxHP,         // [얼음 수정] 최대 체력 상한치 자체를 영구적으로 증가시킴
+    AddExtraAttack,        // [풍신의 북] 결산 데미지로 적을 때린 후, 똑같은 데미지로 N번 더 때림
+    NullifyEnemySkill,     // [조련사의 모자] 적 보스의 특수 능력(가짜 주사위 등)을 이번 턴에 무력화
+    FixEnemyAttackToOne,   // [검은 지느러미] 적이 다음 턴에 때릴 공격력 수치를 1로 고정시킴
+    DestroyDebuffDice,     // [황금 발톱] 덱 안에 들어있는 방해용 가짜 주사위들을 전부 찾아서 파괴함
+
+    // --- [UI 선택창 호출 (코루틴 대기 발생)] ---
+    OpenTicketSelection,   // 무작위 티켓 3장 중 1장 선택하는 팝업창 띄우기
+    OpenCoatingSelection,  // 주사위 코팅(속성 부여) 타겟 선택 팝업창 띄우기
+    OpenSatelliteSelection // 주사위 위성(행성 효과) 타겟 선택 팝업창 띄우기
 }
 
 // 2.값 계산 방식 분리
@@ -46,7 +68,7 @@ public enum EffectCalcType
 public struct FigureEffectNode
 {
     public FigureEffectType effectType;
-    public EffectCalcType calcType;     // [추가됨] 계산 방식
+    public EffectCalcType calcType;     // 계산 방식
     public float effectValue;           // 고정값이거나 비율(%)
     public float probability;           // 발동 확률 (0이면 100% 발동)
     public BaseItemDataSO optionalItem;
