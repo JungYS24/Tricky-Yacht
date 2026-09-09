@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
@@ -86,6 +86,12 @@ public class DiceManager : MonoBehaviour
 
     [HideInInspector] public DiceData1 originalBossDice = null;
     [HideInInspector] public int fakeDiceIndex = -1;
+
+    [Header("피규어 특수 기믹 상태")]
+    [HideInInspector] public float combatWinGoldMultiplier = 1.0f;
+    [HideInInspector] public int extraAttackCount = 0;
+    [HideInInspector] public bool isEnemySkillNullified = false;
+    [HideInInspector] public bool isNextEnemyAttackFixedToOne = false;
 
     // --- 스낵 시스템용 변수 ---
     private int defaultMaxRerolls;
@@ -358,6 +364,10 @@ public class DiceManager : MonoBehaviour
 
     void StartNewStage()
     {
+        combatWinGoldMultiplier = 1.0f;
+        extraAttackCount = 0;
+        isEnemySkillNullified = false;
+        isNextEnemyAttackFixedToOne = false;
         //기존에 가짜 주사위 기믹이 남아있다면 원상복구
         RestoreFakeDice();
 
@@ -572,8 +582,13 @@ public class DiceManager : MonoBehaviour
         ui?.SetRollButtonInteractable(false);   //즉시 버튼 비활성화
         ui?.SetFinishButtonInteractable(false); //즉시 버튼 비활성화
 
-        // 사운드 끝내기 버튼 클릭 소리 재생
+        // [수정된 부분] 실제 연산 로직은 코루틴으로 넘겨서 실행합니다.
+        StartCoroutine(FinishTurnRoutine());
+    }
 
+    private IEnumerator FinishTurnRoutine()
+    {
+        // 사운드 끝내기 버튼 클릭 소리 재생
 
         CameraShake.Instance.Shake(0.2f, 0.15f);
 
@@ -591,8 +606,13 @@ public class DiceManager : MonoBehaviour
         }
 
         List<int> finalDiceValues = keptDice.Select(d => d.currentValue).ToList();
-        InventoryManager.Instance.EvaluateTurnEndTriggers(finalDiceValues, handName, this, shopManager);
 
+        // ---------------------------------------------------------------------------------
+        // [수정된 부분] InventoryManager 호출을 코루틴으로 변경 (UI 창이 뜨면 닫힐 때까지 여기서 대기)
+        // ---------------------------------------------------------------------------------
+        yield return StartCoroutine(InventoryManager.Instance.EvaluateTurnEndTriggersCoroutine(finalDiceValues, handName, baseSum, this, shopManager));
+
+        // 여기서부터는 작성하셨던 기존 로직 100% 동일합니다.
         float finalMultiplier = comboMultiplier + snackBonusMult;
         int currentSimulatedHP = enemy.CurrentHP;
         int darkDamageTotal = 0, iceBonusChips = 0;
@@ -672,14 +692,14 @@ public class DiceManager : MonoBehaviour
                     }
                 }
             }
-
         }
+
         accumulatedFlameDamage += flameDamageThisTurn;
 
         if (darkDamageTotal > 0) enemy.TakeDamage(darkDamageTotal, null);
 
         //최종 데미지에 위성 효과 합산
-        float finalTotalMult = comboMultiplier + snackBonusMult + satelliteBonusMult;
+        float finalTotalMult = finalMultiplier + satelliteBonusMult;
         int damage = Mathf.FloorToInt((baseSum + iceBonusChips + snackBonusChips + satelliteBonusChips) * finalTotalMult);
 
         // 페퍼민트 성공 여부를 먼저 굴림
@@ -702,9 +722,17 @@ public class DiceManager : MonoBehaviour
         enemy.useExternalDeathSequence = pendingPeppermintSuccess;
         enemy.TakeDamage(damage, OnEnemyKilled);
 
+        //풍신의 북 (야추 시 공격 N회 추가 발동) 처리
+        for (int i = 0; i < extraAttackCount; i++)
+        {
+            if (!enemy.IsDead) enemy.TakeDamage(damage, OnEnemyKilled);
+        }
+        extraAttackCount = 0; // 추가 공격 후 즉시 리셋
+
         // 코루틴에 화염 데미지 값도 같이 넘겨줌
         StartCoroutine(ProcessTurnResult(handName, accumulatedFlameDamage));
     }
+
 
     //티켓 아이템 먹었을 때 호출할 함수
     public void UpgradeHand(HandType handType, float amount)
@@ -768,6 +796,8 @@ public class DiceManager : MonoBehaviour
         }
 
         int baseClearReward = 500;
+        baseClearReward = Mathf.FloorToInt(baseClearReward * combatWinGoldMultiplier); // 투탕카멘 2배 적용
+        combatWinGoldMultiplier = 1.0f; // 초기화
         if (shopManager != null)
         {
             shopManager.currentGold += baseClearReward;
@@ -922,7 +952,9 @@ public class DiceManager : MonoBehaviour
                 yield return new WaitForSeconds(0.2f);
 
                 // 플레이어 체력 감소 및 화면 흔들림
-                currentPlayerHP -= enemy.AttackPower;
+                int finalEnemyAtk = isNextEnemyAttackFixedToOne ? 1 : enemy.AttackPower;
+                isNextEnemyAttackFixedToOne = false; // 적용 후 스위치 끄기
+                currentPlayerHP -= finalEnemyAtk;
                 CameraShake.Instance.Shake(0.15f, 0.1f);
 
                 // 비네트 피격 연출 실행
