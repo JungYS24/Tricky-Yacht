@@ -1,40 +1,44 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-//16Á¾ ¿øÀÎ(Trigger)
+public enum FigureCategory { None = 0, HandEffect = 1, DiceFaceEffect = 2, HPDefense = 3, OneTime = 4, ShopPurchase = 5, RerollEffect = 6, CombatEnd = 7, Special = 8 }
+
 public enum FigureTriggerType
 {
     None,
-    ThreeOf1, ThreeOf2, ThreeOf3, ThreeOf4, ThreeOf5, ThreeOf6, // T-01 ~ T-06, ÁÖ»çÀ§ 3°³ ¼ıÀÚ°¡ °°À» ¶§
-    OnePair, TwoPair, Triple, Straight, FullHouse, FourOfAKind, Yacht, // T-07 ~ T-13 Á·º¸ Ã³¸®
-    OnSnackUsed, // T-14 ½º³¼ ¸Ô¾úÀ» ¶§
-    OnHPLost,    // T-15 hp Â÷°¨½Ã
-    Passive      // T-16
+    OnePair, TwoPair, Triple, Straight, FullHouse, FourOfAKind, Yacht,
+    ThreeOf1, ThreeOf2, ThreeOf3, ThreeOf4, ThreeOf5, ThreeOf6,
+    OnDamaged, OnShopEntered, OnItemPurchased, OnDiceReroll, OnCombatEnd, OnSnackUsed, OnAcquired, Always
 }
 
-//12Á¾ º¸»ó(Effect)
+// 1. ìˆœìˆ˜í•œ í–‰ë™(Action)ë§Œ ë‚¨ê¸´ íš¨ê³¼ íƒ€ì…
 public enum FigureEffectType
 {
-    None,
-    HealHP,        
-    AddGold,       
-    GetSnack,      
-    DamageEnemy,   
-    AddMultiplier,  
-    AddChips,     
-    AddReroll
+    None, HealHP, AddGold, AddMultiplier, AddChips, DamageEnemy, AddReroll, ReduceDamageTaken, GetSnack, DestroySelf,
+    MultiplyCombatEndGold, IncreaseMaxHP, AddExtraAttack, NullifyEnemySkill, FixEnemyAttackToOne, DestroyDebuffDice,
+    OpenTicketSelection, OpenCoatingSelection, OpenSatelliteSelection
 }
 
-// º¸»ó ³ëµå µ¥ÀÌÅÍ ±¸Á¶
+// 2.ê°’ ê³„ì‚° ë°©ì‹ ë¶„ë¦¬
+public enum EffectCalcType
+{
+    Flat,            // ê³ ì • ìˆ˜ì¹˜ (ê¸°ë³¸ê°’)
+    MissingHP,       // ìƒì€ ì²´ë ¥ ë¹„ë¡€ (%)
+    EnemyHP,         // ì  ë‚¨ì€ ì²´ë ¥ ë¹„ë¡€ (%)
+    CurrentChips,    // ì´ë²ˆ í„´ì— ê²°ì‚°ëœ ì¹©ìˆ˜ ë¹„ë¡€ (ì˜ˆ: 1ì´ë©´ 100%, 0.5ë©´ 50%)
+    OwnedFigures     // ë‚´ ë³´ìœ  í”¼ê·œì–´ ê°œìˆ˜ ë¹„ë¡€ (ì•„ë£¡ì˜ ì•Œ ê°™ì€ ì¼€ì´ìŠ¤)
+}
+
 [System.Serializable]
 public struct FigureEffectNode
 {
     public FigureEffectType effectType;
-    public float effectValue; // ¿¡µğÅÍ¿¡¼­ Á¶ÀıÇÒ ¼öÄ¡ ÇÊµå
-    public BaseItemDataSO optionalItem; // Æ¯Á¤ ½º³¼ Áö±Ş µî ¾ÆÀÌÅÛ ¿¬µ¿¿ë
+    public EffectCalcType calcType;     // [ì¶”ê°€ë¨] ê³„ì‚° ë°©ì‹
+    public float effectValue;           // ê³ ì •ê°’ì´ê±°ë‚˜ ë¹„ìœ¨(%)
+    public float probability;           // ë°œë™ í™•ë¥  (0ì´ë©´ 100% ë°œë™)
+    public BaseItemDataSO optionalItem;
 }
 
-//¿øÀÎ ³ëµå µ¥ÀÌÅÍ ±¸Á¶ (1°³ÀÇ ¿øÀÎ¿¡ º¹¼öÀÇ º¸»ó ¿¬°á)
 [System.Serializable]
 public class FigureNode
 {
