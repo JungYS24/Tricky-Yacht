@@ -304,7 +304,7 @@ public class InventoryManager : MonoBehaviour
         // 리롤 횟수 등 UI에 즉각적인 변화가 생겼으므로 화면을 강제 갱신
         diceManager.ForceUpdateUI();
     }
-    // [수정된 함수] 주사위 결산 시 피규어 트리거를 확인하고 코루틴으로 대기합니다.
+    //주사위 결산 시 피규어 트리거를 확인하고 코루틴으로 대기합니다.
     public IEnumerator EvaluateTurnEndTriggersCoroutine(List<int> finalDiceValues, string handName, int currentBaseChips, DiceManager diceManager, ShopManager shopManager)
     {
         int[] diceCounts = new int[7];
@@ -355,9 +355,8 @@ public class InventoryManager : MonoBehaviour
             float prob = effect.probability <= 0f ? 100f : effect.probability;
             if (Random.Range(0f, 100f) > prob) continue;
 
-            // ---------------------------------------------------------
-            // 2.어떻게 계산할지(CalcType)에 따라 최종 값을 먼저 뽑아냅니다.
-            // ---------------------------------------------------------
+            //어떻게 계산할지(CalcType)에 따라 최종 값을 먼저 뽑아냄
+  
             float actualValue = effect.effectValue;
             switch (effect.calcType)
             {
@@ -380,9 +379,8 @@ public class InventoryManager : MonoBehaviour
                     break;
             }
 
-            // ---------------------------------------------------------
-            // 3. 뽑아낸 actualValue를 가지고 행동(Action)을 수행합니다.
-            // ---------------------------------------------------------
+            // 뽑아낸 actualValue를 가지고 행동(Action)을 수행
+
             switch (effect.effectType)
             {
                 case FigureEffectType.HealHP:
@@ -398,7 +396,7 @@ public class InventoryManager : MonoBehaviour
                 case FigureEffectType.AddReroll: diceManager.figureBonusRerolls += Mathf.FloorToInt(actualValue); break;
                 case FigureEffectType.GetSnack: if (effect.optionalItem != null) AddItem(effect.optionalItem); break;   
 
-                // --- 1번 카테고리 특수 효과들 ---
+                //1번 카테고리 특수 효과들
                 case FigureEffectType.MultiplyCombatEndGold: diceManager.combatWinGoldMultiplier *= actualValue; break;
                 case FigureEffectType.IncreaseMaxHP: diceManager.playerMaxHP += Mathf.FloorToInt(actualValue); diceManager.currentPlayerHP += Mathf.FloorToInt(actualValue); break;
                 case FigureEffectType.AddExtraAttack: diceManager.extraAttackCount += Mathf.FloorToInt(actualValue); break;
