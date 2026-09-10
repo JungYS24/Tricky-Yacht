@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: fa4ad5b8c1620eb46bb84a70649f0d3d
+guid: 755039245343daf42a45b5158885d20e
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - DungGeunMo
+  - Noto Sans JP
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

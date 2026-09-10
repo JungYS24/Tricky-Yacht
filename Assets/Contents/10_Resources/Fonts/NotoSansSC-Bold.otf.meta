@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 6ed80ec0d853fa44dae353b75210fc78
+guid: 85126e45e019501448b4dd084aa7a2d4
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - DOSGothic
+  - Noto Sans SC
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
