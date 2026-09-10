@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System.Collections;
 
 public class InventoryManager : MonoBehaviour
 {
@@ -267,52 +268,8 @@ public class InventoryManager : MonoBehaviour
 
     // 주사위 결산
     // 주사위 결산
-    public void EvaluateTurnEndTriggers(List<int> finalDiceValues, string handName, DiceManager diceManager, ShopManager shopManager)
-    {
-        //주사위 눈금 개수 카운팅
-        int[] diceCounts = new int[7];
-        foreach (int v in finalDiceValues)
-        {
-            if (v >= 0 && v <= 6)
-            {
-                diceCounts[v]++;
-            }
-        }
 
-        foreach (var figure in ownedFigures)
-        {
-            foreach (var node in figure.figureNodes)
-            {
-                bool isTriggered = false;
-
-                // 족보 및 주사위 개수 감지
-                switch (node.triggerType)
-                {
-                    case FigureTriggerType.ThreeOf1: if (diceCounts[1] >= 3) isTriggered = true; break;
-                    case FigureTriggerType.ThreeOf2: if (diceCounts[2] >= 3) isTriggered = true; break;
-                    case FigureTriggerType.ThreeOf3: if (diceCounts[3] >= 3) isTriggered = true; break;
-                    case FigureTriggerType.ThreeOf4: if (diceCounts[4] >= 3) isTriggered = true; break;
-                    case FigureTriggerType.ThreeOf5: if (diceCounts[5] >= 3) isTriggered = true; break;
-                    case FigureTriggerType.ThreeOf6: if (diceCounts[6] >= 3) isTriggered = true; break;
-
-                    case FigureTriggerType.OnePair: if (handName == "원 페어") isTriggered = true; break;
-                    case FigureTriggerType.TwoPair: if (handName == "투 페어") isTriggered = true; break;
-                    case FigureTriggerType.Triple: if (handName == "트리플") isTriggered = true; break;
-                    case FigureTriggerType.Straight: if (handName == "스트레이트") isTriggered = true; break;
-                    case FigureTriggerType.FullHouse: if (handName == "풀하우스") isTriggered = true; break;
-                    case FigureTriggerType.FourOfAKind: if (handName == "포카드") isTriggered = true; break;
-                    case FigureTriggerType.Yacht: if (handName == "Yacht" || handName == "요트" || handName == "파이브 카드") isTriggered = true; break;
-                }
-
-                // 조건이 만족되었다면 연결된 복수의 보상 리스트를 모두 실행
-                if (isTriggered)
-                {
-                    Debug.Log($"[피규어 발동] {figure.itemName}의 {node.triggerType} 조건 달성!");
-                    ApplyFigureEffects(node.effects, diceManager, shopManager);
-                }
-            }
-        }
-    }
+        
     // 스테이지가 끝났을 때 패시브 피규어들을 발동시킵니다.
     public void EvaluateStageClearTriggers(DiceManager diceManager, ShopManager shopManager)
     {
@@ -320,7 +277,7 @@ public class InventoryManager : MonoBehaviour
         {
             foreach (var node in figure.figureNodes)
             {
-                if (node.triggerType == FigureTriggerType.Passive)
+                if (node.triggerType == FigureTriggerType.OnCombatEnd)
                 {
                     Debug.Log($"[피규어 스테이지 클리어 발동] {figure.itemName} 패시브 효과 달성!");
                     ApplyFigureEffects(node.effects, diceManager, shopManager);
@@ -347,51 +304,133 @@ public class InventoryManager : MonoBehaviour
         // 리롤 횟수 등 UI에 즉각적인 변화가 생겼으므로 화면을 강제 갱신
         diceManager.ForceUpdateUI();
     }
+    //주사위 결산 시 피규어 트리거를 확인하고 코루틴으로 대기합니다.
+    public IEnumerator EvaluateTurnEndTriggersCoroutine(List<int> finalDiceValues, string handName, int currentBaseChips, DiceManager diceManager, ShopManager shopManager)
+    {
+        int[] diceCounts = new int[7];
+        foreach (int v in finalDiceValues)
+        {
+            if (v >= 0 && v <= 6) diceCounts[v]++;
+        }
 
-    // 조건 만족 시 실질적인 인게임 변화(보상)를 주는 함수
-    private void ApplyFigureEffects(List<FigureEffectNode> effects, DiceManager diceManager, ShopManager shopManager)
+        foreach (var figure in ownedFigures)
+        {
+            foreach (var node in figure.figureNodes)
+            {
+                bool isTriggered = false;
+
+                switch (node.triggerType)
+                {
+                    case FigureTriggerType.ThreeOf1: if (diceCounts[1] >= 3) isTriggered = true; break;
+                    case FigureTriggerType.ThreeOf2: if (diceCounts[2] >= 3) isTriggered = true; break;
+                    case FigureTriggerType.ThreeOf3: if (diceCounts[3] >= 3) isTriggered = true; break;
+                    case FigureTriggerType.ThreeOf4: if (diceCounts[4] >= 3) isTriggered = true; break;
+                    case FigureTriggerType.ThreeOf5: if (diceCounts[5] >= 3) isTriggered = true; break;
+                    case FigureTriggerType.ThreeOf6: if (diceCounts[6] >= 3) isTriggered = true; break;
+
+                    case FigureTriggerType.OnePair: if (handName == "원 페어") isTriggered = true; break;
+                    case FigureTriggerType.TwoPair: if (handName == "투 페어") isTriggered = true; break;
+                    case FigureTriggerType.Triple: if (handName == "트리플") isTriggered = true; break;
+                    case FigureTriggerType.Straight: if (handName == "스트레이트") isTriggered = true; break;
+                    case FigureTriggerType.FullHouse: if (handName == "풀하우스") isTriggered = true; break;
+                    case FigureTriggerType.FourOfAKind: if (handName == "포카드") isTriggered = true; break;
+                    case FigureTriggerType.Yacht: if (handName == "Yacht" || handName == "요트" || handName == "파이브 카드") isTriggered = true; break;
+                }
+
+                if (isTriggered)
+                {
+                    Debug.Log($"[피규어 발동] {figure.itemName}의 {node.triggerType} 조건 달성!");
+                    yield return StartCoroutine(ApplyFigureEffectsCoroutine(node.effects, currentBaseChips, diceManager, shopManager));
+                }
+            }
+        }
+    }
+
+    // 조건 만족 시 실질적인 효과를 주고, UI 창이 켜지면 닫힐 때까지 대기하는 코루틴
+    private IEnumerator ApplyFigureEffectsCoroutine(List<FigureEffectNode> effects, int currentBaseChips, DiceManager diceManager, ShopManager shopManager)
     {
         foreach (var effect in effects)
         {
+            // 1. 확률 검사
+            float prob = effect.probability <= 0f ? 100f : effect.probability;
+            if (Random.Range(0f, 100f) > prob) continue;
+
+            //어떻게 계산할지(CalcType)에 따라 최종 값을 먼저 뽑아냄
+  
+            float actualValue = effect.effectValue;
+            switch (effect.calcType)
+            {
+                case EffectCalcType.MissingHP:
+                    int missingHP = diceManager.playerMaxHP - diceManager.currentPlayerHP;
+                    actualValue = missingHP * (effect.effectValue / 100f);
+                    break;
+                case EffectCalcType.EnemyHP:
+                    if (diceManager.enemy != null) actualValue = diceManager.enemy.CurrentHP * (effect.effectValue / 100f);
+                    break;
+                case EffectCalcType.CurrentChips:
+                    actualValue = currentBaseChips * (effect.effectValue > 0 ? effect.effectValue : 1f);
+                    break;
+                case EffectCalcType.OwnedFigures:
+                    actualValue = ownedFigures.Count * effect.effectValue;
+                    break;
+                case EffectCalcType.Flat:
+                default:
+                    actualValue = effect.effectValue; // 고정값 그대로 사용
+                    break;
+            }
+
+            // 뽑아낸 actualValue를 가지고 행동(Action)을 수행
+
             switch (effect.effectType)
             {
                 case FigureEffectType.HealHP:
-                    diceManager.currentPlayerHP += (int)effect.effectValue;
-                    if (diceManager.currentPlayerHP > diceManager.playerMaxHP)
-                        diceManager.currentPlayerHP = diceManager.playerMaxHP; // 오버힐 방지[cite: 1]
+                    diceManager.currentPlayerHP += Mathf.FloorToInt(actualValue);
+                    if (diceManager.currentPlayerHP > diceManager.playerMaxHP) diceManager.currentPlayerHP = diceManager.playerMaxHP;
                     break;
-
                 case FigureEffectType.AddGold:
-                    if (shopManager != null)
-                    {
-                        shopManager.currentGold += (int)effect.effectValue;
-                        diceManager.ui?.UpdateGoldUI(shopManager.currentGold);
-                        if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold); // GoldCounter 연출 실행
+                    if (shopManager != null) { shopManager.currentGold += Mathf.FloorToInt(actualValue); diceManager.ui?.UpdateGoldUI(shopManager.currentGold); if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold); }
+                    break;
+                case FigureEffectType.AddChips: diceManager.snackBonusChips += Mathf.FloorToInt(actualValue); break;
+                case FigureEffectType.AddMultiplier: diceManager.snackBonusMult += actualValue; break; // 배수는 float 그대로
+                case FigureEffectType.DamageEnemy: if (diceManager.enemy != null) diceManager.enemy.TakeDamage(Mathf.FloorToInt(actualValue), null); break;
+                case FigureEffectType.AddReroll: diceManager.figureBonusRerolls += Mathf.FloorToInt(actualValue); break;
+                case FigureEffectType.GetSnack: if (effect.optionalItem != null) AddItem(effect.optionalItem); break;   
+
+                //1번 카테고리 특수 효과들
+                case FigureEffectType.MultiplyCombatEndGold: diceManager.combatWinGoldMultiplier *= actualValue; break;
+                case FigureEffectType.IncreaseMaxHP: diceManager.playerMaxHP += Mathf.FloorToInt(actualValue); diceManager.currentPlayerHP += Mathf.FloorToInt(actualValue); break;
+                case FigureEffectType.AddExtraAttack: diceManager.extraAttackCount += Mathf.FloorToInt(actualValue); break;
+                case FigureEffectType.NullifyEnemySkill:
+                    diceManager.isEnemySkillNullified = true;
+                    if (diceManager.enemy != null && diceManager.enemy.CurrentBossAbility == BossAbilityType.FakeDice) diceManager.RestoreFakeDice();
+                    break;
+                case FigureEffectType.FixEnemyAttackToOne: diceManager.isNextEnemyAttackFixedToOne = true; break;
+                case FigureEffectType.DestroyDebuffDice: diceManager.RestoreFakeDice(); break;
+
+                // --- UI 선택창 호출 ---
+                case FigureEffectType.OpenTicketSelection:
+                    if (shopManager != null) { shopManager.ShowTicketSelection(); while (shopManager.ticketSelectionPanel != null && shopManager.ticketSelectionPanel.activeSelf) yield return null; }
+                    break;
+                case FigureEffectType.OpenCoatingSelection:
+                    if (shopManager != null) {
+                        DiceType randType = (DiceType)Random.Range(1, 5);
+                        Color randColor = randType == DiceType.Gold ? Color.yellow : randType == DiceType.Ice ? Color.cyan : randType == DiceType.Dark ? new Color32(43, 42, 26, 255) : Color.white;
+                        shopManager.ShowCoatingSelection(randType, 1.0f, randColor);
+                        while (CoatingSelectionPanel.IsPanelOpen) yield return null;
                     }
                     break;
-
-                case FigureEffectType.AddReroll:
-                    diceManager.figureBonusRerolls += (int)effect.effectValue; // 리롤 횟수 가산
-                    break;
-
-                case FigureEffectType.AddChips:
-                    diceManager.snackBonusChips += (int)effect.effectValue; // 최종 플랫 칩 추가
-                    break;
-
-                case FigureEffectType.AddMultiplier:
-                    diceManager.snackBonusMult += effect.effectValue; // 차례 정산 시 배수 가산
-                    break;
-
-                case FigureEffectType.DamageEnemy:
-                    if (diceManager.enemy != null)
-                        diceManager.enemy.TakeDamage((int)effect.effectValue, null); // 고정 데미지 부여
-                    break;
-
-                case FigureEffectType.GetSnack:
-                    if (effect.optionalItem != null)
-                        AddItem(effect.optionalItem); // 지정된 스낵 프리팹 인벤토리에 추가[cite: 1]
+                case FigureEffectType.OpenSatelliteSelection:
+                    if (shopManager != null) { shopManager.ShowSatelliteSelection((SatelliteType)Random.Range(0, 4)); while (shopManager.satelliteSelectionPanel != null && shopManager.satelliteSelectionPanel.gameObject.activeSelf) yield return null; }
                     break;
             }
         }
     }
+
+    // 다른 스크립트(스테이지 클리어, 스낵 사용)에서 에러가 안 나도록 기존 동기형 이름도 남겨둠
+    public void ApplyFigureEffects(List<FigureEffectNode> effects, DiceManager diceManager, ShopManager shopManager)
+    {
+        StartCoroutine(ApplyFigureEffectsCoroutine(effects, 0, diceManager, shopManager));
+    }
+
+
 }
