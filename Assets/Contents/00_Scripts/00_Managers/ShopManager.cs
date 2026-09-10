@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System.Linq;
 
 public class ShopManager : MonoBehaviour
 {
@@ -81,6 +82,10 @@ public class ShopManager : MonoBehaviour
         if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
 
         RefreshShop(false);
+
+        //리롤 할인 UI 갱신 및 상점 진입 피규어(복고양이) 기믹 발동
+        UpdateRerollUI();
+        InventoryManager.Instance.EvaluateShopEnteredTriggers(diceManager, this);
     }
 
     public void RefreshShop(bool isReroll)
@@ -206,23 +211,20 @@ public class ShopManager : MonoBehaviour
 
     public void RerollShop()
     {
-        // 코팅 선택 중이거나 파괴 선택 중이면 작동 불가
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return;
 
-        if (currentGold >= rerollCost)
+        //기본 rerollCost 대신 할인이 적용된 최종 비용 사용
+        int finalCost = GetFinalRerollCost();
+        if (currentGold >= finalCost)
         {
-            currentGold -= rerollCost;
+            currentGold -= finalCost;
             if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
             RefreshShop(true);
         }
         else
         {
-            // [추가] 리롤 비용이 부족할 때 토스트 팝업 강제 출력
-            if (ToastPopupController.Instance != null)
-            {
-                ToastPopupController.Instance.ShowToast("골드가 부족합니다.");
-            }
+            if (ToastPopupController.Instance != null) ToastPopupController.Instance.ShowToast("골드가 부족합니다.");
         }
         if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
     }
@@ -257,14 +259,11 @@ public class ShopManager : MonoBehaviour
         }
     }
 
-    public bool PurchaseItem(BaseItemDataSO item)
+    public bool PurchaseItem(BaseItemDataSO item, int actualPrice)
     {
         // 코팅 선택 중이거나 파괴 선택 중이면 구매 불가
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return false;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return false;
-
-        //실제 계산될 가격 판별 로직 추가
-        int actualPrice = diceManager.isNextShopFree ? 0 : item.price;
 
         if (currentGold >= actualPrice)
         {
@@ -375,6 +374,30 @@ public class ShopManager : MonoBehaviour
         else
         {
             Debug.LogWarning("CoatingSelectionPanel 또는 DiceManager 연결이 누락되었습니다.");
+        }
+    }
+    // 리롤(고양이 눈) 할인율을 적용한 최종 리롤 비용 계산
+    public int GetFinalRerollCost()
+    {
+        int discount = InventoryManager.Instance.GetShopDiscountRate(FigureEffectType.DiscountShopReroll);
+        int finalCost = Mathf.FloorToInt(rerollCost * (1f - discount / 100f));
+        return Mathf.Max(0, finalCost);
+    }
+
+    public void UpdateRerollUI()
+    {
+        int finalCost = GetFinalRerollCost();
+        if (rerollCostText != null) rerollCostText.text = "리롤 : " + finalCost + " G";
+    }
+
+    // 복고양이 효과: 진열된 아이템 중 하나를 무작위로 0원 처리
+    public void MakeRandomItemFree()
+    {
+        var validSlots = shopSlots.Where(s => s.gameObject.activeSelf && !s.isLocked && !s.isPurchased && s.currentData != null).ToList();
+        if (validSlots.Count > 0)
+        {
+            var randSlot = validSlots[Random.Range(0, validSlots.Count)];
+            randSlot.ApplyLuckyCatFree();
         }
     }
 
