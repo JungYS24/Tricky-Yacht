@@ -5,7 +5,7 @@ public enum SnackType { Cherry, Pancake, LimeJuice, Steak, Garnish, Peppermint }
 [CreateAssetMenu(fileName = "NewSnack", menuName = "Shop/Items/Snack")]
 public class SnackItemSO : BaseItemDataSO
 {
-    [Header("--- ½º³¼ Àü¿ë ½ºÆå ---")]
+    [Header("--- ìŠ¤ë‚µ ì „ìš© ìŠ¤í™ ---")]
     public SnackType snackType;
 
     public override void ApplyItemEffect(DiceManager diceManager)
@@ -15,20 +15,20 @@ public class SnackItemSO : BaseItemDataSO
         switch (snackType)
         {
             case SnackType.Cherry:
-                // [Ã¼¸®] ÃÖÁ¾ µ¥¹ÌÁö ¹è¼ö +0.2 (ÇÕ¿¬»ê)
+                // [ì²´ë¦¬] ìµœì¢… ë°ë¯¸ì§€ ë°°ìˆ˜ +0.2 (í•©ì—°ì‚°)
                 diceManager.snackBonusMult += 0.2f;
                 break;
             case SnackType.Pancake:
-                // [ÆÒÄÉÀÌÅ©] ±âº» Ä¨ ¼ö +30
+                // [íŒ¬ì¼€ì´í¬] ê¸°ë³¸ ì¹© ìˆ˜ +30
                 diceManager.snackBonusChips += 30;
                 break;
             case SnackType.LimeJuice:
-                // [¶óÀÓ ÁÖ½º] ¸®·Ñ ±âÈ¸ +1
+                // [ë¼ì„ ì£¼ìŠ¤] ë¦¬ë¡¤ ê¸°íšŒ +1
                 diceManager.snackBonusRerolls++;
                 break;
 
             case SnackType.Steak:
-                // [½ºÅ×ÀÌÅ©] Ã¼·Â 10 È¸º¹
+                // [ìŠ¤í…Œì´í¬] ì²´ë ¥ 10 íšŒë³µ
                 diceManager.currentPlayerHP += 10;
                 if (diceManager.currentPlayerHP > diceManager.playerMaxHP)
                 {
@@ -37,19 +37,19 @@ public class SnackItemSO : BaseItemDataSO
                 break;
 
             case SnackType.Garnish:
-                // [°¡´Ï½¬] ÀÌ¹ø ¶ó¿îµå ¸ó½ºÅÍ ¹ÚÁ¦(ÇÇ±Ô¾î) È®·ü 15% Áõ°¡ (¿øÇÏ½Ã´Â ¼öÄ¡·Î Á¶Àı °¡´É)
+                // [ê°€ë‹ˆì‰¬] ì´ë²ˆ ë¼ìš´ë“œ ëª¬ìŠ¤í„° ë°•ì œ(í”¼ê·œì–´) í™•ë¥  15% ì¦ê°€ (ì›í•˜ì‹œëŠ” ìˆ˜ì¹˜ë¡œ ì¡°ì ˆ ê°€ëŠ¥)
                 diceManager.snackBonusFigureDropRate += 0.15f;
                 break;
             case SnackType.Peppermint:
-                // [ÆäÆÛ¹ÎÆ®] Áï½Ã Æ÷È¹ ½Ãµµ ´ë½Å, ÀÌ¹ø ÅÏ Ã³Ä¡ ½Ã 30% È®·ü·Î Æ÷È¹µÇ´Â ¹öÇÁ¸¦ ÄÕ´Ï´Ù.
+                // [í˜í¼ë¯¼íŠ¸] ì¦‰ì‹œ í¬íš ì‹œë„ ëŒ€ì‹ , ì´ë²ˆ í„´ ì²˜ì¹˜ ì‹œ 30% í™•ë¥ ë¡œ í¬íšë˜ëŠ” ë²„í”„ë¥¼ ì¼­ë‹ˆë‹¤.
                 diceManager.isPeppermintActive = true;
                 break;
 
         }
 
-        Debug.Log($"½º³¼ [{itemName}] »ç¿ë! È¿°ú°¡ Àû¿ëµÇ¾ú½À´Ï´Ù.");
+        Debug.Log($"ìŠ¤ë‚µ [{itemName}] ì‚¬ìš©! íš¨ê³¼ê°€ ì ìš©ë˜ì—ˆìŠµë‹ˆë‹¤.");
 
-        // ¾ÆÀÌÅÛ »ç¿ë ÈÄ È­¸é¿¡ ¹Ù²ï µ¥¹ÌÁö/È½¼ö/È®·ü µîÀ» Áï½Ã ¹İ¿µ
+        // ì•„ì´í…œ ì‚¬ìš© í›„ í™”ë©´ì— ë°”ë€ ë°ë¯¸ì§€/íšŸìˆ˜/í™•ë¥  ë“±ì„ ì¦‰ì‹œ ë°˜ì˜
         diceManager.ForceUpdateUI();
     }
 }

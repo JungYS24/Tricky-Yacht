@@ -10,11 +10,11 @@ public class DeckUI : MonoBehaviour
     public DiceManager diceManager;
     public GameObject deckPanel;
 
-    [Header("ÀÎº¥Åä¸® UI ¼³Á¤")]
+    [Header("ì¸ë²¤í† ë¦¬ UI ì„¤ì •")]
     public Transform slotParent;
     public GameObject deckSlotPrefab;
 
-    [Header("¹öÆ° ¼³Á¤")]
+    [Header("ë²„íŠ¼ ì„¤ì •")]
     public Button closeButton;
     public Button sortButton;
 
@@ -29,7 +29,7 @@ public class DeckUI : MonoBehaviour
     }
     private void Start()
     {
-        // ¿¡µğÅÍ¿¡¼­ ÆË¾÷Ã¢À» ÄÑµĞ Ã¤·Î ½ÃÀÛÇÏ´õ¶óµµ, °ÔÀÓ ½ÃÀÛ ½Ã °­Á¦·Î ´İ¾Æ¼­ ÄÚµå¿Í »óÅÂ¸¦ ÀÏÄ¡½ÃÅµ´Ï´Ù.
+        // ì—ë””í„°ì—ì„œ íŒì—…ì°½ì„ ì¼œë‘” ì±„ë¡œ ì‹œì‘í•˜ë”ë¼ë„, ê²Œì„ ì‹œì‘ ì‹œ ê°•ì œë¡œ ë‹«ì•„ì„œ ì½”ë“œì™€ ìƒíƒœë¥¼ ì¼ì¹˜ì‹œí‚µë‹ˆë‹¤.
         if (deckPanel != null && deckPanel.activeSelf)
         {
             deckPanel.SetActive(false);

@@ -10,7 +10,7 @@ public enum BiomeType
 
 public class BiomeNavigator
 {
-    // °¢ ¹ÙÀÌ¿È¸¶´Ù Á¤È®È÷ 3°³ÀÇ ´ÙÀ½ ¸ñÀûÁö ³ëµå¸¦ °¡Áı´Ï´Ù
+    // ê° ë°”ì´ì˜´ë§ˆë‹¤ ì •í™•íˆ 3ê°œì˜ ë‹¤ìŒ ëª©ì ì§€ ë…¸ë“œë¥¼ ê°€ì§‘ë‹ˆë‹¤
     public readonly Dictionary<BiomeType, List<BiomeType>> BiomeRoutes = new Dictionary<BiomeType, List<BiomeType>>()
     {
         { BiomeType.Forest, new List<BiomeType> { BiomeType.Meadow, BiomeType.Jungle, BiomeType.Cave } },
@@ -32,7 +32,7 @@ public class BiomeNavigator
 
     public List<BiomeType> GetNextBiomeOptions(BiomeType currentBiome, int currentStage)
     {
-        //100½ºÅ×ÀÌÁö(¹ÙÀÌ¿È 10°³) Å¬¸®¾î ½Ã ¹«Á¶°Ç °øÇã(Void) 3°³·Î °íÁ¤ÇÏ¿© ¼±ÅÃÁö¿¡ ¶ç¿ò
+        //100ìŠ¤í…Œì´ì§€(ë°”ì´ì˜´ 10ê°œ) í´ë¦¬ì–´ ì‹œ ë¬´ì¡°ê±´ ê³µí—ˆ(Void) 3ê°œë¡œ ê³ ì •í•˜ì—¬ ì„ íƒì§€ì— ë„ì›€
         if (currentStage >= 10)
         {
             return new List<BiomeType> { BiomeType.Void, BiomeType.Void, BiomeType.Void };

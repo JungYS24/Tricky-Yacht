@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 
 [CreateAssetMenu(fileName = "NewFigure", menuName = "Shop/Items/Figure")]
 public class FigureItemSO : BaseItemDataSO
 {
-    [Header("--- 피규어 고유 사양 ---")]
+    [Header("--- 피규어 분류 (엑셀 기준) ---")]
+    public FigureCategory category = FigureCategory.None;
     public bool isPermanent = true;
     public int requiredSlots = 1;
 
@@ -16,6 +17,6 @@ public class FigureItemSO : BaseItemDataSO
 
     public override void ApplyItemEffect(DiceManager diceManager)
     {
-        Debug.Log($"{itemName} 피규어 획득! 슬롯 {requiredSlots} 소모");
+        Debug.Log($"[{category}] {itemName} 피규어 인벤토리에 추가됨!");
     }
 }

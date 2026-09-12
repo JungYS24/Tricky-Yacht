@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
@@ -65,7 +65,7 @@ public class DiceManager : MonoBehaviour
     public AudioEvent playerHurtAudioEvent;
 
     [Header("게임 오버 UI 설정")]
-    public GameOverPanelController gameOverPanel;
+    public GameOverPanelController gameOverPanel;   
 
     [Header("보스전 가짜 주사위")]
     public Sprite fakeDiceShell; // 가짜 주사위 외곽선 이미지 (인스펙터에서 할당)
@@ -86,6 +86,13 @@ public class DiceManager : MonoBehaviour
 
     [HideInInspector] public DiceData1 originalBossDice = null;
     [HideInInspector] public int fakeDiceIndex = -1;
+
+    [Header("피규어 특수 기믹 상태")]
+    [HideInInspector] public float combatWinGoldMultiplier = 1.0f;
+    [HideInInspector] public int extraAttackCount = 0;
+    [HideInInspector] public bool isEnemySkillNullified = false;
+    [HideInInspector] public bool isNextEnemyAttackFixedToOne = false;
+    [HideInInspector] public int figureBonusFlameDamage = 0; //피규어로 얻은 화상 데미지
 
     // --- 스낵 시스템용 변수 ---
     private int defaultMaxRerolls;
@@ -108,7 +115,7 @@ public class DiceManager : MonoBehaviour
     private Dice[] keepSlotOccupants;
     private bool pendingPeppermintSuccess = false;
     private bool isRolling = false; // 주사위 굴러가는중 
-    private bool isCalculating = false; // 끝내기 버튼
+    public bool isCalculating = false;  //끝내기 버튼
 
     //족보별 배수
     [Header("족보 배수 설정")]
@@ -358,6 +365,11 @@ public class DiceManager : MonoBehaviour
 
     void StartNewStage()
     {
+        combatWinGoldMultiplier = 1.0f;
+        extraAttackCount = 0;
+        isEnemySkillNullified = false;
+        isNextEnemyAttackFixedToOne = false;
+        figureBonusFlameDamage = 0;
         //기존에 가짜 주사위 기믹이 남아있다면 원상복구
         RestoreFakeDice();
 
@@ -556,6 +568,8 @@ public class DiceManager : MonoBehaviour
         }
 
         currentRerolls++;
+        //리롤 시 발동(OnDiceReroll)하는 6번 카테고리 피규어 발동
+        InventoryManager.Instance.EvaluateRerollTriggers(this, shopManager);
 
         StartCoroutine(HandleDiceChangedDelayed());
     }
@@ -572,8 +586,13 @@ public class DiceManager : MonoBehaviour
         ui?.SetRollButtonInteractable(false);   //즉시 버튼 비활성화
         ui?.SetFinishButtonInteractable(false); //즉시 버튼 비활성화
 
-        // 사운드 끝내기 버튼 클릭 소리 재생
+        // [수정된 부분] 실제 연산 로직은 코루틴으로 넘겨서 실행합니다.
+        StartCoroutine(FinishTurnRoutine());
+    }
 
+    private IEnumerator FinishTurnRoutine()
+    {
+        // 사운드 끝내기 버튼 클릭 소리 재생
 
         CameraShake.Instance.Shake(0.2f, 0.15f);
 
@@ -591,8 +610,13 @@ public class DiceManager : MonoBehaviour
         }
 
         List<int> finalDiceValues = keptDice.Select(d => d.currentValue).ToList();
-        InventoryManager.Instance.EvaluateTurnEndTriggers(finalDiceValues, handName, this, shopManager);
 
+        //
+        //InventoryManager 호출을 코루틴으로 변경 (UI 창이 뜨면 닫힐 때까지 여기서 대기)
+        //
+        yield return StartCoroutine(InventoryManager.Instance.EvaluateTurnEndTriggersCoroutine(finalDiceValues, handName, baseSum, this, shopManager));
+
+        // 여기서부터는 작성하셨던 기존 로직 100% 동일합니다.
         float finalMultiplier = comboMultiplier + snackBonusMult;
         int currentSimulatedHP = enemy.CurrentHP;
         int darkDamageTotal = 0, iceBonusChips = 0;
@@ -616,7 +640,9 @@ public class DiceManager : MonoBehaviour
                     }
                     break;
                 case SpecialDieEffect.Heart:
-                    currentPlayerHP += d.currentValue;
+                    //실제로 회복할 때도 배수 적용
+                    float hMult = InventoryManager.Instance.GetHealMultiplier();
+                    currentPlayerHP += Mathf.FloorToInt(d.currentValue * hMult);
                     if (currentPlayerHP > playerMaxHP) currentPlayerHP = playerMaxHP;
                     break;
                 case SpecialDieEffect.Flame:
@@ -666,20 +692,22 @@ public class DiceManager : MonoBehaviour
                             satelliteBonusMult += 1.1f;
                             break;
                         case SatelliteType.Jupiter: // 목성
-                            currentPlayerHP += 2;
+                            float jMult = InventoryManager.Instance.GetHealMultiplier();
+                            currentPlayerHP += Mathf.FloorToInt(2 * jMult);
                             if (currentPlayerHP > playerMaxHP) currentPlayerHP = playerMaxHP;
                             break;
                     }
                 }
             }
-
         }
-        accumulatedFlameDamage += flameDamageThisTurn;
+
+        accumulatedFlameDamage += flameDamageThisTurn + figureBonusFlameDamage;
+        figureBonusFlameDamage = 0; // 더해준 뒤 즉시 리셋
 
         if (darkDamageTotal > 0) enemy.TakeDamage(darkDamageTotal, null);
 
         //최종 데미지에 위성 효과 합산
-        float finalTotalMult = comboMultiplier + snackBonusMult + satelliteBonusMult;
+        float finalTotalMult = finalMultiplier + satelliteBonusMult;
         int damage = Mathf.FloorToInt((baseSum + iceBonusChips + snackBonusChips + satelliteBonusChips) * finalTotalMult);
 
         // 페퍼민트 성공 여부를 먼저 굴림
@@ -700,11 +728,29 @@ public class DiceManager : MonoBehaviour
 
         // 성공할 때만 외부 포획 연출 사용
         enemy.useExternalDeathSequence = pendingPeppermintSuccess;
-        enemy.TakeDamage(damage, OnEnemyKilled);
+
+        if (enemy.IsDead)
+        {
+            // 메인 공격이 들어가기도 전에 피규어나 다크 주사위로 돌연사했다면 즉시 클리어
+            OnEnemyKilled();
+        }
+        else
+        {
+            // 살아있다면 정상적으로 메인 데미지를 입힙니다.
+            enemy.TakeDamage(damage, OnEnemyKilled);
+        }
+
+        //풍신의 북 (야추 시 공격 N회 추가 발동) 처리
+        for (int i = 0; i < extraAttackCount; i++)
+        {
+            if (!enemy.IsDead) enemy.TakeDamage(damage, OnEnemyKilled);
+        }
+        extraAttackCount = 0; // 추가 공격 후 즉시 리셋
 
         // 코루틴에 화염 데미지 값도 같이 넘겨줌
         StartCoroutine(ProcessTurnResult(handName, accumulatedFlameDamage));
     }
+
 
     //티켓 아이템 먹었을 때 호출할 함수
     public void UpgradeHand(HandType handType, float amount)
@@ -722,7 +768,7 @@ public class DiceManager : MonoBehaviour
         }
     }
 
-    private void OnEnemyKilled()
+    public void OnEnemyKilled()
     {
         if (pendingPeppermintSuccess &&
             peppermintCaptureEffect != null &&
@@ -768,6 +814,8 @@ public class DiceManager : MonoBehaviour
         }
 
         int baseClearReward = 500;
+        baseClearReward = Mathf.FloorToInt(baseClearReward * combatWinGoldMultiplier); // 투탕카멘 2배 적용
+        combatWinGoldMultiplier = 1.0f; // 초기화
         if (shopManager != null)
         {
             shopManager.currentGold += baseClearReward;
@@ -922,7 +970,16 @@ public class DiceManager : MonoBehaviour
                 yield return new WaitForSeconds(0.2f);
 
                 // 플레이어 체력 감소 및 화면 흔들림
-                currentPlayerHP -= enemy.AttackPower;
+
+                int finalEnemyAtk = isNextEnemyAttackFixedToOne ? 1 : enemy.AttackPower;
+                isNextEnemyAttackFixedToOne = false; // 적용 후 스위치 끄기
+
+                // [방어 로직 적용] 인벤토리에 뎀감이 총 얼마인지 물어보고 빼줍니다.
+                int reduction = InventoryManager.Instance.GetTotalDamageReduction(finalEnemyAtk, this);
+                finalEnemyAtk -= reduction;
+                if (finalEnemyAtk < 0) finalEnemyAtk = 0; // 뎀감이 너무 높아도 체력이 차진 않도록 방어
+
+                currentPlayerHP -= finalEnemyAtk;
                 CameraShake.Instance.Shake(0.15f, 0.1f);
 
                 // 비네트 피격 연출 실행
@@ -1026,7 +1083,9 @@ public class DiceManager : MonoBehaviour
                     expectedGold += d.currentValue;
                     break;
                 case SpecialDieEffect.Heart:
-                    expectedHeal += d.currentValue;
+                    //UI에 표시될 때도 도도새 모자 배수 적용
+                    float hMultUI = InventoryManager.Instance.GetHealMultiplier();
+                    expectedHeal += Mathf.FloorToInt(d.currentValue * hMultUI);
                     break;
             }
 
@@ -1050,7 +1109,10 @@ public class DiceManager : MonoBehaviour
                         case SatelliteType.Mercury: satelliteBonusChips += 15; break;
                         case SatelliteType.Venus: expectedGold += 30; break;
                         case SatelliteType.Mars: satelliteBonusMult += 1.1f; break;
-                        case SatelliteType.Jupiter: expectedHeal += 2; break;
+                        case SatelliteType.Jupiter:
+                            float jMultUI = InventoryManager.Instance.GetHealMultiplier();
+                            expectedHeal += Mathf.FloorToInt(2 * jMultUI);
+                            break;
                     }
                 }
             }

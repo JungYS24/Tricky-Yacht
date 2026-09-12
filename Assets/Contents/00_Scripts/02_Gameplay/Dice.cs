@@ -6,20 +6,20 @@ using System.Linq;
 
 public class Dice : MonoBehaviour, IPointerDownHandler
 {
-    [Header("»óÅÂ µ¥ÀÌÅÍ")]
+    [Header("ìƒíƒœ ë°ì´í„°")]
     public int currentValue;
     public bool isKept = false;
     public int currentKeepIndex = -1;
     public Vector3 rollPos;
-    public DiceData1 myData; // ÁÖ»çÀ§ °íÀ¯ µ¥ÀÌÅÍ (ÄÚÆÃ, »ö»ó, ¸é ±¸¼º µî)
+    public DiceData1 myData; // ì£¼ì‚¬ìœ„ ê³ ìœ  ë°ì´í„° (ì½”íŒ…, ìƒ‰ìƒ, ë©´ êµ¬ì„± ë“±)
 
-    [Header("·»´õ¸µ ¹× ¿¬Ãâ")]
-    public Sprite[] diceFaceSprites;     // ÀÏ¹İ ÁÖ»çÀ§ ´«±İ ÀÌ¹ÌÁö (1~6)
-    public Sprite[] fixedNumberSprites;  // °íÁ¤ ÁÖ»çÀ§¿ë ¾Æ¶óºñ¾Æ ¼ıÀÚ ÀÌ¹ÌÁö (1~6)
+    [Header("ë Œë”ë§ ë° ì—°ì¶œ")]
+    public Sprite[] diceFaceSprites;     // ì¼ë°˜ ì£¼ì‚¬ìœ„ ëˆˆê¸ˆ ì´ë¯¸ì§€ (1~6)
+    public Sprite[] fixedNumberSprites;  // ê³ ì • ì£¼ì‚¬ìœ„ìš© ì•„ë¼ë¹„ì•„ ìˆ«ì ì´ë¯¸ì§€ (1~6)
     private SpriteRenderer spriteRenderer;
     public ParticleSystem rollParticle;
 
-    [Header("¾Ö´Ï¸ŞÀÌ¼Ç ¼³Á¤")]
+    [Header("ì• ë‹ˆë©”ì´ì…˜ ì„¤ì •")]
     public float rollDuration = 0.45f;
     public float shakePower = 0.12f;
     public float rotatePower = 25f;
@@ -27,10 +27,10 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
     private Vector3 originalScale;
     private Coroutine rollCoroutine;
-    private bool isFixedDice = false; // 6¸éÀÌ ¸ğµÎ °°Àº ¼ıÀÚÀÎÁö ¿©ºÎ
+    private bool isFixedDice = false; // 6ë©´ì´ ëª¨ë‘ ê°™ì€ ìˆ«ìì¸ì§€ ì—¬ë¶€
     private bool useNumberSprite = false;
 
-    [Header("ÄÚÆÃ »ö»ó º¸Á¤")]
+    [Header("ì½”íŒ… ìƒ‰ìƒ ë³´ì •")]
     [SerializeField] private float coatingBrightness = 1.35f;
     [SerializeField] private float keptDarkness = 0.6f;
 
@@ -48,10 +48,10 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         if (isKept) return;
         myData = data;
 
-        // ¸¸¾à µ¥ÀÌÅÍ¿¡ Ä¿½ºÅÒ ´«±İÀÌ ÀÖ´Ù¸é ±×°ÍÀ» »ç¿ëÇÏ°í, ¾ø´Ù¸é ±âº» ½ºÇÁ¶óÀÌÆ®¸¦ »ç¿ë
+        // ë§Œì•½ ë°ì´í„°ì— ì»¤ìŠ¤í…€ ëˆˆê¸ˆì´ ìˆë‹¤ë©´ ê·¸ê²ƒì„ ì‚¬ìš©í•˜ê³ , ì—†ë‹¤ë©´ ê¸°ë³¸ ìŠ¤í”„ë¼ì´íŠ¸ë¥¼ ì‚¬ìš©
         if (myData.customFaceSprites != null && myData.customFaceSprites.Length > 0)
         {
-            // Dice ½ºÅ©¸³Æ®ÀÇ diceFaceSprites ¹è¿­À» Ä¿½ºÅÒ ÀÌ¹ÌÁö·Î ±³Ã¼
+            // Dice ìŠ¤í¬ë¦½íŠ¸ì˜ diceFaceSprites ë°°ì—´ì„ ì»¤ìŠ¤í…€ ì´ë¯¸ì§€ë¡œ êµì²´
             this.diceFaceSprites = myData.customFaceSprites;
         }
         if (myData.customDiceShell != null)
@@ -59,7 +59,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             spriteRenderer.sprite = myData.customDiceShell;
         }
 
-        // °íÁ¤ ÁÖ»çÀ§ÀÌ°Å³ª, ÀÌ¸§¿¡ 'È¦¼ö' ¶Ç´Â 'Â¦¼ö'°¡ µé¾î°¡¸é ¼ıÀÚ ÀÌ¹ÌÁö¸¦ »ç¿ëÇÏµµ·Ï ¼³Á¤
+        // ê³ ì • ì£¼ì‚¬ìœ„ì´ê±°ë‚˜, ì´ë¦„ì— 'í™€ìˆ˜' ë˜ëŠ” 'ì§ìˆ˜'ê°€ ë“¤ì–´ê°€ë©´ ìˆ«ì ì´ë¯¸ì§€ë¥¼ ì‚¬ìš©í•˜ë„ë¡ ì„¤ì •
         bool isFixed = myData.faceValues.All(f => f == myData.faceValues[0]);
         bool isOddEven = myData.specialEffect == SpecialDieEffect.Odd || myData.specialEffect == SpecialDieEffect.Even;
 
@@ -70,7 +70,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
         ApplyDiceColor();
 
-        // ÇÊµå ´ë±â »óÅÂ ¾Ö´Ï¸ŞÀÌ¼Ç Ãß°¡
+        // í•„ë“œ ëŒ€ê¸° ìƒíƒœ ì• ë‹ˆë©”ì´ì…˜ ì¶”ê°€
         int[] uniqueFaces = myData.faceValues.Distinct().ToArray();
         bool shouldAnimate = uniqueFaces.Length > 1 && uniqueFaces.Length < 6;
 
@@ -80,7 +80,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
     {
         if (spriteRenderer == null) return;
 
-        // 1. °ªÀÌ 0 ÀÌÇÏÀÏ ¶§(°¡Â¥ ÁÖ»çÀ§)ÀÇ Ã³¸®
+        // 1. ê°’ì´ 0 ì´í•˜ì¼ ë•Œ(ê°€ì§œ ì£¼ì‚¬ìœ„)ì˜ ì²˜ë¦¬
         if (value <= 0)
         {
             if (myData != null && myData.customFaceSprites != null && myData.customFaceSprites.Length > 0)
@@ -90,17 +90,17 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             return;
         }
 
-        // Ä¿½ºÅÒ ÀÌ¹ÌÁö°¡ ÀÖ´Â °æ¿ì (88 ÁÖ»çÀ§ ¿Ïº® ´ëÀÀ)
+        // ì»¤ìŠ¤í…€ ì´ë¯¸ì§€ê°€ ìˆëŠ” ê²½ìš° (88 ì£¼ì‚¬ìœ„ ì™„ë²½ ëŒ€ì‘)
         if (myData != null && myData.customFaceSprites != null && myData.customFaceSprites.Length > 0)
         {
-            // Ä¿½ºÅÒ ÀÌ¹ÌÁö°¡ 1Àå»ÓÀÌ¶ó¸é ¹«Á¶°Ç 0¹øÀ», ¿©·¯ ÀåÀÌ¶ó¸é ´«±İ¿¡ ¸Â°Ô ¾ÈÀüÇÏ°Ô °¡Á®¿É´Ï´Ù.
+            // ì»¤ìŠ¤í…€ ì´ë¯¸ì§€ê°€ 1ì¥ë¿ì´ë¼ë©´ ë¬´ì¡°ê±´ 0ë²ˆì„, ì—¬ëŸ¬ ì¥ì´ë¼ë©´ ëˆˆê¸ˆì— ë§ê²Œ ì•ˆì „í•˜ê²Œ ê°€ì ¸ì˜µë‹ˆë‹¤.
             int safeIndex = (myData.customFaceSprites.Length == 1) ? 0 : Mathf.Clamp(value - 1, 0, myData.customFaceSprites.Length - 1);
             spriteRenderer.sprite = myData.customFaceSprites[safeIndex];
-            return; // ¿©±â¼­ ¹Ù·Î ÇÔ¼ö¸¦ ³¡³»¼­ ¿¡·¯¸¦ Â÷´ÜÇÕ´Ï´Ù!
+            return; // ì—¬ê¸°ì„œ ë°”ë¡œ í•¨ìˆ˜ë¥¼ ëë‚´ì„œ ì—ëŸ¬ë¥¼ ì°¨ë‹¨í•©ë‹ˆë‹¤!
         }
 
-        //±âÁ¸ 1~6 ÀÏ¹İ ¼ıÀÚ/´«±İ Ã³¸® (¾ÈÀüÀåÄ¡ Ãß°¡)
-        int safeDefaultIndex = Mathf.Clamp(value - 1, 0, 5); // 0~5 ¹üÀ§¸¦ ¹ş¾î³ªÁö ¸øÇÏµµ·Ï °­Á¦ °íÁ¤
+        //ê¸°ì¡´ 1~6 ì¼ë°˜ ìˆ«ì/ëˆˆê¸ˆ ì²˜ë¦¬ (ì•ˆì „ì¥ì¹˜ ì¶”ê°€)
+        int safeDefaultIndex = Mathf.Clamp(value - 1, 0, 5); // 0~5 ë²”ìœ„ë¥¼ ë²—ì–´ë‚˜ì§€ ëª»í•˜ë„ë¡ ê°•ì œ ê³ ì •
 
         if (useNumberSprite && fixedNumberSprites != null && fixedNumberSprites.Length >= 6)
         {
@@ -108,7 +108,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         }
         else if (diceFaceSprites != null && diceFaceSprites.Length > 0)
         {
-            // SetData¿¡¼­ Ä¿½ºÅÒ ÀÌ¹ÌÁö·Î µ¤¾î¾º¿öÁ³À» °æ¿ì¸¦ ´ëºñÇØ ¹è¿­ ±æÀÌ¿¡ ¸Â°Ô ¾ÈÀüÇÏ°Ô °¡Á®¿È
+            // SetDataì—ì„œ ì»¤ìŠ¤í…€ ì´ë¯¸ì§€ë¡œ ë®ì–´ì”Œì›Œì¡Œì„ ê²½ìš°ë¥¼ ëŒ€ë¹„í•´ ë°°ì—´ ê¸¸ì´ì— ë§ê²Œ ì•ˆì „í•˜ê²Œ ê°€ì ¸ì˜´
             int finalIndex = Mathf.Clamp(value - 1, 0, diceFaceSprites.Length - 1);
             spriteRenderer.sprite = diceFaceSprites[finalIndex];
         }
@@ -176,12 +176,12 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             elapsed += Time.deltaTime;
             float t = elapsed / rollDuration;
 
-            // 1~6 ÀüÃ¼°¡ ¾Æ´Ñ, ÀÌ ÁÖ»çÀ§°¡ °¡Áø ¸é(faceValues) Áß¿¡¼­¸¸ ·£´ıÇÏ°Ô º¸¿©ÁÜ
-            // È¦¼ö ÁÖ»çÀ§¶ó¸é ±¼·¯°¡´Â µ¿¾È¿¡µµ 1, 3, 5¸¸ º¸ÀÓ
+            // 1~6 ì „ì²´ê°€ ì•„ë‹Œ, ì´ ì£¼ì‚¬ìœ„ê°€ ê°€ì§„ ë©´(faceValues) ì¤‘ì—ì„œë§Œ ëœë¤í•˜ê²Œ ë³´ì—¬ì¤Œ
+            // í™€ìˆ˜ ì£¼ì‚¬ìœ„ë¼ë©´ êµ´ëŸ¬ê°€ëŠ” ë™ì•ˆì—ë„ 1, 3, 5ë§Œ ë³´ì„
             int randomFaceIndex = UnityEngine.Random.Range(0, 6);
             UpdateSprite(myData.faceValues[randomFaceIndex]);
 
-            // Èçµé¸² ¹× È¸Àü ¿¬Ãâ
+            // í”ë“¤ë¦¼ ë° íšŒì „ ì—°ì¶œ
             Vector3 randomOffset = new Vector3(
                 UnityEngine.Random.Range(-shakePower, shakePower),
                 UnityEngine.Random.Range(-shakePower, shakePower), 0f);
@@ -193,13 +193,13 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             yield return null;
         }
 
-        // ¿¬Ãâ Á¾·á ÈÄ »óÅÂ º¹±¸
+        // ì—°ì¶œ ì¢…ë£Œ í›„ ìƒíƒœ ë³µêµ¬
         transform.SetPositionAndRotation(startPos, Quaternion.identity);
         transform.localScale = originalScale;
         currentValue = finalValue;
         UpdateSprite(finalValue);
 
-        // ÆË¾÷ ÀÌÆåÆ® ¹× ÆÄÆ¼Å¬
+        // íŒì—… ì´í™íŠ¸ ë° íŒŒí‹°í´
         transform.localScale = originalScale * 1.25f;
         if (rollParticle != null)
         {
@@ -210,30 +210,30 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         yield return new WaitForSeconds(0.06f);
         transform.localScale = originalScale;
 
-        // º¸°ü »óÅÂ¿¡ µû¸¥ »ö»ó ÃÖÁ¾ Á¶Á¤
+        // ë³´ê´€ ìƒíƒœì— ë”°ë¥¸ ìƒ‰ìƒ ìµœì¢… ì¡°ì •
         ApplyDiceColor();
         rollCoroutine = null;
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        // »óÁ¡ÀÌ ¿­·ÁÀÖ°Å³ª ÇÇ±Ô¾î »ó¼¼ ÆĞ³ÎÀÌ ¿­·ÁÀÖÀ¸¸é Å¬¸¯ Ãë¼Ò
+        // ìƒì ì´ ì—´ë ¤ìˆê±°ë‚˜ í”¼ê·œì–´ ìƒì„¸ íŒ¨ë„ì´ ì—´ë ¤ìˆìœ¼ë©´ í´ë¦­ ì·¨ì†Œ
         if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || DeckUI.IsPanelOpen || TicketDetailPanel.IsPanelOpen || CoatingSelectionPanel.IsPanelOpen || UIManager.IsSettingsOpen)
             return;
 
-        //»óÁ¡ ¼±ÅÃ ÆĞ³Î(»óÁ¡/´ÙÀ½ ½ºÅ×ÀÌÁö) ¶Ç´Â ¹ÙÀÌ¿È ¼±ÅÃ ÆĞ³ÎÀÌ ¿­·ÁÀÖÀ» ¶§ Å¬¸¯ Â÷´Ü
+        //ìƒì  ì„ íƒ íŒ¨ë„(ìƒì /ë‹¤ìŒ ìŠ¤í…Œì´ì§€) ë˜ëŠ” ë°”ì´ì˜´ ì„ íƒ íŒ¨ë„ì´ ì—´ë ¤ìˆì„ ë•Œ í´ë¦­ ì°¨ë‹¨
         if (DiceManager.Instance != null)
         {
             if (DiceManager.Instance.ui != null && DiceManager.Instance.ui.shopChoicePanel.activeInHierarchy) return;
             if (DiceManager.Instance.biomeSelectionPanel != null && DiceManager.Instance.biomeSelectionPanel.panelRoot.activeInHierarchy) return;
         }
 
-        //Æ©Åä¸®¾ó Áß Å¬¸¯ Á¦ÇÑ ·ÎÁ÷
+        //íŠœí† ë¦¬ì–¼ ì¤‘ í´ë¦­ ì œí•œ ë¡œì§
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
             if (!TutorialManager.Instance.IsDiceClickable(this))
             {
-                return; // Çã¶ôµÇÁö ¾ÊÀº ÁÖ»çÀ§¸é ¿©±â¼­ Å¬¸¯ Ãë¼Ò
+                return; // í—ˆë½ë˜ì§€ ì•Šì€ ì£¼ì‚¬ìœ„ë©´ ì—¬ê¸°ì„œ í´ë¦­ ì·¨ì†Œ
             }
         }
 

@@ -27,12 +27,12 @@ public class CoatingSelectionPanel : MonoBehaviour
         pendingColor = color;
 
 
-        //(GetRandomDiceForCoating È£Ãâ)
+        //(GetRandomDiceForCoating í˜¸ì¶œ)
         List<DiceData1> options = dm.GetRandomDiceForCoating(5);
 
         if (options.Count == 0)
         {
-            Debug.Log("ÄÚÆÃÇÒ ¼ö ÀÖ´Â ÁÖ»çÀ§°¡ µ¦¿¡ ¾ø½À´Ï´Ù!");
+            Debug.Log("ì½”íŒ…í•  ìˆ˜ ìˆëŠ” ì£¼ì‚¬ìœ„ê°€ ë±ì— ì—†ìŠµë‹ˆë‹¤!");
             return;
         }
 
@@ -65,9 +65,9 @@ public class CoatingSelectionPanel : MonoBehaviour
         selectedDice.multiplier = pendingMultiplier;
         selectedDice.diceColor = pendingColor;
 
-        Debug.Log($"{selectedDice.diceName}¿¡ {pendingCoatingType} ÄÚÆÃ Àû¿ë ¿Ï·á!");
+        Debug.Log($"{selectedDice.diceName}ì— {pendingCoatingType} ì½”íŒ… ì ìš© ì™„ë£Œ!");
 
-        // Æ©Åä¸®¾ó ÁßÀÏ ¶§ ÄÚÆÃ Ã³¸®°¡ ³¡³µÀ½À» ¾Ë¸²
+        // íŠœí† ë¦¬ì–¼ ì¤‘ì¼ ë•Œ ì½”íŒ… ì²˜ë¦¬ê°€ ëë‚¬ìŒì„ ì•Œë¦¼
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
             TutorialManager.Instance.OnCoatingAppliedComplete();

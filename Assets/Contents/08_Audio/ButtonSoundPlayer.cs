@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class ButtonSoundPlayer : MonoBehaviour
 {
-    [Header("»ç¿îµå ¿¡¼Â ¼³Á¤")]
+    [Header("ì‚¬ìš´ë“œ ì—ì…‹ ì„¤ì •")]
     public AudioEvent clickSound; 
 
     private AudioSource audioSource;
@@ -14,7 +14,7 @@ public class ButtonSoundPlayer : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
 
-        // ¹öÆ° ÄÄÆ÷³ÍÆ®¸¦ °¡Á®¿Í¼­ Å¬¸¯ ÀÌº¥Æ®¸¦ ¿¬°áÇÕ´Ï´Ù.
+        // ë²„íŠ¼ ì»´í¬ë„ŒíŠ¸ë¥¼ ê°€ì ¸ì™€ì„œ í´ë¦­ ì´ë²¤íŠ¸ë¥¼ ì—°ê²°í•©ë‹ˆë‹¤.
         button = GetComponent<Button>();
         if (button != null)
         {

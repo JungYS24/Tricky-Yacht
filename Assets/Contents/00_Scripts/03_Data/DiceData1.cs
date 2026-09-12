@@ -31,8 +31,8 @@ public enum DiceType
 [System.Serializable]
 public class DiceData1
 {
-    // 1. º¯¼ö ¼±¾ğºÎ¿¡ ÀÌ¸§À» Ãß°¡ÇÏ°í ±âº»°ªÀ» ³Ö¾îÁİ´Ï´Ù.
-    public string diceName = "±âº» ÁÖ»çÀ§";
+    // 1. ë³€ìˆ˜ ì„ ì–¸ë¶€ì— ì´ë¦„ì„ ì¶”ê°€í•˜ê³  ê¸°ë³¸ê°’ì„ ë„£ì–´ì¤ë‹ˆë‹¤.
+    public string diceName = "ê¸°ë³¸ ì£¼ì‚¬ìœ„";
 
     public bool isCoated = false;
     public float multiplier = 1f;
@@ -43,7 +43,7 @@ public class DiceData1
 
     public Sprite customDiceShell;
     public Sprite[] customFaceSprites;
-    public List<SatelliteType> activeSatellites = new List<SatelliteType>();//À§¼º ¸®½ºÆ®
+    public List<SatelliteType> activeSatellites = new List<SatelliteType>();//ìœ„ì„± ë¦¬ìŠ¤íŠ¸
 
     //public int minRoll = 1;
     //public int maxRoll = 6;
@@ -51,18 +51,18 @@ public class DiceData1
 
     public DiceData1()
     {
-        diceName = "±âº» ÁÖ»çÀ§";
+        diceName = "ê¸°ë³¸ ì£¼ì‚¬ìœ„";
         isCoated = false;
         multiplier = 1f;
         diceColor = Color.white;
         type = DiceType.Normal;
         specialEffect = SpecialDieEffect.None;
 
-        // 6°³ ¸éÀÇ ±âº»°ªÀ» 1~6À¸·Î ¼³Á¤
+        // 6ê°œ ë©´ì˜ ê¸°ë³¸ê°’ì„ 1~6ìœ¼ë¡œ ì„¤ì •
         faceValues = new int[6] { 1, 2, 3, 4, 5, 6 };
     }
 
-    // Æ¯¼ö ÁÖ»çÀ§ »ı¼ºÀ» À§ÇÑ »ı¼ºÀÚ (¼±ÅÃ »çÇ×)
+    // íŠ¹ìˆ˜ ì£¼ì‚¬ìœ„ ìƒì„±ì„ ìœ„í•œ ìƒì„±ì (ì„ íƒ ì‚¬í•­)
     public DiceData1(string name, int[] faces)
     {
         this.diceName = name;

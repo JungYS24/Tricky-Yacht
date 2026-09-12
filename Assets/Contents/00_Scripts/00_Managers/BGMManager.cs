@@ -18,7 +18,7 @@ public class BGMManager : MonoBehaviour
     public float fadeSpeed = 0.5f;
 
     [Header("Lobby BGM Settings")]
-    // ·Îºñ ¾ÀÀ¸·Î µ¹¾Æ¿ÔÀ» ¶§ Àç»ıÇÒ ·Îºñ ºê±İ ¿¡¼Â ½½·Ô
+    // ë¡œë¹„ ì”¬ìœ¼ë¡œ ëŒì•„ì™”ì„ ë•Œ ì¬ìƒí•  ë¡œë¹„ ë¸Œê¸ˆ ì—ì…‹ ìŠ¬ë¡¯
     public AudioClip lobbyBGM;
 
     void Awake()
@@ -37,7 +37,7 @@ public class BGMManager : MonoBehaviour
             if (SceneManager.GetActiveScene().name == "Lobby" && lobbyBGM != null)
             {
                 ChangeBGM(lobbyBGM);
-                Debug.Log("·Îºñ ÁøÀÔ Áï½Ã °¨Áö ¹× Àç»ı!");
+                Debug.Log("ë¡œë¹„ ì§„ì… ì¦‰ì‹œ ê°ì§€ ë° ì¬ìƒ!");
             }
         }
         else
@@ -63,7 +63,7 @@ public class BGMManager : MonoBehaviour
             if (lobbyBGM != null)
             {
                 ChangeBGM(lobbyBGM);
-                Debug.Log("<color=yellow>[BGMManager]</color> ·Îºñ ÁøÀÔ °¨Áö : ·Îºñ BGM ÆäÀÌµå ½º¿Ò ½ÃÀÛ");
+                Debug.Log("<color=yellow>[BGMManager]</color> ë¡œë¹„ ì§„ì… ê°ì§€ : ë¡œë¹„ BGM í˜ì´ë“œ ìŠ¤ì™‘ ì‹œì‘");
             }
             else
             {
@@ -72,7 +72,7 @@ public class BGMManager : MonoBehaviour
         }
     }
 
-    //º¼·ı (Master) Á¶Àı
+    //ë³¼ë¥¨ (Master) ì¡°ì ˆ
     public void SetMasterVolume(float volume)
     {
         if (bgmMixerGroup == null || bgmMixerGroup.audioMixer == null) return;
@@ -81,7 +81,7 @@ public class BGMManager : MonoBehaviour
         else bgmMixerGroup.audioMixer.SetFloat("Master", volume);
     }
 
-    //¹è°æÀ½¾Ç (BGM) Á¶Àı
+    //ë°°ê²½ìŒì•… (BGM) ì¡°ì ˆ
     public void SetBGMVolume(float volume)
     {
         if (bgmMixerGroup == null || bgmMixerGroup.audioMixer == null) return;
@@ -90,7 +90,7 @@ public class BGMManager : MonoBehaviour
         else bgmMixerGroup.audioMixer.SetFloat("BGM", volume);
     }
 
-    //È¿°úÀ½ (SFX) Á¶Àı
+    //íš¨ê³¼ìŒ (SFX) ì¡°ì ˆ
     public void SetSFXVolume(float volume)
     {
         if (bgmMixerGroup == null || bgmMixerGroup.audioMixer == null) return;
@@ -100,13 +100,13 @@ public class BGMManager : MonoBehaviour
     }
 
 
-    // ¿ÜºÎ¿¡¼­ BGMManager.Instance.ChangeBGM(Å¬¸³); À¸·Î È£Ãâ
+    // ì™¸ë¶€ì—ì„œ BGMManager.Instance.ChangeBGM(í´ë¦½); ìœ¼ë¡œ í˜¸ì¶œ
     public void ChangeBGM(AudioClip nextClip)
     {
         if (nextClip == null) return;
         if (audioSource == null) audioSource = GetComponent<AudioSource>();
 
-        //°°Àº Å¬¸³ÀÌ´õ¶óµµ ÇöÀç Àç»ı ÁßÀÌ ¾Æ´Ï°Å³ª º¼·ıÀÌ 0ÀÌ¸é ¹«½ÃÇÏÁö ¾Ê°í ´Ù½Ã Æ´
+        //ê°™ì€ í´ë¦½ì´ë”ë¼ë„ í˜„ì¬ ì¬ìƒ ì¤‘ì´ ì•„ë‹ˆê±°ë‚˜ ë³¼ë¥¨ì´ 0ì´ë©´ ë¬´ì‹œí•˜ì§€ ì•Šê³  ë‹¤ì‹œ í‹ˆ
         if (audioSource.clip == nextClip && audioSource.isPlaying && audioSource.volume > 0)
             return;
 
@@ -122,24 +122,24 @@ public class BGMManager : MonoBehaviour
         {
             audioSource.Stop();
             audioSource.volume = 0f;
-            audioSource.clip = null; // Å¬¸³À» ¿ÏÀüÈ÷ ºñ¿öµÖ¼­ ´ÙÀ½¹ø Àç»ı ½Ã ¹«½ÃµÇ´Â °É ¹æÁö
+            audioSource.clip = null; // í´ë¦½ì„ ì™„ì „íˆ ë¹„ì›Œë‘¬ì„œ ë‹¤ìŒë²ˆ ì¬ìƒ ì‹œ ë¬´ì‹œë˜ëŠ” ê±¸ ë°©ì§€
         }
     }
 
     IEnumerator FadeAndPlay(AudioClip nextClip)
     {
-        // 1. ±âÁ¸ À½¾Ç ÆäÀÌµå ¾Æ¿ô
+        // 1. ê¸°ì¡´ ìŒì•… í˜ì´ë“œ ì•„ì›ƒ
         while (audioSource.volume > 0)
         {
             audioSource.volume -= Time.unscaledDeltaTime * fadeSpeed;
             yield return null;
         }
 
-        // 2. À½¾Ç ±³Ã¼ ¹× Àç»ı
+        // 2. ìŒì•… êµì²´ ë° ì¬ìƒ
         audioSource.clip = nextClip;
         audioSource.Play();
 
-        // 3. »õ À½¾Ç ÆäÀÌµå ÀÎ
+        // 3. ìƒˆ ìŒì•… í˜ì´ë“œ ì¸
         while (audioSource.volume < maxVolume)
         {
             audioSource.volume += Time.unscaledDeltaTime * fadeSpeed;
