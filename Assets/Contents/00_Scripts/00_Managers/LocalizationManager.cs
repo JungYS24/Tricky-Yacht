@@ -13,6 +13,7 @@ public class LocalizationManager : MonoBehaviour
 {
     public const string LanguagePrefsKey = "GameLanguage";
     public const string DefaultLanguageCode = "ko";
+    public const string UiTable = "UI_StringTable";
 
     public static readonly string[] SupportedLanguageCodes =
     {
@@ -107,6 +108,37 @@ public class LocalizationManager : MonoBehaviour
         try
         {
             var result = LocalizationSettings.StringDatabase.GetLocalizedString(tableName, entryKey);
+            if (string.IsNullOrEmpty(result))
+                return entryKey;
+
+            return result;
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"[LocalizationManager] 번역을 찾지 못했습니다. table={tableName}, key={entryKey}, error={e.Message}");
+            return entryKey;
+        }
+    }
+
+    /// <summary>
+    /// 인자 치환이 있는 번역 문자열을 가져온다. 예: "남은 굴리기: {0}"
+    /// </summary>
+    public string GetLocalizedString(string tableName, string entryKey, params object[] arguments)
+    {
+        if (string.IsNullOrEmpty(tableName) || string.IsNullOrEmpty(entryKey))
+        {
+            Debug.LogWarning("[LocalizationManager] tableName 또는 entryKey가 비어 있습니다.");
+            return entryKey ?? string.Empty;
+        }
+
+        EnsureInitialized();
+
+        try
+        {
+            var result = arguments == null || arguments.Length == 0
+                ? LocalizationSettings.StringDatabase.GetLocalizedString(tableName, entryKey)
+                : LocalizationSettings.StringDatabase.GetLocalizedString(tableName, entryKey, arguments);
+
             if (string.IsNullOrEmpty(result))
                 return entryKey;
 

@@ -994,7 +994,10 @@ public class DiceManager : MonoBehaviour
                     //게임 오버가 되면 기존 세이브 파일을 지워버림
                     if (GameSaveManager.Instance != null) GameSaveManager.Instance.DeleteSave();
 
-                    ui?.ShowResult("#FF0000", "게임 오버");
+                    string gameOverText = LocalizationManager.Instance != null
+                        ? LocalizationManager.Instance.GetLocalizedString(LocalizationManager.UiTable, "UI_GAME_OVER")
+                        : "게임 오버";
+                    ui?.ShowResult("#FF0000", gameOverText);
                     Invoke(nameof(RestartGame), 1.5f);
 
                     StartCoroutine(ShowGameOverPanelDelayed());

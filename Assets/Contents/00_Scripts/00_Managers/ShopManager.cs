@@ -53,7 +53,9 @@ public class ShopManager : MonoBehaviour
             shopRerollButton.onClick.AddListener(RerollShop);
 
         if (rerollCostText != null)
-            rerollCostText.text = "리롤 : " + rerollCost + " G";
+            rerollCostText.text = LocalizationManager.Instance != null
+                ? LocalizationManager.Instance.GetLocalizedString(LocalizationManager.UiTable, "UI_REROLL_COST", rerollCost)
+                : "리롤 : " + rerollCost + " G";
 
         if (nextStageButton != null)
             nextStageButton.onClick.AddListener(CloseShopAndGoNext);
