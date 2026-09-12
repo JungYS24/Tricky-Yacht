@@ -86,7 +86,9 @@ public class UIManager : MonoBehaviour
         stageText.text = stageName;
         targetScoreText.text = $"<color=#FF5555>{currentHP}/{maxHP}</color>";
         cumulativeScoreText.text = "";
-        roundPlaysText.text = $"남은 굴리기: {rerollsLeft}";
+        roundPlaysText.text = LocalizationManager.Instance != null
+            ? LocalizationManager.Instance.GetLocalizedString(LocalizationManager.UiTable, "UI_REROLLS_LEFT", rerollsLeft)
+            : $"남은 굴리기: {rerollsLeft}";
 
         if (heartText != null)
         {
