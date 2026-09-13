@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -22,6 +22,8 @@ public class CardFlipManager : MonoBehaviour
     [SerializeField] private float appearanceInterval = 0.18f;
     [SerializeField] private float duration = 0.5f;
     [SerializeField] private float cardSpacing = 220f;
+
+
 
     private List<CardUI> generatedCardUIList = new List<CardUI>();
     private Sequence cardSequence;
@@ -154,38 +156,84 @@ public class CardFlipManager : MonoBehaviour
 
         Sequence selectSeq = DOTween.Sequence();
 
+        RectTransform selectedRect = null;
+
         foreach (var card in generatedCardUIList)
         {
             if (card == null) continue;
 
-            // 선택 연출을 위해 다른 모든 카드의 흔들림도 정지
+            // 기존 흔들림 정지
             card.StopIdleAnimation();
 
             RectTransform cardRect = card.GetComponent<RectTransform>();
+
             CanvasGroup canvasGroup = card.GetComponent<CanvasGroup>();
-            if (canvasGroup == null) canvasGroup = card.gameObject.AddComponent<CanvasGroup>();
+
+            if (canvasGroup == null)
+                canvasGroup = card.gameObject.AddComponent<CanvasGroup>();
+
 
             if (card == selectedCard)
             {
-                // 선택된 카드는 강조
+                // 선택된 티켓 저장
+                selectedRect = cardRect;
+
+                // 선택된 티켓을 가장 앞으로
                 cardRect.SetAsLastSibling();
-                selectSeq.Join(cardRect.DOScale(Vector3.one * 1.25f, 0.3f).SetEase(Ease.OutBack));
-                selectSeq.Join(cardRect.DOLocalRotate(Vector3.zero, 0.2f)); // 원래 각도로 정렬
+
+                // 기존 선택 강조 효과
+                selectSeq.Join(
+                    cardRect.DOScale(Vector3.one * 1.25f, 0.3f)
+                        .SetEase(Ease.OutBack)
+                );
+
+                selectSeq.Join(
+                    cardRect.DOLocalRotate(Vector3.zero, 0.2f)
+                );
             }
             else
             {
-                // 선택 안 된 카드는 숨김
-                selectSeq.Join(cardRect.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack));
-                selectSeq.Join(canvasGroup.DOFade(0f, 0.3f));
+                // 선택되지 않은 티켓은 기존처럼 사라짐
+                selectSeq.Join(
+                    cardRect.DOScale(Vector3.zero, 0.3f)
+                        .SetEase(Ease.InBack)
+                );
+
+                selectSeq.Join(
+                    canvasGroup.DOFade(0f, 0.3f)
+                );
             }
         }
 
+
+        // 선택된 티켓을 잠깐 보여줌
+        selectSeq.AppendInterval(0.4f);
+
+
+        // ⭐ 선택된 티켓 오른쪽으로 슝 + 동시에 작아짐
+        if (selectedRect != null)
+        {
+                selectSeq.Append(
+                selectedRect.DOAnchorPos(
+                selectedRect.anchoredPosition + new Vector2(750f, 200f),
+                0.6f
+        )
+             .SetEase(Ease.InCubic)
+);
+            selectSeq.Join(
+                selectedRect.DOScale(
+                    Vector3.zero,
+                    0.6f
+                )
+                .SetEase(Ease.InBack)
+            );
+        }
+
+
+        // ⭐ 모든 연출이 끝나면 카드 삭제
         selectSeq.OnComplete(() =>
         {
-            DOVirtual.DelayedCall(0.8f, () =>
-            {
-                ClearGeneratedCards();
-            });
+            ClearGeneratedCards();
         });
     }
 

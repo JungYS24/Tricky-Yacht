@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
@@ -23,6 +23,9 @@ public class ShopManager : MonoBehaviour
     public Button shopRerollButton;
     public TextMeshProUGUI rerollCostText;
     public int rerollCost = 100;
+
+    [Header("골드 이펙트")]
+    public GoldEffectUI goldEffectUI;
 
     [Header("상점 제어 버튼")]
     public Button nextStageButton;
@@ -212,6 +215,9 @@ public class ShopManager : MonoBehaviour
 
         if (currentGold >= rerollCost)
         {
+            // ⭐ 리롤 골드 감소 이펙트
+            goldEffectUI?.PlaySpend(rerollCost);
+
             currentGold -= rerollCost;
             if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
             RefreshShop(true);
@@ -273,6 +279,12 @@ public class ShopManager : MonoBehaviour
                 if (InventoryManager.Instance.AddItem(item))
                 {
                     currentGold -= actualPrice;
+
+
+                    // ⭐ 구매 골드 감소 이펙트
+                    if (actualPrice > 0)
+                        goldEffectUI?.PlaySpend(actualPrice);
+
                     if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
 
                     // 피규어/간식 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용
@@ -297,6 +309,11 @@ public class ShopManager : MonoBehaviour
             {
                 item.ApplyItemEffect(diceManager);
                 currentGold -= actualPrice;
+
+                // ⭐ 구매 골드 감소 이펙트
+                if (actualPrice > 0)
+                    goldEffectUI?.PlaySpend(actualPrice);
+
                 if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
 
                 // 그 외 소모품/티켓류 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용

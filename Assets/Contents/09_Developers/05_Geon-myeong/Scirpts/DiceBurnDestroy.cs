@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using DG.Tweening;
@@ -51,7 +51,6 @@ public class DiceBurnDestroy : MonoBehaviour, IPointerClickHandler
         if (isBurning) return;
         isBurning = true;
 
-        // 1. 불꽃 파티클 재생
         if (fireParticle != null)
         {
             fireParticle.gameObject.SetActive(true);
@@ -60,25 +59,63 @@ public class DiceBurnDestroy : MonoBehaviour, IPointerClickHandler
 
         Sequence burnSeq = DOTween.Sequence();
 
-        // 2. 부들부들 떨리는 흔들림
         if (diceRect != null)
         {
-            burnSeq.Join(diceRect.DOShakeAnchorPos(burnDuration, 12f, 25, 90f, false));
-        }
+            // 1. 불붙기 직전 살짝 팽창
+            burnSeq.Append(
+                diceRect.DOScale(1.12f, 0.12f)
+                    .SetEase(Ease.OutBack)
+            );
 
-        // 3. ⭐ [핵심] 셰이더의 불타는 수치(0 -> 1)를 올려서 불타며 타들어가는 연출
-        if (instancedMaterial != null)
-        {
+            // 2. 흔들리면서 불타기
             burnSeq.Join(
-                DOTween.To(() => 0f, x => instancedMaterial.SetFloat(BurnAmountID, x), 1f, burnDuration)
-                       .SetEase(Ease.InQuad)
+                diceRect.DOShakeAnchorPos(
+                    burnDuration,
+                    12f,
+                    25,
+                    90f,
+                    false
+                )
+            );
+
+            // 3. 타면서 점점 작아짐
+            burnSeq.Join(
+                diceRect.DOScale(
+                    Vector3.zero,
+                    burnDuration
+                )
+                .SetEase(Ease.InBack)
+            );
+
+            // 4. 살짝 회전
+            burnSeq.Join(
+                diceRect.DOLocalRotate(
+                    new Vector3(0f, 0f, 15f),
+                    burnDuration
+                )
+                .SetEase(Ease.InQuad)
             );
         }
 
-        // 4. 완료 후 비활성화
+        // 기존 Burn Shader
+        if (instancedMaterial != null)
+        {
+            burnSeq.Join(
+                DOTween.To(
+                    () => 0f,
+                    x => instancedMaterial.SetFloat(BurnAmountID, x),
+                    1f,
+                    burnDuration
+                )
+                .SetEase(Ease.InQuad)
+            );
+        }
+
         burnSeq.OnComplete(() =>
         {
-            if (fireParticle != null) fireParticle.Stop();
+            if (fireParticle != null)
+                fireParticle.Stop();
+
             gameObject.SetActive(false);
         });
     }

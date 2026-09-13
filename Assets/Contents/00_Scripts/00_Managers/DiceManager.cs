@@ -14,6 +14,7 @@ public class DiceManager : MonoBehaviour
     public List<DiceData1> drawPile = new List<DiceData1>();
     private List<DiceData1> discardPile = new List<DiceData1>();
 
+
     [Header("프리팹 및 슬롯 설정")]
     public GameObject dicePrefab;
     public Transform keepSlotParent;
@@ -30,6 +31,9 @@ public class DiceManager : MonoBehaviour
     public ShopManager shopManager;
     [HideInInspector] public Enemy enemy;
     public HandVFXManager handVFXManager;
+
+    [Header("골드 이펙트")]
+    public GoldEffectUI goldEffectUI;
 
     [Header("게임 데이터")]
     public int currentStage = 1;
@@ -805,7 +809,12 @@ public class DiceManager : MonoBehaviour
             //스테이지 클리어 기본 골드 카운팅 연출 실행
 
             if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
+
+            Debug.Log("골드 이펙트 실행: " + baseClearReward);
+            goldEffectUI?.PlayGain(baseClearReward);
         }
+
+        
 
         //스테이지 클리어 시 패시브(Passive) 피규어 효과 일괄 발동!
         InventoryManager.Instance.EvaluateStageClearTriggers(this, shopManager);

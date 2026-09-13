@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using DG.Tweening;
 
 public class LetterShakeController : MonoBehaviour
@@ -31,14 +31,13 @@ public class LetterShakeController : MonoBehaviour
             originalAnchoredPosition = letterTarget.anchoredPosition;
             originalRotation = letterTarget.localRotation;
             isInitialized = true;
-
-            // ⭐ [핵심] 게임 시작 시 화면에 안 보이도록 즉시 숨김!
             letterTarget.gameObject.SetActive(false);
         }
 
         if (tearEffect == null)
         {
-            tearEffect = GetComponent<LetterTearEffect>();
+            // typeof() 방식으로 수정하여 꺾쇠괄호 소실 방지
+            tearEffect = (LetterTearEffect)GetComponent(typeof(LetterTearEffect));
         }
     }
 
@@ -51,9 +50,7 @@ public class LetterShakeController : MonoBehaviour
             return;
         }
 
-        // ⭐ 버튼을 눌러 흔들기가 시작될 때만 짠! 하고 켜기
         letterTarget.gameObject.SetActive(true);
-
         StopAndReset();
 
         if (sparkParticle != null)
@@ -88,8 +85,12 @@ public class LetterShakeController : MonoBehaviour
     {
         if (tearEffect == null)
         {
-            tearEffect = GetComponent<LetterTearEffect>();
-            if (tearEffect == null) tearEffect = FindObjectOfType<LetterTearEffect>();
+            // typeof() 방식으로 수정하여 꺾쇠괄호 소실 방지
+            tearEffect = (LetterTearEffect)GetComponent(typeof(LetterTearEffect));
+            if (tearEffect == null)
+            {
+                tearEffect = (LetterTearEffect)Object.FindFirstObjectByType(typeof(LetterTearEffect));
+            }
         }
 
         if (tearEffect != null)
