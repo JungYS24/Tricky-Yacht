@@ -304,11 +304,11 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         //DOTween 연출 (위로 이동 -> 크기 튕김 -> 서서히 투명해지며 꺼짐)
         float targetY = floatingText.transform.localPosition.y + 1.2f;
 
-        floatingText.transform.DOLocalMoveY(targetY, 0.7f).SetEase(Ease.OutQuad);
+        floatingText.transform.DOLocalMoveY(targetY, 1.2f).SetEase(Ease.OutQuad);
         floatingText.transform.DOPunchScale(new Vector3(0.5f, 0.5f, 0f), 0.3f, 2, 0.5f);
 
-        // 0.2초 대기 후 0.5초 동안 투명해지고 비활성화 (Destroy 안함)
-        floatingText.DOFade(0f, 0.5f).SetDelay(0.2f).OnComplete(() =>
+        // 0.8초 대기 후 0.5초 동안 투명해지고 비활성화 (Destroy 안함)
+        floatingText.DOFade(0f, 0.5f).SetDelay(0.8f).OnComplete(() =>
         {
             floatingText.gameObject.SetActive(false);
         });

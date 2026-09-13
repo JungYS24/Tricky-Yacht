@@ -12,8 +12,15 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI cumulativeScoreText;
     public TextMeshProUGUI roundPlaysText;
 
-    [Header("데미지 계산 UI (통합)")]
-    public TextMeshProUGUI scoringFormulaText;
+    // 기존 통합 UI 대신, 용도별로 완전히 분리된 텍스트들을 선언
+    [Header("데미지 계산 UI (분리형)")]
+    //public TextMeshProUGUI scoringFormulaText; // 기존 통합 텍스트는 이제 사용 안 함
+    public TextMeshProUGUI handInfoText;     // 족보 이름 및 기본 코팅 보너스
+    public TextMeshProUGUI chipsSumText;     // 합연산(덧셈) 전용 텍스트
+    public TextMeshProUGUI multSumText;      // 곱연산(배수) 전용 텍스트
+    public TextMeshProUGUI chipsLogText;     // 덧셈(칩) 머리 위에서 뜰 로그
+    public TextMeshProUGUI multLogText;      // 곱셈(배수) 머리 위에서 뜰 로그
+    public TextMeshProUGUI finalDamageText;  // = 대미지 예정 텍스트
 
     [Header("플레이어 체력 UI")]
     //플레이어 체력
@@ -99,11 +106,6 @@ public class UIManager : MonoBehaviour
         if (heartText != null)
         {
             heartText.text = $"{playerHP}/{playerMaxHP}";
-        }
-
-        if (scoringFormulaText != null)
-        {
-            scoringFormulaText.text = combinedDamageText;
         }
 
 
