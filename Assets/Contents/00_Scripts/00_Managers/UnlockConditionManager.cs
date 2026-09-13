@@ -7,11 +7,42 @@ public static class UnlockConditionManager
 
     private static UnlockFlag unlockedFlag = 0;
 
-    public static bool IsUnlocked(UnlockFlag flag)
+    /// <summary>
+    /// 여러 조건 플래그를 하나의 플래그 값으로 합쳐줍니다.
+    /// </summary>
+    /// <param name="flags"></param>
+    /// <returns></returns>
+    public static UnlockFlag CombineFlags(params UnlockFlag[] flags)
     {
-        return flag == UnlockFlag.None || (unlockedFlag & flag) == flag;
+        var result = UnlockFlag.None;
+        foreach (var flag in flags)
+        {
+            result |= flag;
+        }
+        return result;
     }
 
+    /// <summary>
+    /// 조건이 해금되었는지 확인합니다.
+    /// </summary>
+    /// <param name="flag"></param>
+    /// <returns></returns>
+    public static bool IsUnlocked(UnlockFlag flag)
+    {
+        if (flag == UnlockFlag.None)
+        {
+            Debug.LogWarning($"{UnlockFlag.None}은 항상 {true}입니다.");
+            return true;
+        }
+        
+        return (unlockedFlag & flag) == flag;
+    }
+
+    /// <summary>
+    /// 조건 플래그 값을 변경합니다.
+    /// </summary>
+    /// <param name="flag"></param>
+    /// <param name="isUnlocked"></param>
     public static void SetUnlockCondition(UnlockFlag flag, bool isUnlocked)
     {
         if ((flag & ~rangeMask) != 0)
