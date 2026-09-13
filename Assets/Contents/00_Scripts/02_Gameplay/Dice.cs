@@ -3,6 +3,8 @@ using UnityEngine.EventSystems;
 using System;
 using System.Collections;
 using System.Linq;
+using TMPro;           
+using DG.Tweening;     
 
 public class Dice : MonoBehaviour, IPointerDownHandler
 {
@@ -36,6 +38,9 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
     public static event Action OnDiceStateChanged;
     private Coroutine idleAnimCoroutine;
+
+    private TextMeshPro floatingText;
+
 
     private void Awake()
     {
@@ -268,4 +273,45 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             ApplyDiceColor();
         }
     }
+
+
+    public void ShowFloatingText(int bonusValue)
+    {
+        //매번 Instantiate 하지 않고, 없을 때 딱 한 번만 만둠
+        if (floatingText == null)
+        {
+            GameObject textObj = new GameObject("FloatingText");
+            textObj.transform.SetParent(this.transform);
+
+            floatingText = textObj.AddComponent<TextMeshPro>();
+            floatingText.fontSize = 5;
+            floatingText.alignment = TextAlignmentOptions.Center;
+            floatingText.sortingOrder = 25000; // UI와 가림막을 뚫고 맨 위에 보이도록 높게 설정
+        }
+
+        //이전 연출 찌꺼기 초기화
+        floatingText.DOKill();
+        floatingText.transform.DOKill();
+
+        // 주사위 머리 위쪽으로 시작 위치 리셋
+        floatingText.transform.localPosition = new Vector3(0, 0.5f, 0);
+        floatingText.transform.localScale = Vector3.one;
+
+        floatingText.color = new Color(1f, 0.8f, 0f, 1f); // 황금색 텍스트
+        floatingText.text = $"+{bonusValue}";
+        floatingText.gameObject.SetActive(true);
+
+        //DOTween 연출 (위로 이동 -> 크기 튕김 -> 서서히 투명해지며 꺼짐)
+        float targetY = floatingText.transform.localPosition.y + 1.2f;
+
+        floatingText.transform.DOLocalMoveY(targetY, 0.7f).SetEase(Ease.OutQuad);
+        floatingText.transform.DOPunchScale(new Vector3(0.5f, 0.5f, 0f), 0.3f, 2, 0.5f);
+
+        // 0.2초 대기 후 0.5초 동안 투명해지고 비활성화 (Destroy 안함)
+        floatingText.DOFade(0f, 0.5f).SetDelay(0.2f).OnComplete(() =>
+        {
+            floatingText.gameObject.SetActive(false);
+        });
+    }
+
 }

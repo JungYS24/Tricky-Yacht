@@ -169,7 +169,7 @@ public class ShopManager : MonoBehaviour
 
 
         // 스테이지에 따른 슬롯 해금 개수 계산 (기본 2개 + 2스테이지마다 1개씩 추가)
-        int unlockedCount = 6 + (diceManager.currentStage - 1) / 2;
+        int unlockedCount = 2 + (diceManager.currentStage - 1) / 2;
         unlockedCount = Mathf.Clamp(unlockedCount, 2, shopSlots.Length); // 최소 2개, 최대 6개(Length)로 고정
 
         // 주의: 이 for문 아래에 기존 for문이 또 남아있으면 안 됩니다!

@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.SceneManagement;
+using DG.Tweening;
 
 public class DiceManager : MonoBehaviour
 {
@@ -127,6 +128,7 @@ public class DiceManager : MonoBehaviour
     public float multFourOfAKind = 1.8f;
     public float multStraight = 2.0f;
     public float multYacht = 2.5f;
+
 
     // 전역 접근을 위한 싱글톤 인스턴스 선언 (클래스 상단 변수 선언부에 위치)
     public static DiceManager Instance { get; private set; }
@@ -316,11 +318,13 @@ public class DiceManager : MonoBehaviour
             else enemy.Initialize(currentStage, currentBiome); // 에러 방지용 안전장치
 
             accumulatedFlameDamage = data.savedFlameDamage;
+            ui?.UpdateFlameStackUI(accumulatedFlameDamage); //세이브 로드 시 스택 UI 갱신
         }
         else
         {
             enemy.Initialize(currentStage, currentBiome);
             accumulatedFlameDamage = 0; // 새로 시작할 땐 확실하게 0으로 초기화
+            ui?.UpdateFlameStackUI(0);
         }
 
         //세이브 로드 시에도 적 능력을 체크해서 다시 발동
@@ -388,6 +392,7 @@ public class DiceManager : MonoBehaviour
 
         //화염 데미지 스택 초기화
         accumulatedFlameDamage = 0;
+        ui?.UpdateFlameStackUI(0); //새 스테이지 돌입 시 스택 UI 숨김
 
         if (currentBiome != null)
         {
@@ -613,10 +618,17 @@ public class DiceManager : MonoBehaviour
 
         //
         //InventoryManager 호출을 코루틴으로 변경 (UI 창이 뜨면 닫힐 때까지 여기서 대기)
-        //
+
+        // 피규어 효과 계산 전의 스낵 보너스를 기억해둠
+        int chipsBeforeFigures = snackBonusChips;
+        float multBeforeFigures = snackBonusMult;
         yield return StartCoroutine(InventoryManager.Instance.EvaluateTurnEndTriggersCoroutine(finalDiceValues, handName, baseSum, this, shopManager));
 
-        // 여기서부터는 작성하셨던 기존 로직 100% 동일합니다.
+
+        // 피규어 효과 계산 전의 스낵 보너스를 기억해둠 (나중에 연출을 분리하기 위함)
+        int figureAddedChips = snackBonusChips - chipsBeforeFigures;
+        float figureAddedMult = snackBonusMult - multBeforeFigures;
+
         float finalMultiplier = comboMultiplier + snackBonusMult;
         int currentSimulatedHP = enemy.CurrentHP;
         int darkDamageTotal = 0, iceBonusChips = 0;
@@ -625,10 +637,14 @@ public class DiceManager : MonoBehaviour
         int satelliteBonusChips = 0;
         float satelliteBonusMult = 0f;
 
-        int flameDamageThisTurn = 0; // 이번 턴에 새로 추가할 화염 데미지
+        int flameDamageThisTurn = 0; //이번 턴에 새로 추가할 화염 데미지
+        float prismMultTotal = 0f;   //연출을 위해 프리즘 배수만 따로 뺌
 
+        //주사위별로 값을 정산하고 텍스트를 띄우도록 변경
         foreach (var d in keptDice)
         {
+            int singleDiceValue = d.currentValue; //이 주사위가 낸 기본 눈금
+
             switch (d.myData.specialEffect)
             {
                 case SpecialDieEffect.Coin:
@@ -654,7 +670,11 @@ public class DiceManager : MonoBehaviour
             {
                 switch (d.myData.type)
                 {
-                    case DiceType.Prism: finalMultiplier += (d.myData.multiplier - 1.0f); break;
+                    case DiceType.Prism:
+                        float pMult = (d.myData.multiplier - 1.0f);
+                        finalMultiplier += pMult;
+                        prismMultTotal += pMult; // 시퀀스 연출용 저장
+                        break;
                     case DiceType.Gold:
                         if (shopManager != null)
                         {
@@ -666,7 +686,10 @@ public class DiceManager : MonoBehaviour
                     case DiceType.Dark:
                         int drop = Mathf.FloorToInt(currentSimulatedHP * 0.1f);
                         darkDamageTotal += drop; currentSimulatedHP -= drop; break;
-                    case DiceType.Ice: iceBonusChips += 10; break;
+                    case DiceType.Ice:
+                        iceBonusChips += 10;
+                        singleDiceValue += 10; //아이스 코팅이 발라져 있다면 표기 값에 10 추가
+                        break;
                 }
             }
 
@@ -679,6 +702,7 @@ public class DiceManager : MonoBehaviour
                     {
                         case SatelliteType.Mercury: // 수성
                             satelliteBonusChips += 15;
+                            singleDiceValue += 15; //수성이 달려있다면 표기 값에 15 추가
                             break;
                         case SatelliteType.Venus: // 금성
                             if (shopManager != null)
@@ -699,16 +723,135 @@ public class DiceManager : MonoBehaviour
                     }
                 }
             }
+            //최종 합산된 이 주사위의 개별 수치를 머리 위로 띄움.
+            d.ShowFloatingText(singleDiceValue);
         }
+        //숫자가 튀어 오르는 것을 볼 수 있도록 잠깐(0.4초) 대기하는 템포 조절
+        yield return new WaitForSeconds(0.4f);
+
+
+        //덧셈 먼저, 곱셈 나중에 연출
+
+        int currentSequenceChips = baseSum + iceBonusChips + satelliteBonusChips;
+        float currentSequenceMult = 1.0f;
+
+        // 텍스트를 즉시 업데이트하고 튕기는 기본 연출용 함수
+        Action<string> UpdateTextAndPunch = (desc) =>
+        {
+            string text = $"<color=#FFD700>{handName}</color>\n<color=#00BFFF>{currentSequenceChips}</color> x <color=#00BFFF>{currentSequenceMult:F1}배</color>\n<color=#FF5555>{desc}</color>";
+            if (ui != null && ui.scoringFormulaText != null)
+            {
+                ui.scoringFormulaText.text = text;
+                ui.scoringFormulaText.transform.DOKill(true);
+                ui.scoringFormulaText.transform.DOPunchScale(new Vector3(0.2f, 0.2f, 0f), 0.35f, 4, 0.5f);
+                CameraShake.Instance.Shake(0.05f, 0.1f); // 타격감
+            }
+        };
+
+        UpdateTextAndPunch("정산 시작!");
+        yield return new WaitForSeconds(0.5f);
+
+        //합연산 기본 애니메이션
+        IEnumerator AnimateChips(int addValue, string desc)
+        {
+            if (addValue <= 0) yield break;
+
+            int startVal = currentSequenceChips;
+            int targetVal = currentSequenceChips + addValue;
+
+            UpdateTextAndPunch($"+{desc} ({addValue})");
+
+            yield return DOVirtual.Float(startVal, targetVal, 0.4f, (v) =>
+            {
+                currentSequenceChips = Mathf.FloorToInt(v);
+                if (ui != null && ui.scoringFormulaText != null)
+                    ui.scoringFormulaText.text = $"<color=#FFD700>{handName}</color>\n<color=#00BFFF>{currentSequenceChips}</color> x <color=#00BFFF>{currentSequenceMult:F1}배</color>\n<color=#FF5555>+{desc} ({addValue})</color>";
+            }).SetEase(Ease.OutQuad).WaitForCompletion();
+
+            yield return new WaitForSeconds(0.2f); // 짧은 대기로 연속 타격감 부여
+        }
+
+        //총합을 받아서 지정된 크기(chunkSize)만큼 쪼개어 여러 번 연출하는 함수
+        IEnumerator AnimateChipsChunked(int totalValue, string desc, int chunkSize)
+        {
+            int remaining = totalValue;
+            while (remaining > 0)
+            {
+                int step = remaining >= chunkSize ? chunkSize : remaining;
+                yield return AnimateChips(step, desc);
+                remaining -= step;
+            }
+        }
+
+        //곱연산 기본 애니메이션
+        IEnumerator AnimateMult(float addValue, string desc)
+        {
+            if (addValue <= 0.01f) yield break;
+
+            float startVal = currentSequenceMult;
+            float targetVal = currentSequenceMult + addValue;
+
+            UpdateTextAndPunch($"x{desc} (+{addValue:F1}배)");
+
+            yield return DOVirtual.Float(startVal, targetVal, 0.4f, (v) =>
+            {
+                currentSequenceMult = v;
+                if (ui != null && ui.scoringFormulaText != null)
+                    ui.scoringFormulaText.text = $"<color=#FFD700>{handName}</color>\n<color=#00BFFF>{currentSequenceChips}</color> x <color=#00BFFF>{currentSequenceMult:F1}배</color>\n<color=#FF5555>x{desc} (+{addValue:F1}배)</color>";
+            }).SetEase(Ease.OutQuad).WaitForCompletion();
+
+            yield return new WaitForSeconds(0.2f);
+        }
+
+        // 배수 총합을 쪼개서 여러 번 연출
+        IEnumerator AnimateMultChunked(float totalValue, string desc, float chunkSize)
+        {
+            float remaining = totalValue;
+            while (remaining > 0.01f)
+            {
+                float step = remaining >= chunkSize ? chunkSize : remaining;
+                yield return AnimateMult(step, desc);
+                remaining -= step;
+            }
+        }
+
+        //덧셈 (합연산) 시퀀스 실행
+        yield return AnimateChipsChunked(chipsBeforeFigures, "스낵 칩", 30);
+        // 피규어도 30단위로 쪼개서 타격감 유지
+        yield return AnimateChipsChunked(figureAddedChips, "피규어 칩", 30);
+
+        // 곱셈 (배수) 시퀀스 실행
+        // 족보는 1개니까 통째로 연출
+        yield return AnimateMult(comboMultiplier - 1.0f, "족보 배수");
+
+        // 체리가 0.2 단위이므로 0.2씩 반복
+        yield return AnimateMultChunked(multBeforeFigures, "스낵 배수", 0.2f);
+        // 프리즘이나 피규어는 적당한 크기(0.5)로 끊어줌
+        yield return AnimateMultChunked(figureAddedMult, "피규어 배수", 0.5f);
+        yield return AnimateMultChunked(prismMultTotal, "프리즘 배수", 0.5f);
+        // 화성(Mars) 위성이 1.1배이므로 1.1씩 끊어줌
+        yield return AnimateMultChunked(satelliteBonusMult, "위성 배수", 1.1f);
+
+        // 최종 데미지에 위성 효과 합산 (원래 코드의 데미지 변수와 완벽 호환)
+        float finalTotalMult = finalMultiplier + satelliteBonusMult;
+        int damage = Mathf.FloorToInt(currentSequenceChips * currentSequenceMult);
+
+        // 다크 데미지(고정 피해)는 배수 연산에 포함되지 않으므로 마지막에 텍스트만 보여주고 바로 전달
+        if (darkDamageTotal > 0)
+        {
+            UpdateTextAndPunch($"+다크 주사위 피해 ({darkDamageTotal})");
+            yield return new WaitForSeconds(0.5f);
+            enemy.TakeDamage(darkDamageTotal, null);
+        }
+
+        UpdateTextAndPunch($"= {damage} 대미지 확정!");
+        yield return new WaitForSeconds(0.6f);
 
         accumulatedFlameDamage += flameDamageThisTurn + figureBonusFlameDamage;
         figureBonusFlameDamage = 0; // 더해준 뒤 즉시 리셋
 
-        if (darkDamageTotal > 0) enemy.TakeDamage(darkDamageTotal, null);
+        ui?.UpdateFlameStackUI(accumulatedFlameDamage); //화염 데미지가 합산된 직후 UI 최신화
 
-        //최종 데미지에 위성 효과 합산
-        float finalTotalMult = finalMultiplier + satelliteBonusMult;
-        int damage = Mathf.FloorToInt((baseSum + iceBonusChips + snackBonusChips + satelliteBonusChips) * finalTotalMult);
 
         // 페퍼민트 성공 여부를 먼저 굴림
         pendingPeppermintSuccess = false;
@@ -1179,7 +1322,7 @@ public class DiceManager : MonoBehaviour
                     if (!activeFigureNames.Contains(figure.itemName))
                     {
                         activeFigureNames.Add(figure.itemName);
-                        activeFigureSprites.Add(figure.icon); // [추가된 줄] 발동된 피규어의 아이콘 저장
+                        activeFigureSprites.Add(figure.icon); //발동된 피규어의 아이콘 저장
                     }
                     figureBonusChips += (int)tempChips;
                     figureBonusMult += tempMult;
@@ -1187,43 +1330,34 @@ public class DiceManager : MonoBehaviour
             }
         }
 
-        int finalBaseSum = baseSum + iceBonusChips + snackBonusChips + satelliteBonusChips + (isCalculating ? 0 : figureBonusChips);
-        float totalFinalMult = finalMult + satelliteBonusMult + (isCalculating ? 0f : figureBonusMult);
-        int totalDamage = Mathf.FloorToInt(finalBaseSum * totalFinalMult) + darkDamageTotal;
-
-        string displayHand = $"<color=#FFD700>{handName}</color>";
-        if (iceBonusChips > 0) displayHand += $" <color=#00FFFF>+{iceBonusChips}</color>";
-
-        // 다크 주사위 텍스트 위치 (이전에 수정한 부분)
-        if (darkDamageTotal > 0) displayHand += $" <color=#A9A9A9>+{darkDamageTotal}</color>";
-
-        //위성칩
-        if (satelliteBonusChips > 0) displayHand += $" <color=#B19CD9>+{satelliteBonusChips}(위성)</color>";
-            
-
-
-        //피규어로 얻은 칩이 스낵 칩 표기로 둔갑하는 현상 방어
-        int displaySnackChips = isCalculating ? (snackBonusChips - figureBonusChips) : snackBonusChips;
-        if (displaySnackChips > 0) displayHand += $" <color=#FFA500>+{displaySnackChips}(스낵)</color>";
-        if (expectedGold > 0) displayHand += $" <color=#FFFF00>+{expectedGold}</color>";
-        if (expectedHeal > 0) displayHand += $" <color=#FF5555>+{expectedHeal}</color>";
-        if (expectedFlameDamage > 0) displayHand += $" <color=#FF4500>+{expectedFlameDamage}(화염)</color>"; //화염주사위
-
-
-        // 피규어로 칩이나 배수가 올랐다면 파란색(#00BFFF)으로, 아니면 기본색 유지
-        string chipsText = figureBonusChips > 0 ? $"<color=#00BFFF>{finalBaseSum}</color>" : finalBaseSum.ToString();
-        string multText = figureBonusMult > 0f ? $"<color=#00BFFF>{totalFinalMult:F1}배</color>" : $"{totalFinalMult:F1}배";
-
-        // 다크 주사위 계산식 분리로 수식 깔끔하게 처리 (이전에 수정한 부분)
-        string formula = $"{chipsText} x {multText}";
-        string combinedText = $"{displayHand}\n{formula}\n<color=#FF5555>= {totalDamage} 대미지 예정</color>";
-
-        int remainingRerolls = (maxRerolls + snackBonusRerolls + figureBonusRerolls) - currentRerolls;
+        //끝내기 버튼을 누르기 전과 후의 UI 렌더링을 완벽하게 분리합니다.
         string bName = (currentBiome != null) ? currentBiome.biomeName : "Stage";
-
         string stageDisplayName = $"{bName} {currentStage}";
+        int remainingRerolls = (maxRerolls + snackBonusRerolls + figureBonusRerolls) - currentRerolls;
 
-        ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText, "", activeFigureSprites);
+        if (!isCalculating)
+        {
+            // 끝내기 누르기 전: 스낵, 피규어, 족보 배수를 모두 숨기고 기본 수치(주사위합+아이스+수성) * 1.0배만 보여줌
+            int displayBaseSum = baseSum + iceBonusChips + satelliteBonusChips;
+            float displayMult = 1.0f;
+            int displayDamage = Mathf.FloorToInt(displayBaseSum * displayMult) + darkDamageTotal;
+
+            string displayHand = $"<color=#FFD700>{handName}</color>";
+            if (iceBonusChips > 0) displayHand += $" <color=#00FFFF>+{iceBonusChips}</color>";
+            if (darkDamageTotal > 0) displayHand += $" <color=#A9A9A9>+{darkDamageTotal}</color>";
+            if (satelliteBonusChips > 0) displayHand += $" <color=#B19CD9>+{satelliteBonusChips}(위성)</color>";
+
+            string formula = $"<color=#00BFFF>{displayBaseSum}</color> x <color=#00BFFF>{displayMult:F1}배</color>";
+            string combinedText = $"{displayHand}\n{formula}\n<color=#FF5555>= {displayDamage} 대미지 예정</color>";
+
+            ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, combinedText, "", activeFigureSprites);
+        }
+        else
+        {
+            // 끝내기를 누른 후(결산 중): 시퀀스 코루틴이 수식 텍스트를 제어하므로 덮어쓰지 않고 기존 텍스트 유지
+            string currentFormulaText = ui != null ? ui.scoringFormulaText.text : "";
+            ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, currentFormulaText, "", activeFigureSprites);
+        }
 
         float currentEnemyDropRate = isPeppermintActive ? enemy.baseDropRate : 0f;
     }
