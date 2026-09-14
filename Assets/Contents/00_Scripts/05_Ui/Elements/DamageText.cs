@@ -7,9 +7,9 @@ public class DamageText : MonoBehaviour
     private TextMeshProUGUI textMesh;
     private Color originalColor;
 
-    [Header("¿¬Ãâ ¼³Á¤")]
-    public float floatSpeed = 1f; // ¶°¿À¸£´Â ¼Óµµ
-    public float lifetime = 1f; // ÅØ½ºÆ®°¡ À¯ÁöµÇ´Â ½Ã°£
+    [Header("ì—°ì¶œ ì„¤ì •")]
+    public float floatSpeed = 1f; // ë– ì˜¤ë¥´ëŠ” ì†ë„
+    public float lifetime = 1f; // í…ìŠ¤íŠ¸ê°€ ìœ ì§€ë˜ëŠ” ì‹œê°„
 
     public void Setup(int damageAmount, float sizeMultiplier)
     {
@@ -18,8 +18,8 @@ public class DamageText : MonoBehaviour
 
         textMesh.text = damageAmount.ToString();
 
-        // µ¥¹ÌÁö¿¡ ºñ·ÊÇÏ¿© ÅØ½ºÆ® Å©±â Á¶Àı (±âº» Å©±â * multiplier)
-        // ÃÖ´ë/ÃÖ¼Ò Å©±â Á¦ÇÑÀ» µÎ´Â °ÍÀÌ ÁÁ½À´Ï´Ù.
+        // ë°ë¯¸ì§€ì— ë¹„ë¡€í•˜ì—¬ í…ìŠ¤íŠ¸ í¬ê¸° ì¡°ì ˆ (ê¸°ë³¸ í¬ê¸° * multiplier)
+        // ìµœëŒ€/ìµœì†Œ í¬ê¸° ì œí•œì„ ë‘ëŠ” ê²ƒì´ ì¢‹ìŠµë‹ˆë‹¤.
         float clampedScale = Mathf.Clamp(sizeMultiplier, 0.8f, 2.5f);
         transform.localScale = Vector3.one * clampedScale;
 
@@ -36,10 +36,10 @@ public class DamageText : MonoBehaviour
             timer += Time.deltaTime;
             float progress = timer / lifetime;
 
-            // 1. À§·Î ¶°¿À¸£±â
+            // 1. ìœ„ë¡œ ë– ì˜¤ë¥´ê¸°
             transform.position = startPos + new Vector3(0, progress * floatSpeed, 0);
 
-            // 2. ¼­¼­È÷ Åõ¸íÇØÁö±â (ÈÄ¹İ 50% ±¸°£ºÎÅÍ)
+            // 2. ì„œì„œíˆ íˆ¬ëª…í•´ì§€ê¸° (í›„ë°˜ 50% êµ¬ê°„ë¶€í„°)
             if (progress > 0.5f)
             {
                 float alpha = Mathf.Lerp(1f, 0f, (progress - 0.5f) * 2f);
@@ -49,7 +49,7 @@ public class DamageText : MonoBehaviour
             yield return null;
         }
 
-        // ¼ö¸íÀÌ ´ÙÇÏ¸é ¿ÀºêÁ§Æ® ÆÄ±«
+        // ìˆ˜ëª…ì´ ë‹¤í•˜ë©´ ì˜¤ë¸Œì íŠ¸ íŒŒê´´
         Destroy(gameObject);
     }
 }

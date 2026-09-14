@@ -3,28 +3,28 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewDiceItem", menuName = "Shop/Items/DiceItem")]
 public class DiceItemSO : BaseItemDataSO
 {
-    [Header("ÁÖ»çÀ§ ±¸¼º (6°³ ¸é)")]
+    [Header("ì£¼ì‚¬ìœ„ êµ¬ì„± (6ê°œ ë©´)")]
     public int[] customFaces = new int[6] { 1, 2, 3, 4, 5, 6 };
 
-    [Header("Æ¯¼ö ÁÖ»çÀ§ ´É·Â ¼³Á¤")]
+    [Header("íŠ¹ìˆ˜ ì£¼ì‚¬ìœ„ ëŠ¥ë ¥ ì„¤ì •")]
     public SpecialDieEffect specialEffect = SpecialDieEffect.None;
 
-    [Header("Ä¿½ºÅÒ ¿ÜÇü ¼³Á¤ (»ï°¢Çü ÁÖ»çÀ§ µî)")]
-    public Sprite customDiceShell;      // »ï°¢Çü ÁÖ»çÀ§ ÀÌ¹ÌÁö
-    public Sprite[] customFaceSprites;  // ÇØ´ç ÁÖ»çÀ§ Àü¿ë ´«±İ ÀÌ¹ÌÁöµé (1~6¹ø)
+    [Header("ì»¤ìŠ¤í…€ ì™¸í˜• ì„¤ì • (ì‚¼ê°í˜• ì£¼ì‚¬ìœ„ ë“±)")]
+    public Sprite customDiceShell;      // ì‚¼ê°í˜• ì£¼ì‚¬ìœ„ ì´ë¯¸ì§€
+    public Sprite[] customFaceSprites;  // í•´ë‹¹ ì£¼ì‚¬ìœ„ ì „ìš© ëˆˆê¸ˆ ì´ë¯¸ì§€ë“¤ (1~6ë²ˆ)
 
     public override void ApplyItemEffect(DiceManager diceManager)
     {
 
-        // »óÁ¡¿¡¼­ ±¸¸Å ½Ã masterDeck¿¡ »õ ÁÖ»çÀ§ Ãß°¡
+        // ìƒì ì—ì„œ êµ¬ë§¤ ì‹œ masterDeckì— ìƒˆ ì£¼ì‚¬ìœ„ ì¶”ê°€
         DiceData1 newDice = new DiceData1(itemName, customFaces);
         newDice.customDiceShell = customDiceShell;
         newDice.customFaceSprites = customFaceSprites;
 
-        // ÀÌ ¶óÀÎÀ» Ãß°¡ÇÏ¿© ÀÎ½ºÆåÅÍ¿¡¼­ °í¸¥ Æ¯¼ö ´É·ÂÀ» »õ ÁÖ»çÀ§¿¡ Àü´ŞÇÕ´Ï´Ù.
+        // ì´ ë¼ì¸ì„ ì¶”ê°€í•˜ì—¬ ì¸ìŠ¤í™í„°ì—ì„œ ê³ ë¥¸ íŠ¹ìˆ˜ ëŠ¥ë ¥ì„ ìƒˆ ì£¼ì‚¬ìœ„ì— ì „ë‹¬í•©ë‹ˆë‹¤.
         newDice.specialEffect = this.specialEffect;
 
         diceManager.masterDeck.Add(newDice);
-        Debug.Log($"{itemName}ÀÌ(°¡) µ¦¿¡ Ãß°¡µÇ¾ú½À´Ï´Ù! ÃÑ ÁÖ»çÀ§ ¼ö: {diceManager.masterDeck.Count}");
+        Debug.Log($"{itemName}ì´(ê°€) ë±ì— ì¶”ê°€ë˜ì—ˆìŠµë‹ˆë‹¤! ì´ ì£¼ì‚¬ìœ„ ìˆ˜: {diceManager.masterDeck.Count}");
     }
 }

@@ -20,13 +20,13 @@ public class SatelliteSelectionPanel : MonoBehaviour
         diceManager = dm;
         pendingSatelliteType = type;
 
-        // ÀüÃ¼ µ¦À» °¡Á®¿Â µÚ Á¶°Ç¿¡ ¸Â´Â ÁÖ»çÀ§¸¸ ÇÊÅÍ¸µÇÕ´Ï´Ù.
+        // ì „ì²´ ë±ì„ ê°€ì ¸ì˜¨ ë’¤ ì¡°ê±´ì— ë§ëŠ” ì£¼ì‚¬ìœ„ë§Œ í•„í„°ë§í•©ë‹ˆë‹¤.
         List<DiceData1> validOptions = new List<DiceData1>();
 
         foreach (var dice in dm.masterDeck)
         {
-            //À§¼ºÀÌ 4°³ ¹Ì¸¸ÀÌ¾î¾ß ÇÔ
-            //ÀÌ¹Ì °°Àº Á¾·ùÀÇ À§¼ºÀÌ ¾ø¾î¾ß ÇÔ (Áßº¹ ¹æÁö)
+            //ìœ„ì„±ì´ 4ê°œ ë¯¸ë§Œì´ì–´ì•¼ í•¨
+            //ì´ë¯¸ ê°™ì€ ì¢…ë¥˜ì˜ ìœ„ì„±ì´ ì—†ì–´ì•¼ í•¨ (ì¤‘ë³µ ë°©ì§€)
             if (dice.activeSatellites.Count < 4 && !dice.activeSatellites.Contains(type))
             {
                 validOptions.Add(dice);
@@ -35,14 +35,14 @@ public class SatelliteSelectionPanel : MonoBehaviour
 
         if (validOptions.Count == 0)
         {
-            //ÇÊÅÍ¸µµÈ ÁÖ»çÀ§°¡ ¾ø´Ù¸é µ·À» µ¹·ÁÁÖ°Å³ª Åä½ºÆ® ¸Ş½ÃÁö Ãâ·Â
-            Debug.Log("À§¼ºÀ» ´Ş ¼ö ÀÖ´Â ÁÖ»çÀ§°¡ µ¦¿¡ ¾ø½À´Ï´Ù! (ÀüºÎ 4°³ÀÌ°Å³ª ÀÌ¹Ì µ¿ÀÏ À§¼º ÀåÂøÁß)");
-            if (ToastPopupController.Instance != null) ToastPopupController.Instance.ShowToast("ÀåÂø °¡´ÉÇÑ ÁÖ»çÀ§°¡ ¾ø½À´Ï´Ù.");
+            //í•„í„°ë§ëœ ì£¼ì‚¬ìœ„ê°€ ì—†ë‹¤ë©´ ëˆì„ ëŒë ¤ì£¼ê±°ë‚˜ í† ìŠ¤íŠ¸ ë©”ì‹œì§€ ì¶œë ¥
+            Debug.Log("ìœ„ì„±ì„ ë‹¬ ìˆ˜ ìˆëŠ” ì£¼ì‚¬ìœ„ê°€ ë±ì— ì—†ìŠµë‹ˆë‹¤! (ì „ë¶€ 4ê°œì´ê±°ë‚˜ ì´ë¯¸ ë™ì¼ ìœ„ì„± ì¥ì°©ì¤‘)");
+            if (ToastPopupController.Instance != null) ToastPopupController.Instance.ShowToast("ì¥ì°© ê°€ëŠ¥í•œ ì£¼ì‚¬ìœ„ê°€ ì—†ìŠµë‹ˆë‹¤.");
             ClosePanel();
             return;
         }
 
-        // À¯È¿ÇÑ ¿É¼Ç Áß ·£´ı 5°³ ÃßÃâ
+        // ìœ íš¨í•œ ì˜µì…˜ ì¤‘ ëœë¤ 5ê°œ ì¶”ì¶œ
         ShuffleList(validOptions);
         int maxShowCount = Mathf.Min(5, validOptions.Count);
         List<DiceData1> finalOptions = validOptions.GetRange(0, maxShowCount);
@@ -72,11 +72,11 @@ public class SatelliteSelectionPanel : MonoBehaviour
     private void OnDiceSelected(DiceData1 selectedDice)
     {
         selectedDice.activeSatellites.Add(pendingSatelliteType);
-        Debug.Log($"{selectedDice.diceName}¿¡ {pendingSatelliteType} À§¼º ÀåÂø! (ÇöÀç À§¼º °¹¼ö: {selectedDice.activeSatellites.Count})");
+        Debug.Log($"{selectedDice.diceName}ì— {pendingSatelliteType} ìœ„ì„± ì¥ì°©! (í˜„ì¬ ìœ„ì„± ê°¯ìˆ˜: {selectedDice.activeSatellites.Count})");
 
         ClosePanel();
 
-        // ¾ÆÀÌÅÛ ÀåÂø Á÷ÈÄ µ¥¹ÌÁö Ç¥±â °»½Å
+        // ì•„ì´í…œ ì¥ì°© ì§í›„ ë°ë¯¸ì§€ í‘œê¸° ê°±ì‹ 
         diceManager.ForceUpdateUI();
     }
 

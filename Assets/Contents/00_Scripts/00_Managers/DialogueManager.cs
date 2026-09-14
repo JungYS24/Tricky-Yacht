@@ -25,46 +25,46 @@ public class DialogueManager : MonoBehaviour
         TextAsset csvData = Resources.Load<TextAsset>("DialogData");
         if (csvData == null) return;
 
-        // \r Âî²¨±â¸¦ Áö¿ì°í ÁÙ¹Ù²ŞÀ¸·Î ºĞ¸®
+        // \r ì°Œêº¼ê¸°ë¥¼ ì§€ìš°ê³  ì¤„ë°”ê¿ˆìœ¼ë¡œ ë¶„ë¦¬
         string cleanText = csvData.text.Replace("\r", "");
         string[] lines = cleanText.Split('\n');
 
-        // Ã¹ ÁÙÀº Çì´õÀÌ¹Ç·Î ÀÎµ¦½º 1ºÎÅÍ ½ÃÀÛ
+        // ì²« ì¤„ì€ í—¤ë”ì´ë¯€ë¡œ ì¸ë±ìŠ¤ 1ë¶€í„° ì‹œì‘
         for (int i = 1; i < lines.Length; i++)
         {
             string line = lines[i].Trim();
             if (string.IsNullOrEmpty(line)) continue;
 
-            // ´ë»ç ¾È¿¡ ÀÖ´Â ½°Ç¥(,) ¶§¹®¿¡ ¸Á°¡Áö´Â °ÍÀ» ¸·±â À§ÇØ Ã¹ 2°³ÀÇ ½°Ç¥ À§Ä¡¸¸ Ã£¾Æ¼­ Á÷Á¢ ÀÚ¸¨´Ï´Ù.
+            // ëŒ€ì‚¬ ì•ˆì— ìˆëŠ” ì‰¼í‘œ(,) ë•Œë¬¸ì— ë§ê°€ì§€ëŠ” ê²ƒì„ ë§‰ê¸° ìœ„í•´ ì²« 2ê°œì˜ ì‰¼í‘œ ìœ„ì¹˜ë§Œ ì°¾ì•„ì„œ ì§ì ‘ ìë¦…ë‹ˆë‹¤.
             int firstComma = line.IndexOf(',');
             int secondComma = line.IndexOf(',', firstComma + 1);
 
             if (firstComma != -1 && secondComma != -1)
             {
-                // ID ÃßÃâ (´«¿¡ ¾È º¸ÀÌ´Â ÆøÅº ¹®ÀÚ \uFEFF Á¦°Å)
+                // ID ì¶”ì¶œ (ëˆˆì— ì•ˆ ë³´ì´ëŠ” í­íƒ„ ë¬¸ì \uFEFF ì œê±°)
                 string id = line.Substring(0, firstComma).Trim().Replace("\uFEFF", "");
 
-                // ´ë»ç ÅØ½ºÆ® ÃßÃâ
+                // ëŒ€ì‚¬ í…ìŠ¤íŠ¸ ì¶”ì¶œ
                 string text = line.Substring(secondComma + 1).Trim();
 
-                // ±¸±Û ½ÃÆ®°¡ ½°Ç¥ ¶§¹®¿¡ ÀÚµ¿À¸·Î °¨½Î³õÀº Å«µû¿ÈÇ¥("") Á¦°Å
+                // êµ¬ê¸€ ì‹œíŠ¸ê°€ ì‰¼í‘œ ë•Œë¬¸ì— ìë™ìœ¼ë¡œ ê°ì‹¸ë†“ì€ í°ë”°ì˜´í‘œ("") ì œê±°
                 if (text.StartsWith("\"") && text.EndsWith("\""))
                 {
                     text = text.Substring(1, text.Length - 2);
                 }
 
-                // ¿¬¼ÓµÈ µû¿ÈÇ¥ Ã³¸® ¹× ÁÙ¹Ù²Ş ±âÈ£(\n) ½ÇÁ¦ ÁÙ¹Ù²ŞÀ¸·Î º¯È¯
+                // ì—°ì†ëœ ë”°ì˜´í‘œ ì²˜ë¦¬ ë° ì¤„ë°”ê¿ˆ ê¸°í˜¸(\n) ì‹¤ì œ ì¤„ë°”ê¿ˆìœ¼ë¡œ ë³€í™˜
                 text = text.Replace("\"\"", "\"").Replace("\\n", "\n");
 
                 dialogDatabase[id] = text;
             }
         }
-        Debug.Log($"ÃÑ {dialogDatabase.Count}°³ÀÇ ´ë»ç¸¦ ¾ÈÀüÇÏ°Ô ºÒ·¯¿Ô½À´Ï´Ù!");
+        Debug.Log($"ì´ {dialogDatabase.Count}ê°œì˜ ëŒ€ì‚¬ë¥¼ ì•ˆì „í•˜ê²Œ ë¶ˆëŸ¬ì™”ìŠµë‹ˆë‹¤!");
     }
 
     public string GetText(string id)
     {
         if (dialogDatabase.TryGetValue(id, out string text)) return text;
-        return $"[{id} ´ë»ç ¿À·ù!]"; // ´ë»ç¸¦ ¸ø Ã£À¸¸é °ÔÀÓ È­¸é¿¡ ¹Ù·Î ¿À·ù¸¦ ¶ç¿ö¼­ ¾Ë·ÁÁÜ
+        return $"[{id} ëŒ€ì‚¬ ì˜¤ë¥˜!]"; // ëŒ€ì‚¬ë¥¼ ëª» ì°¾ìœ¼ë©´ ê²Œì„ í™”ë©´ì— ë°”ë¡œ ì˜¤ë¥˜ë¥¼ ë„ì›Œì„œ ì•Œë ¤ì¤Œ
     }
 }

@@ -9,14 +9,14 @@ public class AudioEvent : ScriptableObject
     public Vector2 volumeRange = new Vector2(0.5f, 0.5f);
     public Vector2 pitchRange = new Vector2(1f, 1f);
 
-    [Header("¼±ÅÃ »çÇ× (°ø¶õÀÏ ½Ã AudioSource ±âº» ¹Í¼­ ÁØ¼ö)")]
+    [Header("ì„ íƒ ì‚¬í•­ (ê³µë€ì¼ ì‹œ AudioSource ê¸°ë³¸ ë¯¹ì„œ ì¤€ìˆ˜)")]
     public AudioMixerGroup customMixerGroup;
 
     public void Play(AudioSource source)
     {
         if (clips.Length == 0) return;
 
-        // 1. ¼Ò½º µ¥ÀÌÅÍ ¹× ¸ğµâ·¹ÀÌÅÍ ¼¼ÆÃ
+        // 1. ì†ŒìŠ¤ ë°ì´í„° ë° ëª¨ë“ˆë ˆì´í„° ì„¸íŒ…
         source.clip = clips[Random.Range(0, clips.Length)];
         source.volume = Random.Range(volumeRange.x, volumeRange.y);
         source.pitch = Random.Range(pitchRange.x, pitchRange.y);

@@ -3,18 +3,18 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewCoating", menuName = "Shop/Items/Coating")]
 public class CoatingItemSO : BaseItemDataSO
 {
-    [Header("--- ÄÚÆÃ Àü¿ë ½ºÆå ---")]
+    [Header("--- ì½”íŒ… ì „ìš© ìŠ¤í™ ---")]
     public DiceType coatingType = DiceType.Prism;
     public float scoreMultiplier = 1.0f;
 
-    [Header("--- ÄÚÆÃ ½Ã ¾º¿öÁú »ö»ó ---")]
+    [Header("--- ì½”íŒ… ì‹œ ì”Œì›Œì§ˆ ìƒ‰ìƒ ---")]
     public Color coatingColor = Color.yellow;
 
     public override void ApplyItemEffect(DiceManager diceManager)
     {
         if (diceManager != null && diceManager.shopManager != null)
         {
-            // ShopManager¿¡°Ô ¼±ÅÃ UI¸¦ ¿­¾î´Ş¶ó°í ¿äÃ»
+            // ShopManagerì—ê²Œ ì„ íƒ UIë¥¼ ì—´ì–´ë‹¬ë¼ê³  ìš”ì²­
             diceManager.shopManager.ShowCoatingSelection(coatingType, scoreMultiplier, coatingColor);
         }
     }

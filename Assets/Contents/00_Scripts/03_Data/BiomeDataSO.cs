@@ -4,20 +4,20 @@ using System.Collections.Generic;
 [CreateAssetMenu(fileName = "NewBiome", menuName = "Stage/BiomeData")]
 public class BiomeDataSO : ScriptableObject
 {
-    [Header("¸Ê ¼³Á¤")]
-    public BiomeType biomeType; //ÀÎ½ºÆåÅÍ¿¡¼­ Forest, Meadow µîÀ» ¸ÅÇÎ
-    public string biomeName = "»õ·Î¿î »ı¹°±º°è";
+    [Header("ë§µ ì„¤ì •")]
+    public BiomeType biomeType; //ì¸ìŠ¤í™í„°ì—ì„œ Forest, Meadow ë“±ì„ ë§¤í•‘
+    public string biomeName = "ìƒˆë¡œìš´ ìƒë¬¼êµ°ê³„";
     public Sprite backgroundImage;
     public Sprite choiceBackgroundImaage;
 
-    // ¹ÙÀÌ¿È Àü¿ë ¹è°æÀ½¾Ç
-    [Header("»ç¿îµå ¼³Á¤")]
+    // ë°”ì´ì˜´ ì „ìš© ë°°ê²½ìŒì•…
+    [Header("ì‚¬ìš´ë“œ ì„¤ì •")]
     public AudioClip biomeBGM;
 
-    [Header("ÀÌ ¸Ê¿¡ µîÀåÇÏ´Â ÀÏ¹İ ¸ó½ºÅÍ ¸ñ·Ï")]
+    [Header("ì´ ë§µì— ë“±ì¥í•˜ëŠ” ì¼ë°˜ ëª¬ìŠ¤í„° ëª©ë¡")]
     public List<MonsterDataSO> biomeMonsters;
 
-    // 5½ºÅ×ÀÌÁö¸¶´Ù µîÀåÇÒ º¸½º ¸ó½ºÅÍ¸¦ ³Ö´Â Ä­
-    [Header("º¸½º ¸ó½ºÅÍ (10½ºÅ×ÀÌÁö¸¶´Ù µîÀå)")]
+    // 5ìŠ¤í…Œì´ì§€ë§ˆë‹¤ ë“±ì¥í•  ë³´ìŠ¤ ëª¬ìŠ¤í„°ë¥¼ ë„£ëŠ” ì¹¸
+    [Header("ë³´ìŠ¤ ëª¬ìŠ¤í„° (10ìŠ¤í…Œì´ì§€ë§ˆë‹¤ ë“±ì¥)")]
     public MonsterDataSO bossMonster;
 }

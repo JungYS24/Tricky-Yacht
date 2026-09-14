@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
@@ -15,10 +15,11 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public GameObject lockUI;
     public bool isLocked = false;
 
-    private BaseItemDataSO currentData;
+    public BaseItemDataSO currentData;
     private ShopManager manager;
 
     public bool isPurchased = false;
+    public bool isLuckyCatFree = false; //복고양이 발동 여부
 
     // --- 애니메이션 제어용 변수 (코루틴 대체) ---
     private bool isAnimating = false;
@@ -73,8 +74,9 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             if (itemIcon != null) itemIcon.sprite = data.icon;
         }
 
-        // 가격 및 버튼 설정
-        int displayPrice = manager.diceManager.isNextShopFree ? 0 : data.price;
+        //가격 및 버튼 설정
+        isLuckyCatFree = false; // 슬롯 세팅 시 무료 스위치 초기화
+        int displayPrice = GetFinalPrice();
         if (priceText != null) priceText.text = displayPrice + " G";
 
         buyButton.interactable = true;
@@ -102,13 +104,13 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         if (isPurchased) return;
 
-        if (manager.PurchaseItem(currentData))
+        //할인된 최종 가격을 계산해서 ShopManager에게 결제를 요청
+        int actualPrice = GetFinalPrice();
+        if (manager.PurchaseItem(currentData, actualPrice))
         {
-
             // 사운드 구매 성공 소리 재생 (코인 지불하는 소리 등)
-
             isPurchased = true;
-            isAnimating = false; //아이템을 구매하면 즉시 애니메이션 연산을 정지
+            isAnimating = false; //아이템을 구매하면 즉시 애니메이션 연산을 정지    
 
             if (itemIcon != null) itemIcon.color = new Color(0.3f, 0.3f, 0.3f, 1f);
 
@@ -149,5 +151,36 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         {
             manager.HideTooltip();
         }
+    }
+
+    // 최종 가격을 계산하는 전용 함수 (할인 및 무료화 적용)
+    public int GetFinalPrice()
+    {
+        // 이벤트 무료화(선장) 또는 복고양이 무료화 당첨 시 무조건 0원
+        if (manager.diceManager.isNextShopFree || isLuckyCatFree) return 0;
+
+        int price = currentData.price;
+        // 코팅 및 위성 20% 할인 적용 (클래스 타입으로 안전하게 구분)
+        if (currentData is CoatingItemSO)
+        {
+            int discount = InventoryManager.Instance.GetShopDiscountRate(FigureEffectType.DiscountCoating);
+            price = Mathf.FloorToInt(price * (1f - discount / 100f));
+        }
+        // 위성 아이템도 전용 SO 스크립트
+        else if (currentData is SatelliteItemSO)
+        {
+            int discount = InventoryManager.Instance.GetShopDiscountRate(FigureEffectType.DiscountSatellite);
+            price = Mathf.FloorToInt(price * (1f - discount / 100f));
+        }
+
+        return Mathf.Max(0, price);
+    }
+
+    // 복고양이 당첨 시 호출되는 함수
+    public void ApplyLuckyCatFree()
+    {
+        isLuckyCatFree = true;
+        if (priceText != null) priceText.text = "<color=#FFFF00>0 G (무료!)</color>";
+        Debug.Log($"[복고양이] {currentData.itemName} 무료 적용!");
     }
 }
