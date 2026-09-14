@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using DG.Tweening;
 
 public class UIManager : MonoBehaviour
 {
@@ -11,8 +12,15 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI cumulativeScoreText;
     public TextMeshProUGUI roundPlaysText;
 
-    [Header("데미지 계산 UI (통합)")]
-    public TextMeshProUGUI scoringFormulaText;
+    // 기존 통합 UI 대신, 용도별로 완전히 분리된 텍스트들을 선언
+    [Header("데미지 계산 UI (분리형)")]
+    //public TextMeshProUGUI scoringFormulaText; // 기존 통합 텍스트는 이제 사용 안 함
+    public TextMeshProUGUI handInfoText;     // 족보 이름 및 기본 코팅 보너스
+    public TextMeshProUGUI chipsSumText;     // 합연산(덧셈) 전용 텍스트
+    public TextMeshProUGUI multSumText;      // 곱연산(배수) 전용 텍스트
+    public TextMeshProUGUI chipsLogText;     // 덧셈(칩) 머리 위에서 뜰 로그
+    public TextMeshProUGUI multLogText;      // 곱셈(배수) 머리 위에서 뜰 로그
+    public TextMeshProUGUI finalDamageText;  // = 대미지 예정 텍스트
 
     [Header("플레이어 체력 UI")]
     //플레이어 체력
@@ -32,6 +40,11 @@ public class UIManager : MonoBehaviour
 
     [Header("피규어 발동 아이콘 UI")]
     public Image[] activeFigureIcons; // 유니티 에디터에서 띄워줄 이미지 UI들을 연결할 배열
+
+    //준비된 화염 틱딜 UI를 연결할 변수
+    [Header("상태이상(화염) UI")]
+    public GameObject flameStackRoot;  // 이미지와 텍스트를 모두 포함하는 최상위 부모 오브젝트
+    public TextMeshProUGUI flameStackText; // 숫자가 표시될 텍스트
 
     [Header("결과창 설정")]
     public TMPro.TextMeshProUGUI resultText;
@@ -95,11 +108,6 @@ public class UIManager : MonoBehaviour
             heartText.text = $"{playerHP}/{playerMaxHP}";
         }
 
-        if (scoringFormulaText != null)
-        {
-            scoringFormulaText.text = combinedDamageText;
-        }
-
 
         //발동된 피규어 아이콘 표시 로직
         if (activeFigureIcons != null)
@@ -107,7 +115,13 @@ public class UIManager : MonoBehaviour
             // 1. 매번 갱신할 때마다 일단 모든 아이콘을 숨깁니다.
             foreach (var icon in activeFigureIcons)
             {
-                if (icon != null) icon.gameObject.SetActive(false);
+                if (icon != null)
+                {
+                    // DOTween 연출 중복 실행으로 인해 크기나 투명도가 꼬이지 않도록 초기화
+                    icon.DOKill();
+                    icon.transform.DOKill();
+                    icon.gameObject.SetActive(false);
+                }
             }
 
             // 전달받은 발동 피규어 아이콘이 있다면 앞에서부터 순서대로 켬
@@ -119,6 +133,14 @@ public class UIManager : MonoBehaviour
                     {
                         activeFigureIcons[i].sprite = activeSprites[i];
                         activeFigureIcons[i].gameObject.SetActive(true);
+
+                        //발동되는 순간 쫀득하게 튀어 오르는 타격감
+                        activeFigureIcons[i].transform.localScale = Vector3.one;
+                        activeFigureIcons[i].transform.DOPunchScale(new Vector3(0.3f, 0.3f, 0f), 0.4f, 2, 0.5f);
+
+                        //상시 발동(연한 빛) 느낌을 위한 투명도 깜빡임(숨쉬기) 효과
+                        activeFigureIcons[i].color = new Color(1f, 1f, 1f, 1f);
+                        activeFigureIcons[i].DOFade(0.5f, 0.8f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
                     }
                 }
             }
@@ -166,4 +188,25 @@ public class UIManager : MonoBehaviour
     }
 
     public void HideResult() => resultPanel.SetActive(false);
+    //화염 스택 갱신
+    public void UpdateFlameStackUI(int flameDamage)
+    {
+        if (flameStackRoot != null)
+        {
+            if (flameDamage > 0)
+            {
+                flameStackRoot.SetActive(true);
+                if (flameStackText != null) flameStackText.text = flameDamage.ToString();
+
+                // 데미지가 누적될 때마다 아이콘 전체가 쫀득하게 튕기는 타격감
+                flameStackRoot.transform.DOKill(true);
+                flameStackRoot.transform.DOPunchScale(new Vector3(0.25f, 0.25f, 0f), 0.35f, 3, 0.5f);
+            }
+            else
+            {
+                flameStackRoot.SetActive(false); // 0이면 아예 숨김 처리
+            }
+        }
+    }
+
 }
