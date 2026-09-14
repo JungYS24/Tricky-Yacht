@@ -29,13 +29,7 @@ public static class UnlockConditionManager
     /// <returns></returns>
     public static bool IsUnlocked(UnlockFlag flag)
     {
-        if (flag == UnlockFlag.None)
-        {
-            Debug.LogWarning($"{UnlockFlag.None}은 항상 {true}입니다.");
-            return true;
-        }
-        
-        return (unlockedFlag & flag) == flag;
+        return flag == UnlockFlag.None || (unlockedFlag & flag) == flag;
     }
 
     /// <summary>
