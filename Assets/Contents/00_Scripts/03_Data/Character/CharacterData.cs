@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[CreateAssetMenu(fileName = "CharacterData", menuName = "Playable/Character")]
 public class CharacterData : ScriptableObject
 {
     [SerializeField] private string characterName;
