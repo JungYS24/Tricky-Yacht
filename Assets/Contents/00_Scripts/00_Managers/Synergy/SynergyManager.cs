@@ -44,7 +44,7 @@ public class SynergyManager : MonoBehaviour
             synergyToFigures[synergy.SynergyName] = required;
             foreach (var figure in required)
             {
-                var id = figure.itemID;
+                var id = figure.Item_ID;
                 if (figureToSynergies.ContainsKey(id))
                 {
                     figureToSynergies[id].Add(synergy);

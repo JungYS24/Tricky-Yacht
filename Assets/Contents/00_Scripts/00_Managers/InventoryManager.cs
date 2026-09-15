@@ -106,8 +106,8 @@ public class InventoryManager : MonoBehaviour
             ownedFigures.Add(figure);
 
             // 도감 영구 해금 기록
-            PlayerPrefs.SetInt("Collection_Unlocked_" + figure.itemName, 1);
-            PlayerPrefs.Save();
+            // PlayerPrefs 대신 새로운 매니저를 통해 메모리에 즉시 반영하고 자동 압축 저장
+            CollectionDataManager.Instance.UnlockFigure(figure.Item_ID);
 
             // 새 슬롯 생성
             GameObject newSlotGo = Instantiate(figureSlotPrefab, figureSlotParent);
