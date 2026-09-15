@@ -120,8 +120,10 @@ public class CollectionBookManager : MonoBehaviour
             if (currentBiomeFilter != CollectionBiomeFilter.All && !figure.sourceBiomes.Contains((BiomeType)currentBiomeFilter))
                 continue;
 
-            bool isUnlocked = PlayerPrefs.GetInt("Collection_Unlocked_" + figure.itemName, 0) == 1;
-            bool isEncountered = PlayerPrefs.GetInt("Collection_Encountered_" + figure.itemName, 0) == 1;
+            //하드디스크 대신 매니저의 딕셔너리에서 상태(0, 1, 2)를 한 번에 가져옴
+            int figureState = CollectionDataManager.Instance.GetFigureState(figure.Item_ID);
+            bool isUnlocked = (figureState == 2);         // 2번이면 완전 해금
+            bool isEncountered = (figureState >= 1);      // 1번 이상(1, 2)이면 마주친 적 있음
 
             if (currentStatusFilter == CollectionStatusFilter.Unlocked && !isUnlocked) continue;
             if (currentStatusFilter == CollectionStatusFilter.Locked && isUnlocked) continue;

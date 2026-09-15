@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
@@ -76,7 +76,7 @@ public class FigureDataSyncWindow : EditorWindow
             }
 
             // --- 데이터 직렬화 동기화 ---
-            asset.itemID = currentID;
+            asset.Item_ID = currentID;
             asset.itemName = data.itemName;
             asset.price = data.price;
             asset.description = data.description;
