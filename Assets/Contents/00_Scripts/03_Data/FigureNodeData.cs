@@ -8,7 +8,8 @@ public enum FigureTriggerType
     None,
     OnePair, TwoPair, Triple, Straight, FullHouse, FourOfAKind, Yacht,
     ThreeOf1, ThreeOf2, ThreeOf3, ThreeOf4, ThreeOf5, ThreeOf6,
-    OnDamaged, OnShopEntered, OnItemPurchased, OnDiceReroll, OnCombatEnd, OnSnackUsed, OnAcquired, Always
+    OnDamaged, OnShopEntered, OnItemPurchased, OnDiceReroll, OnCombatEnd, OnSnackUsed,  Always,
+    OnAcquired//얻을 때 한번만 발동되는 트리거
 }
 
 
