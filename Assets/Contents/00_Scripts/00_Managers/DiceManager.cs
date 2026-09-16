@@ -39,6 +39,13 @@ public class DiceManager : MonoBehaviour
     public int playerMaxHP = 100;
     public int currentPlayerHP;
 
+    //현재 보유 중인 보호막
+    [HideInInspector] public int currentShield = 0;
+
+    //이번 스테이지(전투) 동안만 누적되는 보너스
+    [HideInInspector] public float stageBonusMult = 0f;
+    [HideInInspector] public int stageBonusChips = 0;
+
     [Header("페퍼민트 포획 연출")]
     public PeppermintCaptureEffect peppermintCaptureEffect;
     public Transform peppermintCaptureCenter;
@@ -210,8 +217,16 @@ public class DiceManager : MonoBehaviour
         currentStage = data.currentStage;
         currentPlayerHP = data.currentPlayerHP;
 
+        //누적 보너스 로드
+        stageBonusMult = data.stageBonusMult;
+        stageBonusChips = data.stageBonusChips;
+
         //세이브에 값이 없으면 기본 100으로, 있으면 세이브된 값으로 덮어씌움
         playerMaxHP = data.playerMaxHP > 0 ? data.playerMaxHP : 100;
+
+        //세이브 파일에서 보호막 불러오기 및 UI 갱신
+        currentShield = data.currentShield;
+        ui?.UpdateShieldUI(currentShield);
 
         if (shopManager != null)
         {
@@ -374,6 +389,15 @@ public class DiceManager : MonoBehaviour
         isEnemySkillNullified = false;
         isNextEnemyAttackFixedToOne = false;
         figureBonusFlameDamage = 0;
+
+        //새로운 몬스터(스테이지) 등장 시 보호막은 무조건 0으로 초기화
+        currentShield = 0;
+        ui?.UpdateShieldUI(currentShield);
+
+        //새로운 몬스터 등장 시 누적 스탯 완전 초기화
+        stageBonusMult = 0f;
+        stageBonusChips = 0;
+
         //기존에 가짜 주사위 기믹이 남아있다면 원상복구
         RestoreFakeDice();
 
@@ -417,6 +441,12 @@ public class DiceManager : MonoBehaviour
             ApplyFakeDice();
         }
 
+        //몬스터가 생성되고 전투가 막 시작되는 시점 (첫 라운드 시작 직전 딱 한 번)
+        if (FigureEffectManager.Instance != null)
+        {
+            FigureEffectManager.Instance.EvaluateCombatStartTriggers(this, shopManager);
+        }
+
         drawPile = new List<DiceData1>(masterDeck);
         discardPile.Clear();
         ShufflePile(drawPile);
@@ -443,9 +473,17 @@ public class DiceManager : MonoBehaviour
         snackBonusMult = 0f;
         snackBonusChips = 0;
         snackBonusRerolls = 0;
+        //figureBonusRerolls는 OnFinishButtonClick(결산)에서만 0으로 초기화되므로,
+        // OnCombatStart나 OnRoundStart에서 획득한 리롤 보너스는 턴 내내 안전하게 유지됨
 
         SpawnDice();
         HandleDiceChanged();
+
+        //주사위 세팅이 끝나고 새로운 라운드(턴)가 본격적으로 시작되는 시점
+        if (FigureEffectManager.Instance != null)
+        {
+            FigureEffectManager.Instance.EvaluateRoundStartTriggers(this, shopManager);
+        }
     }
 
     public void ForceUpdateUI() => HandleDiceChanged();
@@ -574,7 +612,10 @@ public class DiceManager : MonoBehaviour
 
         currentRerolls++;
         //리롤 시 발동(OnDiceReroll)하는 6번 카테고리 피규어 발동
-        InventoryManager.Instance.EvaluateRerollTriggers(this, shopManager);
+        if (FigureEffectManager.Instance != null)
+        {
+            FigureEffectManager.Instance.EvaluateRerollTriggers(this, shopManager);
+        }
 
         StartCoroutine(HandleDiceChangedDelayed());
     }
@@ -633,8 +674,11 @@ public class DiceManager : MonoBehaviour
         // 피규어 효과 계산 전의 스낵 보너스를 기억해둠
         int chipsBeforeFigures = snackBonusChips;
         float multBeforeFigures = snackBonusMult;
-        yield return StartCoroutine(InventoryManager.Instance.EvaluateTurnEndTriggersCoroutine(finalDiceValues, handName, baseSum, this, shopManager));
 
+        if (FigureEffectManager.Instance != null)
+        {
+            yield return StartCoroutine(FigureEffectManager.Instance.EvaluateTurnEndTriggersCoroutine(finalDiceValues, handName, baseSum, this, shopManager));
+        }
 
         // 피규어 효과 계산 전의 스낵 보너스를 기억해둠 (나중에 연출을 분리하기 위함)
         int figureAddedChips = snackBonusChips - chipsBeforeFigures;
@@ -668,7 +712,7 @@ public class DiceManager : MonoBehaviour
                     break;
                 case SpecialDieEffect.Heart:
                     //실제로 회복할 때도 배수 적용
-                    float hMult = InventoryManager.Instance.GetHealMultiplier();
+                    float hMult = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetHealMultiplier() : 1.0f;
                     currentPlayerHP += Mathf.FloorToInt(d.currentValue * hMult);
                     if (currentPlayerHP > playerMaxHP) currentPlayerHP = playerMaxHP;
                     break;
@@ -727,7 +771,7 @@ public class DiceManager : MonoBehaviour
                             satelliteBonusMult += 1.1f;
                             break;
                         case SatelliteType.Jupiter: // 목성
-                            float jMult = InventoryManager.Instance.GetHealMultiplier();
+                            float jMult = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetHealMultiplier() : 1.0f;
                             currentPlayerHP += Mathf.FloorToInt(2 * jMult);
                             if (currentPlayerHP > playerMaxHP) currentPlayerHP = playerMaxHP;
                             break;
@@ -748,7 +792,6 @@ public class DiceManager : MonoBehaviour
         if (ui != null && ui.chipsLogText != null) ui.chipsLogText.text = "";
         if (ui != null && ui.multLogText != null) ui.multLogText.text = "";
 
-        //덧셈(합연산) 전용 애니메이션 로컬 코루틴
         //덧셈(합연산) 전용 애니메이션 로컬 코루틴
         IEnumerator AnimateChips(int addValue, string desc)
         {
@@ -850,18 +893,22 @@ public class DiceManager : MonoBehaviour
         // 덧셈 (합연산) 시퀀스 실행
         yield return AnimateChipsChunked(chipsBeforeFigures, "스낵 효과", 30);
         yield return AnimateChipsChunked(figureAddedChips, "피규어 효과", 30);
+        //전투(스테이지) 누적 칩수 보너스 연출
+        yield return AnimateChipsChunked(stageBonusChips, "전투 누적", 30);
         //곱셈 (배수) 시퀀스 실행
         yield return AnimateMult(comboMultiplier - 1.0f, handName);
         yield return AnimateMultChunked(multBeforeFigures, "스낵 효과", 0.2f);
         yield return AnimateMultChunked(figureAddedMult, "피규어 효과", 0.5f);
         yield return AnimateMultChunked(prismMultTotal, "프리즘 코팅", 0.5f);
+        //전투(스테이지) 누적 배수 보너스 연출
+        yield return AnimateMultChunked(stageBonusMult, "전투 누적", 0.5f);
         yield return AnimateMultChunked(satelliteBonusMult, "위성 배수", 1.1f);
 
         // 곱셈 연산도 끝나면 로그 비워줌
         if (ui != null && ui.multLogText != null) ui.multLogText.text = "";
 
         // 최종 데미지에 위성 효과 합산 (원래 코드의 데미지 변수와 완벽 호환)
-        float finalTotalMult = finalMultiplier + satelliteBonusMult;
+        float finalTotalMult = finalMultiplier + satelliteBonusMult + stageBonusMult;
         int damage = Mathf.FloorToInt(currentSequenceChips * currentSequenceMult);
 
         // 다크 데미지는 중앙(chipsLogText 등 아무거나 활용)에 잠시 표시
@@ -1009,8 +1056,11 @@ public class DiceManager : MonoBehaviour
             if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
         }
 
-        //스테이지 클리어 시 패시브(Passive) 피규어 효과 일괄 발동!
-        InventoryManager.Instance.EvaluateStageClearTriggers(this, shopManager);
+        //스테이지 클리어 시 패시브(Passive) 피규어 효과 일괄 발동
+        if (FigureEffectManager.Instance != null)
+        {
+            FigureEffectManager.Instance.EvaluateStageClearTriggers(this, shopManager);
+        }
 
         if (pendingPeppermintSuccess)
         {
@@ -1158,11 +1208,28 @@ public class DiceManager : MonoBehaviour
                 int finalEnemyAtk = isNextEnemyAttackFixedToOne ? 1 : enemy.AttackPower;
                 isNextEnemyAttackFixedToOne = false; // 적용 후 스위치 끄기
 
-                // [방어 로직 적용] 인벤토리에 뎀감이 총 얼마인지 물어보고 빼줍니다.
-                int reduction = InventoryManager.Instance.GetTotalDamageReduction(finalEnemyAtk, this);
+                // [방어 로직 적용] FigureEffectManager에 뎀감이 총 얼마인지 물어보고 빼줍니다.
+                int reduction = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetTotalDamageReduction(finalEnemyAtk, this) : 0;
                 finalEnemyAtk -= reduction;
                 if (finalEnemyAtk < 0) finalEnemyAtk = 0; // 뎀감이 너무 높아도 체력이 차진 않도록 방어
 
+                //보호막이 있다면, 내 기본 체력보다 보호막이 먼저 깎임
+                if (currentShield > 0)
+                {
+                    if (currentShield >= finalEnemyAtk)
+                    {
+                        currentShield -= finalEnemyAtk;
+                        finalEnemyAtk = 0; // 보호막이 다 막아줌
+                    }
+                    else
+                    {
+                        finalEnemyAtk -= currentShield;
+                        currentShield = 0; // 보호막 파괴됨
+                    }
+                    ui?.UpdateShieldUI(currentShield); // 깎인 보호막 UI 즉시 갱신
+                }
+
+                // 보호막을 뚫고 들어온 최종 데미지만 체력에서 깎음
                 currentPlayerHP -= finalEnemyAtk;
                 CameraShake.Instance.Shake(0.15f, 0.1f);
 
@@ -1171,23 +1238,42 @@ public class DiceManager : MonoBehaviour
                 // 플레이어 피격 효과음 재생!
                 if (sfxSource != null && playerHurtAudioEvent != null) playerHurtAudioEvent.Play(sfxSource);
 
+                //피격 완료 시 발동하는 피규어(광대의 눈물 등) 처리
+                if (FigureEffectManager.Instance != null)
+                {
+                    FigureEffectManager.Instance.EvaluateDamagedTriggers(this, shopManager);
+                }
+
                 enemy.ResetTurn(); // 공격을 했으므로 턴 카운트를 다시 원래대로(2) 되돌림
 
-                if (currentPlayerHP <= 0)
-                {
-                    //게임 오버가 되면 기존 세이브 파일을 지워버림
-                    if (GameSaveManager.Instance != null) GameSaveManager.Instance.DeleteSave();
+                    if (currentPlayerHP <= 0)
+                    {
+                        //사망 시 부활 피규어가 있는지 효과 매니저에 물어봄
+                        bool isRevived = FigureEffectManager.Instance != null && FigureEffectManager.Instance.EvaluateDeathTriggers(this, shopManager);
 
-                    string gameOverText = LocalizationManager.Instance != null
-                        ? LocalizationManager.Instance.GetLocalizedString(LocalizationManager.UiTable, "UI_GAME_OVER")
-                        : "게임 오버";
-                    ui?.ShowResult("#FF0000", gameOverText);
-                    Invoke(nameof(RestartGame), 1.5f);
+                        if (isRevived)
+                        {
+                            // 부활에 성공했다면, 아래 게임 오버 로직을 건너뛰고 
+                            // 자연스럽게 밑에 있는 StartNewRound(내 공격 턴)로 넘어옴
+                            Debug.Log("<color=cyan>부활 성공! 즉시 플레이어 턴으로 넘어갑니다.</color>");
+                        }
+                        else
+                        {
+                            // 부활 수단이 없으면 기존처럼 게임 오버 처리
+                            //게임 오버가 되면 기존 세이브 파일을 지워버림
+                            if (GameSaveManager.Instance != null) GameSaveManager.Instance.DeleteSave();
 
-                    StartCoroutine(ShowGameOverPanelDelayed());
+                            string gameOverText = LocalizationManager.Instance != null
+                                ? LocalizationManager.Instance.GetLocalizedString(LocalizationManager.UiTable, "UI_GAME_OVER")
+                                : "게임 오버";
+                            ui?.ShowResult("#FF0000", gameOverText);
+                            Invoke(nameof(RestartGame), 1.5f);
 
-                    //플레이어가 죽었다면 아래 세이브 및 다음 라운드 코드가 실행되지 않도록 강제 종료
-                    yield break;
+                            StartCoroutine(ShowGameOverPanelDelayed());
+
+                            //플레이어가 죽었다면 아래 세이브 및 다음 라운드 코드가 실행되지 않도록 강제 종료
+                            yield break;                    
+                        }
                 }
             }
 
@@ -1268,7 +1354,7 @@ public class DiceManager : MonoBehaviour
                     break;
                 case SpecialDieEffect.Heart:
                     //UI에 표시될 때도 도도새 모자 배수 적용
-                    float hMultUI = InventoryManager.Instance.GetHealMultiplier();
+                    float hMultUI = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetHealMultiplier() : 1.0f;
                     expectedHeal += Mathf.FloorToInt(d.currentValue * hMultUI);
                     break;
             }
@@ -1294,7 +1380,7 @@ public class DiceManager : MonoBehaviour
                         case SatelliteType.Venus: expectedGold += 30; break;
                         case SatelliteType.Mars: satelliteBonusMult += 1.1f; break;
                         case SatelliteType.Jupiter:
-                            float jMultUI = InventoryManager.Instance.GetHealMultiplier();
+                            float jMultUI = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetHealMultiplier() : 1.0f;
                             expectedHeal += Mathf.FloorToInt(2 * jMultUI);
                             break;
                     }
@@ -1378,9 +1464,9 @@ public class DiceManager : MonoBehaviour
 
         if (!isCalculating)
         {
-            // 끝내기 누르기 전: 기본 수치(주사위합+아이스+수성) * 1.0배만 보여줌
-            int displayBaseSum = baseSum + iceBonusChips + satelliteBonusChips;
-            float displayMult = 1.0f;
+            int displayBaseSum = baseSum + iceBonusChips + satelliteBonusChips + stageBonusChips;
+            float displayMult = 1.0f + stageBonusMult;
+
             int displayDamage = Mathf.FloorToInt(displayBaseSum * displayMult) + darkDamageTotal;
 
             string displayHand = $"<color=#FFD700>{handName}</color>";
@@ -1392,6 +1478,7 @@ public class DiceManager : MonoBehaviour
             if (ui != null)
             {
                 if (ui.handInfoText != null) ui.handInfoText.text = displayHand;
+                // 분리된 텍스트에 적용
                 if (ui.chipsSumText != null) ui.chipsSumText.text = $"<color=#00BFFF>{displayBaseSum}</color>";
                 if (ui.multSumText != null) ui.multSumText.text = $"x  <color=#00BFFF>{displayMult:F1}배</color>";
 
@@ -1494,12 +1581,6 @@ public class DiceManager : MonoBehaviour
         //기본 스테이지 데이터 초기화
         currentStage = 1;
         currentPlayerHP = playerMaxHP;
-
-        ////도감도 같이 초기화
-        //if (GameSaveManager.Instance != null)
-        //{
-        //    GameSaveManager.Instance.ResetCollectionData();
-        //}
 
         //덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 20개로)
         InitializeMasterDeck();
