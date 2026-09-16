@@ -1,134 +1,65 @@
 using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic;
 using System.IO;
-using System;
 using System.Linq;
 
-public class SynergyDataImportFromTSV : EditorWindow
+public class SynergyDataImportFromTSV : ImportDataFromTSV
 {
-    private string tsvPath;
-    private string dataSaveFolder;
-
     [MenuItem("Tools/Synergy Importer")]
     private static void ShowWindow()
     {
         GetWindow<SynergyDataImportFromTSV>("SynergyDataImportWindow");
     }
 
-    private void OnGUI()
+    protected override void ImportData()
     {
-        tsvPath = GUILayout.TextField(tsvPath);
-        if (GUILayout.Button("Find"))
+        if (string.IsNullOrEmpty(tsvPath) ||
+            string.IsNullOrEmpty(importDirectory) ||
+            string.IsNullOrEmpty(dataDirectory))
         {
-            var path = EditorUtility.OpenFilePanel(
-                "Select TSV File",
-                "Assets",
-                "tsv"
-            );
-
-            if (!string.IsNullOrEmpty(path))
-            {
-                tsvPath = path;
-            }
+            Debug.LogWarning("파일 또는 폴더가 설정되지 않았습니다.");
+            return;
         }
 
-        dataSaveFolder = GUILayout.TextField(dataSaveFolder);
-        if (GUILayout.Button("Select Output Folder"))
+        var tsvData = Parse();
+        var itemIDs                   = tsvData["itemID"];
+        var requiredFigureIDContainer = tsvData["requiredFigureIds"];
+        var requiredFigureCounts      = tsvData["필요 피규어 수"];
+        var effectTypes               = tsvData["effectType"];
+        var effectValues              = tsvData["effectValue"];
+        var nameKR                    = tsvData["defaultNameKo"];
+        var descriptionKR             = tsvData["defaultDescKo"];
+
+        var figures = AssetDatabase.FindAssets("", new[] { dataDirectory })
+            .Select(g => AssetDatabase.GUIDToAssetPath(g))
+            .Select(p => AssetDatabase.LoadAssetAtPath<FigureItemSO>(p))
+            .ToDictionary(f => f.Item_ID, f => f);
+
+        int cnt = itemIDs.Count;
+        for (int i = 0; i < cnt; i++)
         {
-            var directory = EditorUtility.OpenFolderPanel(
-                "Select Import Folder",
-                "Assets",
-                "Data"
-            );
+            var synergyData = CreateInstance<SynergyData>();
+            SerializedObject so = new(synergyData);
+            so.FindProperty("synergyName").stringValue = nameKR[i];
+            so.FindProperty("synergyDescription").stringValue = descriptionKR[i];
 
-            if (!string.IsNullOrEmpty(directory))
+            int fCnt = int.Parse(requiredFigureCounts[i]);
+
+            var requiredFigureIDs = requiredFigureIDContainer[i]
+                .Split(",")
+                .Select(r => r.Trim())
+                .ToArray();
+
+            var requiredFigures = so.FindProperty("requiredFigures");
+            requiredFigures.arraySize = fCnt;
+            for (int j = 0; j < fCnt; j++)
             {
-                dataSaveFolder = directory;
-            }
-        }
-
-        if (GUILayout.Button("Import"))
-        {
-            var figureSOsFolder = EditorUtility.OpenFolderPanel(
-                "Select Figures Folder",
-                "Assets",
-                "Data"
-            );
-
-            if (string.IsNullOrEmpty(tsvPath) ||
-                string.IsNullOrEmpty(dataSaveFolder) ||
-                string.IsNullOrEmpty(figureSOsFolder))
-            {
-                Debug.LogWarning("파일 또는 폴더가 설정되지 않았습니다.");
-                goto invaild;
+                var id = requiredFigureIDs[j];
+                requiredFigures.GetArrayElementAtIndex(j).objectReferenceValue = figures[id];
             }
 
-            var tsvData = Parse();
-            var itemIDs                   = tsvData["itemID"];
-            var requiredFigureIDContainer = tsvData["requiredFigureIds"];
-            var requiredFigureCounts      = tsvData["필요 피규어 수"];
-            var effectTypes               = tsvData["effectType"];
-            var effectValues              = tsvData["effectValue"];
-            var nameKR                    = tsvData["defaultNameKo"];
-            var descriptionKR             = tsvData["defaultDescKo"];
-
-            var figures = AssetDatabase.FindAssets("", new[] { figureSOsFolder })
-                .Select(g => AssetDatabase.GUIDToAssetPath(g))
-                .Select(p => AssetDatabase.LoadAssetAtPath<FigureItemSO>(p))
-                .ToDictionary(f => f.Item_ID, f => f);
-
-            int cnt = itemIDs.Count;
-            for (int i = 0; i < cnt; i++)
-            {
-                var synergyData = CreateInstance<SynergyData>();
-                SerializedObject so = new(synergyData);
-                so.FindProperty("synergyName").stringValue = nameKR[i];
-                so.FindProperty("synergyDescription").stringValue = descriptionKR[i];
-
-                int fCnt = int.Parse(requiredFigureCounts[i]);
-
-                var requiredFigureIDs = requiredFigureIDContainer[i]
-                    .Split(",")
-                    .Select(r => r.Trim())
-                    .ToArray();
-
-                var requiredFigures = so.FindProperty("requiredFigures");
-                requiredFigures.arraySize = fCnt;
-                for (int j = 0; j < fCnt; j++)
-                {
-                    var id = requiredFigureIDs[j];
-                    requiredFigures.GetArrayElementAtIndex(j).objectReferenceValue = figures[id];
-                }
-
-                so.ApplyModifiedProperties();
-                AssetDatabase.CreateAsset(synergyData, Path.Join(dataSaveFolder, itemIDs[i] + ".asset"));
-            }
-        invaild:;
+            so.ApplyModifiedProperties();
+            AssetDatabase.CreateAsset(synergyData, Path.Join(dataDirectory, itemIDs[i] + ".asset"));
         }
-    }
-    
-    private Dictionary<string, List<string>> Parse()
-    {
-        Dictionary<string, List<string>> result = new();
-
-        using StreamReader reader = new(tsvPath);
-        string[] headers = reader.ReadLine().Split('\t');
-        foreach (var header in headers)
-        {
-            result.Add(header, new());
-        }
-
-        int len = headers.Length;
-        while (!reader.EndOfStream)
-        {
-            string[] values = reader.ReadLine().Split('\t');
-            for (int i = 0; i < len; i++)
-            {
-                result[headers[i]].Add(values[i]);
-            }
-        }
-
-        return result;
     }
 }
