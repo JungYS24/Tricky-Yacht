@@ -163,13 +163,15 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         // 코팅 및 위성 20% 할인 적용 (클래스 타입으로 안전하게 구분)
         if (currentData is CoatingItemSO)
         {
-            int discount = InventoryManager.Instance.GetShopDiscountRate(FigureEffectType.DiscountCoating);
+            // InventoryManager를 FigureEffectManager로 변경!
+            int discount = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetShopDiscountRate(FigureEffectType.DiscountCoating) : 0;
             price = Mathf.FloorToInt(price * (1f - discount / 100f));
         }
-        // 위성 아이템도 전용 SO 스크립트
+        // 위성 아이템 전용 SO 스크립트
         else if (currentData is SatelliteItemSO)
         {
-            int discount = InventoryManager.Instance.GetShopDiscountRate(FigureEffectType.DiscountSatellite);
+            // 여기도 FigureEffectManager로 변경!
+            int discount = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetShopDiscountRate(FigureEffectType.DiscountSatellite) : 0;
             price = Mathf.FloorToInt(price * (1f - discount / 100f));
         }
 

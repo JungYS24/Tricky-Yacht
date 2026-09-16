@@ -87,7 +87,10 @@ public class ShopManager : MonoBehaviour
 
         //리롤 할인 UI 갱신 및 상점 진입 피규어(복고양이) 기믹 발동
         UpdateRerollUI();
-        InventoryManager.Instance.EvaluateShopEnteredTriggers(diceManager, this);
+        if (FigureEffectManager.Instance != null)
+        {
+            FigureEffectManager.Instance.EvaluateShopEnteredTriggers(diceManager, this);
+        }
     }
 
     public void RefreshShop(bool isReroll)
@@ -381,7 +384,7 @@ public class ShopManager : MonoBehaviour
     // 리롤(고양이 눈) 할인율을 적용한 최종 리롤 비용 계산
     public int GetFinalRerollCost()
     {
-        int discount = InventoryManager.Instance.GetShopDiscountRate(FigureEffectType.DiscountShopReroll);
+        int discount = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetShopDiscountRate(FigureEffectType.DiscountShopReroll) : 0;
         int finalCost = Mathf.FloorToInt(rerollCost * (1f - discount / 100f));
         return Mathf.Max(0, finalCost);
     }

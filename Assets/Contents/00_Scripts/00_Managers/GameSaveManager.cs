@@ -20,6 +20,13 @@ public class SaveData
     public int playerMaxHP;
     public int currentGold;
 
+    //전투 중 나갔을 때를 대비한 보호막 저장
+    public int currentShield;
+
+    //전투(스테이지) 전용 누적 보너스 저장
+    public float stageBonusMult;
+    public int stageBonusChips;
+
 
     //일회성 버프 상태 저장
     public float snackBonusMult;
@@ -101,6 +108,13 @@ public class GameSaveManager : MonoBehaviour
         data.currentStage = dice.currentStage;
         data.currentPlayerHP = dice.currentPlayerHP;
         data.currentGold = shop != null ? shop.currentGold : 0;
+
+        //보호막 저장
+        data.currentShield = dice.currentShield;
+
+        //누적 보너스 저장
+        data.stageBonusMult = dice.stageBonusMult;
+        data.stageBonusChips = dice.stageBonusChips;
 
         //몬스터가 살아있다면 현재 스탯 그대로 저장
         if (dice.enemy != null && !dice.enemy.IsDead)
