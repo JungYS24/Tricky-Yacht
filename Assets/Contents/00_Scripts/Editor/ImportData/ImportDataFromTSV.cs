@@ -21,6 +21,9 @@ public abstract class ImportDataFromTSV : EditorWindow
         }
     }
 
+    /// <summary>
+    /// tsv 파일 경로와 찾는 버튼을 그려줍니다.
+    /// </summary>
     protected virtual void DrawTSVPathField()
     {
         tsvPath = GUILayout.TextArea(tsvPath);
@@ -39,6 +42,9 @@ public abstract class ImportDataFromTSV : EditorWindow
         }
     }
 
+    /// <summary>
+    /// 에셋을 저장할 위치와 찾는 버튼을 그려줍니다.
+    /// </summary>
     protected virtual void DrawImportDirectoryField()
     {
         importDirectory = GUILayout.TextArea(importDirectory);
@@ -57,6 +63,9 @@ public abstract class ImportDataFromTSV : EditorWindow
         }
     }
 
+    /// <summary>
+    /// 참조할 데이터들의 경로와 찾는 버튼을 그려줍니다.
+    /// </summary>
     protected virtual void DrawDatasDirectoryField()
     {
         dataDirectory = GUILayout.TextArea(dataDirectory);
@@ -75,6 +84,11 @@ public abstract class ImportDataFromTSV : EditorWindow
         }
     }
     
+    /// <summary>
+    /// 입력된 파일 경로를 통해 순차적으로 읽어들여 파일을 해석합니다.
+    /// 
+    /// </summary>
+    /// <returns>시트의 키 값에 해당하는 열의 값들.</returns>
     protected Dictionary<string, List<string>> Parse()
     {
         try
@@ -107,5 +121,8 @@ public abstract class ImportDataFromTSV : EditorWindow
         }
     }
 
+    /// <summary>
+    /// 파싱된 데이터를 바탕으로 데이터를 저장합니다.
+    /// </summary>
     protected abstract void ImportData();
 }
