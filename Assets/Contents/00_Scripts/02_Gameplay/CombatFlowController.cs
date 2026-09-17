@@ -48,25 +48,11 @@ public static class CombatFlowController
                 finalEnemyAtk -= reduction;
                 if (finalEnemyAtk < 0) finalEnemyAtk = 0; // 뎀감이 너무 높아도 체력이 차진 않도록 방어
 
-                //보호막이 있다면, 내 기본 체력보다 보호막이 먼저 깎임
-                if (dm.currentShield > 0)
-                {
-                    if (dm.currentShield >= finalEnemyAtk)
-                    {
-                        dm.currentShield -= finalEnemyAtk;
-                        finalEnemyAtk = 0; // 보호막이 다 막아줌
-                    }
-                    else
-                    {
-                        finalEnemyAtk -= dm.currentShield;
-                        dm.currentShield = 0; // 보호막 파괴됨
-                    }
-                    dm.ui?.UpdateShieldUI(dm.currentShield); // 깎인 보호막 UI 즉시 갱신
-                }
+                // [단일화된 데미지 로직] PlayerStatus가 알아서 보호막부터 깎고 체력을 깎음
+                dm.playerStatus.TakeDamage(finalEnemyAtk);
 
-                // 보호막을 뚫고 들어온 최종 데미지만 체력에서 깎음
-                dm.currentPlayerHP -= finalEnemyAtk;
                 CameraShake.Instance.Shake(0.15f, 0.1f);
+                dm.ui?.UpdateShieldUI(dm.playerStatus.currentShield); // 깎인 보호막 UI 즉시 갱신
 
                 // 비네트 피격 연출 실행
                 if (HurtVignetteController.Instance != null) HurtVignetteController.Instance.TriggerHurtEffect();

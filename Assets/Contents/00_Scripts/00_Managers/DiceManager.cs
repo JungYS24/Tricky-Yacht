@@ -58,10 +58,6 @@ public class TurnContext
 public class DiceManager : MonoBehaviour
 {
     [Header("덱 시스템 ")]
-    public List<DiceData1> masterDeck = new List<DiceData1>();
-    public List<DiceData1> drawPile = new List<DiceData1>();
-    private List<DiceData1> discardPile = new List<DiceData1>();
-
     [Header("프리팹 및 슬롯 설정")]
     public GameObject dicePrefab;
     public Transform keepSlotParent;
@@ -83,8 +79,6 @@ public class DiceManager : MonoBehaviour
     public int currentStage = 1;
     public int maxRerolls = 2;
     public int currentRerolls;
-    public int playerMaxHP = 100;
-    public int currentPlayerHP;
 
     [Header("페퍼민트 포획 연출")]
     public PeppermintCaptureEffect peppermintCaptureEffect;
@@ -139,6 +133,19 @@ public class DiceManager : MonoBehaviour
     public StageContext stageContext = new StageContext();
     public TurnContext turnContext = new TurnContext();
 
+    // 플레이어 상태 전담 객체 
+    public PlayerStatus playerStatus = new PlayerStatus();
+    // 덱 전담 객체
+    public DeckManager deckManager = new DeckManager();
+        
+    // 튜토리얼 매니저와 세이브 데이터의 에러를 막기 위한 위임 프로퍼티!
+    public List<DiceData1> masterDeck { get => deckManager.masterDeck; set => deckManager.masterDeck = value; }
+    public List<DiceData1> drawPile { get => deckManager.drawPile; set => deckManager.drawPile = value; }
+    public List<DiceData1> discardPile { get => deckManager.discardPile; set => deckManager.discardPile = value; }
+
+    // 외부 스크립트(스낵, 피규어 등) 연결 유지를 위한 프로퍼티 위임 (에러 완벽 방어)
+    [HideInInspector] public int playerMaxHP { get => playerStatus.maxHP; set => playerStatus.maxHP = value; }
+    [HideInInspector] public int currentPlayerHP { get => playerStatus.currentHP; set => playerStatus.currentHP = value; }
     [HideInInspector] public int currentShield { get => stageContext.currentShield; set => stageContext.currentShield = value; }
     [HideInInspector] public float stageBonusMult { get => stageContext.stageBonusMult; set => stageContext.stageBonusMult = value; }
     [HideInInspector] public int stageBonusChips { get => stageContext.stageBonusChips; set => stageContext.stageBonusChips = value; }
@@ -237,7 +244,7 @@ public class DiceManager : MonoBehaviour
         else
         {
             currentPlayerHP = playerMaxHP;
-            InitializeMasterDeck();
+            deckManager.InitializeMasterDeck();
 
             // 첫 시작은 무조건 숲(Forest)으로 고정
             currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
@@ -415,17 +422,6 @@ public class DiceManager : MonoBehaviour
         return null;
     }
 
-    void InitializeMasterDeck()
-    {
-        masterDeck.Clear();
-        for (int i = 0; i < 12; i++) masterDeck.Add(new DiceData1()); // 주사위 12개로 수정
-    }
-
-    public List<DiceData1> GetRandomDiceForCoating(int count)
-    {
-        return masterDeck.OrderBy(x => UnityEngine.Random.value).Take(count).ToList();
-    }
-
 
     void StartNewStage()
     {
@@ -433,11 +429,13 @@ public class DiceManager : MonoBehaviour
         stageContext.ResetForNewStage();
         turnContext.figureBonusRerolls = 0;
 
-        ui?.UpdateShieldUI(stageContext.currentShield);
+        playerStatus.currentShield = 0; // 매 스테이지 시작 시 보호막만 초기화!
+
+        ui?.UpdateShieldUI(playerStatus.currentShield);
         ui?.UpdateFlameStackUI(stageContext.accumulatedFlameDamage);
 
-        //기존에 가짜 주사위 기믹이 남아있다면 원상복구
-        RestoreFakeDice();
+        // 기존에 가짜 주사위 기믹이 남아있다면 원상복구
+        deckManager.RestoreFakeDice(ref originalBossDice, ref fakeDiceIndex);
 
         //(숙원의 방랑자 패널티 적용)
         if (isNextCombatHPTiedToOne)
@@ -476,31 +474,21 @@ public class DiceManager : MonoBehaviour
 
         if (enemy.CurrentBossAbility == BossAbilityType.FakeDice)
         {
-            ApplyFakeDice();
+            deckManager.ApplyFakeDice(fakeDiceShell, fakeDiceFace, ref originalBossDice, ref fakeDiceIndex);
         }
 
-        //몬스터가 생성되고 전투가 막 시작되는 시점 (첫 라운드 시작 직전 딱 한 번)
+        // 몬스터 생성 완료 직후 로직
         if (FigureEffectManager.Instance != null)
         {
             FigureEffectManager.Instance.EvaluateCombatStartTriggers(this, shopManager);
         }
 
-        drawPile = new List<DiceData1>(masterDeck);
-        discardPile.Clear();
-        ShufflePile(drawPile);
+        // 드로우 리스트 초기화 및 셔플 (이제 DeckManager가 대신 해줌)
+        deckManager.PrepareDeckForNewStage();
         StartNewRound();
     }
 
-    void ShufflePile(List<DiceData1> pile)
-    {
-        for (int i = 0; i < pile.Count; i++)
-        {
-            int rnd = UnityEngine.Random.Range(i, pile.Count);
-            var temp = pile[i];
-            pile[i] = pile[rnd];
-            pile[rnd] = temp;
-        }
-    }
+    
 
     void StartNewRound(bool isFromLoad = false)
     {
@@ -542,13 +530,8 @@ public class DiceManager : MonoBehaviour
         activeDiceList.Clear();
         Array.Clear(keepSlotOccupants, 0, keepSlotOccupants.Length);
 
-        // 덱에 주사위가 5개 미만으로 남았고, 버린 주사위가 있다면 다시 덱에 섞어 넣음
-        if (drawPile.Count < 5 && discardPile.Count > 0)
-        {
-            drawPile.AddRange(discardPile);
-            discardPile.Clear();
-            ShufflePile(drawPile);
-        }
+        // 덱 리필 검사 로직 한 줄로 압축! (DeckManager에게 위임)
+        deckManager.CheckAndRefillDrawPile(5);
 
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
@@ -600,20 +583,9 @@ public class DiceManager : MonoBehaviour
 
         for (int i = 0; i < rollSlots.Length; i++)
         {
-            if (drawPile.Count == 0)
-            {
-                if (discardPile.Count > 0)
-                {
-                    drawPile = new List<DiceData1>(discardPile);
-                    discardPile.Clear();
-                    ShufflePile(drawPile);
-                }
-                if (drawPile.Count == 0) break;
-            }
-
-            DiceData1 drawnData = drawPile[0];
-            drawPile.RemoveAt(0);
-            discardPile.Add(drawnData);
+            // 복잡했던 덱 리필 및 드로우 로직이 단 한 줄로 끝납니다.
+            DiceData1 drawnData = deckManager.DrawOneDice();
+            if (drawnData == null) break;
 
             // Instantiate 대신 풀에서 대기 중인 주사위 꺼내 쓰기
             Dice d;
@@ -709,7 +681,7 @@ public class DiceManager : MonoBehaviour
         StartCoroutine(FinishTurnRoutine());
     }
 
-    // 3. 다크 주사위 계산 순서 역전 수정 및 애니메이션 의존성 완벽 분리
+    // 다크 주사위 계산 순서 역전 수정 및 애니메이션 의존성 완벽 분리
     private IEnumerator FinishTurnRoutine()
     {
         // 사운드 끝내기 버튼 클릭 소리 재생
@@ -776,7 +748,10 @@ public class DiceManager : MonoBehaviour
         if (calcResult.expectedHeal > 0)
         {
             currentPlayerHP += calcResult.expectedHeal;
-            if (currentPlayerHP > playerMaxHP) currentPlayerHP = playerMaxHP;
+            if (calcResult.expectedHeal > 0)
+        {
+            playerStatus.Heal(calcResult.expectedHeal); // 통합 회복 함수 호출
+        }
         }
 
         // 연출을 위한 시각적 텍스트 띄우기 (연산이 끝난 후 오직 텍스트 표기 용도로만 Loop를 돕니다)
@@ -1117,39 +1092,6 @@ public class DiceManager : MonoBehaviour
         }
     }
 
-
-    public void ApplyFakeDice()
-    {
-        if (masterDeck.Count == 0) return;
-
-        fakeDiceIndex = UnityEngine.Random.Range(0, masterDeck.Count);
-        originalBossDice = masterDeck[fakeDiceIndex];
-
-        DiceData1 fakeDice = new DiceData1("가짜 주사위", new int[] { 0, 0, 0, 0, 0, 0 });
-        fakeDice.customDiceShell = fakeDiceShell;
-        fakeDice.customFaceSprites = new Sprite[] { fakeDiceFace, fakeDiceFace, fakeDiceFace, fakeDiceFace, fakeDiceFace, fakeDiceFace };
-
-        fakeDice.isCoated = false;
-        fakeDice.type = DiceType.Normal;
-        fakeDice.specialEffect = SpecialDieEffect.None; // 하트/코인 효과 등 완전 삭제
-        fakeDice.diceColor = Color.white;               // 원래 주사위 색상 지우기
-        fakeDice.multiplier = 1.0f;                     // 배수 초기화
-
-        masterDeck[fakeDiceIndex] = fakeDice;
-        Debug.Log($"<color=red>[보스 기믹]</color> {originalBossDice.diceName}이(가) 가짜 주사위로 변했습니다!");
-    }
-
-    public void RestoreFakeDice()
-    {
-        if (originalBossDice != null && fakeDiceIndex >= 0 && fakeDiceIndex < masterDeck.Count)
-        {
-            masterDeck[fakeDiceIndex] = originalBossDice;
-            Debug.Log($"<color=green>[기믹 해제]</color> 주사위가 {originalBossDice.diceName}(으)로 복구되었습니다.");
-            originalBossDice = null;
-            fakeDiceIndex = -1;
-        }
-    }
-
     private void HideResultAfterFailure() { if (!ShopManager.IsShopOpen && !enemy.IsDead) ui?.HideResult(); }
 
     void InitializeSlots()
@@ -1430,11 +1372,12 @@ public class DiceManager : MonoBehaviour
         fakeDiceIndex = -1;
         //기본 스테이지 데이터 초기화
         currentStage = 1;
-        playerMaxHP = 100; // 이전 게임에서 피규어로 늘어난 최대 체력 원상 복구
-        currentPlayerHP = playerMaxHP;
+
+        // 낡은 변수 대신 우리가 만든 상태 초기화 함수를 씀
+        playerStatus.ResetStatus(100);
 
         //덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 20개로)
-        InitializeMasterDeck();
+        deckManager.InitializeMasterDeck();
 
         //골드 초기화 (ShopManager 참조)
         if (shopManager != null)
