@@ -33,7 +33,7 @@ public class SynergyDataImportFromTSV : ImportDataFromTSV
         var figures = AssetDatabase.FindAssets("", new[] { dataDirectory })
             .Select(g => AssetDatabase.GUIDToAssetPath(g))
             .Select(p => AssetDatabase.LoadAssetAtPath<FigureItemSO>(p))
-            .ToDictionary(f => f.Item_ID, f => f);
+            .ToDictionary(f => f.Item_ID ?? string.Empty, f => f);
 
         int cnt = itemIDs.Count;
         for (int i = 0; i < cnt; i++)

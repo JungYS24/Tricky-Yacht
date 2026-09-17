@@ -79,7 +79,7 @@ public abstract class ImportDataFromTSV : EditorWindow
 
             if (!string.IsNullOrEmpty(dir))
             {
-                dataDirectory = dir;
+                dataDirectory = FileUtil.GetProjectRelativePath(dir);
             }
         }
     }
