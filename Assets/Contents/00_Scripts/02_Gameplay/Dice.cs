@@ -222,6 +222,10 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (DiceManager.Instance == null || DiceManager.Instance.IsDiceInputLocked)
+        {
+            return;
+        }
 
         // 상점이 열려있거나 피규어 상세 패널이 열려있으면 클릭 취소
         if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || DeckUI.IsPanelOpen || TicketDetailPanel.IsPanelOpen || CoatingSelectionPanel.IsPanelOpen || UIManager.IsSettingsOpen)

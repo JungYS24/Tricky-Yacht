@@ -145,22 +145,26 @@ public class GameSaveManager : MonoBehaviour
 
 
             SavedDiceData sdd = new SavedDiceData();
-            sdd.diceName = d.diceName;
-            sdd.isCoated = d.isCoated;
-            sdd.type = (int)d.type;
-            sdd.multiplier = d.multiplier;
-            sdd.diceColor = d.diceColor;
-            // 위성 데이터 저장 
+            sdd.diceName = targetToSave.diceName;
+            sdd.isCoated = targetToSave.isCoated;
+            sdd.type = (int)targetToSave.type;
+            sdd.multiplier = targetToSave.multiplier;
+            sdd.diceColor = targetToSave.diceColor;
+
             sdd.activeSatellites = new List<int>();
-            foreach (var sat in d.activeSatellites)
+
+            if (targetToSave.activeSatellites != null)
             {
-                sdd.activeSatellites.Add((int)sat);
+                foreach (var sat in targetToSave.activeSatellites)
+                {
+                    sdd.activeSatellites.Add((int)sat);
+                }
             }
 
             data.deckDiceList.Add(sdd);
         }
         foreach (var f in inv.ownedFigures) data.ownedFigureNames.Add(f.itemName);
-        foreach (var t in inv.ownedTickets) data.ownedTicketNames.Add(t.itemName);
+        inv.CollectTicketNamesForSave(data.ownedTicketNames);
         foreach (var s in inv.snackSlots)
         {
             if (!s.isEmpty && s.currentItem != null)
