@@ -19,6 +19,8 @@ public struct TurnCalcResult
 
 public static class TurnCalculator
 {
+    public const int GoldPerPip = 10;
+
     // 기존 DiceManager에 있던 족보 판정 로직을 이관
     public static void CalculateHand(List<int> values, DiceManager dm, out float multiplier, out string handName)
     {
@@ -77,7 +79,7 @@ public static class TurnCalculator
             switch (d.myData.specialEffect)
             {
                 case SpecialDieEffect.Coin:
-                    res.expectedGold += d.currentValue;
+                    res.expectedGold += d.currentValue * GoldPerPip;
                     break;
                 case SpecialDieEffect.Heart:
                     res.expectedHeal += Mathf.FloorToInt(d.currentValue * healMultiplier);
@@ -95,7 +97,7 @@ public static class TurnCalculator
                         res.prismMultTotal += (d.myData.multiplier - 1.0f);
                         break;
                     case DiceType.Gold:
-                        res.expectedGold += d.currentValue;
+                        res.expectedGold += d.currentValue * GoldPerPip;
                         break;                 
                     case DiceType.Ice:
                         res.iceBonusChips += 10;
