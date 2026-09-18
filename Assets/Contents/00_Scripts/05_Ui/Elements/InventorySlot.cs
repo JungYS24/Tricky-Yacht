@@ -82,6 +82,12 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
         {
             if (!ShopManager.IsShopOpen && currentItem is SnackItemSO snack)
             {
+                // 결산 시작부터 다음 라운드 시작 전까지 스낵 사용 차단
+                if (manager.diceManager == null ||
+                    manager.diceManager.isCalculating)
+                {
+                    return;
+                }
                 // 현재 먹으려는 스낵이 페퍼민트인데, 이미 DiceManager에서 효과가 활성 상태라면
                 if (snack.snackType == SnackType.Peppermint && manager.diceManager.isPeppermintActive)
                 {
@@ -92,8 +98,11 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
                 // 스낵 고유의 효과(체력 회복 등) 적용
                 snack.ApplyItemEffect(manager.diceManager);
 
-                // 스낵을 먹었으니 인벤토리 매니저에게 알려서 OnSnackUsed 피규어를 발동
-                manager.EvaluateSnackUsedTriggers(manager.diceManager, manager.diceManager.shopManager);
+                // 스낵을 먹었으니 FigureEffectManager에게 알려서 OnSnackUsed 피규어를 발동
+                if (FigureEffectManager.Instance != null)
+                {
+                    FigureEffectManager.Instance.EvaluateSnackUsedTriggers(manager.diceManager, manager.diceManager.shopManager);
+                }
 
 
                 if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)

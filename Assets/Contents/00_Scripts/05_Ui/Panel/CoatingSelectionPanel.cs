@@ -28,7 +28,7 @@ public class CoatingSelectionPanel : MonoBehaviour
 
 
         //(GetRandomDiceForCoating 호출)
-        List<DiceData1> options = dm.GetRandomDiceForCoating(5);
+        List<DiceData1> options = dm.deckManager.GetRandomDiceForCoating(5);
 
         if (options.Count == 0)
         {

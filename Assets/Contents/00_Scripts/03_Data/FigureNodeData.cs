@@ -8,7 +8,8 @@ public enum FigureTriggerType
     None,
     OnePair, TwoPair, Triple, Straight, FullHouse, FourOfAKind, Yacht,
     ThreeOf1, ThreeOf2, ThreeOf3, ThreeOf4, ThreeOf5, ThreeOf6,
-    OnDamaged, OnShopEntered, OnItemPurchased, OnDiceReroll, OnCombatEnd, OnSnackUsed, OnAcquired, Always
+    OnDamaged, OnShopEntered, OnItemPurchased, OnDiceReroll, OnCombatEnd, OnSnackUsed,  Always,
+    OnAcquired, OnCombatStart, OnRoundStart, OnDeath
 }
 
 
@@ -27,6 +28,7 @@ public enum FigureEffectType
     ReduceDamageTaken,   // 몬스터에게 맞는 피해량 고정 수치 감소 (방어용)
     GetSnack,            // 지정된 스낵(optionalItem)을 인벤토리에 획득
     DestroySelf,         // 이 효과 발동 후 피규어 자신을 영구 파괴 (일회성 아이템용)
+    AddShield,
 
     // --- [특수 기믹 (주로 1번 족보 카테고리 전용)] ---
     MultiplyCombatEndGold, // [투탕카멘] 이번 전투 승리 시 얻는 기본 골드 보상 N배 뻥튀기
@@ -50,7 +52,10 @@ public enum FigureEffectType
     // --- [UI 선택창 호출 (코루틴 대기 발생)] ---
     OpenTicketSelection,   // 무작위 티켓 3장 중 1장 선택하는 팝업창 띄우기
     OpenCoatingSelection,  // 주사위 코팅(속성 부여) 타겟 선택 팝업창 띄우기
-    OpenSatelliteSelection // 주사위 위성(행성 효과) 타겟 선택 팝업창 띄우기
+    OpenSatelliteSelection, // 주사위 위성(행성 효과) 타겟 선택 팝업창 띄우기
+
+    AddCombatMultiplier, // 이번 전투 동안 족보 배수 누적 (예: 광대의 눈물)
+    AddCombatChips     // 이번 전투 동안 기본 칩수 누적
 }
 
 // 2.값 계산 방식 분리

@@ -53,12 +53,12 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         if (isKept) return;
         myData = data;
 
-        // 만약 데이터에 커스텀 눈금이 있다면 그것을 사용하고, 없다면 기본 스프라이트를 사용
-        if (myData.customFaceSprites != null && myData.customFaceSprites.Length > 0)
-        {
-            // Dice 스크립트의 diceFaceSprites 배열을 커스텀 이미지로 교체
-            this.diceFaceSprites = myData.customFaceSprites;
-        }
+        //// 만약 데이터에 커스텀 눈금이 있다면 그것을 사용하고, 없다면 기본 스프라이트를 사용
+        //if (myData.customFaceSprites != null && myData.customFaceSprites.Length > 0)
+        //{
+        //    // Dice 스크립트의 diceFaceSprites 배열을 커스텀 이미지로 교체
+        //    this.diceFaceSprites = myData.customFaceSprites;
+        //}
         if (myData.customDiceShell != null)
         {
             spriteRenderer.sprite = myData.customDiceShell;
@@ -222,6 +222,11 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (DiceManager.Instance == null || DiceManager.Instance.IsDiceInputLocked)
+        {
+            return;
+        }
+
         // 상점이 열려있거나 피규어 상세 패널이 열려있으면 클릭 취소
         if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || DeckUI.IsPanelOpen || TicketDetailPanel.IsPanelOpen || CoatingSelectionPanel.IsPanelOpen || UIManager.IsSettingsOpen)
             return;

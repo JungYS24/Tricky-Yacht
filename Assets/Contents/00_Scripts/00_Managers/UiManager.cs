@@ -26,6 +26,10 @@ public class UIManager : MonoBehaviour
     //플레이어 체력
     public TextMeshProUGUI heartText;
 
+    //보호막 UI 연결용
+    public GameObject shieldRoot;        
+    public TextMeshProUGUI shieldText;   
+
     [Header("버튼 및 패널")]
     public Button rollButton;
     public Button finishButton;
@@ -68,8 +72,7 @@ public class UIManager : MonoBehaviour
         if (resumeButton != null)
             resumeButton.onClick.AddListener(CloseSettings);
 
-        if (settingsPanel != null)
-            settingsPanel.SetActive(false);
+        CloseSettings();
     }
 
     public void OpenSettings()
@@ -205,6 +208,26 @@ public class UIManager : MonoBehaviour
             else
             {
                 flameStackRoot.SetActive(false); // 0이면 아예 숨김 처리
+            }
+        }
+    }
+
+    public void UpdateShieldUI(int shieldAmount)
+    {
+        if (shieldRoot != null)
+        {
+            if (shieldAmount > 0)
+            {
+                shieldRoot.SetActive(true);
+                if (shieldText != null) shieldText.text = shieldAmount.ToString();
+
+                // 획득하거나 깎일 때마다 타격감 연출
+                shieldRoot.transform.DOKill(true);
+                shieldRoot.transform.DOPunchScale(new Vector3(0.25f, 0.25f, 0f), 0.35f, 3, 0.5f);
+            }
+            else
+            {
+                shieldRoot.SetActive(false); // 보호막이 0이면 아예 숨김
             }
         }
     }

@@ -20,6 +20,13 @@ public class SaveData
     public int playerMaxHP;
     public int currentGold;
 
+    //전투 중 나갔을 때를 대비한 보호막 저장
+    public int currentShield;
+
+    //전투(스테이지) 전용 누적 보너스 저장
+    public float stageBonusMult;
+    public int stageBonusChips;
+
 
     //일회성 버프 상태 저장
     public float snackBonusMult;
@@ -102,6 +109,13 @@ public class GameSaveManager : MonoBehaviour
         data.currentPlayerHP = dice.currentPlayerHP;
         data.currentGold = shop != null ? shop.currentGold : 0;
 
+        //보호막 저장
+        data.currentShield = dice.currentShield;
+
+        //누적 보너스 저장
+        data.stageBonusMult = dice.stageBonusMult;
+        data.stageBonusChips = dice.stageBonusChips;
+
         //몬스터가 살아있다면 현재 스탯 그대로 저장
         if (dice.enemy != null && !dice.enemy.IsDead)
         {
@@ -131,22 +145,26 @@ public class GameSaveManager : MonoBehaviour
 
 
             SavedDiceData sdd = new SavedDiceData();
-            sdd.diceName = d.diceName;
-            sdd.isCoated = d.isCoated;
-            sdd.type = (int)d.type;
-            sdd.multiplier = d.multiplier;
-            sdd.diceColor = d.diceColor;
-            // 위성 데이터 저장 
+            sdd.diceName = targetToSave.diceName;
+            sdd.isCoated = targetToSave.isCoated;
+            sdd.type = (int)targetToSave.type;
+            sdd.multiplier = targetToSave.multiplier;
+            sdd.diceColor = targetToSave.diceColor;
+
             sdd.activeSatellites = new List<int>();
-            foreach (var sat in d.activeSatellites)
+
+            if (targetToSave.activeSatellites != null)
             {
-                sdd.activeSatellites.Add((int)sat);
+                foreach (var sat in targetToSave.activeSatellites)
+                {
+                    sdd.activeSatellites.Add((int)sat);
+                }
             }
 
             data.deckDiceList.Add(sdd);
         }
         foreach (var f in inv.ownedFigures) data.ownedFigureNames.Add(f.itemName);
-        foreach (var t in inv.ownedTickets) data.ownedTicketNames.Add(t.itemName);
+        inv.CollectTicketNamesForSave(data.ownedTicketNames);
         foreach (var s in inv.snackSlots)
         {
             if (!s.isEmpty && s.currentItem != null)
@@ -180,17 +198,4 @@ public class GameSaveManager : MonoBehaviour
 
     public void DeleteSave() { PlayerPrefs.DeleteKey("TrickYacht_Save"); }
 
-    //public void ResetCollectionData()
-    //{
-    //    foreach (var item in masterItemDatabase)
-    //    {
-    //        if (item is FigureItemSO)
-    //        {
-    //            PlayerPrefs.DeleteKey("Collection_Unlocked_" + item.itemName);
-    //            PlayerPrefs.DeleteKey("Collection_Encountered_" + item.itemName);
-    //        }
-    //    }
-    //    PlayerPrefs.Save();
-    //    Debug.Log("도감 데이터가 완전히 초기화되었습니다.");
-    //}
 }
