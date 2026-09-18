@@ -1,0 +1,5 @@
+﻿table,key,ko,en,ja,zh-Hans,note
+SYS,SYS_GOLD_NOT_ENOUGH,골드가 부족합니다.,Not enough gold.,ゴールドが足りません。,金币不足。,
+SYS,SYS_INVENTORY_FULL,인벤토리가 가득 찼습니다.,Inventory is full.,インベントリが満杯です。,背包已满。,
+SYS,SYS_NO_EQUIPPABLE_DICE,장착 가능한 주사위가 없습니다.,No equippable dice available.,装着できるサイコロがありません。,没有可装备的骰子。,
+SYS,SYS_SELL_PRICE,판매: {0} G,Sell: {0} G,売却: {0} G,出售: {0} G,
