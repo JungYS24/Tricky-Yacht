@@ -97,6 +97,11 @@ public class InventoryManager : MonoBehaviour
 
     public bool AddItem(BaseItemDataSO item)
     {
+        return AddItemInternal(item, true);
+    }
+
+    private bool AddItemInternal(BaseItemDataSO item, bool applyAcquiredEffects)
+    {
         if (item is FigureItemSO figure)
         {
             // 중복 획득 방지
@@ -113,8 +118,11 @@ public class InventoryManager : MonoBehaviour
             //피규어 획득 즉시(OnAcquired) 발동하는 효과 적용
             // (거북 등껍질, 바나나 왕관 등의 최대 체력 증가)
             var acquiredNode = figure.figureNodes.Find(n => n.triggerType == FigureTriggerType.OnAcquired);
-            if (acquiredNode != null && acquiredNode.effects.Count > 0)
-            {
+
+            if (applyAcquiredEffects &&
+                 acquiredNode != null &&
+                    acquiredNode.effects.Count > 0)
+                {
                 if (FigureEffectManager.Instance != null)
                 {
                     FigureEffectManager.Instance.ApplyFigureEffects(acquiredNode.effects, diceManager, diceManager.shopManager, figure);
@@ -289,6 +297,11 @@ public class InventoryManager : MonoBehaviour
         tooltipRect.position = slotRect.position;
         // x, y 값을 조절하여 마우스/슬롯을 가리지 않게 오프셋 부여
         tooltipRect.localPosition += new Vector3(0f, -50f, 0f);
+    }
+
+    public bool RestoreItem(BaseItemDataSO item)
+    {
+        return AddItemInternal(item, false);
     }
 
     //툴팁 숨김 함수

@@ -72,8 +72,7 @@ public class UIManager : MonoBehaviour
         if (resumeButton != null)
             resumeButton.onClick.AddListener(CloseSettings);
 
-        if (settingsPanel != null)
-            settingsPanel.SetActive(false);
+        CloseSettings();
     }
 
     public void OpenSettings()

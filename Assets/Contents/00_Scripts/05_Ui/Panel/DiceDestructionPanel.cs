@@ -16,7 +16,7 @@ public class DiceDestructionPanel : MonoBehaviour
         diceManager = dm;
 
         // 덱에서 주사위를 랜덤으로 최대 5개 추출 (GetRandomDiceForCoating 재사용)
-        List<DiceData1> options = dm.GetRandomDiceForCoating(5);
+        List<DiceData1> options = dm.deckManager.GetRandomDiceForCoating(5);
 
         if (options.Count == 0)
         {

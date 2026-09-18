@@ -60,8 +60,6 @@ public class DeckManager
 
         DiceData1 drawnData = drawPile[0];
         drawPile.RemoveAt(0);
-        discardPile.Add(drawnData); // 기획에 맞게 뽑자마자 버린 주사위로 직행
-
         return drawnData;
     }
 
@@ -94,12 +92,21 @@ public class DeckManager
 
     public void RestoreFakeDice(ref DiceData1 originalBossDice, ref int fakeDiceIndex)
     {
-        if (originalBossDice != null && fakeDiceIndex >= 0 && fakeDiceIndex < masterDeck.Count)
+        if (originalBossDice == null || fakeDiceIndex < 0) return;
+
+        // 인덱스를 신뢰할 수 없는 상황(덱 개수 변경)을 대비한 방어 코드
+        if (fakeDiceIndex < masterDeck.Count)
         {
             masterDeck[fakeDiceIndex] = originalBossDice;
-            Debug.Log($"<color=green>[기믹 해제]</color> 주사위가 {originalBossDice.diceName}(으)로 복구되었습니다.");
-            originalBossDice = null;
-            fakeDiceIndex = -1;
         }
+        else
+        {
+            // 인덱스가 밀렸다면, 맨 뒤에라도 안전하게 원본을 다시 넣어줌
+            masterDeck.Add(originalBossDice);
+        }
+
+        // 복구 완료 후 참조 비우기
+        originalBossDice = null;
+        fakeDiceIndex = -1;
     }
 }
