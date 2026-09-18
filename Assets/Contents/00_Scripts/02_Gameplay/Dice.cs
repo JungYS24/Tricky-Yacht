@@ -222,16 +222,6 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        Debug.Log(
-    $"[주사위 클릭 도착] " +
-    $"상점={ShopManager.IsShopOpen}, " +
-    $"피규어상세={FigureDetailPanel.IsPanelOpen}, " +
-    $"전리품={LootSelectionPanel.IsPanelOpen}, " +
-    $"덱={DeckUI.IsPanelOpen}, " +
-    $"티켓={TicketDetailPanel.IsPanelOpen}, " +
-    $"코팅={CoatingSelectionPanel.IsPanelOpen}, " +
-    $"설정={UIManager.IsSettingsOpen}"
-);
 
         // 상점이 열려있거나 피규어 상세 패널이 열려있으면 클릭 취소
         if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || DeckUI.IsPanelOpen || TicketDetailPanel.IsPanelOpen || CoatingSelectionPanel.IsPanelOpen || UIManager.IsSettingsOpen)

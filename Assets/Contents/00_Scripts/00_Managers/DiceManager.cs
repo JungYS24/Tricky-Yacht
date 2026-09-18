@@ -346,7 +346,6 @@ public class DiceManager : MonoBehaviour
                 continue;
             }
 
-            Debug.Log($"[피규어 복원 요청] '{fName}'");
             InventoryManager.Instance.RestoreItem(item);
         }
         foreach (string sName in data.ownedSnackNames)
