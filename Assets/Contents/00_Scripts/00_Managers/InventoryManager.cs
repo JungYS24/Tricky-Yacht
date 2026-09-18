@@ -170,6 +170,27 @@ public class InventoryManager : MonoBehaviour
         return false;
     }
 
+    public void CollectTicketNamesForSave(List<string> destination)
+    {
+        destination.Clear();
+
+        foreach (var slotGo in activeTicketSlots)
+        {
+            if (slotGo == null) continue;
+
+            var slot = slotGo.GetComponent<InventorySlot>();
+
+            if (slot == null || slot.isEmpty ||
+                !(slot.currentItem is TicketItemSO ticket))
+                continue;
+
+            for (int i = 0; i < slot.currentStack; i++)
+            {
+                destination.Add(ticket.itemName);
+            }
+        }
+    }
+
     private bool PlaceIntoEmptySlot(BaseItemDataSO item, InventorySlot[] slots, int maxLimit)
     {
         // 슬롯 배열의 실제 길이와 기획상 최대 길이 중 더 작은 값을 기준으로 삼습니다.

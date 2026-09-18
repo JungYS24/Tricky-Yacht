@@ -18,6 +18,11 @@ public static class CombatFlowController
         {
             dm.shopManager.currentGold += expectedGold;
             dm.ui?.UpdateGoldUI(dm.shopManager.currentGold);
+
+            if (GoldCounter.Instance != null)
+            {
+                GoldCounter.Instance.SetGold(dm.shopManager.currentGold);
+            }
         }
 
         //화염 스택 누적
@@ -27,23 +32,29 @@ public static class CombatFlowController
             dm.ui?.UpdateFlameStackUI(dm.accumulatedFlameDamage);
         }
 
-        // 플레이어 공격 (야추 추가 타격 적용)
-        int attackCount = 1 + dm.extraAttackCount;
-        dm.extraAttackCount = 0; // 사용 후 바로 스위치 차단
+        // 반복 공격 기능은 사용하지 않음
+        dm.extraAttackCount = 0;
 
-        for (int i = 0; i < attackCount; i++)
+        // 피규어 효과로 이미 처치된 경우에는 공격하지 않음
+        if (dm.enemy.IsDead || dm.enemy.CurrentHP <= 0)
         {
-            if (dm.enemy.IsDead) break;
-
-            yield return dm.StartCoroutine(ProcessPlayerAttack(dm, finalDamage, darkDamage));
-
-            // 반사 데미지 등으로 플레이어가 죽었는지 매 타격마다 검사
-            if (dm.currentPlayerHP <= 0)
-            {
-                yield return dm.StartCoroutine(HandlePlayerDeath(dm));
-                yield break;
-            }
+            dm.OnEnemyKilled();
+            yield break;
         }
+
+        // 다크 피해까지 합쳐 일반 공격 한 번으로 처리
+        int combinedDamage = finalDamage + darkDamage;
+
+        yield return dm.StartCoroutine(
+            ProcessPlayerAttack(dm, combinedDamage));
+
+        // 반사 피해 등으로 플레이어가 사망한 경우
+        if (dm.currentPlayerHP <= 0)
+        {
+            yield return dm.StartCoroutine(HandlePlayerDeath(dm));
+            yield break;
+        }
+
 
         // 적 사망 여부 확정 판정 (포획 이벤트 포함)
         if (dm.enemy.IsDead || dm.enemy.CurrentHP <= 0)
@@ -52,25 +63,18 @@ public static class CombatFlowController
             yield break;
         }
 
-        // 6. 적 반격 루틴 (이때 누적된 화상 데미지 데이터를 넘겨줌)
+        //적 반격 루틴 (이때 누적된 화상 데미지 데이터를 넘겨줌)
         yield return dm.StartCoroutine(ProcessEnemyTurnRoutine(dm, handName, dm.accumulatedFlameDamage));
     }
 
 
     //플레이어 공격 연출
-    private static IEnumerator ProcessPlayerAttack(DiceManager dm, int damage, int darkDamage)
+    private static IEnumerator ProcessPlayerAttack(DiceManager dm, int damage)
     {
-        if (damage > 0)
+        if (damage > 0 && !dm.enemy.IsDead && dm.enemy.CurrentHP > 0)
         {
             dm.enemy.TakeDamage(damage, dm.OnEnemyKilled);
-            yield return new WaitForSeconds(0.4f);
-        }
-
-        // 일반 데미지를 맞고 살아있을 때만 다크 데미지 적용
-        if (darkDamage > 0 && !dm.enemy.IsDead)
-        {
-            dm.enemy.TakeDamage(darkDamage, dm.OnEnemyKilled);
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(0.2f);
         }
     }
 
@@ -95,7 +99,7 @@ public static class CombatFlowController
 
     public static IEnumerator ProcessEnemyTurnRoutine(DiceManager dm, string handName, int flameDamage)
     {
-        yield return new WaitForSeconds(0.4f);
+        yield return new WaitForSeconds(0.3f);
         dm.UpdateMainUI(handName);
 
         if (!dm.enemy.IsDead)

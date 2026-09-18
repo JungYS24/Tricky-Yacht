@@ -180,6 +180,7 @@ public class DiceManager : MonoBehaviour
     private bool pendingPeppermintSuccess = false;
     private bool enemyDeathHandled = false;
     private bool isRolling = false; // 주사위 굴러가는중 
+    public bool IsDiceInputLocked => isRolling || isCalculating;// 주사위를 굴리거나 결산하는 동안 선택 입력 차단
     public bool isCalculating = false;  //끝내기 버튼
 
     //족보별 배수
@@ -192,6 +193,8 @@ public class DiceManager : MonoBehaviour
     public float multFourOfAKind = 1.8f;
     public float multStraight = 2.0f;
     public float multYacht = 2.5f;
+
+
 
     // 전역 접근을 위한 싱글톤 인스턴스 선언 (클래스 상단 변수 선언부에 위치)
     public static DiceManager Instance { get; private set; }
@@ -356,7 +359,8 @@ public class DiceManager : MonoBehaviour
         foreach (string tName in data.ownedTicketNames)
         {
             var item = GameSaveManager.Instance.FindItemByName(tName);
-            if (item != null) InventoryManager.Instance.AddItem(item);
+            if (item != null)
+                InventoryManager.Instance.AddItem(item);
         }
 
         //환경(바이옴, BGM) 복구
@@ -698,52 +702,177 @@ public class DiceManager : MonoBehaviour
         if (keptValues.Count != 5)
         {
             isCalculating = false;
+            HandleDiceChanged();
             yield break;
         }
 
         // 족보 판정 (TurnCalculator가 주는 정확한 배수와 이름을 그대로 사용)
         float handMult = 1.0f;
         string handName = "";
+
         TurnCalculator.CalculateHand(keptValues, this, out handMult, out handName);
 
-        // 주사위 효과 계산 (피규어 발동 전)
-        float healMultUI = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetHealMultiplier() : 1.0f;
-        int simEnemyHP = (enemy != null) ? enemy.CurrentHP : 0;
-        TurnCalcResult calcResult = TurnCalculator.CalculateDiceEffects(keptDice, simEnemyHP, healMultUI);
+        // 달성한 족보의 이펙트 재생
+        handVFXManager?.PlayHandVFX(handName);
 
-        // 결산 피규어 실행 및 대기 (이 과정에서 칩, 배수, 적 HP 등이 변경됨)
-        if (FigureEffectManager.Instance != null)
+        // 분리 전과 동일하게 족보 배수가 2 이상이면 슬로모션
+        if (handMult >= 2.0f)
         {
-            yield return StartCoroutine(FigureEffectManager.Instance.EvaluateTurnEndTriggersCoroutine(keptValues, handName, calcResult.baseSum, this, shopManager));
+            SlowMotion.Instance?.PlaySlowMotion(0.2f, 0.2f);
         }
 
-        //피규어 효과가 반영된 최종 수치 계산
-        simEnemyHP = (enemy != null) ? enemy.CurrentHP : 0; // 피규어가 깎은 HP 반영
+        // 피규어 계산에 필요한 기본 눈금 합만 먼저 구함
+        int baseSumBeforeFigures = 0;
+        foreach (int value in keptValues)
+        {
+            baseSumBeforeFigures += value;
+        }
+
+        int chipsBeforeFigures = snackBonusChips;
+        float multBeforeFigures = snackBonusMult;
+
+        // 피규어 발동 및 선택창 처리가 끝날 때까지 대기
+        if (FigureEffectManager.Instance != null)
+        {
+            yield return StartCoroutine(FigureEffectManager.Instance.EvaluateTurnEndTriggersCoroutine(keptValues, handName, baseSumBeforeFigures, this, shopManager));
+        }
+
+        // 피규어 적용 이후의 회복 배수와 적 체력을 사용
+        float healMultUI = FigureEffectManager.Instance != null
+            ? FigureEffectManager.Instance.GetHealMultiplier()
+            : 1.0f;
+
+        int simEnemyHP = enemy != null ? enemy.CurrentHP : 0;
+
+        // 변경된 코팅·위성을 반영하여 주사위 효과 계산
+        TurnCalcResult calcResult = TurnCalculator.CalculateDiceEffects(
+            keptDice, simEnemyHP, healMultUI);
+
+        // 주사위별 칩 기여량 표시: 눈금 + 얼음 코팅 + 수성 위성
+        foreach (var d in keptDice)
+        {
+            if (d == null || d.myData == null) continue;
+
+            int displayedChips = d.currentValue;
+
+            if (d.myData.isCoated && d.myData.type == DiceType.Ice)
+            {
+                displayedChips += 10;
+            }
+
+            if (d.myData.activeSatellites != null)
+            {
+                foreach (var satellite in d.myData.activeSatellites)
+                {
+                    if (satellite == SatelliteType.Mercury)
+                    {
+                        displayedChips += 15;
+                    }
+                }
+            }
+
+            d.ShowFloatingText(displayedChips);
+        }
+
+        // 주사위 위 숫자를 보여준 뒤 전체 결산으로 진행
+        yield return new WaitForSeconds(0.6f);
 
         // 최종 칩 = 주사위 기본합 + 얼음/위성 + 피규어/스테이지 보너스 + 스낵 보너스
-        int finalBaseSum = calcResult.baseSum + calcResult.iceBonusChips + calcResult.satelliteBonusChips + stageBonusChips + snackBonusChips;
-
+        int finalBaseSum = calcResult.baseSum+ calcResult.iceBonusChips+ calcResult.satelliteBonusChips+ stageBonusChips+ snackBonusChips;
         // 최종 배수 = 족보 배수 + 피규어/스테이지 배수 + 스낵 배수 + 프리즘/위성 배수
-        float finalMult = handMult + stageBonusMult + snackBonusMult + calcResult.prismMultTotal + calcResult.satelliteBonusMult;
-
+        float finalMult = handMult+ stageBonusMult+ snackBonusMult+ calcResult.prismMultTotal + calcResult.satelliteBonusMult;
         int finalDamage = Mathf.FloorToInt(finalBaseSum * finalMult);
+        // 연출 전용 값: 실제 피해 계산에는 사용하지 않음
+        float shownChips = calcResult.baseSum + calcResult.iceBonusChips+ calcResult.satelliteBonusChips;
+        float shownMult = 1f;
+        // 칩과 배수의 보너스를 항목별로 표시
+        IEnumerator AnimateBonus(bool isChips, float amount, string label)
+        {
+            if (Mathf.Approximately(amount, 0f)) yield break;
+            if (ui == null) yield break;
+
+            var valueText = isChips ? ui.chipsSumText : ui.multSumText;
+            var logText = isChips ? ui.chipsLogText : ui.multLogText;
+
+            float start = isChips ? shownChips : shownMult;
+            float target = start + amount;
+
+            if (logText != null)
+            {
+                string amountText = isChips? amount.ToString("+0;-0;0"): amount.ToString("+0.0;-0.0;0.0");
+
+                logText.text = $"{label} ({amountText})";
+            }
+
+            // 계산된 최종 칩과 배수를 UI에 띄우고 통통 튀는 펀치 스케일 적용
+            // 각 보너스가 반영될 때마다 숫자와 연출을 갱신
+            if (valueText != null)
+            {
+                valueText.transform.DOKill(true);
+                valueText.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 4, 0.5f);
+
+                yield return DOVirtual.Float(start, target, 0.3f, value =>
+                {
+                    valueText.text = isChips? $"<color=#00BFFF>{Mathf.FloorToInt(value)}</color>": $"x <color=#00BFFF>{value:F1}배</color>";
+                }).SetEase(Ease.OutQuad).WaitForCompletion();
+            }
+
+            if (isChips)
+                shownChips = target;
+            else
+                shownMult = target;
+
+            yield return new WaitForSeconds(0.15f);//항목별 대기 오르는 배수가 있을 때마다 적용
+
+            if (logText != null)
+                logText.text = "";
+        }
 
         if (ui != null)
         {
-            // 계산된 최종 칩과 배수를 UI에 띄우고 통통 튀는 펀치 스케일 적용
+            if (ui.chipsLogText != null) ui.chipsLogText.text = "";
+            if (ui.multLogText != null) ui.multLogText.text = "";
+            if (ui.finalDamageText != null) ui.finalDamageText.text = "";
+
             if (ui.chipsSumText != null)
             {
-                ui.chipsSumText.text = $"<color=#00BFFF>{finalBaseSum}</color>";
-                ui.chipsSumText.transform.DOPunchScale(new Vector3(0.3f, 0.3f, 0f), 0.4f, 5, 0.5f);
+                ui.chipsSumText.text =
+                    $"<color=#00BFFF>{Mathf.FloorToInt(shownChips)}</color>";
             }
+
             if (ui.multSumText != null)
             {
-                ui.multSumText.text = $"x  <color=#00BFFF>{finalMult:F1}배</color>";
-                ui.multSumText.transform.DOPunchScale(new Vector3(0.3f, 0.3f, 0f), 0.4f, 5, 0.5f);
+                ui.multSumText.text = "x <color=#00BFFF>1.0배</color>";
+            }
+
+            // 칩 보너스부터 표시
+            yield return AnimateBonus(true, chipsBeforeFigures, "스낵");
+            yield return AnimateBonus(true, snackBonusChips - chipsBeforeFigures, "피규어");
+            yield return AnimateBonus(true, stageBonusChips, "전투 누적");
+
+            // 이후 배수 보너스 표시
+            yield return AnimateBonus(false, handMult - 1f, handName);
+            yield return AnimateBonus(false, multBeforeFigures, "스낵");
+            yield return AnimateBonus(false, snackBonusMult - multBeforeFigures, "피규어");
+            yield return AnimateBonus(false, calcResult.prismMultTotal, "프리즘");
+            yield return AnimateBonus(false, stageBonusMult, "전투 누적");
+            yield return AnimateBonus(false, calcResult.satelliteBonusMult, "위성");
+
+            // 표시의 최종값을 실제 계산 결과에 맞춤
+            if (ui.chipsSumText != null)
+            {
+                ui.chipsSumText.text =
+                    $"<color=#00BFFF>{finalBaseSum}</color>";
+            }
+
+            if (ui.multSumText != null)
+            {
+                ui.multSumText.text =
+                    $"x <color=#00BFFF>{finalMult:F1}배</color>";
             }
 
             // 배수가 오르고 화면에 연출이 보일 수 있도록 0.8초간 뜸을 들인 후 데미지 전달
-            yield return new WaitForSeconds(0.8f);
+            yield return new WaitForSeconds(0.2f);
         }
 
         // 다크 데미지 별도 계산 (최신 HP 기준)
@@ -758,14 +887,29 @@ public class DiceManager : MonoBehaviour
             }
         }
 
+        // 다크 피해까지 포함한 일반 공격의 최종 피해 표시
+        if (ui != null && ui.finalDamageText != null)
+        {
+            int displayedDamage = finalDamage + darkDamageTotal;
+
+            ui.finalDamageText.text =
+                $"<color=#FF5555>= {displayedDamage} 데미지</color>";
+
+            ui.finalDamageText.transform.DOKill(true);
+            ui.finalDamageText.transform.DOPunchScale(Vector3.one * 0.3f, 0.4f, 5, 0.5f);
+            yield return new WaitForSeconds(0.4f);
+        }
+
         // 화염 및 기타 수치 종합
         int totalFlameDamage = calcResult.flameDamageThisTurn + figureBonusFlameDamage;
+        figureBonusFlameDamage = 0;
         int finalHeal = calcResult.expectedHeal;
         int expectedGold = calcResult.expectedGold; // 코인 주사위 등에서 얻은 골드
 
-        // 6. 완벽하게 쪼개진 수치들을 전투 지휘관(CombatFlowController)에게 전달
+        // 완벽하게 쪼개진 수치들을 전투 지휘관(CombatFlowController)에게 전달
         yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(
-            this, finalDamage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName
+            this, finalDamage, darkDamageTotal, finalHeal,
+            expectedGold, totalFlameDamage, handName
         ));
     }
 
