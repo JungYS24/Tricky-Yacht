@@ -8,7 +8,7 @@ public static class CaptureResolver
         if (!isPeppermintActive || enemy == null)
             return false;
 
-        float dropChance = enemy.baseDropRate + snackBonusFigureDropRate;
+        float dropChance = 1.0f;//enemy.baseDropRate + snackBonusFigureDropRate;
 
         // 중복 획득 방지 조건
         bool canCapture = enemy.dropFigureData != null &&
