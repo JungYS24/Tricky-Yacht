@@ -88,6 +88,8 @@ public class DiceManager : MonoBehaviour
     [HideInInspector] public DiceData1 originalBossDice = null;
     [HideInInspector] public int fakeDiceIndex = -1;
 
+    public const int GoldCoatingGoldPerPip = 10;
+
     [Header("피규어 특수 기믹 상태")]
     [HideInInspector] public float combatWinGoldMultiplier = 1.0f;
     [HideInInspector] public int extraAttackCount = 0;
@@ -689,7 +691,7 @@ public class DiceManager : MonoBehaviour
                     case DiceType.Gold:
                         if (shopManager != null)
                         {
-                            shopManager.currentGold += d.currentValue;
+                            shopManager.currentGold += d.currentValue * GoldCoatingGoldPerPip;
                             // 골드 주사위 정산 즉시 카운팅 연출 실행
                             if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
                         }
@@ -1276,6 +1278,7 @@ public class DiceManager : MonoBehaviour
             if (d.myData.isCoated)
             {
                 if (d.myData.type == DiceType.Prism) finalMult += (d.myData.multiplier - 1.0f);
+                else if (d.myData.type == DiceType.Gold) expectedGold += d.currentValue * GoldCoatingGoldPerPip;
                 else if (d.myData.type == DiceType.Dark)
                 {
                     int drop = Mathf.FloorToInt(currentSimulatedHP * 0.1f);

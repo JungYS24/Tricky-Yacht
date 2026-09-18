@@ -1,0 +1,73 @@
+[
+  {
+    "No": 1,
+    "Stamp_ID": "Stamp_Heart",
+    "NameKey": "CNT_Stamp_Heart_NAME",
+    "Item_Name_KR": "하트",
+    "DescKey": "CNT_Stamp_Heart_DESC",
+    "Effect_Summary_KR": "킵하면 이번 피격 -4",
+    "Trigger": "OnKeep",
+    "Effects": [
+      {
+        "Condition": "Always",
+        "EffectType": "IncomingDamageReduction",
+        "Value": 4,
+        "Duration": "NextHitOnly"
+      }
+    ]
+  },
+  {
+    "No": 2,
+    "Stamp_ID": "Stamp_Clover",
+    "NameKey": "CNT_Stamp_Clover_NAME",
+    "Item_Name_KR": "클로버",
+    "DescKey": "CNT_Stamp_Clover_DESC",
+    "Effect_Summary_KR": "이 주사위 리롤 시 30%로 횟수 유지",
+    "Trigger": "OnRerollThisDie",
+    "Effects": [
+      {
+        "Condition": "Always",
+        "EffectType": "RerollChargeRefundChance",
+        "Value": 30,
+        "Unit": "Percent"
+      }
+    ]
+  },
+  {
+    "No": 3,
+    "Stamp_ID": "Stamp_Diamond",
+    "NameKey": "CNT_Stamp_Diamond_NAME",
+    "Item_Name_KR": "다이아",
+    "DescKey": "CNT_Stamp_Diamond_DESC",
+    "Effect_Summary_KR": "킵 결산 시 눈금×5 골드",
+    "Trigger": "OnKeepSettle",
+    "Effects": [
+      {
+        "Condition": "Always",
+        "EffectType": "GoldGain",
+        "Value": "PipValue*5"
+      }
+    ]
+  },
+  {
+    "No": 4,
+    "Stamp_ID": "Stamp_Spade",
+    "NameKey": "CNT_Stamp_Spade_NAME",
+    "Item_Name_KR": "스페이드",
+    "DescKey": "CNT_Stamp_Spade_DESC",
+    "Effect_Summary_KR": "족보에 쓰이면 칩 +20, 아니면 눈금만큼 추가 피해",
+    "Trigger": "OnScoreResolve",
+    "Effects": [
+      {
+        "Condition": "UsedInHand",
+        "EffectType": "ChipBonus",
+        "Value": 20
+      },
+      {
+        "Condition": "NotUsedInHand",
+        "EffectType": "BonusDamage",
+        "Value": "PipValue"
+      }
+    ]
+  }
+]
