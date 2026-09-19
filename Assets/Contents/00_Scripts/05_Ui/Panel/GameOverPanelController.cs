@@ -5,8 +5,8 @@ using DG.Tweening;
 public class GameOverPanelController : MonoBehaviour
 {
     [Header("Text References")]
-    public TextMeshProUGUI stageNumberText; // ºĞ¸®µÈ ½ºÅ×ÀÌÁö ¼ıÀÚ TMP
-    public TextMeshProUGUI scoreText;       // ÃÖÁ¾ Á¡¼ö ¼ıÀÚ TMP
+    public TextMeshProUGUI stageNumberText; // ë¶„ë¦¬ëœ ìŠ¤í…Œì´ì§€ ìˆ«ì TMP
+    public TextMeshProUGUI scoreText;       // ìµœì¢… ì ìˆ˜ ìˆ«ì TMP
 
     [Header("Tween Settings")]
     [SerializeField] private float duration = 0.8f;
@@ -16,7 +16,7 @@ public class GameOverPanelController : MonoBehaviour
 
     public void SetupGameOver(int reachedStage)
     {
-        // 1. ÆĞ³Î È°¼ºÈ­
+        // 1. íŒ¨ë„ í™œì„±í™”
         gameObject.SetActive(true);
 
         if (scoreTween != null && scoreTween.IsActive())
@@ -24,13 +24,13 @@ public class GameOverPanelController : MonoBehaviour
             scoreTween.Kill();
         }
 
-        // 2. µµ´Ş ½ºÅ×ÀÌÁö ¼ıÀÚ ¼¼ÆÃ (¼ø¼ö Á¤¼ö µ¥ÀÌÅÍ¸¸)
+        // 2. ë„ë‹¬ ìŠ¤í…Œì´ì§€ ìˆ«ì ì„¸íŒ… (ìˆœìˆ˜ ì •ìˆ˜ ë°ì´í„°ë§Œ)
         if (stageNumberText != null)
         {
             stageNumberText.text = reachedStage.ToString();
         }
 
-        // 3. Á¡¼ö °è»ê : ½ºÅ×ÀÌÁö * ·£´ı ¼ö (55 ~ 88 »çÀÌÀÇ ÀÚ¿¬¼ö)
+        // 3. ì ìˆ˜ ê³„ì‚° : ìŠ¤í…Œì´ì§€ * ëœë¤ ìˆ˜ (55 ~ 88 ì‚¬ì´ì˜ ìì—°ìˆ˜)
         int randomFactor = Random.Range(55, 89);
         int targetScore = reachedStage * randomFactor;
 
@@ -40,7 +40,7 @@ public class GameOverPanelController : MonoBehaviour
             scoreText.text = "0";
         }
 
-        // ½Ç½Ã°£ Ä«¿îÆÃ ¿¬Ãâ
+        // ì‹¤ì‹œê°„ ì¹´ìš´íŒ… ì—°ì¶œ
         scoreTween = DOVirtual.Float(0f, targetScore, duration, (value) =>
         {
             currentDisplayedScore = value;
@@ -53,10 +53,10 @@ public class GameOverPanelController : MonoBehaviour
         .SetEase(Ease.OutQuad) 
         .SetUpdate(true);  
 
-        Debug.Log($"[GameOver] ¿¬Ãâ ½ÃÀÛ - ¸ñÇ¥ Á¡¼ö: {targetScore} (°¡ÁßÄ¡: x{randomFactor})");
+        Debug.Log($"[GameOver] ì—°ì¶œ ì‹œì‘ - ëª©í‘œ ì ìˆ˜: {targetScore} (ê°€ì¤‘ì¹˜: x{randomFactor})");
     }
 
-    // ¿ÀºêÁ§Æ®°¡ ÆÄ±«µÉ ¶§ ¸Ş¸ğ¸® ´©¼ö ¹æÁö
+    // ì˜¤ë¸Œì íŠ¸ê°€ íŒŒê´´ë  ë•Œ ë©”ëª¨ë¦¬ ëˆ„ìˆ˜ ë°©ì§€
     private void OnDestroy()
     {
         if (scoreTween != null && scoreTween.IsActive())

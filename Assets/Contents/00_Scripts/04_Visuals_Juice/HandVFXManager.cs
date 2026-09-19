@@ -12,31 +12,29 @@ public class HandVFXManager : MonoBehaviour
     public GameObject straightVFX;
     public GameObject fiveCardVFX;
 
-    public void PlayHandVFX(string handName)
+    public void PlayHandVFX(HandRank handRank)
     {
         GameObject targetPrefab = null;
 
-        switch (handName)
+        switch (handRank)
         {
-            case "원 페어":
+            case HandRank.OnePair:
                 targetPrefab = onePairVFX;
                 break;
 
-            case "투 페어":
+            case HandRank.TwoPair:
                 targetPrefab = twoPairVFX;
                 break;
 
-            case "트리플":
+            case HandRank.Triple:
                 targetPrefab = tripleVFX;
                 break;
 
-            case "스트레이트":
+            case HandRank.Straight:
                 targetPrefab = straightVFX;
                 break;
 
-            case "파이브 카드":
-            case "Yacht":
-            case "요트":
+            case HandRank.Yacht:
                 targetPrefab = fiveCardVFX;
                 break;
         }

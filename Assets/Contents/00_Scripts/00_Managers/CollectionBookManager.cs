@@ -13,26 +13,26 @@ public enum CollectionStatusFilter { All, Unlocked, Locked }
 
 public class CollectionBookManager : MonoBehaviour
 {
-    [Header("µµ°¨ µ¥ÀÌÅÍ")]
+    [Header("ë„ê° ë°ì´í„°")]
     public List<FigureItemSO> masterFigureDatabase;
 
-    [Header("UI ¿¬°á")]
+    [Header("UI ì—°ê²°")]
     public GameObject collectionPanelRoot;
     public Transform gridContentParent;
     public GameObject collectionSlotPrefab;
     public FigureDetailPanel detailPanel;
 
-    [Header("ÇÊÅÍÃ¢ UI")]
-    public GameObject biomeFilterPanelRoot; // ¾îµÎ¿î ¹è°æÀ» Æ÷ÇÔÇÑ ÀüÃ¼ ÇÊÅÍÃ¢
+    [Header("í•„í„°ì°½ UI")]
+    public GameObject biomeFilterPanelRoot; // ì–´ë‘ìš´ ë°°ê²½ì„ í¬í•¨í•œ ì „ì²´ í•„í„°ì°½
 
-    [Header("ÇÊÅÍ ¹öÆ° µ¿Àû »ı¼º")]
-    public Transform filterGridParent;      // Grid Layout GroupÀÌ ÀÖ´Â ºÎ¸ğ
-    public GameObject filterButtonPrefab;   // BiomeFilterSlot.cs°¡ ´Ş¸° ¹öÆ° ÇÁ¸®ÆÕ
+    [Header("í•„í„° ë²„íŠ¼ ë™ì  ìƒì„±")]
+    public Transform filterGridParent;      // Grid Layout Groupì´ ìˆëŠ” ë¶€ëª¨
+    public GameObject filterButtonPrefab;   // BiomeFilterSlot.csê°€ ë‹¬ë¦° ë²„íŠ¼ í”„ë¦¬íŒ¹
 
-    [Header("ÁøÇàµµ ÅØ½ºÆ®")]
+    [Header("ì§„í–‰ë„ í…ìŠ¤íŠ¸")]
     public TextMeshProUGUI progressText;
 
-    [Header("ÇöÀç ÇÊÅÍ »óÅÂ")]
+    [Header("í˜„ì¬ í•„í„° ìƒíƒœ")]
     public CollectionBiomeFilter currentBiomeFilter = CollectionBiomeFilter.All;
     public CollectionStatusFilter currentStatusFilter = CollectionStatusFilter.All;
 
@@ -44,18 +44,18 @@ public class CollectionBookManager : MonoBehaviour
     {
         masterFigureDatabase = masterFigureDatabase.OrderBy(f => (int)f.sourceBiomes.FirstOrDefault()).ToList();
 
-        GenerateFilterButtons(); // ½ÃÀÛÇÒ ¶§ ÇÊÅÍ ¹öÆ° 18°³ ÀÚµ¿ »ı¼º
+        GenerateFilterButtons(); // ì‹œì‘í•  ë•Œ í•„í„° ë²„íŠ¼ 18ê°œ ìë™ ìƒì„±
 
         if (biomeFilterPanelRoot != null) biomeFilterPanelRoot.SetActive(false);
         RefreshCollectionBoard();
     }
 
-    // ÇÊÅÍ ¹öÆ°µéÀ» »ı¼ºÇØÁÖ´Â ÇÔ¼ö
+    // í•„í„° ë²„íŠ¼ë“¤ì„ ìƒì„±í•´ì£¼ëŠ” í•¨ìˆ˜
     private void GenerateFilterButtons()
     {
         if (filterGridParent == null || filterButtonPrefab == null) return;
 
-        string[] filterNames = { "ÀüÃ¼", "½£", "ÃÊ¿ø", "½ÅÀü", "Á¤±Û", "»ç¸·", "À¯Àû", "µ¿±¼", "È­»ê", "´Ë", "ÇØº¯", "¹Ù´Ù", "½É¿¬", "¼³¿ø", "¹«´ı", "¼­Ä¿½º", "°øÇã", "»óÁ¡" };
+        string[] filterNames = { "ì „ì²´", "ìˆ²", "ì´ˆì›", "ì‹ ì „", "ì •ê¸€", "ì‚¬ë§‰", "ìœ ì ", "ë™êµ´", "í™”ì‚°", "ëŠª", "í•´ë³€", "ë°”ë‹¤", "ì‹¬ì—°", "ì„¤ì›", "ë¬´ë¤", "ì„œì»¤ìŠ¤", "ê³µí—ˆ", "ìƒì " };
         int[] filterValues = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
 
         for (int i = 0; i < filterNames.Length; i++)
@@ -97,7 +97,7 @@ public class CollectionBookManager : MonoBehaviour
     {
         currentBiomeFilter = (CollectionBiomeFilter)biomeFilterIndex;
         RefreshCollectionBoard();
-        CloseBiomeFilterPanel(); // ´©¸£¸é ÀÚµ¿À¸·Î ´İÈû
+        CloseBiomeFilterPanel(); // ëˆ„ë¥´ë©´ ìë™ìœ¼ë¡œ ë‹«í˜
     }
 
     public void ChangeStatusFilter(int statusFilterIndex)
@@ -120,8 +120,10 @@ public class CollectionBookManager : MonoBehaviour
             if (currentBiomeFilter != CollectionBiomeFilter.All && !figure.sourceBiomes.Contains((BiomeType)currentBiomeFilter))
                 continue;
 
-            bool isUnlocked = PlayerPrefs.GetInt("Collection_Unlocked_" + figure.itemName, 0) == 1;
-            bool isEncountered = PlayerPrefs.GetInt("Collection_Encountered_" + figure.itemName, 0) == 1;
+            //í•˜ë“œë””ìŠ¤í¬ ëŒ€ì‹  ë§¤ë‹ˆì €ì˜ ë”•ì…”ë„ˆë¦¬ì—ì„œ ìƒíƒœ(0, 1, 2)ë¥¼ í•œ ë²ˆì— ê°€ì ¸ì˜´
+            int figureState = CollectionDataManager.Instance.GetFigureState(figure.Item_ID);
+            bool isUnlocked = (figureState == 2);         // 2ë²ˆì´ë©´ ì™„ì „ í•´ê¸ˆ
+            bool isEncountered = (figureState >= 1);      // 1ë²ˆ ì´ìƒ(1, 2)ì´ë©´ ë§ˆì£¼ì¹œ ì  ìˆìŒ
 
             if (currentStatusFilter == CollectionStatusFilter.Unlocked && !isUnlocked) continue;
             if (currentStatusFilter == CollectionStatusFilter.Locked && isUnlocked) continue;
@@ -159,26 +161,26 @@ public class CollectionBookManager : MonoBehaviour
         string filterName = "";
         switch (currentBiomeFilter)
         {
-            case CollectionBiomeFilter.All: filterName = "ÀüÃ¼"; break;
-            case CollectionBiomeFilter.Forest: filterName = "½£"; break;
-            case CollectionBiomeFilter.Meadow: filterName = "ÃÊ¿ø"; break;
-            case CollectionBiomeFilter.Temple: filterName = "½ÅÀü"; break;
-            case CollectionBiomeFilter.Jungle: filterName = "Á¤±Û"; break;
-            case CollectionBiomeFilter.Desert: filterName = "»ç¸·"; break;
-            case CollectionBiomeFilter.Ruins: filterName = "À¯Àû"; break;
-            case CollectionBiomeFilter.Cave: filterName = "µ¿±¼"; break;
-            case CollectionBiomeFilter.Volcano: filterName = "È­»ê"; break;
-            case CollectionBiomeFilter.Swamp: filterName = "´Ë"; break;
-            case CollectionBiomeFilter.Beach: filterName = "ÇØº¯"; break;
-            case CollectionBiomeFilter.Ocean: filterName = "¹Ù´Ù"; break;
-            case CollectionBiomeFilter.Abyss: filterName = "½É¿¬"; break;
-            case CollectionBiomeFilter.Snow: filterName = "¼³¿ø"; break;
-            case CollectionBiomeFilter.Grave: filterName = "¹«´ı"; break;
-            case CollectionBiomeFilter.Circus: filterName = "¼­Ä¿½º"; break;
-            case CollectionBiomeFilter.Void: filterName = "°øÇã"; break;
-            case CollectionBiomeFilter.Shop: filterName = "»óÁ¡"; break;
+            case CollectionBiomeFilter.All: filterName = "ì „ì²´"; break;
+            case CollectionBiomeFilter.Forest: filterName = "ìˆ²"; break;
+            case CollectionBiomeFilter.Meadow: filterName = "ì´ˆì›"; break;
+            case CollectionBiomeFilter.Temple: filterName = "ì‹ ì „"; break;
+            case CollectionBiomeFilter.Jungle: filterName = "ì •ê¸€"; break;
+            case CollectionBiomeFilter.Desert: filterName = "ì‚¬ë§‰"; break;
+            case CollectionBiomeFilter.Ruins: filterName = "ìœ ì "; break;
+            case CollectionBiomeFilter.Cave: filterName = "ë™êµ´"; break;
+            case CollectionBiomeFilter.Volcano: filterName = "í™”ì‚°"; break;
+            case CollectionBiomeFilter.Swamp: filterName = "ëŠª"; break;
+            case CollectionBiomeFilter.Beach: filterName = "í•´ë³€"; break;
+            case CollectionBiomeFilter.Ocean: filterName = "ë°”ë‹¤"; break;
+            case CollectionBiomeFilter.Abyss: filterName = "ì‹¬ì—°"; break;
+            case CollectionBiomeFilter.Snow: filterName = "ì„¤ì›"; break;
+            case CollectionBiomeFilter.Grave: filterName = "ë¬´ë¤"; break;
+            case CollectionBiomeFilter.Circus: filterName = "ì„œì»¤ìŠ¤"; break;
+            case CollectionBiomeFilter.Void: filterName = "ê³µí—ˆ"; break;
+            case CollectionBiomeFilter.Shop: filterName = "ìƒì "; break;
         }
 
-        currentFilterText.text = $"¹ÙÀÌ¿È : {filterName}";
+        currentFilterText.text = $"ë°”ì´ì˜´ : {filterName}";
     }
 }

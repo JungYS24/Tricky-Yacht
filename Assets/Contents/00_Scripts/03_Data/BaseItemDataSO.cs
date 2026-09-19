@@ -7,8 +7,8 @@ public enum ShakerClass { None, Balance, Attack, Technic, Custom }
 
 public abstract class BaseItemDataSO : ScriptableObject
 {
-    [Header("--- °øÅë ±âº» Á¤º¸ ---")]
-    public string itemID;
+    [Header("--- ê³µí†µ ê¸°ë³¸ ì •ë³´ ---")]
+    public string Item_ID;
     public string itemName;
     public int price;
     public Sprite icon;

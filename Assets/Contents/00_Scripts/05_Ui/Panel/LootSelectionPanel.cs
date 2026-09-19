@@ -4,16 +4,16 @@ using System.Collections;
 
 public class LootSelectionPanel : MonoBehaviour
 {
-    //´Ù¸¥ ½ºÅ©¸³Æ®¿¡¼­ Àü¸®Ç° Ã¢ÀÌ ¿­·ÁÀÖ´ÂÁö È®ÀÎÇÒ ¼ö ÀÖ´Â º¯¼ö
+    //ë‹¤ë¥¸ ìŠ¤í¬ë¦½íŠ¸ì—ì„œ ì „ë¦¬í’ˆ ì°½ì´ ì—´ë ¤ìˆëŠ”ì§€ í™•ì¸í•  ìˆ˜ ìˆëŠ” ë³€ìˆ˜
     public static bool IsPanelOpen { get; private set; } = false;
 
     public GameObject panelRoot;
     public LootChoiceSlot[] choiceSlots;
 
-    [Header("1¹ø Ä­ ·£´ı Àü¸®Ç° Ç® (Ã¼·Â, °ñµå, Æ¼ÄÏÆÑ)")]
+    [Header("1ë²ˆ ì¹¸ ëœë¤ ì „ë¦¬í’ˆ í’€ (ì²´ë ¥, ê³¨ë“œ, í‹°ì¼“íŒ©)")]
     public List<BaseItemDataSO> firstSlotPool;
 
-    [Header("Àü¸®Ç° Ç® ¼¼ÆÃ")]
+    [Header("ì „ë¦¬í’ˆ í’€ ì„¸íŒ…")]
     public List<SnackItemSO> snackPool; 
     public List<DiceItemSO> dicePool;
 
@@ -21,33 +21,33 @@ public class LootSelectionPanel : MonoBehaviour
 
     private void Awake()
     {
-        IsPanelOpen = false; // ½ÃÀÛÇÒ ¶§ ÃÊ±âÈ­
+        IsPanelOpen = false; // ì‹œì‘í•  ë•Œ ì´ˆê¸°í™”
     }
 
     public void OpenSelection(DiceManager manager)
     {
         diceManager = manager;
 
-        // ¿¡·¯ ¹æÁö: ½º³¼ 1°³, ÁÖ»çÀ§ 1°³, ±×¸®°í °íÁ¤ Ã¼·Â ¾ÆÀÌÅÛÀÌ ¼¼ÆÃµÇ¾ú´ÂÁö È®ÀÎ
+        // ì—ëŸ¬ ë°©ì§€: ìŠ¤ë‚µ 1ê°œ, ì£¼ì‚¬ìœ„ 1ê°œ, ê·¸ë¦¬ê³  ê³ ì • ì²´ë ¥ ì•„ì´í…œì´ ì„¸íŒ…ë˜ì—ˆëŠ”ì§€ í™•ì¸
         if (snackPool.Count < 1 || dicePool.Count < 1 || firstSlotPool.Count < 1)
         {
-            Debug.LogWarning("Àü¸®Ç° Ç®¿¡ ¾ÆÀÌÅÛÀÌ ºÎÁ·ÇÏ°Å³ª 1¹ø Ä­ ¾ÆÀÌÅÛÀÌ ´©¶ôµÇ¾ú½À´Ï´Ù!");
+            Debug.LogWarning("ì „ë¦¬í’ˆ í’€ì— ì•„ì´í…œì´ ë¶€ì¡±í•˜ê±°ë‚˜ 1ë²ˆ ì¹¸ ì•„ì´í…œì´ ëˆ„ë½ë˜ì—ˆìŠµë‹ˆë‹¤!");
             ClosePanelAndProceed();
             return;
         }
 
-        // 1¹ø Ä­ ¾ÆÀÌÅÛ 1°³ ·£´ı »Ì±â
+        // 1ë²ˆ ì¹¸ ì•„ì´í…œ 1ê°œ ëœë¤ ë½‘ê¸°
         BaseItemDataSO selectedFirstSlotItem = firstSlotPool[Random.Range(0, firstSlotPool.Count)];
 
-        // ½º³¼ 1°³ »Ì±â
+        // ìŠ¤ë‚µ 1ê°œ ë½‘ê¸°
         List<SnackItemSO> shuffledSnacks = new List<SnackItemSO>(snackPool);
         ShuffleList(shuffledSnacks);
 
-        // ÁÖ»çÀ§ 1°³ »Ì±â
+        // ì£¼ì‚¬ìœ„ 1ê°œ ë½‘ê¸°
         List<DiceItemSO> shuffledDice = new List<DiceItemSO>(dicePool);
         ShuffleList(shuffledDice);
 
-        // ½½·Ô ¼¼ÆÃ (1¹ø: Ã¼·Â ¾ÆÀÌÅÛ, 2¹ø: ½º³¼, 3¹ø: ÁÖ»çÀ§)
+        // ìŠ¬ë¡¯ ì„¸íŒ… (1ë²ˆ: ì²´ë ¥ ì•„ì´í…œ, 2ë²ˆ: ìŠ¤ë‚µ, 3ë²ˆ: ì£¼ì‚¬ìœ„)
         choiceSlots[0].Setup(selectedFirstSlotItem, this);
         choiceSlots[1].Setup(shuffledSnacks[0], this);
         choiceSlots[2].Setup(shuffledDice[0], this);
@@ -63,13 +63,13 @@ public class LootSelectionPanel : MonoBehaviour
             bool added = InventoryManager.Instance.AddItem(snack);
             if (!added)
             {
-                Debug.Log("½º³¼ ÀÎº¥Åä¸®°¡ ²Ë Â÷¼­ ¹ŞÀ» ¼ö ¾ø½À´Ï´Ù!");
-                return; // ²Ë Â÷¼­ ¾È µé¾î°¡¸é ¸®ÅÏÇÏ¿© ´Ü°è°¡ ³Ñ¾î°¡Áö ¾Êµµ·Ï ¹æÁö
+                Debug.Log("ìŠ¤ë‚µ ì¸ë²¤í† ë¦¬ê°€ ê½‰ ì°¨ì„œ ë°›ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
+                return; // ê½‰ ì°¨ì„œ ì•ˆ ë“¤ì–´ê°€ë©´ ë¦¬í„´í•˜ì—¬ ë‹¨ê³„ê°€ ë„˜ì–´ê°€ì§€ ì•Šë„ë¡ ë°©ì§€
             }
         }
         else
         {
-            // DiceItemSO ¶Ç´Â MaxHPItemSOÀÏ °æ¿ì ÀÎº¥Åä¸®¿¡ µé¾î°¡Áö ¾Ê°í Áï½Ã È¿°ú ¹ßµ¿
+            // DiceItemSO ë˜ëŠ” MaxHPItemSOì¼ ê²½ìš° ì¸ë²¤í† ë¦¬ì— ë“¤ì–´ê°€ì§€ ì•Šê³  ì¦‰ì‹œ íš¨ê³¼ ë°œë™
             selectedLoot.ApplyItemEffect(diceManager);
         }
 
@@ -78,7 +78,7 @@ public class LootSelectionPanel : MonoBehaviour
             dice.ApplyItemEffect(diceManager);
         }
 
-        //Æ©Åä¸®¾ó »óÅÂÀÏ ¶§ Àü¸®Ç° ¼±ÅÃ ¿Ï·á¸¦ ¸Å´ÏÀú¿¡°Ô ¾Ë¸²
+        //íŠœí† ë¦¬ì–¼ ìƒíƒœì¼ ë•Œ ì „ë¦¬í’ˆ ì„ íƒ ì™„ë£Œë¥¼ ë§¤ë‹ˆì €ì—ê²Œ ì•Œë¦¼
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
             TutorialManager.Instance.OnLootSelectedComplete();
@@ -89,18 +89,18 @@ public class LootSelectionPanel : MonoBehaviour
 
     private void ClosePanelAndProceed()
     {
-        // ÆĞ³Î ´İ±â
+        // íŒ¨ë„ ë‹«ê¸°
         IsPanelOpen = false;
         panelRoot.SetActive(false);
 
-        // Æ©Åä¸®¾ó 11¹ø ½ºÅÜ(Ã¹ ¹øÂ° Àü¸®Ç°)ÀÏ ¶§´Â 0.5ÃÊ ´ë±â ¾øÀÌ ±×³É ³Ñ±è
+        // íŠœí† ë¦¬ì–¼ 11ë²ˆ ìŠ¤í…(ì²« ë²ˆì§¸ ì „ë¦¬í’ˆ)ì¼ ë•ŒëŠ” 0.5ì´ˆ ëŒ€ê¸° ì—†ì´ ê·¸ëƒ¥ ë„˜ê¹€
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive && TutorialManager.Instance.currentStepIndex == 11)
         {
-            // ¾Æ¹«°Íµµ ¾È ÇÔ (TutorialManager¿¡¼­ 12¹ø ´ë»ç¸¦ ¶ç¿ì°í ´ÙÀ½ ¹öÆ°À» ±â´Ù¸²)
+            // ì•„ë¬´ê²ƒë„ ì•ˆ í•¨ (TutorialManagerì—ì„œ 12ë²ˆ ëŒ€ì‚¬ë¥¼ ë„ìš°ê³  ë‹¤ìŒ ë²„íŠ¼ì„ ê¸°ë‹¤ë¦¼)
         }
         else
         {
-            // ¸ŞÀÎ °ÔÀÓÀÌ°Å³ª Æ©Åä¸®¾ó µÎ ¹øÂ° Àü¸®Ç°(22¹ø)ÀÏ ¶§´Â DiceManager¸¦ ÅëÇØ 0.5ÃÊ ÄÚ·çÆ¾ ½ÇÇà
+            // ë©”ì¸ ê²Œì„ì´ê±°ë‚˜ íŠœí† ë¦¬ì–¼ ë‘ ë²ˆì§¸ ì „ë¦¬í’ˆ(22ë²ˆ)ì¼ ë•ŒëŠ” DiceManagerë¥¼ í†µí•´ 0.5ì´ˆ ì½”ë£¨í‹´ ì‹¤í–‰
             diceManager.StartCoroutine(WaitAndOpenShopRoutine());
         }
     }
@@ -115,27 +115,27 @@ public class LootSelectionPanel : MonoBehaviour
             list[rnd] = temp;
         }
     }
-    // 0.2ÃÊ µÚ »óÁ¡À» ¿©´Â ÄÚ·çÆ¾
+    // 0.2ì´ˆ ë’¤ ìƒì ì„ ì—¬ëŠ” ì½”ë£¨í‹´
     private IEnumerator WaitAndOpenShopRoutine()
     {
         yield return new WaitForSeconds(0.2f);
 
-        // Æ¼ÄÏ ÆÑÀ» °ñ¶ó¼­ Æ¼ÄÏ ¼±ÅÃ Ã¢ÀÌ ¿­·ÁÀÖ´Ù¸é, À¯Àú°¡ °í¸¦ ¶§±îÁö ¹«ÇÑ ´ë±â!
+        // í‹°ì¼“ íŒ©ì„ ê³¨ë¼ì„œ í‹°ì¼“ ì„ íƒ ì°½ì´ ì—´ë ¤ìˆë‹¤ë©´, ìœ ì €ê°€ ê³ ë¥¼ ë•Œê¹Œì§€ ë¬´í•œ ëŒ€ê¸°!
         if (diceManager.shopManager != null && diceManager.shopManager.ticketSelectionPanel != null)
         {
             while (diceManager.shopManager.ticketSelectionPanel.activeSelf)
             {
-                yield return null; // Æ¼ÄÏ ¼±ÅÃ Ã¢ÀÌ ´İÈú ¶§±îÁö ´ë±â
+                yield return null; // í‹°ì¼“ ì„ íƒ ì°½ì´ ë‹«í ë•Œê¹Œì§€ ëŒ€ê¸°
             }
         }
 
-        // Æ¼ÄÏ ¼±ÅÃÀÌ ³¡³µ°Å³ª(Ã¢ÀÌ ´İÈû) ¾ÖÃÊ¿¡ ¾È ¿­·È´Ù¸é µåµğ¾î »óÁ¡ ¿­±â
+        // í‹°ì¼“ ì„ íƒì´ ëë‚¬ê±°ë‚˜(ì°½ì´ ë‹«í˜) ì• ì´ˆì— ì•ˆ ì—´ë ¸ë‹¤ë©´ ë“œë””ì–´ ìƒì  ì—´ê¸°
         if (diceManager.shopManager != null)
         {
             diceManager.shopManager.OpenShop();
         }
 
-        // Æ©Åä¸®¾ó µÎ ¹øÂ° »óÁ¡ ÁøÀÔÀÏ °æ¿ì ÀÚµ¿À¸·Î 23¹ø ´ë»ç·Î ³Ñ±è
+        // íŠœí† ë¦¬ì–¼ ë‘ ë²ˆì§¸ ìƒì  ì§„ì…ì¼ ê²½ìš° ìë™ìœ¼ë¡œ 23ë²ˆ ëŒ€ì‚¬ë¡œ ë„˜ê¹€
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
             TutorialManager.Instance.OnAutoShopEntered();

@@ -20,8 +20,15 @@ public class SaveData
     public int playerMaxHP;
     public int currentGold;
 
+    //ì „íˆ¬ ì¤‘ ë‚˜ê°”ì„ ë•Œë¥¼ ëŒ€ë¹„í•œ ë³´í˜¸ë§‰ ì €ì¥
+    public int currentShield;
 
-    //ÀÏÈ¸¼º ¹öÇÁ »óÅÂ ÀúÀå
+    //ì „íˆ¬(ìŠ¤í…Œì´ì§€) ì „ìš© ëˆ„ì  ë³´ë„ˆìŠ¤ ì €ì¥
+    public float stageBonusMult;
+    public int stageBonusChips;
+
+
+    //ì¼íšŒì„± ë²„í”„ ìƒíƒœ ì €ì¥
     public float snackBonusMult;
     public int snackBonusChips;
     public int snackBonusRerolls;
@@ -29,9 +36,9 @@ public class SaveData
     public int figureBonusRerolls;
     public bool isPeppermintActive;
 
-    public int savedBiomeType; // ¹ÙÀÌ¿È ÀúÀå
+    public int savedBiomeType; // ë°”ì´ì˜´ ì €ì¥
 
-    //½Î¿ì´ø ¸ó½ºÅÍ »óÅÂ ÀúÀå
+    //ì‹¸ìš°ë˜ ëª¬ìŠ¤í„° ìƒíƒœ ì €ì¥
     public string savedMonsterName;
     public int savedMonsterHP;
     public int savedMonsterMaxHP;
@@ -40,7 +47,7 @@ public class SaveData
 
     public int savedFlameDamage;
 
-    public int savedMonsterCurrentTurn;//¸ó½ºÅÍ ÅÏ°³³ä Ãß°¡
+    public int savedMonsterCurrentTurn;//ëª¬ìŠ¤í„° í„´ê°œë… ì¶”ê°€
     public int savedMonsterMaxTurn;
 
     public List<SavedDiceData> deckDiceList = new List<SavedDiceData>();
@@ -56,7 +63,7 @@ public class GameSaveManager : MonoBehaviour
 {
     public static GameSaveManager Instance;
 
-    [Header("°ÔÀÓ ³» ¸ğµç ¾ÆÀÌÅÛ ÃÑÁıÇÕ")]
+    [Header("ê²Œì„ ë‚´ ëª¨ë“  ì•„ì´í…œ ì´ì§‘í•©")]
     public List<BaseItemDataSO> masterItemDatabase = new List<BaseItemDataSO>();
 
     private void Awake()
@@ -65,13 +72,13 @@ public class GameSaveManager : MonoBehaviour
         else Destroy(gameObject);
     }
 
-    //¸ğ¹ÙÀÏ ¹é±×¶ó¿îµå·Î °¡°Å³ª Ã¢À» ´İÀ» ¶§ ÀÚµ¿À¸·Î ½ÇÇàµÊ
+    //ëª¨ë°”ì¼ ë°±ê·¸ë¼ìš´ë“œë¡œ ê°€ê±°ë‚˜ ì°½ì„ ë‹«ì„ ë•Œ ìë™ìœ¼ë¡œ ì‹¤í–‰ë¨
     private void OnApplicationQuit() { AutoSave(); }
     private void OnApplicationPause(bool pauseStatus) { if (pauseStatus) AutoSave(); }
 
     private void AutoSave()
     {
-        // ¾À¿¡ ¸Å´ÏÀúµéÀÌ ´Ù Á¤»óÀûÀ¸·Î ÄÑÁ® ÀÖÀ» ¶§¸¸(ÀüÅõ/»óÁ¡ ÁßÀÏ ¶§¸¸) ÀúÀå
+        // ì”¬ì— ë§¤ë‹ˆì €ë“¤ì´ ë‹¤ ì •ìƒì ìœ¼ë¡œ ì¼œì ¸ ìˆì„ ë•Œë§Œ(ì „íˆ¬/ìƒì  ì¤‘ì¼ ë•Œë§Œ) ì €ì¥
         if (DiceManager.Instance != null && InventoryManager.Instance != null)
         {
             SaveGame(DiceManager.Instance, InventoryManager.Instance, DiceManager.Instance.shopManager);
@@ -83,7 +90,7 @@ public class GameSaveManager : MonoBehaviour
         SaveData data = new SaveData();
 
 
-        //ÀÏÈ¸¼º ¹öÇÁµéµµ ÀØÁö ¸»°í ¼¼ÀÌºê ÆÄÀÏ¿¡ µµÀå Âï±â
+        //ì¼íšŒì„± ë²„í”„ë“¤ë„ ìŠì§€ ë§ê³  ì„¸ì´ë¸Œ íŒŒì¼ì— ë„ì¥ ì°ê¸°
         data.playerMaxHP = dice.playerMaxHP;
         data.snackBonusMult = dice.snackBonusMult;
         data.snackBonusChips = dice.snackBonusChips;
@@ -102,7 +109,14 @@ public class GameSaveManager : MonoBehaviour
         data.currentPlayerHP = dice.currentPlayerHP;
         data.currentGold = shop != null ? shop.currentGold : 0;
 
-        //¸ó½ºÅÍ°¡ »ì¾ÆÀÖ´Ù¸é ÇöÀç ½ºÅÈ ±×´ë·Î ÀúÀå
+        //ë³´í˜¸ë§‰ ì €ì¥
+        data.currentShield = dice.currentShield;
+
+        //ëˆ„ì  ë³´ë„ˆìŠ¤ ì €ì¥
+        data.stageBonusMult = dice.stageBonusMult;
+        data.stageBonusChips = dice.stageBonusChips;
+
+        //ëª¬ìŠ¤í„°ê°€ ì‚´ì•„ìˆë‹¤ë©´ í˜„ì¬ ìŠ¤íƒ¯ ê·¸ëŒ€ë¡œ ì €ì¥
         if (dice.enemy != null && !dice.enemy.IsDead)
         {
             data.savedMonsterName = dice.enemy.CurrentMonsterName;
@@ -110,43 +124,47 @@ public class GameSaveManager : MonoBehaviour
             data.savedMonsterMaxHP = dice.enemy.MaxHP;
             data.savedMonsterAttack = dice.enemy.AttackPower;
             data.savedMonsterIndex = dice.enemy.CurrentMonsterIndex;
-            //½Î¿ì´ø ¸ó½ºÅÍ°¡ »ì¾ÆÀÖ´Ù¸é È­¿° ½ºÅÃµµ °°ÀÌ ÀúÀå
+            //ì‹¸ìš°ë˜ ëª¬ìŠ¤í„°ê°€ ì‚´ì•„ìˆë‹¤ë©´ í™”ì—¼ ìŠ¤íƒë„ ê°™ì´ ì €ì¥
             data.savedFlameDamage = dice.accumulatedFlameDamage;
 
-            // ÇöÀç ³²Àº ÅÏ ¼ö¿Í ÃÖ´ë ÅÏ ¼ö ÀúÀå
+            // í˜„ì¬ ë‚¨ì€ í„´ ìˆ˜ì™€ ìµœëŒ€ í„´ ìˆ˜ ì €ì¥
             data.savedMonsterCurrentTurn = dice.enemy.CurrentAttackTurn;
             data.savedMonsterMaxTurn = dice.enemy.MaxAttackTurn;
         }
 
-        // ÁÖ»çÀ§ ÄÚÆÃ Á¤º¸±îÁö ÀüºÎ ÃßÃâÇØ¼­ ÀúÀå
+        // ì£¼ì‚¬ìœ„ ì½”íŒ… ì •ë³´ê¹Œì§€ ì „ë¶€ ì¶”ì¶œí•´ì„œ ì €ì¥
         foreach (var d in dice.masterDeck)
         {
             DiceData1 targetToSave = d;
 
-            //°¡Â¥ ÁÖ»çÀ§¶ó¸é ¿øº» ÁÖ»çÀ§¸¦ ´ë½Å ÀúÀå½ÃÅ´!
-            if (d.diceName == "°¡Â¥ ÁÖ»çÀ§" && dice.originalBossDice != null)
+            //ê°€ì§œ ì£¼ì‚¬ìœ„ë¼ë©´ ì›ë³¸ ì£¼ì‚¬ìœ„ë¥¼ ëŒ€ì‹  ì €ì¥ì‹œí‚´!
+            if (d.diceName == "ê°€ì§œ ì£¼ì‚¬ìœ„" && dice.originalBossDice != null)
             {
                 targetToSave = dice.originalBossDice;
             }
 
 
             SavedDiceData sdd = new SavedDiceData();
-            sdd.diceName = d.diceName;
-            sdd.isCoated = d.isCoated;
-            sdd.type = (int)d.type;
-            sdd.multiplier = d.multiplier;
-            sdd.diceColor = d.diceColor;
-            // À§¼º µ¥ÀÌÅÍ ÀúÀå 
+            sdd.diceName = targetToSave.diceName;
+            sdd.isCoated = targetToSave.isCoated;
+            sdd.type = (int)targetToSave.type;
+            sdd.multiplier = targetToSave.multiplier;
+            sdd.diceColor = targetToSave.diceColor;
+
             sdd.activeSatellites = new List<int>();
-            foreach (var sat in d.activeSatellites)
+
+            if (targetToSave.activeSatellites != null)
             {
-                sdd.activeSatellites.Add((int)sat);
+                foreach (var sat in targetToSave.activeSatellites)
+                {
+                    sdd.activeSatellites.Add((int)sat);
+                }
             }
 
             data.deckDiceList.Add(sdd);
         }
         foreach (var f in inv.ownedFigures) data.ownedFigureNames.Add(f.itemName);
-        foreach (var t in inv.ownedTickets) data.ownedTicketNames.Add(t.itemName);
+        inv.CollectTicketNamesForSave(data.ownedTicketNames);
         foreach (var s in inv.snackSlots)
         {
             if (!s.isEmpty && s.currentItem != null)
@@ -180,17 +198,4 @@ public class GameSaveManager : MonoBehaviour
 
     public void DeleteSave() { PlayerPrefs.DeleteKey("TrickYacht_Save"); }
 
-    //public void ResetCollectionData()
-    //{
-    //    foreach (var item in masterItemDatabase)
-    //    {
-    //        if (item is FigureItemSO)
-    //        {
-    //            PlayerPrefs.DeleteKey("Collection_Unlocked_" + item.itemName);
-    //            PlayerPrefs.DeleteKey("Collection_Encountered_" + item.itemName);
-    //        }
-    //    }
-    //    PlayerPrefs.Save();
-    //    Debug.Log("µµ°¨ µ¥ÀÌÅÍ°¡ ¿ÏÀüÈ÷ ÃÊ±âÈ­µÇ¾ú½À´Ï´Ù.");
-    //}
 }

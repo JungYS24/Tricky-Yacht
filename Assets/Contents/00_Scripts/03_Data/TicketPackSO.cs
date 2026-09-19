@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// »óÁ¡ Áø¿­¿ë 'Æ¼ÄÏ ºÀÅõ' ¾ÆÀÌÅÛ
+// ìƒì  ì§„ì—´ìš© 'í‹°ì¼“ ë´‰íˆ¬' ì•„ì´í…œ
 [CreateAssetMenu(fileName = "NewTicketPack", menuName = "Shop/Items/TicketPack")]
 public class TicketPackSO : BaseItemDataSO
 {
@@ -8,7 +8,7 @@ public class TicketPackSO : BaseItemDataSO
     {
         if (diceManager != null && diceManager.shopManager != null)
         {
-            // »óÁ¡¿¡¼­ ÀÌ°É ±¸¸ÅÇÏ¸é ¹è¼ö¸¦ ¿Ã¸®Áö ¾Ê°í, Æ¼ÄÏ ¼±ÅÃ ÆĞ³ÎÀ» ¿±´Ï´Ù!
+            // ìƒì ì—ì„œ ì´ê±¸ êµ¬ë§¤í•˜ë©´ ë°°ìˆ˜ë¥¼ ì˜¬ë¦¬ì§€ ì•Šê³ , í‹°ì¼“ ì„ íƒ íŒ¨ë„ì„ ì—½ë‹ˆë‹¤!
             diceManager.shopManager.ShowTicketSelection();
         }
     }

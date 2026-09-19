@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using System.Collections; // ÄÚ·çÆ¾ »ç¿ëÀ» À§ÇØ Ãß°¡
+using System.Collections; // ì½”ë£¨í‹´ ì‚¬ìš©ì„ ìœ„í•´ ì¶”ê°€
 using TMPro;
 
-// ¸¶¿ì½º ¿À¹ö ÀÌº¥Æ®¸¦ ¹Ş±â À§ÇØ IPointerEnterHandler, IPointerExitHandler ÀÎÅÍÆäÀÌ½º Ãß°¡
+// ë§ˆìš°ìŠ¤ ì˜¤ë²„ ì´ë²¤íŠ¸ë¥¼ ë°›ê¸° ìœ„í•´ IPointerEnterHandler, IPointerExitHandler ì¸í„°í˜ì´ìŠ¤ ì¶”ê°€
 public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public Image itemIcon;
@@ -16,10 +16,10 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
 
     private InventoryManager manager;
 
-    [Header("È£¹ö È¿°ú ¼³Á¤")]
-    [SerializeField] private float hoverScaleFactor = 0.93f; // »ìÂ¦ ´­¸° Å©±â
-    [SerializeField] private float transitionDuration = 0.07f; // º¯ÇÏ´Â ½Ã°£
-    private Vector3 originalScale = Vector3.one; // ¾ÈÀüÇÏ°Ô ±âº»°ª 1·Î ¼¼ÆÃ
+    [Header("í˜¸ë²„ íš¨ê³¼ ì„¤ì •")]
+    [SerializeField] private float hoverScaleFactor = 0.93f; // ì‚´ì§ ëˆŒë¦° í¬ê¸°
+    [SerializeField] private float transitionDuration = 0.07f; // ë³€í•˜ëŠ” ì‹œê°„
+    private Vector3 originalScale = Vector3.one; // ì•ˆì „í•˜ê²Œ ê¸°ë³¸ê°’ 1ë¡œ ì„¸íŒ…
     private Coroutine scaleCoroutine;
 
 
@@ -27,7 +27,7 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
     {
         manager = invManager;
 
-        // °¡Àå ¾ÈÀüÇÑ ½ÃÁ¡: ¸Å´ÏÀú°¡ ÃÊ±âÈ­ÇÏ¶ó°í ¸í·ÉÇÒ ¶§ ³» ¿ø·¡ Å©±â¸¦ ÀúÀåÇÕ´Ï´Ù.
+        // ê°€ì¥ ì•ˆì „í•œ ì‹œì : ë§¤ë‹ˆì €ê°€ ì´ˆê¸°í™”í•˜ë¼ê³  ëª…ë ¹í•  ë•Œ ë‚´ ì›ë˜ í¬ê¸°ë¥¼ ì €ì¥í•©ë‹ˆë‹¤.
         originalScale = transform.localScale;
 
         ClearSlot();
@@ -52,7 +52,7 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
         currentStack = 0;
         if (countText != null) countText.gameObject.SetActive(false);
 
-        // ½½·ÔÀÌ ºñ¿öÁú ¶§ Å©±â ¿¬Ãâ ÁßÀÌ¾ú´Ù¸é ÃÊ±âÈ­
+        // ìŠ¬ë¡¯ì´ ë¹„ì›Œì§ˆ ë•Œ í¬ê¸° ì—°ì¶œ ì¤‘ì´ì—ˆë‹¤ë©´ ì´ˆê¸°í™”
         if (scaleCoroutine != null) StopCoroutine(scaleCoroutine);
         transform.localScale = originalScale;
     }
@@ -71,55 +71,64 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
     {
         if (isEmpty) return;
 
-        //¸ó½ºÅÍ°¡ Á×¾îÀÖ´Â »óÅÂ(ÀüÅõ Á¾·á ¹× ¿¬Ãâ ´ë±â Áß)¶ó¸é ÀÎº¥Åä¸® »óÈ£ÀÛ¿ë Â÷´Ü!
+        //ëª¬ìŠ¤í„°ê°€ ì£½ì–´ìˆëŠ” ìƒíƒœ(ì „íˆ¬ ì¢…ë£Œ ë° ì—°ì¶œ ëŒ€ê¸° ì¤‘)ë¼ë©´ ì¸ë²¤í† ë¦¬ ìƒí˜¸ì‘ìš© ì°¨ë‹¨!
         if (manager.diceManager != null && manager.diceManager.enemy != null && manager.diceManager.enemy.IsDead)
         {
             return;
         }
 
-        // ÁÂÅ¬¸¯: ½º³¼ ¸Ô±â ¶Ç´Â ÇÇ±Ô¾î »ó¼¼ º¸±â
+        // ì¢Œí´ë¦­: ìŠ¤ë‚µ ë¨¹ê¸° ë˜ëŠ” í”¼ê·œì–´ ìƒì„¸ ë³´ê¸°
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             if (!ShopManager.IsShopOpen && currentItem is SnackItemSO snack)
             {
-                // ÇöÀç ¸ÔÀ¸·Á´Â ½º³¼ÀÌ ÆäÆÛ¹ÎÆ®ÀÎµ¥, ÀÌ¹Ì DiceManager¿¡¼­ È¿°ú°¡ È°¼º »óÅÂ¶ó¸é
+                // ê²°ì‚° ì‹œì‘ë¶€í„° ë‹¤ìŒ ë¼ìš´ë“œ ì‹œì‘ ì „ê¹Œì§€ ìŠ¤ë‚µ ì‚¬ìš© ì°¨ë‹¨
+                if (manager.diceManager == null ||
+                    manager.diceManager.isCalculating)
+                {
+                    return;
+                }
+                // í˜„ì¬ ë¨¹ìœ¼ë ¤ëŠ” ìŠ¤ë‚µì´ í˜í¼ë¯¼íŠ¸ì¸ë°, ì´ë¯¸ DiceManagerì—ì„œ íš¨ê³¼ê°€ í™œì„± ìƒíƒœë¼ë©´
                 if (snack.snackType == SnackType.Peppermint && manager.diceManager.isPeppermintActive)
                 {
-                    Debug.Log("ÀÌ¹Ì ÆäÆÛ¹ÎÆ® È¿°ú°¡ È°¼ºÈ­µÇ¾î ÀÖ¾î ´Ù½Ã ¸ÔÀ» ¼ö ¾ø½À´Ï´Ù!");
-                    return; // ¿©±â¼­ ÇÔ¼ö¸¦ Á¾·áÇÏ¸é ¾Æ·¡ÀÇ snack.ApplyItemEffect¿Í ClearSlotÀÌ ½ÇÇàµÇÁö ¾Ê½À´Ï´Ù.
+                    Debug.Log("ì´ë¯¸ í˜í¼ë¯¼íŠ¸ íš¨ê³¼ê°€ í™œì„±í™”ë˜ì–´ ìˆì–´ ë‹¤ì‹œ ë¨¹ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
+                    return; // ì—¬ê¸°ì„œ í•¨ìˆ˜ë¥¼ ì¢…ë£Œí•˜ë©´ ì•„ë˜ì˜ snack.ApplyItemEffectì™€ ClearSlotì´ ì‹¤í–‰ë˜ì§€ ì•ŠìŠµë‹ˆë‹¤.
                 }
 
-                // ½º³¼ °íÀ¯ÀÇ È¿°ú(Ã¼·Â È¸º¹ µî) Àû¿ë
+                // ìŠ¤ë‚µ ê³ ìœ ì˜ íš¨ê³¼(ì²´ë ¥ íšŒë³µ ë“±) ì ìš©
                 snack.ApplyItemEffect(manager.diceManager);
 
-                // ½º³¼À» ¸Ô¾úÀ¸´Ï ÀÎº¥Åä¸® ¸Å´ÏÀú¿¡°Ô ¾Ë·Á¼­ OnSnackUsed ÇÇ±Ô¾î¸¦ ¹ßµ¿
-                manager.EvaluateSnackUsedTriggers(manager.diceManager, manager.diceManager.shopManager);
+                // ìŠ¤ë‚µì„ ë¨¹ì—ˆìœ¼ë‹ˆ FigureEffectManagerì—ê²Œ ì•Œë ¤ì„œ OnSnackUsed í”¼ê·œì–´ë¥¼ ë°œë™
+                if (FigureEffectManager.Instance != null)
+                {
+                    FigureEffectManager.Instance.EvaluateSnackUsedTriggers(manager.diceManager, manager.diceManager.shopManager);
+                }
 
 
                 if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
                 {
                     TutorialManager.Instance.OnItemUsed(currentItem.itemName);
                 }
-                ClearSlot(); // È¿°ú°¡ Àû¿ëµÈ ÈÄ¿¡¸¸ ½½·ÔÀ» ºñ¿ó´Ï´Ù.
+                ClearSlot(); // íš¨ê³¼ê°€ ì ìš©ëœ í›„ì—ë§Œ ìŠ¬ë¡¯ì„ ë¹„ì›ë‹ˆë‹¤.
                 manager.HideSellPopup();
                 manager.HideTooltip();
             }
             else if (currentItem is FigureItemSO figure)
             {
-                // ÇÇ±Ô¾î Å¬¸¯ ½Ã »ó¼¼ ÆĞ³Î ¿­±â
+                // í”¼ê·œì–´ í´ë¦­ ì‹œ ìƒì„¸ íŒ¨ë„ ì—´ê¸°
                 if (manager.figureDetailPanel != null)
                 {
                     manager.figureDetailPanel.OpenPanel(manager.ownedFigures, figure);
                 }
             }
-            //Æ¼ÄÏ Å¬¸¯ ½Ã Àü¿ë ÆË¾÷ ¿­±â
+            //í‹°ì¼“ í´ë¦­ ì‹œ ì „ìš© íŒì—… ì—´ê¸°
             else if (currentItem is TicketItemSO ticket)
             {
                 if (manager.ticketDetailPanel != null)
                     manager.ticketDetailPanel.OpenPanel(manager.ownedTickets, ticket);
             }
         }
-        // ¿ìÅ¬¸¯: ÇÇ±Ô¾î ÆÇ¸Å ÆË¾÷ ¶ç¿ì±â
+        // ìš°í´ë¦­: í”¼ê·œì–´ íŒë§¤ íŒì—… ë„ìš°ê¸°
         else if (eventData.button == PointerEventData.InputButton.Right)
         {
             if (currentItem is FigureItemSO)
@@ -133,10 +142,10 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
     {
         if (!isEmpty && currentItem != null)
         {
-            //ÇÇ±Ô¾î ¶Ç´Â Æ¼ÄÏÀÏ ¶§ È£¹ö(´­¸²) ¿¬Ãâ ½ÇÇà
+            //í”¼ê·œì–´ ë˜ëŠ” í‹°ì¼“ì¼ ë•Œ í˜¸ë²„(ëˆŒë¦¼) ì—°ì¶œ ì‹¤í–‰
             if (currentItem is FigureItemSO || currentItem is TicketItemSO)
             {
-                // µÑ Áß ÇÏ³ªÀÇ ÆĞ³ÎÀÌ¶óµµ ¿­·ÁÀÖÀ¸¸é ²Ü··ÀÌ´Â ¿¬Ãâ ¹æÁö
+                // ë‘˜ ì¤‘ í•˜ë‚˜ì˜ íŒ¨ë„ì´ë¼ë„ ì—´ë ¤ìˆìœ¼ë©´ ê¿€ë ì´ëŠ” ì—°ì¶œ ë°©ì§€
                 if (!FigureDetailPanel.IsPanelOpen && !TicketDetailPanel.IsPanelOpen)
                 {
                     StartScaleTransition(originalScale * hoverScaleFactor);
@@ -144,14 +153,14 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
                 return;
             }
 
-            // ÀÎº¥Åä¸® ¸Å´ÏÀú¿¡°Ô ³» À§Ä¡(RectTransform)¿Í ¼³¸íÀ» Àü´ŞÇÏ¿© ÅøÆÁ ¶ç¿ì±â
-            manager.ShowTooltip(currentItem.description, GetComponent<RectTransform>());
+            // ì¸ë²¤í† ë¦¬ ë§¤ë‹ˆì €ì—ê²Œ ë‚´ ìœ„ì¹˜(RectTransform)ì™€ ì„¤ëª…ì„ ì „ë‹¬í•˜ì—¬ íˆ´íŒ ë„ìš°ê¸°
+            manager.ShowTooltip(LocalizationManager.GetItemDescription(currentItem), GetComponent<RectTransform>());
         }
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        //¸¶¿ì½º°¡ ³ª°¥ ¶§ ¿ø·¡ Å©±â·Î º¹±¸ (ÇÇ±Ô¾î & Æ¼ÄÏ)
+        //ë§ˆìš°ìŠ¤ê°€ ë‚˜ê°ˆ ë•Œ ì›ë˜ í¬ê¸°ë¡œ ë³µêµ¬ (í”¼ê·œì–´ & í‹°ì¼“)
         if (!isEmpty && (currentItem is FigureItemSO || currentItem is TicketItemSO))
         {
             StartScaleTransition(originalScale);
@@ -160,7 +169,7 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
         manager.HideTooltip();
     }
 
-    // --- SmoothÇÑ Å©±â º¯È­¸¦ À§ÇÑ Coroutine Á¦¾î ·ÎÁ÷ ---
+    // --- Smoothí•œ í¬ê¸° ë³€í™”ë¥¼ ìœ„í•œ Coroutine ì œì–´ ë¡œì§ ---
     private void StartScaleTransition(Vector3 targetScale)
     {
         if (scaleCoroutine != null) StopCoroutine(scaleCoroutine);

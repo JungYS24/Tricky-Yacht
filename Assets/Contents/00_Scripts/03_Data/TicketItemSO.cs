@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// Á·º¸ Á¾·ù¸¦ ¼±ÅÃÇÒ ¼ö ÀÖ°Ô ¸¸µé¾îÁİ´Ï´Ù.
+// ì¡±ë³´ ì¢…ë¥˜ë¥¼ ì„ íƒí•  ìˆ˜ ìˆê²Œ ë§Œë“¤ì–´ì¤ë‹ˆë‹¤.
 public enum HandType
 {
     HighCard, OnePair, TwoPair, Triple, FullHouse, FourOfAKind, Straight, Yacht
@@ -9,19 +9,19 @@ public enum HandType
 [CreateAssetMenu(fileName = "NewTicketItem", menuName = "Shop/Items/TicketItem")]
 public class TicketItemSO : BaseItemDataSO
 {
-    [Header("¾÷±×·¹ÀÌµåÇÒ Á·º¸")]
+    [Header("ì—…ê·¸ë ˆì´ë“œí•  ì¡±ë³´")]
     public HandType targetHand;
 
-    [Header("¹è¼ö Áõ°¡·® (±âº» 1.1¹è)")]
-    public float upgradeMultiplier = 1.1f; // ±âÁ¸ ¹è¼ö¿¡ °öÇØÁı´Ï´Ù.
+    [Header("ë°°ìˆ˜ ì¦ê°€ëŸ‰ (ê¸°ë³¸ 1.1ë°°)")]
+    public float upgradeMultiplier = 1.1f; // ê¸°ì¡´ ë°°ìˆ˜ì— ê³±í•´ì§‘ë‹ˆë‹¤.
 
     public override void ApplyItemEffect(DiceManager diceManager)
     {
         if (diceManager != null)
         {
-            // DiceManager¿¡ Á·º¸¿Í Áõ°¡·®À» Àü´ŞÇÏ¿© ¾÷±×·¹ÀÌµå ½ÃÅµ´Ï´Ù.
+            // DiceManagerì— ì¡±ë³´ì™€ ì¦ê°€ëŸ‰ì„ ì „ë‹¬í•˜ì—¬ ì—…ê·¸ë ˆì´ë“œ ì‹œí‚µë‹ˆë‹¤.
             diceManager.UpgradeHand(targetHand, upgradeMultiplier);
-            Debug.Log($"Æ¼ÄÏ Àû¿ë: {targetHand}ÀÇ ¹è¼ö°¡ {upgradeMultiplier}¹è Áõ°¡Çß½À´Ï´Ù!");
+            Debug.Log($"í‹°ì¼“ ì ìš©: {targetHand}ì˜ ë°°ìˆ˜ê°€ {upgradeMultiplier}ë°° ì¦ê°€í–ˆìŠµë‹ˆë‹¤!");
         }
     }
 }

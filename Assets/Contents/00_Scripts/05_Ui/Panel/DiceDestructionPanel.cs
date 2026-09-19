@@ -15,12 +15,12 @@ public class DiceDestructionPanel : MonoBehaviour
     {
         diceManager = dm;
 
-        // µ¦¿¡¼­ ÁÖ»çÀ§¸¦ ·£´ıÀ¸·Î ÃÖ´ë 5°³ ÃßÃâ (GetRandomDiceForCoating Àç»ç¿ë)
-        List<DiceData1> options = dm.GetRandomDiceForCoating(5);
+        // ë±ì—ì„œ ì£¼ì‚¬ìœ„ë¥¼ ëœë¤ìœ¼ë¡œ ìµœëŒ€ 5ê°œ ì¶”ì¶œ (GetRandomDiceForCoating ì¬ì‚¬ìš©)
+        List<DiceData1> options = dm.deckManager.GetRandomDiceForCoating(5);
 
         if (options.Count == 0)
         {
-            Debug.Log("ÆÄ±«ÇÒ ¼ö ÀÖ´Â ÁÖ»çÀ§°¡ µ¦¿¡ ¾ø½À´Ï´Ù!");
+            Debug.Log("íŒŒê´´í•  ìˆ˜ ìˆëŠ” ì£¼ì‚¬ìœ„ê°€ ë±ì— ì—†ìŠµë‹ˆë‹¤!");
             return;
         }
 
@@ -48,11 +48,11 @@ public class DiceDestructionPanel : MonoBehaviour
 
     private void OnDiceSelected(DiceData1 selectedDice)
     {
-        // ¼±ÅÃÇÑ ÁÖ»çÀ§¸¦ µ¦(masterDeck)¿¡¼­ ¿µ±¸ »èÁ¦
+        // ì„ íƒí•œ ì£¼ì‚¬ìœ„ë¥¼ ë±(masterDeck)ì—ì„œ ì˜êµ¬ ì‚­ì œ
         if (diceManager.masterDeck.Contains(selectedDice))
         {
             diceManager.masterDeck.Remove(selectedDice);
-            Debug.Log($"{selectedDice.diceName} ÁÖ»çÀ§°¡ µ¦¿¡¼­ ¿µ±¸È÷ ÆÄ±«µÇ¾ú½À´Ï´Ù! ³²Àº ÁÖ»çÀ§: {diceManager.masterDeck.Count}");
+            Debug.Log($"{selectedDice.diceName} ì£¼ì‚¬ìœ„ê°€ ë±ì—ì„œ ì˜êµ¬íˆ íŒŒê´´ë˜ì—ˆìŠµë‹ˆë‹¤! ë‚¨ì€ ì£¼ì‚¬ìœ„: {diceManager.masterDeck.Count}");
         }
 
         ClosePanel();

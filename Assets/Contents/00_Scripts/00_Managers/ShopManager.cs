@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System.Linq;
 
 public class ShopManager : MonoBehaviour
 {
@@ -52,7 +53,9 @@ public class ShopManager : MonoBehaviour
             shopRerollButton.onClick.AddListener(RerollShop);
 
         if (rerollCostText != null)
-            rerollCostText.text = "리롤 : " + rerollCost + " G";
+            rerollCostText.text = LocalizationManager.Instance != null
+                ? LocalizationManager.Instance.GetLocalizedString(LocalizationManager.UiTable, "UI_REROLL_COST", rerollCost)
+                : "리롤 : " + rerollCost + " G";
 
         if (nextStageButton != null)
             nextStageButton.onClick.AddListener(CloseShopAndGoNext);
@@ -81,6 +84,13 @@ public class ShopManager : MonoBehaviour
         if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
 
         RefreshShop(false);
+
+        //리롤 할인 UI 갱신 및 상점 진입 피규어(복고양이) 기믹 발동
+        UpdateRerollUI();
+        if (FigureEffectManager.Instance != null)
+        {
+            FigureEffectManager.Instance.EvaluateShopEnteredTriggers(diceManager, this);
+        }
     }
 
     public void RefreshShop(bool isReroll)
@@ -97,7 +107,7 @@ public class ShopManager : MonoBehaviour
             validPool.Add(item);
         }
 
-        // 1. 일반 상점을 위해 미리 모든 아이템을 섞어둡니다. (validPool 기준)
+        // 일반 상점을 위해 미리 모든 아이템을 섞어둡니다. (validPool 기준)
         List<BaseItemDataSO> shuffled = new List<BaseItemDataSO>(validPool);
         for (int i = 0; i < shuffled.Count; i++)
         {
@@ -107,7 +117,7 @@ public class ShopManager : MonoBehaviour
 
         int dataIndex = 0;
 
-        // 2. 튜토리얼 강제 진열 로직 분기
+        // 튜토리얼 강제 진열 로직 분기
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
             int step = TutorialManager.Instance.currentStepIndex;
@@ -157,7 +167,7 @@ public class ShopManager : MonoBehaviour
             }
         }
 
-        // 3. 튜토리얼이 모두 끝났거나 일반 게임일 때 (완전 랜덤 상점)
+        // 튜토리얼이 모두 끝났거나 일반 게임일 때 (완전 랜덤 상점)
 
 
 
@@ -171,17 +181,17 @@ public class ShopManager : MonoBehaviour
             // 일단 슬롯 자체는 무조건 켭니다 (자물쇠 UI를 보여줘야 하므로)
             shopSlots[i].gameObject.SetActive(true);
 
-            // 1. 아직 해금되지 않은 칸은 '자물쇠 모드'로 만듦
+            // 아직 해금되지 않은 칸은 '자물쇠 모드'로 만듦
             if (i >= unlockedCount)
             {
                 shopSlots[i].SetLockedSlot();
                 continue; // 자물쇠로 잠갔으니 이번 칸은 여기서 끝내고 다음 칸으로 넘어감
             }
 
-            // 2. 리롤을 눌렀을 때, 이미 구매한 슬롯은 상품을 바꾸지 않고 건너뜁니다.
+            // 리롤을 눌렀을 때, 이미 구매한 슬롯은 상품을 바꾸지 않고 건너뜁니다.
             if (isReroll && shopSlots[i].isPurchased) continue;
 
-            // 3. 해금된 슬롯에 정상적으로 아이템 배치
+            // 해금된 슬롯에 정상적으로 아이템 배치
             if (dataIndex < shuffled.Count)
             {
                 shopSlots[i].SetupSlot(shuffled[dataIndex], this);
@@ -206,23 +216,20 @@ public class ShopManager : MonoBehaviour
 
     public void RerollShop()
     {
-        // 코팅 선택 중이거나 파괴 선택 중이면 작동 불가
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return;
 
-        if (currentGold >= rerollCost)
+        //기본 rerollCost 대신 할인이 적용된 최종 비용 사용
+        int finalCost = GetFinalRerollCost();
+        if (currentGold >= finalCost)
         {
-            currentGold -= rerollCost;
+            currentGold -= finalCost;
             if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
             RefreshShop(true);
         }
         else
         {
-            // [추가] 리롤 비용이 부족할 때 토스트 팝업 강제 출력
-            if (ToastPopupController.Instance != null)
-            {
-                ToastPopupController.Instance.ShowToast("골드가 부족합니다.");
-            }
+            if (ToastPopupController.Instance != null) ToastPopupController.Instance.ShowToast("골드가 부족합니다.");
         }
         if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
     }
@@ -257,14 +264,11 @@ public class ShopManager : MonoBehaviour
         }
     }
 
-    public bool PurchaseItem(BaseItemDataSO item)
+    public bool PurchaseItem(BaseItemDataSO item, int actualPrice)
     {
         // 코팅 선택 중이거나 파괴 선택 중이면 구매 불가
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return false;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return false;
-
-        //실제 계산될 가격 판별 로직 추가
-        int actualPrice = diceManager.isNextShopFree ? 0 : item.price;
 
         if (currentGold >= actualPrice)
         {
@@ -375,6 +379,30 @@ public class ShopManager : MonoBehaviour
         else
         {
             Debug.LogWarning("CoatingSelectionPanel 또는 DiceManager 연결이 누락되었습니다.");
+        }
+    }
+    // 리롤(고양이 눈) 할인율을 적용한 최종 리롤 비용 계산
+    public int GetFinalRerollCost()
+    {
+        int discount = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetShopDiscountRate(FigureEffectType.DiscountShopReroll) : 0;
+        int finalCost = Mathf.FloorToInt(rerollCost * (1f - discount / 100f));
+        return Mathf.Max(0, finalCost);
+    }
+
+    public void UpdateRerollUI()
+    {
+        int finalCost = GetFinalRerollCost();
+        if (rerollCostText != null) rerollCostText.text = "리롤 : " + finalCost + " G";
+    }
+
+    // 복고양이 효과: 진열된 아이템 중 하나를 무작위로 0원 처리
+    public void MakeRandomItemFree()
+    {
+        var validSlots = shopSlots.Where(s => s.gameObject.activeSelf && !s.isLocked && !s.isPurchased && s.currentData != null).ToList();
+        if (validSlots.Count > 0)
+        {
+            var randSlot = validSlots[Random.Range(0, validSlots.Count)];
+            randSlot.ApplyLuckyCatFree();
         }
     }
 
