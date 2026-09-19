@@ -14,6 +14,14 @@ public class LocalizationManager : MonoBehaviour
     public const string LanguagePrefsKey = "GameLanguage";
     public const string DefaultLanguageCode = "ko";
     public const string UiTable = "UI_StringTable";
+    public const string SysTable = "SYS_StringTable";
+    public const string TutTable = "TUT_StringTable";
+    public const string HandTable = "GP_Hand_StringTable";
+    public const string ItemTable = "CNT_Item_StringTable";
+    public const string MonsterTable = "CNT_Monster_StringTable";
+    public const string BiomeTable = "CNT_Biome_StringTable";
+    public const string EncounterTable = "ENC_StringTable";
+    public const string SatelliteTable = "Satellite_StringTable";
 
     public static readonly string[] SupportedLanguageCodes =
     {
