@@ -331,7 +331,7 @@ CNT_Item,ID_DICE_DESC_1010,"4, 5, 6 상위 숫자들만 등장하는 강력한 �
 CNT_Item,ID_DICE_NAME_1011,로우 롤러(123),Low Roller (123),ローローラー(123),低额骰(123),
 CNT_Item,ID_DICE_DESC_1011,"1, 2, 3 하위 숫자들만 등장하는 전략용 주사위입니다.","A tactical die that only rolls the low numbers 1, 2, and 3.",1、2、3の低い目だけが出る戦略用のサイコロです。,只会掷出1、2、3低点数的策略骰子。,
 CNT_Item,ID_DICE_NAME_1012,코인 주사위,Coin Dice,コインのサイコロ,硬币骰子,
-CNT_Item,ID_DICE_DESC_1012,1 눈금 적중 시 보너스 코인을 획득하는 탐욕의 주사위입니다.,A greedy die that grants bonus coins whenever a 1 comes up.,1の目が出るとボーナスコインを獲得する、欲張りなサイコロです。,掷出1点时能获得额外金币的贪婪骰子。,
+CNT_Item,ID_DICE_DESC_1012,결산 시 눈금의 10배만큼 골드를 획득합니다.,Gain gold equal to this die's face value x10 when scored.,決算時、出目の10倍のゴールドを獲得します。,结算时获得点数x10的金币。,
 CNT_Item,ID_COAT_NAME_2001,바닐라,Vanilla,バニラ,香草,
 CNT_Item,ID_COAT_DESC_2001,특별한 효과 없이 주사위 외형만 바꿔주는 코팅입니다.,A coating with no special effect — it only changes the die's look.,特別な効果はなく、サイコロの見た目だけを変えるコーティングです。,没有特殊效果，只改变骰子外观的涂层。,
 CNT_Item,ID_COAT_NAME_2002,프리즘,Prism,プリズム,三棱镜,
