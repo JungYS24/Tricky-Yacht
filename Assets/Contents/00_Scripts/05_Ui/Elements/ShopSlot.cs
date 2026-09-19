@@ -115,7 +115,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             if (itemIcon != null) itemIcon.color = new Color(0.3f, 0.3f, 0.3f, 1f);
 
             buyButton.interactable = false;
-            if (priceText != null) priceText.text = "Sold Out";
+            if (priceText != null) priceText.text = LocalizationManager.GetUi("UI_SOLD_OUT", "Sold Out");
 
             manager.HideTooltip();
         }
@@ -141,7 +141,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if (isLocked) return; // 잠겨있는 슬롯은 툴팁 안 띄움
         if (currentData != null && !isPurchased && manager != null)
         {
-            manager.ShowTooltip(currentData.description, GetComponent<RectTransform>());
+            manager.ShowTooltip(LocalizationManager.GetItemDescription(currentData), GetComponent<RectTransform>());
         }
     }
 

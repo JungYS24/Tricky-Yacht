@@ -74,7 +74,7 @@ public class FigureEffectManager : MonoBehaviour
     }
 
     // 주사위 결산 시 피규어 트리거를 확인하고 코루틴으로 대기합니다.
-    public IEnumerator EvaluateTurnEndTriggersCoroutine(List<int> finalDiceValues, string handName, int currentBaseChips, DiceManager diceManager, ShopManager shopManager)
+    public IEnumerator EvaluateTurnEndTriggersCoroutine(List<int> finalDiceValues, HandRank handRank, int currentBaseChips, DiceManager diceManager, ShopManager shopManager)
     {
         int[] diceCounts = new int[7];
         foreach (int v in finalDiceValues)
@@ -92,13 +92,7 @@ public class FigureEffectManager : MonoBehaviour
         if (diceCounts[5] >= 3) activeTriggers.Add(FigureTriggerType.ThreeOf5);
         if (diceCounts[6] >= 3) activeTriggers.Add(FigureTriggerType.ThreeOf6);
 
-        if (handName == "원 페어") activeTriggers.Add(FigureTriggerType.OnePair);
-        if (handName == "투 페어") activeTriggers.Add(FigureTriggerType.TwoPair);
-        if (handName == "트리플") activeTriggers.Add(FigureTriggerType.Triple);
-        if (handName == "스트레이트") activeTriggers.Add(FigureTriggerType.Straight);
-        if (handName == "풀하우스") activeTriggers.Add(FigureTriggerType.FullHouse);
-        if (handName == "포카드") activeTriggers.Add(FigureTriggerType.FourOfAKind);
-        if (handName == "Yacht" || handName == "요트" || handName == "파이브 카드") activeTriggers.Add(FigureTriggerType.Yacht);
+        HandRankUtil.AddHandTriggers(handRank, activeTriggers);
 
         // 수집된 트리거에 해당하는 피규어 효과만 꺼내서 바로 실행 (불필요한 반복 탐색 제거)
         foreach (var tType in activeTriggers)

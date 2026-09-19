@@ -159,6 +159,133 @@ public class LocalizationManager : MonoBehaviour
         }
     }
 
+    public static string GetHandDisplayName(HandRank rank)
+    {
+        string key = HandRankUtil.GetLocKey(rank);
+        string fallback = HandRankUtil.GetFallbackName(rank);
+        return GetOrFallback(HandTable, key, fallback);
+    }
+
+    public static string GetItemDisplayName(BaseItemDataSO item)
+    {
+        if (item == null)
+            return string.Empty;
+
+        string key = ResolveItemNameKey(item);
+        return GetOrFallback(ItemTable, key, item.itemName);
+    }
+
+    public static string GetItemDescription(BaseItemDataSO item)
+    {
+        if (item == null)
+            return string.Empty;
+
+        string key = ResolveItemDescKey(item);
+        return GetOrFallback(ItemTable, key, item.description);
+    }
+
+    public static string GetBiomeDisplayName(BiomeType biome)
+    {
+        string key = "CNT_BIOME_" + biome.ToString().ToUpperInvariant() + "_NAME";
+        return GetOrFallback(BiomeTable, key, biome.ToString());
+    }
+
+    public static string GetUi(string entryKey, string fallback)
+    {
+        return GetOrFallback(UiTable, entryKey, fallback);
+    }
+
+    public static string GetUi(string entryKey, string fallback, params object[] arguments)
+    {
+        if (Instance == null)
+            return FormatFallback(fallback, arguments);
+
+        string result = Instance.GetLocalizedString(UiTable, entryKey, arguments);
+        if (string.IsNullOrEmpty(result) || result == entryKey)
+            return FormatFallback(fallback, arguments);
+
+        return result;
+    }
+
+    private static string GetOrFallback(string tableName, string entryKey, string fallback)
+    {
+        if (string.IsNullOrEmpty(entryKey))
+            return fallback ?? string.Empty;
+
+        if (Instance == null)
+            return fallback ?? entryKey;
+
+        string result = Instance.GetLocalizedString(tableName, entryKey);
+        if (string.IsNullOrEmpty(result) || result == entryKey)
+            return string.IsNullOrEmpty(fallback) ? entryKey : fallback;
+
+        return result;
+    }
+
+    private static string ResolveItemNameKey(BaseItemDataSO item)
+    {
+        string id = ResolveRuntimeItemId(item);
+        if (string.IsNullOrEmpty(id))
+            return null;
+
+        return "CNT_" + id + "_NAME";
+    }
+
+    private static string ResolveItemDescKey(BaseItemDataSO item)
+    {
+        string id = ResolveRuntimeItemId(item);
+        if (string.IsNullOrEmpty(id))
+            return null;
+
+        return "CNT_" + id + "_DESC";
+    }
+
+    private static string ResolveRuntimeItemId(BaseItemDataSO item)
+    {
+        if (item == null)
+            return null;
+
+        if (!string.IsNullOrEmpty(item.Item_ID) && !IsLegacyNumericFigureId(item.Item_ID))
+            return item.Item_ID;
+
+        if (!string.IsNullOrEmpty(item.name) && item.name.StartsWith("Fig_"))
+            return item.name;
+
+        return item.Item_ID;
+    }
+
+    private static bool IsLegacyNumericFigureId(string itemId)
+    {
+        if (string.IsNullOrEmpty(itemId) || !itemId.StartsWith("Fig_") || itemId.Length < 5)
+            return false;
+
+        for (int i = 4; i < itemId.Length; i++)
+        {
+            if (!char.IsDigit(itemId[i]))
+                return false;
+        }
+
+        return true;
+    }
+
+    private static string FormatFallback(string fallback, object[] arguments)
+    {
+        if (string.IsNullOrEmpty(fallback))
+            return string.Empty;
+
+        if (arguments == null || arguments.Length == 0)
+            return fallback;
+
+        try
+        {
+            return string.Format(fallback, arguments);
+        }
+        catch (FormatException)
+        {
+            return fallback;
+        }
+    }
+
     private IEnumerator InitializeLanguageRoutine()
     {
         yield return LocalizationSettings.InitializationOperation;

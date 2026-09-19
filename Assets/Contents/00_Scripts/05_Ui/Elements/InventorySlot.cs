@@ -154,7 +154,7 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
             }
 
             // 인벤토리 매니저에게 내 위치(RectTransform)와 설명을 전달하여 툴팁 띄우기
-            manager.ShowTooltip(currentItem.description, GetComponent<RectTransform>());
+            manager.ShowTooltip(LocalizationManager.GetItemDescription(currentItem), GetComponent<RectTransform>());
         }
     }
 

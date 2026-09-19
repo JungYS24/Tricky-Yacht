@@ -21,10 +21,10 @@ public static class TurnCalculator
 {
     public const int GoldPerPip = 10;
 
-    // 기존 DiceManager에 있던 족보 판정 로직을 이관
-    public static void CalculateHand(List<int> values, DiceManager dm, out float multiplier, out string handName)
+    public static HandRank CalculateHand(List<int> values, DiceManager dm, out float multiplier)
     {
-        multiplier = dm.multHighCard; handName = "탑 (High Card)";
+        multiplier = dm.multHighCard;
+        HandRank rank = HandRank.HighCard;
 
         Dictionary<int, int> countDict = new Dictionary<int, int>();
         foreach (int v in values)
@@ -36,17 +36,19 @@ public static class TurnCalculator
 
         List<int> sortedValues = new List<int>(values); sortedValues.Sort();
 
-        if (counts.Any(c => c == 5)) { multiplier = dm.multYacht; handName = "Yacht"; return; }
+        if (counts.Any(c => c == 5))
+        {
+            multiplier = dm.multYacht;
+            return HandRank.Yacht;
+        }
 
         bool isStraight = true;
-        //가짜 주사위(0)가 껴있으면 애초에 스트레이트 탈락 처리
         if (sortedValues.Contains(0))
         {
             isStraight = false;
         }
         else
         {
-            //0이 없을 때만 정상적으로 스트레이트 검사
             for (int i = 0; i < sortedValues.Count - 1; i++)
             {
                 if (sortedValues[i] + 1 != sortedValues[i + 1])
@@ -57,13 +59,19 @@ public static class TurnCalculator
             }
         }
 
-        if (isStraight) { multiplier = dm.multStraight; handName = "스트레이트"; return; }
+        if (isStraight)
+        {
+            multiplier = dm.multStraight;
+            return HandRank.Straight;
+        }
 
-        if (counts.Any(c => c == 4)) { multiplier = dm.multFourOfAKind; handName = "포카드"; return; }
-        if (counts.Any(c => c == 3) && counts.Any(c => c == 2)) { multiplier = dm.multFullHouse; handName = "풀하우스"; return; }
-        if (counts.Any(c => c == 3)) { multiplier = dm.multTriple; handName = "트리플"; return; }
-        if (counts.Count(c => c == 2) == 2) { multiplier = dm.multTwoPair; handName = "투 페어"; return; }
-        if (counts.Any(c => c == 2)) { multiplier = dm.multOnePair; handName = "원 페어"; return; }
+        if (counts.Any(c => c == 4)) { multiplier = dm.multFourOfAKind; return HandRank.FourOfAKind; }
+        if (counts.Any(c => c == 3) && counts.Any(c => c == 2)) { multiplier = dm.multFullHouse; return HandRank.FullHouse; }
+        if (counts.Any(c => c == 3)) { multiplier = dm.multTriple; return HandRank.Triple; }
+        if (counts.Count(c => c == 2) == 2) { multiplier = dm.multTwoPair; return HandRank.TwoPair; }
+        if (counts.Any(c => c == 2)) { multiplier = dm.multOnePair; return HandRank.OnePair; }
+
+        return rank;
     }
 
     // 결산 및 UI 갱신 시 주사위 개별 효과들을 한 번에 합산해주는 순수 연산 함수
