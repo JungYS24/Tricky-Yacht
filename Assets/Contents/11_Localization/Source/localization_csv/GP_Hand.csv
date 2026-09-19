@@ -1,9 +1,11 @@
 ﻿table,key,ko,en,ja,zh-Hans,note
+GP_Hand,GP_HAND_HIGH_CARD,하이 카드,High Card,ハイカード,高牌,
 GP_Hand,GP_HAND_ONE_PAIR,원 페어,One Pair,ワンペア,一对,
 GP_Hand,GP_HAND_TWO_PAIR,투 페어,Two Pair,ツーペア,两对,
 GP_Hand,GP_HAND_THREE_OF_A_KIND,트리플,Three of a Kind,スリーカード,三条,
-GP_Hand,GP_HAND_FOUR_OF_A_KIND,포 카인드,Four of a Kind,フォーカード,四条,
-GP_Hand,GP_HAND_FULL_HOUSE,풀 하우스,Full House,フルハウス,葫芦,
+GP_Hand,GP_HAND_FOUR_OF_A_KIND,포카드,Four of a Kind,フォーカード,四条,
+GP_Hand,GP_HAND_FULL_HOUSE,풀하우스,Full House,フルハウス,葫芦,
+GP_Hand,GP_HAND_STRAIGHT,스트레이트,Straight,ストレート,顺子,
 GP_Hand,GP_HAND_SMALL_STRAIGHT,스몰 스트레이트,Small Straight,スモールストレート,小顺,
 GP_Hand,GP_HAND_LARGE_STRAIGHT,라지 스트레이트,Large Straight,ラージストレート,大顺,
 GP_Hand,GP_HAND_CHOICE,초이스,Choice,チョイス,自选,

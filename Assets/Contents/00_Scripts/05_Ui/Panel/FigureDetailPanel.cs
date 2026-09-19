@@ -47,29 +47,9 @@ public class FigureDetailPanel : MonoBehaviour
         panelRoot.SetActive(true);
     }
 
-    private string GetBiomeKoreanName(BiomeType biome)
+    private string GetBiomeDisplayName(BiomeType biome)
     {
-        switch (biome)
-        {
-            case BiomeType.Forest: return "숲";
-            case BiomeType.Meadow: return "초원";
-            case BiomeType.Temple: return "신전";
-            case BiomeType.Jungle: return "정글";
-            case BiomeType.Desert: return "사막";
-            case BiomeType.Ruins: return "유적";
-            case BiomeType.Cave: return "동굴";
-            case BiomeType.Volcano: return "화산";
-            case BiomeType.Swamp: return "늪";
-            case BiomeType.Beach: return "해변";
-            case BiomeType.Ocean: return "바다";
-            case BiomeType.Abyss: return "심연";
-            case BiomeType.Snow: return "설원";
-            case BiomeType.Grave: return "무덤";
-            case BiomeType.Circus: return "서커스";
-            case BiomeType.Void: return "공허";
-            case BiomeType.Shop: return "상점";
-            default: return "알 수 없음";
-        }
+        return LocalizationManager.GetBiomeDisplayName(biome);
     }
 
 
@@ -81,8 +61,8 @@ public class FigureDetailPanel : MonoBehaviour
         bool isUnlocked = PlayerPrefs.GetInt("Collection_Unlocked_" + currentFigure.itemName, 0) == 1;
         bool isEncountered = PlayerPrefs.GetInt("Collection_Encountered_" + currentFigure.itemName, 0) == 1;
 
-        string biomeNames = string.Join(", ", currentFigure.sourceBiomes.Select(b => GetBiomeKoreanName(b)));
-        string biomeText = $"획득 바이옴 : {biomeNames}";
+        string biomeNames = string.Join(", ", currentFigure.sourceBiomes.Select(b => GetBiomeDisplayName(b)));
+        string biomeText = LocalizationManager.GetUi("UI_BIOME_SOURCES", "획득 바이옴 : {0}", biomeNames);
 
         if (isUnlocked)
         {
@@ -93,12 +73,12 @@ public class FigureDetailPanel : MonoBehaviour
             }
             if (nameText != null)
             {
-                nameText.text = currentFigure.itemName;
+                nameText.text = LocalizationManager.GetItemDisplayName(currentFigure);
                 nameText.color = Color.white;
             }
             if (descText != null)
             {
-                descText.text = currentFigure.description;
+                descText.text = LocalizationManager.GetItemDescription(currentFigure);
                 descText.color = Color.white;
             }
             if (locationText != null)
@@ -116,12 +96,12 @@ public class FigureDetailPanel : MonoBehaviour
             }
             if (nameText != null)
             {
-                nameText.text = currentFigure.itemName;
+                nameText.text = LocalizationManager.GetItemDisplayName(currentFigure);
                 nameText.color = Color.green;
             }
             if (descText != null)
             {
-                descText.text = currentFigure.description;
+                descText.text = LocalizationManager.GetItemDescription(currentFigure);
                 descText.color = Color.white;
             }
             if (locationText != null)

@@ -76,7 +76,8 @@ public class DiceManager : MonoBehaviour
     [Header("게임 데이터")]
     public int maxRerolls = 2;
     public int currentRerolls;
-    [HideInInspector] public string currentHandName = ""; // 전투 결산 시 필요한 족보 이름
+    [HideInInspector] public string currentHandName = ""; // 전투 결산 시 화면에 보이는 족보 이름
+    [HideInInspector] public HandRank currentHandRank = HandRank.HighCard;
     [HideInInspector] public int flameDamageThisTurn = 0; // 이번 턴 화상 데미지
 
     [Header("페퍼민트 포획 연출")]
@@ -708,12 +709,12 @@ public class DiceManager : MonoBehaviour
 
         // 족보 판정 (TurnCalculator가 주는 정확한 배수와 이름을 그대로 사용)
         float handMult = 1.0f;
-        string handName = "";
-
-        TurnCalculator.CalculateHand(keptValues, this, out handMult, out handName);
+        HandRank handRank = TurnCalculator.CalculateHand(keptValues, this, out handMult);
+        currentHandRank = handRank;
+        string handName = LocalizationManager.GetHandDisplayName(handRank);
 
         // 달성한 족보의 이펙트 재생
-        handVFXManager?.PlayHandVFX(handName);
+        handVFXManager?.PlayHandVFX(handRank);
 
         // 분리 전과 동일하게 족보 배수가 2 이상이면 슬로모션
         if (handMult >= 2.0f)
@@ -734,7 +735,7 @@ public class DiceManager : MonoBehaviour
         // 피규어 발동 및 선택창 처리가 끝날 때까지 대기
         if (FigureEffectManager.Instance != null)
         {
-            yield return StartCoroutine(FigureEffectManager.Instance.EvaluateTurnEndTriggersCoroutine(keptValues, handName, baseSumBeforeFigures, this, shopManager));
+            yield return StartCoroutine(FigureEffectManager.Instance.EvaluateTurnEndTriggersCoroutine(keptValues, handRank, baseSumBeforeFigures, this, shopManager));
         }
 
         // 피규어 적용 이후의 회복 배수와 적 체력을 사용
@@ -1121,17 +1122,20 @@ public class DiceManager : MonoBehaviour
     public void PlayPlayerHurtSound() { if (sfxSource != null && playerHurtAudioEvent != null) playerHurtAudioEvent.Play(sfxSource); }
 
     // 현재 족보 이름에 맞는 진짜 배수를 찾아오는 함수
-    public float GetHandMultiplier(string handName)
+    public float GetHandMultiplier(HandRank rank)
     {
-        if (handName.Contains("하이 카드")) return multHighCard;
-        if (handName.Contains("원 페어")) return multOnePair;
-        if (handName.Contains("투 페어")) return multTwoPair;
-        if (handName.Contains("트리플")) return multTriple;
-        if (handName.Contains("스트레이트")) return multStraight;
-        if (handName.Contains("풀하우스")) return multFullHouse;
-        if (handName.Contains("포카드") || handName.Contains("포 카드")) return multFourOfAKind;
-        if (handName.Contains("요트") || handName.Contains("Yacht") || handName.Contains("파이브 카드")) return multYacht;
-        return 1.0f; // 기본값
+        switch (rank)
+        {
+            case HandRank.HighCard: return multHighCard;
+            case HandRank.OnePair: return multOnePair;
+            case HandRank.TwoPair: return multTwoPair;
+            case HandRank.Triple: return multTriple;
+            case HandRank.Straight: return multStraight;
+            case HandRank.FullHouse: return multFullHouse;
+            case HandRank.FourOfAKind: return multFourOfAKind;
+            case HandRank.Yacht: return multYacht;
+            default: return 1.0f;
+        }
     }
 
     public void UpdateMainUI(string handName)
@@ -1150,18 +1154,26 @@ public class DiceManager : MonoBehaviour
 
         float baseMult = uiValuesBuffer.Count == 5 ? 0 : 1.0f;
 
+        HandRank rank = currentHandRank;
         if (!isCalculating)
         {
-            if (uiValuesBuffer.Count == 5) TurnCalculator.CalculateHand(uiValuesBuffer, this, out baseMult, out handName);
-            else if (uiValuesBuffer.Count > 0) handName = "계산 중...";
+            if (uiValuesBuffer.Count == 5)
+            {
+                rank = TurnCalculator.CalculateHand(uiValuesBuffer, this, out baseMult);
+                currentHandRank = rank;
+                handName = LocalizationManager.GetHandDisplayName(rank);
+            }
+            else if (uiValuesBuffer.Count > 0)
+            {
+                handName = LocalizationManager.GetUi("UI_HAND_CALCULATING", "계산 중...");
+            }
 
-            currentHandName = handName; // 이번 턴의 족보 이름을 저장
+            currentHandName = handName;
         }
         else
         {
-            // 결산 중에는 데미지 계산을 위해 배수(baseMult)만 몰래 가져오고, 이름(tempName)은 버림
-            string tempName;
-            if (uiValuesBuffer.Count == 5) TurnCalculator.CalculateHand(uiValuesBuffer, this, out baseMult, out tempName);
+            if (uiValuesBuffer.Count == 5)
+                TurnCalculator.CalculateHand(uiValuesBuffer, this, out baseMult);
         }
 
         // 순수 연산기를 통한 통합 연산 호출
@@ -1222,13 +1234,15 @@ public class DiceManager : MonoBehaviour
                         case FigureTriggerType.ThreeOf4: if (diceCounts[4] >= 3) nodeTriggered = true; break;
                         case FigureTriggerType.ThreeOf5: if (diceCounts[5] >= 3) nodeTriggered = true; break;
                         case FigureTriggerType.ThreeOf6: if (diceCounts[6] >= 3) nodeTriggered = true; break;
-                        case FigureTriggerType.OnePair: if (handName == "원 페어") nodeTriggered = true; break;
-                        case FigureTriggerType.TwoPair: if (handName == "투 페어") nodeTriggered = true; break;
-                        case FigureTriggerType.Triple: if (handName == "트리플") nodeTriggered = true; break;
-                        case FigureTriggerType.Straight: if (handName == "스트레이트") nodeTriggered = true; break;
-                        case FigureTriggerType.FullHouse: if (handName == "풀하우스") nodeTriggered = true; break;
-                        case FigureTriggerType.FourOfAKind: if (handName == "포카드") nodeTriggered = true; break;
-                        case FigureTriggerType.Yacht: if (handName == "Yacht" || handName == "요트" || handName == "파이브 카드") nodeTriggered = true; break;
+                        case FigureTriggerType.OnePair:
+                        case FigureTriggerType.TwoPair:
+                        case FigureTriggerType.Triple:
+                        case FigureTriggerType.Straight:
+                        case FigureTriggerType.FullHouse:
+                        case FigureTriggerType.FourOfAKind:
+                        case FigureTriggerType.Yacht:
+                            if (HandRankUtil.MatchesTrigger(rank, node.triggerType)) nodeTriggered = true;
+                            break;
                     }
 
                     if (nodeTriggered)
