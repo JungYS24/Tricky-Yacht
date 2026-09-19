@@ -208,17 +208,17 @@ MonoBehaviour:
   diceIcon: {fileID: 445989346094941115}
   descText: {fileID: 0}
   defaultFaceSprites:
-  - {fileID: 5114336044013623915, guid: 57f9f46b2ef5d2e438f888f896ac2db4, type: 3}
-  - {fileID: 4277651623651152253, guid: 4a4761681d308864e86310e4a393d6f5, type: 3}
-  - {fileID: 8572930375631895552, guid: 797b33bba0f315f4ea1961eb5d6ce62c, type: 3}
-  - {fileID: 6584158007040453875, guid: 73cca03ad1f597441bbc9c999b86a0a7, type: 3}
-  - {fileID: 7099116345629502920, guid: bbf80e8244d1aca46a021ba395282516, type: 3}
-  - {fileID: -7865692014833397383, guid: b1e83609a1defef46b845a44bb9ba73a, type: 3}
+  - {fileID: 21300000, guid: e6d4349e6942c9344957fae0a557fc9e, type: 3}
+  - {fileID: 21300000, guid: 4a4761681d308864e86310e4a393d6f5, type: 3}
+  - {fileID: 21300000, guid: 797b33bba0f315f4ea1961eb5d6ce62c, type: 3}
+  - {fileID: 21300000, guid: 73cca03ad1f597441bbc9c999b86a0a7, type: 3}
+  - {fileID: 21300000, guid: bbf80e8244d1aca46a021ba395282516, type: 3}
+  - {fileID: 21300000, guid: b1e83609a1defef46b845a44bb9ba73a, type: 3}
   normalSprite: {fileID: 21300000, guid: 69eac61b23e6477428ac787638480632, type: 3}
   prismSprite: {fileID: 21300000, guid: 8bbf01b9f97145746b67e7c0093af7ac, type: 3}
   goldSprite: {fileID: 21300000, guid: bf5e455349b9da14697cf42ce9a863b5, type: 3}
   blackSprite: {fileID: 21300000, guid: 3eee32ef40695be4bbf7427d319bdcd1, type: 3}
-  iceSprite: {fileID: 3143735842892198136, guid: 160f5b55454249b40856cf3da12d5f08, type: 3}
+  iceSprite: {fileID: 21300000, guid: 1859c63ca8434104cb3e15d5e669d931, type: 3}
   fixedNumberSprites:
   - {fileID: 21300000, guid: 530d105a15c14d6459ffada9fad79886, type: 3}
   - {fileID: 21300000, guid: aa0a775608c986c409cdb3f873ed8d4c, type: 3}
