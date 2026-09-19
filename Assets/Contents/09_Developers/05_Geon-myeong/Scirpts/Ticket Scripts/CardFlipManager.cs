@@ -11,8 +11,10 @@ public class CardFlipManager : MonoBehaviour
     [SerializeField] private Button triggerButton;
     [SerializeField] private LetterShakeController letterController;
 
-    [Header("Project 창의 티켓/이미지 파일들")]
-    [SerializeField] private List<Object> allTicketDataList = new List<Object>();
+
+
+    [Header("티켓 데이터 목록")]
+    [SerializeField] private List<TicketItemSO> allTicketDataList = new List<TicketItemSO>();
 
     [Header("카드 생성 위치 및 프리팹 설정")]
     [SerializeField] private RectTransform cardSpawnParent;
@@ -88,7 +90,7 @@ public class CardFlipManager : MonoBehaviour
         }
 
         int countToPick = Mathf.Min(3, allTicketDataList.Count);
-        List<Object> selectedData = GetRandomElements(allTicketDataList, countToPick);
+        List<TicketItemSO> selectedData = GetRandomElements(allTicketDataList, countToPick);
 
         cardSequence = DOTween.Sequence();
         float startX = -((countToPick - 1) * cardSpacing) / 2f;
@@ -96,7 +98,7 @@ public class CardFlipManager : MonoBehaviour
         for (int i = 0; i < selectedData.Count; i++)
         {
             int index = i;
-            Object data = selectedData[index];
+            TicketItemSO data = selectedData[index];
 
             CardUI cardUI = CreateCardUIObject(data);
             if (cardUI == null) continue;
@@ -251,11 +253,29 @@ public class CardFlipManager : MonoBehaviour
         }
         else
         {
-            newCardObj = new GameObject($"CardUI_{data.name}", typeof(RectTransform), typeof(Image), typeof(CardUI));
+            newCardObj = new GameObject(
+                $"CardUI_{data.name}",
+                typeof(RectTransform),
+                typeof(Image),
+                typeof(CardUI)
+            );
+
             newCardObj.transform.SetParent(cardSpawnParent, false);
 
             RectTransform rect = newCardObj.GetComponent<RectTransform>();
-            rect.sizeDelta = new Vector2(160f, 220f);
+
+            // 티켓 이미지 비율에 맞게 크기 설정
+            rect.sizeDelta = new Vector2(220f, 120f);
+
+            // 티켓 이미지 적용
+            Image image = newCardObj.GetComponent<Image>();
+
+            if (data is TicketItemSO ticketData)
+            {
+                image.sprite = ticketData.icon;
+                image.color = Color.white;
+                image.preserveAspect = true;
+            }
         }
 
         CardUI cardUI = newCardObj.GetComponent<CardUI>();

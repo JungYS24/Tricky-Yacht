@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using DG.Tweening;
+using UnityEditor.Experimental.GraphView;
 
 public class ShopManager : MonoBehaviour
 {
@@ -37,6 +39,11 @@ public class ShopManager : MonoBehaviour
     public GameObject ticketSelectionPanel;
     public List<TicketItemSO> allTicketsPool; // 8개의 티켓을 미리 넣어둘 리스트
     public TicketChoiceSlot[] ticketChoiceSlots; // 화면에 보일 3개의 버튼 슬롯
+
+    [Header("티켓 VFX 연출")]
+    public CardFlipManager cardFlipManager;
+    [Header("티켓 봉투 연출")]
+    [SerializeField] private LetterShakeController letterShakeController;
 
     [Header("주사위 파괴 선택 UI")]
     public DiceDestructionPanel diceDestructionPanel;
@@ -312,7 +319,7 @@ public class ShopManager : MonoBehaviour
 
                 // ⭐ 구매 골드 감소 이펙트
                 if (actualPrice > 0)
-                    goldEffectUI?.PlaySpend(actualPrice);
+                    goldEffectUI?.PlaySpend(actualPrice); 
 
                 if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
 
@@ -373,6 +380,140 @@ public class ShopManager : MonoBehaviour
         for (int i = 0; i < ticketChoiceSlots.Length; i++)
         {
             ticketChoiceSlots[i].Setup(shuffledTickets[i], this);
+
+            //봉투 찢어질 때까지 티켓 숨기기
+            ticketChoiceSlots[i].gameObject.SetActive(false); 
+        }
+        
+        if (letterShakeController != null)
+        {
+            letterShakeController.gameObject.SetActive(true);
+            letterShakeController.StartLetterShake();
+        }
+        else
+        {
+            //봉투가 연결되지 않았으면 티켓은 그냥 등장
+            PlayTicketAppearEffects();
+        }
+
+        // ⭐ 기존 창 안에서 티켓 등장 VFX 실행
+        if (cardFlipManager != null)
+        {
+            cardFlipManager.OnClickStartButton();
+        }
+    }
+
+    public void SelectTicketWithVFX(
+     TicketChoiceSlot selectedSlot,
+     TicketItemSO selectedTicket)
+    {
+        Sequence selectSeq = DOTween.Sequence();
+
+        RectTransform selectedRect = null;
+
+        foreach (TicketChoiceSlot slot in ticketChoiceSlots)
+        {
+            if (slot == null)
+                continue;
+
+            //  모든 티켓 둥실거림 정지
+            slot.StopIdleAnimation();
+
+            RectTransform rect = slot.GetComponent<RectTransform>();
+
+            CanvasGroup canvasGroup = slot.GetComponent<CanvasGroup>();
+
+            if (canvasGroup == null)
+                canvasGroup = slot.gameObject.AddComponent<CanvasGroup>();
+
+            rect.DOKill();
+            canvasGroup.DOKill();
+
+            if (slot == selectedSlot)
+            {
+                selectedRect = rect;
+
+                //  선택한 티켓을 가장 앞으로
+                rect.SetAsLastSibling();
+
+                //  선택 티켓 확대
+                selectSeq.Join(
+                    rect.DOScale(Vector3.one * 1.25f, 0.3f)
+                        .SetEase(Ease.OutBack)
+                );
+
+                // 기울어져 있으면 정면으로
+                selectSeq.Join(
+                    rect.DOLocalRotate(Vector3.zero, 0.2f)
+                );
+            }
+            else
+            {
+                //  선택하지 않은 티켓은 작아지면서 사라짐
+                selectSeq.Join(
+                    rect.DOScale(Vector3.zero, 0.3f)
+                        .SetEase(Ease.InBack)
+                );
+
+                selectSeq.Join(
+                    canvasGroup.DOFade(0f, 0.3f)
+                );
+            }
+        }
+
+        // ⭐ 선택한 티켓 잠깐 강조
+        selectSeq.AppendInterval(0.4f);
+
+        // ⭐ 오른쪽 위로 슝
+        if (selectedRect != null)
+        {
+            selectSeq.Append(
+                selectedRect.DOAnchorPos(
+                    selectedRect.anchoredPosition + new Vector2(750f, 200f),
+                    0.6f
+                )
+                .SetEase(Ease.InCubic)
+            );
+
+            // 동시에 작아짐
+            selectSeq.Join(
+                selectedRect.DOScale(Vector3.zero, 0.6f)
+                    .SetEase(Ease.InBack)
+            );
+        }
+
+        // 모든 연출이 끝난 다음 실제 티켓 적용
+        selectSeq.OnComplete(() =>
+        {
+            HideTooltip();
+
+            selectedTicket.ApplyItemEffect(diceManager);
+
+            InventoryManager.Instance.AddItem(selectedTicket);
+
+            CloseTicketSelection();
+        });
+    }
+
+    public void PlayTicketAppearEffects()
+    {
+        Debug.Log("⭐ PlayTicketAppearEffects 실행됨!");
+
+        for (int i = 0; i < ticketChoiceSlots.Length; i++)
+        {
+            if (ticketChoiceSlots[i] == null)
+            {
+                Debug.LogError($"❌ TicketChoiceSlot {i}가 비어있음!");
+                continue;
+            }
+
+            Debug.Log($"⭐ 티켓 {i} 등장!");
+
+            // 숨겨놨던 티켓 다시 활성화
+            ticketChoiceSlots[i].gameObject.SetActive(true);
+
+            // 등장 애니메이션
+            ticketChoiceSlots[i].PlayAppearEffect(i * 0.18f);
         }
     }
 

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 
@@ -10,11 +10,16 @@ public class LetterTearEffect : MonoBehaviour
     [SerializeField] private RectTransform leftPiece;   // 왼쪽 조각 (Image_Left)
     [SerializeField] private RectTransform rightPiece;  // 오른쪽 조각 (Image_Right)
 
-    [Header("다음 연출 스크립트 연결 (CardFlipManager)")]
-    [SerializeField] private CardFlipManager flipManager;
+    [Header("티켓 선택 시스템 연결")]
+    [SerializeField] private ShopManager shopManager;
 
     [Header("파티클 이펙트")]
     [SerializeField] private ParticleSystem confettiParticle; // 컨페티 파티클 (ConfettiFX)
+
+    [Header("카드팩 개봉 빛 연출")]
+    [SerializeField] private Image tearGlow;   // 원형 후광
+    [SerializeField] private Image tearRays;   // 방사형 빛
+    [SerializeField] private Image tearFlash;  // 순간 플래시
 
     [Header("연출 상세 설정")]
     [SerializeField] private float duration = 0.6f;     // 찢어지며 퍼지는 시간
@@ -42,10 +47,13 @@ public class LetterTearEffect : MonoBehaviour
             rightOriginPos = rightPiece.anchoredPosition;
         }
 
-        if (flipManager == null)
+        if (shopManager == null)
         {
-            flipManager = FindObjectOfType<CardFlipManager>();
+            shopManager = FindFirstObjectByType<ShopManager>();
         }
+
+        // ⭐ 게임 시작 시 빛 이펙트 완전히 숨기기
+        HideLightEffects();
     }
 
     private void CheckReferences()
@@ -61,6 +69,11 @@ public class LetterTearEffect : MonoBehaviour
     public void PlayTearEffect()
     {
         ResetTear();
+
+        // ⭐ 빛 이펙트 초기화
+        SetupLightEffect(tearGlow);
+        SetupLightEffect(tearRays);
+        SetupLightEffect(tearFlash);
 
         // 1. 원본 편지는 숨기기
         if (originalLetter != null)
@@ -82,36 +95,65 @@ public class LetterTearEffect : MonoBehaviour
             confettiParticle.Play(true);
         }
 
-        // 4. 조각 애니메이션
+        // 4. 조각 + 빛 애니메이션
         Sequence seq = DOTween.Sequence();
 
+
+        // ⭐ 여기에 넣기!
+        if (tearRays != null)
+        {
+            tearRays.gameObject.SetActive(true);
+
+            tearRays.transform.localScale = Vector3.one * 0.7f;
+
+            Color color = tearRays.color;
+            color.a = 0f;
+            tearRays.color = color;
+
+            seq.Append(
+                tearRays.DOFade(0.55f, 0.08f)
+            );
+
+            seq.Join(
+                tearRays.transform
+                    .DOScale(1.15f, 0.25f)
+                    .SetEase(Ease.OutCubic)
+            );
+
+            seq.Append(
+                tearRays.DOFade(0f, 0.18f)
+                    .SetEase(Ease.OutQuad)
+            );
+        }
+
+
+        // ↓ 그 아래에 기존 봉투 찢어지는 코드
         if (leftPiece != null)
         {
-            seq.Join(leftPiece.DOAnchorPos(leftOriginPos + new Vector2(-moveDistance, 40f), duration).SetEase(Ease.OutCubic));
-            seq.Join(leftPiece.DOScale(Vector3.one * targetScale, duration));
-            if (leftImage != null) seq.Join(leftImage.DOFade(0f, duration));
+            // 왼쪽 조각 코드
         }
 
         if (rightPiece != null)
         {
-            seq.Join(rightPiece.DOAnchorPos(rightOriginPos + new Vector2(moveDistance, -40f), duration).SetEase(Ease.OutCubic));
-            seq.Join(rightPiece.DOScale(Vector3.one * targetScale, duration));
-            if (rightImage != null) seq.Join(rightImage.DOFade(0f, duration));
+            // 오른쪽 조각 코드
         }
 
-        // 5. 완료 후 카드 등장
+
+        // ↓ 마지막
         seq.OnComplete(() =>
         {
-            if (piecesGroup != null) piecesGroup.SetActive(false);
+            if (piecesGroup != null)
+                piecesGroup.SetActive(false);
 
-            if (flipManager == null) flipManager = FindObjectOfType<CardFlipManager>();
+            if (tearRays != null)
+                tearRays.gameObject.SetActive(false);
 
-            if (flipManager != null)
-            {
-                flipManager.PlayCardFlipSequence();
-            }
+            if (shopManager != null)
+                shopManager.PlayTicketAppearEffects();
         });
     }
+
+
 
     public void ResetTear()
     {
@@ -138,5 +180,35 @@ public class LetterTearEffect : MonoBehaviour
                 rightImage.color = new Color(c.r, c.g, c.b, 1f);
             }
         }
+    }
+
+    private void SetupLightEffect(Image image)
+    {
+        if (image == null)
+            return;
+
+        image.DOKill();
+        image.transform.DOKill();
+
+        Color color = image.color;
+        color.a = 0f;
+        image.color = color;
+
+        image.transform.localScale = Vector3.one;
+        image.transform.localRotation = Quaternion.identity;
+
+        image.gameObject.SetActive(false);
+    }
+
+    private void HideLightEffects()
+    {
+        if (tearGlow != null)
+            tearGlow.gameObject.SetActive(false);
+
+        if (tearRays != null)
+            tearRays.gameObject.SetActive(false);
+
+        if (tearFlash != null)
+            tearFlash.gameObject.SetActive(false);
     }
 }
