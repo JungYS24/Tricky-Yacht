@@ -45,7 +45,15 @@ public static class CjkFontFallbackSetup
 
         AssignGlobalTmpFallbacks(jpSdf, scSdf);
 
-        AssetDatabase.SaveAssets();
+        CjkDynamicFontPlayModeGuard.AllowPersist = true;
+        try
+        {
+            AssetDatabase.SaveAssets();
+        }
+        finally
+        {
+            CjkDynamicFontPlayModeGuard.AllowPersist = false;
+        }
         AssetDatabase.Refresh();
         Debug.Log("[CJK Font] KR 메인 폰트에 JP/SC Dynamic Fallback을 연결했습니다. Play 후 일본어/중국어 글리프를 확인하세요.");
     }
