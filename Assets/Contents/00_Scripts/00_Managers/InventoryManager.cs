@@ -272,8 +272,7 @@ public class InventoryManager : MonoBehaviour
 
         if (diceManager != null && diceManager.shopManager != null)
         {
-            diceManager.shopManager.currentGold += sellPrice;
-            diceManager.ui?.UpdateGoldUI(diceManager.shopManager.currentGold);
+            diceManager.shopManager.GrantGold(sellPrice);
         }
 
         Debug.Log($"피규어 [{targetSellSlot.currentItem.itemName}] 판매 완료! +{sellPrice} G");

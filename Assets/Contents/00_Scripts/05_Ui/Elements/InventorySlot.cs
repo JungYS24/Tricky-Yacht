@@ -95,8 +95,14 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
                     return; // 여기서 함수를 종료하면 아래의 snack.ApplyItemEffect와 ClearSlot이 실행되지 않습니다.
                 }
 
+                // 사용이 허용된 스낵에 대해서만 소모 방지 여부를 한 번 판정
+                bool preserveSnack = FigureEffectManager.Instance != null &&
+                    FigureEffectManager.Instance.ShouldPreserveSnack();
+
                 // 스낵 고유의 효과(체력 회복 등) 적용
                 snack.ApplyItemEffect(manager.diceManager);
+
+                
 
                 // 스낵을 먹었으니 FigureEffectManager에게 알려서 OnSnackUsed 피규어를 발동
                 if (FigureEffectManager.Instance != null)
@@ -109,7 +115,13 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
                 {
                     TutorialManager.Instance.OnItemUsed(currentItem.itemName);
                 }
-                ClearSlot(); // 효과가 적용된 후에만 슬롯을 비웁니다.
+
+                // 효과가 적용된 후에만 슬롯을 비움
+                // 소모 방지에 성공했다면 스낵은 유지
+                if (!preserveSnack)
+                {
+                    ClearSlot();
+                }
                 manager.HideSellPopup();
                 manager.HideTooltip();
             }

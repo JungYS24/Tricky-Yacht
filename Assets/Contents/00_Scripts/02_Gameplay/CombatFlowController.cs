@@ -16,13 +16,7 @@ public static class CombatFlowController
         //골드 획득 처리
         if (expectedGold > 0 && dm.shopManager != null)
         {
-            dm.shopManager.currentGold += expectedGold;
-            dm.ui?.UpdateGoldUI(dm.shopManager.currentGold);
-
-            if (GoldCounter.Instance != null)
-            {
-                GoldCounter.Instance.SetGold(dm.shopManager.currentGold);
-            }
+            dm.shopManager.GrantGold(expectedGold);
         }
 
         //화염 스택 누적
@@ -139,6 +133,8 @@ public static class CombatFlowController
                 if (finalEnemyAtk < 0) finalEnemyAtk = 0;
 
                 dm.playerStatus.TakeDamage(finalEnemyAtk);
+                // 피격 후 회복 피규어 등이 실행되기 전에 체력 조건 검사
+                FigureEffectManager.Instance?.EvaluateLowHPTriggers(dm, dm.shopManager);
 
                 CameraShake.Instance.Shake(0.15f, 0.1f);
                 dm.ui?.UpdateShieldUI(dm.playerStatus.currentShield);

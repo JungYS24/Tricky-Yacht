@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic; // List를 사용하기 위해 추가
@@ -467,6 +467,25 @@ public class Enemy : MonoBehaviour
         {
             turnText.text = LocalizationManager.GetUi("UI_ENEMY_TURN", "Turn : {0}", CurrentAttackTurn);
         }
+    }
+
+    // 스테이지 시작 시 최대 체력을 낮추는 효과용
+    public void ReduceMaxHP(int amount)
+    {
+        if (IsDead || amount <= 0) return;
+
+        // 최대 체력 감소만으로 적이 죽지는 않도록 최소 1 유지
+        MaxHP = Mathf.Max(1, MaxHP - amount);
+        CurrentHP = Mathf.Min(CurrentHP, MaxHP);
+
+        // 이전 체력바 애니메이션이 새 값을 덮어쓰지 않도록 중단
+        if (hpCoroutine != null)
+        {
+            StopCoroutine(hpCoroutine);
+            hpCoroutine = null;
+        }
+
+        UpdateHPBar(true);
     }
 
     public void DecreaseTurn()

@@ -9,7 +9,7 @@ public enum FigureTriggerType
     OnePair, TwoPair, Triple, Straight, FullHouse, FourOfAKind, Yacht,
     ThreeOf1, ThreeOf2, ThreeOf3, ThreeOf4, ThreeOf5, ThreeOf6,
     OnDamaged, OnShopEntered, OnItemPurchased, OnDiceReroll, OnCombatEnd, OnSnackUsed,  Always,
-    OnAcquired, OnCombatStart, OnRoundStart, OnDeath
+    OnAcquired, OnCombatStart, OnRoundStart, OnDeath, OnLowHP // 살아 있는 플레이어의 체력이 지정 비율 이하일 때
 }
 
 
@@ -55,7 +55,14 @@ public enum FigureEffectType
     OpenSatelliteSelection, // 주사위 위성(행성 효과) 타겟 선택 팝업창 띄우기
 
     AddCombatMultiplier, // 이번 전투 동안 족보 배수 누적 (예: 광대의 눈물)
-    AddCombatChips     // 이번 전투 동안 기본 칩수 누적
+    AddCombatChips,     // 이번 전투 동안 기본 칩수 누적
+
+    PreserveSnackChance, // 스낵 사용 시 소모하지 않을 확률(%)
+    MultiplySnackEffects, // 페퍼민트 외 스낵 효과 배율
+    IncreaseGoldGainPercent, // 모든 골드 획득량 증가(%)
+    ReduceEnemyMaxHP, // 적 최대 체력 감소
+    AddIceMultiplier, // 아이스 코팅 주사위의 추가 배수
+    AddIceChips       // 아이스 코팅 주사위의 추가 칩
 }
 
 // 2.값 계산 방식 분리
@@ -95,4 +102,10 @@ public class FigureNode
 {
     public FigureTriggerType triggerType;
     public List<FigureEffectNode> effects = new List<FigureEffectNode>();
+    // 활성화하면 같은 스테이지에서 이 노드는 한 번만 실행
+    public bool oncePerStage = false;
+
+    // OnLowHP에서 사용. 예: 15이면 최대 체력의 15% 이하
+    [Range(0f, 100f)]
+    public float healthThresholdPercent = 15f;
 }
