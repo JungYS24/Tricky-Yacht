@@ -21,6 +21,8 @@ public class DiceDestructionPanel : MonoBehaviour
         if (options.Count == 0)
         {
             Debug.Log("파괴할 수 있는 주사위가 덱에 없습니다!");
+            if (ToastPopupController.Instance != null)
+                ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_NO_EQUIPPABLE_DICE", "장착 가능한 주사위가 없습니다."));
             return;
         }
 

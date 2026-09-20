@@ -119,12 +119,12 @@ public class FigureDetailPanel : MonoBehaviour
             }
             if (nameText != null)
             {
-                nameText.text = "???";
+                nameText.text = LocalizationManager.GetUi("UI_UNKNOWN", "???");
                 nameText.color = new Color(0.4f, 0.4f, 0.4f, 1f);
             }
             if (descText != null)
             {
-                descText.text = "???";
+                descText.text = LocalizationManager.GetUi("UI_UNKNOWN", "???");
                 descText.color = new Color(0.4f, 0.4f, 0.4f, 1f);
             }
             if (locationText != null)

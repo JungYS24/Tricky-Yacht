@@ -64,6 +64,8 @@ public class LootSelectionPanel : MonoBehaviour
             if (!added)
             {
                 Debug.Log("스낵 인벤토리가 꽉 차서 받을 수 없습니다!");
+                if (ToastPopupController.Instance != null)
+                    ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_INVENTORY_FULL", "인벤토리가 가득 찼습니다."));
                 return; // 꽉 차서 안 들어가면 리턴하여 단계가 넘어가지 않도록 방지
             }
         }

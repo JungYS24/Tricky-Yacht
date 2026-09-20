@@ -111,7 +111,10 @@ public static class CombatFlowController
             {
                 CameraShake.Instance.Shake(0.1f, 0.1f);
                 dm.enemy.TakeDamage(flameDamage, dm.OnEnemyKilled);
-                dm.UpdateMainUI($"화염 데미지! <color=#FF4500>-{flameDamage}</color>");
+                dm.UpdateMainUI(LocalizationManager.GetUi(
+                    "UI_FLAME_DAMAGE",
+                    "화염 데미지! <color=#FF4500>-{0}</color>",
+                    flameDamage));
 
                 if (dm.enemy.IsDead) yield break;
                 yield return new WaitForSeconds(0.8f);

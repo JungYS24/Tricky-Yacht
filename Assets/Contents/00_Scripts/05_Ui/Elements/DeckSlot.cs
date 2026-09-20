@@ -191,7 +191,8 @@ public class DeckSlot : MonoBehaviour
         if (descText != null)
         {
             //가짜 주사위 일 떄 숫자 대신 Fake 출력
-            if (data.diceName == "가짜 주사위") descText.text = "Fake";
+            if (data.diceName == "가짜 주사위")
+                descText.text = LocalizationManager.GetUi("UI_FAKE_DICE", "Fake");
             else if (minVal == maxVal) descText.text = minVal.ToString();
             else descText.text = $"{minVal}~{maxVal}";
         }
