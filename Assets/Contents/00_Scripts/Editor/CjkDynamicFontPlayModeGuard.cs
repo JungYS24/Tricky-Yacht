@@ -1,17 +1,22 @@
 ﻿#if UNITY_EDITOR
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 using TMPro;
 
 /// <summary>
-/// Dynamic JP/SC Atlas는 Play 중 글리프가 에셋에 저장된다.
-/// Play 종료 후 Atlas를 비워 Git에 용량 diff가 안 남게 한다. 런타임에는 다시 채워진다.
+/// Dynamic JP/SC Atlas는 Play 중 글리프가 에셋에 기록된다.
+/// 그 YAML을 저장하면 Git에 매번 잡히므로, 자동 저장을 막고 Play 종료 후 워킹트리를 되돌린다.
 /// </summary>
 [InitializeOnLoad]
 public static class CjkDynamicFontPlayModeGuard
 {
-    private const string JpSdfPath = "Assets/Contents/10_Resources/Fonts/NotoSansJP-Bold SDF.asset";
-    private const string ScSdfPath = "Assets/Contents/10_Resources/Fonts/NotoSansSC-Bold SDF.asset";
+    public const string JpSdfPath = "Assets/Contents/10_Resources/Fonts/NotoSansJP-Bold SDF.asset";
+    public const string ScSdfPath = "Assets/Contents/10_Resources/Fonts/NotoSansSC-Bold SDF.asset";
+
+    internal static bool AllowPersist;
 
     static CjkDynamicFontPlayModeGuard()
     {
@@ -23,41 +28,84 @@ public static class CjkDynamicFontPlayModeGuard
         if (state != PlayModeStateChange.EnteredEditMode)
             return;
 
-        ClearDynamicAtlases();
+        DiscardDynamicAtlasChanges();
     }
 
     [MenuItem("Studio 10&6/Localization/Clear CJK Dynamic Atlases")]
-    public static void ClearDynamicAtlases()
+    public static void DiscardDynamicAtlasChanges()
     {
-        bool changed = false;
-        changed |= ClearIfDynamic(JpSdfPath);
-        changed |= ClearIfDynamic(ScSdfPath);
-
-        if (!changed)
-            return;
-
-        AssetDatabase.SaveAssets();
-        Debug.Log("[CJK Font] Play로 늘어난 JP/SC Dynamic Atlas를 비웠습니다. Git에 올리지 마세요.");
+        ClearInMemory(JpSdfPath);
+        ClearInMemory(ScSdfPath);
+        RestoreFromGit(JpSdfPath);
+        RestoreFromGit(ScSdfPath);
+        AssetDatabase.Refresh();
     }
 
-    private static bool ClearIfDynamic(string assetPath)
+    private static void ClearInMemory(string assetPath)
     {
         TMP_FontAsset fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath);
         if (fontAsset == null)
-            return false;
+            return;
 
-        if (fontAsset.atlasPopulationMode != AtlasPopulationMode.Dynamic)
-            return false;
+        if (fontAsset.atlasPopulationMode == AtlasPopulationMode.Dynamic)
+            fontAsset.ClearFontAssetData(true);
 
-        bool hasGlyphs = (fontAsset.characterTable != null && fontAsset.characterTable.Count > 0)
-            || (fontAsset.glyphTable != null && fontAsset.glyphTable.Count > 0);
+        EditorUtility.ClearDirty(fontAsset);
+    }
 
-        if (!hasGlyphs)
-            return false;
+    private static void RestoreFromGit(string assetPath)
+    {
+        string projectRoot = Directory.GetParent(Application.dataPath)?.FullName;
+        if (string.IsNullOrEmpty(projectRoot))
+            return;
 
-        fontAsset.ClearFontAssetData(true);
-        EditorUtility.SetDirty(fontAsset);
-        return true;
+        string normalized = assetPath.Replace('\\', '/');
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = "git",
+            Arguments = $"restore -- \"{normalized}\"",
+            WorkingDirectory = projectRoot,
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true
+        };
+
+        try
+        {
+            using (Process process = Process.Start(startInfo))
+            {
+                if (process == null)
+                    return;
+                process.WaitForExit(5000);
+            }
+        }
+        catch
+        {
+            // git이 없으면 메모리 ClearDirty만으로 저장을 막는다.
+        }
+    }
+}
+
+public class CjkDynamicFontSaveGuard : UnityEditor.AssetModificationProcessor
+{
+    private static string[] OnWillSaveAssets(string[] paths)
+    {
+        if (CjkDynamicFontPlayModeGuard.AllowPersist || paths == null || paths.Length == 0)
+            return paths;
+
+        var kept = new List<string>(paths.Length);
+        for (int i = 0; i < paths.Length; i++)
+        {
+            string path = paths[i].Replace('\\', '/');
+            if (path == CjkDynamicFontPlayModeGuard.JpSdfPath
+                || path == CjkDynamicFontPlayModeGuard.ScSdfPath)
+                continue;
+
+            kept.Add(paths[i]);
+        }
+
+        return kept.ToArray();
     }
 }
 #endif
