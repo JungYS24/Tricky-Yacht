@@ -53,9 +53,7 @@ public class ShopManager : MonoBehaviour
             shopRerollButton.onClick.AddListener(RerollShop);
 
         if (rerollCostText != null)
-            rerollCostText.text = LocalizationManager.Instance != null
-                ? LocalizationManager.Instance.GetLocalizedString(LocalizationManager.UiTable, "UI_REROLL_COST", rerollCost)
-                : "리롤 : " + rerollCost + " G";
+            rerollCostText.text = LocalizationManager.GetUi("UI_REROLL_COST", "리롤 : {0} G", rerollCost);
 
         if (nextStageButton != null)
             nextStageButton.onClick.AddListener(CloseShopAndGoNext);
@@ -229,7 +227,8 @@ public class ShopManager : MonoBehaviour
         }
         else
         {
-            if (ToastPopupController.Instance != null) ToastPopupController.Instance.ShowToast("골드가 부족합니다.");
+            if (ToastPopupController.Instance != null)
+                ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_GOLD_NOT_ENOUGH", "골드가 부족합니다."));
         }
         if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
     }
@@ -292,7 +291,7 @@ public class ShopManager : MonoBehaviour
                     //인벤토리가 꽉 찼을 때도 토스트 팝업으로 피드백 제공
                     if (ToastPopupController.Instance != null)
                     {
-                        ToastPopupController.Instance.ShowToast("인벤토리가 가득 찼습니다.");
+                        ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_INVENTORY_FULL", "인벤토리가 가득 찼습니다."));
                     }
                     return false;
                 }
@@ -316,7 +315,7 @@ public class ShopManager : MonoBehaviour
         // 아이템 구매 비용이 부족할 때 토스트 팝업 띄우기
         if (ToastPopupController.Instance != null)
         {
-            ToastPopupController.Instance.ShowToast("골드가 부족합니다.");
+            ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_GOLD_NOT_ENOUGH", "골드가 부족합니다."));
         }
         return false;
     }
@@ -392,7 +391,7 @@ public class ShopManager : MonoBehaviour
     public void UpdateRerollUI()
     {
         int finalCost = GetFinalRerollCost();
-        if (rerollCostText != null) rerollCostText.text = "리롤 : " + finalCost + " G";
+        if (rerollCostText != null) rerollCostText.text = LocalizationManager.GetUi("UI_REROLL_COST", "리롤 : {0} G", finalCost);
     }
 
     // 복고양이 효과: 진열된 아이템 중 하나를 무작위로 0원 처리

@@ -209,6 +209,7 @@ public class Enemy : MonoBehaviour
 
         MaxAttackTurn = 2;
         CurrentAttackTurn = MaxAttackTurn;
+        UpdateTurnUI();
 
         //몬스터가 등장할 때(초기화될 때) 공격력 텍스트를 업데이트
         if (attackPowerText != null)
@@ -464,7 +465,7 @@ public class Enemy : MonoBehaviour
     {
         if (turnText != null)
         {
-            turnText.text = $"Turn : {CurrentAttackTurn}턴";
+            turnText.text = LocalizationManager.GetUi("UI_ENEMY_TURN", "Turn : {0}", CurrentAttackTurn);
         }
     }
 

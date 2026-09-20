@@ -126,15 +126,28 @@ public class EncounterEventPanel : MonoBehaviour
 
     private void UpdateDialogue()
     {
-        if (currentEncounter != null && dialogueIndex < currentEncounter.dialogues.Length)
+        if (currentEncounter == null)
+        {
+            ShowChoices();
+            return;
+        }
+
+        string locLine = GetEncounterDialogue(currentEncounter.type, dialogueIndex);
+        if (!string.IsNullOrEmpty(locLine))
+        {
+            dialogueText.text = locLine;
+            return;
+        }
+
+        if (currentEncounter.dialogues != null && dialogueIndex < currentEncounter.dialogues.Length
+            && !string.IsNullOrEmpty(currentEncounter.dialogues[dialogueIndex]))
         {
             dialogueText.text = currentEncounter.dialogues[dialogueIndex];
+            return;
         }
-        else
-        {
-            if (dialogueRoot != null) dialogueRoot.SetActive(false);
-            ShowChoices();
-        }
+
+        if (dialogueRoot != null) dialogueRoot.SetActive(false);
+        ShowChoices();
     }
 
     private void OnNextDialogue()
@@ -148,8 +161,10 @@ public class EncounterEventPanel : MonoBehaviour
         if (encounterAnimator != null && encounterAnimator.enabled)
             encounterAnimator.speed = 0f; // 대화가 끝나고 선택지가 나오면 애니메이션 정지
 
-        if (choiceAText != null) choiceAText.text = currentEncounter.choiceAText;
-        if (choiceBText != null) choiceBText.text = currentEncounter.choiceBText;
+        string locA = GetEncounterChoice(currentEncounter.type, true);
+        string locB = GetEncounterChoice(currentEncounter.type, false);
+        if (choiceAText != null) choiceAText.text = !string.IsNullOrEmpty(locA) ? locA : currentEncounter.choiceAText;
+        if (choiceBText != null) choiceBText.text = !string.IsNullOrEmpty(locB) ? locB : currentEncounter.choiceBText;
 
         choiceAButton.interactable = CheckChoiceACondition(currentEncounter.type);
         choiceBButton.interactable = true;
@@ -158,6 +173,46 @@ public class EncounterEventPanel : MonoBehaviour
         if (choiceBButton != null) choiceBButton.gameObject.SetActive(true);
 
         if (choiceRoot != null) choiceRoot.SetActive(true);
+    }
+
+    private static string GetEncounterKeyPrefix(EncounterType type)
+    {
+        switch (type)
+        {
+            case EncounterType.Clown: return "ENC_CLOWN";
+            case EncounterType.AbyssDealer: return "ENC_ABYSS_DEALER";
+            case EncounterType.BlindFortuneTeller: return "ENC_BLIND_FORTUNE_TELLER";
+            case EncounterType.Poacher: return "ENC_POACHER";
+            case EncounterType.SacrificedGirl: return "ENC_SACRIFICED_GIRL";
+            case EncounterType.Alchemist: return "ENC_ALCHEMIST";
+            case EncounterType.WishWanderer: return "ENC_WISH_WANDERER";
+            case EncounterType.ForgottenExplorer: return "ENC_FORGOTTEN_EXPLORER";
+            case EncounterType.MadHatter: return "ENC_MAD_HATTER";
+            case EncounterType.RustyCaptain: return "ENC_RUSTY_CAPTAIN";
+            default: return null;
+        }
+    }
+
+    private static string GetEncounterDialogue(EncounterType type, int index)
+    {
+        string prefix = GetEncounterKeyPrefix(type);
+        if (string.IsNullOrEmpty(prefix))
+            return null;
+
+        string key = prefix + "_DLG_" + (index + 1).ToString("D2");
+        LocalizationManager.TryGetLocalized(LocalizationManager.EncounterTable, key, out string value);
+        return value;
+    }
+
+    private static string GetEncounterChoice(EncounterType type, bool choiceA)
+    {
+        string prefix = GetEncounterKeyPrefix(type);
+        if (string.IsNullOrEmpty(prefix))
+            return null;
+
+        string key = prefix + (choiceA ? "_CHOICE_A" : "_CHOICE_B");
+        LocalizationManager.TryGetLocalized(LocalizationManager.EncounterTable, key, out string value);
+        return value;
     }
 
     private bool CheckChoiceACondition(EncounterType type)

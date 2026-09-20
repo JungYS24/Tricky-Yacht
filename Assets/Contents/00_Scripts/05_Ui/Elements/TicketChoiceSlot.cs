@@ -19,7 +19,7 @@ public class TicketChoiceSlot : MonoBehaviour, IPointerEnterHandler, IPointerExi
         shopManager = manager;
 
         ticketIcon.sprite = data.icon;
-        handNameText.text = data.itemName;
+        handNameText.text = LocalizationManager.GetItemDisplayName(data);
 
         selectButton.onClick.RemoveAllListeners();
         selectButton.onClick.AddListener(OnClicked);
@@ -45,7 +45,7 @@ public class TicketChoiceSlot : MonoBehaviour, IPointerEnterHandler, IPointerExi
     {
         if (currentTicketData != null && shopManager != null)
         {
-            shopManager.ShowTooltip(currentTicketData.description, GetComponent<RectTransform>());
+            shopManager.ShowTooltip(LocalizationManager.GetItemDescription(currentTicketData), GetComponent<RectTransform>());
         }
     }
 

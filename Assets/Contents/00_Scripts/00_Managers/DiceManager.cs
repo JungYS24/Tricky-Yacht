@@ -814,7 +814,9 @@ public class DiceManager : MonoBehaviour
 
                 yield return DOVirtual.Float(start, target, 0.3f, value =>
                 {
-                    valueText.text = isChips? $"<color=#00BFFF>{Mathf.FloorToInt(value)}</color>": $"x <color=#00BFFF>{value:F1}배</color>";
+                    valueText.text = isChips
+                        ? $"<color=#00BFFF>{Mathf.FloorToInt(value)}</color>"
+                        : LocalizationManager.GetUi("UI_MULT_VALUE", "x <color=#00BFFF>{0}배</color>", value.ToString("F1"));
                 }).SetEase(Ease.OutQuad).WaitForCompletion();
             }
 
@@ -843,21 +845,21 @@ public class DiceManager : MonoBehaviour
 
             if (ui.multSumText != null)
             {
-                ui.multSumText.text = "x <color=#00BFFF>1.0배</color>";
+                ui.multSumText.text = LocalizationManager.GetUi("UI_MULT_VALUE", "x <color=#00BFFF>{0}배</color>", "1.0");
             }
 
             // 칩 보너스부터 표시
-            yield return AnimateBonus(true, chipsBeforeFigures, "스낵");
-            yield return AnimateBonus(true, snackBonusChips - chipsBeforeFigures, "피규어");
-            yield return AnimateBonus(true, stageBonusChips, "전투 누적");
+            yield return AnimateBonus(true, chipsBeforeFigures, LocalizationManager.GetUi("UI_BONUS_SNACK", "스낵"));
+            yield return AnimateBonus(true, snackBonusChips - chipsBeforeFigures, LocalizationManager.GetUi("UI_BONUS_FIGURE", "피규어"));
+            yield return AnimateBonus(true, stageBonusChips, LocalizationManager.GetUi("UI_BONUS_STAGE", "전투 누적"));
 
             // 이후 배수 보너스 표시
             yield return AnimateBonus(false, handMult - 1f, handName);
-            yield return AnimateBonus(false, multBeforeFigures, "스낵");
-            yield return AnimateBonus(false, snackBonusMult - multBeforeFigures, "피규어");
-            yield return AnimateBonus(false, calcResult.prismMultTotal, "프리즘");
-            yield return AnimateBonus(false, stageBonusMult, "전투 누적");
-            yield return AnimateBonus(false, calcResult.satelliteBonusMult, "위성");
+            yield return AnimateBonus(false, multBeforeFigures, LocalizationManager.GetUi("UI_BONUS_SNACK", "스낵"));
+            yield return AnimateBonus(false, snackBonusMult - multBeforeFigures, LocalizationManager.GetUi("UI_BONUS_FIGURE", "피규어"));
+            yield return AnimateBonus(false, calcResult.prismMultTotal, LocalizationManager.GetUi("UI_BONUS_PRISM", "프리즘"));
+            yield return AnimateBonus(false, stageBonusMult, LocalizationManager.GetUi("UI_BONUS_STAGE", "전투 누적"));
+            yield return AnimateBonus(false, calcResult.satelliteBonusMult, LocalizationManager.GetUi("UI_BONUS_SATELLITE", "위성"));
 
             // 표시의 최종값을 실제 계산 결과에 맞춤
             if (ui.chipsSumText != null)
@@ -869,7 +871,7 @@ public class DiceManager : MonoBehaviour
             if (ui.multSumText != null)
             {
                 ui.multSumText.text =
-                    $"x <color=#00BFFF>{finalMult:F1}배</color>";
+                    LocalizationManager.GetUi("UI_MULT_VALUE", "x <color=#00BFFF>{0}배</color>", finalMult.ToString("F1"));
             }
 
             // 배수가 오르고 화면에 연출이 보일 수 있도록 0.8초간 뜸을 들인 후 데미지 전달
@@ -893,8 +895,10 @@ public class DiceManager : MonoBehaviour
         {
             int displayedDamage = finalDamage + darkDamageTotal;
 
-            ui.finalDamageText.text =
-                $"<color=#FF5555>= {displayedDamage} 데미지</color>";
+            ui.finalDamageText.text = LocalizationManager.GetUi(
+                "UI_DAMAGE_VALUE",
+                "<color=#FF5555>= {0} 데미지</color>",
+                displayedDamage);
 
             ui.finalDamageText.transform.DOKill(true);
             ui.finalDamageText.transform.DOPunchScale(Vector3.one * 0.3f, 0.4f, 5, 0.5f);
@@ -1049,7 +1053,9 @@ public class DiceManager : MonoBehaviour
 
         if (gameClearText != null)
         {
-            gameClearText.text = "<color=#00FF00>GAME CLEAR!</color>\n\n축하합니다!\n모든 시련을 이겨내고 공허를 정복했습니다!";
+            gameClearText.text = LocalizationManager.GetUi(
+                "UI_GAME_CLEAR",
+                "<color=#00FF00>GAME CLEAR!</color>\n\n축하합니다!\n모든 시련을 이겨내고 공허를 정복했습니다!");
         }
 
         // 게임을 완전히 클리어했으므로 기존 세이브 데이터는 초기화(삭제)
@@ -1270,7 +1276,9 @@ public class DiceManager : MonoBehaviour
         }
 
         // 끝내기 버튼을 누르기 전과 후의 UI 렌더링을 분리형 텍스트에 맞게 수정
-        string bName = (currentBiome != null) ? currentBiome.biomeName : "Stage";
+        string bName = (currentBiome != null)
+            ? LocalizationManager.GetBiomeDisplayName(currentBiome.biomeType)
+            : "Stage";
         string stageDisplayName = $"{bName} {currentStage}";
         int remainingRerolls = (maxRerolls + snackBonusRerolls + figureBonusRerolls) - currentRerolls;
 
@@ -1284,7 +1292,7 @@ public class DiceManager : MonoBehaviour
             string displayHand = $"<color=#FFD700>{handName}</color>";
             if (iceBonusChips > 0) displayHand += $" <color=#00FFFF>+{iceBonusChips}</color>";
             if (darkDamageTotal > 0) displayHand += $" <color=#A9A9A9>+{darkDamageTotal}</color>";
-            if (satelliteBonusChips > 0) displayHand += $" <color=#B19CD9>+{satelliteBonusChips}(위성)</color>";
+            if (satelliteBonusChips > 0) displayHand += $" <color=#B19CD9>+{satelliteBonusChips}{LocalizationManager.GetUi("UI_SATELLITE_TAG", "(위성)")}</color>";
 
             // 분리된 텍스트에 각각 할당
             if (ui != null)
@@ -1292,7 +1300,7 @@ public class DiceManager : MonoBehaviour
                 if (ui.handInfoText != null) ui.handInfoText.text = displayHand;
                 // 분리된 텍스트에 적용
                 if (ui.chipsSumText != null) ui.chipsSumText.text = $"<color=#00BFFF>{displayBaseSum}</color>";
-                if (ui.multSumText != null) ui.multSumText.text = $"x  <color=#00BFFF>{displayMult:F1}배</color>";
+                if (ui.multSumText != null) ui.multSumText.text = LocalizationManager.GetUi("UI_MULT_VALUE", "x <color=#00BFFF>{0}배</color>", displayMult.ToString("F1"));
 
                 // 대기 중엔 로그를 모두 비우고, '대미지 예정' 텍스트도 완전히 안 보이게 처리
                 if (ui.chipsLogText != null) ui.chipsLogText.text = "";
