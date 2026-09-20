@@ -50,6 +50,12 @@ public class SaveData
     public int savedMonsterCurrentTurn;//몬스터 턴개념 추가
     public int savedMonsterMaxTurn;
 
+    // 스테이지당 1회 피규어 사용 기록
+    public List<string> usedFigureNodes = new List<string>();
+
+    // 아직 결산에서 누적 화염으로 옮기지 않은 피규어 화염량
+    public int pendingFigureFlameDamage;
+
     public List<SavedDiceData> deckDiceList = new List<SavedDiceData>();
 
     public List<string> ownedFigureNames = new List<string>();
@@ -88,6 +94,9 @@ public class GameSaveManager : MonoBehaviour
     public void SaveGame(DiceManager dice, InventoryManager inv, ShopManager shop)
     {
         SaveData data = new SaveData();
+        data.usedFigureNodes = new List<string>(dice.stageContext.usedFigureNodes);
+
+        data.pendingFigureFlameDamage = dice.figureBonusFlameDamage;
 
 
         //일회성 버프들도 잊지 말고 세이브 파일에 도장 찍기

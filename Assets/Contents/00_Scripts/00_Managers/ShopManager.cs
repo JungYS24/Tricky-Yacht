@@ -214,6 +214,11 @@ public class ShopManager : MonoBehaviour
 
     public void RerollShop()
     {
+        if ((ticketSelectionPanel != null && ticketSelectionPanel.activeSelf) || SatelliteSelectionPanel.IsPanelOpen)
+        {
+            return;
+        }
+
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return;
 
@@ -235,6 +240,10 @@ public class ShopManager : MonoBehaviour
 
     public void CloseShopAndGoNext()
     {
+        if ((ticketSelectionPanel != null && ticketSelectionPanel.activeSelf) ||SatelliteSelectionPanel.IsPanelOpen)
+        {
+            return;
+        }
         // 코팅 선택 중이거나 파괴 선택 중이면 다음 스테이지 넘어가기 불가
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return;
@@ -265,6 +274,11 @@ public class ShopManager : MonoBehaviour
 
     public bool PurchaseItem(BaseItemDataSO item, int actualPrice)
     {
+        if ((ticketSelectionPanel != null && ticketSelectionPanel.activeSelf) || SatelliteSelectionPanel.IsPanelOpen)
+        {
+            return false;
+        }
+
         // 코팅 선택 중이거나 파괴 선택 중이면 구매 불가
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return false;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return false;
@@ -403,6 +417,31 @@ public class ShopManager : MonoBehaviour
             var randSlot = validSlots[Random.Range(0, validSlots.Count)];
             randSlot.ApplyLuckyCatFree();
         }
+    }
+
+    // 골드 획득 시 사용. 증가 효과 적용과 UI 갱신을 한 곳에서 처리
+    // 반환값은 보너스까지 반영해 실제로 지급한 골드
+    public int GrantGold(int baseAmount)
+    {
+        if (baseAmount <= 0) return 0;
+
+        float multiplier = FigureEffectManager.Instance != null
+            ? FigureEffectManager.Instance.GetGoldGainMultiplier()
+            : 1f;
+
+        // 획득 건별로 소수점 아래는 버림
+        int grantedAmount = Mathf.FloorToInt(baseAmount * multiplier);
+
+        currentGold += grantedAmount;
+
+        diceManager?.ui?.UpdateGoldUI(currentGold);
+
+        if (GoldCounter.Instance != null)
+        {
+            GoldCounter.Instance.SetGold(currentGold);
+        }
+
+        return grantedAmount;
     }
 
     public void HideTooltip() => tooltipPanel.SetActive(false);
