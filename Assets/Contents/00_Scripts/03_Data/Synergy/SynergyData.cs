@@ -10,9 +10,17 @@ public class SynergyData : ScriptableObject
 
     [SerializeField] private FigureItemSO[] requiredFigures;
 
+    [SerializeField] private FigureTriggerType triggerType;
+
+    [SerializeField] private SynergyEffectContext skillEffect;
+
     public string SynergyName => synergyName;
 
     public string SynergyDescription => synergyDescription;
 
     public IReadOnlyList<FigureItemSO> RequiredFigures => requiredFigures;
+
+    public FigureTriggerType TriggerType => triggerType;
+
+    public SynergyEffectContext Skilleffect => skillEffect;
 }
