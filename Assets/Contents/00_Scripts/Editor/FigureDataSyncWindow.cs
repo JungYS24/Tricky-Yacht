@@ -48,7 +48,7 @@ public class FigureDataSyncWindow : EditorWindow
             if (contentStartIndex == -1) continue;
 
             string pureJson = block.Substring(contentStartIndex).Trim();
-
+                
             if (!pureJson.EndsWith("}")) pureJson += "}";
             if (pureJson.Contains("} }")) pureJson = pureJson.Replace("} }", "}");
             if (pureJson.EndsWith("}}")) pureJson = pureJson.Substring(0, pureJson.Length - 1);

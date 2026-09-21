@@ -63,13 +63,32 @@ public static class CombatFlowController
 
 
     //플레이어 공격 연출
-    private static IEnumerator ProcessPlayerAttack(DiceManager dm, int damage)
+    private static IEnumerator ProcessPlayerAttack(
+    DiceManager dm,
+    int damage)
     {
-        if (damage > 0 && !dm.enemy.IsDead && dm.enemy.CurrentHP > 0)
+        if (dm.enemy == null ||
+            dm.enemy.IsDead ||
+            dm.enemy.CurrentHP <= 0)
         {
-            dm.enemy.TakeDamage(damage, dm.OnEnemyKilled);
-            yield return new WaitForSeconds(0.2f);
+            yield break;
         }
+
+        bool isFirstNormalAttack =
+            !dm.stageContext.firstNormalAttackDone;
+
+        // 첫 공격이 0 피해여도 이후 공격을 첫 공격으로 취급하지 않음
+        dm.stageContext.firstNormalAttackDone = true;
+
+        if (damage <= 0)
+            yield break;
+
+        dm.enemy.TakeDamage(
+            damage,
+            dm.OnEnemyKilled,
+            isFirstNormalAttack);
+
+        yield return new WaitForSeconds(0.15f);
     }
 
     private static IEnumerator HandlePlayerDeath(DiceManager dm)

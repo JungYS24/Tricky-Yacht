@@ -173,7 +173,7 @@ public class FigureEffectManager : MonoBehaviour
     }
 
     // 조건 만족 시 실질적인 효과를 주고, UI 창이 켜지면 닫힐 때까지 대기하는 코루틴
-    private IEnumerator ApplyFigureEffectsCoroutine(List<FigureEffectNode> effects, int currentBaseChips, DiceManager diceManager, ShopManager shopManager, FigureItemSO sourceFigure)
+    private IEnumerator ApplyFigureEffectsCoroutine(List<FigureEffectNode> effects, int currentBaseChips, DiceManager diceManager, ShopManager shopManager, FigureItemSO sourceFigure, int actualDamage = 0)
     {
         foreach (var effect in effects)
         {
@@ -232,6 +232,9 @@ public class FigureEffectManager : MonoBehaviour
                     {
                         actualValue = diceManager.enemy.MaxHP * (effect.effectValue / 100f);
                     }
+                    break;
+                case EffectCalcType.ActualDamage:
+                    actualValue = actualDamage * (effect.effectValue / 100f);
                     break;
 
             }
@@ -292,6 +295,48 @@ public class FigureEffectManager : MonoBehaviour
                         diceManager.enemy.ReduceMaxHP(
                             Mathf.FloorToInt(actualValue));
                     }
+                    break;
+                case FigureEffectType.DamageEnemyOrPlayer:
+                    {
+                        // 두 효과를 각각 추첨하지 않고, 한 번의 추첨으로 한쪽만 실행
+                    if (Random.value < 0.5f)
+                        {
+                    if (diceManager.enemy != null && !diceManager.enemy.IsDead)
+                            {
+                                int enemyDamage = Mathf.Max(0, Mathf.FloorToInt(actualValue));
+                                diceManager.enemy.TakeDamage(enemyDamage, diceManager.OnEnemyKilled);
+                            }
+                        }
+                    else
+                        {
+                            int playerDamage = Mathf.Max(0, Mathf.FloorToInt(effect.secondaryEffectValue));
+                            // 기존 피해 규칙에 따라 보호막부터 차감
+                            diceManager.playerStatus.TakeDamage(playerDamage);
+                            diceManager.ui?.UpdateShieldUI(diceManager.currentShield);
+                            // 살아 있다면 용암 가면 등의 체력 조건 검사
+                            EvaluateLowHPTriggers(diceManager, shopManager);
+
+                    if (diceManager.currentPlayerHP <= 0)
+                            {
+                                bool revived = EvaluateDeathTriggers(diceManager, shopManager);
+                                if (!revived)
+                                {
+                                    // 현재 라운드의 입력을 막고 게임 오버 처리
+                                    diceManager.isCalculating = true;
+
+                                    GameSaveManager.Instance?.DeleteSave();
+
+                            string gameOverText = LocalizationManager.GetUi("UI_GAME_OVER", "게임 오버");
+                                    diceManager.ui?.ShowResult("#FF0000", gameOverText);
+                                    diceManager.StartCoroutine(diceManager.ShowGameOverPanelDelayed());
+                                }
+                            }
+                        }
+                        diceManager.ForceUpdateUI();
+                        break;
+                    }
+                case FigureEffectType.AddPermanentMultiplier:
+                    diceManager.permanentFigureMultiplier += actualValue;
                     break;
 
                 //1번 카테고리 특수 효과들
@@ -489,43 +534,96 @@ public class FigureEffectManager : MonoBehaviour
     }
 
     // 사망 시 발동하는 피규어 처리 (부활)
-    public bool EvaluateDeathTriggers(DiceManager diceManager, ShopManager shopManager)
+    public bool EvaluateDeathTriggers(
+     DiceManager diceManager,
+     ShopManager shopManager)
     {
-        if (effectCache.ContainsKey(FigureTriggerType.OnDeath))
+        if (diceManager == null ||
+            diceManager.currentPlayerHP > 0 ||
+            InventoryManager.Instance == null)
         {
-            // 부활 피규어가 여러 개 있어도 회차당 1회씩 소모하도록 첫 번째 것만 사용
-            var cacheItem = effectCache[FigureTriggerType.OnDeath][0];
-            Debug.Log($"[부활 발동] {cacheItem.sourceFigure.itemName} 기믹으로 부활합니다!");
+            return false;
+        }
 
-            foreach (var effect in cacheItem.node.effects)
+        if (!effectCache.TryGetValue(
+            FigureTriggerType.OnDeath, out var candidates))
+        {
+            return false;
+        }
+
+        // 부활 피규어 소멸로 캐시가 변경될 수 있으므로 복사
+        FigureCacheItem[] snapshot = candidates.ToArray();
+
+        foreach (var cacheItem in snapshot)
+        {
+            FigureItemSO figure = cacheItem.sourceFigure;
+            FigureNode node = cacheItem.node;
+
+            if (figure == null || node == null ||
+                !InventoryManager.Instance.ownedFigures.Contains(figure))
             {
-                float actualValue = effect.effectValue;
-                if (effect.calcType == EffectCalcType.PlayerMaxHP)
-                {
-                    actualValue = diceManager.playerMaxHP * (effect.effectValue / 100f);
-                }
-                else if (effect.calcType == EffectCalcType.Flat)
-                {
-                    actualValue = effect.effectValue;
-                }
+                continue;
+            }
 
+            if (node.requiredKills > 0)
+            {
+                diceManager.figureKillCounts.TryGetValue(
+                    figure.itemName, out int kills);
+
+                if (kills < node.requiredKills)
+                    continue;
+            }
+
+            bool hasHealEffect = false;
+            bool destroyAfterRevive = false;
+            int reviveHP = 0;
+
+            foreach (var effect in node.effects)
+            {
                 if (effect.effectType == FigureEffectType.HealHP)
                 {
-                    // 부활 시에는 힐량 증폭(도도새 등)을 무시하고 명시된 체력(예: 1%)만 채워줌
-                    diceManager.currentPlayerHP = Mathf.Max(1, Mathf.FloorToInt(actualValue));
+                    float value;
+
+                    if (effect.calcType == EffectCalcType.PlayerMaxHP)
+                    {
+                        value = diceManager.playerMaxHP
+                            * effect.effectValue / 100f;
+                    }
+                    else if (effect.calcType == EffectCalcType.Flat)
+                    {
+                        value = effect.effectValue;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                    hasHealEffect = true;
+                    reviveHP = Mathf.Max(
+                        reviveHP, Mathf.FloorToInt(value));
                 }
                 else if (effect.effectType == FigureEffectType.DestroySelf)
                 {
-                    // 효과 발동 후 피규어 영구 파괴
-                    InventoryManager.Instance.RemoveItem(cacheItem.sourceFigure);
+                    destroyAfterRevive = true;
                 }
             }
 
-            // 부활 후 체력 UI 즉시 갱신
+            if (!hasHealEffect) continue;
+
+            // 부활은 도도새 회복 증가를 적용하지 않음
+            diceManager.currentPlayerHP = Mathf.Clamp(
+                reviveHP, 1, Mathf.Max(1, diceManager.playerMaxHP));
+
+            if (destroyAfterRevive)
+            {
+                InventoryManager.Instance.RemoveItem(figure);
+            }
+
             diceManager.ForceUpdateUI();
-            return true; // 부활 성공!
+            return true; // 조건을 만족한 피규어 하나만 사용
         }
-        return false; // 부활 수단 없음
+
+        return false;
     }
 
     // 적에게 피해를 입었을 때(피격 시) 발동하는 피규어 처리 (예: 광대의 눈물)
@@ -543,21 +641,27 @@ public class FigureEffectManager : MonoBehaviour
         diceManager.ForceUpdateUI();
     }
     // 조건 및 스테이지당 사용 제한을 확인한 뒤 기존 효과 실행기로 전달
-    private IEnumerator ExecuteFigureNode(
-        FigureCacheItem cacheItem,
-        int currentBaseChips,
-        DiceManager diceManager,
-        ShopManager shopManager)
-    {
-        if (cacheItem == null ||
-            cacheItem.sourceFigure == null ||
-            cacheItem.node == null ||
-            diceManager == null)
+    private IEnumerator ExecuteFigureNode( FigureCacheItem cacheItem,int currentBaseChips,DiceManager diceManager,ShopManager shopManager,int actualDamage = 0)
+    { 
+        if (cacheItem == null ||cacheItem.sourceFigure == null ||cacheItem.node == null ||diceManager == null)
         {
             yield break;
         }
+        // 사망 후에는 일반 트리거 실행 중단
+        // 부활은 EvaluateDeathTriggers에서 별도로 처리
+        if (diceManager.currentPlayerHP <= 0)
+            yield break;
 
         FigureNode node = cacheItem.node;
+        if (node.requiredKills > 0)
+        {
+            diceManager.figureKillCounts.TryGetValue(
+                cacheItem.sourceFigure.itemName, out int kills);
+
+            if (kills < node.requiredKills)
+                yield break;
+        }
+
 
         if (node.effects == null || node.effects.Count == 0)
             yield break;
@@ -592,12 +696,7 @@ public class FigureEffectManager : MonoBehaviour
                 yield break;
         }
 
-        yield return ApplyFigureEffectsCoroutine(
-            node.effects,
-            currentBaseChips,
-            diceManager,
-            shopManager,
-            cacheItem.sourceFigure);
+        yield return ApplyFigureEffectsCoroutine(node.effects,currentBaseChips,diceManager,shopManager,cacheItem.sourceFigure,actualDamage);
     }
 
     public void EvaluateLowHPTriggers(
@@ -623,6 +722,110 @@ public class FigureEffectManager : MonoBehaviour
             StartCoroutine(
                 ExecuteFigureNode(cacheItem, 0, diceManager, shopManager));
         }
+    }
+
+    public void EvaluateEnemyDamageTriggers(
+    DiceManager diceManager,
+    int actualDamage,
+    bool isFirstNormalAttack)
+    {
+        if (diceManager == null || actualDamage <= 0)
+            return;
+
+        ExecuteDamageTrigger(
+            FigureTriggerType.OnEnemyDamaged,
+            diceManager,
+            actualDamage);
+
+        if (isFirstNormalAttack)
+        {
+            ExecuteDamageTrigger(
+                FigureTriggerType.OnFirstNormalAttack,
+                diceManager,
+                actualDamage);
+        }
+    }
+
+    private void ExecuteDamageTrigger(
+        FigureTriggerType trigger,
+        DiceManager diceManager,
+        int actualDamage)
+    {
+        if (!effectCache.TryGetValue(trigger, out var candidates))
+            return;
+
+        // 효과 실행 중 피규어가 제거되어 캐시가 바뀌어도 안전하게 순회
+        FigureCacheItem[] snapshot = candidates.ToArray();
+
+        foreach (var cacheItem in snapshot)
+        {
+            if (InventoryManager.Instance == null ||
+                !InventoryManager.Instance.ownedFigures.Contains(
+                    cacheItem.sourceFigure))
+            {
+                continue;
+            }
+
+            StartCoroutine(
+                ExecuteFigureNode(
+                    cacheItem,
+                    0,
+                    diceManager,
+                    diceManager.shopManager,
+                    actualDamage));
+        }
+    }
+
+    public void RecordEnemyKill(DiceManager diceManager)
+    {
+        if (diceManager == null || InventoryManager.Instance == null)
+            return;
+
+        foreach (var figure in InventoryManager.Instance.ownedFigures)
+        {
+            int requiredCount = 0;
+
+            foreach (var node in figure.figureNodes)
+            {
+                requiredCount = Mathf.Max(
+                    requiredCount, node.requiredKills);
+            }
+
+            // 처치 조건을 사용하지 않는 피규어는 기록하지 않음
+            if (requiredCount <= 0) continue;
+
+            diceManager.figureKillCounts.TryGetValue(
+                figure.itemName, out int currentCount);
+
+            // 조건 달성 이후에는 불필요하게 계속 증가시키지 않음
+            diceManager.figureKillCounts[figure.itemName] =
+                currentCount >= requiredCount
+                    ? requiredCount
+                    : currentCount + 1;
+        }
+    }
+    public void EvaluateDiceDestroyedTriggers(
+    DiceManager diceManager,
+    ShopManager shopManager)
+    {
+        if (diceManager == null) return;
+
+        if (!effectCache.TryGetValue(
+            FigureTriggerType.OnDiceDestroyed, out var candidates))
+        {
+            return;
+        }
+
+        FigureCacheItem[] snapshot = candidates.ToArray();
+
+        foreach (var cacheItem in snapshot)
+        {
+            StartCoroutine(
+                ExecuteFigureNode(
+                    cacheItem, 0, diceManager, shopManager));
+        }
+
+        diceManager.ForceUpdateUI();
     }
 
 

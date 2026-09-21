@@ -9,7 +9,7 @@ public enum FigureTriggerType
     OnePair, TwoPair, Triple, Straight, FullHouse, FourOfAKind, Yacht,
     ThreeOf1, ThreeOf2, ThreeOf3, ThreeOf4, ThreeOf5, ThreeOf6,
     OnDamaged, OnShopEntered, OnItemPurchased, OnDiceReroll, OnCombatEnd, OnSnackUsed,  Always,
-    OnAcquired, OnCombatStart, OnRoundStart, OnDeath, OnLowHP // 살아 있는 플레이어의 체력이 지정 비율 이하일 때
+    OnAcquired, OnCombatStart, OnRoundStart, OnDeath, OnLowHP, OnEnemyDamaged,OnFirstNormalAttack, OnDiceDestroyed
 }
 
 
@@ -62,7 +62,10 @@ public enum FigureEffectType
     IncreaseGoldGainPercent, // 모든 골드 획득량 증가(%)
     ReduceEnemyMaxHP, // 적 최대 체력 감소
     AddIceMultiplier, // 아이스 코팅 주사위의 추가 배수
-    AddIceChips       // 아이스 코팅 주사위의 추가 칩
+    AddIceChips,       // 아이스 코팅 주사위의 추가 칩
+
+    DamageEnemyOrPlayer,   // 50%로 적 피해, 나머지 50%로 플레이어 피해
+    AddPermanentMultiplier // 현재 회차 동안 유지되는 배수 추가
 }
 
 // 2.값 계산 방식 분리
@@ -78,7 +81,8 @@ public enum EffectCalcType
     DeckDiceCount,    //현재 덱(masterDeck)에 있는 주사위 총 개수 비례 (조개껍질용)
     SnackCount,       //인벤토리에 남아있는 스낵 개수 비례 (맹그로브 버섯용)
     CurrentGold,     // 현재 소지한 골드 비례 (황금 해골용)
-    EnemyMaxHP       // 몬스터의 최대 체력 비례 (소용돌이 트로피용)
+    EnemyMaxHP,       // 몬스터의 최대 체력 비례 (소용돌이 트로피용)
+    ActualDamage // 실제로 감소한 적 체력 비례(%)
 
 }
 
@@ -91,6 +95,8 @@ public struct FigureEffectNode
     public float effectValue;           // 고정값이거나 비율(%)
     public float probability;           // 발동 확률 (0이면 100% 발동)
     public BaseItemDataSO optionalItem;
+    // DamageEnemyOrPlayer에서 플레이어가 받을 피해량
+    public float secondaryEffectValue;
 }
 
 
@@ -104,6 +110,8 @@ public class FigureNode
     public List<FigureEffectNode> effects = new List<FigureEffectNode>();
     // 활성화하면 같은 스테이지에서 이 노드는 한 번만 실행
     public bool oncePerStage = false;
+    // 이 피규어 획득 이후 필요한 적 처치 수. 0이면 제한 없음
+    public int requiredKills = 0;
 
     // OnLowHP에서 사용. 예: 15이면 최대 체력의 15% 이하
     [Range(0f, 100f)]

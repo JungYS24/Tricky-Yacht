@@ -50,6 +50,7 @@ public class SaveData
 
     public int savedMonsterCurrentTurn;//몬스터 턴개념 추가
     public int savedMonsterMaxTurn;
+    public bool firstNormalAttackDone;
 
     // 스테이지당 1회 피규어 사용 기록
     public List<string> usedFigureNodes = new List<string>();
@@ -127,6 +128,7 @@ public class GameSaveManager : MonoBehaviour
     public void SaveGame(DiceManager dice, InventoryManager inv, ShopManager shop)
     {
         SaveData data = new SaveData();
+        data.firstNormalAttackDone =dice.stageContext.firstNormalAttackDone;
         data.usedFigureNodes = new List<string>(dice.stageContext.usedFigureNodes);
 
         data.pendingFigureFlameDamage = dice.figureBonusFlameDamage;
