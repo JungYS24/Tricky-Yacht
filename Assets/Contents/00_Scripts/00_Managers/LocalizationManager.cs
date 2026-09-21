@@ -323,12 +323,34 @@ public class LocalizationManager : MonoBehaviour
             }
         }
 
+        foreach (string candidate in GetItemLocTokens(item))
+        {
+            string tryKey = "CNT_" + candidate + suffix;
+            if (TryGetLocalized(ItemTable, tryKey, out _))
+            {
+                key = tryKey;
+                return;
+            }
+        }
+
         string id = ResolveRuntimeItemId(item);
         if (string.Equals(id, "Dice2", StringComparison.OrdinalIgnoreCase))
             id = "Dark";
 
         if (!string.IsNullOrEmpty(id))
             key = "CNT_" + id + suffix;
+    }
+
+    private static System.Collections.Generic.IEnumerable<string> GetItemLocTokens(BaseItemDataSO item)
+    {
+        if (item == null)
+            yield break;
+
+        if (!string.IsNullOrEmpty(item.Item_ID) && !IsLegacyNumericFigureId(item.Item_ID))
+            yield return item.Item_ID;
+
+        if (!string.IsNullOrEmpty(item.name) && item.name.StartsWith("Fig_") && item.name != item.Item_ID)
+            yield return item.name;
     }
 
     private static string ResolveRuntimeItemId(BaseItemDataSO item)
