@@ -116,4 +116,6 @@ public class FigureNode
     // OnLowHP에서 사용. 예: 15이면 최대 체력의 15% 이하
     [Range(0f, 100f)]
     public float healthThresholdPercent = 15f;
+
+    
 }

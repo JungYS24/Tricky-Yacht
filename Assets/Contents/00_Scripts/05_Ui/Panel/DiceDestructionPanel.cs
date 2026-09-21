@@ -50,11 +50,29 @@ public class DiceDestructionPanel : MonoBehaviour
 
     private void OnDiceSelected(DiceData1 selectedDice)
     {
+        if (diceManager == null || selectedDice == null) return;
+
         // 선택한 주사위를 덱(masterDeck)에서 영구 삭제
-        if (diceManager.masterDeck.Contains(selectedDice))
+        if (diceManager.masterDeck.Remove(selectedDice))
         {
-            diceManager.masterDeck.Remove(selectedDice);
+            // 뽑기 더미와 버린 더미에 남아 있는 같은 주사위도 제거
+            diceManager.deckManager.drawPile.RemoveAll(
+                dice => ReferenceEquals(dice, selectedDice));
+
+            diceManager.deckManager.discardPile.RemoveAll(
+                dice => ReferenceEquals(dice, selectedDice));
+
             Debug.Log($"{selectedDice.diceName} 주사위가 덱에서 영구히 파괴되었습니다! 남은 주사위: {diceManager.masterDeck.Count}");
+
+            // 파괴 선택창을 닫은 뒤 주사위 파괴 피규어 효과 발동
+            ClosePanel();
+
+            FigureEffectManager.Instance?.EvaluateDiceDestroyedTriggers(
+                diceManager,
+                diceManager.shopManager);
+
+            diceManager.ForceUpdateUI();
+            return;
         }
 
         ClosePanel();

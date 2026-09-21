@@ -438,6 +438,25 @@ public class DiceManager : MonoBehaviour
         drawPile = new List<DiceData1>(masterDeck);
         discardPile.Clear();
         deckManager.ShufflePile(drawPile);
+        permanentFigureMultiplier =
+    data.permanentFigureMultiplier;
+
+        figureKillCounts.Clear();
+
+        if (data.figureKillCounts != null)
+        {
+            foreach (var saved in data.figureKillCounts)
+            {
+                if (saved == null ||
+                    string.IsNullOrEmpty(saved.figureName))
+                {
+                    continue;
+                }
+
+                figureKillCounts[saved.figureName] =
+                    Mathf.Max(0, saved.count);
+            }
+        }
         StartNewRound(isFromLoad: true, returnPreviousDiceToDiscard: false);
         // 사용 기록은 유지한 채, 아직 미사용인 낮은 체력 효과만 검사
         FigureEffectManager.Instance?.EvaluateLowHPTriggers(this, shopManager);
@@ -801,8 +820,7 @@ public class DiceManager : MonoBehaviour
         // 최종 칩 = 주사위 기본합 + 얼음/위성 + 피규어/스테이지 보너스 + 스낵 보너스
         int finalBaseSum = calcResult.baseSum+ calcResult.iceBonusChips+ calcResult.satelliteBonusChips+ stageBonusChips+ snackBonusChips;
         // 최종 배수 = 족보 배수 + 피규어/스테이지 배수 + 스낵 배수 + 프리즘/위성 배수
-        float finalMult = handMult+ stageBonusMult+ snackBonusMult+ calcResult.prismMultTotal + calcResult.satelliteBonusMult + calcResult.iceBonusMult
-            + calcResult.satelliteBonusMult+ calcResult.iceBonusMult+ permanentFigureMultiplier; 
+        float finalMult = handMult + stageBonusMult+ snackBonusMult+ calcResult.prismMultTotal+ calcResult.satelliteBonusMult+ calcResult.iceBonusMult+ permanentFigureMultiplier;
         int finalDamage = Mathf.FloorToInt(finalBaseSum * finalMult);
         // 연출 전용 값: 실제 피해 계산에는 사용하지 않음
         float shownChips = calcResult.baseSum + calcResult.iceBonusChips+ calcResult.satelliteBonusChips;
