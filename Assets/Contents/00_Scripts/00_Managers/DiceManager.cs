@@ -21,6 +21,7 @@ public class StageContext
     public int accumulatedFlameDamage = 0;
     public bool isPeppermintActive = false;
     public float snackBonusFigureDropRate = 0f;
+    public bool firstNormalAttackDone = false;
     // 현재 스테이지에서 사용한 1회 제한 노드
     public HashSet<string> usedFigureNodes = new HashSet<string>();
 
@@ -37,6 +38,7 @@ public class StageContext
         isPeppermintActive = false;
         snackBonusFigureDropRate = 0f;
         usedFigureNodes.Clear();
+        firstNormalAttackDone = false;
     }
 }
 
@@ -184,8 +186,10 @@ public class DiceManager : MonoBehaviour
     private bool pendingPeppermintSuccess = false;
     private bool enemyDeathHandled = false;
     private bool isRolling = false; // 주사위 굴러가는중 
-    public bool IsDiceInputLocked => isRolling || isCalculating;// 주사위를 굴리거나 결산하는 동안 선택 입력 차단
-    public bool isCalculating = false;  //끝내기 버튼
+    public bool IsDiceInputLocked =>isRolling|| isCalculating|| currentPlayerHP <= 0|| enemy == null|| enemy.IsDead|| isStageClearing;
+    public bool isCalculating = false;  //끝내기 버튼                                
+    public Dictionary<string, int> figureKillCounts =new Dictionary<string, int>();// 피규어 획득 후 처치 기록. 스테이지가 바뀌어도 유지
+    public float permanentFigureMultiplier = 0f;
 
     //족보별 배수
     [Header("족보 배수 설정")]
@@ -275,6 +279,7 @@ public class DiceManager : MonoBehaviour
     {
         SaveData data = GameSaveManager.Instance.LoadSaveData();
         if (data == null) return;
+        stageContext.firstNormalAttackDone =data.firstNormalAttackDone;
 
         stageContext.usedFigureNodes.Clear();
 
@@ -526,7 +531,8 @@ public class DiceManager : MonoBehaviour
         HandleDiceChanged();
 
         //주사위 세팅이 끝나고 새로운 라운드(턴)가 본격적으로 시작되는 시점
-        if (FigureEffectManager.Instance != null)
+        // 이어하기는 새 라운드 발동 효과를 다시 지급하지 않음
+        if (!isFromLoad && FigureEffectManager.Instance != null)
         {
             FigureEffectManager.Instance.EvaluateRoundStartTriggers(this, shopManager);
         }
@@ -795,7 +801,8 @@ public class DiceManager : MonoBehaviour
         // 최종 칩 = 주사위 기본합 + 얼음/위성 + 피규어/스테이지 보너스 + 스낵 보너스
         int finalBaseSum = calcResult.baseSum+ calcResult.iceBonusChips+ calcResult.satelliteBonusChips+ stageBonusChips+ snackBonusChips;
         // 최종 배수 = 족보 배수 + 피규어/스테이지 배수 + 스낵 배수 + 프리즘/위성 배수
-        float finalMult = handMult+ stageBonusMult+ snackBonusMult+ calcResult.prismMultTotal + calcResult.satelliteBonusMult + calcResult.iceBonusMult;
+        float finalMult = handMult+ stageBonusMult+ snackBonusMult+ calcResult.prismMultTotal + calcResult.satelliteBonusMult + calcResult.iceBonusMult
+            + calcResult.satelliteBonusMult+ calcResult.iceBonusMult+ permanentFigureMultiplier; 
         int finalDamage = Mathf.FloorToInt(finalBaseSum * finalMult);
         // 연출 전용 값: 실제 피해 계산에는 사용하지 않음
         float shownChips = calcResult.baseSum + calcResult.iceBonusChips+ calcResult.satelliteBonusChips;
@@ -865,6 +872,7 @@ public class DiceManager : MonoBehaviour
             yield return AnimateBonus(true, chipsBeforeFigures, LocalizationManager.GetUi("UI_BONUS_SNACK", "스낵"));
             yield return AnimateBonus(true, snackBonusChips - chipsBeforeFigures, LocalizationManager.GetUi("UI_BONUS_FIGURE", "피규어"));
             yield return AnimateBonus(true, stageBonusChips, LocalizationManager.GetUi("UI_BONUS_STAGE", "전투 누적"));
+            yield return AnimateBonus(false,permanentFigureMultiplier,LocalizationManager.GetUi("UI_BONUS_PERMANENT", "영구 보너스"));
 
             // 이후 배수 보너스 표시
             yield return AnimateBonus(false, handMult - 1f, handName);
@@ -954,6 +962,9 @@ public class DiceManager : MonoBehaviour
         if (enemy == null || isStageClearing || enemyDeathHandled)
             return;
         enemyDeathHandled = true;
+
+        // 포획 보상으로 새 피규어를 얻기 전에 기존 보유 피규어의 처치 수 기록
+        FigureEffectManager.Instance?.RecordEnemyKill(this);
 
         // 포획 성공 여부를 실제로 계산해서 저장
         pendingPeppermintSuccess = CaptureResolver.CheckCaptureSuccess(
@@ -1128,8 +1139,11 @@ public class DiceManager : MonoBehaviour
             else { if (d.currentKeepIndex != -1) ReleaseFromKeepSlot(d); hasDiceToRoll = true; }
         }
         UpdateMainUI("");
-        ui?.SetRollButtonInteractable((currentRerolls < maxRerolls + snackBonusRerolls + figureBonusRerolls) && hasDiceToRoll);
-        ui?.SetFinishButtonInteractable(keptCount == keepSlots.Length);
+        bool canAct = !isRolling&& !isCalculating&& currentPlayerHP > 0&& enemy != null&& !enemy.IsDead && !isStageClearing;
+
+        ui?.SetRollButtonInteractable(canAct&& currentRerolls < maxRerolls + snackBonusRerolls + figureBonusRerolls&& hasDiceToRoll);
+
+        ui?.SetFinishButtonInteractable(canAct && keptCount == keepSlots.Length);
 
         OnDeckUpdateNeeded?.Invoke();
     }
@@ -1304,7 +1318,7 @@ public class DiceManager : MonoBehaviour
         if (!isCalculating)
         {
             int displayBaseSum = baseSum + iceBonusChips + satelliteBonusChips + stageBonusChips;
-            float displayMult = 1.0f + stageBonusMult;
+            float displayMult =1.0f + stageBonusMult + permanentFigureMultiplier;
 
             int displayDamage = Mathf.FloorToInt(displayBaseSum * displayMult) + darkDamageTotal;
 
@@ -1411,6 +1425,7 @@ public class DiceManager : MonoBehaviour
     //재시작
     public void RestartGame()
     {
+        permanentFigureMultiplier = 0f;
         //재시작시 가짜 주사위 참조 안전하게 비우기
         originalBossDice = null;
         fakeDiceIndex = -1;

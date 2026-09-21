@@ -84,6 +84,11 @@ public class InventoryManager : MonoBehaviour
         activeFigureSlots.Clear();
         ownedFigures.Clear();
 
+        if (diceManager != null)
+        {
+            diceManager.figureKillCounts.Clear();
+        }
+
         FigureEffectManager.Instance?.RebuildCache(); // 초기화 시 캐시 갱신
 
         //티켓 슬롯도 같이 비워줌
@@ -112,6 +117,13 @@ public class InventoryManager : MonoBehaviour
             }
 
             ownedFigures.Add(figure);
+
+            // 새로 획득한 피규어는 처치 기록을 처음부터 시작
+            // 이어하기 RestoreItem에서는 초기화하지 않음
+            if (applyAcquiredEffects && diceManager != null)
+            {
+                diceManager.figureKillCounts.Remove(figure.itemName);
+            }
 
             FigureEffectManager.Instance?.RebuildCache(); // 피규어 추가 시 캐시 갱신
 
@@ -240,6 +252,11 @@ public class InventoryManager : MonoBehaviour
             // 리스트에서 제거
             ownedFigures.Remove(figure);
 
+            if (diceManager != null)
+            {
+                diceManager.figureKillCounts.Remove(figure.itemName);
+            }
+
             // 해당 피규어가 들어있던 UI 슬롯 찾아 삭제
             for (int i = 0; i < activeFigureSlots.Count; i++)
             {
@@ -281,6 +298,10 @@ public class InventoryManager : MonoBehaviour
         {
             // 판매 시 리스트와 씬에서 삭제
             ownedFigures.Remove(figure);
+            if (diceManager != null)
+            {
+                diceManager.figureKillCounts.Remove(figure.itemName);
+            }
             FigureEffectManager.Instance?.RebuildCache(); // 피규어 판매 시 캐시 갱신
 
             activeFigureSlots.Remove(targetSellSlot.gameObject);

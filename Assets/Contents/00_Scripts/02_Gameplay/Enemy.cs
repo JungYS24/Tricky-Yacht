@@ -240,11 +240,21 @@ public class Enemy : MonoBehaviour
     }
 
 
-    public void TakeDamage(int damage, System.Action onDeathCallback)
+    public void TakeDamage(int damage,System.Action onDeathCallback,bool isFirstNormalAttack = false)
     {
-        if (IsDead) return;
+        if (IsDead || damage <= 0) return;
 
-        CurrentHP = Mathf.Max(0, CurrentHP - damage);
+        // 적 체력보다 큰 공격도 실제 감소한 체력까지만 피해로 인정
+        int actualDamage = Mathf.Min(CurrentHP, damage);
+        CurrentHP -= actualDamage;
+
+        // 사망 콜백 전에 지급해야 마지막 공격의 효과도 적용됨
+        DiceManager dm = DiceManager.Instance;
+
+        if (dm != null && dm.enemy == this)
+        {
+            FigureEffectManager.Instance?.EvaluateEnemyDamageTriggers(dm,actualDamage,isFirstNormalAttack);
+        }
 
         // 데미지를 입었으니 HP바 깎는 코루틴 실행!
         if (hpCoroutine != null) StopCoroutine(hpCoroutine);
