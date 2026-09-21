@@ -143,7 +143,7 @@ public class InventoryManager : MonoBehaviour
 
             // 도감 영구 해금 기록
             // PlayerPrefs 대신 새로운 매니저를 통해 메모리에 즉시 반영하고 자동 압축 저장
-            CollectionDataManager.Instance.UnlockFigure(figure.Item_ID);
+            CollectionDataManager.Instance.UnlockFigure(figure);
 
             // 새 슬롯 생성
             GameObject newSlotGo = Instantiate(figureSlotPrefab, figureSlotParent);

@@ -1,171 +1,165 @@
+#if UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
-using System.IO;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
 
-public class FigureDataSyncWindow : EditorWindow
+public static class FigureDataSyncWindow
 {
+    private const string JsonPath = "Assets/Contents/10_Resources/Data/FigureDataList.json";
+    private const string FigureFolder = "Assets/Contents/05_DataSO/FiguresSO";
+
     [MenuItem("Studio 10&6/피규어 데이터 동기화")]
     public static void SyncFigureData()
     {
-        string jsonPath = Path.Combine(Application.dataPath, "Contents/10_Resources/Data/FigureDataList.json");
-
-        if (!File.Exists(jsonPath))
+        if (!File.Exists(JsonPath))
         {
-            Debug.LogError($"[Studio 10&6] JSON 파일을 찾을 수 없습니다: {jsonPath}");
+            Debug.LogError($"[Studio 10&6] JSON 파일을 찾을 수 없습니다: {JsonPath}");
             return;
         }
 
-        string jsonText = File.ReadAllText(jsonPath);
-
-        int startIndex = jsonText.IndexOf("\"FigureDataList\": {");
-        if (startIndex == -1)
+        string wrapped = "{\"items\":" + File.ReadAllText(JsonPath) + "}";
+        FigureJsonFile file = JsonUtility.FromJson<FigureJsonFile>(wrapped);
+        if (file == null || file.items == null || file.items.Length == 0)
         {
-            Debug.LogError("[Studio 10&6] JSON 루트 키 'FigureDataList'를 찾을 수 없습니다.");
+            Debug.LogError("[Studio 10&6] FigureDataList.json을 읽지 못했습니다.");
             return;
         }
 
-        string targetFolderPath = "Assets/Contents/05_DataSO/FiguresSO";
-        if (!Directory.Exists(targetFolderPath))
+        FigureItemSO[] assets = LoadFigureAssets();
+        int updated = 0;
+        int missing = 0;
+
+        foreach (FigureJsonRow row in file.items)
         {
-            Directory.CreateDirectory(targetFolderPath);
-        }
+            if (string.IsNullOrEmpty(row.Item_ID))
+                continue;
 
-        string spriteRootPath = "Assets/Contents/02_Sprites/07_Figure";
-        string[] splitData = jsonText.Split(new string[] { "}," }, System.StringSplitOptions.RemoveEmptyEntries);
-        int syncCount = 0;
-
-        foreach (string block in splitData)
-        {
-            if (!block.Contains("\"itemName\"")) continue;
-
-            int idStartIndex = block.IndexOf("\"Fig_");
-            if (idStartIndex == -1) continue;
-            int idEndIndex = block.IndexOf("\"", idStartIndex + 1);
-            string currentID = block.Substring(idStartIndex + 1, idEndIndex - idStartIndex - 1);
-
-            int contentStartIndex = block.IndexOf("{");
-            if (contentStartIndex == -1) continue;
-
-            string pureJson = block.Substring(contentStartIndex).Trim();
-                
-            if (!pureJson.EndsWith("}")) pureJson += "}";
-            if (pureJson.Contains("} }")) pureJson = pureJson.Replace("} }", "}");
-            if (pureJson.EndsWith("}}")) pureJson = pureJson.Substring(0, pureJson.Length - 1);
-
-            JsonFigureItem data = null;
-            try
+            FigureItemSO asset = FindAsset(assets, row);
+            if (asset == null)
             {
-                data = JsonUtility.FromJson<JsonFigureItem>(pureJson);
-            }
-            catch (System.Exception)
-            {
+                missing++;
+                Debug.LogWarning($"[Studio 10&6] SO 없음, 건너뜀: {row.Item_ID} ({row.Item_Name_KR})");
                 continue;
             }
 
-            if (data == null) continue;
+            asset.Item_ID = row.Item_ID;
+            if (!string.IsNullOrEmpty(row.Item_Name_KR))
+                asset.itemName = row.Item_Name_KR;
+            asset.price = row.Price;
+            if (!string.IsNullOrEmpty(row.Effect_Summary_KR))
+                asset.description = row.Effect_Summary_KR;
 
-            string assetPath = $"{targetFolderPath}/{currentID}.asset";
-            FigureItemSO asset = AssetDatabase.LoadAssetAtPath<FigureItemSO>(assetPath);
-
-            bool isNew = false;
-            if (asset == null)
-            {
-                asset = ScriptableObject.CreateInstance<FigureItemSO>();
-                isNew = true;
-            }
-
-            // --- 데이터 직렬화 동기화 ---
-            asset.Item_ID = currentID;
-            asset.itemName = data.itemName;
-            asset.price = data.price;
-            asset.description = data.description;
-
-            // --- 바이옴 리스트 동기화 (추가된 부분) ---
-            if (asset.sourceBiomes == null) asset.sourceBiomes = new List<BiomeType>();
-            asset.sourceBiomes.Clear();
-
-            // JSON 배열에 바이옴 값이 정상적으로 들어있다면 Enum으로 변환해서 넣기
-            if (data.sourceBiomes != null && data.sourceBiomes.Count > 0)
-            {
-                foreach (string biomeStr in data.sourceBiomes)
-                {
-                    if (System.Enum.TryParse(biomeStr.Trim(), out BiomeType parsedBiome))
-                    {
-                        asset.sourceBiomes.Add(parsedBiome);
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"[Studio 10&6] '{currentID}'의 알 수 없는 바이옴 이름입니다: {biomeStr}");
-                    }
-                }
-            }
-            else
-            {
-                // JSON에 값이 아예 없을 경우를 대비한 안전장치 (기본값 숲 부여)
-                asset.sourceBiomes.Add(BiomeType.Forest);
-            }
-
-            // [구조 수정] 자식 클래스의 iconSprite 대신 부모 클래스(BaseItemDataSO)에 구현된 원래 'icon' 필드에 직접 타겟팅합니다.
-            string fullSpritePath = $"{spriteRootPath}/{data.biomeFolder}/{data.icon}.png";
-            Sprite targetSprite = AssetDatabase.LoadAssetAtPath<Sprite>(fullSpritePath);
-
-            if (targetSprite != null)
-            {
-                asset.icon = targetSprite;
-            }
-            else
-            {
-                Debug.LogWarning($"[Studio 10&6] 스프라이트 로드 실패. 경로를 확인하세요: {fullSpritePath}");
-            }
-
-            asset.figureNodes = new List<FigureNode>();
-
-            System.Enum.TryParse(data.triggerType.Replace(" ", ""), out FigureTriggerType parsedTrigger);
-            System.Enum.TryParse(data.effectType.Replace(" ", ""), out FigureEffectType parsedEffect);
-
-            FigureNode newNode = new FigureNode();
-            newNode.triggerType = parsedTrigger;
-            newNode.effects = new List<FigureEffectNode>();
-
-            FigureEffectNode effectNode = new FigureEffectNode();
-            effectNode.effectType = parsedEffect;
-            effectNode.effectValue = data.effectValue;
-
-            newNode.effects.Add(effectNode);
-            asset.figureNodes.Add(newNode);
-
-            if (isNew)
-            {
-                AssetDatabase.CreateAsset(asset, assetPath);
-            }
-            else
-            {
-                EditorUtility.SetDirty(asset);
-            }
-
-            syncCount++;
+            ApplyBiomes(asset, row);
+            EditorUtility.SetDirty(asset);
+            updated++;
         }
 
         AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
+        Debug.Log($"[Studio 10&6] 피규어 ID/이름/가격/설명/바이옴 동기화 완료. 갱신 {updated}개, SO 없음 {missing}개. 노드(기믹)는 건드리지 않았습니다.");
+    }
 
-        Debug.Log($"[Studio 10&6] 부모 속성 동기화 완료! {targetFolderPath}에 {syncCount}개의 깔끔한 피규어 SO를 빌드했습니다.");
+    private static FigureItemSO[] LoadFigureAssets()
+    {
+        string[] guids = AssetDatabase.FindAssets("t:FigureItemSO", new[] { FigureFolder });
+        var list = new List<FigureItemSO>(guids.Length);
+        foreach (string guid in guids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            FigureItemSO asset = AssetDatabase.LoadAssetAtPath<FigureItemSO>(path);
+            if (asset != null)
+                list.Add(asset);
+        }
+
+        return list.ToArray();
+    }
+
+    private static FigureItemSO FindAsset(FigureItemSO[] assets, FigureJsonRow row)
+    {
+        foreach (FigureItemSO asset in assets)
+        {
+            if (asset.Item_ID == row.Item_ID)
+                return asset;
+        }
+
+        foreach (FigureItemSO asset in assets)
+        {
+            if (!string.IsNullOrEmpty(row.Item_Name_KR) && asset.itemName == row.Item_Name_KR)
+                return asset;
+        }
+
+        string compactIcon = CompactFigId(row.Icon);
+        string compactId = CompactFigId(row.Item_ID);
+        foreach (FigureItemSO asset in assets)
+        {
+            string compactName = CompactFigId(asset.name);
+            if (asset.name == row.Item_ID || asset.name == row.Icon)
+                return asset;
+            if (!string.IsNullOrEmpty(compactId) && compactName == compactId)
+                return asset;
+            if (!string.IsNullOrEmpty(compactIcon) && compactName == compactIcon)
+                return asset;
+        }
+
+        return null;
+    }
+
+    private static string CompactFigId(string id)
+    {
+        if (string.IsNullOrEmpty(id) || !id.StartsWith("Fig_", StringComparison.Ordinal))
+            return id;
+        return "Fig_" + id.Substring(4).Replace("_", string.Empty);
+    }
+
+    private static void ApplyBiomes(FigureItemSO asset, FigureJsonRow row)
+    {
+        if (asset.sourceBiomes == null)
+            asset.sourceBiomes = new List<BiomeType>();
+        asset.sourceBiomes.Clear();
+
+        TryAddBiome(asset.sourceBiomes, row.Source_Biome_1);
+        TryAddBiome(asset.sourceBiomes, row.Source_Biome_2);
+        TryAddBiome(asset.sourceBiomes, row.Source_Biome_3);
+
+        if (asset.sourceBiomes.Count == 0)
+            asset.sourceBiomes.Add(BiomeType.Forest);
+    }
+
+    private static void TryAddBiome(List<BiomeType> list, string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw) || raw == "-")
+            return;
+
+        string token = raw.Trim();
+        Match numbered = Regex.Match(token, @"^\d+_(.+)$");
+        if (numbered.Success)
+            token = numbered.Groups[1].Value;
+
+        if (Enum.TryParse(token, true, out BiomeType biome) && !list.Contains(biome))
+            list.Add(biome);
+        else
+            Debug.LogWarning($"[Studio 10&6] 알 수 없는 바이옴: {raw}");
+    }
+
+    [Serializable]
+    private class FigureJsonFile
+    {
+        public FigureJsonRow[] items;
+    }
+
+    [Serializable]
+    private class FigureJsonRow
+    {
+        public string Item_ID;
+        public string Icon;
+        public string Item_Name_KR;
+        public int Price;
+        public string Effect_Summary_KR;
+        public string Source_Biome_1;
+        public string Source_Biome_2;
+        public string Source_Biome_3;
     }
 }
-
-[System.Serializable]
-public class JsonFigureItem
-{
-    public string itemName;
-    public int price;
-    public string icon;
-    public string description;
-    public string triggerType;
-    public string effectType;
-    public float effectValue;
-    public string optionalItem;
-    public string biomeFolder;
-
-    public List<string> sourceBiomes;
-}
+#endif

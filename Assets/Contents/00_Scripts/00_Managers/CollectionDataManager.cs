@@ -6,7 +6,7 @@ public class CollectionDataManager : MonoBehaviour
 {
     public static CollectionDataManager Instance;
 
-    // 핵심 딕셔너리: <피규어ID (예: Fig_001), 상태(0=미해금, 1=조우함, 2=완전해금)>
+    // 핵심 딕셔너리: <피규어ID (예: Fig_Ball), 상태(0=미해금, 1=조우함, 2=완전해금)>
     private Dictionary<string, int> collectionDict = new Dictionary<string, int>();
 
     private void Awake()
@@ -24,11 +24,24 @@ public class CollectionDataManager : MonoBehaviour
         }
     }
 
+    public void UnlockFigure(FigureItemSO figure)
+    {
+        if (figure == null) return;
+        UnlockFigure(GetCanonicalId(figure));
+    }
+
     // 피규어를 완전히 획득(해금)했을 때 호출
     public void UnlockFigure(string figureID)
     {
+        if (string.IsNullOrEmpty(figureID)) return;
         collectionDict[figureID] = 2; // 2: 완전 해금
         SaveData(); // 상태가 변했으니 하드디스크에 한 번 덮어씀
+    }
+
+    public void EncounterFigure(FigureItemSO figure)
+    {
+        if (figure == null) return;
+        EncounterFigure(GetCanonicalId(figure));
     }
 
     //피규어를 상점이나 적으로 마주쳤을 때 호출
@@ -41,9 +54,18 @@ public class CollectionDataManager : MonoBehaviour
         }
     }
 
+    public int GetFigureState(FigureItemSO figure)
+    {
+        if (figure == null) return 0;
+        int byId = GetFigureState(figure.Item_ID);
+        int byName = GetFigureState(figure.name);
+        return byId > byName ? byId : byName;
+    }
+
     //도감에서 현재 상태를 확인할 때 호출
     public int GetFigureState(string figureID)
     {
+        if (string.IsNullOrEmpty(figureID)) return 0;
         // 딕셔너리에 데이터가 있다면 해당 상태값을 즉시 반환, 없다면 0(미해금) 반환
         if (collectionDict.TryGetValue(figureID, out int state))
         {
@@ -52,9 +74,16 @@ public class CollectionDataManager : MonoBehaviour
         return 0;
     }
 
+    private static string GetCanonicalId(FigureItemSO figure)
+    {
+        if (!string.IsNullOrEmpty(figure.Item_ID))
+            return figure.Item_ID;
+        return figure.name;
+    }
+
     private void SaveData()
     {
-        // 딕셔너리의 모든 데이터를 "Fig_001:2,Fig_002:1," 형태의 긴 문자열로 조립함
+        // 딕셔너리의 모든 데이터를 "Fig_Ball:2,Fig_Mushroom:1," 형태의 긴 문자열로 조립함
         StringBuilder sb = new StringBuilder();
         foreach (var kvp in collectionDict)
         {
