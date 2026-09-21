@@ -6,7 +6,6 @@ public class FigureItemSO : BaseItemDataSO
 {
     [Header("--- 피규어 분류 (엑셀 기준) ---")]
     public FigureCategory category = FigureCategory.None;
-    public bool isPermanent = true;
     public int requiredSlots = 1;
 
     [Header("--- 도감(Collection) 정보 ---")]

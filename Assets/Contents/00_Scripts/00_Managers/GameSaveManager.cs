@@ -14,6 +14,13 @@ public class SavedDiceData
     public List<int> activeSatellites = new List<int>();
 }
 
+[System.Serializable]
+public class SavedFigureKillCount
+{
+    public string figureName;
+    public int count;
+}
+
 public class SaveData
 {
     public int currentStage;
@@ -51,6 +58,10 @@ public class SaveData
     public int savedMonsterCurrentTurn;//몬스터 턴개념 추가
     public int savedMonsterMaxTurn;
     public bool firstNormalAttackDone;
+
+    public List<SavedFigureKillCount> figureKillCounts =new List<SavedFigureKillCount>();
+
+    public float permanentFigureMultiplier;
 
     // 스테이지당 1회 피규어 사용 기록
     public List<string> usedFigureNodes = new List<string>();
@@ -128,6 +139,18 @@ public class GameSaveManager : MonoBehaviour
     public void SaveGame(DiceManager dice, InventoryManager inv, ShopManager shop)
     {
         SaveData data = new SaveData();
+
+        data.permanentFigureMultiplier =
+    dice.permanentFigureMultiplier;
+
+        foreach (var entry in dice.figureKillCounts)
+        {
+            data.figureKillCounts.Add(new SavedFigureKillCount
+            {
+                figureName = entry.Key,
+                count = entry.Value
+            });
+        }
         data.firstNormalAttackDone =dice.stageContext.firstNormalAttackDone;
         data.usedFigureNodes = new List<string>(dice.stageContext.usedFigureNodes);
 
