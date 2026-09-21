@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Linq;
+using System;
 
 public class SynergyDataImportFromTSV : ImportDataFromTSV
 {
@@ -33,7 +34,7 @@ public class SynergyDataImportFromTSV : ImportDataFromTSV
         var figures = AssetDatabase.FindAssets("", new[] { dataDirectory })
             .Select(g => AssetDatabase.GUIDToAssetPath(g))
             .Select(p => AssetDatabase.LoadAssetAtPath<FigureItemSO>(p))
-            .ToDictionary(f => f.Item_ID ?? string.Empty, f => f);
+            .ToDictionary(f => f.name ?? string.Empty, f => f);
 
         int cnt = itemIDs.Count;
         for (int i = 0; i < cnt; i++)
@@ -42,6 +43,11 @@ public class SynergyDataImportFromTSV : ImportDataFromTSV
             SerializedObject so = new(synergyData);
             so.FindProperty("synergyName").stringValue = nameKR[i];
             so.FindProperty("synergyDescription").stringValue = descriptionKR[i];
+            so.FindProperty("skillEffect").boxedValue = new SynergyEffectContext()
+            {
+                EffectType = Enum.Parse<EffectType>(effectTypes[i]),
+                EffectValue = float.Parse(effectValues[i]),
+            };
 
             int fCnt = int.Parse(requiredFigureCounts[i]);
 
