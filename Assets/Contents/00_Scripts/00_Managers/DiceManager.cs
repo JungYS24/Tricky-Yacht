@@ -355,24 +355,24 @@ public class DiceManager : MonoBehaviour
             }
         }
         InventoryManager.Instance.ClearAllSlots();
-        foreach (string fName in data.ownedFigureNames)
+
+        //최적화된 ID 기반으로 피규어 복원
+        if (data.ownedFigureIDs != null && data.ownedFigureIDs.Count > 0)
         {
-            var item = GameSaveManager.Instance.FindItemByName(fName);
-
-            if (item == null)
+            foreach (string fID in data.ownedFigureIDs)
             {
-                Debug.LogError($"[피규어 복원 실패] 저장된 이름: '{fName}'");
-                continue;
+                var item = GameSaveManager.Instance.FindFigureByID(fID);
+                if (item != null) InventoryManager.Instance.RestoreItem(item);
+                else Debug.LogError($"[피규어 복원 실패] 저장된 아이디: '{fID}'를 찾을 수 없습니다.");
             }
-
-            InventoryManager.Instance.RestoreItem(item);
         }
-        foreach (string sName in data.ownedSnackNames)
+        
+        foreach (string sName in data.ownedSnackIDs)
         {
             var item = GameSaveManager.Instance.FindItemByName(sName);
             if (item != null) InventoryManager.Instance.AddItem(item);
         }
-        foreach (string tName in data.ownedTicketNames)
+        foreach (string tName in data.ownedTicketIDs)
         {
             var item = GameSaveManager.Instance.FindItemByName(tName);
             if (item != null)
