@@ -1,11 +1,15 @@
 using System;
 using UnityEngine;
 
-public static class UnlockConditionManager
+public class UnlockConditionManager : MonoBehaviour
 {
+    public static UnlockConditionManager Instance { get; private set; }
+
     private static readonly UnlockFlag rangeMask = GetMask();
 
     private static UnlockFlag unlockedFlag = 0;
+
+    [SerializeField] private UnlockFlag initialFlag = 0;
 
     /// <summary>
     /// 여러 조건 플래그를 하나의 플래그 값으로 합쳐줍니다.
@@ -41,7 +45,7 @@ public static class UnlockConditionManager
     {
         if ((flag & ~rangeMask) != 0)
         {
-            Debug.LogWarning("정의되지 않은 조건: " + Convert.ToString((long)flag, 2));
+            Debug.LogWarning("정의되지 않은 조건: " + Convert.ToString((int)flag, 2));
             flag &= rangeMask;
         }
 
@@ -66,12 +70,12 @@ public static class UnlockConditionManager
         return flag;
     }
 
-    [Flags]
-    public enum UnlockFlag : long
+    private void Awake()
     {
-        None = 0,
-        BeatVolacnoBoss = 1 << 0,
-        Spend5000Gold   = 1 << 1,
-        BeatDevilDice   = 1 << 2,
+#if UNITY_EDITOR
+        unlockedFlag = initialFlag;
+#else
+        unlockedFlag = (UnlockFlag)PlayerPrefs.GetInt("unlock", 0);
+#endif
     }
 }
