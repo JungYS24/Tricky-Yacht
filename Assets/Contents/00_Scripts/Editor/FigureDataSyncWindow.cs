@@ -338,6 +338,11 @@ public static class FigureDataSyncWindow
         if (numbered.Success)
             token = numbered.Groups[1].Value;
 
+        if (token.Equals("Shop", System.StringComparison.OrdinalIgnoreCase))
+            token = nameof(BiomeType.Special);
+        else if (token.Equals("SkyIsland", System.StringComparison.OrdinalIgnoreCase))
+            token = nameof(BiomeType.Skyisland);
+
         if (Enum.TryParse(token, true, out BiomeType biome) && !list.Contains(biome))
             list.Add(biome);
         else

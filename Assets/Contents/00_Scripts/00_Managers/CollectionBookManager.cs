@@ -5,9 +5,10 @@ using TMPro;
 
 public enum CollectionBiomeFilter
 {
-    All = -1, Forest = 0, Meadow = 1, Temple = 2, Jungle = 3, Desert = 4,
-    Ruins = 5, Cave = 6, Volcano = 7, Swamp = 8, Beach = 9, Ocean = 10,
-    Abyss = 11, Snow = 12, Grave = 13, Circus = 14, Void = 15, Shop = 16
+    All = -1,
+    Special = 0, Forest = 1, Meadow = 2, Temple = 3, Jungle = 4, Desert = 5,
+    Ruins = 6, Cave = 7, Volcano = 8, Swamp = 9, Beach = 10, Ocean = 11,
+    Abyss = 12, Snow = 13, Grave = 14, Circus = 15, Void = 16, Skyisland = 17
 }
 public enum CollectionStatusFilter { All, Unlocked, Locked }
 
@@ -44,7 +45,7 @@ public class CollectionBookManager : MonoBehaviour
     {
         masterFigureDatabase = masterFigureDatabase.OrderBy(f => (int)f.sourceBiomes.FirstOrDefault()).ToList();
 
-        GenerateFilterButtons(); // 시작할 때 필터 버튼 18개 자동 생성
+        GenerateFilterButtons(); // 시작할 때 필터 버튼 자동 생성
 
         if (biomeFilterPanelRoot != null) biomeFilterPanelRoot.SetActive(false);
         RefreshCollectionBoard();
@@ -58,6 +59,7 @@ public class CollectionBookManager : MonoBehaviour
         string[] filterNames =
         {
             LocalizationManager.GetUi("UI_FILTER_ALL", "전체"),
+            LocalizationManager.GetBiomeDisplayName(BiomeType.Special),
             LocalizationManager.GetBiomeDisplayName(BiomeType.Forest),
             LocalizationManager.GetBiomeDisplayName(BiomeType.Meadow),
             LocalizationManager.GetBiomeDisplayName(BiomeType.Temple),
@@ -74,9 +76,9 @@ public class CollectionBookManager : MonoBehaviour
             LocalizationManager.GetBiomeDisplayName(BiomeType.Grave),
             LocalizationManager.GetBiomeDisplayName(BiomeType.Circus),
             LocalizationManager.GetBiomeDisplayName(BiomeType.Void),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Shop)
+            LocalizationManager.GetBiomeDisplayName(BiomeType.Skyisland)
         };
-        int[] filterValues = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+        int[] filterValues = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
 
         for (int i = 0; i < filterNames.Length; i++)
         {
