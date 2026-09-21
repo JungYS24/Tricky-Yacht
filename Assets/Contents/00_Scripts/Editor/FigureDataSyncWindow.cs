@@ -35,23 +35,23 @@ public static class FigureDataSyncWindow
 
         foreach (FigureJsonRow row in file.items)
         {
-            if (string.IsNullOrEmpty(row.Item_ID))
+            if (string.IsNullOrEmpty(row.item_ID))
                 continue;
 
             FigureItemSO asset = FindAsset(assets, row);
             if (asset == null)
             {
                 missing++;
-                Debug.LogWarning($"[Studio 10&6] SO 없음, 건너뜀: {row.Item_ID} ({row.Item_Name_KR})");
+                Debug.LogWarning($"[Studio 10&6] SO 없음, 건너뜀: {row.item_ID} ({row.item_Name_KR})");
                 continue;
             }
 
-            asset.Item_ID = row.Item_ID;
-            if (!string.IsNullOrEmpty(row.Item_Name_KR))
-                asset.itemName = row.Item_Name_KR;
-            asset.price = row.Price;
-            if (!string.IsNullOrEmpty(row.Effect_Summary_KR))
-                asset.description = row.Effect_Summary_KR;
+            asset.Item_ID = row.item_ID;
+            if (!string.IsNullOrEmpty(row.item_Name_KR))
+                asset.itemName = row.item_Name_KR;
+            asset.price = row.price;
+            if (!string.IsNullOrEmpty(row.effect_Summary_KR))
+                asset.description = row.effect_Summary_KR;
 
             ApplyBiomes(asset, row);
             EditorUtility.SetDirty(asset);
@@ -74,7 +74,7 @@ public static class FigureDataSyncWindow
 
         foreach (FigureJsonRow row in rows)
         {
-            if (string.IsNullOrWhiteSpace(row.Item_ID))
+            if (string.IsNullOrWhiteSpace(row.item_ID))
                 continue;
 
             // 능력 데이터가 없는 기존 기본정보 행은 건너뜀
@@ -84,10 +84,10 @@ public static class FigureDataSyncWindow
                 continue;
             }
 
-            if (!groups.TryGetValue(row.Item_ID, out var group))
+            if (!groups.TryGetValue(row.item_ID, out var group))
             {
                 group = new List<FigureJsonRow>();
-                groups.Add(row.Item_ID, group);
+                groups.Add(row.item_ID, group);
             }
 
             group.Add(row);
@@ -281,22 +281,22 @@ public static class FigureDataSyncWindow
     {
         foreach (FigureItemSO asset in assets)
         {
-            if (asset.Item_ID == row.Item_ID)
+            if (asset.Item_ID == row.item_ID)
                 return asset;
         }
 
         foreach (FigureItemSO asset in assets)
         {
-            if (!string.IsNullOrEmpty(row.Item_Name_KR) && asset.itemName == row.Item_Name_KR)
+            if (!string.IsNullOrEmpty(row.item_Name_KR) && asset.itemName == row.item_Name_KR)
                 return asset;
         }
 
-        string compactIcon = CompactFigId(row.Icon);
-        string compactId = CompactFigId(row.Item_ID);
+        string compactIcon = CompactFigId(row.icon);
+        string compactId = CompactFigId(row.item_ID);
         foreach (FigureItemSO asset in assets)
         {
             string compactName = CompactFigId(asset.name);
-            if (asset.name == row.Item_ID || asset.name == row.Icon)
+            if (asset.name == row.item_ID || asset.name == row.icon)
                 return asset;
             if (!string.IsNullOrEmpty(compactId) && compactName == compactId)
                 return asset;
@@ -320,9 +320,9 @@ public static class FigureDataSyncWindow
             asset.sourceBiomes = new List<BiomeType>();
         asset.sourceBiomes.Clear();
 
-        TryAddBiome(asset.sourceBiomes, row.Source_Biome_1);
-        TryAddBiome(asset.sourceBiomes, row.Source_Biome_2);
-        TryAddBiome(asset.sourceBiomes, row.Source_Biome_3);
+        TryAddBiome(asset.sourceBiomes, row.source_Biome_1);
+        TryAddBiome(asset.sourceBiomes, row.source_Biome_2);
+        TryAddBiome(asset.sourceBiomes, row.source_Biome_3);
 
         if (asset.sourceBiomes.Count == 0)
             asset.sourceBiomes.Add(BiomeType.Forest);
@@ -359,14 +359,16 @@ public static class FigureDataSyncWindow
     [Serializable]
     private class FigureJsonRow
     {
-        public string Item_ID;
-        public string Icon;
-        public string Item_Name_KR;
-        public int Price;
-        public string Effect_Summary_KR;
-        public string Source_Biome_1;
-        public string Source_Biome_2;
-        public string Source_Biome_3;
+        public string item_ID;
+        public string icon;
+        public string nameKey;
+        public string descKey;
+        public string item_Name_KR;
+        public int price;
+        public string effect_Summary_KR;
+        public string source_Biome_1;
+        public string source_Biome_2;
+        public string source_Biome_3;
 
         // 엑셀 행을 노드와 효과 목록으로 묶기 위한 번호
         public int nodeIndex;
