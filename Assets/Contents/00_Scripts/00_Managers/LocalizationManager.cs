@@ -199,8 +199,50 @@ public class LocalizationManager : MonoBehaviour
         if (monster == null)
             return string.Empty;
 
-        string key = ResolveMonsterNameKey(monster);
+        string key = ResolveMonsterLocKey(monster, "_NAME");
         return GetOrFallback(MonsterTable, key, monster.monsterName);
+    }
+
+    public static string GetMonsterDescription(MonsterDataSO monster)
+    {
+        if (monster == null)
+            return string.Empty;
+
+        string key = ResolveMonsterLocKey(monster, "_DESC");
+        return GetOrFallback(MonsterTable, key, monster.description);
+    }
+
+    public static string GetEncounterLocPrefix(EncounterType type)
+    {
+        switch (type)
+        {
+            case EncounterType.Clown: return "ENC_CLOWN";
+            case EncounterType.AbyssDealer: return "ENC_ABYSS_DEALER";
+            case EncounterType.BlindFortuneTeller: return "ENC_BLIND_FORTUNE_TELLER";
+            case EncounterType.Poacher: return "ENC_POACHER";
+            case EncounterType.SacrificedGirl: return "ENC_SACRIFICED_GIRL";
+            case EncounterType.Alchemist: return "ENC_ALCHEMIST";
+            case EncounterType.WishWanderer: return "ENC_WISH_WANDERER";
+            case EncounterType.ForgottenExplorer: return "ENC_FORGOTTEN_EXPLORER";
+            case EncounterType.MadHatter: return "ENC_MAD_HATTER";
+            case EncounterType.RustyCaptain: return "ENC_RUSTY_CAPTAIN";
+            default: return null;
+        }
+    }
+
+    public static string GetEncounterNameKey(EncounterType type)
+    {
+        string prefix = GetEncounterLocPrefix(type);
+        return string.IsNullOrEmpty(prefix) ? null : prefix + "_NAME";
+    }
+
+    public static string GetEncounterDisplayName(EncounterType type, string fallback)
+    {
+        string key = GetEncounterNameKey(type);
+        if (string.IsNullOrEmpty(key))
+            return fallback ?? string.Empty;
+
+        return GetOrFallback(EncounterTable, key, fallback);
     }
 
     public static string GetBiomeDisplayName(BiomeType biome)
@@ -408,13 +450,19 @@ public class LocalizationManager : MonoBehaviour
         return null;
     }
 
-    private static string ResolveMonsterNameKey(MonsterDataSO monster)
+    private static string ResolveMonsterLocKey(MonsterDataSO monster, string suffix)
     {
-        if (monster == null || string.IsNullOrEmpty(monster.monsterID))
+        if (monster == null)
             return null;
 
-        string token = monster.monsterID.Trim().Replace(' ', '_').Replace('-', '_');
-        return "CNT_MON_" + token.ToUpperInvariant() + "_NAME";
+        string token = monster.monsterID;
+        if (string.IsNullOrEmpty(token))
+            token = monster.name;
+        if (string.IsNullOrEmpty(token))
+            return null;
+
+        token = token.Trim().Replace(' ', '_').Replace('-', '_');
+        return "CNT_MON_" + token.ToUpperInvariant() + suffix;
     }
 
     private static string ToSnakeUpper(string pascal)

@@ -1279,7 +1279,11 @@ public class DiceManager : MonoBehaviour
         string bName = (currentBiome != null)
             ? LocalizationManager.GetBiomeDisplayName(currentBiome.biomeType)
             : "Stage";
-        string stageDisplayName = $"{bName} {currentStage}";
+        string stageDisplayName = LocalizationManager.GetUi(
+            "UI_STAGE_NAME",
+            "{0} {1}",
+            bName,
+            currentStage);
         int remainingRerolls = (maxRerolls + snackBonusRerolls + figureBonusRerolls) - currentRerolls;
 
         if (!isCalculating)

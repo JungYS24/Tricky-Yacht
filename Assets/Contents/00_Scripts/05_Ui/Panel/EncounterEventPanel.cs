@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Localization.Components;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
@@ -50,6 +51,7 @@ public class EncounterEventPanel : MonoBehaviour
     public Animator encounterAnimator;
     public GameObject dialogueRoot;
     public TextMeshProUGUI dialogueText;
+    public TextMeshProUGUI encounterNameText;
     public Button nextDialogueButton;
     public SpriteRenderer encounterSpriteRenderer;
 
@@ -61,6 +63,7 @@ public class EncounterEventPanel : MonoBehaviour
     public TextMeshProUGUI choiceBText;
 
     private int dialogueIndex = 0;
+    private LocalizeStringEvent encounterNameLocalize;
 
     private void Awake()
     {
@@ -68,9 +71,37 @@ public class EncounterEventPanel : MonoBehaviour
         if (choiceAButton != null) choiceAButton.onClick.AddListener(OnChoiceASelected);
         if (choiceBButton != null) choiceBButton.onClick.AddListener(OnChoiceBSelected);
 
+        if (encounterNameText == null)
+        {
+            TextMeshProUGUI[] labels = GetComponentsInChildren<TextMeshProUGUI>(true);
+            for (int i = 0; i < labels.Length; i++)
+            {
+                if (labels[i] != null && labels[i].name == "Encounter Name Text")
+                {
+                    encounterNameText = labels[i];
+                    break;
+                }
+            }
+        }
+
+        if (encounterNameText != null)
+        {
+            encounterNameLocalize = encounterNameText.GetComponent<LocalizeStringEvent>();
+            if (encounterNameLocalize == null)
+                encounterNameLocalize = encounterNameText.gameObject.AddComponent<LocalizeStringEvent>();
+
+            encounterNameLocalize.OnUpdateString.AddListener(OnEncounterNameLocalized);
+        }
+
         if (fullScreenBackground != null) fullScreenBackground.SetActive(false);
         if (dialogueRoot != null) dialogueRoot.SetActive(false);
         if (choiceRoot != null) choiceRoot.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        if (encounterNameLocalize != null)
+            encounterNameLocalize.OnUpdateString.RemoveListener(OnEncounterNameLocalized);
     }
 
     public void StartEvent(BiomeType currentBiome)
@@ -116,6 +147,8 @@ public class EncounterEventPanel : MonoBehaviour
                 encounterAnimator.enabled = false;
             }
         }
+
+        ApplyEncounterNameKey();
 
         if (fullScreenBackground != null) fullScreenBackground.SetActive(true);
         if (dialogueRoot != null) dialogueRoot.SetActive(true);
@@ -175,22 +208,40 @@ public class EncounterEventPanel : MonoBehaviour
         if (choiceRoot != null) choiceRoot.SetActive(true);
     }
 
+    private void ApplyEncounterNameKey()
+    {
+        if (encounterNameText == null || currentEncounter == null)
+            return;
+
+        string key = LocalizationManager.GetEncounterNameKey(currentEncounter.type);
+        if (string.IsNullOrEmpty(key))
+        {
+            encounterNameText.text = currentEncounter.encounterName;
+            return;
+        }
+
+        if (encounterNameLocalize != null)
+        {
+            encounterNameLocalize.StringReference.SetReference(LocalizationManager.EncounterTable, key);
+            encounterNameLocalize.RefreshString();
+        }
+
+        encounterNameText.text = LocalizationManager.GetEncounterDisplayName(
+            currentEncounter.type,
+            currentEncounter.encounterName);
+    }
+
+    private void OnEncounterNameLocalized(string value)
+    {
+        if (encounterNameText == null || string.IsNullOrEmpty(value))
+            return;
+
+        encounterNameText.text = value;
+    }
+
     private static string GetEncounterKeyPrefix(EncounterType type)
     {
-        switch (type)
-        {
-            case EncounterType.Clown: return "ENC_CLOWN";
-            case EncounterType.AbyssDealer: return "ENC_ABYSS_DEALER";
-            case EncounterType.BlindFortuneTeller: return "ENC_BLIND_FORTUNE_TELLER";
-            case EncounterType.Poacher: return "ENC_POACHER";
-            case EncounterType.SacrificedGirl: return "ENC_SACRIFICED_GIRL";
-            case EncounterType.Alchemist: return "ENC_ALCHEMIST";
-            case EncounterType.WishWanderer: return "ENC_WISH_WANDERER";
-            case EncounterType.ForgottenExplorer: return "ENC_FORGOTTEN_EXPLORER";
-            case EncounterType.MadHatter: return "ENC_MAD_HATTER";
-            case EncounterType.RustyCaptain: return "ENC_RUSTY_CAPTAIN";
-            default: return null;
-        }
+        return LocalizationManager.GetEncounterLocPrefix(type);
     }
 
     private static string GetEncounterDialogue(EncounterType type, int index)
