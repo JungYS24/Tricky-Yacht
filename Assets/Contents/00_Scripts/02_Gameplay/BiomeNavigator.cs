@@ -2,10 +2,24 @@ using System.Collections.Generic;
 
 public enum BiomeType
 {
-    Forest, Meadow, Temple, Jungle,
-    Desert, Ruins, Cave, Volcano,
-    Swamp, Beach, Ocean, Abyss,
-    Snow, Grave, Circus, Void,Shop
+    Special = 0,
+    Forest = 1,
+    Meadow = 2,
+    Temple = 3,
+    Jungle = 4,
+    Desert = 5,
+    Ruins = 6,
+    Cave = 7,
+    Volcano = 8,
+    Swamp = 9,
+    Beach = 10,
+    Ocean = 11,
+    Abyss = 12,
+    Snow = 13,
+    Grave = 14,
+    Circus = 15,
+    Void = 16,
+    Skyisland = 17
 }
 
 public class BiomeNavigator
@@ -25,9 +39,10 @@ public class BiomeNavigator
         { BiomeType.Beach,  new List<BiomeType> { BiomeType.Meadow, BiomeType.Ocean, BiomeType.Circus } },
         { BiomeType.Ocean,  new List<BiomeType> { BiomeType.Beach, BiomeType.Swamp, BiomeType.Abyss } },
         { BiomeType.Abyss,  new List<BiomeType> { BiomeType.Ocean, BiomeType.Grave, BiomeType.Temple } },
-        { BiomeType.Snow,   new List<BiomeType> { BiomeType.Volcano, BiomeType.Forest, BiomeType.Circus } },
+        { BiomeType.Snow,   new List<BiomeType> { BiomeType.Volcano, BiomeType.Forest, BiomeType.Skyisland } },
         { BiomeType.Grave,  new List<BiomeType> { BiomeType.Temple, BiomeType.Swamp, BiomeType.Abyss } },
-        { BiomeType.Circus, new List<BiomeType> { BiomeType.Temple, BiomeType.Beach, BiomeType.Snow } }
+        { BiomeType.Circus, new List<BiomeType> { BiomeType.Temple, BiomeType.Beach, BiomeType.Skyisland } },
+        { BiomeType.Skyisland, new List<BiomeType> { BiomeType.Circus, BiomeType.Snow, BiomeType.Beach } }
     };
 
     public List<BiomeType> GetNextBiomeOptions(BiomeType currentBiome, int currentStage)
