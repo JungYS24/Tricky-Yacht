@@ -106,10 +106,8 @@ public class UIManager : MonoBehaviour
             ? LocalizationManager.Instance.GetLocalizedString(LocalizationManager.UiTable, "UI_REROLLS_LEFT", rerollsLeft)
             : $"남은 굴리기: {rerollsLeft}";
 
-        if (heartText != null)
-        {
-            heartText.text = $"{playerHP}/{playerMaxHP}";
-        }
+        int shield = DiceManager.Instance != null ? DiceManager.Instance.currentShield : 0;
+        UpdatePlayerHealthText(playerHP, playerMaxHP, shield);
 
 
         //발동된 피규어 아이콘 표시 로직
@@ -212,23 +210,44 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    // 보호막이 있으면 현재 체력 옆에 괄호로 표시
+    private void UpdatePlayerHealthText(int hp, int maxHP, int shield)
+    {
+        if (heartText == null) return;
+
+        heartText.text = shield > 0? $"{hp}<color=#65CFFF>({shield})</color>/{maxHP}": $"{hp}/{maxHP}";
+    }
+
     public void UpdateShieldUI(int shieldAmount)
     {
-        if (shieldRoot != null)
-        {
-            if (shieldAmount > 0)
-            {
-                shieldRoot.SetActive(true);
-                if (shieldText != null) shieldText.text = shieldAmount.ToString();
+        shieldAmount = Mathf.Max(0, shieldAmount);
 
-                // 획득하거나 깎일 때마다 타격감 연출
-                shieldRoot.transform.DOKill(true);
-                shieldRoot.transform.DOPunchScale(new Vector3(0.25f, 0.25f, 0f), 0.35f, 3, 0.5f);
-            }
-            else
-            {
-                shieldRoot.SetActive(false); // 보호막이 0이면 아예 숨김
-            }
+        // 보호막 획득·차감 직후 체력 옆 숫자도 갱신
+        if (DiceManager.Instance != null)
+        {
+            UpdatePlayerHealthText(DiceManager.Instance.currentPlayerHP,DiceManager.Instance.playerMaxHP,shieldAmount);
+        }
+
+        // 기존 별도 보호막 숫자는 숨김: 체력 옆에 표시하므로 중복 방지
+        // 이미지와 같은 오브젝트여도 이미지는 유지
+        if (shieldText != null)
+        {
+            shieldText.text = "";
+        }
+
+        if (shieldRoot == null) return;
+
+        bool hasShield = shieldAmount > 0;
+
+        shieldRoot.transform.DOKill(true);
+        shieldRoot.SetActive(hasShield);
+
+        if (hasShield)
+        {
+            // 획득하거나 깎일 때마다 타격감 연출
+            shieldRoot.transform.DOPunchScale(
+                new Vector3(0.25f, 0.25f, 0f),
+                0.35f, 3, 0.5f);
         }
     }
 
