@@ -279,6 +279,7 @@ public class FigureEffectManager : MonoBehaviour
                 //보호막 추가 (이번 전투 동안 유지)
                 case FigureEffectType.AddShield:
                     diceManager.currentShield += Mathf.FloorToInt(actualValue);
+                    Debug.Log($"[보호막 확인] 계산값={actualValue}, 추가량={Mathf.FloorToInt(actualValue)}, 현재 보호막={diceManager.currentShield}, UI연결={diceManager.ui != null}");
                     // 보호막 UI가 있다면 즉시 갱신
                     if (diceManager.ui != null) diceManager.ui.UpdateShieldUI(diceManager.currentShield);
                     break;
