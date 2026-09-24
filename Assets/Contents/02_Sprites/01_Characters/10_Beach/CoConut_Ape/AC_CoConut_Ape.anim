@@ -6,7 +6,7 @@ AnimationClip:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: New Animation
+  m_Name: AC_CoConut_Ape
   serializedVersion: 7
   m_Legacy: 0
   m_Compressed: 0
@@ -22,26 +22,26 @@ AnimationClip:
     curve:
     - time: 0
       value: {fileID: -8147334946655624064, guid: 1cbd7d1b0fb25c14291c320e9604c88e, type: 3}
-    - time: 0.125
+    - time: 0.18333334
       value: {fileID: 7472032534401162678, guid: 1cbd7d1b0fb25c14291c320e9604c88e, type: 3}
-    - time: 0.25
+    - time: 0.38333333
       value: {fileID: 446264109620437562, guid: 1cbd7d1b0fb25c14291c320e9604c88e, type: 3}
-    - time: 0.375
+    - time: 0.56666666
       value: {fileID: -8206123973075290266, guid: 1cbd7d1b0fb25c14291c320e9604c88e, type: 3}
-    - time: 0.5
+    - time: 0.76666665
       value: {fileID: 5462182062085267408, guid: 1cbd7d1b0fb25c14291c320e9604c88e, type: 3}
-    - time: 0.625
+    - time: 0.95
       value: {fileID: -4849116730620457989, guid: 1cbd7d1b0fb25c14291c320e9604c88e, type: 3}
-    - time: 0.75
+    - time: 1.15
       value: {fileID: 6600815051483744183, guid: 1cbd7d1b0fb25c14291c320e9604c88e, type: 3}
-    - time: 0.875
+    - time: 1.3333334
       value: {fileID: 1199927384190234428, guid: 1cbd7d1b0fb25c14291c320e9604c88e, type: 3}
     attribute: m_Sprite
     path: 
     classID: 212
     script: {fileID: 0}
     flags: 2
-  m_SampleRate: 8
+  m_SampleRate: 60
   m_WrapMode: 0
   m_Bounds:
     m_Center: {x: 0, y: 0, z: 0}
@@ -71,7 +71,7 @@ AnimationClip:
     m_AdditiveReferencePoseClip: {fileID: 0}
     m_AdditiveReferencePoseTime: 0
     m_StartTime: 0
-    m_StopTime: 1
+    m_StopTime: 1.35
     m_OrientationOffsetY: 0
     m_Level: 0
     m_CycleOffset: 0
