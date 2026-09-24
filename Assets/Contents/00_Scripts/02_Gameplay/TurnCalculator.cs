@@ -15,6 +15,7 @@ public struct TurnCalcResult
 
     public int satelliteBonusChips;
     public float satelliteBonusMult;
+    public float iceBonusMult;
 }
 
 public static class TurnCalculator
@@ -82,6 +83,8 @@ public static class TurnCalculator
 
         foreach (var d in targetDice)
         {
+            int extraIceChips = FigureEffectManager.Instance != null? FigureEffectManager.Instance.GetIceChipsBonus(): 0;
+            float extraIceMult = FigureEffectManager.Instance != null? FigureEffectManager.Instance.GetIceMultiplierBonus(): 0f;
             res.baseSum += d.currentValue;
 
             switch (d.myData.specialEffect)
@@ -106,9 +109,10 @@ public static class TurnCalculator
                         break;
                     case DiceType.Gold:
                         res.expectedGold += d.currentValue * GoldPerPip;
-                        break;                 
+                        break;
                     case DiceType.Ice:
-                        res.iceBonusChips += 10;
+                        res.iceBonusChips += 10 + extraIceChips;
+                        res.iceBonusMult += extraIceMult;
                         break;
                 }
             }

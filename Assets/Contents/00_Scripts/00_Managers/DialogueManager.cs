@@ -64,7 +64,12 @@ public class DialogueManager : MonoBehaviour
 
     public string GetText(string id)
     {
-        if (dialogDatabase.TryGetValue(id, out string text)) return text;
-        return $"[{id} 대사 오류!]"; // 대사를 못 찾으면 게임 화면에 바로 오류를 띄워서 알려줌
+        if (LocalizationManager.TryGetLocalized(LocalizationManager.TutTable, id, out string localized))
+            return localized;
+
+        if (dialogDatabase.TryGetValue(id, out string text))
+            return text;
+
+        return $"[{id} 대사 오류!]";
     }
 }

@@ -37,7 +37,8 @@ public class SatelliteSelectionPanel : MonoBehaviour
         {
             //필터링된 주사위가 없다면 돈을 돌려주거나 토스트 메시지 출력
             Debug.Log("위성을 달 수 있는 주사위가 덱에 없습니다! (전부 4개이거나 이미 동일 위성 장착중)");
-            if (ToastPopupController.Instance != null) ToastPopupController.Instance.ShowToast("장착 가능한 주사위가 없습니다.");
+            if (ToastPopupController.Instance != null)
+                ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_NO_EQUIPPABLE_DICE", "장착 가능한 주사위가 없습니다."));
             ClosePanel();
             return;
         }

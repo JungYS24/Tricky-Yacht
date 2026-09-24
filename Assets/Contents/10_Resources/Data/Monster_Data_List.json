@@ -1256,7 +1256,7 @@
     "monsterSprite": "Seahorse",
     "monsterAnimator": "AC_Seahorse",
     "figureDropRate": 0.2,
-    "dropFigureId": "Fig_SeahorseDoll",
+    "dropFigureId": "Fig_BlackFin",
     "description": "심해 밑바닥 어둠 속에서 유유히 헤엄치며 칠흑빛 물길을 일으키는 해마입니다."
   },
   {
@@ -1301,7 +1301,7 @@
     "monsterSprite": "Griffin",
     "monsterAnimator": "AC_Griffin",
     "figureDropRate": 0.4,
-    "dropFigureId": "Fig_GriffinWing",
+    "dropFigureId": "Fig_GoldClaw",
     "description": "하늘섬과 높이 솟은 설원 산맥의 상공을 수호하는 사자 몸통과 독수리 날개의 환수입니다."
   },
   {

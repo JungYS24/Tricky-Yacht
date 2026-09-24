@@ -64,6 +64,8 @@ public class LootSelectionPanel : MonoBehaviour
             if (!added)
             {
                 Debug.Log("스낵 인벤토리가 꽉 차서 받을 수 없습니다!");
+                if (ToastPopupController.Instance != null)
+                    ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_INVENTORY_FULL", "인벤토리가 가득 찼습니다."));
                 return; // 꽉 차서 안 들어가면 리턴하여 단계가 넘어가지 않도록 방지
             }
         }
@@ -72,12 +74,6 @@ public class LootSelectionPanel : MonoBehaviour
             // DiceItemSO 또는 MaxHPItemSO일 경우 인벤토리에 들어가지 않고 즉시 효과 발동
             selectedLoot.ApplyItemEffect(diceManager);
         }
-
-        if (selectedLoot is DiceItemSO dice)
-        {
-            dice.ApplyItemEffect(diceManager);
-        }
-
         //튜토리얼 상태일 때 전리품 선택 완료를 매니저에게 알림
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {

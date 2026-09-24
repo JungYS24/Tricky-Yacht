@@ -53,9 +53,7 @@ public class ShopManager : MonoBehaviour
             shopRerollButton.onClick.AddListener(RerollShop);
 
         if (rerollCostText != null)
-            rerollCostText.text = LocalizationManager.Instance != null
-                ? LocalizationManager.Instance.GetLocalizedString(LocalizationManager.UiTable, "UI_REROLL_COST", rerollCost)
-                : "리롤 : " + rerollCost + " G";
+            rerollCostText.text = LocalizationManager.GetUi("UI_REROLL_COST", "리롤 : {0} G", rerollCost);
 
         if (nextStageButton != null)
             nextStageButton.onClick.AddListener(CloseShopAndGoNext);
@@ -216,6 +214,11 @@ public class ShopManager : MonoBehaviour
 
     public void RerollShop()
     {
+        if ((ticketSelectionPanel != null && ticketSelectionPanel.activeSelf) || SatelliteSelectionPanel.IsPanelOpen)
+        {
+            return;
+        }
+
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return;
 
@@ -229,13 +232,18 @@ public class ShopManager : MonoBehaviour
         }
         else
         {
-            if (ToastPopupController.Instance != null) ToastPopupController.Instance.ShowToast("골드가 부족합니다.");
+            if (ToastPopupController.Instance != null)
+                ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_GOLD_NOT_ENOUGH", "골드가 부족합니다."));
         }
         if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
     }
 
     public void CloseShopAndGoNext()
     {
+        if ((ticketSelectionPanel != null && ticketSelectionPanel.activeSelf) ||SatelliteSelectionPanel.IsPanelOpen)
+        {
+            return;
+        }
         // 코팅 선택 중이거나 파괴 선택 중이면 다음 스테이지 넘어가기 불가
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return;
@@ -266,6 +274,11 @@ public class ShopManager : MonoBehaviour
 
     public bool PurchaseItem(BaseItemDataSO item, int actualPrice)
     {
+        if ((ticketSelectionPanel != null && ticketSelectionPanel.activeSelf) || SatelliteSelectionPanel.IsPanelOpen)
+        {
+            return false;
+        }
+
         // 코팅 선택 중이거나 파괴 선택 중이면 구매 불가
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return false;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return false;
@@ -292,7 +305,7 @@ public class ShopManager : MonoBehaviour
                     //인벤토리가 꽉 찼을 때도 토스트 팝업으로 피드백 제공
                     if (ToastPopupController.Instance != null)
                     {
-                        ToastPopupController.Instance.ShowToast("인벤토리가 가득 찼습니다.");
+                        ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_INVENTORY_FULL", "인벤토리가 가득 찼습니다."));
                     }
                     return false;
                 }
@@ -316,7 +329,7 @@ public class ShopManager : MonoBehaviour
         // 아이템 구매 비용이 부족할 때 토스트 팝업 띄우기
         if (ToastPopupController.Instance != null)
         {
-            ToastPopupController.Instance.ShowToast("골드가 부족합니다.");
+            ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_GOLD_NOT_ENOUGH", "골드가 부족합니다."));
         }
         return false;
     }
@@ -392,7 +405,7 @@ public class ShopManager : MonoBehaviour
     public void UpdateRerollUI()
     {
         int finalCost = GetFinalRerollCost();
-        if (rerollCostText != null) rerollCostText.text = "리롤 : " + finalCost + " G";
+        if (rerollCostText != null) rerollCostText.text = LocalizationManager.GetUi("UI_REROLL_COST", "리롤 : {0} G", finalCost);
     }
 
     // 복고양이 효과: 진열된 아이템 중 하나를 무작위로 0원 처리
@@ -404,6 +417,31 @@ public class ShopManager : MonoBehaviour
             var randSlot = validSlots[Random.Range(0, validSlots.Count)];
             randSlot.ApplyLuckyCatFree();
         }
+    }
+
+    // 골드 획득 시 사용. 증가 효과 적용과 UI 갱신을 한 곳에서 처리
+    // 반환값은 보너스까지 반영해 실제로 지급한 골드
+    public int GrantGold(int baseAmount)
+    {
+        if (baseAmount <= 0) return 0;
+
+        float multiplier = FigureEffectManager.Instance != null
+            ? FigureEffectManager.Instance.GetGoldGainMultiplier()
+            : 1f;
+
+        // 획득 건별로 소수점 아래는 버림
+        int grantedAmount = Mathf.FloorToInt(baseAmount * multiplier);
+
+        currentGold += grantedAmount;
+
+        diceManager?.ui?.UpdateGoldUI(currentGold);
+
+        if (GoldCounter.Instance != null)
+        {
+            GoldCounter.Instance.SetGold(currentGold);
+        }
+
+        return grantedAmount;
     }
 
     public void HideTooltip() => tooltipPanel.SetActive(false);

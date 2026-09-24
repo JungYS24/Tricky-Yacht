@@ -31,21 +31,21 @@ public class CollectionSlot : MonoBehaviour
         {
             figureIcon.sprite = figureData.icon;
             figureIcon.color = Color.white;
-            nameText.text = figureData.itemName;
+            nameText.text = LocalizationManager.GetItemDisplayName(figureData);
             nameText.color = Color.white;
         }
         else if (isEncountered)
         {
             figureIcon.sprite = figureData.icon;
             figureIcon.color = Color.gray;
-            nameText.text = figureData.itemName;
+            nameText.text = LocalizationManager.GetItemDisplayName(figureData);
             nameText.color = Color.green;
         }
         else
         {
             figureIcon.sprite = unknownQuestionSprite != null ? unknownQuestionSprite : figureData.icon;
             figureIcon.color = unknownQuestionSprite != null ? Color.white : lockedColor;
-            nameText.text = "???";
+            nameText.text = LocalizationManager.GetUi("UI_UNKNOWN", "???");
             nameText.color = new Color(0.4f, 0.4f, 0.4f, 1f);
         }
     }

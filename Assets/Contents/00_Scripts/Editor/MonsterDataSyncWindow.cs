@@ -10,7 +10,8 @@ public class MonsterDataSyncWindow : EditorWindow
         { "Forest", "01_Forest" }, { "Meadow", "02_Meadow" }, { "Temple", "03_Temple" }, { "Jungle", "04_Jungle" },
         { "Desert", "05_Desert" }, { "Ruins", "06_Ruins" }, { "Cave", "07_Cave" }, { "Volcano", "08_Volcano" },
         { "Swamp", "09_Swamp" }, { "Beach", "10_Beach" }, { "Ocean", "11_Ocean" }, { "Abyss", "12_Abyss" },
-        { "Snow", "13_Snow" }, { "Grave", "14_Grave" }, { "Circus", "15_Circus" }, { "Void", "16_Void" }
+        { "Snow", "13_Snow" }, { "Grave", "14_Grave" }, { "Circus", "15_Circus" }, { "Void", "16_Void" },
+        { "Skyisland", "17_Skyisland" }, { "SkyIsland", "17_Skyisland" }
     };
 
     [MenuItem("Studio 10&6/몬스터 데이터 동기화")]
@@ -105,8 +106,7 @@ public class MonsterDataSyncWindow : EditorWindow
             asset.description = data.description;
 
             // 제이슨의 드롭 피규어 ID 텍스트 문자열을 기반으로 프로젝트 내 실제 FigureItemSO 파일을 자동 검색
-            string figureAssetPath = $"Assets/Contents/05_DataSO/FiguresSO/{data.dropFigureId}.asset";
-            asset.dropFigureData = AssetDatabase.LoadAssetAtPath<FigureItemSO>(figureAssetPath);
+            asset.dropFigureData = FindFigureAsset(data.dropFigureId);
 
             // 비주얼 리소스 폴더 구조화 경로 추적
             string monsterFolderPath = $"Assets/Contents/02_Sprites/01_Characters/{biomeFolder}/{currentID}";
@@ -127,7 +127,7 @@ public class MonsterDataSyncWindow : EditorWindow
             if (asset.animatorController == null)
                 Debug.LogWarning($"[Studio 10&6] 애니메이터 로드 실패: {animAssetPath}");
             if (asset.dropFigureData == null && !string.IsNullOrEmpty(data.dropFigureId))
-                Debug.LogWarning($"[Studio 10&6] 피규어 SO 매칭 실패. 경로에 파일이 있는지 확인해 주세요: {figureAssetPath}");
+                Debug.LogWarning($"[Studio 10&6] 피규어 SO 매칭 실패: {data.dropFigureId}");
 
             if (isNew)
             {
@@ -145,6 +145,36 @@ public class MonsterDataSyncWindow : EditorWindow
         AssetDatabase.Refresh();
 
         Debug.Log($"[Studio 10&6] 동기화 성공! {syncCount}개의 몬스터 SO가 폴더별로 자동 분류 생성되었습니다.");
+    }
+
+    private static FigureItemSO FindFigureAsset(string dropFigureId)
+    {
+        if (string.IsNullOrEmpty(dropFigureId))
+            return null;
+
+        const string figureRoot = "Assets/Contents/05_DataSO/FiguresSO";
+        string[] matches = Directory.GetFiles(figureRoot, dropFigureId + ".asset", SearchOption.AllDirectories);
+        if (matches.Length > 0)
+        {
+            string unityPath = matches[0].Replace("\\", "/");
+            int assetsIndex = unityPath.IndexOf("Assets/");
+            if (assetsIndex >= 0)
+                unityPath = unityPath.Substring(assetsIndex);
+            return AssetDatabase.LoadAssetAtPath<FigureItemSO>(unityPath);
+        }
+
+        string[] guids = AssetDatabase.FindAssets("t:FigureItemSO", new[] { figureRoot });
+        foreach (string guid in guids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            FigureItemSO asset = AssetDatabase.LoadAssetAtPath<FigureItemSO>(path);
+            if (asset == null)
+                continue;
+            if (asset.Item_ID == dropFigureId || asset.name == dropFigureId)
+                return asset;
+        }
+
+        return null;
     }
 }
 

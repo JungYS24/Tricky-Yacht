@@ -171,8 +171,8 @@ public class LocalizationManager : MonoBehaviour
         if (item == null)
             return string.Empty;
 
-        string key = ResolveItemNameKey(item);
-        return GetOrFallback(ItemTable, key, item.itemName);
+        ResolveItemLoc(item, isName: true, out string tableName, out string key);
+        return GetOrFallback(tableName, key, item.itemName);
     }
 
     public static string GetItemDescription(BaseItemDataSO item)
@@ -180,14 +180,50 @@ public class LocalizationManager : MonoBehaviour
         if (item == null)
             return string.Empty;
 
-        string key = ResolveItemDescKey(item);
-        return GetOrFallback(ItemTable, key, item.description);
+        ResolveItemLoc(item, isName: false, out string tableName, out string key);
+        return GetOrFallback(tableName, key, item.description);
+    }
+
+    public static string GetTut(string entryKey, string fallback)
+    {
+        return GetOrFallback(TutTable, entryKey, fallback);
+    }
+
+    public static string GetEncounter(string entryKey, string fallback)
+    {
+        return GetOrFallback(EncounterTable, entryKey, fallback);
+    }
+
+    public static string GetMonsterDisplayName(MonsterDataSO monster)
+    {
+        if (monster == null)
+            return string.Empty;
+
+        string key = ResolveMonsterNameKey(monster);
+        return GetOrFallback(MonsterTable, key, monster.monsterName);
     }
 
     public static string GetBiomeDisplayName(BiomeType biome)
     {
         string key = "CNT_BIOME_" + biome.ToString().ToUpperInvariant() + "_NAME";
         return GetOrFallback(BiomeTable, key, biome.ToString());
+    }
+
+    public static string GetSys(string entryKey, string fallback)
+    {
+        return GetOrFallback(SysTable, entryKey, fallback);
+    }
+
+    public static string GetSys(string entryKey, string fallback, params object[] arguments)
+    {
+        if (Instance == null)
+            return FormatFallback(fallback, arguments);
+
+        string result = Instance.GetLocalizedString(SysTable, entryKey, arguments);
+        if (string.IsNullOrEmpty(result) || result == entryKey)
+            return FormatFallback(fallback, arguments);
+
+        return result;
     }
 
     public static string GetUi(string entryKey, string fallback)
@@ -207,6 +243,23 @@ public class LocalizationManager : MonoBehaviour
         return result;
     }
 
+    public static bool TryGetLocalized(string tableName, string entryKey, out string value)
+    {
+        value = null;
+        if (string.IsNullOrEmpty(tableName) || string.IsNullOrEmpty(entryKey) || Instance == null)
+            return false;
+
+        string result = Instance.GetLocalizedString(tableName, entryKey);
+        if (string.IsNullOrEmpty(result) || result == entryKey)
+            return false;
+
+        if (result.StartsWith("No translation found", StringComparison.Ordinal))
+            return false;
+
+        value = result;
+        return true;
+    }
+
     private static string GetOrFallback(string tableName, string entryKey, string fallback)
     {
         if (string.IsNullOrEmpty(entryKey))
@@ -222,22 +275,82 @@ public class LocalizationManager : MonoBehaviour
         return result;
     }
 
-    private static string ResolveItemNameKey(BaseItemDataSO item)
+    private static void ResolveItemLoc(BaseItemDataSO item, bool isName, out string tableName, out string key)
     {
-        string id = ResolveRuntimeItemId(item);
-        if (string.IsNullOrEmpty(id))
-            return null;
+        tableName = ItemTable;
+        string suffix = isName ? "_NAME" : "_DESC";
+        key = null;
 
-        return "CNT_" + id + "_NAME";
+        if (item is SnackItemSO snack)
+        {
+            key = "CNT_SNACK_" + ToSnakeUpper(snack.snackType.ToString()) + suffix;
+            return;
+        }
+
+        if (item is TicketPackSO)
+        {
+            key = "CNT_TICKET_PACK" + suffix;
+            return;
+        }
+
+        if (item is TicketItemSO ticket)
+        {
+            key = "CNT_TICKET_" + ToSnakeUpper(ticket.targetHand.ToString()) + suffix;
+            return;
+        }
+
+        if (item is SatelliteItemSO satellite)
+        {
+            tableName = SatelliteTable;
+            key = "SAT_" + satellite.satelliteType.ToString().ToUpperInvariant() + suffix;
+            return;
+        }
+
+        if (item is CoatingItemSO coating)
+        {
+            string token = coating.coatingType == DiceType.Normal ? "Vanilla" : coating.coatingType.ToString();
+            key = "CNT_" + token + suffix;
+            return;
+        }
+
+        if (item is DiceItemSO dice)
+        {
+            string diceToken = ResolveDiceLocToken(dice);
+            if (!string.IsNullOrEmpty(diceToken))
+            {
+                key = "CNT_" + diceToken + suffix;
+                return;
+            }
+        }
+
+        foreach (string candidate in GetItemLocTokens(item))
+        {
+            string tryKey = "CNT_" + candidate + suffix;
+            if (TryGetLocalized(ItemTable, tryKey, out _))
+            {
+                key = tryKey;
+                return;
+            }
+        }
+
+        string id = ResolveRuntimeItemId(item);
+        if (string.Equals(id, "Dice2", StringComparison.OrdinalIgnoreCase))
+            id = "Dark";
+
+        if (!string.IsNullOrEmpty(id))
+            key = "CNT_" + id + suffix;
     }
 
-    private static string ResolveItemDescKey(BaseItemDataSO item)
+    private static System.Collections.Generic.IEnumerable<string> GetItemLocTokens(BaseItemDataSO item)
     {
-        string id = ResolveRuntimeItemId(item);
-        if (string.IsNullOrEmpty(id))
-            return null;
+        if (item == null)
+            yield break;
 
-        return "CNT_" + id + "_DESC";
+        if (!string.IsNullOrEmpty(item.Item_ID) && !IsLegacyNumericFigureId(item.Item_ID))
+            yield return item.Item_ID;
+
+        if (!string.IsNullOrEmpty(item.name) && item.name.StartsWith("Fig_") && item.name != item.Item_ID)
+            yield return item.name;
     }
 
     private static string ResolveRuntimeItemId(BaseItemDataSO item)
@@ -252,6 +365,73 @@ public class LocalizationManager : MonoBehaviour
             return item.name;
 
         return item.Item_ID;
+    }
+
+    private static string ResolveDiceLocToken(DiceItemSO dice)
+    {
+        if (dice == null)
+            return null;
+
+        switch (dice.specialEffect)
+        {
+            case SpecialDieEffect.Coin: return "Coin";
+            case SpecialDieEffect.Heart: return "Heart";
+            case SpecialDieEffect.Flame: return "Flame";
+            case SpecialDieEffect.Even: return "Even";
+            case SpecialDieEffect.Odd: return "Odd";
+        }
+
+        string id = dice.Item_ID ?? string.Empty;
+        string assetName = dice.name ?? string.Empty;
+
+        if (id == "tutorialHighRollerDice" || assetName == "High")
+            return "High";
+        if (id == "Low" || assetName == "Low")
+            return "Low";
+        if (assetName == "Even Number")
+            return "Even";
+        if (assetName == "odd number")
+            return "Odd";
+        if (id == "One" || id == "Two" || id == "Three" || id == "Four" || id == "Five" || id == "Six")
+            return id;
+        if (assetName == "One" || assetName == "Two" || assetName == "Three" || assetName == "Four" || assetName == "Five" || assetName == "Six")
+            return assetName;
+        if (id == "88Dice" || assetName == "88Dice")
+            return "88Dice";
+        if (id == "Heart" || assetName == "Heart")
+            return "Heart";
+        if (id == "Flame" || assetName == "Flame")
+            return "Flame";
+        if (id == "Coin" || assetName == "Coin")
+            return "Coin";
+
+        return null;
+    }
+
+    private static string ResolveMonsterNameKey(MonsterDataSO monster)
+    {
+        if (monster == null || string.IsNullOrEmpty(monster.monsterID))
+            return null;
+
+        string token = monster.monsterID.Trim().Replace(' ', '_').Replace('-', '_');
+        return "CNT_MON_" + token.ToUpperInvariant() + "_NAME";
+    }
+
+    private static string ToSnakeUpper(string pascal)
+    {
+        if (string.IsNullOrEmpty(pascal))
+            return string.Empty;
+
+        var builder = new System.Text.StringBuilder(pascal.Length + 4);
+        for (int i = 0; i < pascal.Length; i++)
+        {
+            char c = pascal[i];
+            if (i > 0 && char.IsUpper(c) && (char.IsLower(pascal[i - 1]) || (i + 1 < pascal.Length && char.IsLower(pascal[i + 1]))))
+                builder.Append('_');
+            builder.Append(char.ToUpperInvariant(c));
+        }
+
+        return builder.ToString();
     }
 
     private static bool IsLegacyNumericFigureId(string itemId)

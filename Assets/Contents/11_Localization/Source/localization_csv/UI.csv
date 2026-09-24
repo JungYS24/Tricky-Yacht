@@ -32,3 +32,29 @@ UI,Tuto,튜토리얼,Tutorial,遊び方,教程,
 UI,UI_HAND_CALCULATING,계산 중...,Calculating...,計算中...,计算中...,
 UI,UI_BIOME_SOURCES,획득 바이옴 : {0},Found in: {0},出現バイオーム: {0},出现区域: {0},
 UI,UI_SOLD_OUT,Sold Out,Sold Out,売り切れ,售罄,
+UI,UI_FILTER_ALL,전체,All,すべて,全部,
+UI,UI_ENEMY_TURN,턴 : {0},Turn : {0},ターン : {0},回合 : {0},
+UI,UI_FAKE_DICE,Fake,Fake,Fake,Fake,
+UI,UI_FREE,0 G (무료!),0 G (Free!),0 G (無料!),0 G (免费!),
+UI,UI_BONUS_SNACK,스낵,Snack,スナック,零食,
+UI,UI_BONUS_FIGURE,피규어,Figure,フィギュア,手办,
+UI,UI_BONUS_STAGE,전투 누적,Combat Bonus,戦闘累積,战斗累计,
+UI,UI_BONUS_PRISM,프리즘,Prism,プリズム,棱镜,
+UI,UI_BONUS_SATELLITE,위성,Satellite,衛星,卫星,
+UI,UI_SATELLITE_TAG,(위성),(Sat),(衛星),(卫星),
+UI,UI_MULT_VALUE,x <color=#00BFFF>{0}배</color>,x <color=#00BFFF>{0}</color>,x <color=#00BFFF>{0}倍</color>,x <color=#00BFFF>{0}倍</color>,
+UI,UI_COLLECTION_PROGRESS,{0} : {1} / {2},{0} : {1} / {2},{0} : {1} / {2},{0} : {1} / {2},
+UI,UI_BIOME_FILTER,바이옴 : {0},Biome : {0},バイオーム: {0},生态区域: {0},
+UI,UI_GAME_CLEAR,"<color=#00FF00>GAME CLEAR!</color>
+축하합니다!
+모든 시련을 이겨내고 공허를 정복했습니다!","<color=#00FF00>GAME CLEAR!</color>
+Congratulations!
+You overcame every trial and conquered the Void.","<color=#00FF00>GAME CLEAR!</color>
+おめでとうございます！
+すべての試練を乗り越え、虚無を征服しました！","<color=#00FF00>GAME CLEAR!</color>
+恭喜！
+你克服了所有试炼，征服了虚空。",
+UI,UI_UNKNOWN,???,???,???,???,
+UI,UI_DAMAGE_VALUE,<color=#FF5555>= {0} 데미지</color>,<color=#FF5555>= {0} Damage</color>,<color=#FF5555>= {0} ダメージ</color>,<color=#FF5555>= {0} 伤害</color>,
+UI,UI_FLAME_DAMAGE,화염 데미지! <color=#FF4500>-{0}</color>,Flame damage! <color=#FF4500>-{0}</color>,火炎ダメージ！ <color=#FF4500>-{0}</color>,火焰伤害！ <color=#FF4500>-{0}</color>,
+UI,UI_GOLD_PRICE,{0} G,{0} G,{0} G,{0} G,

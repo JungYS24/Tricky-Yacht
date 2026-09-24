@@ -84,6 +84,11 @@ public class InventoryManager : MonoBehaviour
         activeFigureSlots.Clear();
         ownedFigures.Clear();
 
+        if (diceManager != null)
+        {
+            diceManager.figureKillCounts.Clear();
+        }
+
         FigureEffectManager.Instance?.RebuildCache(); // 초기화 시 캐시 갱신
 
         //티켓 슬롯도 같이 비워줌
@@ -113,6 +118,13 @@ public class InventoryManager : MonoBehaviour
 
             ownedFigures.Add(figure);
 
+            // 새로 획득한 피규어는 처치 기록을 처음부터 시작
+            // 이어하기 RestoreItem에서는 초기화하지 않음
+            if (applyAcquiredEffects && diceManager != null)
+            {
+                diceManager.figureKillCounts.Remove(figure.itemName);
+            }
+
             FigureEffectManager.Instance?.RebuildCache(); // 피규어 추가 시 캐시 갱신
 
             //피규어 획득 즉시(OnAcquired) 발동하는 효과 적용
@@ -131,7 +143,7 @@ public class InventoryManager : MonoBehaviour
 
             // 도감 영구 해금 기록
             // PlayerPrefs 대신 새로운 매니저를 통해 메모리에 즉시 반영하고 자동 압축 저장
-            CollectionDataManager.Instance.UnlockFigure(figure.Item_ID);
+            CollectionDataManager.Instance.UnlockFigure(figure);
 
             // 새 슬롯 생성
             GameObject newSlotGo = Instantiate(figureSlotPrefab, figureSlotParent);
@@ -212,7 +224,7 @@ public class InventoryManager : MonoBehaviour
         targetSellSlot = slot;
 
         int sellPrice = Mathf.FloorToInt(slot.currentItem.price * 0.5f);
-        if (sellPriceText != null) sellPriceText.text = $"판매: {sellPrice} G";
+        if (sellPriceText != null) sellPriceText.text = LocalizationManager.GetSys("SYS_SELL_PRICE", "판매: {0} G", sellPrice);
 
         if (sellPopupRoot != null)
         {
@@ -239,6 +251,11 @@ public class InventoryManager : MonoBehaviour
         {
             // 리스트에서 제거
             ownedFigures.Remove(figure);
+
+            if (diceManager != null)
+            {
+                diceManager.figureKillCounts.Remove(figure.itemName);
+            }
 
             // 해당 피규어가 들어있던 UI 슬롯 찾아 삭제
             for (int i = 0; i < activeFigureSlots.Count; i++)
@@ -272,8 +289,7 @@ public class InventoryManager : MonoBehaviour
 
         if (diceManager != null && diceManager.shopManager != null)
         {
-            diceManager.shopManager.currentGold += sellPrice;
-            diceManager.ui?.UpdateGoldUI(diceManager.shopManager.currentGold);
+            diceManager.shopManager.GrantGold(sellPrice);
         }
 
         Debug.Log($"피규어 [{targetSellSlot.currentItem.itemName}] 판매 완료! +{sellPrice} G");
@@ -282,6 +298,10 @@ public class InventoryManager : MonoBehaviour
         {
             // 판매 시 리스트와 씬에서 삭제
             ownedFigures.Remove(figure);
+            if (diceManager != null)
+            {
+                diceManager.figureKillCounts.Remove(figure.itemName);
+            }
             FigureEffectManager.Instance?.RebuildCache(); // 피규어 판매 시 캐시 갱신
 
             activeFigureSlots.Remove(targetSellSlot.gameObject);

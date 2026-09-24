@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic; // List를 사용하기 위해 추가
@@ -175,11 +175,8 @@ public class Enemy : MonoBehaviour
             dropFigureData = nextMonsterData.dropFigureData;
             baseDropRate = nextMonsterData.dropRate;
 
-            if (dropFigureData != null)
-            {
-                PlayerPrefs.SetInt("Collection_Encountered_" + dropFigureData.itemName, 1);
-                PlayerPrefs.Save();
-            }
+            if (dropFigureData != null && CollectionDataManager.Instance != null)
+                CollectionDataManager.Instance.EncounterFigure(dropFigureData);
 
             finalMaxHP = nextMonsterData.maxHp;
             finalAttack = nextMonsterData.baseAtk;
@@ -209,6 +206,7 @@ public class Enemy : MonoBehaviour
 
         MaxAttackTurn = 2;
         CurrentAttackTurn = MaxAttackTurn;
+        UpdateTurnUI();
 
         //몬스터가 등장할 때(초기화될 때) 공격력 텍스트를 업데이트
         if (attackPowerText != null)
@@ -242,11 +240,21 @@ public class Enemy : MonoBehaviour
     }
 
 
-    public void TakeDamage(int damage, System.Action onDeathCallback)
+    public void TakeDamage(int damage,System.Action onDeathCallback,bool isFirstNormalAttack = false)
     {
-        if (IsDead) return;
+        if (IsDead || damage <= 0) return;
 
-        CurrentHP = Mathf.Max(0, CurrentHP - damage);
+        // 적 체력보다 큰 공격도 실제 감소한 체력까지만 피해로 인정
+        int actualDamage = Mathf.Min(CurrentHP, damage);
+        CurrentHP -= actualDamage;
+
+        // 사망 콜백 전에 지급해야 마지막 공격의 효과도 적용됨
+        DiceManager dm = DiceManager.Instance;
+
+        if (dm != null && dm.enemy == this)
+        {
+            FigureEffectManager.Instance?.EvaluateEnemyDamageTriggers(dm,actualDamage,isFirstNormalAttack);
+        }
 
         // 데미지를 입었으니 HP바 깎는 코루틴 실행!
         if (hpCoroutine != null) StopCoroutine(hpCoroutine);
@@ -423,11 +431,8 @@ public class Enemy : MonoBehaviour
         dropFigureData = monsterData.dropFigureData;
         baseDropRate = monsterData.dropRate;
 
-        if (dropFigureData != null)
-        {
-            PlayerPrefs.SetInt("Collection_Encountered_" + dropFigureData.itemName, 1);
-            PlayerPrefs.Save();
-        }
+        if (dropFigureData != null && CollectionDataManager.Instance != null)
+            CollectionDataManager.Instance.EncounterFigure(dropFigureData);
 
         MaxHP = maxHp;
         CurrentHP = hp;
@@ -464,8 +469,27 @@ public class Enemy : MonoBehaviour
     {
         if (turnText != null)
         {
-            turnText.text = $"Turn : {CurrentAttackTurn}턴";
+            turnText.text = LocalizationManager.GetUi("UI_ENEMY_TURN", "Turn : {0}", CurrentAttackTurn);
         }
+    }
+
+    // 스테이지 시작 시 최대 체력을 낮추는 효과용
+    public void ReduceMaxHP(int amount)
+    {
+        if (IsDead || amount <= 0) return;
+
+        // 최대 체력 감소만으로 적이 죽지는 않도록 최소 1 유지
+        MaxHP = Mathf.Max(1, MaxHP - amount);
+        CurrentHP = Mathf.Min(CurrentHP, MaxHP);
+
+        // 이전 체력바 애니메이션이 새 값을 덮어쓰지 않도록 중단
+        if (hpCoroutine != null)
+        {
+            StopCoroutine(hpCoroutine);
+            hpCoroutine = null;
+        }
+
+        UpdateHPBar(true);
     }
 
     public void DecreaseTurn()

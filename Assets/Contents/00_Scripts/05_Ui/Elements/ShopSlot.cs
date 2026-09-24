@@ -77,7 +77,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         //가격 및 버튼 설정
         isLuckyCatFree = false; // 슬롯 세팅 시 무료 스위치 초기화
         int displayPrice = GetFinalPrice();
-        if (priceText != null) priceText.text = displayPrice + " G";
+        if (priceText != null) priceText.text = LocalizationManager.GetUi("UI_GOLD_PRICE", "{0} G", displayPrice);
 
         buyButton.interactable = true;
         buyButton.onClick.RemoveAllListeners();
@@ -130,7 +130,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
         if (lockUI != null) lockUI.SetActive(true); // 자물쇠 아이콘 켜기
         if (itemIcon != null) itemIcon.color = Color.clear; // 아이템 아이콘 투명하게 숨김
-        if (priceText != null) priceText.text = "???";
+        if (priceText != null) priceText.text = LocalizationManager.GetUi("UI_UNKNOWN", "???");
 
         buyButton.interactable = false; // 버튼 클릭 방지
         buyButton.onClick.RemoveAllListeners();
@@ -182,7 +182,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void ApplyLuckyCatFree()
     {
         isLuckyCatFree = true;
-        if (priceText != null) priceText.text = "<color=#FFFF00>0 G (무료!)</color>";
+        if (priceText != null) priceText.text = "<color=#FFFF00>" + LocalizationManager.GetUi("UI_FREE", "0 G (무료!)") + "</color>";
         Debug.Log($"[복고양이] {currentData.itemName} 무료 적용!");
     }
 }

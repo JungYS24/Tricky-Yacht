@@ -16,13 +16,7 @@ public static class CombatFlowController
         //골드 획득 처리
         if (expectedGold > 0 && dm.shopManager != null)
         {
-            dm.shopManager.currentGold += expectedGold;
-            dm.ui?.UpdateGoldUI(dm.shopManager.currentGold);
-
-            if (GoldCounter.Instance != null)
-            {
-                GoldCounter.Instance.SetGold(dm.shopManager.currentGold);
-            }
+            dm.shopManager.GrantGold(expectedGold);
         }
 
         //화염 스택 누적
@@ -69,13 +63,32 @@ public static class CombatFlowController
 
 
     //플레이어 공격 연출
-    private static IEnumerator ProcessPlayerAttack(DiceManager dm, int damage)
+    private static IEnumerator ProcessPlayerAttack(
+    DiceManager dm,
+    int damage)
     {
-        if (damage > 0 && !dm.enemy.IsDead && dm.enemy.CurrentHP > 0)
+        if (dm.enemy == null ||
+            dm.enemy.IsDead ||
+            dm.enemy.CurrentHP <= 0)
         {
-            dm.enemy.TakeDamage(damage, dm.OnEnemyKilled);
-            yield return new WaitForSeconds(0.2f);
+            yield break;
         }
+
+        bool isFirstNormalAttack =
+            !dm.stageContext.firstNormalAttackDone;
+
+        // 첫 공격이 0 피해여도 이후 공격을 첫 공격으로 취급하지 않음
+        dm.stageContext.firstNormalAttackDone = true;
+
+        if (damage <= 0)
+            yield break;
+
+        dm.enemy.TakeDamage(
+            damage,
+            dm.OnEnemyKilled,
+            isFirstNormalAttack);
+
+        yield return new WaitForSeconds(0.15f);
     }
 
     private static IEnumerator HandlePlayerDeath(DiceManager dm)
@@ -111,7 +124,10 @@ public static class CombatFlowController
             {
                 CameraShake.Instance.Shake(0.1f, 0.1f);
                 dm.enemy.TakeDamage(flameDamage, dm.OnEnemyKilled);
-                dm.UpdateMainUI($"화염 데미지! <color=#FF4500>-{flameDamage}</color>");
+                dm.UpdateMainUI(LocalizationManager.GetUi(
+                    "UI_FLAME_DAMAGE",
+                    "화염 데미지! <color=#FF4500>-{0}</color>",
+                    flameDamage));
 
                 if (dm.enemy.IsDead) yield break;
                 yield return new WaitForSeconds(0.8f);
@@ -136,6 +152,8 @@ public static class CombatFlowController
                 if (finalEnemyAtk < 0) finalEnemyAtk = 0;
 
                 dm.playerStatus.TakeDamage(finalEnemyAtk);
+                // 피격 후 회복 피규어 등이 실행되기 전에 체력 조건 검사
+                FigureEffectManager.Instance?.EvaluateLowHPTriggers(dm, dm.shopManager);
 
                 CameraShake.Instance.Shake(0.15f, 0.1f);
                 dm.ui?.UpdateShieldUI(dm.playerStatus.currentShield);

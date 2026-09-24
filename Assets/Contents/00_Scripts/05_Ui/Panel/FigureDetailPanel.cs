@@ -58,8 +58,11 @@ public class FigureDetailPanel : MonoBehaviour
         if (currentIndex < 0 || currentIndex >= currentOwnedFigures.Count) return;
 
         FigureItemSO currentFigure = currentOwnedFigures[currentIndex];
-        bool isUnlocked = PlayerPrefs.GetInt("Collection_Unlocked_" + currentFigure.itemName, 0) == 1;
-        bool isEncountered = PlayerPrefs.GetInt("Collection_Encountered_" + currentFigure.itemName, 0) == 1;
+        int figureState = CollectionDataManager.Instance != null
+            ? CollectionDataManager.Instance.GetFigureState(currentFigure)
+            : 0;
+        bool isUnlocked = figureState == 2;
+        bool isEncountered = figureState >= 1;
 
         string biomeNames = string.Join(", ", currentFigure.sourceBiomes.Select(b => GetBiomeDisplayName(b)));
         string biomeText = LocalizationManager.GetUi("UI_BIOME_SOURCES", "획득 바이옴 : {0}", biomeNames);
@@ -119,12 +122,12 @@ public class FigureDetailPanel : MonoBehaviour
             }
             if (nameText != null)
             {
-                nameText.text = "???";
+                nameText.text = LocalizationManager.GetUi("UI_UNKNOWN", "???");
                 nameText.color = new Color(0.4f, 0.4f, 0.4f, 1f);
             }
             if (descText != null)
             {
-                descText.text = "???";
+                descText.text = LocalizationManager.GetUi("UI_UNKNOWN", "???");
                 descText.color = new Color(0.4f, 0.4f, 0.4f, 1f);
             }
             if (locationText != null)

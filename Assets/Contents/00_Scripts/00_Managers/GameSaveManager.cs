@@ -13,6 +13,14 @@ public class SavedDiceData
 
     public List<int> activeSatellites = new List<int>();
 }
+
+[System.Serializable]
+public class SavedFigureKillCount
+{
+    public string figureName;
+    public int count;
+}
+
 public class SaveData
 {
     public int currentStage;
@@ -49,12 +57,24 @@ public class SaveData
 
     public int savedMonsterCurrentTurn;//몬스터 턴개념 추가
     public int savedMonsterMaxTurn;
+    public bool firstNormalAttackDone;
+
+    public List<SavedFigureKillCount> figureKillCounts =new List<SavedFigureKillCount>();
+
+    public float permanentFigureMultiplier;
+
+    // 스테이지당 1회 피규어 사용 기록
+    public List<string> usedFigureNodes = new List<string>();
+
+    // 아직 결산에서 누적 화염으로 옮기지 않은 피규어 화염량
+    public int pendingFigureFlameDamage;
 
     public List<SavedDiceData> deckDiceList = new List<SavedDiceData>();
 
-    public List<string> ownedFigureNames = new List<string>();
-    public List<string> ownedSnackNames = new List<string>();
-    public List<string> ownedTicketNames = new List<string>();
+    public List<string> ownedFigureIDs = new List<string>(); //새로 추가된 ID 저장용 리스트
+
+    public List<string> ownedSnackIDs = new List<string>();
+    public List<string> ownedTicketIDs = new List<string>();
 
     public float multHighCard, multOnePair, multTwoPair, multTriple, multFullHouse, multFourOfAKind, multStraight, multYacht;
 }
@@ -66,10 +86,41 @@ public class GameSaveManager : MonoBehaviour
     [Header("게임 내 모든 아이템 총집합")]
     public List<BaseItemDataSO> masterItemDatabase = new List<BaseItemDataSO>();
 
+    //탐색 속도 최적화를 위한 피규어 전용 딕셔너리
+    private Dictionary<string, FigureItemSO> figureDictionary = new Dictionary<string, FigureItemSO>();
+
     private void Awake()
     {
-        if (Instance == null) Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+            InitializeDictionary(); // 시작할 때 딕셔너리 셋업
+        }
         else Destroy(gameObject);
+    }
+
+    // 피규어뿐만 아니라 모든 아이템을 담는 만능 딕셔너리
+    private Dictionary<string, BaseItemDataSO> itemDictionary = new Dictionary<string, BaseItemDataSO>();
+    // List에 있는 피규어들을 초고속 탐색용 딕셔너리로 압축하는 함수
+    private void InitializeDictionary()
+    {
+        itemDictionary.Clear();
+        foreach (var item in masterItemDatabase)
+        {
+            // 모든 아이템(BaseItemDataSO)은 Item_ID를 가지므로 그대로 등록
+            if (!string.IsNullOrEmpty(item.Item_ID))
+            {
+                if (!itemDictionary.ContainsKey(item.Item_ID))
+                    itemDictionary.Add(item.Item_ID, item);
+            }
+        }
+    }
+
+    // 만능 탐지기 함수
+    public BaseItemDataSO FindItemByID(string id)
+    {
+        if (itemDictionary.TryGetValue(id, out BaseItemDataSO item)) return item;
+        return null;
     }
 
     //모바일 백그라운드로 가거나 창을 닫을 때 자동으로 실행됨
@@ -88,6 +139,22 @@ public class GameSaveManager : MonoBehaviour
     public void SaveGame(DiceManager dice, InventoryManager inv, ShopManager shop)
     {
         SaveData data = new SaveData();
+
+        data.permanentFigureMultiplier =
+    dice.permanentFigureMultiplier;
+
+        foreach (var entry in dice.figureKillCounts)
+        {
+            data.figureKillCounts.Add(new SavedFigureKillCount
+            {
+                figureName = entry.Key,
+                count = entry.Value
+            });
+        }
+        data.firstNormalAttackDone =dice.stageContext.firstNormalAttackDone;
+        data.usedFigureNodes = new List<string>(dice.stageContext.usedFigureNodes);
+
+        data.pendingFigureFlameDamage = dice.figureBonusFlameDamage;
 
 
         //일회성 버프들도 잊지 말고 세이브 파일에 도장 찍기
@@ -163,12 +230,17 @@ public class GameSaveManager : MonoBehaviour
 
             data.deckDiceList.Add(sdd);
         }
-        foreach (var f in inv.ownedFigures) data.ownedFigureNames.Add(f.itemName);
-        inv.CollectTicketNamesForSave(data.ownedTicketNames);
+
+        foreach (var f in inv.ownedFigures)
+        {
+            data.ownedFigureIDs.Add(f.Item_ID);    //고유 아이디를 세이브 파일에 기록
+        }
+
+        inv.CollectTicketNamesForSave(data.ownedTicketIDs);
         foreach (var s in inv.snackSlots)
         {
             if (!s.isEmpty && s.currentItem != null)
-                data.ownedSnackNames.Add(s.currentItem.itemName);
+                data.ownedSnackIDs.Add(s.currentItem.itemName);
         }
 
         data.multHighCard = dice.multHighCard; data.multOnePair = dice.multOnePair;
@@ -198,4 +270,13 @@ public class GameSaveManager : MonoBehaviour
 
     public void DeleteSave() { PlayerPrefs.DeleteKey("TrickYacht_Save"); }
 
+    // 딕셔너리를 이용해 ID로 피규어를 0.001초 만에 찾아내는 함수
+    public FigureItemSO FindFigureByID(string id)
+    {
+        if (figureDictionary.TryGetValue(id, out FigureItemSO figure))
+        {
+            return figure;
+        }
+        return null;
+    }
 }
