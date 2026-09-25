@@ -11,31 +11,33 @@ public class AudioControl : MonoBehaviour
     [Header("Audio Mixer")]
     public AudioMixer masterMixer;
 
-    private Slider masterSlider;
-    private Slider bgmSlider;
-    private Slider sfxSlider;
+    [Header("재생 소스")]
+    public AudioSource sfxSource;
 
-    // UI 파괴 시 오작동 값이 저장되는 것을 막는 방어막 변수
-    private bool isReady = false;
+    [Header("슬라이더 (비우면 이름 검색)")]
+    public Slider masterSlider;
+    public Slider bgmSlider;
+    public Slider sfxSlider;
+
+    private bool isReady;
 
     private void Awake()
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject);
+            Destroy(this);
             return;
         }
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-
-        //ApplySavedVolumes();
+        EnsureSfxSource();
+        ApplySavedVolumes();
     }
 
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
-        // 씬이 꺼질 때를 감지하는 이벤트 추가
         SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
 
@@ -53,80 +55,91 @@ public class AudioControl : MonoBehaviour
 
     private void OnSceneUnloaded(Scene scene)
     {
-        // 씬이 이동하며 UI가 파괴될 때, 찌그러진 값이 저장되는 것을 원천 차단
         isReady = false;
+        UnbindIfFromScene(ref masterSlider, scene);
+        UnbindIfFromScene(ref bgmSlider, scene);
+        UnbindIfFromScene(ref sfxSlider, scene);
     }
-    
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // 씬이 이동할 때도 믹서가 잠시 기절하므로, 코루틴으로 깨우고 값을 넣습니다.
         StartCoroutine(ApplyVolumeNextFrame());
         SyncAudioSettings();
     }
+
     private IEnumerator ApplyVolumeNextFrame()
     {
         yield return new WaitForSecondsRealtime(0.05f);
         ApplySavedVolumes();
     }
+
+    public void PlaySFX(AudioEvent audioEvent)
+    {
+        EnsureSfxSource();
+        if (audioEvent != null)
+            audioEvent.PlayOneShot(sfxSource);
+    }
+
+    public void PlaySFX(AudioClip clip, float volume = 1f)
+    {
+        EnsureSfxSource();
+        if (sfxSource != null && clip != null)
+            sfxSource.PlayOneShot(clip, volume);
+    }
+
     private void ApplySavedVolumes()
     {
-        SetMasterVolume(PlayerPrefs.GetFloat("MasterVol", 1f));
-        SetBGMVolume(PlayerPrefs.GetFloat("BGMVol", 1f));
-        SetSFXVolume(PlayerPrefs.GetFloat("SFXVol", 1f));
+        SetMixerVolume("Master", PlayerPrefs.GetFloat("MasterVol", 1f));
+        SetMixerVolume("BGM", PlayerPrefs.GetFloat("BGMVol", 1f));
+        SetMixerVolume("SFX", PlayerPrefs.GetFloat("SFXVol", 1f));
     }
 
     private void SyncAudioSettings()
     {
-        // 세팅을 진행하는 동안에는 저장이 일어나지 않도록 잠금
         isReady = false;
 
-        masterSlider = FindSliderByName("MasterSlider");
-        bgmSlider = FindSliderByName("BGMSlider");
-        sfxSlider = FindSliderByName("SFXSlider");
+        BindSlider(ref masterSlider, "MasterSlider", SetMasterVolume, "MasterVol");
+        BindSlider(ref bgmSlider, "BGMSlider", SetBGMVolume, "BGMVol");
+        BindSlider(ref sfxSlider, "SFXSlider", SetSFXVolume, "SFXVol");
 
-        if (masterSlider != null)
-        {
-            masterSlider.onValueChanged.RemoveAllListeners();
-            masterSlider.minValue = 0.0001f;
-            masterSlider.maxValue = 1f;
-            masterSlider.value = PlayerPrefs.GetFloat("MasterVol", 1f);
-            masterSlider.onValueChanged.AddListener(SetMasterVolume);
-        }
-
-        if (bgmSlider != null)
-        {
-            bgmSlider.onValueChanged.RemoveAllListeners();
-            bgmSlider.minValue = 0.0001f;
-            bgmSlider.maxValue = 1f;
-            bgmSlider.value = PlayerPrefs.GetFloat("BGMVol", 1f);
-            bgmSlider.onValueChanged.AddListener(SetBGMVolume);
-        }
-
-        if (sfxSlider != null)
-        {
-            sfxSlider.onValueChanged.RemoveAllListeners();
-            sfxSlider.minValue = 0.0001f;
-            sfxSlider.maxValue = 1f;
-            sfxSlider.value = PlayerPrefs.GetFloat("SFXVol", 1f);
-            sfxSlider.onValueChanged.AddListener(SetSFXVolume);
-        }
-
-        // 모든 슬라이더 세팅이 무사히 끝나면 잠금 해제
         isReady = true;
+    }
+
+    private void BindSlider(ref Slider slider, string fallbackName, UnityEngine.Events.UnityAction<float> listener, string prefsKey)
+    {
+        if (slider == null)
+            slider = FindSliderByName(fallbackName);
+        if (slider == null)
+            return;
+
+        slider.onValueChanged.RemoveListener(listener);
+        slider.minValue = 0.0001f;
+        slider.maxValue = 1f;
+        slider.value = PlayerPrefs.GetFloat(prefsKey, 1f);
+        slider.onValueChanged.AddListener(listener);
+    }
+
+    private void UnbindIfFromScene(ref Slider slider, Scene scene)
+    {
+        if (slider == null || slider.gameObject.scene != scene)
+            return;
+
+        slider.onValueChanged.RemoveListener(SetMasterVolume);
+        slider.onValueChanged.RemoveListener(SetBGMVolume);
+        slider.onValueChanged.RemoveListener(SetSFXVolume);
+        slider = null;
     }
 
     private Slider FindSliderByName(string targetName)
     {
         Slider[] allSliders = Resources.FindObjectsOfTypeAll<Slider>();
-
-        foreach (Slider s in allSliders)
+        foreach (Slider slider in allSliders)
         {
-            if (s.gameObject.name == targetName &&
-                s.gameObject.scene.IsValid() &&
-                s.gameObject.scene.isLoaded)
+            if (slider.gameObject.name == targetName &&
+                slider.gameObject.scene.IsValid() &&
+                slider.gameObject.scene.isLoaded)
             {
-                return s;
+                return slider;
             }
         }
 
@@ -135,38 +148,63 @@ public class AudioControl : MonoBehaviour
 
     public void SetMasterVolume(float volume)
     {
-        float dbValue = Mathf.Log10(Mathf.Max(0.0001f, volume)) * 20f;
-        masterMixer.SetFloat("MasterVol", dbValue);
-
-        // UI 세팅 중이거나 파괴 중이 아닐 때만 실제 세이브 파일에 기록
-        if (isReady)
-        {
-            PlayerPrefs.SetFloat("MasterVol", volume);
-            PlayerPrefs.Save();
-        }
+        SetMixerVolume("Master", volume);
+        SaveVolume("MasterVol", volume, masterSlider);
     }
 
     public void SetBGMVolume(float volume)
     {
-        float dbValue = Mathf.Log10(Mathf.Max(0.0001f, volume)) * 20f;
-        masterMixer.SetFloat("BGMVol", dbValue);
-
-        if (isReady)
-        {
-            PlayerPrefs.SetFloat("BGMVol", volume);
-            PlayerPrefs.Save();
-        }
+        SetMixerVolume("BGM", volume);
+        SaveVolume("BGMVol", volume, bgmSlider);
     }
 
     public void SetSFXVolume(float volume)
     {
-        float dbValue = Mathf.Log10(Mathf.Max(0.0001f, volume)) * 20f;
-        masterMixer.SetFloat("SFXVol", dbValue);
+        SetMixerVolume("SFX", volume);
+        SaveVolume("SFXVol", volume, sfxSlider);
+    }
 
-        if (isReady)
+    private void SetMixerVolume(string parameter, float volume)
+    {
+        if (masterMixer == null)
+            return;
+
+        float dbValue = volume <= 0.0001f
+            ? -80f
+            : Mathf.Log10(volume) * 20f;
+        masterMixer.SetFloat(parameter, dbValue);
+    }
+
+    private void SaveVolume(string key, float volume, Slider sourceSlider)
+    {
+        if (!isReady || sourceSlider == null || !sourceSlider.gameObject.activeInHierarchy)
+            return;
+
+        PlayerPrefs.SetFloat(key, volume);
+        PlayerPrefs.Save();
+    }
+
+    private void EnsureSfxSource()
+    {
+        if (sfxSource != null)
+            return;
+
+        var holder = new GameObject("SFXSource");
+        holder.transform.SetParent(transform, false);
+        sfxSource = holder.AddComponent<AudioSource>();
+        sfxSource.playOnAwake = false;
+        sfxSource.loop = false;
+        if (masterMixer != null)
         {
-            PlayerPrefs.SetFloat("SFXVol", volume);
-            PlayerPrefs.Save();
+            AudioMixerGroup[] groups = masterMixer.FindMatchingGroups("SFX");
+            if (groups != null && groups.Length > 0)
+                sfxSource.outputAudioMixerGroup = groups[0];
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 }

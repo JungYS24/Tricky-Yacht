@@ -42,7 +42,9 @@ public class BGMManager : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject);
+            if (Instance.lobbyBGM == null && lobbyBGM != null)
+                Instance.lobbyBGM = lobbyBGM;
+            Destroy(this);
         }
     }
 

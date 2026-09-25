@@ -1176,7 +1176,20 @@ public class DiceManager : MonoBehaviour
         yield return new WaitForSeconds(time);
         StartNewRound();
     }
-    public void PlayPlayerHurtSound() { if (sfxSource != null && playerHurtAudioEvent != null) playerHurtAudioEvent.Play(sfxSource); }
+    public void PlayPlayerHurtSound()
+    {
+        if (playerHurtAudioEvent == null)
+            return;
+
+        if (AudioControl.Instance != null)
+        {
+            AudioControl.Instance.PlaySFX(playerHurtAudioEvent);
+            return;
+        }
+
+        if (sfxSource != null)
+            playerHurtAudioEvent.PlayOneShot(sfxSource);
+    }
 
     // 현재 족보 이름에 맞는 진짜 배수를 찾아오는 함수
     public float GetHandMultiplier(HandRank rank)
