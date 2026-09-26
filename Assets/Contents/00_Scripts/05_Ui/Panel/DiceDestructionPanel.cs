@@ -10,9 +10,11 @@ public class DiceDestructionPanel : MonoBehaviour
 
     private List<GameObject> activeSlots = new List<GameObject>();
     private DiceManager diceManager;
+    private bool isBusy;
 
     public void OpenSelection(DiceManager dm)
     {
+        if (isBusy) return;
         diceManager = dm;
 
         // 덱에서 주사위를 랜덤으로 최대 5개 추출 (GetRandomDiceForCoating 재사용)
@@ -37,7 +39,7 @@ public class DiceDestructionPanel : MonoBehaviour
             Button btn = slotGo.GetComponent<Button>();
             if (btn != null)
             {
-                btn.onClick.AddListener(() => OnDiceSelected(dice));
+                btn.onClick.AddListener(() => OnDiceSelected(dice, slotGo.GetComponent<DeckSlot>()));
             }
 
             DeckSlot deckSlot = slotGo.GetComponent<DeckSlot>();
@@ -48,13 +50,16 @@ public class DiceDestructionPanel : MonoBehaviour
         }
     }
 
-    private void OnDiceSelected(DiceData1 selectedDice)
+    private void OnDiceSelected(DiceData1 selectedDice, DeckSlot selectedSlot)
     {
+        if (isBusy) return;
         if (diceManager == null || selectedDice == null) return;
 
         // 선택한 주사위를 덱(masterDeck)에서 영구 삭제
         if (diceManager.masterDeck.Remove(selectedDice))
         {
+            isBusy = true;
+
             // 뽑기 더미와 버린 더미에 남아 있는 같은 주사위도 제거
             diceManager.deckManager.drawPile.RemoveAll(
                 dice => ReferenceEquals(dice, selectedDice));
@@ -64,14 +69,19 @@ public class DiceDestructionPanel : MonoBehaviour
 
             Debug.Log($"{selectedDice.diceName} 주사위가 덱에서 영구히 파괴되었습니다! 남은 주사위: {diceManager.masterDeck.Count}");
 
-            // 파괴 선택창을 닫은 뒤 주사위 파괴 피규어 효과 발동
-            ClosePanel();
+            DiceSelectionFeedback.Get(this).PlayDestruction(selectedSlot, activeSlots, () =>
+            {
+                isBusy = false;
+                // 파괴 선택창을 닫은 뒤 주사위 파괴 피규어 효과 발동
+                ClosePanel();
 
-            FigureEffectManager.Instance?.EvaluateDiceDestroyedTriggers(
-                diceManager,
-                diceManager.shopManager);
+                if (diceManager == null) return;
+                FigureEffectManager.Instance?.EvaluateDiceDestroyedTriggers(
+                    diceManager,
+                    diceManager.shopManager);
 
-            diceManager.ForceUpdateUI();
+                if (diceManager.enemy != null) diceManager.ForceUpdateUI();
+            });
             return;
         }
 
@@ -80,6 +90,7 @@ public class DiceDestructionPanel : MonoBehaviour
 
     public void ClosePanel()
     {
+        if (isBusy) return;
         panelRoot.SetActive(false);
         ClearSlots();
     }
