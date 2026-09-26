@@ -16,9 +16,11 @@ public class CoatingSelectionPanel : MonoBehaviour
 
     private List<GameObject> activeSlots = new List<GameObject>();
     private DiceManager diceManager;
+    private bool isBusy;
 
     public void OpenSelection(DiceManager dm, DiceType type, float mult, Color color)
     {
+        if (isBusy) return;
         IsPanelOpen = true;
 
         diceManager = dm;
@@ -50,7 +52,7 @@ public class CoatingSelectionPanel : MonoBehaviour
             Button btn = slotGo.GetComponent<Button>();
             if (btn != null)
             {
-                btn.onClick.AddListener(() => OnDiceSelected(dice));
+                btn.onClick.AddListener(() => OnDiceSelected(dice, slotGo.GetComponent<DeckSlot>()));
             }
 
             DeckSlot deckSlot = slotGo.GetComponent<DeckSlot>();
@@ -61,8 +63,12 @@ public class CoatingSelectionPanel : MonoBehaviour
         }
     }
 
-    private void OnDiceSelected(DiceData1 selectedDice)
+    private void OnDiceSelected(DiceData1 selectedDice, DeckSlot selectedSlot)
     {
+        if (isBusy) return;
+        if (diceManager == null || selectedDice == null || !diceManager.masterDeck.Contains(selectedDice)) return;
+        isBusy = true;
+
         selectedDice.isCoated = true;
         selectedDice.type = pendingCoatingType;
         selectedDice.multiplier = pendingMultiplier;
@@ -70,17 +76,26 @@ public class CoatingSelectionPanel : MonoBehaviour
 
         Debug.Log($"{selectedDice.diceName}에 {pendingCoatingType} 코팅 적용 완료!");
 
-        // 튜토리얼 중일 때 코팅 처리가 끝났음을 알림
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+        DiceSelectionFeedback.Get(this).PlayCoating(selectedSlot, activeSlots, pendingCoatingType, pendingColor, () =>
         {
-            TutorialManager.Instance.OnCoatingAppliedComplete();
-        }
+            if (selectedSlot != null) selectedSlot.SetDice(selectedDice, false);
+        }, () =>
+        {
+            isBusy = false;
+            // 튜토리얼 중일 때 코팅 처리가 끝났음을 알림
+            if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+            {
+                TutorialManager.Instance.OnCoatingAppliedComplete();
+            }
 
-        ClosePanel();
+            ClosePanel();
+            if (diceManager != null && diceManager.enemy != null) diceManager.ForceUpdateUI();
+        });
     }
 
     public void ClosePanel()
     {
+        if (isBusy) return;
         IsPanelOpen = false;
 
         panelRoot.SetActive(false);
