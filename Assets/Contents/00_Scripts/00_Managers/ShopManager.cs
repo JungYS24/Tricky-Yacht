@@ -42,6 +42,10 @@ public class ShopManager : MonoBehaviour
     [Header("위성 선택 UI")]
     public SatelliteSelectionPanel satelliteSelectionPanel;
 
+    //스탬프 선택 UI
+    [Header("스탬프 선택 UI")]
+    public StampSelectionPanel stampSelectionPanel;
+
     private void Awake()
     {
         if (tooltipRect == null && tooltipPanel != null)
@@ -221,6 +225,7 @@ public class ShopManager : MonoBehaviour
 
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return;
+        if (stampSelectionPanel != null && stampSelectionPanel.gameObject.activeSelf) return;
 
         //기본 rerollCost 대신 할인이 적용된 최종 비용 사용
         int finalCost = GetFinalRerollCost();
@@ -247,6 +252,7 @@ public class ShopManager : MonoBehaviour
         // 코팅 선택 중이거나 파괴 선택 중이면 다음 스테이지 넘어가기 불가
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return;
+        if (stampSelectionPanel != null && stampSelectionPanel.gameObject.activeSelf) return;
 
         IsShopOpen = false;
         if (shopUI != null) shopUI.SetActive(false);
@@ -282,6 +288,7 @@ public class ShopManager : MonoBehaviour
         // 코팅 선택 중이거나 파괴 선택 중이면 구매 불가
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return false;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return false;
+        if (stampSelectionPanel != null && stampSelectionPanel.gameObject.activeSelf) return false;
 
         if (currentGold >= actualPrice)
         {
@@ -380,6 +387,19 @@ public class ShopManager : MonoBehaviour
     {
         if (ticketSelectionPanel != null)
             ticketSelectionPanel.SetActive(false);
+    }
+
+    // 스탬프 선택창 함수
+    public void ShowStampSelection(StampType type, Sprite sealImage)
+    {
+        if (stampSelectionPanel != null && diceManager != null)
+        {
+            stampSelectionPanel.OpenSelection(diceManager, type, sealImage);
+        }
+        else
+        {
+            Debug.LogWarning("StampSelectionPanel 또는 DiceManager가 연결되지 않았습니다.");
+        }
     }
 
     public void ShowCoatingSelection(DiceType type, float mult, Color color)
