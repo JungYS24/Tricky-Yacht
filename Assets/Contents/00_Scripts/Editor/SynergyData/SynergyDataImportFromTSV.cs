@@ -23,18 +23,18 @@ public class SynergyDataImportFromTSV : ImportDataFromTSV
         }
 
         var tsvData = Parse();
-        var itemIDs                   = tsvData["itemID"];
-        var requiredFigureIDContainer = tsvData["requiredFigureIds"];
-        var requiredFigureCounts      = tsvData["필요 피규어 수"];
-        var effectTypes               = tsvData["effectType"];
-        var effectValues              = tsvData["effectValue"];
-        var nameKR                    = tsvData["defaultNameKo"];
-        var descriptionKR             = tsvData["defaultDescKo"];
+        var itemIDs                     = tsvData["itemID"];
+        var requiredFigureNameContainer = tsvData["필요 피규어 (이름)"];
+        var requiredFigureCounts        = tsvData["필요 피규어 수"];
+        var effectTypes                 = tsvData["effectType"];
+        var effectValues                = tsvData["effectValue"];
+        var nameKR                      = tsvData["세트 이름"];
+        var descriptionKR               = tsvData["설명"];
 
-        var figures = AssetDatabase.FindAssets("", new[] { dataDirectory })
+        var figures = AssetDatabase.FindAssets("t:FigureItemSO", new[] { dataDirectory })
             .Select(g => AssetDatabase.GUIDToAssetPath(g))
             .Select(p => AssetDatabase.LoadAssetAtPath<FigureItemSO>(p))
-            .ToDictionary(f => f.name ?? string.Empty, f => f);
+            .ToDictionary(f => f.itemName ?? string.Empty, f => f);
 
         int cnt = itemIDs.Count;
         for (int i = 0; i < cnt; i++)
@@ -51,9 +51,9 @@ public class SynergyDataImportFromTSV : ImportDataFromTSV
 
             int fCnt = int.Parse(requiredFigureCounts[i]);
 
-            var requiredFigureIDs = requiredFigureIDContainer[i]
+            var requiredFigureIDs = requiredFigureNameContainer[i]
                 .Split(",")
-                .Select(r => r.Trim())
+                .Select(r => r.Trim()[8..^1])
                 .ToArray();
 
             var requiredFigures = so.FindProperty("requiredFigures");
@@ -65,7 +65,7 @@ public class SynergyDataImportFromTSV : ImportDataFromTSV
             }
 
             so.ApplyModifiedProperties();
-            AssetDatabase.CreateAsset(synergyData, Path.Join(dataDirectory, itemIDs[i] + ".asset"));
+            AssetDatabase.CreateAsset(synergyData, Path.Join(importDirectory, itemIDs[i] + ".asset"));
         }
     }
 }
