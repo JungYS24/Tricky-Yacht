@@ -12,8 +12,9 @@ public class SnackItemSO : BaseItemDataSO
     {
         if (diceManager == null) return;
 
-        float snackMultiplier = FigureEffectManager.Instance != null? FigureEffectManager.Instance.GetSnackEffectMultiplier(): 1f;
+        float snackMultiplier = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetSnackEffectMultiplier() : 1f;
 
+        int hpBeforeSnack = diceManager.currentPlayerHP;
         switch (snackType)
         {
             case SnackType.Cherry:
@@ -45,6 +46,7 @@ public class SnackItemSO : BaseItemDataSO
                         10f * snackMultiplier * healMultiplier);
 
                     diceManager.playerStatus.Heal(healAmount);
+                    if (diceManager.currentPlayerHP > hpBeforeSnack && healMultiplier > 1f) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.IncreaseHealMultiplier);
                     break;
                 }
 
@@ -59,6 +61,9 @@ public class SnackItemSO : BaseItemDataSO
                 diceManager.isPeppermintActive = true;
                 break;
         }
+
+        bool snackApplied = snackType != SnackType.Peppermint && (snackType != SnackType.Steak || diceManager.currentPlayerHP > hpBeforeSnack);
+        if (snackApplied && snackMultiplier > 1f) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.MultiplySnackEffects);
 
         Debug.Log($"스낵 [{itemName}] 사용! 효과가 적용되었습니다.");
 

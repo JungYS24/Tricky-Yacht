@@ -127,6 +127,13 @@ public class InventoryManager : MonoBehaviour
 
             FigureEffectManager.Instance?.RebuildCache(); // 피규어 추가 시 캐시 갱신
 
+            // 새 슬롯 생성
+            GameObject newSlotGo = Instantiate(figureSlotPrefab, figureSlotParent);
+            InventorySlot newSlot = newSlotGo.GetComponent<InventorySlot>();
+            newSlot.Initialize(this);
+            newSlot.SetItem(figure);
+            activeFigureSlots.Add(newSlotGo);
+
             //피규어 획득 즉시(OnAcquired) 발동하는 효과 적용
             // (거북 등껍질, 바나나 왕관 등의 최대 체력 증가)
             var acquiredNode = figure.figureNodes.Find(n => n.triggerType == FigureTriggerType.OnAcquired);
@@ -134,7 +141,7 @@ public class InventoryManager : MonoBehaviour
             if (applyAcquiredEffects &&
                  acquiredNode != null &&
                     acquiredNode.effects.Count > 0)
-                {
+            {
                 if (FigureEffectManager.Instance != null)
                 {
                     FigureEffectManager.Instance.ApplyFigureEffects(acquiredNode.effects, diceManager, diceManager.shopManager, figure);
@@ -145,12 +152,7 @@ public class InventoryManager : MonoBehaviour
             // PlayerPrefs 대신 새로운 매니저를 통해 메모리에 즉시 반영하고 자동 압축 저장
             CollectionDataManager.Instance.UnlockFigure(figure);
 
-            // 새 슬롯 생성
-            GameObject newSlotGo = Instantiate(figureSlotPrefab, figureSlotParent);
-            InventorySlot newSlot = newSlotGo.GetComponent<InventorySlot>();
-            newSlot.Initialize(this);
-            newSlot.SetItem(figure);
-            activeFigureSlots.Add(newSlotGo);
+            if (diceManager != null && diceManager.enemy != null) diceManager.ForceUpdateUI();
             return true;
         }
         //티켓 아이템이 들어올 경우 처리
@@ -263,7 +265,7 @@ public class InventoryManager : MonoBehaviour
                 InventorySlot slot = activeFigureSlots[i].GetComponent<InventorySlot>();
                 if (slot != null && slot.currentItem == figure)
                 {
-                    Destroy(activeFigureSlots[i]);
+                    FigureFeedback.RemoveSlot(activeFigureSlots[i]);
                     activeFigureSlots.RemoveAt(i);
                     break;
                 }

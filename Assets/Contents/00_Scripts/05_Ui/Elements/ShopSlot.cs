@@ -106,8 +106,11 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
         //할인된 최종 가격을 계산해서 ShopManager에게 결제를 요청
         int actualPrice = GetFinalPrice();
+        bool usedDiscount = !manager.diceManager.isNextShopFree && !isLuckyCatFree && actualPrice < currentData.price;
         if (manager.PurchaseItem(currentData, actualPrice))
         {
+            if (usedDiscount && currentData is CoatingItemSO) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.DiscountCoating);
+            if (usedDiscount && currentData is SatelliteItemSO) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.DiscountSatellite);
             // 사운드 구매 성공 소리 재생 (코인 지불하는 소리 등)
             isPurchased = true;
             isAnimating = false; //아이템을 구매하면 즉시 애니메이션 연산을 정지    

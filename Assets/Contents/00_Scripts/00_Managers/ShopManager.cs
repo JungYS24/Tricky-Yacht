@@ -227,6 +227,7 @@ public class ShopManager : MonoBehaviour
         if (currentGold >= finalCost)
         {
             currentGold -= finalCost;
+            if (finalCost < rerollCost) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.DiscountShopReroll);
             if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
             RefreshShop(true);
         }
@@ -240,7 +241,7 @@ public class ShopManager : MonoBehaviour
 
     public void CloseShopAndGoNext()
     {
-        if ((ticketSelectionPanel != null && ticketSelectionPanel.activeSelf) ||SatelliteSelectionPanel.IsPanelOpen)
+        if ((ticketSelectionPanel != null && ticketSelectionPanel.activeSelf) || SatelliteSelectionPanel.IsPanelOpen)
         {
             return;
         }
@@ -433,6 +434,7 @@ public class ShopManager : MonoBehaviour
         int grantedAmount = Mathf.FloorToInt(baseAmount * multiplier);
 
         currentGold += grantedAmount;
+        if (grantedAmount > baseAmount) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.IncreaseGoldGainPercent);
 
         diceManager?.ui?.UpdateGoldUI(currentGold);
 

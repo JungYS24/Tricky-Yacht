@@ -9,7 +9,9 @@ public static class CombatFlowController
         //플레이어 회복
         if (finalHeal > 0)
         {
+            int hpBefore = dm.currentPlayerHP;
             dm.playerStatus.Heal(finalHeal);
+            if (dm.currentPlayerHP > hpBefore && FigureEffectManager.Instance != null && FigureEffectManager.Instance.GetHealMultiplier() > 1f) FigureEffectManager.Instance.NotifyPassiveApplied(FigureEffectType.IncreaseHealMultiplier);
             dm.ui?.UpdateShieldUI(dm.playerStatus.currentShield);
         }
 
@@ -147,7 +149,7 @@ public static class CombatFlowController
                 int finalEnemyAtk = dm.isNextEnemyAttackFixedToOne ? 1 : dm.enemy.AttackPower;
                 dm.isNextEnemyAttackFixedToOne = false;
 
-                int reduction = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetTotalDamageReduction(finalEnemyAtk, dm) : 0;
+                int reduction = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetTotalDamageReduction(finalEnemyAtk, dm, true) : 0;
                 finalEnemyAtk -= reduction;
                 if (finalEnemyAtk < 0) finalEnemyAtk = 0;
 
