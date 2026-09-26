@@ -164,15 +164,23 @@ public class AudioControl : MonoBehaviour
         SaveVolume("SFXVol", volume, sfxSlider);
     }
 
-    private void SetMixerVolume(string parameter, float volume)
+    public static void ApplyMixerVolume(AudioMixer mixer, string parameter, float volume)
     {
-        if (masterMixer == null)
+        if (mixer == null)
             return;
 
-        float dbValue = volume <= 0.0001f
-            ? -80f
-            : Mathf.Log10(volume) * 20f;
-        masterMixer.SetFloat(parameter, dbValue);
+        float dbValue;
+        if (volume > 0f)
+            dbValue = volume <= 0.0001f ? -80f : Mathf.Log10(Mathf.Clamp(volume, 0.0001f, 1f)) * 20f;
+        else
+            dbValue = volume <= -40f ? -80f : volume;
+
+        mixer.SetFloat(parameter, dbValue);
+    }
+
+    private void SetMixerVolume(string parameter, float volume)
+    {
+        ApplyMixerVolume(masterMixer, parameter, volume);
     }
 
     private void SaveVolume(string key, float volume, Slider sourceSlider)
@@ -186,20 +194,26 @@ public class AudioControl : MonoBehaviour
 
     private void EnsureSfxSource()
     {
-        if (sfxSource != null)
-            return;
-
-        var holder = new GameObject("SFXSource");
-        holder.transform.SetParent(transform, false);
-        sfxSource = holder.AddComponent<AudioSource>();
-        sfxSource.playOnAwake = false;
-        sfxSource.loop = false;
-        if (masterMixer != null)
+        if (sfxSource == null)
         {
-            AudioMixerGroup[] groups = masterMixer.FindMatchingGroups("SFX");
-            if (groups != null && groups.Length > 0)
-                sfxSource.outputAudioMixerGroup = groups[0];
+            var holder = new GameObject("SFXSource");
+            holder.transform.SetParent(transform, false);
+            sfxSource = holder.AddComponent<AudioSource>();
+            sfxSource.playOnAwake = false;
+            sfxSource.loop = false;
         }
+
+        if (sfxSource.outputAudioMixerGroup == null)
+            sfxSource.outputAudioMixerGroup = FindMixerGroup("SFX");
+    }
+
+    private AudioMixerGroup FindMixerGroup(string groupName)
+    {
+        if (masterMixer == null)
+            return null;
+
+        AudioMixerGroup[] groups = masterMixer.FindMatchingGroups(groupName);
+        return groups != null && groups.Length > 0 ? groups[0] : null;
     }
 
     private void OnDestroy()

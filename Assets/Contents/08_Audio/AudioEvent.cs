@@ -31,11 +31,13 @@ public class AudioEvent : ScriptableObject
         if (source == null || clip == null)
             return;
 
+        AudioMixerGroup previousGroup = source.outputAudioMixerGroup;
         ApplyMixer(source);
         float previousPitch = source.pitch;
         source.pitch = Random.Range(pitchRange.x, pitchRange.y);
         source.PlayOneShot(clip, Random.Range(volumeRange.x, volumeRange.y));
         source.pitch = previousPitch;
+        source.outputAudioMixerGroup = previousGroup;
     }
 
     private AudioClip PickClip()

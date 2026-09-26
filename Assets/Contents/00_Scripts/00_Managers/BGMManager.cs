@@ -35,10 +35,7 @@ public class BGMManager : MonoBehaviour
                 audioSource.outputAudioMixerGroup = bgmMixerGroup;
             }
             if (SceneManager.GetActiveScene().name == "Lobby" && lobbyBGM != null)
-            {
                 ChangeBGM(lobbyBGM);
-                Debug.Log("로비 진입 즉시 감지 및 재생!");
-            }
         }
         else
         {
@@ -63,10 +60,7 @@ public class BGMManager : MonoBehaviour
         if (scene.name == "Lobby")
         {
             if (lobbyBGM != null)
-            {
                 ChangeBGM(lobbyBGM);
-                Debug.Log("<color=yellow>[BGMManager]</color> 로비 진입 감지 : 로비 BGM 페이드 스왑 시작");
-            }
             else
             {
                 StopBGM();
@@ -74,31 +68,19 @@ public class BGMManager : MonoBehaviour
         }
     }
 
-    //볼륨 (Master) 조절
     public void SetMasterVolume(float volume)
     {
-        if (bgmMixerGroup == null || bgmMixerGroup.audioMixer == null) return;
-
-        if (volume <= -40f) bgmMixerGroup.audioMixer.SetFloat("Master", -80f);
-        else bgmMixerGroup.audioMixer.SetFloat("Master", volume);
+        AudioControl.ApplyMixerVolume(bgmMixerGroup != null ? bgmMixerGroup.audioMixer : null, "Master", volume);
     }
 
-    //배경음악 (BGM) 조절
     public void SetBGMVolume(float volume)
     {
-        if (bgmMixerGroup == null || bgmMixerGroup.audioMixer == null) return;
-
-        if (volume <= -40f) bgmMixerGroup.audioMixer.SetFloat("BGM", -80f);
-        else bgmMixerGroup.audioMixer.SetFloat("BGM", volume);
+        AudioControl.ApplyMixerVolume(bgmMixerGroup != null ? bgmMixerGroup.audioMixer : null, "BGM", volume);
     }
 
-    //효과음 (SFX) 조절
     public void SetSFXVolume(float volume)
     {
-        if (bgmMixerGroup == null || bgmMixerGroup.audioMixer == null) return;
-
-        if (volume <= -40f) bgmMixerGroup.audioMixer.SetFloat("SFX", -80f);
-        else bgmMixerGroup.audioMixer.SetFloat("SFX", volume);
+        AudioControl.ApplyMixerVolume(bgmMixerGroup != null ? bgmMixerGroup.audioMixer : null, "SFX", volume);
     }
 
 
@@ -107,6 +89,7 @@ public class BGMManager : MonoBehaviour
     {
         if (nextClip == null) return;
         if (audioSource == null) audioSource = GetComponent<AudioSource>();
+        if (audioSource == null) return;
 
         //같은 클립이더라도 현재 재생 중이 아니거나 볼륨이 0이면 무시하지 않고 다시 틈
         if (audioSource.clip == nextClip && audioSource.isPlaying && audioSource.volume > 0)
@@ -130,6 +113,9 @@ public class BGMManager : MonoBehaviour
 
     IEnumerator FadeAndPlay(AudioClip nextClip)
     {
+        if (audioSource == null)
+            yield break;
+
         // 1. 기존 음악 페이드 아웃
         while (audioSource.volume > 0)
         {
