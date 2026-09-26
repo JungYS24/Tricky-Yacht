@@ -14,18 +14,43 @@ public class AudioEvent : ScriptableObject
 
     public void Play(AudioSource source)
     {
-        if (clips.Length == 0) return;
+        AudioClip clip = PickClip();
+        if (source == null || clip == null)
+            return;
 
-        // 1. 소스 데이터 및 모듈레이터 세팅
-        source.clip = clips[Random.Range(0, clips.Length)];
+        ApplyMixer(source);
+        source.clip = clip;
         source.volume = Random.Range(volumeRange.x, volumeRange.y);
         source.pitch = Random.Range(pitchRange.x, pitchRange.y);
-
-        if (customMixerGroup != null)
-        {
-            source.outputAudioMixerGroup = customMixerGroup;
-        }
-
         source.Play();
+    }
+
+    public void PlayOneShot(AudioSource source)
+    {
+        AudioClip clip = PickClip();
+        if (source == null || clip == null)
+            return;
+
+        AudioMixerGroup previousGroup = source.outputAudioMixerGroup;
+        ApplyMixer(source);
+        float previousPitch = source.pitch;
+        source.pitch = Random.Range(pitchRange.x, pitchRange.y);
+        source.PlayOneShot(clip, Random.Range(volumeRange.x, volumeRange.y));
+        source.pitch = previousPitch;
+        source.outputAudioMixerGroup = previousGroup;
+    }
+
+    private AudioClip PickClip()
+    {
+        if (clips == null || clips.Length == 0)
+            return null;
+
+        return clips[Random.Range(0, clips.Length)];
+    }
+
+    private void ApplyMixer(AudioSource source)
+    {
+        if (customMixerGroup != null)
+            source.outputAudioMixerGroup = customMixerGroup;
     }
 }

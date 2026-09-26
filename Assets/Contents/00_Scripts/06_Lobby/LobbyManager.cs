@@ -74,7 +74,13 @@ public class LobbyManager : MonoBehaviour
     IEnumerator GlitchAndLoad(string sceneName)
     {
         if (glitchOverlay != null) glitchOverlay.SetActive(true);
-        if (sfxSource != null && glitchSound != null) sfxSource.PlayOneShot(glitchSound);
+        if (glitchSound != null)
+        {
+            if (AudioControl.Instance != null)
+                AudioControl.Instance.PlaySFX(glitchSound);
+            else if (sfxSource != null)
+                sfxSource.PlayOneShot(glitchSound);
+        }
 
         yield return new WaitForSeconds(0.7f);
 
