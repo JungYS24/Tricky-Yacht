@@ -40,10 +40,12 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
         itemIcon.sprite = item.icon;
         itemIcon.color = Color.white;
         itemIcon.gameObject.SetActive(true);
+        FigureFeedback.Bind(this, item as FigureItemSO);
     }
 
     public void ClearSlot()
     {
+        FigureFeedback.Bind(this, null);
         currentItem = null;
         isEmpty = true;
         itemIcon.sprite = null;
@@ -102,7 +104,7 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
                 // 스낵 고유의 효과(체력 회복 등) 적용
                 snack.ApplyItemEffect(manager.diceManager);
 
-                
+
 
                 // 스낵을 먹었으니 FigureEffectManager에게 알려서 OnSnackUsed 피규어를 발동
                 if (FigureEffectManager.Instance != null)

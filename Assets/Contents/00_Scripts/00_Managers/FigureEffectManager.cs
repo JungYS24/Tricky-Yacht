@@ -166,15 +166,22 @@ public class FigureEffectManager : MonoBehaviour
                 foreach (var cacheItem in effectCache[tType])
                 {
                     Debug.Log($"[피규어 발동] {cacheItem.sourceFigure.itemName}의 {tType} 조건 달성!");
-                    yield return StartCoroutine(ExecuteFigureNode(cacheItem,currentBaseChips,diceManager,shopManager));
+                    yield return StartCoroutine(ExecuteFigureNode(cacheItem, currentBaseChips, diceManager, shopManager));
                 }
             }
         }
     }
 
     // 조건 만족 시 실질적인 효과를 주고, UI 창이 켜지면 닫힐 때까지 대기하는 코루틴
-    private IEnumerator ApplyFigureEffectsCoroutine(List<FigureEffectNode> effects, int currentBaseChips, DiceManager diceManager, ShopManager shopManager, FigureItemSO sourceFigure, int actualDamage = 0)
+    private IEnumerator ApplyFigureEffectsCoroutine(List<FigureEffectNode> effects, int currentBaseChips, DiceManager diceManager, ShopManager shopManager, FigureItemSO sourceFigure, int actualDamage = 0, bool playFeedback = true)
     {
+        bool feedbackPlayed = false;
+        void ReportApplied(bool applied)
+        {
+            if (!applied || !playFeedback || feedbackPlayed) return;
+            feedbackPlayed = true;
+            FigureFeedback.Pulse(sourceFigure);
+        }
         foreach (var effect in effects)
         {
             //확률 검사
@@ -248,76 +255,85 @@ public class FigureEffectManager : MonoBehaviour
                         float healMult = GetHealMultiplier();
                         int healAmount = Mathf.FloorToInt(actualValue * healMult);
 
+                        int hpBefore = diceManager.currentPlayerHP;
                         diceManager.playerStatus.Heal(healAmount);
+                        ReportApplied(diceManager.currentPlayerHP > hpBefore);
+                        if (diceManager.currentPlayerHP > hpBefore && healMult > 1f) NotifyPassiveApplied(FigureEffectType.IncreaseHealMultiplier);
                         break;
                     }
                 case FigureEffectType.AddGold:
                     if (shopManager != null)
                     {
-                        shopManager.GrantGold(Mathf.FloorToInt(actualValue));
+                        ReportApplied(shopManager.GrantGold(Mathf.FloorToInt(actualValue)) > 0);
                     }
                     break;
-                case FigureEffectType.AddChips: diceManager.snackBonusChips += Mathf.FloorToInt(actualValue); break;
-                case FigureEffectType.AddMultiplier: diceManager.snackBonusMult += actualValue; break; // 배수는 float 그대로
+                case FigureEffectType.AddChips: diceManager.snackBonusChips += Mathf.FloorToInt(actualValue); ReportApplied(Mathf.FloorToInt(actualValue) != 0); break;
+                case FigureEffectType.AddMultiplier: diceManager.snackBonusMult += actualValue; ReportApplied(actualValue != 0f); break; // 배수는 float 그대로
                 case FigureEffectType.DamageEnemy:
                     if (diceManager.enemy != null)
                     {
                         // 리롤 중에 돌연사하면 즉시 문지기(OnEnemyKilled)를 부르고,
                         // 결산 중에 돌연사하면 아까 짠 방어 코드가 부르도록 null을 줌
                         System.Action deathCallback = diceManager.isCalculating ? null : (System.Action)diceManager.OnEnemyKilled;
+                        int hpBefore = diceManager.enemy.CurrentHP;
                         diceManager.enemy.TakeDamage(Mathf.FloorToInt(actualValue), deathCallback);
+                        ReportApplied(diceManager.enemy.CurrentHP < hpBefore);
                     }
                     break;
-                case FigureEffectType.AddReroll: diceManager.figureBonusRerolls += Mathf.FloorToInt(actualValue); break;
-                case FigureEffectType.GetSnack: if (effect.optionalItem != null) InventoryManager.Instance.AddItem(effect.optionalItem); break;
+                case FigureEffectType.AddReroll: diceManager.figureBonusRerolls += Mathf.FloorToInt(actualValue); ReportApplied(Mathf.FloorToInt(actualValue) != 0); break;
+                case FigureEffectType.GetSnack: if (effect.optionalItem != null && InventoryManager.Instance != null) ReportApplied(InventoryManager.Instance.AddItem(effect.optionalItem)); break;
 
                 case FigureEffectType.DestroySelf:
                     // 피규어 발동 후 영구 파괴 (일회성 아이템용)
+                    ReportApplied(true);
                     InventoryManager.Instance.RemoveItem(sourceFigure);
                     break;
                     break;
                 //보호막 추가 (이번 전투 동안 유지)
                 case FigureEffectType.AddShield:
-                    diceManager.currentShield += Mathf.FloorToInt(actualValue);
+                    diceManager.currentShield += Mathf.FloorToInt(actualValue); ReportApplied(Mathf.FloorToInt(actualValue) != 0);
                     Debug.Log($"[보호막 확인] 계산값={actualValue}, 추가량={Mathf.FloorToInt(actualValue)}, 현재 보호막={diceManager.currentShield}, UI연결={diceManager.ui != null}");
                     // 보호막 UI가 있다면 즉시 갱신
                     if (diceManager.ui != null) diceManager.ui.UpdateShieldUI(diceManager.currentShield);
                     break;
                 //전투 누적 보너스 (스테이지 한정)
                 case FigureEffectType.AddCombatMultiplier:
-                    diceManager.stageBonusMult += actualValue;
+                    diceManager.stageBonusMult += actualValue; ReportApplied(actualValue != 0f);
                     break;
                 case FigureEffectType.AddCombatChips:
-                    diceManager.stageBonusChips += Mathf.FloorToInt(actualValue);
+                    diceManager.stageBonusChips += Mathf.FloorToInt(actualValue); ReportApplied(Mathf.FloorToInt(actualValue) != 0);
                     break;
                 case FigureEffectType.ReduceEnemyMaxHP:
                     if (diceManager.enemy != null)
                     {
-                        diceManager.enemy.ReduceMaxHP(
-                            Mathf.FloorToInt(actualValue));
+                        int maxBefore = diceManager.enemy.MaxHP;
+                        diceManager.enemy.ReduceMaxHP(Mathf.FloorToInt(actualValue));
+                        ReportApplied(diceManager.enemy.MaxHP < maxBefore);
                     }
                     break;
                 case FigureEffectType.DamageEnemyOrPlayer:
                     {
                         // 두 효과를 각각 추첨하지 않고, 한 번의 추첨으로 한쪽만 실행
-                    if (Random.value < 0.5f)
+                        if (Random.value < 0.5f)
                         {
-                    if (diceManager.enemy != null && !diceManager.enemy.IsDead)
+                            if (diceManager.enemy != null && !diceManager.enemy.IsDead)
                             {
                                 int enemyDamage = Mathf.Max(0, Mathf.FloorToInt(actualValue));
+                                ReportApplied(enemyDamage > 0 && diceManager.enemy.CurrentHP > 0);
                                 diceManager.enemy.TakeDamage(enemyDamage, diceManager.OnEnemyKilled);
                             }
                         }
-                    else
+                        else
                         {
                             int playerDamage = Mathf.Max(0, Mathf.FloorToInt(effect.secondaryEffectValue));
                             // 기존 피해 규칙에 따라 보호막부터 차감
+                            ReportApplied(playerDamage > 0);
                             diceManager.playerStatus.TakeDamage(playerDamage);
                             diceManager.ui?.UpdateShieldUI(diceManager.currentShield);
                             // 살아 있다면 용암 가면 등의 체력 조건 검사
                             EvaluateLowHPTriggers(diceManager, shopManager);
 
-                    if (diceManager.currentPlayerHP <= 0)
+                            if (diceManager.currentPlayerHP <= 0)
                             {
                                 bool revived = EvaluateDeathTriggers(diceManager, shopManager);
                                 if (!revived)
@@ -327,7 +343,7 @@ public class FigureEffectManager : MonoBehaviour
 
                                     GameSaveManager.Instance?.DeleteSave();
 
-                            string gameOverText = LocalizationManager.GetUi("UI_GAME_OVER", "게임 오버");
+                                    string gameOverText = LocalizationManager.GetUi("UI_GAME_OVER", "게임 오버");
                                     diceManager.ui?.ShowResult("#FF0000", gameOverText);
                                     diceManager.StartCoroutine(diceManager.ShowGameOverPanelDelayed());
                                 }
@@ -337,33 +353,37 @@ public class FigureEffectManager : MonoBehaviour
                         break;
                     }
                 case FigureEffectType.AddPermanentMultiplier:
-                    diceManager.permanentFigureMultiplier += actualValue;
+                    diceManager.permanentFigureMultiplier += actualValue; ReportApplied(actualValue != 0f);
                     break;
 
                 //1번 카테고리 특수 효과들
-                case FigureEffectType.MultiplyCombatEndGold: diceManager.combatWinGoldMultiplier *= actualValue; break;
-                case FigureEffectType.IncreaseMaxHP: diceManager.playerMaxHP += Mathf.FloorToInt(actualValue); diceManager.currentPlayerHP += Mathf.FloorToInt(actualValue); break;
-                case FigureEffectType.AddExtraAttack: diceManager.extraAttackCount += Mathf.FloorToInt(actualValue); break;
+                case FigureEffectType.MultiplyCombatEndGold: diceManager.combatWinGoldMultiplier *= actualValue; ReportApplied(actualValue != 1f); break;
+                case FigureEffectType.IncreaseMaxHP: diceManager.playerMaxHP += Mathf.FloorToInt(actualValue); diceManager.currentPlayerHP += Mathf.FloorToInt(actualValue); ReportApplied(Mathf.FloorToInt(actualValue) != 0); break;
+                case FigureEffectType.AddExtraAttack: diceManager.extraAttackCount += Mathf.FloorToInt(actualValue); ReportApplied(Mathf.FloorToInt(actualValue) > 0); break;
                 case FigureEffectType.NullifyEnemySkill:
-                    diceManager.isEnemySkillNullified = true;
-                    if (diceManager.enemy != null && diceManager.enemy.CurrentBossAbility == BossAbilityType.FakeDice) diceManager.deckManager.RestoreFakeDice(ref diceManager.originalBossDice, ref diceManager.fakeDiceIndex);    
+                    diceManager.isEnemySkillNullified = true; ReportApplied(true);
+                    if (diceManager.enemy != null && diceManager.enemy.CurrentBossAbility == BossAbilityType.FakeDice) diceManager.deckManager.RestoreFakeDice(ref diceManager.originalBossDice, ref diceManager.fakeDiceIndex);
                     break;
-                case FigureEffectType.FixEnemyAttackToOne: diceManager.isNextEnemyAttackFixedToOne = true; break;
+                case FigureEffectType.FixEnemyAttackToOne: diceManager.isNextEnemyAttackFixedToOne = true; ReportApplied(true); break;
                 case FigureEffectType.DestroyDebuffDice: diceManager.deckManager.RestoreFakeDice(ref diceManager.originalBossDice, ref diceManager.fakeDiceIndex); break;
                 case FigureEffectType.AddFlameDamage:
-                    diceManager.figureBonusFlameDamage += Mathf.FloorToInt(actualValue);
+                    diceManager.figureBonusFlameDamage += Mathf.FloorToInt(actualValue); ReportApplied(Mathf.FloorToInt(actualValue) > 0);
                     break;
                 //5번 상점 복고양이 효과
                 case FigureEffectType.MakeRandomShopItemFree:
                     if (shopManager != null)
                     {
+                        foreach (var slot in shopManager.shopSlots)
+                        {
+                            if (slot != null && slot.gameObject.activeSelf && !slot.isLocked && !slot.isPurchased && slot.currentData != null) { ReportApplied(true); break; }
+                        }
                         shopManager.MakeRandomItemFree();
                     }
                     break;
 
                 // --- UI 선택창 호출 ---
                 case FigureEffectType.OpenTicketSelection:
-                    if (shopManager != null) { shopManager.ShowTicketSelection(); while (shopManager.ticketSelectionPanel != null && shopManager.ticketSelectionPanel.activeSelf) yield return null; }
+                    if (shopManager != null) { shopManager.ShowTicketSelection(); ReportApplied(shopManager.ticketSelectionPanel != null && shopManager.ticketSelectionPanel.activeSelf); while (shopManager.ticketSelectionPanel != null && shopManager.ticketSelectionPanel.activeSelf) yield return null; }
                     break;
                 case FigureEffectType.OpenCoatingSelection:
                     if (shopManager != null)
@@ -373,6 +393,7 @@ public class FigureEffectManager : MonoBehaviour
                         float coatingMultiplier = randType == DiceType.Prism ? 1.2f : 1.0f;
 
                         shopManager.ShowCoatingSelection(randType, coatingMultiplier, randColor);
+                        ReportApplied(CoatingSelectionPanel.IsPanelOpen);
                         while (CoatingSelectionPanel.IsPanelOpen) yield return null;
                     }
                     break;
@@ -382,6 +403,8 @@ public class FigureEffectManager : MonoBehaviour
                     {
                         shopManager.ShowSatelliteSelection(
                             (SatelliteType)Random.Range(0, 4));
+
+                        ReportApplied(SatelliteSelectionPanel.IsPanelOpen);
 
                         // 위성 선택이 끝날 때까지 다음 효과 진행 대기
                         while (SatelliteSelectionPanel.IsPanelOpen)
@@ -395,9 +418,12 @@ public class FigureEffectManager : MonoBehaviour
     }
 
     // 적에게 맞기 직전에 모든 뎀감(ReduceDamageTaken) 효과를 긁어와서 합산해 주는 함수
-    public int GetTotalDamageReduction(int incomingDamage, DiceManager diceManager)
+    private readonly HashSet<FigureItemSO> reductionFeedback = new HashSet<FigureItemSO>();
+
+    public int GetTotalDamageReduction(int incomingDamage, DiceManager diceManager, bool playFeedback = false)
     {
         float totalReduction = 0;
+        reductionFeedback.Clear();
 
         // 보조 함수: 특정 트리거 캐시를 확인해 데미지 계산
         void CalculateReduction(FigureTriggerType type)
@@ -406,6 +432,7 @@ public class FigureEffectManager : MonoBehaviour
             {
                 foreach (var cacheItem in effectCache[type])
                 {
+                    float beforeReduction = totalReduction;
                     foreach (var effect in cacheItem.node.effects)
                     {
                         if (effect.effectType == FigureEffectType.ReduceDamageTaken)
@@ -425,6 +452,7 @@ public class FigureEffectManager : MonoBehaviour
                             }
                         }
                     }
+                    if (totalReduction > beforeReduction) reductionFeedback.Add(cacheItem.sourceFigure);
                 }
             }
         }
@@ -433,7 +461,12 @@ public class FigureEffectManager : MonoBehaviour
         CalculateReduction(FigureTriggerType.Always);
         CalculateReduction(FigureTriggerType.OnDamaged);
 
-        return Mathf.FloorToInt(totalReduction);
+        int result = Mathf.FloorToInt(totalReduction);
+        if (playFeedback && incomingDamage > 0 && result > 0)
+        {
+            foreach (var figure in reductionFeedback) FigureFeedback.Pulse(figure);
+        }
+        return result;
     }
 
     // 도도새 모자 등의 힐량 증가(%) 수치를 가져오는 함수 (기본 1배 = 1.0f)
@@ -472,10 +505,9 @@ public class FigureEffectManager : MonoBehaviour
     {
         float chance = Mathf.Clamp01(cachedSnackPreserveChance);
 
-        if (chance <= 0f) return false;
-        if (chance >= 1f) return true;
-
-        return Random.value < chance;
+        bool preserved = chance > 0f && (chance >= 1f || Random.value < chance);
+        if (preserved) NotifyPassiveApplied(FigureEffectType.PreserveSnackChance);
+        return preserved;
     }
 
     // 상점 문을 열었을 때(OnShopEntered) 발동하는 피규어 처리 (복고양이용)
@@ -615,6 +647,8 @@ public class FigureEffectManager : MonoBehaviour
             diceManager.currentPlayerHP = Mathf.Clamp(
                 reviveHP, 1, Mathf.Max(1, diceManager.playerMaxHP));
 
+            FigureFeedback.Pulse(figure);
+
             if (destroyAfterRevive)
             {
                 InventoryManager.Instance.RemoveItem(figure);
@@ -642,9 +676,9 @@ public class FigureEffectManager : MonoBehaviour
         diceManager.ForceUpdateUI();
     }
     // 조건 및 스테이지당 사용 제한을 확인한 뒤 기존 효과 실행기로 전달
-    private IEnumerator ExecuteFigureNode( FigureCacheItem cacheItem,int currentBaseChips,DiceManager diceManager,ShopManager shopManager,int actualDamage = 0)
-    { 
-        if (cacheItem == null ||cacheItem.sourceFigure == null ||cacheItem.node == null ||diceManager == null)
+    private IEnumerator ExecuteFigureNode(FigureCacheItem cacheItem, int currentBaseChips, DiceManager diceManager, ShopManager shopManager, int actualDamage = 0)
+    {
+        if (cacheItem == null || cacheItem.sourceFigure == null || cacheItem.node == null || diceManager == null)
         {
             yield break;
         }
@@ -697,7 +731,7 @@ public class FigureEffectManager : MonoBehaviour
                 yield break;
         }
 
-        yield return ApplyFigureEffectsCoroutine(node.effects,currentBaseChips,diceManager,shopManager,cacheItem.sourceFigure,actualDamage);
+        yield return ApplyFigureEffectsCoroutine(node.effects, currentBaseChips, diceManager, shopManager, cacheItem.sourceFigure, actualDamage, !IsDicePreviewTrigger(node.triggerType));
     }
 
     public void EvaluateLowHPTriggers(
@@ -848,6 +882,43 @@ public class FigureEffectManager : MonoBehaviour
     public int GetIceChipsBonus()
     {
         return Mathf.FloorToInt(cachedIceChipsBonus);
+    }
+
+    private static bool IsDicePreviewTrigger(FigureTriggerType trigger)
+    {
+        switch (trigger)
+        {
+            case FigureTriggerType.OnePair:
+            case FigureTriggerType.TwoPair:
+            case FigureTriggerType.Triple:
+            case FigureTriggerType.Straight:
+            case FigureTriggerType.FullHouse:
+            case FigureTriggerType.FourOfAKind:
+            case FigureTriggerType.Yacht:
+            case FigureTriggerType.ThreeOf1:
+            case FigureTriggerType.ThreeOf2:
+            case FigureTriggerType.ThreeOf3:
+            case FigureTriggerType.ThreeOf4:
+            case FigureTriggerType.ThreeOf5:
+            case FigureTriggerType.ThreeOf6: return true;
+            default: return false;
+        }
+    }
+
+    // 수치 조회 함수에서는 호출하지 않습니다. 실제로 보너스가 적용된 곳에서만 호출합니다.
+    public void NotifyPassiveApplied(FigureEffectType type)
+    {
+        if (!effectCache.TryGetValue(FigureTriggerType.Always, out var items)) return;
+        foreach (var item in items)
+        {
+            foreach (var effect in item.node.effects)
+            {
+                if (effect.effectType != type || effect.effectValue <= 0f) continue;
+                if (type == FigureEffectType.MultiplySnackEffects && Mathf.Approximately(effect.effectValue, 1f)) continue;
+                FigureFeedback.Pulse(item.sourceFigure);
+                break;
+            }
+        }
     }
 
     // 다른 스크립트(스테이지 클리어, 스낵 사용)에서 에러가 안 나도록 기존 동기형 이름도 남겨둠
