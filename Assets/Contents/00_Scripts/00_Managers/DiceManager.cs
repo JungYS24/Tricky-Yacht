@@ -810,7 +810,6 @@ public class DiceManager : MonoBehaviour
 
             if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
 
-            Debug.Log("골드 이펙트 실행: " + baseClearReward);
             goldEffectUI?.PlayGain(baseClearReward);
         }
 
