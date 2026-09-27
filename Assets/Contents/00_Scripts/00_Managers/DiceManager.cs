@@ -756,7 +756,7 @@ public class DiceManager : MonoBehaviour
         string handName = LocalizationManager.GetHandDisplayName(handRank);
 
         // 달성한 족보의 이펙트 재생
-        handVFXManager?.PlayHandVFX(handRank);
+        yield return HandResolutionFeedback.Get(this).Play(keptDice, handRank, ui);
 
         // 분리 전과 동일하게 족보 배수가 2 이상이면 슬로모션
         if (handMult >= 2.0f)

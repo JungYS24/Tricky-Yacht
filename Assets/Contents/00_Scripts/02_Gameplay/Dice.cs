@@ -3,8 +3,8 @@ using UnityEngine.EventSystems;
 using System;
 using System.Collections;
 using System.Linq;
-using TMPro;           
-using DG.Tweening;     
+using TMPro;
+using DG.Tweening;
 
 public class Dice : MonoBehaviour, IPointerDownHandler
 {
@@ -13,6 +13,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
     public bool isKept = false;
     public int currentKeepIndex = -1;
     public Vector3 rollPos;
+    public bool IsMoving { get; private set; }
     public DiceData1 myData; // 주사위 고유 데이터 (코팅, 색상, 면 구성 등)
 
     [Header("렌더링 및 연출")]
@@ -261,6 +262,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
     private IEnumerator MoveRoutine(Vector3 target)
     {
+        IsMoving = true;
         float duration = 0.2f, elapsed = 0f;
         Vector3 startPos = transform.position;
         while (elapsed < duration)
@@ -270,7 +272,11 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             yield return null;
         }
         transform.position = target;
+        IsMoving = false;
     }
+
+    private void OnDisable() => IsMoving = false;
+
     private void Update()
     {
         if (myData != null && myData.type == DiceType.Prism)
