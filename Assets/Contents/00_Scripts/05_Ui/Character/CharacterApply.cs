@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CharacterApply : MonoBehaviour
 {
@@ -34,7 +35,7 @@ public class CharacterApply : MonoBehaviour
         if (apply)
         {
             CharacterStatus status = new(data.CharacterName, data.InitialHP, data.DedicateDiceData, data.DedicateFigureData);
-            Debug.Log("시작");
+            SceneManager.LoadScene("MainScene");
         }
         else
         {
