@@ -43,7 +43,7 @@ public class LobbyManager : MonoBehaviour
         //}
 
         StopAllCoroutines();
-        StartCoroutine(GlitchAndLoad("MainScene"));
+        StartCoroutine(GlitchAndLoad("Playable"));
     }
 
     //이어하기 전용 클릭 이벤트
