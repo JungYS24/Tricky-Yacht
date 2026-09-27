@@ -9,6 +9,9 @@ public class StampItemSO : BaseItemDataSO
 
     public override void ApplyItemEffect(DiceManager diceManager)
     {
-        Debug.LogException(new System.NotImplementedException());
+        if (diceManager != null && diceManager.shopManager != null)
+        {
+            diceManager.shopManager.ShowStampSelection(type, sealImage);
+        }
     }
 }

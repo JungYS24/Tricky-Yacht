@@ -45,6 +45,9 @@ public class DiceData1
     public Sprite[] customFaceSprites;
     public List<SatelliteType> activeSatellites = new List<SatelliteType>();//위성 리스트
 
+    public StampType stampType = StampType.None;
+    public Sprite sealImage;
+
     //public int minRoll = 1;
     //public int maxRoll = 6;
     public int[] faceValues = new int[6] { 1, 2, 3, 4, 5, 6 };
