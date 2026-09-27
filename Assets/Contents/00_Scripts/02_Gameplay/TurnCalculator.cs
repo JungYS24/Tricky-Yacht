@@ -15,6 +15,10 @@ public struct TurnCalcResult
     public int satelliteBonusChips;
     public float satelliteBonusMult;
     public float iceBonusMult;
+
+    public int stampBonusChips;
+    public int stampDamage;
+    public int stampGold;
 }
 
 public enum DiceScoreBonusKind
@@ -196,6 +200,26 @@ public static class TurnCalculator
                             break;
                     }
                 }
+            }
+
+            // 스탬프 효과
+            switch (d.myData.stampType)
+            {
+                case StampType.Spade:
+                    res.stampBonusChips += 20;
+                    res.stampDamage += d.currentValue;
+                    break;
+
+                case StampType.Heart:
+                    res.stampDamage -= 4;
+                    break;
+                
+                case StampType.Diamond:
+                    res.stampGold += d.currentValue * 5;
+                    break;
+
+                default:
+                    break;
             }
         }
         return res;
