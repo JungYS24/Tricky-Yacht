@@ -90,10 +90,10 @@ public class UiCountUpText : MonoBehaviour
         switch (format)
         {
             case FormatKind.Chips:
-                label.text = DiceManager.FormatChipsValue(Mathf.FloorToInt(value));
+                label.text = UIManager.FormatChipsValue(Mathf.FloorToInt(value));
                 break;
             case FormatKind.Mult:
-                label.text = DiceManager.FormatMultValue(value);
+                label.text = UIManager.FormatMultValue(value);
                 break;
             default:
                 label.text = Mathf.FloorToInt(value).ToString();
