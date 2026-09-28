@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -38,9 +38,50 @@ public struct DiceScoreBonus
     }
 }
 
+public struct TurnScoreBonuses
+{
+    public int stageChips;
+    public int snackChips;
+    public float stageMult;
+    public float snackMult;
+    public float permanentMult;
+}
+
+public struct TurnScoreResult
+{
+    public int chips;
+    public float multiplier;
+    public int damage;
+}
+
 public static class TurnCalculator
 {
     public const int GoldPerPip = 10;
+
+    public static TurnScoreResult CalculateScore(TurnCalcResult dice, float handMult, TurnScoreBonuses bonuses)
+    {
+        // 최종 칩 = 주사위 기본합 + 얼음/위성 + 피규어/스테이지 보너스 + 스낵 보너스
+        int chips = dice.baseSum + dice.iceBonusChips + dice.satelliteBonusChips + bonuses.stageChips + bonuses.snackChips;
+        // 최종 배수 = 족보 배수 + 피규어/스테이지 배수 + 스낵 배수 + 프리즘/위성 배수
+        float multiplier = handMult + bonuses.stageMult + bonuses.snackMult + dice.prismMultTotal + dice.satelliteBonusMult + dice.iceBonusMult + bonuses.permanentMult;
+        return new TurnScoreResult { chips = chips, multiplier = multiplier, damage = Mathf.FloorToInt(chips * multiplier) };
+    }
+
+    // 미리보기와 실제 정산에서 동일한 순차 HP 감소 계산을 사용합니다.
+    public static int CalculateDarkDamage(List<Dice> dice, int enemyHP)
+    {
+        int total = 0;
+        foreach (var d in dice)
+        {
+            if (d.myData.isCoated && d.myData.type == DiceType.Dark)
+            {
+                int drop = Mathf.FloorToInt(enemyHP * 0.1f);
+                total += drop;
+                enemyHP -= drop;
+            }
+        }
+        return total;
+    }
 
     public static HandRank CalculateHand(List<int> values, DiceManager dm, out float multiplier)
     {

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections; // 코루틴 사용을 위해 추가
@@ -15,6 +15,21 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
     public int currentStack = 0;
 
     private InventoryManager manager;
+    public SnackUseEntry PendingSnack { get; private set; }
+    public bool CountsAsOwnedSnack => !isEmpty && (PendingSnack == null || PendingSnack.preserved);
+
+    public void MarkSnackUsed(SnackUseEntry entry, Color tint)
+    {
+        PendingSnack = entry;
+        SnackUseFeedback.Get(this).ShowUsed(tint);
+    }
+
+    public void ReleaseSnackReservation()
+    {
+        PendingSnack = null;
+        var feedback = GetComponent<SnackUseFeedback>();
+        if (feedback != null) feedback.ResetVisual();
+    }
 
     [Header("호버 효과 설정")]
     [SerializeField] private float hoverScaleFactor = 0.93f; // 살짝 눌린 크기
@@ -35,6 +50,7 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
 
     public void SetItem(BaseItemDataSO item)
     {
+        ReleaseSnackReservation();
         currentItem = item;
         isEmpty = false;
         itemIcon.sprite = item.icon;
@@ -45,6 +61,7 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
 
     public void ClearSlot()
     {
+        ReleaseSnackReservation();
         FigureFeedback.Bind(this, null);
         currentItem = null;
         isEmpty = true;
@@ -71,7 +88,7 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (isEmpty) return;
+        if (isEmpty || PendingSnack != null) return;
 
         //몬스터가 죽어있는 상태(전투 종료 및 연출 대기 중)라면 인벤토리 상호작용 차단!
         if (manager.diceManager != null && manager.diceManager.enemy != null && manager.diceManager.enemy.IsDead)
@@ -97,35 +114,9 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
                     return; // 여기서 함수를 종료하면 아래의 snack.ApplyItemEffect와 ClearSlot이 실행되지 않습니다.
                 }
 
-                // 사용이 허용된 스낵에 대해서만 소모 방지 여부를 한 번 판정
-                bool preserveSnack = FigureEffectManager.Instance != null &&
-                    FigureEffectManager.Instance.ShouldPreserveSnack();
-
-                // 스낵 고유의 효과(체력 회복 등) 적용
-                snack.ApplyItemEffect(manager.diceManager);
-
-
-
-                // 스낵을 먹었으니 FigureEffectManager에게 알려서 OnSnackUsed 피규어를 발동
-                if (FigureEffectManager.Instance != null)
-                {
-                    FigureEffectManager.Instance.EvaluateSnackUsedTriggers(manager.diceManager, manager.diceManager.shopManager);
-                }
-
-
-                if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-                {
-                    TutorialManager.Instance.OnItemUsed(currentItem.itemName);
-                }
-
-                // 효과가 적용된 후에만 슬롯을 비움
-                // 소모 방지에 성공했다면 스낵은 유지
-                if (!preserveSnack)
-                {
-                    ClearSlot();
-                }
-                manager.HideSellPopup();
-                manager.HideTooltip();
+                // 실제 효과와 사용 후 자리 예약은 스낵 담당에 위임합니다.
+                // 소모 방지 판정, OnSnackUsed 피규어 알림, 튜토리얼 알림도 한 번만 처리합니다.
+                manager.SnackUses.TryUse(this, snack);
             }
             else if (currentItem is FigureItemSO figure)
             {
