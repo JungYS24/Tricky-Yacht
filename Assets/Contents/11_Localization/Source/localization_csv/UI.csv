@@ -42,7 +42,7 @@ UI,UI_BONUS_STAGE,전투 누적,Combat Bonus,戦闘累積,战斗累计,
 UI,UI_BONUS_PRISM,프리즘,Prism,プリズム,棱镜,
 UI,UI_BONUS_SATELLITE,위성,Satellite,衛星,卫星,
 UI,UI_SATELLITE_TAG,(위성),(Sat),(衛星),(卫星),
-UI,UI_MULT_VALUE,x <color=#00BFFF>{0}배</color>,x <color=#00BFFF>{0}</color>,x <color=#00BFFF>{0}倍</color>,x <color=#00BFFF>{0}倍</color>,
+UI,UI_MULT_VALUE,<color=#FDE470>{0}</color>,<color=#FDE470>{0}</color>,<color=#FDE470>{0}</color>,<color=#FDE470>{0}</color>,
 UI,UI_COLLECTION_PROGRESS,{0} : {1} / {2},{0} : {1} / {2},{0} : {1} / {2},{0} : {1} / {2},
 UI,UI_BIOME_FILTER,바이옴 : {0},Biome : {0},バイオーム: {0},生态区域: {0},
 UI,UI_GAME_CLEAR,"<color=#00FF00>GAME CLEAR!</color>

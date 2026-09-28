@@ -47,6 +47,12 @@ public static class TurnCalculator
         multiplier = dm.multHighCard;
         HandRank rank = HandRank.HighCard;
 
+        if (values == null || values.Count == 0)
+        {
+            multiplier = dm.multHighCard;
+            return HandRank.HighCard;
+        }
+
         Dictionary<int, int> countDict = new Dictionary<int, int>();
         foreach (int v in values)
         {
@@ -80,7 +86,7 @@ public static class TurnCalculator
             }
         }
 
-        if (isStraight)
+        if (isStraight && sortedValues.Count == 5)
         {
             multiplier = dm.multStraight;
             return HandRank.Straight;

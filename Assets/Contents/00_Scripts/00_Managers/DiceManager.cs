@@ -567,6 +567,12 @@ public class DiceManager : MonoBehaviour
 
     void SpawnDice(bool returnPreviousDiceToDiscard)
     {
+        if (returnPreviousDiceToDiscard && activeDiceList.Count > 0)
+        {
+            RecycleKeptDiceAndRefillFromDeck();
+            return;
+        }
+
         //기존 활성화된 주사위들을 파괴하지 않고 비활성화하여 풀(Pool)에 보관
         foreach (var d in activeDiceList)
         {
@@ -672,6 +678,77 @@ public class DiceManager : MonoBehaviour
         }
     }
 
+    void RecycleKeptDiceAndRefillFromDeck()
+    {
+        List<Dice> remaining = new List<Dice>();
+        foreach (var d in activeDiceList)
+        {
+            if (d == null) continue;
+
+            if (d.isKept)
+            {
+                if (d.myData != null) discardPile.Add(d.myData);
+                d.isKept = false;
+                d.currentKeepIndex = -1;
+                d.gameObject.SetActive(false);
+                dicePool.Add(d);
+            }
+            else
+            {
+                d.currentKeepIndex = -1;
+                remaining.Add(d);
+            }
+        }
+
+        activeDiceList.Clear();
+        Array.Clear(keepSlotOccupants, 0, keepSlotOccupants.Length);
+
+        int slot = 0;
+        foreach (var d in remaining)
+        {
+            if (slot >= rollSlots.Length) break;
+            d.rollPos = rollSlots[slot].position;
+            d.MoveToTarget(d.rollPos);
+            activeDiceList.Add(d);
+            slot++;
+        }
+
+        int need = rollSlots.Length - activeDiceList.Count;
+        deckManager.CheckAndRefillDrawPile(Mathf.Max(need, 1));
+
+        for (int i = slot; i < rollSlots.Length; i++)
+        {
+            DiceData1 drawnData = deckManager.DrawOneDice();
+            if (drawnData == null) break;
+
+            Dice d;
+            if (dicePool.Count > 0)
+            {
+                d = dicePool[dicePool.Count - 1];
+                dicePool.RemoveAt(dicePool.Count - 1);
+                d.transform.position = rollSlots[i].position;
+                d.gameObject.SetActive(true);
+            }
+            else
+            {
+                GameObject go = Instantiate(dicePrefab, rollSlots[i].position, Quaternion.identity);
+                d = go.GetComponent<Dice>();
+            }
+
+            d.rollPos = rollSlots[i].position;
+            int initialVal = drawnData.faceValues[UnityEngine.Random.Range(0, 6)];
+
+            if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+            {
+                int forcedVal = TutorialManager.Instance.GetForcedDiceValue(i);
+                if (forcedVal != -1) initialVal = forcedVal;
+            }
+
+            d.SetData(drawnData, initialVal);
+            activeDiceList.Add(d);
+        }
+    }
+
     public void OnRollButtonClick()
     {
         // 결산 중(isCalculating)일 때 리롤 진입 완벽 차단 방어막 추가
@@ -718,6 +795,7 @@ public class DiceManager : MonoBehaviour
         isCalculating = true; //결산 연출 시작
         ui?.SetRollButtonInteractable(false);   //즉시 버튼 비활성화
         ui?.SetFinishButtonInteractable(false); //즉시 버튼 비활성화
+        ClearMergedHandDamageText();
 
         //끝내기 버튼을 누르는 순간 화면 전체를 묵직하게 흔듭니다.
         CameraShake.Instance.Shake(0.3f, 0.2f);
@@ -748,8 +826,8 @@ public class DiceManager : MonoBehaviour
             }
         }
 
-        // 안전장치: 5개가 모두 킵되지 않았다면 결산 중단
-        if (keptValues.Count != 5)
+        // 안전장치: 킵한 주사위가 없으면 결산 중단
+        if (keptValues.Count == 0)
         {
             isCalculating = false;
             HandleDiceChanged();
@@ -844,13 +922,23 @@ public class DiceManager : MonoBehaviour
             // 숫자 상승과 같은 순간에 원인이 된 주사위를 반응
             if (reactHand)
             {
-                for (int i = 0; i < keptDice.Count; i++) scoreHandValues[i] = keptDice[i].currentValue;
-
-                HandResolutionFeedback.GetEmphasisGroups(handRank, scoreHandValues, scoreHandGroups, scoreHandOrder);
-
-                for (int i = 0; i < keptDice.Count; i++)
+                if (keptDice.Count == 5)
                 {
-                    if (scoreHandGroups[i] >= 0) keptDice[i].PlayScoreFeedback(duration);
+                    for (int i = 0; i < keptDice.Count; i++) scoreHandValues[i] = keptDice[i].currentValue;
+
+                    HandResolutionFeedback.GetEmphasisGroups(handRank, scoreHandValues, scoreHandGroups, scoreHandOrder);
+
+                    for (int i = 0; i < keptDice.Count; i++)
+                    {
+                        if (scoreHandGroups[i] >= 0) keptDice[i].PlayScoreFeedback(duration);
+                    }
+                }
+                else
+                {
+                    foreach (var d in keptDice)
+                    {
+                        if (d != null) d.PlayScoreFeedback(duration);
+                    }
                 }
             }
             else if (source != null)
@@ -881,7 +969,7 @@ public class DiceManager : MonoBehaviour
 
                 yield return DOVirtual.Float(start, target, duration, value =>
                 {
-                    valueText.text = isChips ? $"<color=#00BFFF>{Mathf.FloorToInt(value)}</color>" : LocalizationManager.GetUi("UI_MULT_VALUE", "x <color=#00BFFF>{0}배</color>", value.ToString("F1"));
+                    valueText.text = isChips ? FormatChipsValue(Mathf.FloorToInt(value)) : FormatMultValue(value);
                 }).SetEase(Ease.OutQuad).WaitForCompletion();
             }
 
@@ -912,16 +1000,17 @@ public class DiceManager : MonoBehaviour
             if (ui.chipsLogText != null) ui.chipsLogText.text = "";
             if (ui.multLogText != null) ui.multLogText.text = "";
             if (ui.finalDamageText != null) ui.finalDamageText.text = "";
+            if (ui.handInfoText != null) ui.handInfoText.text = "";
 
             if (ui.chipsSumText != null)
             {
                 ui.chipsSumText.text =
-                    $"<color=#00BFFF>{Mathf.FloorToInt(shownChips)}</color>";
+                    FormatChipsValue(Mathf.FloorToInt(shownChips));
             }
 
             if (ui.multSumText != null)
             {
-                ui.multSumText.text = LocalizationManager.GetUi("UI_MULT_VALUE", "x <color=#00BFFF>{0}배</color>", "1.0");
+                ui.multSumText.text = FormatMultValue(1f);
             }
 
             // 족보 → 칩 추가 → 배수 추가
@@ -947,13 +1036,12 @@ public class DiceManager : MonoBehaviour
             if (ui.chipsSumText != null)
             {
                 ui.chipsSumText.text =
-                    $"<color=#00BFFF>{finalBaseSum}</color>";
+                    FormatChipsValue(finalBaseSum);
             }
 
             if (ui.multSumText != null)
             {
-                ui.multSumText.text =
-                    LocalizationManager.GetUi("UI_MULT_VALUE", "x <color=#00BFFF>{0}배</color>", finalMult.ToString("F1"));
+                ui.multSumText.text = FormatMultValue(finalMult);
             }
 
             // 배수가 오르고 화면에 연출이 보일 수 있도록 0.8초간 뜸을 들인 후 데미지 전달
@@ -973,17 +1061,17 @@ public class DiceManager : MonoBehaviour
         }
 
         // 다크 피해까지 포함한 일반 공격의 최종 피해 표시
-        if (ui != null && ui.finalDamageText != null)
+        if (ui != null && ui.handInfoText != null)
         {
             int displayedDamage = finalDamage + darkDamageTotal;
 
-            ui.finalDamageText.text = LocalizationManager.GetUi(
+            ui.handInfoText.text = LocalizationManager.GetUi(
                 "UI_DAMAGE_VALUE",
                 "<color=#FF5555>= {0} 데미지</color>",
                 displayedDamage);
 
-            ui.finalDamageText.transform.DOKill(true);
-            ui.finalDamageText.transform.DOPunchScale(Vector3.one * 0.3f, 0.4f, 5, 0.5f);
+            ui.handInfoText.transform.DOKill(true);
+            ui.handInfoText.transform.DOPunchScale(Vector3.one * 0.3f, 0.4f, 5, 0.5f);
             yield return new WaitForSeconds(0.4f);
         }
 
@@ -996,6 +1084,7 @@ public class DiceManager : MonoBehaviour
         // 완벽하게 쪼개진 수치들을 전투 지휘관(CombatFlowController)에게 전달
         yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, finalDamage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName
         ));
+        ClearMergedHandDamageText();
     }
 
 
@@ -1203,7 +1292,7 @@ public class DiceManager : MonoBehaviour
 
         ui?.SetRollButtonInteractable(canAct && currentRerolls < maxRerolls + snackBonusRerolls + figureBonusRerolls && hasDiceToRoll);
 
-        ui?.SetFinishButtonInteractable(canAct && keptCount == keepSlots.Length);
+        ui?.SetFinishButtonInteractable(canAct && keptCount >= 1);
 
         OnDeckUpdateNeeded?.Invoke();
     }
@@ -1262,27 +1351,29 @@ public class DiceManager : MonoBehaviour
         uiValuesBuffer.Clear();
         foreach (var d in activeDiceList)
         {
-            if (d != null && d.gameObject.activeInHierarchy)
+            if (d != null && d.gameObject.activeInHierarchy && d.isKept)
             {
                 uiDiceBuffer.Add(d);
                 uiValuesBuffer.Add(d.currentValue);
             }
         }
 
-        float baseMult = uiValuesBuffer.Count == 5 ? 0 : 1.0f;
+        float baseMult = 1.0f;
 
         HandRank rank = currentHandRank;
         if (!isCalculating)
         {
-            if (uiValuesBuffer.Count == 5)
+            if (uiValuesBuffer.Count > 0)
             {
                 rank = TurnCalculator.CalculateHand(uiValuesBuffer, this, out baseMult);
                 currentHandRank = rank;
                 handName = LocalizationManager.GetHandDisplayName(rank);
             }
-            else if (uiValuesBuffer.Count > 0)
+            else
             {
-                handName = LocalizationManager.GetUi("UI_HAND_CALCULATING", "계산 중...");
+                rank = HandRank.HighCard;
+                currentHandRank = rank;
+                handName = "";
             }
 
             currentHandName = handName;
@@ -1401,6 +1492,7 @@ public class DiceManager : MonoBehaviour
             : "Stage";
         string stageDisplayName = $"{bName} {currentStage}";
         int remainingRerolls = (maxRerolls + snackBonusRerolls + figureBonusRerolls) - currentRerolls;
+        int remainingFinishes = isCalculating ? 0 : 1;
 
         if (!isCalculating)
         {
@@ -1409,7 +1501,7 @@ public class DiceManager : MonoBehaviour
 
             int displayDamage = Mathf.FloorToInt(displayBaseSum * displayMult) + darkDamageTotal;
 
-            string displayHand = $"<color=#FFD700>{handName}</color>";
+            string displayHand = string.IsNullOrEmpty(handName) ? "" : $"<color=#FFD700>{handName}</color>";
             if (iceBonusChips > 0) displayHand += $" <color=#00FFFF>+{iceBonusChips}</color>";
             if (darkDamageTotal > 0) displayHand += $" <color=#A9A9A9>+{darkDamageTotal}</color>";
             if (satelliteBonusChips > 0) displayHand += $" <color=#B19CD9>+{satelliteBonusChips}{LocalizationManager.GetUi("UI_SATELLITE_TAG", "(위성)")}</color>";
@@ -1419,8 +1511,8 @@ public class DiceManager : MonoBehaviour
             {
                 if (ui.handInfoText != null) ui.handInfoText.text = displayHand;
                 // 분리된 텍스트에 적용
-                if (ui.chipsSumText != null) ui.chipsSumText.text = $"<color=#00BFFF>{displayBaseSum}</color>";
-                if (ui.multSumText != null) ui.multSumText.text = LocalizationManager.GetUi("UI_MULT_VALUE", "x <color=#00BFFF>{0}배</color>", displayMult.ToString("F1"));
+                if (ui.chipsSumText != null) ui.chipsSumText.text = FormatChipsValue(displayBaseSum);
+                if (ui.multSumText != null) ui.multSumText.text = FormatMultValue(displayMult);
 
                 // 대기 중엔 로그를 모두 비우고, '대미지 예정' 텍스트도 완전히 안 보이게 처리
                 if (ui.chipsLogText != null) ui.chipsLogText.text = "";
@@ -1429,15 +1521,32 @@ public class DiceManager : MonoBehaviour
             }
 
             // UpdateGameUI의 combinedText 매개변수는 빈 문자열로 보냄
-            ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, "", "", activeFigureSprites);
+            ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, "", "", activeFigureSprites, remainingFinishes);
         }
         else
         {
             // 끝내기를 누른 후(결산 중): 시퀀스 코루틴이 각 텍스트를 개별 제어하므로 건드리지 않음
-            ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, "", "", activeFigureSprites);
+            ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, "", "", activeFigureSprites, remainingFinishes);
         }
 
         float currentEnemyDropRate = isPeppermintActive ? enemy.baseDropRate : 0f;
+    }
+
+    static string FormatChipsValue(int value)
+    {
+        return $"<color=#51F8D5>{value}</color>";
+    }
+
+    static string FormatMultValue(float value)
+    {
+        return LocalizationManager.GetUi("UI_MULT_VALUE", "<color=#FDE470>{0}</color>", value.ToString("F1"));
+    }
+
+    void ClearMergedHandDamageText()
+    {
+        if (ui == null) return;
+        if (ui.handInfoText != null) ui.handInfoText.text = "";
+        if (ui.finalDamageText != null) ui.finalDamageText.text = "";
     }
 
     void AssignToKeepSlot(Dice d)
