@@ -19,6 +19,11 @@ public class AudioControl : MonoBehaviour
     public Slider bgmSlider;
     public Slider sfxSlider;
 
+    private const float DefaultVolume = 0.7f;
+    private const string MasterVolKey = "MasterVol";
+    private const string BgmVolKey = "BGMVol";
+    private const string SfxVolKey = "SFXVol";
+
     private bool isReady;
 
     private void Awake()
@@ -89,18 +94,46 @@ public class AudioControl : MonoBehaviour
 
     private void ApplySavedVolumes()
     {
-        SetMixerVolume("Master", PlayerPrefs.GetFloat("MasterVol", 1f));
-        SetMixerVolume("BGM", PlayerPrefs.GetFloat("BGMVol", 1f));
-        SetMixerVolume("SFX", PlayerPrefs.GetFloat("SFXVol", 1f));
+        EnsureDefaultVolumes();
+        SetMixerVolume("Master", GetSavedVolume(MasterVolKey));
+        SetMixerVolume("BGM", GetSavedVolume(BgmVolKey));
+        SetMixerVolume("SFX", GetSavedVolume(SfxVolKey));
+    }
+
+    private static void EnsureDefaultVolumes()
+    {
+        bool wrote = false;
+        wrote |= EnsureDefaultVolume(MasterVolKey);
+        wrote |= EnsureDefaultVolume(BgmVolKey);
+        wrote |= EnsureDefaultVolume(SfxVolKey);
+        if (wrote)
+            PlayerPrefs.Save();
+    }
+
+    private static bool EnsureDefaultVolume(string key)
+    {
+        if (PlayerPrefs.HasKey(key))
+            return false;
+
+        PlayerPrefs.SetFloat(key, DefaultVolume);
+        return true;
+    }
+
+    private static float GetSavedVolume(string key)
+    {
+        if (!PlayerPrefs.HasKey(key))
+            return DefaultVolume;
+
+        return PlayerPrefs.GetFloat(key, DefaultVolume);
     }
 
     private void SyncAudioSettings()
     {
         isReady = false;
 
-        BindSlider(ref masterSlider, "MasterSlider", SetMasterVolume, "MasterVol");
-        BindSlider(ref bgmSlider, "BGMSlider", SetBGMVolume, "BGMVol");
-        BindSlider(ref sfxSlider, "SFXSlider", SetSFXVolume, "SFXVol");
+        BindSlider(ref masterSlider, "MasterSlider", SetMasterVolume, MasterVolKey);
+        BindSlider(ref bgmSlider, "BGMSlider", SetBGMVolume, BgmVolKey);
+        BindSlider(ref sfxSlider, "SFXSlider", SetSFXVolume, SfxVolKey);
 
         isReady = true;
     }
@@ -115,7 +148,7 @@ public class AudioControl : MonoBehaviour
         slider.onValueChanged.RemoveListener(listener);
         slider.minValue = 0.0001f;
         slider.maxValue = 1f;
-        slider.value = PlayerPrefs.GetFloat(prefsKey, 1f);
+        slider.value = GetSavedVolume(prefsKey);
         slider.onValueChanged.AddListener(listener);
     }
 
@@ -149,19 +182,19 @@ public class AudioControl : MonoBehaviour
     public void SetMasterVolume(float volume)
     {
         SetMixerVolume("Master", volume);
-        SaveVolume("MasterVol", volume, masterSlider);
+        SaveVolume(MasterVolKey, volume, masterSlider);
     }
 
     public void SetBGMVolume(float volume)
     {
         SetMixerVolume("BGM", volume);
-        SaveVolume("BGMVol", volume, bgmSlider);
+        SaveVolume(BgmVolKey, volume, bgmSlider);
     }
 
     public void SetSFXVolume(float volume)
     {
         SetMixerVolume("SFX", volume);
-        SaveVolume("SFXVol", volume, sfxSlider);
+        SaveVolume(SfxVolKey, volume, sfxSlider);
     }
 
     public static void ApplyMixerVolume(AudioMixer mixer, string parameter, float volume)

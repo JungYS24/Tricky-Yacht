@@ -469,7 +469,7 @@ public class Enemy : MonoBehaviour
     {
         if (turnText != null)
         {
-            turnText.text = LocalizationManager.GetUi("UI_ENEMY_TURN", "Turn : {0}", CurrentAttackTurn);
+            turnText.text = CurrentAttackTurn.ToString();
         }
     }
 
