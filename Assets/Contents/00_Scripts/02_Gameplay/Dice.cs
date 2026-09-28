@@ -43,12 +43,17 @@ public class Dice : MonoBehaviour, IPointerDownHandler
     private TextMeshPro floatingText;
 
     private Tween scoreFeedbackTween;
+    private UiHoverIdleJuice hoverJuice;
 
 
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalScale = transform.localScale;
+        hoverJuice = GetComponent<UiHoverIdleJuice>();
+        if (hoverJuice == null)
+            hoverJuice = gameObject.AddComponent<UiHoverIdleJuice>();
+        RefreshHoverJuice();
     }
 
     public void SetData(DiceData1 data, int initialValue)
@@ -172,6 +177,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
         if (rollCoroutine != null) StopCoroutine(rollCoroutine);
         rollCoroutine = StartCoroutine(RollRoutine(finalValue));
+        RefreshHoverJuice();
     }
 
     private IEnumerator RollRoutine(int finalValue)
@@ -221,6 +227,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         // 보관 상태에 따른 색상 최종 조정
         ApplyDiceColor();
         rollCoroutine = null;
+        RefreshHoverJuice();
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -254,17 +261,20 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         OnDiceStateChanged?.Invoke();
 
         ApplyDiceColor();
+        RefreshHoverJuice();
     }
 
     public void MoveToTarget(Vector3 targetPos)
     {
         StopAllCoroutines();
+        rollCoroutine = null;
         StartCoroutine(MoveRoutine(targetPos));
     }
 
     private IEnumerator MoveRoutine(Vector3 target)
     {
         IsMoving = true;
+        RefreshHoverJuice();
         float duration = 0.2f, elapsed = 0f;
         Vector3 startPos = transform.position;
         while (elapsed < duration)
@@ -275,6 +285,17 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         }
         transform.position = target;
         IsMoving = false;
+        RefreshHoverJuice();
+    }
+
+    public void RefreshHoverJuice()
+    {
+        if (hoverJuice == null)
+            hoverJuice = GetComponent<UiHoverIdleJuice>();
+        if (hoverJuice == null)
+            return;
+
+        hoverJuice.enabled = !isKept && !IsMoving && rollCoroutine == null;
     }
 
     private void OnDisable() => IsMoving = false;

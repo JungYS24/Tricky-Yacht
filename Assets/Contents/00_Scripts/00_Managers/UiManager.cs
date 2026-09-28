@@ -106,7 +106,7 @@ public class UIManager : MonoBehaviour
     public void UpdateGameUI(string stageName, int currentHP, int maxHP, int playerHP, int playerMaxHP, int rerollsLeft, string combinedDamageText, string activeFigureString = "", List<Sprite> activeSprites = null, int finishesLeft = 1)
     {
         stageText.text = stageName;
-        targetScoreText.text = $"<color=#FF5555>{currentHP}/{maxHP}</color>";
+        targetScoreText.text = $"{currentHP}/{maxHP}";
         cumulativeScoreText.text = "";
         if (roundPlaysText != null)
             roundPlaysText.text = rerollsLeft.ToString();

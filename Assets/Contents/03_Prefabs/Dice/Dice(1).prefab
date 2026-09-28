@@ -4909,6 +4909,7 @@ GameObject:
   - component: {fileID: -6888208857438917302}
   - component: {fileID: 7708629646872671777}
   - component: {fileID: 2056494654080462187}
+  - component: {fileID: 8141555666777888}
   m_Layer: 0
   m_Name: Dice(1)
   m_TagString: Untagged
@@ -5151,3 +5152,19 @@ MonoBehaviour:
   trailTime: 0.25
   trailStartWidth: 0.2
   trailEndWidth: 0.1
+--- !u!114 &8141555666777888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6826951872689829596}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c4e2b91a7d64f3e9a1f0c6b5d8e3a12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UiHoverIdleJuice
+  hoverScale: 1.1
+  hoverDuration: 0.12
+  shakeAmount: 0.7
+  worldShakeAmount: 0.015
