@@ -111,7 +111,6 @@ public class UIManager : MonoBehaviour
         if (roundPlaysText != null)
             roundPlaysText.text = rerollsLeft.ToString();
 
-        BindRoundEndText();
         if (roundEndText != null)
             roundEndText.text = finishesLeft.ToString();
 
@@ -165,12 +164,36 @@ public class UIManager : MonoBehaviour
     {
         if (roundEndText != null) return;
 
-        var named = GameObject.Find("Round_END");
+        var named = FindRoundEndObject();
         if (named == null) return;
 
         roundEndText = named.GetComponent<TextMeshProUGUI>();
         if (roundEndText == null)
             roundEndText = named.GetComponentInChildren<TextMeshProUGUI>(true);
+    }
+
+    static GameObject FindRoundEndObject()
+    {
+        string[] names = { "Round_End", "Round_END", "Round_end" };
+        for (int i = 0; i < names.Length; i++)
+        {
+            var found = GameObject.Find(names[i]);
+            if (found != null) return found;
+        }
+
+        var transforms = Resources.FindObjectsOfTypeAll<Transform>();
+        for (int i = 0; i < transforms.Length; i++)
+        {
+            var t = transforms[i];
+            if (t == null || !t.gameObject.scene.IsValid()) continue;
+            for (int n = 0; n < names.Length; n++)
+            {
+                if (t.name == names[n])
+                    return t.gameObject;
+            }
+        }
+
+        return null;
     }
 
     public void ShowResult(string colorHex, string message)
