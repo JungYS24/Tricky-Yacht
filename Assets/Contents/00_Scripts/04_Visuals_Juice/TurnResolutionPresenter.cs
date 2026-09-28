@@ -121,10 +121,14 @@ public sealed class TurnResolutionPresenter
                 valueText.transform.DOKill(true);
                 valueText.transform.DOPunchScale(Vector3.one * 0.2f, duration, 4, 0.5f);
 
-                yield return DOVirtual.Float(start, target, duration, value =>
-                {
-                    valueText.text = isChips ? UIManager.FormatChipsValue(Mathf.FloorToInt(value)) : UIManager.FormatMultValue(value);
-                }).SetEase(Ease.OutQuad).WaitForCompletion();
+                var counter = UiCountUpText.On(valueText, isChips ? UiCountUpText.FormatKind.Chips : UiCountUpText.FormatKind.Mult);
+                if (counter != null)
+                    yield return counter.Play(target, duration).WaitForCompletion();
+                else
+                    yield return DOVirtual.Float(start, target, duration, value =>
+                    {
+                        valueText.text = isChips ? UIManager.FormatChipsValue(Mathf.FloorToInt(value)) : UIManager.FormatMultValue(value);
+                    }).SetEase(Ease.OutQuad).WaitForCompletion();
             }
 
             if (isChips)
@@ -175,18 +179,12 @@ public sealed class TurnResolutionPresenter
             if (ui.chipsLogText != null) ui.chipsLogText.text = "";
             if (ui.multLogText != null) ui.multLogText.text = "";
             if (ui.finalDamageText != null) ui.finalDamageText.text = "";
-            if (ui.handInfoText != null) ui.handInfoText.text = "";
 
             if (ui.chipsSumText != null)
-            {
-                ui.chipsSumText.text =
-                    UIManager.FormatChipsValue(Mathf.FloorToInt(shownChips));
-            }
+                UiCountUpText.On(ui.chipsSumText, UiCountUpText.FormatKind.Chips)?.SetInstant(Mathf.FloorToInt(shownChips));
 
             if (ui.multSumText != null)
-            {
-                ui.multSumText.text = UIManager.FormatMultValue(1f);
-            }
+                UiCountUpText.On(ui.multSumText, UiCountUpText.FormatKind.Mult)?.SetInstant(1f);
 
             // 족보 완성 연출 이후: 모든 칩 추가 → 모든 배수 추가
             // 주사위별 칩 보너스: 아이스·수성
@@ -208,15 +206,10 @@ public sealed class TurnResolutionPresenter
 
             // 표시의 최종값을 실제 계산 결과에 맞춤
             if (ui.chipsSumText != null)
-            {
-                ui.chipsSumText.text =
-                    UIManager.FormatChipsValue(total.chips);
-            }
+                UiCountUpText.On(ui.chipsSumText, UiCountUpText.FormatKind.Chips)?.SetInstant(total.chips);
 
             if (ui.multSumText != null)
-            {
-                ui.multSumText.text = UIManager.FormatMultValue(total.multiplier);
-            }
+                UiCountUpText.On(ui.multSumText, UiCountUpText.FormatKind.Mult)?.SetInstant(total.multiplier);
 
             // 배수 표시를 유지한 뒤 최종 피해 표시로 진행
             yield return new WaitForSeconds(timing.afterScoreDelay);
@@ -226,20 +219,18 @@ public sealed class TurnResolutionPresenter
 
     public IEnumerator PlayFinalDamage(UIManager ui, int displayedDamage, TurnResolutionTiming timing)
     {
-        // 다크 피해까지 포함한 일반 공격의 최종 피해 표시
-        if (ui != null && ui.handInfoText != null)
+        if (ui == null || ui.handInfoText == null)
+            yield break;
+
+        ui.ApplyFinalDamageStyle();
+        var handText = ui.handInfoText;
+        var damageCounter = UiCountUpText.On(handText, UiCountUpText.FormatKind.Integer);
+        if (damageCounter != null)
+            yield return damageCounter.Play(displayedDamage, timing.finalDamageDuration).WaitForCompletion();
+        else
         {
-            
-
-            ui.handInfoText.text = LocalizationManager.GetUi(
-                "UI_DAMAGE_VALUE",
-                "<color=#FF5555>= {0} 데미지</color>",
-                displayedDamage);
-
-            ui.handInfoText.transform.DOKill(true);
-            ui.handInfoText.transform.DOPunchScale(Vector3.one * 0.3f, timing.finalDamageDuration, 5, 0.5f);
+            handText.text = displayedDamage.ToString();
             yield return new WaitForSeconds(timing.finalDamageDuration);
         }
-
     }
 }

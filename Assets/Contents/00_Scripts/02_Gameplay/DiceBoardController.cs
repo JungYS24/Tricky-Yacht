@@ -60,6 +60,7 @@ public sealed class DiceBoardController
             if (d != null)
             {
                 d.isKept = false;
+                d.RefreshHoverJuice();
                 d.currentKeepIndex = -1;
                 d.gameObject.SetActive(false);
                 dicePool.Add(d);
@@ -170,6 +171,7 @@ public sealed class DiceBoardController
             {
                 if (d.myData != null) deckManager.discardPile.Add(d.myData);
                 d.isKept = false;
+                d.RefreshHoverJuice();
                 d.currentKeepIndex = -1;
                 d.gameObject.SetActive(false);
                 dicePool.Add(d);

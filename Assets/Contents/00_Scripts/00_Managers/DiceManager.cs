@@ -576,79 +576,6 @@ public class DiceManager : MonoBehaviour
 
     public void ForceUpdateUI() => HandleDiceChanged();
 
-
-    void RecycleKeptDiceAndRefillFromDeck()
-    {
-        List<Dice> remaining = new List<Dice>();
-        foreach (var d in activeDiceList)
-        {
-            if (d == null) continue;
-
-            if (d.isKept)
-            {
-                if (d.myData != null) discardPile.Add(d.myData);
-                d.isKept = false;
-                d.RefreshHoverJuice();
-                d.currentKeepIndex = -1;
-                d.gameObject.SetActive(false);
-                dicePool.Add(d);
-            }
-            else
-            {
-                d.currentKeepIndex = -1;
-                remaining.Add(d);
-            }
-        }
-
-        activeDiceList.Clear();
-        Array.Clear(keepSlotOccupants, 0, keepSlotOccupants.Length);
-
-        int slot = 0;
-        foreach (var d in remaining)
-        {
-            if (slot >= rollSlots.Length) break;
-            d.rollPos = rollSlots[slot].position;
-            d.MoveToTarget(d.rollPos);
-            activeDiceList.Add(d);
-            slot++;
-        }
-
-        int need = rollSlots.Length - activeDiceList.Count;
-        deckManager.CheckAndRefillDrawPile(Mathf.Max(need, 1));
-
-        for (int i = slot; i < rollSlots.Length; i++)
-        {
-            DiceData1 drawnData = deckManager.DrawOneDice();
-            if (drawnData == null) break;
-
-            Dice d;
-            if (dicePool.Count > 0)
-            {
-                d = dicePool[dicePool.Count - 1];
-                dicePool.RemoveAt(dicePool.Count - 1);
-                d.transform.position = rollSlots[i].position;
-                d.gameObject.SetActive(true);
-            }
-            else
-            {
-                GameObject go = Instantiate(dicePrefab, rollSlots[i].position, Quaternion.identity);
-                d = go.GetComponent<Dice>();
-            }
-
-            d.rollPos = rollSlots[i].position;
-            int initialVal = drawnData.faceValues[UnityEngine.Random.Range(0, 6)];
-
-            if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-            {
-                int forcedVal = TutorialManager.Instance.GetForcedDiceValue(i);
-                if (forcedVal != -1) initialVal = forcedVal;
-            }
-
-            d.SetData(drawnData, initialVal);
-            activeDiceList.Add(d);
-        }
-    }
-
     public void OnRollButtonClick()
     {
         // 결산 중(isCalculating)일 때 리롤 진입 완벽 차단 방어막 추가
@@ -683,7 +610,6 @@ public class DiceManager : MonoBehaviour
         isCalculating = true; //결산 연출 시작
         ui?.SetRollButtonInteractable(false);   //즉시 버튼 비활성화
         ui?.SetFinishButtonInteractable(false); //즉시 버튼 비활성화
-        ui?.ClearMergedHandDamageText();
 
         //끝내기 버튼을 누르는 순간 화면 전체를 묵직하게 흔듭니다.
         CameraShake.Instance.Shake(0.3f, 0.2f);
@@ -1192,12 +1118,10 @@ public class DiceManager : MonoBehaviour
             // 분리된 텍스트에 각각 할당
             if (ui != null)
             {
-                if (ui.handInfoText != null) ui.handInfoText.text = displayHand;
-                // 분리된 텍스트에 적용
-                if (ui.chipsSumText != null) ui.chipsSumText.text = UIManager.FormatChipsValue(displayBaseSum);
-                if (ui.multSumText != null) ui.multSumText.text = UIManager.FormatMultValue(displayMult);
+                ui.SetHandNameText(displayHand);
+                UiCountUpText.On(ui.chipsSumText, UiCountUpText.FormatKind.Chips)?.Play(displayBaseSum);
+                UiCountUpText.On(ui.multSumText, UiCountUpText.FormatKind.Mult)?.Play(displayMult);
 
-                // 대기 중엔 로그를 모두 비우고, '대미지 예정' 텍스트도 완전히 안 보이게 처리
                 if (ui.chipsLogText != null) ui.chipsLogText.text = "";
                 if (ui.multLogText != null) ui.multLogText.text = "";
                 if (ui.finalDamageText != null)
