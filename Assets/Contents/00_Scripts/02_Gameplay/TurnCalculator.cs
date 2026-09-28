@@ -18,6 +18,26 @@ public struct TurnCalcResult
     public float iceBonusMult;
 }
 
+public enum DiceScoreBonusKind
+{
+    IceChips, MercuryChips, PrismMult, IceMult, MarsMult
+}
+
+public struct DiceScoreBonus
+{
+    public Dice source;
+    public DiceScoreBonusKind kind;
+    public float amount;
+    public bool IsChips => kind == DiceScoreBonusKind.IceChips || kind == DiceScoreBonusKind.MercuryChips;
+
+    public DiceScoreBonus(Dice source, DiceScoreBonusKind kind, float amount)
+    {
+        this.source = source;
+        this.kind = kind;
+        this.amount = amount;
+    }
+}
+
 public static class TurnCalculator
 {
     public const int GoldPerPip = 10;
@@ -76,8 +96,9 @@ public static class TurnCalculator
     }
 
     // 결산 및 UI 갱신 시 주사위 개별 효과들을 한 번에 합산해주는 순수 연산 함수
-    public static TurnCalcResult CalculateDiceEffects(List<Dice> targetDice, int currentEnemyHP, float healMultiplier)
+    public static TurnCalcResult CalculateDiceEffects(List<Dice> targetDice, int currentEnemyHP, float healMultiplier, List<DiceScoreBonus> bonusSteps = null)
     {
+        bonusSteps?.Clear();
         TurnCalcResult res = new TurnCalcResult();
         int currentSimulatedHP = currentEnemyHP;
 
@@ -106,6 +127,7 @@ public static class TurnCalculator
                 {
                     case DiceType.Prism:
                         res.prismMultTotal += (d.myData.multiplier - 1.0f);
+                        bonusSteps?.Add(new DiceScoreBonus(d, DiceScoreBonusKind.PrismMult, d.myData.multiplier - 1.0f));
                         break;
                     case DiceType.Gold:
                         res.expectedGold += d.currentValue * GoldPerPip;
@@ -113,6 +135,8 @@ public static class TurnCalculator
                     case DiceType.Ice:
                         res.iceBonusChips += 10 + extraIceChips;
                         res.iceBonusMult += extraIceMult;
+                        bonusSteps?.Add(new DiceScoreBonus(d, DiceScoreBonusKind.IceChips, 10 + extraIceChips));
+                        if (!Mathf.Approximately(extraIceMult, 0f)) bonusSteps?.Add(new DiceScoreBonus(d, DiceScoreBonusKind.IceMult, extraIceMult));
                         break;
                 }
             }
@@ -124,9 +148,13 @@ public static class TurnCalculator
                 {
                     switch (sat)
                     {
-                        case SatelliteType.Mercury: res.satelliteBonusChips += 15; break;
+                        case SatelliteType.Mercury:res.satelliteBonusChips += 15;
+                            bonusSteps?.Add(new DiceScoreBonus(d, DiceScoreBonusKind.MercuryChips, 15));
+                            break;
                         case SatelliteType.Venus: res.expectedGold += 30; break;
-                        case SatelliteType.Mars: res.satelliteBonusMult += 1.1f; break;
+                        case SatelliteType.Mars:res.satelliteBonusMult += 1.1f;
+                            bonusSteps?.Add(new DiceScoreBonus(d, DiceScoreBonusKind.MarsMult, 1.1f));
+                            break;
                         case SatelliteType.Jupiter:
                             res.expectedHeal += Mathf.FloorToInt(2 * healMultiplier);
                             break;

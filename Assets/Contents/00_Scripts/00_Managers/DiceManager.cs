@@ -204,6 +204,12 @@ public class DiceManager : MonoBehaviour
 
 
 
+    private readonly List<DiceScoreBonus> diceScoreBonuses = new List<DiceScoreBonus>(20);
+    private readonly int[] scoreHandValues = new int[5];
+    private readonly int[] scoreHandGroups = new int[5];
+    private readonly int[] scoreHandOrder = new int[5];
+
+
     // 전역 접근을 위한 싱글톤 인스턴스 선언 (클래스 상단 변수 선언부에 위치)
     public static DiceManager Instance { get; private set; }
 
@@ -727,6 +733,7 @@ public class DiceManager : MonoBehaviour
         StartCoroutine(FinishTurnRoutine());
     }
 
+
     IEnumerator FinishTurnRoutine()
     {
         //데이터 독립 추출 (UI 버퍼 의존 X, 킵된 주사위만 스냅샷 수집)
@@ -756,7 +763,21 @@ public class DiceManager : MonoBehaviour
         string handName = LocalizationManager.GetHandDisplayName(handRank);
 
         // 달성한 족보의 이펙트 재생
+        foreach (var d in keptDice)
+        {
+            if (d == null || d.myData == null) continue;
+
+            d.ShowFloatingText(d.currentValue);
+        }
+
+        // 숫자 표시 시작 후 0.5초 뒤 족보 연출 시작
+        yield return new WaitForSeconds(0.5f);
+
+        // 달성한 족보의 이펙트 재생
         yield return HandResolutionFeedback.Get(this).Play(keptDice, handRank, ui);
+
+        // 족보 연출이 끝난 뒤 0.5초 대기
+        yield return new WaitForSeconds(0.4f);
 
         // 분리 전과 동일하게 족보 배수가 2 이상이면 슬로모션
         if (handMult >= 2.0f)
@@ -786,38 +807,21 @@ public class DiceManager : MonoBehaviour
         int simEnemyHP = enemy != null ? enemy.CurrentHP : 0;
 
         // 변경된 코팅·위성을 반영하여 주사위 효과 계산
-        TurnCalcResult calcResult = TurnCalculator.CalculateDiceEffects(keptDice, simEnemyHP, healMultUI);
+        TurnCalcResult calcResult = TurnCalculator.CalculateDiceEffects(keptDice, simEnemyHP, healMultUI, diceScoreBonuses);
         int extraIceChipsForDisplay = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetIceChipsBonus() : 0;
-        // 주사위별 칩 기여량 표시: 눈금 + 얼음 코팅 + 수성 위성
+
+        // 주사위별 기본 눈금 표시. 코팅·위성 칩은 아래 순차 결산에서 표시합니다.
         foreach (var d in keptDice)
         {
             if (d == null || d.myData == null) continue;
 
-            int displayedChips = d.currentValue;
-
+            // 기존 피규어 발동 알림은 유지
             if (d.myData.isCoated && d.myData.type == DiceType.Ice)
             {
-                displayedChips += 10 + extraIceChipsForDisplay;
                 if (extraIceChipsForDisplay > 0) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.AddIceChips);
                 if (calcResult.iceBonusMult > 0f) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.AddIceMultiplier);
             }
-
-            if (d.myData.activeSatellites != null)
-            {
-                foreach (var satellite in d.myData.activeSatellites)
-                {
-                    if (satellite == SatelliteType.Mercury)
-                    {
-                        displayedChips += 15;
-                    }
-                }
-            }
-
-            d.ShowFloatingText(displayedChips);
         }
-
-        // 주사위 위 숫자를 보여준 뒤 전체 결산으로 진행
-        yield return new WaitForSeconds(0.6f);
 
         // 최종 칩 = 주사위 기본합 + 얼음/위성 + 피규어/스테이지 보너스 + 스낵 보너스
         int finalBaseSum = calcResult.baseSum + calcResult.iceBonusChips + calcResult.satelliteBonusChips + stageBonusChips + snackBonusChips;
@@ -825,14 +829,35 @@ public class DiceManager : MonoBehaviour
         float finalMult = handMult + stageBonusMult + snackBonusMult + calcResult.prismMultTotal + calcResult.satelliteBonusMult + calcResult.iceBonusMult + permanentFigureMultiplier;
         int finalDamage = Mathf.FloorToInt(finalBaseSum * finalMult);
         // 연출 전용 값: 실제 피해 계산에는 사용하지 않음
-        float shownChips = calcResult.baseSum + calcResult.iceBonusChips + calcResult.satelliteBonusChips;
+        float shownChips = calcResult.baseSum;
         float shownMult = 1f;
 
         // 칩과 배수의 보너스를 항목별로 표시
-        IEnumerator AnimateBonus(bool isChips, float amount, string label)
+        IEnumerator AnimateBonus(bool isChips, float amount, string label, Dice source = null, bool reactHand = false)
         {
             if (Mathf.Approximately(amount, 0f)) yield break;
             if (ui == null) yield break;
+
+            float duration = 0.4f; // 숫자가 올라가고 주사위가 흔들리는 시간
+            float pause = 0.2f; // 다음 항목으로 넘어가기 전 대기
+
+            // 숫자 상승과 같은 순간에 원인이 된 주사위를 반응
+            if (reactHand)
+            {
+                for (int i = 0; i < keptDice.Count; i++) scoreHandValues[i] = keptDice[i].currentValue;
+
+                HandResolutionFeedback.GetEmphasisGroups(handRank, scoreHandValues, scoreHandGroups, scoreHandOrder);
+
+                for (int i = 0; i < keptDice.Count; i++)
+                {
+                    if (scoreHandGroups[i] >= 0) keptDice[i].PlayScoreFeedback(duration);
+                }
+            }
+            else if (source != null)
+            {
+                source.PlayScoreFeedback(duration);
+            }
+
 
             var valueText = isChips ? ui.chipsSumText : ui.multSumText;
             var logText = isChips ? ui.chipsLogText : ui.multLogText;
@@ -844,7 +869,7 @@ public class DiceManager : MonoBehaviour
             {
                 string amountText = isChips ? amount.ToString("+0;-0;0") : amount.ToString("+0.0;-0.0;0.0");
 
-                logText.text = $"{label} ({amountText})";
+                logText.text = string.IsNullOrEmpty(label) ? "" : $"{label} ({amountText})";
             }
 
             // 계산된 최종 칩과 배수를 UI에 띄우고 통통 튀는 펀치 스케일 적용
@@ -852,9 +877,9 @@ public class DiceManager : MonoBehaviour
             if (valueText != null)
             {
                 valueText.transform.DOKill(true);
-                valueText.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 4, 0.5f);
+                valueText.transform.DOPunchScale(Vector3.one * 0.2f, duration, 4, 0.5f);
 
-                yield return DOVirtual.Float(start, target, 0.3f, value =>
+                yield return DOVirtual.Float(start, target, duration, value =>
                 {
                     valueText.text = isChips ? $"<color=#00BFFF>{Mathf.FloorToInt(value)}</color>" : LocalizationManager.GetUi("UI_MULT_VALUE", "x <color=#00BFFF>{0}배</color>", value.ToString("F1"));
                 }).SetEase(Ease.OutQuad).WaitForCompletion();
@@ -865,11 +890,22 @@ public class DiceManager : MonoBehaviour
             else
                 shownMult = target;
 
-            yield return new WaitForSeconds(0.15f);//항목별 대기 오르는 배수가 있을 때마다 적용
+            yield return new WaitForSeconds(pause); //항목별 대기 오르는 배수가 있을 때마다 적용
 
             if (logText != null)
                 logText.text = "";
         }
+
+        IEnumerator AnimateDiceBonuses(bool isChips)
+        {
+            foreach (var bonus in diceScoreBonuses)
+            {
+                if (bonus.IsChips != isChips) continue;
+
+                yield return AnimateBonus(isChips, bonus.amount, "", bonus.source);
+            }
+        }
+
 
         if (ui != null)
         {
@@ -888,22 +924,24 @@ public class DiceManager : MonoBehaviour
                 ui.multSumText.text = LocalizationManager.GetUi("UI_MULT_VALUE", "x <color=#00BFFF>{0}배</color>", "1.0");
             }
 
-            // 칩 보너스부터 표시
+            // 족보 → 칩 추가 → 배수 추가
+            yield return AnimateBonus(true, stageBonusChips, LocalizationManager.GetUi("UI_BONUS_STAGE", "전투 누적"));
+
+            // 모든 칩 처리가 끝난 뒤 족보 배수부터 표시
+            yield return AnimateBonus(false, handMult - 1f, handName, null, true);
+            // 주사위별 칩 보너스: 아이스·수성
+            yield return AnimateDiceBonuses(true);
+            // 기존 스낵·피규어·전투 누적 칩 처리 유지
             yield return AnimateBonus(true, chipsBeforeFigures, LocalizationManager.GetUi("UI_BONUS_SNACK", "스낵"));
             yield return AnimateBonus(true, snackBonusChips - chipsBeforeFigures, LocalizationManager.GetUi("UI_BONUS_FIGURE", "피규어"));
             yield return AnimateBonus(true, stageBonusChips, LocalizationManager.GetUi("UI_BONUS_STAGE", "전투 누적"));
-            yield return AnimateBonus(false, permanentFigureMultiplier, LocalizationManager.GetUi("UI_BONUS_PERMANENT", "영구 보너스"));
-
             // 이후 배수 보너스 표시
-            yield return AnimateBonus(false, handMult - 1f, handName);
+            yield return AnimateBonus(false, permanentFigureMultiplier, LocalizationManager.GetUi("UI_BONUS_PERMANENT", "영구 보너스"));
             yield return AnimateBonus(false, multBeforeFigures, LocalizationManager.GetUi("UI_BONUS_SNACK", "스낵"));
             yield return AnimateBonus(false, snackBonusMult - multBeforeFigures, LocalizationManager.GetUi("UI_BONUS_FIGURE", "피규어"));
-            yield return AnimateBonus(false, calcResult.prismMultTotal, LocalizationManager.GetUi("UI_BONUS_PRISM", "프리즘"));
-            // 아이스 코팅 피규어의 추가 배수 표시
-            yield return AnimateBonus(false, calcResult.iceBonusMult, "아이스");
-
+            // 주사위별 배수 보너스: 프리즘·아이스 추가 배수·화성
+            yield return AnimateDiceBonuses(false);
             yield return AnimateBonus(false, stageBonusMult, LocalizationManager.GetUi("UI_BONUS_STAGE", "전투 누적"));
-            yield return AnimateBonus(false, calcResult.satelliteBonusMult, LocalizationManager.GetUi("UI_BONUS_SATELLITE", "위성"));
 
             // 표시의 최종값을 실제 계산 결과에 맞춤
             if (ui.chipsSumText != null)
@@ -959,6 +997,8 @@ public class DiceManager : MonoBehaviour
         yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, finalDamage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName
         ));
     }
+
+
 
 
     //티켓 아이템 먹었을 때 호출할 함수

@@ -42,6 +42,8 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
     private TextMeshPro floatingText;
 
+    private Tween scoreFeedbackTween;
+
 
     private void Awake()
     {
@@ -285,6 +287,59 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         }
     }
 
+    public void PlayScoreFeedback(float duration)
+    {
+        if (!gameObject.activeInHierarchy) return;
+        CameraShake.Instance?.ShakeScore();
+
+        // 이전 반응을 끝내고 원래 상태에서 다시 시작
+        scoreFeedbackTween?.Kill();
+
+        Vector3 startScale = transform.localScale;
+        Quaternion startRotation = transform.localRotation;
+
+        const float scaleBoost = 0.18f; // 최대 1.18배 확대
+        const float rotationStrength = 14f; // 좌우 회전 강도
+        const float shakeCycles = 3f; // 전체 시간 동안 흔들리는 횟수
+
+        scoreFeedbackTween = DOVirtual.Float(0f, 1f, Mathf.Max(0.05f, duration), t =>
+        {
+            // 앞부분에서 빠르게 확대하고, 남은 시간 동안 부드럽게 복귀
+            float scaleWeight;
+
+            if (t < 0.2f)
+            {
+                float progress = t / 0.2f;
+                scaleWeight = 1f - (1f - progress) * (1f - progress);
+            }
+            else
+            {
+                float remaining = (1f - t) / 0.8f;
+                scaleWeight = remaining * remaining;
+            }
+
+            // 처음에는 강하게 흔들리고 점차 잦아듦
+            float damping = (1f - t) * (1f - t);
+            float angle = Mathf.Sin(t * Mathf.PI * 2f * shakeCycles) * rotationStrength * damping;
+
+            transform.localScale = startScale * (1f + scaleBoost * scaleWeight);
+            transform.localRotation = startRotation * Quaternion.Euler(0f, 0f, angle);
+        })
+        .SetEase(Ease.Linear)
+        .SetLink(gameObject, LinkBehaviour.KillOnDisable)
+        .OnKill(() =>
+        {
+            // 정상 종료하거나 중간에 취소되어도 원래 상태로 복구
+            if (this != null)
+            {
+                transform.localScale = startScale;
+                transform.localRotation = startRotation;
+            }
+
+            scoreFeedbackTween = null;
+        });
+    }
+
 
     public void ShowFloatingText(int bonusValue)
     {
@@ -312,14 +367,14 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         floatingText.text = $"+{bonusValue}";
         floatingText.gameObject.SetActive(true);
 
-        //DOTween 연출 (위로 이동 -> 크기 튕김 -> 서서히 투명해지며 꺼짐)
+        // DOTween 연출 (위로 이동 -> 크기 튕김 -> 서서히 투명해지며 꺼짐)
         float targetY = floatingText.transform.localPosition.y + 1.2f;
 
-        floatingText.transform.DOLocalMoveY(targetY, 1.2f).SetEase(Ease.OutQuad);
+        floatingText.transform.DOLocalMoveY(targetY, 0.8f).SetEase(Ease.OutQuad);
         floatingText.transform.DOPunchScale(new Vector3(0.5f, 0.5f, 0f), 0.3f, 2, 0.5f);
 
-        // 0.8초 대기 후 0.5초 동안 투명해지고 비활성화 (Destroy 안함)
-        floatingText.DOFade(0f, 0.5f).SetDelay(0.8f).OnComplete(() =>
+        // 0.4초 대기 후 0.4초 동안 투명해지고 비활성화 (Destroy 안함)
+        floatingText.DOFade(0f, 0.4f).SetDelay(0.4f).OnComplete(() =>
         {
             floatingText.gameObject.SetActive(false);
         });
