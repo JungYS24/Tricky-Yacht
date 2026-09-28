@@ -11,6 +11,7 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI targetScoreText;
     public TextMeshProUGUI cumulativeScoreText;
     public TextMeshProUGUI roundPlaysText;
+    public TextMeshProUGUI roundEndText;
 
     // 기존 통합 UI 대신, 용도별로 완전히 분리된 텍스트들을 선언
     [Header("데미지 계산 UI (분리형)")]
@@ -64,6 +65,11 @@ public class UIManager : MonoBehaviour
     //다이스 클릭방지
     public static bool IsSettingsOpen = false;
 
+    private void Awake()
+    {
+        BindRoundEndText();
+    }
+
     private void Start()
     {
         if (settingsOpenButton != null)
@@ -97,14 +103,17 @@ public class UIManager : MonoBehaviour
     }
 
     // 매개변수 맨 끝에 List<Sprite> activeSprites = null 을 추가해 줍니다.
-    public void UpdateGameUI(string stageName, int currentHP, int maxHP, int playerHP, int playerMaxHP, int rerollsLeft, string combinedDamageText, string activeFigureString = "", List<Sprite> activeSprites = null)
+    public void UpdateGameUI(string stageName, int currentHP, int maxHP, int playerHP, int playerMaxHP, int rerollsLeft, string combinedDamageText, string activeFigureString = "", List<Sprite> activeSprites = null, int finishesLeft = 1)
     {
         stageText.text = stageName;
         targetScoreText.text = $"<color=#FF5555>{currentHP}/{maxHP}</color>";
         cumulativeScoreText.text = "";
-        roundPlaysText.text = LocalizationManager.Instance != null
-            ? LocalizationManager.Instance.GetLocalizedString(LocalizationManager.UiTable, "UI_REROLLS_LEFT", rerollsLeft)
-            : $"남은 굴리기: {rerollsLeft}";
+        if (roundPlaysText != null)
+            roundPlaysText.text = rerollsLeft.ToString();
+
+        BindRoundEndText();
+        if (roundEndText != null)
+            roundEndText.text = finishesLeft.ToString();
 
         int shield = DiceManager.Instance != null ? DiceManager.Instance.currentShield : 0;
         UpdatePlayerHealthText(playerHP, playerMaxHP, shield);
@@ -151,6 +160,18 @@ public class UIManager : MonoBehaviour
     public void UpdateGoldUI(int currentGold) => goldText.text = currentGold.ToString("N0");
     public void SetRollButtonInteractable(bool state) => rollButton.interactable = state;
     public void SetFinishButtonInteractable(bool state) => finishButton.interactable = state;
+
+    void BindRoundEndText()
+    {
+        if (roundEndText != null) return;
+
+        var named = GameObject.Find("Round_END");
+        if (named == null) return;
+
+        roundEndText = named.GetComponent<TextMeshProUGUI>();
+        if (roundEndText == null)
+            roundEndText = named.GetComponentInChildren<TextMeshProUGUI>(true);
+    }
 
     public void ShowResult(string colorHex, string message)
     {
