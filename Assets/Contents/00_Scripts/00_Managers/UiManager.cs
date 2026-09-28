@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
@@ -272,4 +272,20 @@ public class UIManager : MonoBehaviour
         }
     }
 
+
+    public static string FormatChipsValue(int value)
+    {
+        return $"<color=#51F8D5>{value}</color>";
+    }
+
+    public static string FormatMultValue(float value)
+    {
+        return LocalizationManager.GetUi("UI_MULT_VALUE", "<color=#FDE470>{0}</color>", value.ToString("F1"));
+    }
+
+    public void ClearMergedHandDamageText()
+    {
+        if (handInfoText != null) handInfoText.text = "";
+        if (finalDamageText != null) finalDamageText.text = "";
+    }
 }

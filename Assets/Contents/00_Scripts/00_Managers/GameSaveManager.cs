@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -74,6 +74,9 @@ public class SaveData
     public List<string> ownedFigureIDs = new List<string>(); //새로 추가된 ID 저장용 리스트
 
     public List<string> ownedSnackIDs = new List<string>();
+    // 슬롯 위치와 사용 대기 상태를 함께 저장. 0은 이전 버전 저장 파일입니다.
+    public int snackSlotSaveVersion;
+    public List<SavedSnackSlot> snackSlots = new List<SavedSnackSlot>();
     public List<string> ownedTicketIDs = new List<string>();
 
     public float multHighCard, multOnePair, multTwoPair, multTriple, multFullHouse, multFourOfAKind, multStraight, multYacht;
@@ -237,9 +240,11 @@ public class GameSaveManager : MonoBehaviour
         }
 
         inv.CollectTicketNamesForSave(data.ownedTicketIDs);
+        data.snackSlotSaveVersion = 1;
+        inv.SnackUses.CollectForSave(data.snackSlots);
         foreach (var s in inv.snackSlots)
         {
-            if (!s.isEmpty && s.currentItem != null)
+            if (s.CountsAsOwnedSnack && s.currentItem != null)
                 data.ownedSnackIDs.Add(s.currentItem.itemName);
         }
 

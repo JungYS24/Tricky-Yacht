@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -223,7 +223,7 @@ public class FigureEffectManager : MonoBehaviour
                     int snackCount = 0;
                     foreach (var slot in InventoryManager.Instance.snackSlots)
                     {
-                        if (!slot.isEmpty) snackCount++;
+                        if (slot.CountsAsOwnedSnack) snackCount++;
                     }
                     actualValue = snackCount * effect.effectValue;
                     break;

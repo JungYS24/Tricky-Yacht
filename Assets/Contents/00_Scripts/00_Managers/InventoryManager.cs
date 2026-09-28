@@ -18,6 +18,13 @@ public class InventoryManager : MonoBehaviour
     public GameObject figureSlotPrefab; // 피규어 슬롯 프리팹
     public InventorySlot[] snackSlots;
 
+    [Header("스낵 사용 연출")]
+    public Color snackUsedTint = new Color(0.55f, 0.55f, 0.55f, 0.85f);
+    [Min(0.05f)] public float snackDissolveDuration = 0.65f;
+    [Min(0.05f)] public float snackRestoreDuration = 0.18f;
+    private SnackUseController snackUses;
+    public SnackUseController SnackUses => snackUses ?? (snackUses = new SnackUseController(this));
+
     [Header("티켓 슬롯 설정")]
     public Transform ticketSlotParent;
     public GameObject ticketSlotPrefab;
@@ -76,6 +83,7 @@ public class InventoryManager : MonoBehaviour
 
     public void ClearAllSlots()
     {
+        snackUses?.Clear();
         // 피규어 슬롯 파괴 및 리스트 초기화
         foreach (var slotGo in activeFigureSlots)
         {

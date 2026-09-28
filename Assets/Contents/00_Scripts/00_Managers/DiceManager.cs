@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System;
@@ -65,8 +65,6 @@ public class DiceManager : MonoBehaviour
     public GameObject dicePrefab;
     public Transform keepSlotParent;
     public Transform rollSlotParent;
-    private Transform[] keepSlots;
-    private Transform[] rollSlots;
 
     [Header("몬스터 소환 설정")]
     public Enemy enemyPrefab;        // 프로젝트 창에 있는 몬스터 프리팹
@@ -175,14 +173,20 @@ public class DiceManager : MonoBehaviour
     // --- 스낵 시스템용 변수 ---
     private int defaultMaxRerolls;
 
-    public List<Dice> activeDiceList = new List<Dice>();
+    // 기존 씬의 activeDiceList 데이터를 보존하며 같은 목록을 보드 담당에 전달합니다.
+    [SerializeField, UnityEngine.Serialization.FormerlySerializedAs("activeDiceList")]
+    private List<Dice> serializedActiveDice = new List<Dice>();
+    public List<Dice> activeDiceList => board != null ? board.ActiveDice : serializedActiveDice;
+    private DiceBoardController board;
+    private readonly TurnResolutionPresenter resolutionPresenter = new TurnResolutionPresenter();
+
+    [Header("정산 연출 시간")]
+    public TurnResolutionTiming resolutionTiming = new TurnResolutionTiming();
 
     //오브젝트 풀링 및 UI 갱신용 재사용 버퍼
-    private List<Dice> dicePool = new List<Dice>();
     private List<Dice> uiDiceBuffer = new List<Dice>(5);
     private List<int> uiValuesBuffer = new List<int>(5);
 
-    private Dice[] keepSlotOccupants;
     private bool pendingPeppermintSuccess = false;
     private bool enemyDeathHandled = false;
     private bool isRolling = false; // 주사위 굴러가는중 
@@ -203,11 +207,9 @@ public class DiceManager : MonoBehaviour
     public float multYacht = 2.5f;
 
 
-
+    private readonly List<Dice> keptDice = new List<Dice>(5);
+    private readonly List<int> keptValues = new List<int>(5);
     private readonly List<DiceScoreBonus> diceScoreBonuses = new List<DiceScoreBonus>(20);
-    private readonly int[] scoreHandValues = new int[5];
-    private readonly int[] scoreHandGroups = new int[5];
-    private readonly int[] scoreHandOrder = new int[5];
 
 
     // 전역 접근을 위한 싱글톤 인스턴스 선언 (클래스 상단 변수 선언부에 위치)
@@ -236,8 +238,7 @@ public class DiceManager : MonoBehaviour
             enemy = Instantiate(enemyPrefab, enemySpawnPoint.position, Quaternion.identity);
         }
 
-        InitializeSlots();
-        keepSlotOccupants = new Dice[keepSlots.Length];
+        board = new DiceBoardController(dicePrefab, keepSlotParent, rollSlotParent, serializedActiveDice, deckManager);
 
         // 주사위 상태 변경 이벤트 구독 연동
         Dice.OnDiceStateChanged += HandleDiceChanged;
@@ -378,10 +379,19 @@ public class DiceManager : MonoBehaviour
             }
         }
 
-        foreach (string sName in data.ownedSnackIDs)
+        if (data.snackSlotSaveVersion >= 1)
         {
-            var item = GameSaveManager.Instance.FindItemByName(sName);
-            if (item != null) InventoryManager.Instance.AddItem(item);
+            // 사용 예약과 소모 방지 결과를 복구합니다. 효과/확률 판정은 다시 실행하지 않습니다.
+            InventoryManager.Instance.SnackUses.RestoreSaved(data.snackSlots, GameSaveManager.Instance);
+        }
+        else
+        {
+            // 이전 버전 저장 파일은 기존 스낵 목록으로 복구
+            foreach (string sName in data.ownedSnackIDs)
+            {
+                var item = GameSaveManager.Instance.FindItemByName(sName);
+                if (item != null) InventoryManager.Instance.AddItem(item);
+            }
         }
         foreach (string tName in data.ownedTicketIDs)
         {
@@ -486,6 +496,7 @@ public class DiceManager : MonoBehaviour
 
     void StartNewStage()
     {
+        InventoryManager.Instance?.SnackUses.ResetForStage();
         isStageClearing = false;
         enemyDeathHandled = false;
         //스테이지 생명주기 데이터 일괄 안전 초기화
@@ -552,7 +563,7 @@ public class DiceManager : MonoBehaviour
             turnContext.ResetForNewTurn(); // 로드해서 들어올 때는 증발하지 않도록 스킵
         }
 
-        SpawnDice(returnPreviousDiceToDiscard);
+        board.SpawnDice(returnPreviousDiceToDiscard, currentStage);
         HandleDiceChanged();
 
         //주사위 세팅이 끝나고 새로운 라운드(턴)가 본격적으로 시작되는 시점
@@ -565,189 +576,6 @@ public class DiceManager : MonoBehaviour
 
     public void ForceUpdateUI() => HandleDiceChanged();
 
-    void SpawnDice(bool returnPreviousDiceToDiscard)
-    {
-        if (returnPreviousDiceToDiscard && activeDiceList.Count > 0)
-        {
-            RecycleKeptDiceAndRefillFromDeck();
-            return;
-        }
-
-        //기존 활성화된 주사위들을 파괴하지 않고 비활성화하여 풀(Pool)에 보관
-        foreach (var d in activeDiceList)
-        {
-            if (d != null)
-            {
-                d.isKept = false;
-                d.currentKeepIndex = -1;
-                d.gameObject.SetActive(false);
-                dicePool.Add(d);
-                if (returnPreviousDiceToDiscard && d.myData != null)
-                {
-                    discardPile.Add(d.myData);
-                }
-            }
-
-        }
-        activeDiceList.Clear();
-        Array.Clear(keepSlotOccupants, 0, keepSlotOccupants.Length);
-
-        // 덱 리필 검사 로직 한 줄로 압축! (DeckManager에게 위임)
-        deckManager.CheckAndRefillDrawPile(5);
-
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-        {
-            // 2스테이지 첫 진입 시 하이롤러 주사위 확정 스폰!
-            if (currentStage == 2 && drawPile.Count >= 5)
-            {
-                string hrName = TutorialManager.Instance.tutorialHighRollerDice.itemName;
-                int hrIdx = drawPile.FindIndex(d => d.diceName == hrName);
-                if (hrIdx != -1)
-                {
-                    var temp = drawPile[0];
-                    drawPile[0] = drawPile[hrIdx];
-                    drawPile[hrIdx] = temp;
-                }
-            }
-            // 3스테이지 보스 반격 후 체력 회복 튜토리얼 (하트 주사위 확정)
-            else if (currentStage == 3 && TutorialManager.Instance.currentStepIndex >= 28 && TutorialManager.Instance.currentStepIndex <= 30)
-            {
-                int heartIdx = drawPile.FindIndex(d => d.specialEffect == SpecialDieEffect.Heart);
-                if (heartIdx == -1)
-                {
-                    int discardIdx = discardPile.FindIndex(d => d.specialEffect == SpecialDieEffect.Heart);
-                    if (discardIdx != -1)
-                    {
-                        drawPile.Insert(0, discardPile[discardIdx]);
-                        discardPile.RemoveAt(discardIdx);
-                    }
-                }
-                else
-                {
-                    var temp = drawPile[0];
-                    drawPile[0] = drawPile[heartIdx];
-                    drawPile[heartIdx] = temp;
-                }
-            }
-            // 3스테이지 보스전 첫 번째 턴 (코팅 주사위 확정)
-            else if (currentStage == 3 && TutorialManager.Instance.currentStepIndex >= 24 && TutorialManager.Instance.currentStepIndex <= 27)
-            {
-                int coatedIdx = drawPile.FindIndex(d => d.isCoated);
-                if (coatedIdx != -1)
-                {
-                    var temp = drawPile[0];
-                    drawPile[0] = drawPile[coatedIdx];
-                    drawPile[coatedIdx] = temp;
-                }
-            }
-        }
-
-        for (int i = 0; i < rollSlots.Length; i++)
-        {
-            // 복잡했던 덱 리필 및 드로우 로직이 단 한 줄로 끝납니다.
-            DiceData1 drawnData = deckManager.DrawOneDice();
-            if (drawnData == null) break;
-
-            // Instantiate 대신 풀에서 대기 중인 주사위 꺼내 쓰기
-            Dice d;
-            if (dicePool.Count > 0)
-            {
-                d = dicePool[dicePool.Count - 1];
-                dicePool.RemoveAt(dicePool.Count - 1);
-                d.transform.position = rollSlots[i].position;
-                d.gameObject.SetActive(true);
-            }
-            else
-            {
-                GameObject go = Instantiate(dicePrefab, rollSlots[i].position, Quaternion.identity);
-                d = go.GetComponent<Dice>();
-            }
-
-            d.rollPos = rollSlots[i].position;
-            int initialVal = drawnData.faceValues[UnityEngine.Random.Range(0, 6)];
-
-            //튜토리얼 추가
-            if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-            {
-                int forcedVal = TutorialManager.Instance.GetForcedDiceValue(i);
-                if (forcedVal != -1) initialVal = forcedVal;
-            }
-
-            d.SetData(drawnData, initialVal);
-            activeDiceList.Add(d);
-        }
-    }
-
-    void RecycleKeptDiceAndRefillFromDeck()
-    {
-        List<Dice> remaining = new List<Dice>();
-        foreach (var d in activeDiceList)
-        {
-            if (d == null) continue;
-
-            if (d.isKept)
-            {
-                if (d.myData != null) discardPile.Add(d.myData);
-                d.isKept = false;
-                d.currentKeepIndex = -1;
-                d.gameObject.SetActive(false);
-                dicePool.Add(d);
-            }
-            else
-            {
-                d.currentKeepIndex = -1;
-                remaining.Add(d);
-            }
-        }
-
-        activeDiceList.Clear();
-        Array.Clear(keepSlotOccupants, 0, keepSlotOccupants.Length);
-
-        int slot = 0;
-        foreach (var d in remaining)
-        {
-            if (slot >= rollSlots.Length) break;
-            d.rollPos = rollSlots[slot].position;
-            d.MoveToTarget(d.rollPos);
-            activeDiceList.Add(d);
-            slot++;
-        }
-
-        int need = rollSlots.Length - activeDiceList.Count;
-        deckManager.CheckAndRefillDrawPile(Mathf.Max(need, 1));
-
-        for (int i = slot; i < rollSlots.Length; i++)
-        {
-            DiceData1 drawnData = deckManager.DrawOneDice();
-            if (drawnData == null) break;
-
-            Dice d;
-            if (dicePool.Count > 0)
-            {
-                d = dicePool[dicePool.Count - 1];
-                dicePool.RemoveAt(dicePool.Count - 1);
-                d.transform.position = rollSlots[i].position;
-                d.gameObject.SetActive(true);
-            }
-            else
-            {
-                GameObject go = Instantiate(dicePrefab, rollSlots[i].position, Quaternion.identity);
-                d = go.GetComponent<Dice>();
-            }
-
-            d.rollPos = rollSlots[i].position;
-            int initialVal = drawnData.faceValues[UnityEngine.Random.Range(0, 6)];
-
-            if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-            {
-                int forcedVal = TutorialManager.Instance.GetForcedDiceValue(i);
-                if (forcedVal != -1) initialVal = forcedVal;
-            }
-
-            d.SetData(drawnData, initialVal);
-            activeDiceList.Add(d);
-        }
-    }
 
     public void OnRollButtonClick()
     {
@@ -762,19 +590,7 @@ public class DiceManager : MonoBehaviour
 
         CameraShake.Instance.Shake(0.1f, 0.1f);
 
-        foreach (var d in activeDiceList.Where(d => d != null && !d.isKept))
-        {
-            int finalResult = d.myData.faceValues[UnityEngine.Random.Range(0, 6)];
-            //튜토리얼 추가
-            if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-            {
-                int diceIndex = activeDiceList.IndexOf(d);
-                int forcedVal = TutorialManager.Instance.GetForcedDiceValue(diceIndex);
-                if (forcedVal != -1) finalResult = forcedVal;
-            }
-
-            d.PlayRollEffect(finalResult);
-        }
+        board.RollUnkept();
 
         currentRerolls++;
         //리롤 시 발동(OnDiceReroll)하는 6번 카테고리 피규어 발동
@@ -795,7 +611,7 @@ public class DiceManager : MonoBehaviour
         isCalculating = true; //결산 연출 시작
         ui?.SetRollButtonInteractable(false);   //즉시 버튼 비활성화
         ui?.SetFinishButtonInteractable(false); //즉시 버튼 비활성화
-        ClearMergedHandDamageText();
+        ui?.ClearMergedHandDamageText();
 
         //끝내기 버튼을 누르는 순간 화면 전체를 묵직하게 흔듭니다.
         CameraShake.Instance.Shake(0.3f, 0.2f);
@@ -815,16 +631,7 @@ public class DiceManager : MonoBehaviour
     IEnumerator FinishTurnRoutine()
     {
         //데이터 독립 추출 (UI 버퍼 의존 X, 킵된 주사위만 스냅샷 수집)
-        List<Dice> keptDice = new List<Dice>();
-        List<int> keptValues = new List<int>();
-        for (int i = 0; i < keepSlotOccupants.Length; i++)
-        {
-            if (keepSlotOccupants[i] != null)
-            {
-                keptDice.Add(keepSlotOccupants[i]);
-                keptValues.Add(keepSlotOccupants[i].currentValue);
-            }
-        }
+        board.CollectKept(keptDice, keptValues);
 
         // 안전장치: 킵한 주사위가 없으면 결산 중단
         if (keptValues.Count == 0)
@@ -834,34 +641,17 @@ public class DiceManager : MonoBehaviour
             yield break;
         }
 
+        // 끝내기 직후: 스테이크 회복, 가니쉬/페퍼민트 소멸, 보존된 라임 복귀를 먼저 처리
+        SnackUseController snacks = InventoryManager.Instance != null ? InventoryManager.Instance.SnackUses : null;
+        if (snacks != null) yield return snacks.PlayFinishStart();
+
         // 족보 판정 (TurnCalculator가 주는 정확한 배수와 이름을 그대로 사용)
         float handMult = 1.0f;
         HandRank handRank = TurnCalculator.CalculateHand(keptValues, this, out handMult);
         currentHandRank = handRank;
         string handName = LocalizationManager.GetHandDisplayName(handRank);
 
-        // 달성한 족보의 이펙트 재생
-        foreach (var d in keptDice)
-        {
-            if (d == null || d.myData == null) continue;
-
-            d.ShowFloatingText(d.currentValue);
-        }
-
-        // 숫자 표시 시작 후 0.5초 뒤 족보 연출 시작
-        yield return new WaitForSeconds(0.5f);
-
-        // 달성한 족보의 이펙트 재생
-        yield return HandResolutionFeedback.Get(this).Play(keptDice, handRank, ui);
-
-        // 족보 연출이 끝난 뒤 0.5초 대기
-        yield return new WaitForSeconds(0.4f);
-
-        // 분리 전과 동일하게 족보 배수가 2 이상이면 슬로모션
-        if (handMult >= 2.0f)
-        {
-            SlowMotion.Instance?.PlaySlowMotion(0.2f, 0.2f);
-        }
+        yield return resolutionPresenter.PlayOpening(this, keptDice, handRank, handMult, resolutionTiming);
 
         // 피규어 계산에 필요한 기본 눈금 합만 먼저 구함
         int baseSumBeforeFigures = 0;
@@ -901,179 +691,22 @@ public class DiceManager : MonoBehaviour
             }
         }
 
-        // 최종 칩 = 주사위 기본합 + 얼음/위성 + 피규어/스테이지 보너스 + 스낵 보너스
-        int finalBaseSum = calcResult.baseSum + calcResult.iceBonusChips + calcResult.satelliteBonusChips + stageBonusChips + snackBonusChips;
-        // 최종 배수 = 족보 배수 + 피규어/스테이지 배수 + 스낵 배수 + 프리즘/위성 배수
-        float finalMult = handMult + stageBonusMult + snackBonusMult + calcResult.prismMultTotal + calcResult.satelliteBonusMult + calcResult.iceBonusMult + permanentFigureMultiplier;
-        int finalDamage = Mathf.FloorToInt(finalBaseSum * finalMult);
-        // 연출 전용 값: 실제 피해 계산에는 사용하지 않음
-        float shownChips = calcResult.baseSum;
-        float shownMult = 1f;
-
-        // 칩과 배수의 보너스를 항목별로 표시
-        IEnumerator AnimateBonus(bool isChips, float amount, string label, Dice source = null, bool reactHand = false)
+        var bonuses = new TurnScoreBonuses
         {
-            if (Mathf.Approximately(amount, 0f)) yield break;
-            if (ui == null) yield break;
-
-            float duration = 0.4f; // 숫자가 올라가고 주사위가 흔들리는 시간
-            float pause = 0.2f; // 다음 항목으로 넘어가기 전 대기
-
-            // 숫자 상승과 같은 순간에 원인이 된 주사위를 반응
-            if (reactHand)
-            {
-                if (keptDice.Count == 5)
-                {
-                    for (int i = 0; i < keptDice.Count; i++) scoreHandValues[i] = keptDice[i].currentValue;
-
-                    HandResolutionFeedback.GetEmphasisGroups(handRank, scoreHandValues, scoreHandGroups, scoreHandOrder);
-
-                    for (int i = 0; i < keptDice.Count; i++)
-                    {
-                        if (scoreHandGroups[i] >= 0) keptDice[i].PlayScoreFeedback(duration);
-                    }
-                }
-                else
-                {
-                    foreach (var d in keptDice)
-                    {
-                        if (d != null) d.PlayScoreFeedback(duration);
-                    }
-                }
-            }
-            else if (source != null)
-            {
-                source.PlayScoreFeedback(duration);
-            }
-
-
-            var valueText = isChips ? ui.chipsSumText : ui.multSumText;
-            var logText = isChips ? ui.chipsLogText : ui.multLogText;
-
-            float start = isChips ? shownChips : shownMult;
-            float target = start + amount;
-
-            if (logText != null)
-            {
-                string amountText = isChips ? amount.ToString("+0;-0;0") : amount.ToString("+0.0;-0.0;0.0");
-
-                logText.text = string.IsNullOrEmpty(label) ? "" : $"{label} ({amountText})";
-            }
-
-            // 계산된 최종 칩과 배수를 UI에 띄우고 통통 튀는 펀치 스케일 적용
-            // 각 보너스가 반영될 때마다 숫자와 연출을 갱신
-            if (valueText != null)
-            {
-                valueText.transform.DOKill(true);
-                valueText.transform.DOPunchScale(Vector3.one * 0.2f, duration, 4, 0.5f);
-
-                yield return DOVirtual.Float(start, target, duration, value =>
-                {
-                    valueText.text = isChips ? FormatChipsValue(Mathf.FloorToInt(value)) : FormatMultValue(value);
-                }).SetEase(Ease.OutQuad).WaitForCompletion();
-            }
-
-            if (isChips)
-                shownChips = target;
-            else
-                shownMult = target;
-
-            yield return new WaitForSeconds(pause); //항목별 대기 오르는 배수가 있을 때마다 적용
-
-            if (logText != null)
-                logText.text = "";
-        }
-
-        IEnumerator AnimateDiceBonuses(bool isChips)
-        {
-            foreach (var bonus in diceScoreBonuses)
-            {
-                if (bonus.IsChips != isChips) continue;
-
-                yield return AnimateBonus(isChips, bonus.amount, "", bonus.source);
-            }
-        }
-
-
-        if (ui != null)
-        {
-            if (ui.chipsLogText != null) ui.chipsLogText.text = "";
-            if (ui.multLogText != null) ui.multLogText.text = "";
-            if (ui.finalDamageText != null) ui.finalDamageText.text = "";
-            if (ui.handInfoText != null) ui.handInfoText.text = "";
-
-            if (ui.chipsSumText != null)
-            {
-                ui.chipsSumText.text =
-                    FormatChipsValue(Mathf.FloorToInt(shownChips));
-            }
-
-            if (ui.multSumText != null)
-            {
-                ui.multSumText.text = FormatMultValue(1f);
-            }
-
-            // 족보 → 칩 추가 → 배수 추가
-            yield return AnimateBonus(true, stageBonusChips, LocalizationManager.GetUi("UI_BONUS_STAGE", "전투 누적"));
-
-            // 모든 칩 처리가 끝난 뒤 족보 배수부터 표시
-            yield return AnimateBonus(false, handMult - 1f, handName, null, true);
-            // 주사위별 칩 보너스: 아이스·수성
-            yield return AnimateDiceBonuses(true);
-            // 기존 스낵·피규어·전투 누적 칩 처리 유지
-            yield return AnimateBonus(true, chipsBeforeFigures, LocalizationManager.GetUi("UI_BONUS_SNACK", "스낵"));
-            yield return AnimateBonus(true, snackBonusChips - chipsBeforeFigures, LocalizationManager.GetUi("UI_BONUS_FIGURE", "피규어"));
-            yield return AnimateBonus(true, stageBonusChips, LocalizationManager.GetUi("UI_BONUS_STAGE", "전투 누적"));
-            // 이후 배수 보너스 표시
-            yield return AnimateBonus(false, permanentFigureMultiplier, LocalizationManager.GetUi("UI_BONUS_PERMANENT", "영구 보너스"));
-            yield return AnimateBonus(false, multBeforeFigures, LocalizationManager.GetUi("UI_BONUS_SNACK", "스낵"));
-            yield return AnimateBonus(false, snackBonusMult - multBeforeFigures, LocalizationManager.GetUi("UI_BONUS_FIGURE", "피규어"));
-            // 주사위별 배수 보너스: 프리즘·아이스 추가 배수·화성
-            yield return AnimateDiceBonuses(false);
-            yield return AnimateBonus(false, stageBonusMult, LocalizationManager.GetUi("UI_BONUS_STAGE", "전투 누적"));
-
-            // 표시의 최종값을 실제 계산 결과에 맞춤
-            if (ui.chipsSumText != null)
-            {
-                ui.chipsSumText.text =
-                    FormatChipsValue(finalBaseSum);
-            }
-
-            if (ui.multSumText != null)
-            {
-                ui.multSumText.text = FormatMultValue(finalMult);
-            }
-
-            // 배수가 오르고 화면에 연출이 보일 수 있도록 0.8초간 뜸을 들인 후 데미지 전달
-            yield return new WaitForSeconds(0.2f);
-        }
+            stageChips = stageBonusChips,
+            snackChips = snackBonusChips,
+            stageMult = stageBonusMult,
+            snackMult = snackBonusMult,
+            permanentMult = permanentFigureMultiplier
+        };
+        TurnScoreResult total = TurnCalculator.CalculateScore(calcResult, handMult, bonuses);
+        yield return resolutionPresenter.PlayScore(ui, keptDice, handRank, handName, handMult, calcResult, diceScoreBonuses, bonuses, chipsBeforeFigures, multBeforeFigures, total, resolutionTiming, snacks);
+        if (snacks != null) yield return snacks.CompleteResolution();
 
         // 다크 데미지 별도 계산 (최신 HP 기준)
-        int darkDamageTotal = 0;
-        foreach (var d in keptDice)
-        {
-            if (d.myData.isCoated && d.myData.type == DiceType.Dark)
-            {
-                int drop = Mathf.FloorToInt(simEnemyHP * 0.1f);
-                darkDamageTotal += drop;
-                simEnemyHP -= drop;
-            }
-        }
+        int darkDamageTotal = TurnCalculator.CalculateDarkDamage(keptDice, simEnemyHP);
 
-        // 다크 피해까지 포함한 일반 공격의 최종 피해 표시
-        if (ui != null && ui.handInfoText != null)
-        {
-            int displayedDamage = finalDamage + darkDamageTotal;
-
-            ui.handInfoText.text = LocalizationManager.GetUi(
-                "UI_DAMAGE_VALUE",
-                "<color=#FF5555>= {0} 데미지</color>",
-                displayedDamage);
-
-            ui.handInfoText.transform.DOKill(true);
-            ui.handInfoText.transform.DOPunchScale(Vector3.one * 0.3f, 0.4f, 5, 0.5f);
-            yield return new WaitForSeconds(0.4f);
-        }
+        yield return resolutionPresenter.PlayFinalDamage(ui, total.damage + darkDamageTotal, resolutionTiming);
 
         // 화염 및 기타 수치 종합
         int totalFlameDamage = calcResult.flameDamageThisTurn + figureBonusFlameDamage;
@@ -1082,12 +715,10 @@ public class DiceManager : MonoBehaviour
         int expectedGold = calcResult.expectedGold; // 코인 주사위 등에서 얻은 골드
 
         // 완벽하게 쪼개진 수치들을 전투 지휘관(CombatFlowController)에게 전달
-        yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, finalDamage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName
+        yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, total.damage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName
         ));
-        ClearMergedHandDamageText();
+        ui?.ClearMergedHandDamageText();
     }
-
-
 
 
     //티켓 아이템 먹었을 때 호출할 함수
@@ -1264,11 +895,6 @@ public class DiceManager : MonoBehaviour
 
     private void HideResultAfterFailure() { if (!ShopManager.IsShopOpen && !enemy.IsDead) ui?.HideResult(); }
 
-    void InitializeSlots()
-    {
-        if (keepSlotParent != null) keepSlots = keepSlotParent.Cast<Transform>().ToArray();
-        if (rollSlotParent != null) rollSlots = rollSlotParent.Cast<Transform>().ToArray();
-    }
 
     private IEnumerator HandleDiceChangedDelayed()
     {
@@ -1280,13 +906,7 @@ public class DiceManager : MonoBehaviour
     void HandleDiceChanged()
     {
 
-        int keptCount = 0;
-        bool hasDiceToRoll = false;
-        foreach (var d in activeDiceList.Where(d => d != null))
-        {
-            if (d.isKept) { if (d.currentKeepIndex == -1) AssignToKeepSlot(d); keptCount++; }
-            else { if (d.currentKeepIndex != -1) ReleaseFromKeepSlot(d); hasDiceToRoll = true; }
-        }
+        board.SyncKeepSlots(out int keptCount, out bool hasDiceToRoll);
         UpdateMainUI("");
         bool canAct = !isRolling && !isCalculating && currentPlayerHP > 0 && enemy != null && !enemy.IsDead && !isStageClearing;
 
@@ -1395,16 +1015,7 @@ public class DiceManager : MonoBehaviour
         int satelliteBonusChips = calcResult.satelliteBonusChips;
 
         // 다크 데미지는 피규어 이후 계산을 시뮬레이션하기 위해 따로 빼서 수동 계산
-        int darkDamageTotal = 0;
-        foreach (var d in uiDiceBuffer)
-        {
-            if (d.myData.isCoated && d.myData.type == DiceType.Dark)
-            {
-                int drop = Mathf.FloorToInt(simEnemyHP * 0.1f);
-                darkDamageTotal += drop;
-                simEnemyHP -= drop;
-            }
-        }
+        int darkDamageTotal = TurnCalculator.CalculateDarkDamage(uiDiceBuffer, simEnemyHP);
 
         flameDamageThisTurn = figureBonusFlameDamage; // 화상 데미지 상태 저장 연동
 
@@ -1511,8 +1122,8 @@ public class DiceManager : MonoBehaviour
             {
                 if (ui.handInfoText != null) ui.handInfoText.text = displayHand;
                 // 분리된 텍스트에 적용
-                if (ui.chipsSumText != null) ui.chipsSumText.text = FormatChipsValue(displayBaseSum);
-                if (ui.multSumText != null) ui.multSumText.text = FormatMultValue(displayMult);
+                if (ui.chipsSumText != null) ui.chipsSumText.text = UIManager.FormatChipsValue(displayBaseSum);
+                if (ui.multSumText != null) ui.multSumText.text = UIManager.FormatMultValue(displayMult);
 
                 // 대기 중엔 로그를 모두 비우고, '대미지 예정' 텍스트도 완전히 안 보이게 처리
                 if (ui.chipsLogText != null) ui.chipsLogText.text = "";
@@ -1530,34 +1141,6 @@ public class DiceManager : MonoBehaviour
         }
 
         float currentEnemyDropRate = isPeppermintActive ? enemy.baseDropRate : 0f;
-    }
-
-    static string FormatChipsValue(int value)
-    {
-        return $"<color=#51F8D5>{value}</color>";
-    }
-
-    static string FormatMultValue(float value)
-    {
-        return LocalizationManager.GetUi("UI_MULT_VALUE", "<color=#FDE470>{0}</color>", value.ToString("F1"));
-    }
-
-    void ClearMergedHandDamageText()
-    {
-        if (ui == null) return;
-        if (ui.handInfoText != null) ui.handInfoText.text = "";
-        if (ui.finalDamageText != null) ui.finalDamageText.text = "";
-    }
-
-    void AssignToKeepSlot(Dice d)
-    {
-        int index = Array.IndexOf(keepSlotOccupants, null);
-        if (index != -1) { keepSlotOccupants[index] = d; d.currentKeepIndex = index; d.MoveToTarget(keepSlots[index].position); }
-    }
-
-    void ReleaseFromKeepSlot(Dice d)
-    {
-        if (d.currentKeepIndex != -1) { keepSlotOccupants[d.currentKeepIndex] = null; d.currentKeepIndex = -1; d.MoveToTarget(d.rollPos); }
     }
 
 
