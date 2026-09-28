@@ -283,9 +283,75 @@ public class UIManager : MonoBehaviour
         return LocalizationManager.GetUi("UI_MULT_VALUE", "<color=#FDE470>{0}</color>", value.ToString("F1"));
     }
 
+    static readonly Color FinalDamageColor = new Color(1f, 0.33333334f, 0.33333334f, 1f);
+    Vector3 handInfoBaseScale = Vector3.one;
+    Color handInfoBaseColor = Color.white;
+    bool handInfoBaseCached;
+    bool handInfoDamageStyleActive;
+
+    public void CacheHandInfoBaseStyle()
+    {
+        if (handInfoBaseCached || handInfoText == null)
+            return;
+
+        handInfoBaseScale = handInfoText.transform.localScale;
+        handInfoBaseColor = handInfoText.color;
+        handInfoBaseCached = true;
+    }
+
+    public void RestoreHandInfoAppearance()
+    {
+        if (handInfoText == null)
+            return;
+
+        CacheHandInfoBaseStyle();
+        if (!handInfoDamageStyleActive)
+            return;
+
+        handInfoText.transform.DOKill(true);
+        handInfoText.transform.localScale = handInfoBaseScale;
+        handInfoText.color = handInfoBaseColor;
+        handInfoDamageStyleActive = false;
+    }
+
+    public void ApplyFinalDamageStyle()
+    {
+        if (handInfoText == null)
+            return;
+
+        CacheHandInfoBaseStyle();
+        handInfoText.transform.DOKill(true);
+        handInfoText.color = FinalDamageColor;
+        handInfoText.transform.localScale = handInfoBaseScale;
+        handInfoText.transform.DOScale(handInfoBaseScale * 1.3f, 0.12f).SetEase(Ease.OutQuad);
+        handInfoDamageStyleActive = true;
+    }
+
+    public void SetHandNameText(string displayHand)
+    {
+        if (handInfoText == null)
+            return;
+
+        var handCounter = handInfoText.GetComponent<UiCountUpText>();
+        if (handCounter != null)
+            handCounter.StopTween();
+
+        RestoreHandInfoAppearance();
+        handInfoText.text = displayHand;
+    }
+
     public void ClearMergedHandDamageText()
     {
-        if (handInfoText != null) handInfoText.text = "";
-        if (finalDamageText != null) finalDamageText.text = "";
+        RestoreHandInfoAppearance();
+        if (handInfoText != null)
+        {
+            var handCounter = handInfoText.GetComponent<UiCountUpText>();
+            if (handCounter != null)
+                handCounter.Clear();
+            else
+                handInfoText.text = "";
+        }
+        if (finalDamageText != null)
+            UiCountUpText.On(finalDamageText, UiCountUpText.FormatKind.Integer)?.Clear();
     }
 }

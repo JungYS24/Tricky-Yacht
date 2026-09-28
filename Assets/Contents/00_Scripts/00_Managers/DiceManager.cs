@@ -683,7 +683,6 @@ public class DiceManager : MonoBehaviour
         isCalculating = true; //결산 연출 시작
         ui?.SetRollButtonInteractable(false);   //즉시 버튼 비활성화
         ui?.SetFinishButtonInteractable(false); //즉시 버튼 비활성화
-        ui?.ClearMergedHandDamageText();
 
         //끝내기 버튼을 누르는 순간 화면 전체를 묵직하게 흔듭니다.
         CameraShake.Instance.Shake(0.3f, 0.2f);
@@ -1192,12 +1191,10 @@ public class DiceManager : MonoBehaviour
             // 분리된 텍스트에 각각 할당
             if (ui != null)
             {
-                if (ui.handInfoText != null) ui.handInfoText.text = displayHand;
-                // 분리된 텍스트에 적용
-                if (ui.chipsSumText != null) ui.chipsSumText.text = UIManager.FormatChipsValue(displayBaseSum);
-                if (ui.multSumText != null) ui.multSumText.text = UIManager.FormatMultValue(displayMult);
+                ui.SetHandNameText(displayHand);
+                UiCountUpText.On(ui.chipsSumText, UiCountUpText.FormatKind.Chips)?.Play(displayBaseSum);
+                UiCountUpText.On(ui.multSumText, UiCountUpText.FormatKind.Mult)?.Play(displayMult);
 
-                // 대기 중엔 로그를 모두 비우고, '대미지 예정' 텍스트도 완전히 안 보이게 처리
                 if (ui.chipsLogText != null) ui.chipsLogText.text = "";
                 if (ui.multLogText != null) ui.multLogText.text = "";
                 if (ui.finalDamageText != null)
