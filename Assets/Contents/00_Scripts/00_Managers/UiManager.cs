@@ -6,6 +6,27 @@ using DG.Tweening;
 
 public class UIManager : MonoBehaviour
 {
+    // 미리보기의 표시 형식과 팀원 작업의 카운트업 연출은 UIManager가 담당합니다.
+    public void ShowTurnPreview(string handName, int displayBaseSum, float displayMult, int iceBonusChips, int satelliteBonusChips, int darkDamageTotal)
+    {
+        string displayHand = string.IsNullOrEmpty(handName) ? "" : $"<color=#FFD700>{handName}</color>";
+        if (iceBonusChips > 0) displayHand += $" <color=#00FFFF>+{iceBonusChips}</color>";
+        if (darkDamageTotal > 0) displayHand += $" <color=#A9A9A9>+{darkDamageTotal}</color>";
+        if (satelliteBonusChips > 0) displayHand += $" <color=#B19CD9>+{satelliteBonusChips}{LocalizationManager.GetUi("UI_SATELLITE_TAG", "(위성)")}</color>";
+
+        // 분리된 텍스트에 각각 할당
+
+        SetHandNameText(displayHand);
+        UiCountUpText.On(chipsSumText, UiCountUpText.FormatKind.Chips)?.Play(displayBaseSum);
+        UiCountUpText.On(multSumText, UiCountUpText.FormatKind.Mult)?.Play(displayMult);
+
+        if (chipsLogText != null) chipsLogText.text = "";
+        if (multLogText != null) multLogText.text = "";
+        if (finalDamageText != null)
+            UiCountUpText.On(finalDamageText, UiCountUpText.FormatKind.Integer)?.Clear();
+    }
+
+
     [Header("메인 게임 UI")]
     public TextMeshProUGUI stageText;
     public TextMeshProUGUI targetScoreText;

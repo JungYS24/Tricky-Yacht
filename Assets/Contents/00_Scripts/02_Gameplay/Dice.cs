@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using System;
 using System.Collections;
@@ -287,6 +287,15 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         IsMoving = false;
         RefreshHoverJuice();
     }
+
+    // 이어하기는 클릭 이벤트나 이동/굴림 연출 없이 킵 색상과 입력 상태만 복원합니다.
+    public void RefreshRestoredState()
+    {
+        ApplyDiceColor();
+        RefreshHoverJuice();
+    }
+
+    public bool IsRollAnimating => rollCoroutine != null;
 
     public void RefreshHoverJuice()
     {

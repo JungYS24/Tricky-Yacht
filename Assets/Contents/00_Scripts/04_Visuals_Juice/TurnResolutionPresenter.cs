@@ -87,13 +87,6 @@ public sealed class TurnResolutionPresenter
                         if (scoreHandGroups[i] >= 0) keptDice[i].PlayScoreFeedback(duration);
                     }
                 }
-                else
-                {
-                    foreach (var d in keptDice)
-                    {
-                        if (d != null) d.PlayScoreFeedback(duration);
-                    }
-                }
             }
             else if (source != null)
             {

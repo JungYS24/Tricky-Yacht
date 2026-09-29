@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -69,11 +69,11 @@ public class DeckManager
     }
 
     // --- 가짜 주사위 (보스 기믹) 관리 ---
-    public void ApplyFakeDice(Sprite fakeShell, Sprite fakeFace, ref DiceData1 originalBossDice, ref int fakeDiceIndex)
+    public void ApplyFakeDice(Sprite fakeShell, Sprite fakeFace, ref DiceData1 originalBossDice, ref int fakeDiceIndex, int restoredIndex = -1)
     {
-        if (masterDeck.Count == 0) return;
+        if (masterDeck.Count == 0 || restoredIndex >= masterDeck.Count) return;
 
-        fakeDiceIndex = Random.Range(0, masterDeck.Count);
+        fakeDiceIndex = restoredIndex >= 0 ? restoredIndex : Random.Range(0, masterDeck.Count);
         originalBossDice = masterDeck[fakeDiceIndex];
 
         DiceData1 fakeDice = new DiceData1("가짜 주사위", new int[] { 0, 0, 0, 0, 0, 0 });

@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 
 // 결산 결과를 한 번에 담아 전달할 구조체
 public struct TurnCalcResult
@@ -94,50 +93,41 @@ public static class TurnCalculator
             return HandRank.HighCard;
         }
 
-        Dictionary<int, int> countDict = new Dictionary<int, int>();
-        foreach (int v in values)
+        // 최대 5개인 주사위는 작은 중첩 루프가 Dictionary/List 생성보다 간단하고 할당이 없습니다.
+        int pairs = 0;
+        bool triple = false, four = false, yacht = false, hasZero = false;
+        int uniqueCount = 0, minimum = int.MaxValue, maximum = int.MinValue;
+        for (int i = 0; i < values.Count; i++)
         {
-            if (countDict.ContainsKey(v)) countDict[v]++;
-            else countDict[v] = 1;
-        }
-        List<int> counts = countDict.Values.ToList();
-
-        List<int> sortedValues = new List<int>(values); sortedValues.Sort();
-
-        if (counts.Any(c => c == 5))
-        {
-            multiplier = dm.multYacht;
-            return HandRank.Yacht;
-        }
-
-        bool isStraight = true;
-        if (sortedValues.Contains(0))
-        {
-            isStraight = false;
-        }
-        else
-        {
-            for (int i = 0; i < sortedValues.Count - 1; i++)
+            int value = values[i];
+            bool alreadyCounted = false;
+            for (int j = 0; j < i; j++)
             {
-                if (sortedValues[i] + 1 != sortedValues[i + 1])
-                {
-                    isStraight = false;
-                    break;
-                }
+                if (values[j] == value) { alreadyCounted = true; break; }
             }
+            if (alreadyCounted) continue;
+
+            uniqueCount++;
+            if (value == 0) hasZero = true;
+            if (value < minimum) minimum = value;
+            if (value > maximum) maximum = value;
+            int count = 1;
+            for (int j = i + 1; j < values.Count; j++) if (values[j] == value) count++;
+            if (count == 2) pairs++;
+            else if (count == 3) triple = true;
+            else if (count == 4) four = true;
+            else if (count == 5) yacht = true;
         }
 
-        if (isStraight && sortedValues.Count == 5)
-        {
-            multiplier = dm.multStraight;
-            return HandRank.Straight;
-        }
-
-        if (counts.Any(c => c == 4)) { multiplier = dm.multFourOfAKind; return HandRank.FourOfAKind; }
-        if (counts.Any(c => c == 3) && counts.Any(c => c == 2)) { multiplier = dm.multFullHouse; return HandRank.FullHouse; }
-        if (counts.Any(c => c == 3)) { multiplier = dm.multTriple; return HandRank.Triple; }
-        if (counts.Count(c => c == 2) == 2) { multiplier = dm.multTwoPair; return HandRank.TwoPair; }
-        if (counts.Any(c => c == 2)) { multiplier = dm.multOnePair; return HandRank.OnePair; }
+        // 기존 판정 우선순위와 0 눈금의 스트레이트 제외 규칙을 유지합니다.
+        if (yacht) { multiplier = dm.multYacht; return HandRank.Yacht; }
+        if (values.Count == 5 && uniqueCount == 5 && !hasZero && (long)maximum - minimum == 4)
+        { multiplier = dm.multStraight; return HandRank.Straight; }
+        if (four) { multiplier = dm.multFourOfAKind; return HandRank.FourOfAKind; }
+        if (triple && pairs > 0) { multiplier = dm.multFullHouse; return HandRank.FullHouse; }
+        if (triple) { multiplier = dm.multTriple; return HandRank.Triple; }
+        if (pairs == 2) { multiplier = dm.multTwoPair; return HandRank.TwoPair; }
+        if (pairs > 0) { multiplier = dm.multOnePair; return HandRank.OnePair; }
 
         return rank;
     }
@@ -147,12 +137,11 @@ public static class TurnCalculator
     {
         bonusSteps?.Clear();
         TurnCalcResult res = new TurnCalcResult();
-        int currentSimulatedHP = currentEnemyHP;
+        int extraIceChips = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetIceChipsBonus() : 0;
+        float extraIceMult = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetIceMultiplierBonus() : 0f;
 
         foreach (var d in targetDice)
         {
-            int extraIceChips = FigureEffectManager.Instance != null? FigureEffectManager.Instance.GetIceChipsBonus(): 0;
-            float extraIceMult = FigureEffectManager.Instance != null? FigureEffectManager.Instance.GetIceMultiplierBonus(): 0f;
             res.baseSum += d.currentValue;
 
             switch (d.myData.specialEffect)
