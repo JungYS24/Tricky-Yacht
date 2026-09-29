@@ -6,6 +6,8 @@ using System.Linq;
 public class SavedDiceData
 {
     public string diceName;
+    public int[] faceValues; // 강화/고정 눈금도 저장 당시 그대로 복원
+    public int specialEffect;
     public bool isCoated;
     public int type;
     public float multiplier;
@@ -21,8 +23,26 @@ public class SavedFigureKillCount
     public int count;
 }
 
+[System.Serializable]
+public sealed class SavedBoardDie
+{
+    public int deckIndex;
+    public int value;
+    public int rollSlotIndex;
+    public int keepSlotIndex = -1;
+}
+
 public class SaveData
 {
+    // 0은 구버전 세이브. 1은 보드와 덱 순서를 그대로 복원합니다.
+    public int boardSaveVersion;
+    public List<SavedBoardDie> boardDice = new List<SavedBoardDie>();
+    public List<int> drawPileIndices = new List<int>();
+    public List<int> discardPileIndices = new List<int>();
+    public int savedCurrentRerolls;
+    public int savedMaxRerolls;
+    public int savedFakeDiceIndex = -1;
+
     public int currentStage;
     public int currentPlayerHP;
     public int playerMaxHP;
@@ -89,8 +109,7 @@ public class GameSaveManager : MonoBehaviour
     [Header("게임 내 모든 아이템 총집합")]
     public List<BaseItemDataSO> masterItemDatabase = new List<BaseItemDataSO>();
 
-    //탐색 속도 최적화를 위한 피규어 전용 딕셔너리
-    private Dictionary<string, FigureItemSO> figureDictionary = new Dictionary<string, FigureItemSO>();
+    // 피규어도 아래의 공용 ID 딕셔너리를 사용하여 중복 캐시와 초기화 누락을 방지합니다.
 
     private void Awake()
     {
@@ -110,6 +129,7 @@ public class GameSaveManager : MonoBehaviour
         itemDictionary.Clear();
         foreach (var item in masterItemDatabase)
         {
+            if (item == null) continue;
             // 모든 아이템(BaseItemDataSO)은 Item_ID를 가지므로 그대로 등록
             if (!string.IsNullOrEmpty(item.Item_ID))
             {
@@ -122,6 +142,7 @@ public class GameSaveManager : MonoBehaviour
     // 만능 탐지기 함수
     public BaseItemDataSO FindItemByID(string id)
     {
+        if (string.IsNullOrEmpty(id)) return null;
         if (itemDictionary.TryGetValue(id, out BaseItemDataSO item)) return item;
         return null;
     }
@@ -139,8 +160,21 @@ public class GameSaveManager : MonoBehaviour
         }
     }
 
+    private bool savePending;
+
+    private void LateUpdate()
+    {
+        var dice = DiceManager.Instance;
+        if (savePending && dice != null && dice.IsSaveStateStable && InventoryManager.Instance != null)
+            SaveGame(dice, InventoryManager.Instance, dice.shopManager);
+    }
+
     public void SaveGame(DiceManager dice, InventoryManager inv, ShopManager shop)
     {
+        if (dice == null || inv == null || dice.currentPlayerHP <= 0) return;
+        // 굴리기/정산 중에는 직전 정상 세이브를 보존하고 안정된 시점에 다시 저장합니다.
+        if (!dice.IsSaveStateStable) { savePending = true; return; }
+        savePending = false;
         SaveData data = new SaveData();
 
         data.permanentFigureMultiplier =
@@ -216,6 +250,8 @@ public class GameSaveManager : MonoBehaviour
 
             SavedDiceData sdd = new SavedDiceData();
             sdd.diceName = targetToSave.diceName;
+            sdd.faceValues = targetToSave.faceValues;
+            sdd.specialEffect = (int)targetToSave.specialEffect;
             sdd.isCoated = targetToSave.isCoated;
             sdd.type = (int)targetToSave.type;
             sdd.multiplier = targetToSave.multiplier;
@@ -240,7 +276,7 @@ public class GameSaveManager : MonoBehaviour
         }
 
         inv.CollectTicketNamesForSave(data.ownedTicketIDs);
-        data.snackSlotSaveVersion = 1;
+        data.snackSlotSaveVersion = 2;
         inv.SnackUses.CollectForSave(data.snackSlots);
         foreach (var s in inv.snackSlots)
         {
@@ -253,6 +289,7 @@ public class GameSaveManager : MonoBehaviour
         data.multFullHouse = dice.multFullHouse; data.multFourOfAKind = dice.multFourOfAKind;
         data.multStraight = dice.multStraight; data.multYacht = dice.multYacht;
 
+        dice.CaptureBoardForSave(data);
         string json = JsonUtility.ToJson(data);
         PlayerPrefs.SetString("TrickYacht_Save", json);
         PlayerPrefs.Save();
@@ -273,15 +310,11 @@ public class GameSaveManager : MonoBehaviour
         return masterItemDatabase.FirstOrDefault(x => x.itemName == name);
     }
 
-    public void DeleteSave() { PlayerPrefs.DeleteKey("TrickYacht_Save"); }
+    public void DeleteSave() { savePending = false; PlayerPrefs.DeleteKey("TrickYacht_Save"); }
 
-    // 딕셔너리를 이용해 ID로 피규어를 0.001초 만에 찾아내는 함수
+    // 초기화된 공용 딕셔너리를 이용해 ID로 피규어를 찾습니다.
     public FigureItemSO FindFigureByID(string id)
     {
-        if (figureDictionary.TryGetValue(id, out FigureItemSO figure))
-        {
-            return figure;
-        }
-        return null;
+        return FindItemByID(id) as FigureItemSO;
     }
 }

@@ -183,14 +183,13 @@ public class DiceManager : MonoBehaviour
     [Header("정산 연출 시간")]
     public TurnResolutionTiming resolutionTiming = new TurnResolutionTiming();
 
-    //오브젝트 풀링 및 UI 갱신용 재사용 버퍼
-    private List<Dice> uiDiceBuffer = new List<Dice>(5);
-    private List<int> uiValuesBuffer = new List<int>(5);
-
     private bool pendingPeppermintSuccess = false;
     private bool enemyDeathHandled = false;
     private bool isRolling = false; // 주사위 굴러가는중 
     public bool IsDiceInputLocked => isRolling || isCalculating || currentPlayerHP <= 0 || enemy == null || enemy.IsDead || isStageClearing;
+    private bool isRestoringSave;
+    private bool isResolvingTurn;
+    public bool IsSaveStateStable => !isRolling && !isRestoringSave && !isResolvingTurn && (!isCalculating || isStageClearing) && (board == null || !board.HasRollingDice);
     public bool isCalculating = false;  //끝내기 버튼                                
     public Dictionary<string, int> figureKillCounts = new Dictionary<string, int>();// 피규어 획득 후 처치 기록. 스테이지가 바뀌어도 유지
     public float permanentFigureMultiplier = 0f;
@@ -286,213 +285,41 @@ public class DiceManager : MonoBehaviour
     {
         SaveData data = GameSaveManager.Instance.LoadSaveData();
         if (data == null) return;
-        stageContext.firstNormalAttackDone = data.firstNormalAttackDone;
 
-        stageContext.usedFigureNodes.Clear();
-
-        if (data.usedFigureNodes != null)
+        isRestoringSave = true;
+        try
         {
-            foreach (string nodeKey in data.usedFigureNodes)
+            GameStateRestorer.Restore(this, data, defaultMaxRerolls, ref pendingPeppermintSuccess);
+            if (board.TryRestoreState(data))
             {
-                stageContext.usedFigureNodes.Add(nodeKey);
-            }
-        }
-
-        figureBonusFlameDamage = data.pendingFigureFlameDamage;
-
-        currentStage = data.currentStage;
-        currentPlayerHP = data.currentPlayerHP;
-
-        //누적 보너스 로드
-        stageBonusMult = data.stageBonusMult;
-        stageBonusChips = data.stageBonusChips;
-
-        //세이브에 값이 없으면 기본 100으로, 있으면 세이브된 값으로 덮어씌움
-        playerMaxHP = data.playerMaxHP > 0 ? data.playerMaxHP : 100;
-
-        //세이브 파일에서 보호막 불러오기 및 UI 갱신
-        currentShield = data.currentShield;
-        ui?.UpdateShieldUI(currentShield);
-
-        if (shopManager != null)
-        {
-            shopManager.currentGold = data.currentGold;
-            ui?.UpdateGoldUI(shopManager.currentGold);
-            if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
-        }
-
-        multHighCard = data.multHighCard; multOnePair = data.multOnePair;
-        multTwoPair = data.multTwoPair; multTriple = data.multTriple;
-        multFullHouse = data.multFullHouse; multFourOfAKind = data.multFourOfAKind;
-        multStraight = data.multStraight; multYacht = data.multYacht;
-
-        // 덱 복구 (코팅 정보 복원 포함)
-        masterDeck.Clear();
-        foreach (var dData in data.deckDiceList)
-        {
-            DiceData1 newDice = null;
-
-            if (dData.diceName == "기본 주사위")
-            {
-                newDice = new DiceData1();
-                masterDeck.Add(newDice);
+                // 새 라운드를 시작하지 않으므로 셔플/리롤/라운드 시작 효과를 재실행하지 않습니다.
+                isCalculating = false;
+                currentRerolls = data.savedCurrentRerolls;
+                maxRerolls = data.savedMaxRerolls;
+                ui?.HideResult();
+                HandleDiceChanged();
             }
             else
             {
-                DiceItemSO diceSO = GameSaveManager.Instance.FindItemByName(dData.diceName) as DiceItemSO;
-                if (diceSO != null)
-                {
-                    diceSO.ApplyItemEffect(this);
-                    newDice = masterDeck[masterDeck.Count - 1]; // 방금 추가된 주사위를 가져옴
-                }
+                // 보드 기록이 없는 구버전 저장은 기존 방식으로 호환합니다.
+                StartNewRound(isFromLoad: true, returnPreviousDiceToDiscard: false);
             }
-
-            // 세이브 파일에 있던 코팅 상태를 덮어씌움
-            if (newDice != null && dData.isCoated)
-            {
-                newDice.isCoated = dData.isCoated;
-                newDice.type = (DiceType)dData.type;
-                newDice.multiplier = dData.multiplier;
-                newDice.diceColor = dData.diceColor;
-            }
-
-            //세이브 파일에 있던 위성 상태를 덮어씌움
-            if (newDice != null && dData.activeSatellites != null)
-            {
-                newDice.activeSatellites.Clear();
-                foreach (int satInt in dData.activeSatellites)
-                {
-                    newDice.activeSatellites.Add((SatelliteType)satInt);
-                }
-            }
+            // 사용 기록은 유지한 채, 아직 미사용인 낮은 체력 효과만 검사
+            FigureEffectManager.Instance?.EvaluateLowHPTriggers(this, shopManager);
         }
-        InventoryManager.Instance.ClearAllSlots();
-
-        //최적화된 ID 기반으로 피규어 복원
-        if (data.ownedFigureIDs != null && data.ownedFigureIDs.Count > 0)
-        {
-            foreach (string fID in data.ownedFigureIDs)
-            {
-                var item = GameSaveManager.Instance.FindFigureByID(fID);
-                if (item != null) InventoryManager.Instance.RestoreItem(item);
-                else Debug.LogError($"[피규어 복원 실패] 저장된 아이디: '{fID}'를 찾을 수 없습니다.");
-            }
-        }
-
-        if (data.snackSlotSaveVersion >= 1)
-        {
-            // 사용 예약과 소모 방지 결과를 복구합니다. 효과/확률 판정은 다시 실행하지 않습니다.
-            InventoryManager.Instance.SnackUses.RestoreSaved(data.snackSlots, GameSaveManager.Instance);
-        }
-        else
-        {
-            // 이전 버전 저장 파일은 기존 스낵 목록으로 복구
-            foreach (string sName in data.ownedSnackIDs)
-            {
-                var item = GameSaveManager.Instance.FindItemByName(sName);
-                if (item != null) InventoryManager.Instance.AddItem(item);
-            }
-        }
-        foreach (string tName in data.ownedTicketIDs)
-        {
-            var item = GameSaveManager.Instance.FindItemByName(tName);
-            if (item != null)
-                InventoryManager.Instance.AddItem(item);
-        }
-
-        //환경(바이옴, BGM) 복구
-        currentRerolls = 0;
-        maxRerolls = defaultMaxRerolls;
-        pendingPeppermintSuccess = false;
-        //무조건 0으로 끄는 대신, 저장된 버프 수치를 그대로 가져옵니다!
-        snackBonusMult = data.snackBonusMult;
-        snackBonusChips = data.snackBonusChips;
-        snackBonusRerolls = data.snackBonusRerolls;
-        snackBonusFigureDropRate = data.snackBonusFigureDropRate;
-        figureBonusRerolls = data.figureBonusRerolls;
-        isPeppermintActive = data.isPeppermintActive;
-
-        if (biomeList.Count > 0)
-        {
-            currentBiome = biomeList.Find(b => (int)b.biomeType == data.savedBiomeType);
-
-            if (currentBiome == null) currentBiome = biomeList[0];
-
-            if (biomeBackgroundImage != null && currentBiome.backgroundImage != null)
-                biomeBackgroundImage.sprite = currentBiome.backgroundImage;
-            if (BGMManager.Instance != null && currentBiome.biomeBGM != null)
-                BGMManager.Instance.ChangeBGM(currentBiome.biomeBGM);
-        }
-
-        // 싸우던 몬스터 복구
-        if (!string.IsNullOrEmpty(data.savedMonsterName))
-        {
-            MonsterDataSO savedMonster = GetMonsterDataByName(data.savedMonsterName);
-            if (savedMonster != null)
-            {
-                enemy.RestoreMonster(savedMonster, data.savedMonsterHP, data.savedMonsterMaxHP, data.savedMonsterAttack, data.savedMonsterIndex, data.savedMonsterCurrentTurn, data.savedMonsterMaxTurn);
-            }
-            else enemy.Initialize(currentStage, currentBiome); // 에러 방지용 안전장치
-
-            accumulatedFlameDamage = data.savedFlameDamage;
-            ui?.UpdateFlameStackUI(accumulatedFlameDamage); //세이브 로드 시 스택 UI 갱신
-        }
-        else
-        {
-            enemy.Initialize(currentStage, currentBiome);
-            accumulatedFlameDamage = 0; // 새로 시작할 땐 확실하게 0으로 초기화
-            ui?.UpdateFlameStackUI(0);
-        }
-
-        //세이브 로드 시에도 적 능력을 체크해서 다시 발동
-        if (enemy.CurrentBossAbility == BossAbilityType.FakeDice)
-        {
-            deckManager.ApplyFakeDice(fakeDiceShell, fakeDiceFace, ref originalBossDice, ref fakeDiceIndex);
-        }
-
-        // 덱 섞기 및 이번 턴 시작 (StartNewStage() 대신 호출)
-        drawPile = new List<DiceData1>(masterDeck);
-        discardPile.Clear();
-        deckManager.ShufflePile(drawPile);
-        permanentFigureMultiplier =
-    data.permanentFigureMultiplier;
-
-        figureKillCounts.Clear();
-
-        if (data.figureKillCounts != null)
-        {
-            foreach (var saved in data.figureKillCounts)
-            {
-                if (saved == null ||
-                    string.IsNullOrEmpty(saved.figureName))
-                {
-                    continue;
-                }
-
-                figureKillCounts[saved.figureName] =
-                    Mathf.Max(0, saved.count);
-            }
-        }
-        StartNewRound(isFromLoad: true, returnPreviousDiceToDiscard: false);
-        // 사용 기록은 유지한 채, 아직 미사용인 낮은 체력 효과만 검사
-        FigureEffectManager.Instance?.EvaluateLowHPTriggers(this, shopManager);
+        finally { isRestoringSave = false; }
     }
 
-    // 저장된 몬스터 이름으로 바이옴 리스트를 뒤져서 진짜 데이터를 찾아주는 탐지기 함수
-    private MonsterDataSO GetMonsterDataByName(string mName)
+    internal bool CanRestoreBoard(SaveData data) => board.CanRestoreState(data);
+
+    internal void CaptureBoardForSave(SaveData data)
     {
-        foreach (var biome in biomeList)
-        {
-            if (biome.bossMonster != null && biome.bossMonster.monsterName == mName)
-                return biome.bossMonster;
-            foreach (var monster in biome.biomeMonsters)
-            {
-                if (monster != null && monster.monsterName == mName) return monster;
-            }
-        }
-        return null;
+        if (enemy == null || enemy.IsDead || isStageClearing) return;
+        data.savedCurrentRerolls = currentRerolls;
+        data.savedMaxRerolls = maxRerolls;
+        data.savedFakeDiceIndex = originalBossDice != null ? fakeDiceIndex : -1;
+        board.CaptureForSave(data);
     }
-
 
     void StartNewStage()
     {
@@ -581,6 +408,7 @@ public class DiceManager : MonoBehaviour
         // 결산 중(isCalculating)일 때 리롤 진입 완벽 차단 방어막 추가
         if (isRolling || isCalculating || currentRerolls >= (maxRerolls + snackBonusRerolls + figureBonusRerolls) || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return;
 
+        GameSaveManager.Instance?.SaveGame(this, InventoryManager.Instance, shopManager); // 강제 종료 시에도 굴리기 전 정상 상태 유지
         isRolling = true; // 굴림 상태 켜기
         ui?.SetRollButtonInteractable(false);   //즉시 버튼 비활성화
         ui?.SetFinishButtonInteractable(false); //주사위가 굴러가는 동안 끝내기 버튼도 막기
@@ -603,7 +431,13 @@ public class DiceManager : MonoBehaviour
 
     public void OnFinishButtonClick()
     {
-        if (isRolling || isCalculating || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || enemy.IsDead) return;
+        if (isRolling || isCalculating || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || enemy == null || enemy.IsDead || currentPlayerHP <= 0 || isStageClearing) return;
+
+        // 버튼 상태와 별개로 직접 호출도 5개 킵 조건을 검증합니다.
+        board.SyncKeepSlots(out int keptCount, out _);
+        if (keptCount != 5) return;
+
+        GameSaveManager.Instance?.SaveGame(this, InventoryManager.Instance, shopManager); // 정산 도중 종료하면 직전 정상 상태로 복원
 
         figureBonusRerolls = 0;
 
@@ -628,11 +462,18 @@ public class DiceManager : MonoBehaviour
 
     IEnumerator FinishTurnRoutine()
     {
+        isResolvingTurn = true;
+        try { yield return FinishTurnCore(); }
+        finally { isResolvingTurn = false; }
+    }
+
+    private IEnumerator FinishTurnCore()
+    {
         //데이터 독립 추출 (UI 버퍼 의존 X, 킵된 주사위만 스냅샷 수집)
         board.CollectKept(keptDice, keptValues);
 
-        // 안전장치: 킵한 주사위가 없으면 결산 중단
-        if (keptValues.Count == 0)
+        // 안전장치: 킵한 주사위가 정확히 5개가 아니면 결산 중단
+        if (keptValues.Count != 5)
         {
             isCalculating = false;
             HandleDiceChanged();
@@ -801,15 +642,8 @@ public class DiceManager : MonoBehaviour
 
         if (shopManager != null)
         {
+            //스테이지 클리어 기본 골드 카운팅 연출 실행: GrantGold에서 지급과 UI 갱신을 함께 처리
             shopManager.GrantGold(baseClearReward);
-        }
-        if (shopManager != null)
-        {
-            shopManager.currentGold += baseClearReward;
-            ui?.UpdateGoldUI(shopManager.currentGold);
-            //스테이지 클리어 기본 골드 카운팅 연출 실행
-
-            if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
         }
 
         //스테이지 클리어 시 패시브(Passive) 피규어 효과 일괄 발동
@@ -910,7 +744,7 @@ public class DiceManager : MonoBehaviour
 
         ui?.SetRollButtonInteractable(canAct && currentRerolls < maxRerolls + snackBonusRerolls + figureBonusRerolls && hasDiceToRoll);
 
-        ui?.SetFinishButtonInteractable(canAct && keptCount >= 1);
+        ui?.SetFinishButtonInteractable(canAct && keptCount == 5);
 
         OnDeckUpdateNeeded?.Invoke();
     }
@@ -957,189 +791,14 @@ public class DiceManager : MonoBehaviour
         }
     }
 
-    private readonly HashSet<FigureItemSO> previewFigures = new HashSet<FigureItemSO>();
-    private readonly List<string> previewFigureNames = new List<string>();
-    private readonly List<Sprite> previewFigureSprites = new List<Sprite>();
-    private readonly int[] previewDiceCounts = new int[7];
+    private readonly MainUIPresenter mainUIPresenter = new MainUIPresenter();
 
     public void UpdateMainUI(string handName)
     {
-        //매 틱마다 List를 새로 만들지 않고, 고정된 버퍼를 비우고 다시 채워 메모리 낭비 차단
-        uiDiceBuffer.Clear();
-        uiValuesBuffer.Clear();
-        foreach (var d in activeDiceList)
-        {
-            if (d != null && d.gameObject.activeInHierarchy && d.isKept)
-            {
-                uiDiceBuffer.Add(d);
-                uiValuesBuffer.Add(d.currentValue);
-            }
-        }
-
-        float baseMult = 1.0f;
-
-        HandRank rank = currentHandRank;
-        if (!isCalculating)
-        {
-            if (uiValuesBuffer.Count > 0)
-            {
-                rank = TurnCalculator.CalculateHand(uiValuesBuffer, this, out baseMult);
-                currentHandRank = rank;
-                handName = LocalizationManager.GetHandDisplayName(rank);
-            }
-            else
-            {
-                rank = HandRank.HighCard;
-                currentHandRank = rank;
-                handName = "";
-            }
-
-            currentHandName = handName;
-        }
-        else
-        {
-            if (uiValuesBuffer.Count == 5)
-                TurnCalculator.CalculateHand(uiValuesBuffer, this, out baseMult);
-        }
-
-        // 순수 연산기를 통한 통합 연산 호출
-        float healMultUI = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetHealMultiplier() : 1.0f;
-        int simEnemyHP = (enemy != null) ? enemy.CurrentHP : 0;
-        TurnCalcResult calcResult = TurnCalculator.CalculateDiceEffects(uiDiceBuffer, simEnemyHP, healMultUI);
-
-        int baseSum = calcResult.baseSum;
-        float finalMult = baseMult + snackBonusMult + calcResult.prismMultTotal + calcResult.satelliteBonusMult + calcResult.iceBonusMult;
-        int iceBonusChips = calcResult.iceBonusChips;
-        int satelliteBonusChips = calcResult.satelliteBonusChips;
-
-        // 다크 데미지는 피규어 이후 계산을 시뮬레이션하기 위해 따로 빼서 수동 계산
-        int darkDamageTotal = TurnCalculator.CalculateDarkDamage(uiDiceBuffer, simEnemyHP);
-
+        // 기존 호출부 호환을 위해 매개변수를 유지합니다. 표시명은 현재 킵 상태에서 갱신합니다.
         flameDamageThisTurn = figureBonusFlameDamage; // 화상 데미지 상태 저장 연동
-
-        // 피규어 발동 실시간 시뮬레이션
-        int figureBonusChips = 0;
-        float figureBonusMult = 0f;
-        previewFigures.Clear();
-        previewFigureNames.Clear();
-        previewFigureSprites.Clear();
-        List<string> activeFigureNames = previewFigureNames;
-        List<Sprite> activeFigureSprites = previewFigureSprites; //피규어 아이콘 담을 리스트
-
-        if (uiValuesBuffer.Count == 5 && InventoryManager.Instance != null) // 5개가 모였을 때만 피규어 발동 검사
-        {
-            System.Array.Clear(previewDiceCounts, 0, previewDiceCounts.Length);
-            int[] diceCounts = previewDiceCounts;
-            foreach (int v in uiValuesBuffer)
-            {
-                if (v >= 0 && v <= 6)
-                {
-                    diceCounts[v]++;
-                }
-            }
-
-            foreach (var figure in InventoryManager.Instance.ownedFigures)
-            {
-                bool isTriggered = false;
-                float tempChips = 0;
-                float tempMult = 0;
-
-                foreach (var node in figure.figureNodes)
-                {
-                    if (node == null || node.effects == null || node.effects.Count == 0) continue;
-                    if (node.requiredKills > 0 && (!figureKillCounts.TryGetValue(figure.itemName, out int kills) || kills < node.requiredKills)) continue;
-                    if (node.oncePerStage && stageContext.usedFigureNodes.Contains($"{figure.itemName}:{figure.figureNodes.IndexOf(node)}")) continue;
-                    bool nodeTriggered = false;
-                    switch (node.triggerType)
-                    {
-                        case FigureTriggerType.ThreeOf1: if (diceCounts[1] >= 3) nodeTriggered = true; break;
-                        case FigureTriggerType.ThreeOf2: if (diceCounts[2] >= 3) nodeTriggered = true; break;
-                        case FigureTriggerType.ThreeOf3: if (diceCounts[3] >= 3) nodeTriggered = true; break;
-                        case FigureTriggerType.ThreeOf4: if (diceCounts[4] >= 3) nodeTriggered = true; break;
-                        case FigureTriggerType.ThreeOf5: if (diceCounts[5] >= 3) nodeTriggered = true; break;
-                        case FigureTriggerType.ThreeOf6: if (diceCounts[6] >= 3) nodeTriggered = true; break;
-                        case FigureTriggerType.OnePair:
-                        case FigureTriggerType.TwoPair:
-                        case FigureTriggerType.Triple:
-                        case FigureTriggerType.Straight:
-                        case FigureTriggerType.FullHouse:
-                        case FigureTriggerType.FourOfAKind:
-                        case FigureTriggerType.Yacht:
-                            if (HandRankUtil.MatchesTrigger(rank, node.triggerType)) nodeTriggered = true;
-                            break;
-                    }
-
-                    if (nodeTriggered)
-                    {
-                        isTriggered = true;
-                        foreach (var effect in node.effects)
-                        {
-                            if (effect.effectType == FigureEffectType.AddChips) tempChips += effect.effectValue;
-                            if (effect.effectType == FigureEffectType.AddMultiplier) tempMult += effect.effectValue;
-                        }
-                    }
-                }
-
-                if (isTriggered)
-                {
-                    if (previewFigures.Add(figure))
-                    {
-                        activeFigureNames.Add(figure.itemName);
-                        activeFigureSprites.Add(figure.icon); //발동된 피규어의 아이콘 저장
-                    }
-                    figureBonusChips += (int)tempChips;
-                    figureBonusMult += tempMult;
-                }
-            }
-        }
-
-        FigureFeedback.ApplyPreview(previewFigures);
-
-        // 끝내기 버튼을 누르기 전과 후의 UI 렌더링을 분리형 텍스트에 맞게 수정
-        string bName = (currentBiome != null)
-            ? LocalizationManager.GetBiomeDisplayName(currentBiome.biomeType)
-            : "Stage";
-        string stageDisplayName = $"{bName} {currentStage}";
-        int remainingRerolls = (maxRerolls + snackBonusRerolls + figureBonusRerolls) - currentRerolls;
-        int remainingFinishes = isCalculating ? 0 : 1;
-
-        if (!isCalculating)
-        {
-            int displayBaseSum = baseSum + iceBonusChips + satelliteBonusChips + stageBonusChips;
-            float displayMult = 1.0f + stageBonusMult + permanentFigureMultiplier;
-
-            int displayDamage = Mathf.FloorToInt(displayBaseSum * displayMult) + darkDamageTotal;
-
-            string displayHand = string.IsNullOrEmpty(handName) ? "" : $"<color=#FFD700>{handName}</color>";
-            if (iceBonusChips > 0) displayHand += $" <color=#00FFFF>+{iceBonusChips}</color>";
-            if (darkDamageTotal > 0) displayHand += $" <color=#A9A9A9>+{darkDamageTotal}</color>";
-            if (satelliteBonusChips > 0) displayHand += $" <color=#B19CD9>+{satelliteBonusChips}{LocalizationManager.GetUi("UI_SATELLITE_TAG", "(위성)")}</color>";
-
-            // 분리된 텍스트에 각각 할당
-            if (ui != null)
-            {
-                ui.SetHandNameText(displayHand);
-                UiCountUpText.On(ui.chipsSumText, UiCountUpText.FormatKind.Chips)?.Play(displayBaseSum);
-                UiCountUpText.On(ui.multSumText, UiCountUpText.FormatKind.Mult)?.Play(displayMult);
-
-                if (ui.chipsLogText != null) ui.chipsLogText.text = "";
-                if (ui.multLogText != null) ui.multLogText.text = "";
-                if (ui.finalDamageText != null)
-                    UiCountUpText.On(ui.finalDamageText, UiCountUpText.FormatKind.Integer)?.Clear();
-            }
-
-            // UpdateGameUI의 combinedText 매개변수는 빈 문자열로 보냄
-            ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, "", "", activeFigureSprites, remainingFinishes);
-        }
-        else
-        {
-            // 끝내기를 누른 후(결산 중): 시퀀스 코루틴이 각 텍스트를 개별 제어하므로 건드리지 않음
-            ui?.UpdateGameUI(stageDisplayName, enemy.CurrentHP, enemy.MaxHP, currentPlayerHP, playerMaxHP, remainingRerolls, "", "", activeFigureSprites, remainingFinishes);
-        }
-
-        float currentEnemyDropRate = isPeppermintActive ? enemy.baseDropRate : 0f;
+        mainUIPresenter.Refresh(this);
     }
-
 
     public void PromptShopChoice() { ui?.HideResult(); ui?.ShowShopChoice(); }
     public void GoToShop() { ui?.HideShopChoice(); shopManager?.OpenShop(); }

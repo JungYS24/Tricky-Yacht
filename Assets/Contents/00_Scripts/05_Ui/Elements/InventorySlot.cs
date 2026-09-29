@@ -16,7 +16,7 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
 
     private InventoryManager manager;
     public SnackUseEntry PendingSnack { get; private set; }
-    public bool CountsAsOwnedSnack => !isEmpty && (PendingSnack == null || PendingSnack.preserved);
+    public bool CountsAsOwnedSnack => !isEmpty && (PendingSnack == null || !PendingSnack.committed || PendingSnack.preserved);
 
     public void MarkSnackUsed(SnackUseEntry entry, Color tint)
     {
@@ -88,7 +88,12 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (isEmpty || PendingSnack != null) return;
+        if (isEmpty) return;
+        if (PendingSnack != null)
+        {
+            if (eventData.button == PointerEventData.InputButton.Left) manager.SnackUses.TryCancel(this);
+            return;
+        }
 
         //몬스터가 죽어있는 상태(전투 종료 및 연출 대기 중)라면 인벤토리 상호작용 차단!
         if (manager.diceManager != null && manager.diceManager.enemy != null && manager.diceManager.enemy.IsDead)

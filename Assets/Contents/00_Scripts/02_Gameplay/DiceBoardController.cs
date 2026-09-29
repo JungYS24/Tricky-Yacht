@@ -7,13 +7,21 @@ using UnityEngine;
 public sealed class DiceBoardController
 {
     public List<Dice> ActiveDice { get; }
+    public bool HasRollingDice
+    {
+        get
+        {
+            foreach (var die in ActiveDice)
+                if (die != null && die.IsRollAnimating) return true;
+            return false;
+        }
+    }
     private readonly GameObject dicePrefab;
     private readonly DeckManager deckManager;
     private readonly Transform[] keepSlots;
     private readonly Transform[] rollSlots;
     private readonly Dice[] keepSlotOccupants;
     private readonly List<Dice> dicePool = new List<Dice>();
-    private readonly List<Dice> remaining = new List<Dice>(5);
 
     public DiceBoardController(GameObject prefab, Transform keepParent, Transform rollParent, List<Dice> activeDice, DeckManager deck)
     {
@@ -48,12 +56,6 @@ public sealed class DiceBoardController
 
     public void SpawnDice(bool returnPreviousDiceToDiscard, int currentStage)
     {
-        if (returnPreviousDiceToDiscard && ActiveDice.Count > 0)
-        {
-            RecycleKeptDiceAndRefillFromDeck();
-            return;
-        }
-
         //기존 활성화된 주사위들을 파괴하지 않고 비활성화하여 풀(Pool)에 보관
         foreach (var d in ActiveDice)
         {
@@ -160,76 +162,108 @@ public sealed class DiceBoardController
         }
     }
 
-    void RecycleKeptDiceAndRefillFromDeck()
+    // 보드/더미는 전체 덱 인덱스를 저장하여 같은 종류의 주사위도 개별 인스턴스로 구분합니다.
+    public void CaptureForSave(SaveData data)
     {
-        remaining.Clear();
-        foreach (var d in ActiveDice)
+        var indices = new Dictionary<DiceData1, int>(deckManager.masterDeck.Count);
+        for (int i = 0; i < deckManager.masterDeck.Count; i++)
         {
-            if (d == null) continue;
+            var die = deckManager.masterDeck[i];
+            if (die == null || indices.ContainsKey(die)) return;
+            indices.Add(die, i);
+        }
+        for (int i = 0; i < ActiveDice.Count; i++)
+        {
+            var die = ActiveDice[i];
+            if (die == null || !die.gameObject.activeInHierarchy || die.myData == null || !indices.TryGetValue(die.myData, out int deckIndex)) return;
+            data.boardDice.Add(new SavedBoardDie { deckIndex = deckIndex, value = die.currentValue, rollSlotIndex = i, keepSlotIndex = die.isKept ? die.currentKeepIndex : -1 });
+        }
+        foreach (var die in deckManager.drawPile)
+        {
+            if (die == null || !indices.TryGetValue(die, out int index)) return;
+            data.drawPileIndices.Add(index);
+        }
+        foreach (var die in deckManager.discardPile)
+        {
+            if (die == null || !indices.TryGetValue(die, out int index)) return;
+            data.discardPileIndices.Add(index);
+        }
+        data.boardSaveVersion = 1;
+        if (!CanRestoreState(data)) data.boardSaveVersion = 0;
+    }
 
-            if (d.isKept)
+    public bool CanRestoreState(SaveData data)
+    {
+        if (data.boardSaveVersion != 1 || data.boardDice == null || data.boardDice.Count == 0 || data.boardDice.Count > rollSlots.Length || data.drawPileIndices == null || data.discardPileIndices == null) return false;
+        int count = deckManager.masterDeck.Count;
+        if (data.savedFakeDiceIndex < -1 || data.savedFakeDiceIndex >= count || data.savedCurrentRerolls < 0 || data.savedMaxRerolls < 0) return false;
+        var usedDice = new bool[count];
+        var usedRollSlots = new bool[rollSlots.Length];
+        var usedKeepSlots = new bool[keepSlots.Length];
+        for (int i = 0; i < data.boardDice.Count; i++)
+        {
+            var saved = data.boardDice[i];
+            if (saved == null || saved.deckIndex < 0 || saved.deckIndex >= count || usedDice[saved.deckIndex] || saved.rollSlotIndex < 0 || saved.rollSlotIndex >= rollSlots.Length || usedRollSlots[saved.rollSlotIndex] || saved.keepSlotIndex < -1 || saved.keepSlotIndex >= keepSlots.Length) return false;
+            // ActiveDice 순서와 원래 굴림 위치가 일치해야 다음 저장/리롤에서도 위치가 유지됩니다.
+            if (saved.rollSlotIndex != i) return false;
+            usedDice[saved.deckIndex] = true;
+            usedRollSlots[saved.rollSlotIndex] = true;
+            if (saved.keepSlotIndex >= 0)
             {
-                if (d.myData != null) deckManager.discardPile.Add(d.myData);
-                d.isKept = false;
-                d.RefreshHoverJuice();
-                d.currentKeepIndex = -1;
-                d.gameObject.SetActive(false);
-                dicePool.Add(d);
-            }
-            else
-            {
-                d.currentKeepIndex = -1;
-                remaining.Add(d);
+                if (usedKeepSlots[saved.keepSlotIndex]) return false;
+                usedKeepSlots[saved.keepSlotIndex] = true;
             }
         }
+        foreach (int index in data.drawPileIndices)
+        {
+            if (index < 0 || index >= count || usedDice[index]) return false;
+            usedDice[index] = true;
+        }
+        foreach (int index in data.discardPileIndices)
+        {
+            if (index < 0 || index >= count || usedDice[index]) return false;
+            usedDice[index] = true;
+        }
+        return true;
+    }
 
+    public bool TryRestoreState(SaveData data)
+    {
+        if (!CanRestoreState(data)) return false;
+        // 기존 오브젝트를 풀에 돌려놓되, 저장에서 복원한 버린 덱은 변경하지 않습니다.
+        foreach (var die in ActiveDice)
+        {
+            if (die == null) continue;
+            die.isKept = false;
+            die.currentKeepIndex = -1;
+            die.gameObject.SetActive(false);
+            dicePool.Add(die);
+        }
         ActiveDice.Clear();
         Array.Clear(keepSlotOccupants, 0, keepSlotOccupants.Length);
-
-        int slot = 0;
-        foreach (var d in remaining)
+        foreach (var saved in data.boardDice)
         {
-            if (slot >= rollSlots.Length) break;
-            d.rollPos = rollSlots[slot].position;
-            d.MoveToTarget(d.rollPos);
-            ActiveDice.Add(d);
-            slot++;
-        }
-
-        int need = rollSlots.Length - ActiveDice.Count;
-        deckManager.CheckAndRefillDrawPile(Mathf.Max(need, 1));
-
-        for (int i = slot; i < rollSlots.Length; i++)
-        {
-            DiceData1 drawnData = deckManager.DrawOneDice();
-            if (drawnData == null) break;
-
-            Dice d;
+            Vector3 rollPosition = rollSlots[saved.rollSlotIndex].position;
+            Dice die;
             if (dicePool.Count > 0)
             {
-                d = dicePool[dicePool.Count - 1];
-                dicePool.RemoveAt(dicePool.Count - 1);
-                d.transform.position = rollSlots[i].position;
-                d.gameObject.SetActive(true);
+                int last = dicePool.Count - 1;
+                die = dicePool[last];
+                dicePool.RemoveAt(last);
+                die.gameObject.SetActive(true);
             }
-            else
-            {
-                GameObject go = UnityEngine.Object.Instantiate(dicePrefab, rollSlots[i].position, Quaternion.identity);
-                d = go.GetComponent<Dice>();
-            }
-
-            d.rollPos = rollSlots[i].position;
-            int initialVal = drawnData.faceValues[UnityEngine.Random.Range(0, 6)];
-
-            if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-            {
-                int forcedVal = TutorialManager.Instance.GetForcedDiceValue(i);
-                if (forcedVal != -1) initialVal = forcedVal;
-            }
-
-            d.SetData(drawnData, initialVal);
-            ActiveDice.Add(d);
+            else die = UnityEngine.Object.Instantiate(dicePrefab, rollPosition, Quaternion.identity).GetComponent<Dice>();
+            die.isKept = false;
+            die.SetData(deckManager.masterDeck[saved.deckIndex], saved.value);
+            die.rollPos = rollPosition;
+            die.currentKeepIndex = saved.keepSlotIndex;
+            die.isKept = saved.keepSlotIndex >= 0;
+            die.transform.position = die.isKept ? keepSlots[saved.keepSlotIndex].position : rollPosition;
+            die.RefreshRestoredState();
+            if (die.isKept) keepSlotOccupants[saved.keepSlotIndex] = die;
+            ActiveDice.Add(die);
         }
+        return true;
     }
 
     void AssignToKeepSlot(Dice d)

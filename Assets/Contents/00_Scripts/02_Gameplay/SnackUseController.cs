@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
@@ -10,6 +10,7 @@ public sealed class SavedSnackSlot
     public string itemID;
     public string itemName;
     public bool pending;
+    public bool committed; // 끝내기(라임은 즉시)에서 확정되기 전에는 취소 가능
     public bool preserved;
     public bool effectApplied;
     public bool visualFinished;
@@ -19,11 +20,12 @@ public sealed class SavedSnackSlot
     public int order;
 }
 
-// 슬롯 위치를 예약한 사용 기록. 실제 보너스는 한 번만 적용하고 정산에서는 기록된 수치만 표시합니다.
+// 슬롯 위치를 예약한 사용 기록. 확정 시 보너스를 한 번 적용하고 정산에서는 기록된 수치만 표시합니다.
 public sealed class SnackUseEntry
 {
     public InventorySlot slot;
     public SnackItemSO item;
+    public bool committed; // 끝내기(라임은 즉시)에서 확정되기 전에는 취소 가능
     public bool preserved;
     public bool effectApplied;
     public bool visualFinished;
@@ -50,46 +52,74 @@ public sealed class SnackUseController
     {
         DiceManager dm = inventory.diceManager;
         if (dm == null || dm.isCalculating || dm.currentPlayerHP <= 0 || dm.isStageClearing || ShopManager.IsShopOpen) return false;
-        if (dm.enemy == null || dm.enemy.IsDead || slot == null || slot.isEmpty || slot.PendingSnack != null || slot.currentItem != snack) return false;
-        if (snack.snackType == SnackType.Peppermint && dm.isPeppermintActive) return false;
+        if (dm.enemy == null || dm.enemy.IsDead || slot == null || slot.isEmpty || slot.currentItem != snack) return false;
+        if (slot.PendingSnack != null) return TryCancel(slot);
+        if (snack.snackType == SnackType.Peppermint)
+        {
+            if (dm.isPeppermintActive) return false;
+            foreach (var pending in entries)
+                if (pending.IsCurrent && pending.item.snackType == SnackType.Peppermint) return false;
+        }
 
         for (int i = entries.Count - 1; i >= 0; i--)
         {
             if (!entries[i].IsCurrent) entries.RemoveAt(i);
         }
 
-        // 사용이 허용된 스낵에 대해서만 소모 방지 여부를 한 번 판정
+        // 클릭은 사용 예약만 합니다. 취소 가능한 동안에는 효과와 확률 판정을 실행하지 않습니다.
         var entry = new SnackUseEntry
         {
             slot = slot,
             item = snack,
-            preserved = FigureEffectManager.Instance != null && FigureEffectManager.Instance.ShouldPreserveSnack(),
             order = nextOrder++
         };
         entries.Add(entry);
         slot.MarkSnackUsed(entry, inventory.snackUsedTint);
 
-        // 스테이크만 끝내기까지 효과를 미룹니다. 버프와 리롤, 점수 보너스는 기존 사용 시점에 적용합니다.
-        if (snack.snackType != SnackType.Steak)
-        {
-            int chipsBefore = dm.snackBonusChips;
-            float multBefore = dm.snackBonusMult;
-            entry.effectApplied = true;
-            snack.ApplyItemEffect(dm);
-            entry.chips = dm.snackBonusChips - chipsBefore;
-            entry.multiplier = dm.snackBonusMult - multBefore;
-        }
-
-        // 스낵을 먹었으니 FigureEffectManager에게 알려서 OnSnackUsed 피규어를 발동
-        FigureEffectManager.Instance?.EvaluateSnackUsedTriggers(dm, dm.shopManager);
+        // 튜토리얼의 사용 선택 안내는 기존 클릭 시점에 진행합니다.
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
             TutorialManager.Instance.OnItemUsed(snack.itemName);
 
         // 라임 주스는 즉시 연출. 보존되면 아이콘만 숨기고 끝내기까지 칸과 입력을 잠급니다.
-        if (snack.snackType == SnackType.LimeJuice) BeginDisappear(entry);
+        if (snack.snackType == SnackType.LimeJuice)
+        {
+            Commit(entry);
+            BeginDisappear(entry);
+        }
         inventory.HideSellPopup();
         inventory.HideTooltip();
         return true;
+    }
+
+    public bool TryCancel(InventorySlot slot)
+    {
+        DiceManager dm = inventory.diceManager;
+        var entry = slot != null ? slot.PendingSnack : null;
+        if (dm == null || dm.isCalculating || dm.isStageClearing || dm.currentPlayerHP <= 0 || ShopManager.IsShopOpen) return false;
+        if (dm.enemy == null || dm.enemy.IsDead || entry == null || !entry.IsCurrent || entry.committed || entry.item.snackType == SnackType.LimeJuice) return false;
+
+        entries.Remove(entry);
+        slot.ReleaseSnackReservation(); // 원래 색과 입력 상태 복구. 효과는 아직 적용하지 않았으므로 되돌릴 수치가 없습니다.
+        inventory.HideTooltip();
+        dm.ForceUpdateUI();
+        return true;
+    }
+
+    private void Commit(SnackUseEntry entry)
+    {
+        if (!entry.IsCurrent || entry.committed) return;
+        entry.committed = true;
+        // 실제 사용이 확정된 스낵에 대해서만 소모 방지 여부를 한 번 판정합니다.
+        entry.preserved = FigureEffectManager.Instance != null && FigureEffectManager.Instance.ShouldPreserveSnack();
+        DiceManager dm = inventory.diceManager;
+        int chipsBefore = dm.snackBonusChips;
+        float multBefore = dm.snackBonusMult;
+        entry.effectApplied = true;
+        entry.item.ApplyItemEffect(dm);
+        entry.chips = dm.snackBonusChips - chipsBefore;
+        entry.multiplier = dm.snackBonusMult - multBefore;
+        // 취소한 예약은 OnSnackUsed 피규어를 발동시키지 않습니다.
+        FigureEffectManager.Instance?.EvaluateSnackUsedTriggers(dm, dm.shopManager);
     }
 
     public IEnumerator PlayFinishStart()
@@ -98,6 +128,8 @@ public sealed class SnackUseController
         foreach (var entry in entries)
         {
             if (!entry.IsCurrent || entry.settled) continue;
+            Commit(entry);
+            // 구버전 저장에서 이미 사용 확정했지만 회복은 대기 중인 스테이크 호환
             if (entry.item.snackType == SnackType.Steak && !entry.effectApplied)
             {
                 entry.effectApplied = true;
@@ -113,7 +145,7 @@ public sealed class SnackUseController
 
     public void BeginDisappear(SnackUseEntry entry)
     {
-        if (!entry.IsCurrent || entry.settled || entry.visualFinished || entry.animation != null) return;
+        if (!entry.IsCurrent || !entry.committed || entry.settled || entry.visualFinished || entry.animation != null) return;
         entry.animation = SnackUseFeedback.Get(entry.slot).Disappear(inventory.snackDissolveDuration, () =>
         {
             entry.animation = null;
@@ -129,10 +161,10 @@ public sealed class SnackUseController
 
     public IEnumerator CompleteVisual(SnackUseEntry entry)
     {
-        if (!entry.IsCurrent || entry.settled) yield break;
+        if (!entry.IsCurrent || !entry.committed || entry.settled) yield break;
         BeginDisappear(entry);
         while (entry.IsCurrent && entry.animation != null && entry.animation.IsActive()) yield return null;
-        if (!entry.IsCurrent || entry.settled) yield break;
+        if (!entry.IsCurrent || !entry.committed || entry.settled) yield break;
 
         // 보존된 스낵은 같은 칸으로 돌아오지만 이번 정산이 끝날 때까지 다시 사용할 수 없습니다.
         entry.settled = true;
@@ -146,7 +178,7 @@ public sealed class SnackUseController
 
     public bool IsScoreEntry(SnackUseEntry entry, bool isChips)
     {
-        return entry.IsCurrent && !entry.settled && entry.item.snackType == (isChips ? SnackType.Pancake : SnackType.Cherry);
+        return entry.IsCurrent && entry.committed && !entry.settled && entry.item.snackType == (isChips ? SnackType.Pancake : SnackType.Cherry);
     }
 
     public IEnumerator CompleteResolution()
@@ -162,11 +194,11 @@ public sealed class SnackUseController
 
     public void ResetForStage()
     {
-        // 끝내기 없이 전투가 종료된 경우에도 사용한 스낵은 취소하지 않고, 보존된 것만 돌려줍니다.
+        // 미확정 예약은 취소하고, 이미 사용한 라임/구버전 스낵은 기존 소모 방지 결과를 따릅니다.
         foreach (var entry in entries)
         {
             if (!entry.IsCurrent) continue;
-            if (entry.preserved) entry.slot.ReleaseSnackReservation();
+            if (!entry.committed || entry.preserved) entry.slot.ReleaseSnackReservation();
             else entry.slot.ClearSlot();
         }
         entries.Clear();
@@ -185,6 +217,7 @@ public sealed class SnackUseController
             destination.Add(new SavedSnackSlot
             {
                 slotIndex = i, itemID = snack.Item_ID, itemName = snack.itemName,
+                committed = pending != null && pending.committed,
                 pending = pending != null, preserved = pending != null && pending.preserved,
                 effectApplied = pending != null && pending.effectApplied,
                 visualFinished = pending != null && pending.visualFinished,
@@ -196,7 +229,7 @@ public sealed class SnackUseController
         }
     }
 
-    public void RestoreSaved(List<SavedSnackSlot> savedSlots, GameSaveManager saves)
+    public void RestoreSaved(List<SavedSnackSlot> savedSlots, GameSaveManager saves, int saveVersion = 2)
     {
         if (savedSlots == null) return;
         foreach (var saved in savedSlots)
@@ -211,7 +244,7 @@ public sealed class SnackUseController
 
             var entry = new SnackUseEntry
             {
-                slot = slot, item = snack, preserved = saved.preserved, effectApplied = saved.effectApplied,
+                slot = slot, item = snack, committed = saveVersion < 2 || saved.committed, preserved = saved.preserved, effectApplied = saved.effectApplied,
                 visualFinished = saved.visualFinished, settled = saved.settled,
                 chips = saved.chips, multiplier = saved.multiplier, order = saved.order
             };
