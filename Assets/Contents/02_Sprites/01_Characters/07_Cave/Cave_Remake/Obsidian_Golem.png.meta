@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 8c459ef965c33484f9fe2ceb877081b3
+guid: 58f9ac99d2e2a4741b211f319d86db9e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -413800416329549740
-    second: Mimic_0
+      213: -224736231983021440
+    second: Obsidian_Golem_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Mimic_0
+      name: Obsidian_Golem_0
       rect:
         serializedVersion: 2
-        x: 7
-        y: 0
-        width: 119
-        height: 126
+        x: 11
+        y: 15
+        width: 107
+        height: 91
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 458b4c8b6b2e14af0800000000000000
-      internalID: -413800416329549740
+      spriteID: 0820e74769391ecf0800000000000000
+      internalID: -224736231983021440
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Mimic_0: -413800416329549740
+      Obsidian_Golem_0: -224736231983021440
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

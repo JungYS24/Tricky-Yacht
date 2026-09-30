@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 8c459ef965c33484f9fe2ceb877081b3
+guid: 736277b6cb120994aaabae81b42f6315
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -413800416329549740
-    second: Mimic_0
+      213: 5574258832154084224
+    second: Candle Kobold_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Mimic_0
+      name: Candle Kobold_0
       rect:
         serializedVersion: 2
-        x: 7
-        y: 0
-        width: 119
-        height: 126
+        x: 21
+        y: 25
+        width: 87
+        height: 75
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 458b4c8b6b2e14af0800000000000000
-      internalID: -413800416329549740
+      spriteID: 083c0a8cfdebb5d40800000000000000
+      internalID: 5574258832154084224
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Mimic_0: -413800416329549740
+      Candle Kobold_0: 5574258832154084224
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 8c459ef965c33484f9fe2ceb877081b3
+guid: f73dbb23ce807ed4798d8ded45f7c7ba
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -413800416329549740
-    second: Mimic_0
+      213: -8981968162446518190
+    second: Echo_Bat_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Mimic_0
+      name: Echo_Bat_0
       rect:
         serializedVersion: 2
-        x: 7
-        y: 0
-        width: 119
-        height: 126
+        x: 2
+        y: 32
+        width: 124
+        height: 63
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 458b4c8b6b2e14af0800000000000000
-      internalID: -413800416329549740
+      spriteID: 258d1857b83a95380800000000000000
+      internalID: -8981968162446518190
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Mimic_0: -413800416329549740
+      Echo_Bat_0: -8981968162446518190
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
