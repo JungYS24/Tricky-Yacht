@@ -7,10 +7,12 @@ public class SynergyManager : MonoBehaviour
     public static SynergyManager Instance { get; private set; }
 
     [SerializeField] private List<SynergyData> synergies;
-
+    
     private readonly Dictionary<string, FigureItemSO[]> synergyToFigures = new();
 
     private readonly Dictionary<string, List<SynergyData>> figureToSynergies = new();
+
+    public IReadOnlyList<SynergyData> GetAllSynergies() => synergies;
 
     public IReadOnlyList<FigureItemSO> GetRequiredFigures(string id)
     {
