@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic; // List를 사용하기 위해 추가
@@ -75,6 +75,9 @@ public class Enemy : MonoBehaviour
     public bool useExternalDeathSequence = false;
     private Coroutine hitEffectCoroutine;
     private Coroutine hpCoroutine;
+    private bool deathPresentationStarted;
+    private bool deathAnimatorPaused;
+    private bool deathAnimatorWasEnabled;
 
     //최초 크기는 무조건 Awake에서 딱 한 번만 저장!
     void Awake()
@@ -128,6 +131,8 @@ public class Enemy : MonoBehaviour
 
     public void Initialize(int currentStage, BiomeDataSO currentBiome)
     {
+        ResetDeathPresentation();
+        GetComponent<MonsterHitFeedback>()?.Stop();
         //만약의 사태를 대비한 기본 체력 (리스트가 비어있을 때 등)
         int finalMaxHP = 40;
         int finalAttack = 10;
@@ -240,9 +245,10 @@ public class Enemy : MonoBehaviour
     }
 
 
-    public void TakeDamage(int damage,System.Action onDeathCallback,bool isFirstNormalAttack = false)
+    public void TakeDamage(int damage,System.Action onDeathCallback,bool isFirstNormalAttack = false, EnemyHitKind hitKind = EnemyHitKind.Other, bool includesDark = false)
     {
         if (IsDead || damage <= 0) return;
+        GetComponent<MonsterHitFeedback>()?.Stop();
 
         // 적 체력보다 큰 공격도 실제 감소한 체력까지만 피해로 인정
         int actualDamage = Mathf.Min(CurrentHP, damage);
@@ -263,7 +269,21 @@ public class Enemy : MonoBehaviour
         if (damage > 0)
         {
             if (hitEffectCoroutine != null) StopCoroutine(hitEffectCoroutine);
-            hitEffectCoroutine = StartCoroutine(HitEffectRoutine());
+            if (hitKind != EnemyHitKind.Other)
+            {
+                // 피해 종류별 오버레이를 사용하고 바탕색은 현재 체력에 맞춥니다.
+                if (monsterImage != null) monsterImage.color = Color.Lerp(Color.red, Color.white, MaxHP > 0 ? (float)CurrentHP / MaxHP : 0f);
+                hitEffectCoroutine = null;
+            }
+            else hitEffectCoroutine = StartCoroutine(HitEffectRoutine());
+            // 종류에 맞는 연출을 재생합니다. 치명타는 사망 확대와 충돌하지 않게 밀림을 생략합니다.
+            if (hitKind != EnemyHitKind.Other)
+                {
+                float strength = 1f + 0.35f * Mathf.Clamp01((float)damage / Mathf.Max(1, MaxHP));
+                MonsterHitFeedback.Get(this).Play(monsterImage, CurrentHP > 0, monsterAnimator, strength, hitKind, includesDark);
+                if (hitKind == EnemyHitKind.Normal) CameraShake.Instance?.ShakeImpact(strength);
+                else CameraShake.Instance?.ShakeElemental();
+            }
 
             // ===== 데미지 텍스트 생성 호출 =====
             ShowDamageText(damage);
@@ -274,12 +294,15 @@ public class Enemy : MonoBehaviour
         {
             IsDead = true;
 
-            if (useExternalDeathSequence)
+            // 게임 진행 중에는 DiceManager가 포획 여부를 판정한 뒤 연출을 하나만 선택합니다.
+            // 정산 중 피규어 피해의 null 콜백은 CombatFlowController의 사망 확인까지 기다립니다.
+            if ((dm != null && dm.enemy == this) || useExternalDeathSequence)
             {
                 onDeathCallback?.Invoke();
             }
-            else
+            else if (BeginDeathPresentation())
             {
+                // DiceManager 없이 사용하는 테스트 몬스터는 기존 일반 사망 동작을 유지합니다.
                 StartCoroutine(MonsterDeathRoutine(onDeathCallback));
             }
         }
@@ -308,6 +331,7 @@ public class Enemy : MonoBehaviour
 
     public void PlayAttackAnim()
     {
+        GetComponent<MonsterHitFeedback>()?.Stop();
         if (monsterAnimator != null)
         {
             monsterAnimator.SetTrigger("Attack");
@@ -350,6 +374,7 @@ public class Enemy : MonoBehaviour
 
     private IEnumerator HitEffectRoutine()
     {
+        if (monsterImage == null) yield break;
         monsterImage.color = hitColor;
         float hpPercent = MaxHP > 0 ? (float)CurrentHP / MaxHP : 0f;
         Color targetColor = Color.Lerp(Color.red, Color.white, hpPercent);
@@ -362,6 +387,38 @@ public class Enemy : MonoBehaviour
             yield return null;
         }
         monsterImage.color = targetColor;
+    }
+
+    // 포획/일반 사망이 Transform과 색상을 독점하도록 기존 피격·공격 연출을 종료합니다.
+    public bool BeginDeathPresentation()
+    {
+        if (!IsDead || deathPresentationStarted) return false;
+        deathPresentationStarted = true;
+        GetComponent<MonsterHitFeedback>()?.Stop();
+        StopAllCoroutines();
+        hitEffectCoroutine = null;
+        hpCoroutine = null;
+        UpdateHPBar(true);
+        if (monsterAnimator != null)
+        {
+            deathAnimatorWasEnabled = monsterAnimator.enabled;
+            deathAnimatorPaused = true;
+            monsterAnimator.enabled = false;
+        }
+        return true;
+    }
+
+    public IEnumerator PlayNormalDeathPresentation()
+    {
+        // DiceManager의 코루틴에서 실행하므로 몬스터 비활성화 후에도 클리어 처리가 이어집니다.
+        yield return MonsterDeathRoutine(null);
+    }
+
+    private void ResetDeathPresentation()
+    {
+        if (deathAnimatorPaused && monsterAnimator != null) monsterAnimator.enabled = deathAnimatorWasEnabled;
+        deathAnimatorPaused = false;
+        deathPresentationStarted = false;
     }
 
     private IEnumerator MonsterDeathRoutine(System.Action onFinished)
@@ -414,6 +471,8 @@ public class Enemy : MonoBehaviour
 
     public void RestoreMonster(MonsterDataSO monsterData, int hp, int maxHp, int attack, int index, int currentTurn, int maxTurn)
     {
+        ResetDeathPresentation();
+        GetComponent<MonsterHitFeedback>()?.Stop();
         CurrentMonsterName = monsterData.monsterName;
         currentMonsterIndex = index;
 
