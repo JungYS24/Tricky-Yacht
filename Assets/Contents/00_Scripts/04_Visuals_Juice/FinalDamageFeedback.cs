@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
@@ -6,6 +6,8 @@ using DG.Tweening;
 [DisallowMultipleComponent]
 public sealed class FinalDamageFeedback : MonoBehaviour
 {
+    public float completionGlowAlpha = 0.8f;
+    public float attackPulseScale = 1.12f;
     private TextMeshProUGUI label;
     private float baseFont, minFont, maxFont;
     private bool autoSize, wrapping, prepared;
@@ -51,6 +53,8 @@ public sealed class FinalDamageFeedback : MonoBehaviour
     public void Pulse(float scale, float hold)
     {
         if (!prepared || hold <= 0f) return;
+        pulse?.Kill();
+        label.transform.localScale = baseScale;
         EnsureGlow();
         glow.rectTransform.anchorMin = label.rectTransform.anchorMin;
         glow.rectTransform.anchorMax = label.rectTransform.anchorMax;
@@ -59,13 +63,19 @@ public sealed class FinalDamageFeedback : MonoBehaviour
         glow.rectTransform.anchoredPosition3D = label.rectTransform.anchoredPosition3D;
         glow.rectTransform.localScale = label.rectTransform.localScale;
         glow.gameObject.SetActive(true);
-        glow.color = new Color(1f, 0.8f, 0.25f, 0.45f);
+        glow.color = new Color(1f, 0.8f, 0.25f, completionGlowAlpha);
         float duration = Mathf.Min(0.25f, hold);
         pulse = DOTween.Sequence().SetUpdate(true);
         pulse.Append(label.transform.DOScale(baseScale * scale, duration * 0.3f).SetEase(Ease.OutQuad));
         pulse.Append(label.transform.DOScale(baseScale, duration * 0.7f).SetEase(Ease.OutQuad));
         pulse.Insert(0f, glow.DOFade(0f, duration));
         pulse.OnComplete(() => { if (glow != null) glow.gameObject.SetActive(false); });
+    }
+
+    public void PlayAttackPulse()
+    {
+        // 몬스터 타격과 같은 프레임에 완성된 점수도 짧게 반응합니다.
+        if (prepared) Pulse(attackPulseScale, 0.16f);
     }
 
     public void Restore()

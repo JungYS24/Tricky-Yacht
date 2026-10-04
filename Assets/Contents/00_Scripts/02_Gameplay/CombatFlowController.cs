@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 
 public static class CombatFlowController
@@ -42,7 +42,7 @@ public static class CombatFlowController
         int combinedDamage = finalDamage + darkDamage;
 
         yield return dm.StartCoroutine(
-            ProcessPlayerAttack(dm, combinedDamage));
+            ProcessPlayerAttack(dm, combinedDamage, darkDamage > 0, finalDamage > 0));
 
         // 반사 피해 등으로 플레이어가 사망한 경우
         if (dm.currentPlayerHP <= 0)
@@ -67,7 +67,7 @@ public static class CombatFlowController
     //플레이어 공격 연출
     private static IEnumerator ProcessPlayerAttack(
     DiceManager dm,
-    int damage)
+    int damage, bool includesDark, bool hasNormalDamage)
     {
         if (dm.enemy == null ||
             dm.enemy.IsDead ||
@@ -88,7 +88,11 @@ public static class CombatFlowController
         dm.enemy.TakeDamage(
             damage,
             dm.OnEnemyKilled,
-            isFirstNormalAttack);
+            isFirstNormalAttack,
+            hitKind: hasNormalDamage ? EnemyHitKind.Normal : EnemyHitKind.Dark,
+            includesDark: includesDark);
+        if (dm.ui != null && dm.ui.handInfoText != null)
+            dm.ui.handInfoText.GetComponent<FinalDamageFeedback>()?.PlayAttackPulse();
 
         yield return new WaitForSeconds(0.15f);
     }
@@ -120,12 +124,11 @@ public static class CombatFlowController
         if (!dm.enemy.IsDead)
         {
             // 일반 공격 후 화염 데미지가 0.3초후에 터짐
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.3f);
 
             if (flameDamage > 0)
             {
-                CameraShake.Instance.Shake(0.1f, 0.1f);
-                dm.enemy.TakeDamage(flameDamage, dm.OnEnemyKilled);
+                dm.enemy.TakeDamage(flameDamage, dm.OnEnemyKilled, hitKind: EnemyHitKind.Flame);
                 dm.UpdateMainUI(LocalizationManager.GetUi(
                     "UI_FLAME_DAMAGE",
                     "화염 데미지! <color=#FF4500>-{0}</color>",

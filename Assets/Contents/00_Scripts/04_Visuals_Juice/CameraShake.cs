@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using DG.Tweening;
 
@@ -13,6 +13,13 @@ public class CameraShake : MonoBehaviour
     [SerializeField] private Canvas scoreCanvas;
     [SerializeField] private float scoreShakePixels = 2f;
     [SerializeField] private float scoreShakeDuration = 0.1f;
+
+    [Header("일반 공격 타격 흔들림")]
+    [SerializeField] private float impactShakePixels = 4f;
+    [SerializeField] private float impactShakeDuration = 0.13f;
+
+    [SerializeField] private float elementalShakePixels = 1.5f;
+    [SerializeField] private float elementalShakeDuration = 0.1f;
 
     private Camera scoreCamera;
     private RectTransform[] scoreUIRoots;
@@ -68,7 +75,20 @@ public class CameraShake : MonoBehaviour
         shakeCoroutine = null;
     }
 
-    public void ShakeScore()
+    public void ShakeScore() => PlayFeedbackShake(scoreShakePixels, scoreShakeDuration);
+
+    public void ShakeImpact(float strength = 1f)
+    {
+        scoreShakeTween?.Kill();
+        PlayFeedbackShake(impactShakePixels * Mathf.Clamp(strength, 1f, 1.35f), impactShakeDuration);
+    }
+
+    public void ShakeElemental()
+    {
+        PlayFeedbackShake(elementalShakePixels, elementalShakeDuration);
+    }
+
+    private void PlayFeedbackShake(float pixels, float duration)
     {
         if (!isActiveAndEnabled || scoreCamera == null || !scoreCamera.orthographic) return;
 
@@ -78,11 +98,11 @@ public class CameraShake : MonoBehaviour
         float worldPerPixel = scoreCamera.orthographicSize * 2f / Mathf.Max(1, scoreCamera.pixelHeight);
         float canvasScale = scoreCanvas != null ? Mathf.Max(0.001f, scoreCanvas.scaleFactor) : 1f;
 
-        scoreShakeTween = DOVirtual.Float(0f, 1f, Mathf.Max(0.01f, scoreShakeDuration), t =>
+        scoreShakeTween = DOVirtual.Float(0f, 1f, Mathf.Max(0.01f, duration), t =>
         {
             float damping = (1f - t) * (1f - t);
-            float x = Mathf.Sin(t * Mathf.PI * 4f) * scoreShakePixels * damping;
-            float y = Mathf.Sin(t * Mathf.PI * 2f) * scoreShakePixels * 0.4f * damping;
+            float x = Mathf.Sin(t * Mathf.PI * 4f) * pixels * damping;
+            float y = Mathf.Sin(t * Mathf.PI * 2f) * pixels * 0.4f * damping;
 
             // カ메라는 반대로 움직여 화면 속 오브젝트를 UI와 같은 방향으로 이동
             Vector3 cameraOffset = -(transform.right * x + transform.up * y) * worldPerPixel;
