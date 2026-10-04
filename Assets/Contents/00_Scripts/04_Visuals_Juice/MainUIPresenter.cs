@@ -51,16 +51,11 @@ public sealed class MainUIPresenter
     private void RefreshScorePreview(DiceManager dm)
     {
         if (dm.ui == null) return;
-        // 순수 연산기를 통한 통합 연산 호출
-        float healMultUI = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetHealMultiplier() : 1f;
-        int simEnemyHP = dm.enemy != null ? dm.enemy.CurrentHP : 0;
-        TurnCalcResult calcResult = TurnCalculator.CalculateDiceEffects(uiDiceBuffer, simEnemyHP, healMultUI);
-        // 다크 데미지는 피규어 이후 계산을 시뮬레이션하기 위해 따로 빼서 수동 계산
-        int darkDamageTotal = TurnCalculator.CalculateDarkDamage(uiDiceBuffer, simEnemyHP);
-        // 기존 미리보기 정책 유지. 실제 정산 보너스의 적용 순서/계산은 변경하지 않습니다.
-        int chips = calcResult.baseSum + calcResult.iceBonusChips + calcResult.satelliteBonusChips + dm.stageBonusChips;
+        // 미리보기는 킵된 주사위의 순수 눈금 합만 표시합니다. 강화는 실제 정산에서 반영합니다.
+        int chips = 0;
+        for (int i = 0; i < uiValuesBuffer.Count; i++) chips += uiValuesBuffer[i];
         float mult = 1f + dm.stageBonusMult + dm.permanentFigureMultiplier;
-        dm.ui.ShowTurnPreview(dm.currentHandName, chips, mult, calcResult.iceBonusChips, calcResult.satelliteBonusChips, darkDamageTotal);
+        dm.ui.ShowTurnPreview(dm.currentHandName, chips, mult, 0, 0, 0);
     }
 
     private void RefreshFigures(DiceManager dm, HandRank rank)
