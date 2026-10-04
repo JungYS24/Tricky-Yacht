@@ -1,34 +1,11 @@
 ﻿using UnityEngine;
 using DG.Tweening;
+using static SatelliteVisualResources;
 
 public class SatelliteVisualManager : MonoBehaviour
 {
     [Header("별 위성 공용 설정 (비어 있으면 Resources 기본값 사용)")]
     [SerializeField] private SatelliteVisualProfile visualProfile;
-
-    // 이전 프리팹 직렬화 호환용 필드. 새 궤도/잔상 수치는 위 공용 설정을 사용합니다.
-    [HideInInspector] public Sprite mercurySprite; // 수성
-    [HideInInspector] public Sprite venusSprite;   // 금성
-    [HideInInspector] public Sprite marsSprite;    // 화성
-    [HideInInspector] public Sprite jupiterSprite; // 목성
-
-    [HideInInspector] public float orbitSpeed = 3f;      // 공전 속도
-    [HideInInspector] public float orbitWidth = 1.2f;    // 궤도 가로폭
-    [HideInInspector] public float orbitHeight = 0.35f;  // 궤도 세로폭
-
-    // 주사위 이미지의 기준점(Pivot) 차이로 인해 궤도가 쏠리는 현상을 보정합니다.
-    // 인스펙터에서 X, Y 값을 조금씩 조절하며 정중앙을 맞춰보세요.
-    [HideInInspector] public Vector3 centerOffset = new Vector3(0f, 0.2f, 0f);
-
-    [HideInInspector] public float frontScale = 0.4f;    // 앞으로 올 때 크기
-    [HideInInspector] public float backScale = 0.2f;     // 뒤로 갈 때 크기
-    [HideInInspector] public float backDarkness = 0.4f;  // 뒤로 갈 때 어두워지는 정도
-
-    [HideInInspector] public Material trailMaterial;     // 꼬리에 쓰일 재질 (인스펙터 할당 권장)
-    [HideInInspector] public float trailTime = 0.4f;     // 꼬리가 유지되는 시간 (길이)
-    [HideInInspector] public float trailStartWidth = 0.15f; // 꼬리 시작 두께
-    [HideInInspector] public float trailEndWidth = 0.0f;    // 꼬리 끝 두께
-
 
     private Dice dice;
     private SpriteRenderer diceSpriteRenderer;
@@ -39,12 +16,6 @@ public class SatelliteVisualManager : MonoBehaviour
     private Tween twinkleTween;
     private float tweenPeriod;
     private bool usesSharedAssets;
-
-    private static SatelliteVisualProfile sharedProfile;
-    private static Sprite glowSprite;
-    private static Sprite dotSprite;
-    private static Material effectMaterial;
-    private static int sharedUsers;
 
     private struct TrailDot
     {
@@ -70,11 +41,7 @@ public class SatelliteVisualManager : MonoBehaviour
     {
         dice = GetComponent<Dice>();
         diceSpriteRenderer = GetComponent<SpriteRenderer>();
-        if (visualProfile == null)
-        {
-            if (sharedProfile == null) sharedProfile = Resources.Load<SatelliteVisualProfile>("SatelliteVisualProfile");
-            visualProfile = sharedProfile;
-        }
+        if (visualProfile == null) visualProfile = Profile;
         if (visualProfile == null)
             Debug.LogWarning("[위성 연출] Resources/SatelliteVisualProfile 설정이 필요합니다.", this);
     }
@@ -89,14 +56,7 @@ public class SatelliteVisualManager : MonoBehaviour
     {
         twinkleTween?.Kill();
         if (effectsRoot != null) Destroy(effectsRoot.gameObject);
-        if (!usesSharedAssets || --sharedUsers != 0) return;
-        // 런타임 생성 리소스는 마지막 사용자가 사라질 때 반환합니다. 원본 PNG/설정 에셋은 유지합니다.
-        if (glowSprite != null) { Destroy(glowSprite.texture); Destroy(glowSprite); }
-        if (dotSprite != null) { Destroy(dotSprite.texture); Destroy(dotSprite); }
-        if (effectMaterial != null) Destroy(effectMaterial);
-        glowSprite = null;
-        dotSprite = null;
-        effectMaterial = null;
+        if (usesSharedAssets) Release();
     }
 
     private void LateUpdate()
@@ -244,55 +204,10 @@ public class SatelliteVisualManager : MonoBehaviour
         renderer.sortingOrder = order;
     }
 
-    private static Vector3 OrbitPosition(Vector3 center, Vector2 radius, float degrees)
-    {
-        float angle = degrees * Mathf.Deg2Rad;
-        return center + new Vector3(Mathf.Cos(angle) * radius.x, Mathf.Sin(angle) * radius.y, 0f);
-    }
-
-    private static float StartAngle(SatelliteType type)
-    {
-        switch (type)
-        {
-            case SatelliteType.Mercury: return 45f;
-            case SatelliteType.Mars: return 135f;
-            case SatelliteType.Venus: return 225f;
-            case SatelliteType.Jupiter: return 315f;
-            default: return 0f;
-        }
-    }
-
     private void EnsureSharedAssets()
     {
         if (usesSharedAssets) return;
+        Acquire(true);
         usesSharedAssets = true;
-        sharedUsers++;
-        if (glowSprite == null) glowSprite = CreateRadialSprite(64, false);
-        if (dotSprite == null) dotSprite = CreateRadialSprite(16, true);
-        if (effectMaterial == null)
-        {
-            Shader shader = Shader.Find("Sprites/Default");
-            if (shader != null) effectMaterial = new Material(shader) { name = "Satellite Shared Unlit", hideFlags = HideFlags.DontSave };
-        }
-    }
-
-    private static Sprite CreateRadialSprite(int size, bool dot)
-    {
-        var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { name = dot ? "SatelliteDot" : "SatelliteGlow", filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.DontSave };
-        var pixels = new Color32[size * size];
-        for (int y = 0; y < size; y++)
-        for (int x = 0; x < size; x++)
-        {
-            float dx = (x + 0.5f) / size * 2f - 1f;
-            float dy = (y + 0.5f) / size * 2f - 1f;
-            float distance = Mathf.Sqrt(dx * dx + dy * dy);
-            float alpha = dot ? 1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.35f, 0.95f, distance)) : Mathf.Pow(Mathf.Clamp01(1f - distance), 2f);
-            pixels[y * size + x] = new Color32(255, 255, 255, (byte)Mathf.RoundToInt(alpha * 255f));
-        }
-        texture.SetPixels32(pixels);
-        texture.Apply(false, true); // CPU 픽셀 복사본은 해제하고 GPU 텍스처만 공유합니다.
-        var sprite = Sprite.Create(texture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), size, 0, SpriteMeshType.FullRect);
-        sprite.hideFlags = HideFlags.DontSave;
-        return sprite;
     }
 }

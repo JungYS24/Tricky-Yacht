@@ -6,12 +6,8 @@ using UnityEngine;
 [System.Serializable]
 public sealed class TurnResolutionTiming
 {
-    public float beforeHandDelay = 0.5f;
-    public float afterHandDelay = 0.4f;
-    public float bonusDuration = 0.4f;
-    public float bonusPause = 0.2f;
-    public float afterScoreDelay = 0.2f;
-    public float finalDamageDuration = 0.4f;
+    // 새 묶음으로 분리하여 씬에 저장된 이전 0.4/0.2초 값이 새 기본값을 덮지 않게 합니다.
+    public ScorePacing pacing = new ScorePacing();
 }
 
 // 정산의 표시 순서와 시간만 담당합니다. 피해/골드/회복 등 실제 게임 상태는 변경하지 않습니다.
@@ -24,6 +20,10 @@ public sealed class TurnResolutionPresenter
 
     public IEnumerator PlayOpening(DiceManager manager, List<Dice> keptDice, HandRank rank, float handMult, TurnResolutionTiming timing)
     {
+        timing.pacing = timing.pacing ?? new ScorePacing();
+        // 매 정산마다 주사위별 누적값을 초기화합니다. 표시 오브젝트는 재사용합니다.
+        foreach (var die in keptDice)
+            if (die != null) die.GetComponent<DiceBonusLabel>()?.ResetTotals();
         // 달성한 족보의 이펙트 재생
         foreach (var d in keptDice)
         {
@@ -32,14 +32,14 @@ public sealed class TurnResolutionPresenter
             d.ShowFloatingText(d.currentValue);
         }
 
-        // 숫자 표시 시작 후 0.5초 뒤 족보 연출 시작
-        yield return new WaitForSeconds(timing.beforeHandDelay);
+        // 숫자 표시 시작 후 설정된 간격을 두고 족보 연출 시작
+        yield return new WaitForSeconds(timing.pacing.beforeHandDelay);
 
         // 달성한 족보의 이펙트 재생
         yield return HandResolutionFeedback.Get(manager).Play(keptDice, rank, manager.ui);
 
         // 족보 연출이 끝난 뒤 설정된 시간만큼 대기
-        yield return new WaitForSeconds(timing.afterHandDelay);
+        yield return new WaitForSeconds(timing.pacing.afterHandDelay);
 
         // 분리 전과 동일하게 족보 배수가 2 이상이면 슬로모션
         if (handMult >= 2.0f)
@@ -54,6 +54,11 @@ public sealed class TurnResolutionPresenter
         // 연출 전용 값: 실제 피해 계산에는 사용하지 않음
         float shownChips = calcResult.baseSum;
         float shownMult = 1f;
+        var pace = timing.pacing;
+        int playedCount = 0;
+        bool previousWasChips = true;
+        bool multiplierStarted = false;
+        float pendingPause = 0f;
 
         // 칩과 배수의 보너스를 항목별로 표시
         IEnumerator AnimateBonus(bool isChips, float amount, string label, Dice source = null, bool reactHand = false, SnackUseEntry snack = null)
@@ -68,10 +73,18 @@ public sealed class TurnResolutionPresenter
                 if (snack != null) yield return snacks.CompleteVisual(snack);
                 yield break;
             }
-            if (snack != null) snacks.BeginDisappear(snack);
 
-            float duration = timing.bonusDuration; // 숫자가 올라가고 주사위가 흔들리는 시간
-            float pause = timing.bonusPause; // 다음 항목으로 넘어가기 전 대기
+            bool firstMultiplier = !isChips && !multiplierStarted;
+            // 다음 실제 항목 앞에서 대기하므로 마지막 항목 뒤에는 bonusPause가 남지 않습니다.
+            float gap = ScorePacing.GetGap(playedCount, previousWasChips, isChips, pendingPause, pace.phaseTransition);
+            if (gap > 0f) yield return new WaitForSecondsRealtime(gap);
+            pace.GetBonusTiming(playedCount, firstMultiplier, out float duration, out float pause);
+            playedCount++;
+            previousWasChips = isChips;
+            if (!isChips) multiplierStarted = true;
+            pendingPause = pause;
+
+            if (snack != null) snacks.BeginDisappear(snack);
 
             // 숫자 상승과 같은 순간에 원인이 된 주사위를 반응
             if (reactHand)
@@ -91,6 +104,7 @@ public sealed class TurnResolutionPresenter
             else if (source != null)
             {
                 source.PlayScoreFeedback(duration);
+                DiceBonusLabel.Get(source).Add(isChips, amount, duration, ui.handInfoText != null ? ui.handInfoText.font : null);
             }
 
 
@@ -112,7 +126,7 @@ public sealed class TurnResolutionPresenter
             if (valueText != null)
             {
                 valueText.transform.DOKill(true);
-                valueText.transform.DOPunchScale(Vector3.one * 0.2f, duration, 4, 0.5f);
+                valueText.transform.DOPunchScale(Vector3.one * 0.2f, duration, 4, 0.5f).SetUpdate(true);
 
                 var counter = UiCountUpText.On(valueText, isChips ? UiCountUpText.FormatKind.Chips : UiCountUpText.FormatKind.Mult);
                 if (counter != null)
@@ -121,8 +135,10 @@ public sealed class TurnResolutionPresenter
                     yield return DOVirtual.Float(start, target, duration, value =>
                     {
                         valueText.text = isChips ? UIManager.FormatChipsValue(Mathf.FloorToInt(value)) : UIManager.FormatMultValue(value);
-                    }).SetEase(Ease.OutQuad).WaitForCompletion();
+                    }).SetEase(Ease.OutQuad).SetUpdate(true).WaitForCompletion();
             }
+
+            if (valueText == null) yield return new WaitForSecondsRealtime(duration);
 
             if (isChips)
                 shownChips = target;
@@ -130,7 +146,6 @@ public sealed class TurnResolutionPresenter
                 shownMult = target;
 
             if (snack != null) yield return snacks.CompleteVisual(snack);
-            yield return new WaitForSeconds(pause); //항목별 대기 오르는 배수가 있을 때마다 적용
 
             if (logText != null)
                 logText.text = "";
@@ -205,7 +220,7 @@ public sealed class TurnResolutionPresenter
                 UiCountUpText.On(ui.multSumText, UiCountUpText.FormatKind.Mult)?.SetInstant(total.multiplier);
 
             // 배수 표시를 유지한 뒤 최종 피해 표시로 진행
-            yield return new WaitForSeconds(timing.afterScoreDelay);
+            yield return new WaitForSecondsRealtime(timing.pacing.afterScoreDelay);
         }
 
     }
@@ -217,13 +232,21 @@ public sealed class TurnResolutionPresenter
 
         ui.ApplyFinalDamageStyle();
         var handText = ui.handInfoText;
+        var emphasis = FinalDamageFeedback.Get(handText);
+        emphasis.Prepare(timing.pacing.finalFontScale, timing.pacing.finalWidthScale);
         var damageCounter = UiCountUpText.On(handText, UiCountUpText.FormatKind.Integer);
         if (damageCounter != null)
-            yield return damageCounter.Play(displayedDamage, timing.finalDamageDuration).WaitForCompletion();
+        {
+            damageCounter.SetInstant(0f);
+            yield return damageCounter.Play(displayedDamage, timing.pacing.finalDamageDuration).WaitForCompletion();
+        }
         else
         {
             handText.text = displayedDamage.ToString();
-            yield return new WaitForSeconds(timing.finalDamageDuration);
+            yield return new WaitForSecondsRealtime(timing.pacing.finalDamageDuration);
         }
+        // 도달 순간 강조는 유지 시간 안에 재생하며, 완료된 피해량을 읽은 뒤 실제 공격합니다.
+        emphasis.Pulse(timing.pacing.finalPunchScale, timing.pacing.finalDamageHold);
+        yield return new WaitForSecondsRealtime(timing.pacing.finalDamageHold);
     }
 }

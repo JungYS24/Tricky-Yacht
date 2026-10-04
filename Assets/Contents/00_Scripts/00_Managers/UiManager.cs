@@ -329,6 +329,7 @@ public class UIManager : MonoBehaviour
         if (!handInfoDamageStyleActive)
             return;
 
+        handInfoText.GetComponent<FinalDamageFeedback>()?.Restore();
         handInfoText.transform.DOKill(true);
         handInfoText.transform.localScale = handInfoBaseScale;
         handInfoText.color = handInfoBaseColor;
@@ -344,7 +345,7 @@ public class UIManager : MonoBehaviour
         handInfoText.transform.DOKill(true);
         handInfoText.color = FinalDamageColor;
         handInfoText.transform.localScale = handInfoBaseScale;
-        handInfoText.transform.DOScale(handInfoBaseScale * 1.3f, 0.12f).SetEase(Ease.OutQuad);
+        // 최종 숫자에 도달한 순간의 확대는 FinalDamageFeedback에서 처리합니다.
         handInfoDamageStyleActive = true;
     }
 

@@ -356,6 +356,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             transform.localRotation = startRotation * Quaternion.Euler(0f, 0f, angle);
         })
         .SetEase(Ease.Linear)
+        .SetUpdate(true) // 점수 카운터와 같은 시간 기준으로 흔들림을 동기화
         .SetLink(gameObject, LinkBehaviour.KillOnDisable)
         .OnKill(() =>
         {
