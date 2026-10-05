@@ -1,10 +1,13 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public enum SnackType { Cherry, Pancake, LimeJuice, Steak, Garnish, Peppermint }
+public enum SnackType { Cherry, Pancake, LimeJuice, Steak, Garnish, Peppermint, FortuneCookie }
 
 [CreateAssetMenu(fileName = "NewSnack", menuName = "Shop/Items/Snack")]
 public class SnackItemSO : BaseItemDataSO
 {
+    public const string ResourceFolder = "Snacks";
+
     [Header("--- 스낵 전용 스펙 ---")]
     public SnackType snackType;
 
@@ -60,14 +63,72 @@ public class SnackItemSO : BaseItemDataSO
                 // [페퍼민트] 포획 활성화만 수행. 스낵 배율 적용 제외
                 diceManager.isPeppermintActive = true;
                 break;
+
+            case SnackType.FortuneCookie:
+                // [포춘쿠키] 킵하지 않은 주사위를 덱의 주사위로 교체. 스낵 배율 적용 제외
+                diceManager.TryReplaceUnkeptDiceFromDeck();
+                break;
         }
 
-        bool snackApplied = snackType != SnackType.Peppermint && (snackType != SnackType.Steak || diceManager.currentPlayerHP > hpBeforeSnack);
+        bool snackApplied = snackType != SnackType.Peppermint
+            && snackType != SnackType.FortuneCookie
+            && (snackType != SnackType.Steak || diceManager.currentPlayerHP > hpBeforeSnack);
         if (snackApplied && snackMultiplier > 1f) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.MultiplySnackEffects);
 
         Debug.Log($"스낵 [{itemName}] 사용! 효과가 적용되었습니다.");
 
         // 아이템 사용 후 화면에 바뀐 데미지/횟수/확률 등을 즉시 반영
         diceManager.ForceUpdateUI();
+    }
+
+    public static void RegisterResourceSnacks(List<BaseItemDataSO> pool)
+    {
+        if (pool == null) return;
+        SnackItemSO[] loaded = Resources.LoadAll<SnackItemSO>(ResourceFolder);
+        for (int i = 0; i < loaded.Length; i++)
+        {
+            SnackItemSO snack = loaded[i];
+            if (snack == null || ContainsSnack(pool, snack)) continue;
+            pool.Add(snack);
+        }
+    }
+
+    public static void RegisterResourceSnacks(List<SnackItemSO> pool)
+    {
+        if (pool == null) return;
+        SnackItemSO[] loaded = Resources.LoadAll<SnackItemSO>(ResourceFolder);
+        for (int i = 0; i < loaded.Length; i++)
+        {
+            SnackItemSO snack = loaded[i];
+            if (snack == null || ContainsSnack(pool, snack)) continue;
+            pool.Add(snack);
+        }
+    }
+
+    private static bool ContainsSnack(List<BaseItemDataSO> pool, SnackItemSO snack)
+    {
+        for (int i = 0; i < pool.Count; i++)
+        {
+            if (pool[i] == snack) return true;
+            if (pool[i] is SnackItemSO other && IsSameSnack(other, snack)) return true;
+        }
+        return false;
+    }
+
+    private static bool ContainsSnack(List<SnackItemSO> pool, SnackItemSO snack)
+    {
+        for (int i = 0; i < pool.Count; i++)
+        {
+            if (pool[i] == snack || IsSameSnack(pool[i], snack)) return true;
+        }
+        return false;
+    }
+
+    private static bool IsSameSnack(SnackItemSO a, SnackItemSO b)
+    {
+        if (a == null || b == null) return false;
+        if (!string.IsNullOrEmpty(a.Item_ID) && a.Item_ID == b.Item_ID) return true;
+        if (!string.IsNullOrEmpty(a.itemName) && a.itemName == b.itemName) return true;
+        return false;
     }
 }

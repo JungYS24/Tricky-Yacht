@@ -36,6 +36,7 @@ public sealed class SnackUseEntry
     public Tween animation;
     public bool IsCurrent => slot != null && slot.PendingSnack == this && slot.currentItem == item;
     public bool IsScoreSnack => item.snackType == SnackType.Pancake || item.snackType == SnackType.Cherry;
+    public bool IsImmediateSnack => item != null && (item.snackType == SnackType.LimeJuice || item.snackType == SnackType.FortuneCookie);
 }
 
 // InventoryManager가 소유하는 일반 C# 객체. 사용 확정/자리 예약/소모 방지/정산 시점을 관리합니다.
@@ -60,6 +61,10 @@ public sealed class SnackUseController
             foreach (var pending in entries)
                 if (pending.IsCurrent && pending.item.snackType == SnackType.Peppermint) return false;
         }
+        if (snack.snackType == SnackType.FortuneCookie)
+        {
+            if (dm.IsDiceInputLocked || dm.HasRollingDice || !dm.CanReplaceUnkeptDiceFromDeck) return false;
+        }
 
         for (int i = entries.Count - 1; i >= 0; i--)
         {
@@ -80,8 +85,8 @@ public sealed class SnackUseController
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
             TutorialManager.Instance.OnItemUsed(snack.itemName);
 
-        // 라임 주스는 즉시 연출. 보존되면 아이콘만 숨기고 끝내기까지 칸과 입력을 잠급니다.
-        if (snack.snackType == SnackType.LimeJuice)
+        // 라임 주스와 포춘쿠키는 즉시 연출. 보존되면 아이콘만 숨기고 끝내기까지 칸과 입력을 잠급니다.
+        if (entry.IsImmediateSnack)
         {
             Commit(entry);
             BeginDisappear(entry);
@@ -96,7 +101,7 @@ public sealed class SnackUseController
         DiceManager dm = inventory.diceManager;
         var entry = slot != null ? slot.PendingSnack : null;
         if (dm == null || dm.isCalculating || dm.isStageClearing || dm.currentPlayerHP <= 0 || ShopManager.IsShopOpen) return false;
-        if (dm.enemy == null || dm.enemy.IsDead || entry == null || !entry.IsCurrent || entry.committed || entry.item.snackType == SnackType.LimeJuice) return false;
+        if (dm.enemy == null || dm.enemy.IsDead || entry == null || !entry.IsCurrent || entry.committed || entry.IsImmediateSnack) return false;
 
         entries.Remove(entry);
         slot.ReleaseSnackReservation(); // 원래 색과 입력 상태 복구. 효과는 아직 적용하지 않았으므로 되돌릴 수치가 없습니다.
@@ -253,8 +258,8 @@ public sealed class SnackUseController
             slot.MarkSnackUsed(entry, inventory.snackUsedTint);
             if (entry.visualFinished && !entry.settled) SnackUseFeedback.Get(slot).ShowUsed(inventory.snackUsedTint, true);
             if (entry.settled) SnackUseFeedback.Get(slot).ShowUsed(Color.white);
-            // 즉시 연출 중 저장한 라임은 효과를 재지급하지 않고 사라지는 연출만 이어갑니다.
-            if (snack.snackType == SnackType.LimeJuice && !entry.visualFinished && !entry.settled) BeginDisappear(entry);
+            // 즉시 연출 중 저장한 라임/포춘쿠키는 효과를 재지급하지 않고 사라지는 연출만 이어갑니다.
+            if (entry.IsImmediateSnack && !entry.visualFinished && !entry.settled) BeginDisappear(entry);
         }
         entries.Sort((a, b) => a.order.CompareTo(b.order));
     }
