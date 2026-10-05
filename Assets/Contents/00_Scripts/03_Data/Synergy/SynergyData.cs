@@ -2,25 +2,30 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "SynergySO", menuName = "Synergy/SynergyObject")]
-public class SynergyData : ScriptableObject
+public class SynergyData : BaseItemDataSO
 {
-    [SerializeField] private string synergyName;
-
-    [SerializeField, TextArea] private string synergyDescription;
-
     [SerializeField] private FigureItemSO[] requiredFigures;
-
-    [SerializeField] private FigureTriggerType triggerType;
 
     [SerializeField] private SynergyEffectContext skillEffect;
 
-    public string SynergyName => synergyName;
+    public string SynergyName
+    {
+        get => itemName;
+        set => itemName = value;
+    }
 
-    public string SynergyDescription => synergyDescription;
+    public string SynergyDescription
+    {
+        get => description;
+        set => description = value;
+    }
 
     public IReadOnlyList<FigureItemSO> RequiredFigures => requiredFigures;
 
-    public FigureTriggerType TriggerType => triggerType;
-
     public SynergyEffectContext Skilleffect => skillEffect;
+
+    public override void ApplyItemEffect(DiceManager diceManager)
+    {
+        
+    }
 }
