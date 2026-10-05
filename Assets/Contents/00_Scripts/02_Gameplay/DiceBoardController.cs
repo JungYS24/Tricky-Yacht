@@ -16,6 +16,25 @@ public sealed class DiceBoardController
             return false;
         }
     }
+
+    public bool HasUnkeptDice
+    {
+        get
+        {
+            foreach (var die in ActiveDice)
+                if (die != null && die.gameObject.activeInHierarchy && !die.isKept) return true;
+            return false;
+        }
+    }
+
+    public bool CanReplaceUnkeptFromDeck
+    {
+        get
+        {
+            if (!HasUnkeptDice || deckManager == null) return false;
+            return deckManager.drawPile.Count + deckManager.discardPile.Count > 0;
+        }
+    }
     private readonly GameObject dicePrefab;
     private readonly DeckManager deckManager;
     private readonly Transform[] keepSlots;
@@ -294,6 +313,52 @@ public sealed class DiceBoardController
             d.PlayRollEffect(finalResult);
         }
 
+    }
+
+    // 킵하지 않은 보드 주사위를 드로우/버린 더미의 주사위로 교체합니다. 보드에 있는 주사위는 더미에 없으므로 먼저 뽑은 뒤 기존 데이터를 되돌립니다.
+    public bool ReplaceUnkeptDiceFromDeck()
+    {
+        if (!CanReplaceUnkeptFromDeck) return false;
+
+        var unkept = new List<Dice>(ActiveDice.Count);
+        foreach (var die in ActiveDice)
+        {
+            if (die == null || !die.gameObject.activeInHierarchy || die.isKept || die.myData == null) continue;
+            unkept.Add(die);
+        }
+        if (unkept.Count == 0) return false;
+
+        var oldData = new List<DiceData1>(unkept.Count);
+        for (int i = 0; i < unkept.Count; i++) oldData.Add(unkept[i].myData);
+
+        var replacements = new List<DiceData1>(unkept.Count);
+        for (int i = 0; i < unkept.Count; i++)
+        {
+            DiceData1 drawn = deckManager.DrawOneDice();
+            if (drawn == null) break;
+            replacements.Add(drawn);
+        }
+
+        int reused = 0;
+        while (replacements.Count < unkept.Count && reused < oldData.Count)
+        {
+            replacements.Add(oldData[reused]);
+            reused++;
+        }
+
+        for (int i = reused; i < oldData.Count; i++)
+            deckManager.drawPile.Add(oldData[i]);
+        if (deckManager.drawPile.Count > 1)
+            deckManager.ShufflePile(deckManager.drawPile);
+
+        for (int i = 0; i < unkept.Count; i++)
+        {
+            DiceData1 data = replacements[i];
+            int finalValue = data.faceValues[UnityEngine.Random.Range(0, 6)];
+            unkept[i].SetData(data, finalValue);
+            unkept[i].PlayRollEffect(finalValue);
+        }
+        return true;
     }
 
     public void SyncKeepSlots(out int keptCount, out bool hasDiceToRoll)

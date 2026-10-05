@@ -28,6 +28,9 @@ public class LootSelectionPanel : MonoBehaviour
     {
         diceManager = manager;
 
+        if (snackPool == null) snackPool = new List<SnackItemSO>();
+        SnackItemSO.RegisterResourceSnacks(snackPool);
+
         // 에러 방지: 스낵 1개, 주사위 1개, 그리고 고정 체력 아이템이 세팅되었는지 확인
         if (snackPool.Count < 1 || dicePool.Count < 1 || firstSlotPool.Count < 1)
         {
