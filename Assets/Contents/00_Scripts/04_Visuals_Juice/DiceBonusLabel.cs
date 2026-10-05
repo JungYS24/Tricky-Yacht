@@ -121,7 +121,7 @@ public sealed class DiceBonusLabel : MonoBehaviour
     private void SetValue(float value, bool isChips)
     {
         if (isChips) label.SetText("+{0}", Mathf.FloorToInt(value));
-        else label.SetText("+{0:0.0}배", Mathf.Round(value * 10f) / 10f);
+        else label.SetText("+{0:0.0}", Mathf.Round(value * 10f) / 10f);
     }
 
     private void LateUpdate()

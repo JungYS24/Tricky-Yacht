@@ -252,45 +252,20 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 보호막이 있으면 현재 체력 옆에 괄호로 표시
+    // 체력은 한 줄로 유지하고 보호막은 별도의 방패/숫자 줄에 표시합니다.
     private void UpdatePlayerHealthText(int hp, int maxHP, int shield)
     {
         if (heartText == null) return;
-
-        heartText.text = shield > 0? $"{hp}<color=#65CFFF>({shield})</color>/{maxHP}": $"{hp}/{maxHP}";
+        heartText.text = $"{hp}/{maxHP}";
+        heartText.enableWordWrapping = false;
+        heartText.enableAutoSizing = true;
+        if (DiceManager.Instance != null) HurtVignetteController.Get(DiceManager.Instance).UpdateShieldDisplay(this, Mathf.Max(0, shield));
     }
 
     public void UpdateShieldUI(int shieldAmount)
     {
         shieldAmount = Mathf.Max(0, shieldAmount);
-
-        // 보호막 획득·차감 직후 체력 옆 숫자도 갱신
-        if (DiceManager.Instance != null)
-        {
-            UpdatePlayerHealthText(DiceManager.Instance.currentPlayerHP,DiceManager.Instance.playerMaxHP,shieldAmount);
-        }
-
-        // 기존 별도 보호막 숫자는 숨김: 체력 옆에 표시하므로 중복 방지
-        // 이미지와 같은 오브젝트여도 이미지는 유지
-        if (shieldText != null)
-        {
-            shieldText.text = "";
-        }
-
-        if (shieldRoot == null) return;
-
-        bool hasShield = shieldAmount > 0;
-
-        shieldRoot.transform.DOKill(true);
-        shieldRoot.SetActive(hasShield);
-
-        if (hasShield)
-        {
-            // 획득하거나 깎일 때마다 타격감 연출
-            shieldRoot.transform.DOPunchScale(
-                new Vector3(0.25f, 0.25f, 0f),
-                0.35f, 3, 0.5f);
-        }
+        if (DiceManager.Instance != null) UpdatePlayerHealthText(DiceManager.Instance.currentPlayerHP, DiceManager.Instance.playerMaxHP, shieldAmount);
     }
 
 
@@ -301,7 +276,7 @@ public class UIManager : MonoBehaviour
 
     public static string FormatMultValue(float value)
     {
-        return LocalizationManager.GetUi("UI_MULT_VALUE", "<color=#FDE470>{0}</color>", value.ToString("F1"));
+        return LocalizationManager.GetUi("UI_MULT_VALUE", "<color=#FDE470>{0}</color>", value.ToString("F1")).Replace("배", "");
     }
 
     static readonly Color FinalDamageColor = new Color(1f, 0.33333334f, 0.33333334f, 1f);

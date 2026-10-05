@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic; // List를 사용하기 위해 추가
 using TMPro;
+using DG.Tweening;
 
 public class Enemy : MonoBehaviour
 {
@@ -131,6 +132,7 @@ public class Enemy : MonoBehaviour
 
     public void Initialize(int currentStage, BiomeDataSO currentBiome)
     {
+        StopAttackPresentation();
         ResetDeathPresentation();
         GetComponent<MonsterHitFeedback>()?.Stop();
         //만약의 사태를 대비한 기본 체력 (리스트가 비어있을 때 등)
@@ -248,6 +250,7 @@ public class Enemy : MonoBehaviour
     public void TakeDamage(int damage,System.Action onDeathCallback,bool isFirstNormalAttack = false, EnemyHitKind hitKind = EnemyHitKind.Other, bool includesDark = false)
     {
         if (IsDead || damage <= 0) return;
+        StopAttackPresentation();
         GetComponent<MonsterHitFeedback>()?.Stop();
 
         // 적 체력보다 큰 공격도 실제 감소한 체력까지만 피해로 인정
@@ -329,40 +332,77 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    [Header("플레이어를 향한 공격 연출")]
+    public float attackPrepareDuration = 0.12f;
+    public float attackLungeDuration = 0.10f;
+    public float attackReturnDuration = 0.18f;
+    public float attackScale = 1.12f;
+    public float attackTravelRatio = 0.12f;
+    public float AttackContactDelay => Mathf.Max(0.01f, attackPrepareDuration) + Mathf.Max(0.01f, attackLungeDuration);
+
+    private Sequence attackTween;
+    private SpriteRenderer attackVisual;
+    private bool attackWasHidden;
+    private bool attackVisualActive;
+
     public void PlayAttackAnim()
     {
+        StopAttackPresentation();
         GetComponent<MonsterHitFeedback>()?.Stop();
-        if (monsterAnimator != null)
+        if (monsterImage == null || IsDead) return;
+
+        // 외형만 복제해 움직이므로 몬스터 HP바, 루트, 대기 Animator는 건드리지 않습니다.
+        if (attackVisual == null)
         {
-            monsterAnimator.SetTrigger("Attack");
+            GameObject visual = new GameObject("Attack Visual");
+            visual.transform.SetParent(monsterImage.transform, false);
+            attackVisual = visual.AddComponent<SpriteRenderer>();
         }
-        else
-        {
-            StartCoroutine(SimpleAttackPunchRoutine());
-        }
+        attackVisual.sprite = monsterImage.sprite;
+        attackVisual.sharedMaterial = monsterImage.sharedMaterial;
+        attackVisual.color = monsterImage.color;
+        attackVisual.flipX = monsterImage.flipX;
+        attackVisual.flipY = monsterImage.flipY;
+        attackVisual.sortingLayerID = monsterImage.sortingLayerID;
+        attackVisual.sortingOrder = monsterImage.sortingOrder;
+        attackVisual.gameObject.layer = monsterImage.gameObject.layer;
+        attackVisual.gameObject.SetActive(true);
+        attackWasHidden = monsterImage.forceRenderingOff;
+        attackVisualActive = true;
+        monsterImage.forceRenderingOff = true;
+        Transform visualTransform = attackVisual.transform;
+        visualTransform.localPosition = Vector3.zero;
+        visualTransform.localScale = Vector3.one;
+        float travel = monsterImage.sprite != null ? monsterImage.sprite.bounds.size.y * attackTravelRatio : 0.1f;
+        float prepare = Mathf.Max(0.01f, attackPrepareDuration);
+        float lunge = Mathf.Max(0.01f, attackLungeDuration);
+        attackTween = DOTween.Sequence();
+        attackTween.Append(visualTransform.DOScale(0.96f, prepare).SetEase(Ease.OutSine));
+        attackTween.Join(visualTransform.DOLocalMoveY(travel * 0.25f, prepare));
+        attackTween.Append(visualTransform.DOScale(attackScale, lunge).SetEase(Ease.InQuad));
+        attackTween.Join(visualTransform.DOLocalMoveY(-travel, lunge).SetEase(Ease.InQuad));
+        attackTween.Append(visualTransform.DOScale(1f, Mathf.Max(0.01f, attackReturnDuration)).SetEase(Ease.OutSine));
+        attackTween.Join(visualTransform.DOLocalMoveY(0f, Mathf.Max(0.01f, attackReturnDuration)).SetEase(Ease.OutSine));
+        attackTween.OnKill(RestoreAttackVisual);
     }
 
-    private IEnumerator SimpleAttackPunchRoutine()
+    private void RestoreAttackVisual()
     {
-        float duration = 0.1f;
-        float elapsed = 0f;
-        Vector3 targetPos = originalPosition + Vector3.down * 0.5f;
+        if (attackVisualActive && monsterImage != null) monsterImage.forceRenderingOff = attackWasHidden;
+        attackVisualActive = false;
+        if (attackVisual != null) attackVisual.gameObject.SetActive(false);
+        attackTween = null;
+    }
 
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            transform.position = Vector3.Lerp(originalPosition, targetPos, elapsed / duration);
-            yield return null;
-        }
+    private void StopAttackPresentation()
+    {
+        attackTween?.Kill();
+        RestoreAttackVisual();
+    }
 
-        elapsed = 0f;
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            transform.position = Vector3.Lerp(targetPos, originalPosition, elapsed / duration);
-            yield return null;
-        }
-        transform.position = originalPosition;
+    private void OnDisable()
+    {
+        StopAttackPresentation();
     }
 
     private void UpdateHPBar(bool immediate)
@@ -394,6 +434,7 @@ public class Enemy : MonoBehaviour
     {
         if (!IsDead || deathPresentationStarted) return false;
         deathPresentationStarted = true;
+        StopAttackPresentation();
         GetComponent<MonsterHitFeedback>()?.Stop();
         StopAllCoroutines();
         hitEffectCoroutine = null;
@@ -471,6 +512,7 @@ public class Enemy : MonoBehaviour
 
     public void RestoreMonster(MonsterDataSO monsterData, int hp, int maxHp, int attack, int index, int currentTurn, int maxTurn)
     {
+        StopAttackPresentation();
         ResetDeathPresentation();
         GetComponent<MonsterHitFeedback>()?.Stop();
         CurrentMonsterName = monsterData.monsterName;

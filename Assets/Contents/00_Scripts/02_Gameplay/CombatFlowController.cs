@@ -147,7 +147,7 @@ public static class CombatFlowController
             if (dm.enemy.CurrentAttackTurn <= 0)
             {
                 dm.enemy.PlayAttackAnim();
-                yield return new WaitForSeconds(0.2f);
+                yield return new WaitForSeconds(dm.enemy.AttackContactDelay);
 
                 int finalEnemyAtk = dm.isNextEnemyAttackFixedToOne ? 1 : dm.enemy.AttackPower;
                 dm.isNextEnemyAttackFixedToOne = false;
@@ -156,15 +156,16 @@ public static class CombatFlowController
                 finalEnemyAtk -= reduction;
                 if (finalEnemyAtk < 0) finalEnemyAtk = 0;
 
+                int hpBeforeAttack = dm.currentPlayerHP;
+                int shieldBeforeAttack = dm.playerStatus.currentShield;
                 dm.playerStatus.TakeDamage(finalEnemyAtk);
+                int actualHPDamage = Mathf.Max(0, hpBeforeAttack - dm.currentPlayerHP);
+                dm.ui?.UpdateShieldUI(dm.playerStatus.currentShield);
+                int blockedDamage = Mathf.Max(0, shieldBeforeAttack - dm.playerStatus.currentShield);
+                HurtVignetteController.Get(dm).PlayShieldOrHealthHit(dm.ui, blockedDamage, actualHPDamage, dm.playerStatus.currentShield);
+                if (actualHPDamage > 0) dm.PlayPlayerHurtSound();
                 // 피격 후 회복 피규어 등이 실행되기 전에 체력 조건 검사
                 FigureEffectManager.Instance?.EvaluateLowHPTriggers(dm, dm.shopManager);
-
-                CameraShake.Instance.Shake(0.15f, 0.1f);
-                dm.ui?.UpdateShieldUI(dm.playerStatus.currentShield);
-
-                if (HurtVignetteController.Instance != null) HurtVignetteController.Instance.TriggerHurtEffect();
-                dm.PlayPlayerHurtSound();
 
                 if (FigureEffectManager.Instance != null)
                 {
