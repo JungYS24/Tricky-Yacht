@@ -126,6 +126,7 @@ public class GameSaveManager : MonoBehaviour
     // List에 있는 피규어들을 초고속 탐색용 딕셔너리로 압축하는 함수
     private void InitializeDictionary()
     {
+        SnackItemSO.RegisterResourceSnacks(masterItemDatabase);
         itemDictionary.Clear();
         foreach (var item in masterItemDatabase)
         {

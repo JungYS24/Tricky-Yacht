@@ -187,6 +187,8 @@ public class DiceManager : MonoBehaviour
     private bool enemyDeathHandled = false;
     private bool isRolling = false; // 주사위 굴러가는중 
     public bool IsDiceInputLocked => isRolling || isCalculating || currentPlayerHP <= 0 || enemy == null || enemy.IsDead || isStageClearing;
+    public bool HasRollingDice => board != null && board.HasRollingDice;
+    public bool CanReplaceUnkeptDiceFromDeck => board != null && board.CanReplaceUnkeptFromDeck;
     private bool isRestoringSave;
     private bool isResolvingTurn;
     public bool IsSaveStateStable => !isRolling && !isRestoringSave && !isResolvingTurn && (!isCalculating || isStageClearing) && (board == null || !board.HasRollingDice);
@@ -402,6 +404,20 @@ public class DiceManager : MonoBehaviour
     }
 
     public void ForceUpdateUI() => HandleDiceChanged();
+
+    public bool TryReplaceUnkeptDiceFromDeck()
+    {
+        if (board == null || isRolling || isCalculating || currentPlayerHP <= 0 || enemy == null || enemy.IsDead || isStageClearing) return false;
+        if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return false;
+        if (!board.ReplaceUnkeptDiceFromDeck()) return false;
+
+        isRolling = true;
+        ui?.SetRollButtonInteractable(false);
+        ui?.SetFinishButtonInteractable(false);
+        if (CameraShake.Instance != null) CameraShake.Instance.Shake(0.1f, 0.1f);
+        StartCoroutine(HandleDiceChangedDelayed());
+        return true;
+    }
 
     public void OnRollButtonClick()
     {

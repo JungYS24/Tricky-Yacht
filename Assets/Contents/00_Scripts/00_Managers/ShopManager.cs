@@ -48,6 +48,8 @@ public class ShopManager : MonoBehaviour
             tooltipRect = tooltipPanel.GetComponent<RectTransform>();
 
         HideTooltip();
+        if (allItemsPool == null) allItemsPool = new List<BaseItemDataSO>();
+        SnackItemSO.RegisterResourceSnacks(allItemsPool);
 
         if (shopRerollButton != null)
             shopRerollButton.onClick.AddListener(RerollShop);
