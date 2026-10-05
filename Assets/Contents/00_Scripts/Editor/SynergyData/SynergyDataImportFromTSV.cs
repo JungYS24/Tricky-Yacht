@@ -44,11 +44,8 @@ public class SynergyDataImportFromTSV : ImportDataFromTSV
             so.FindProperty("Item_ID").stringValue = itemIDs[i];
             so.FindProperty("itemName").stringValue = nameKR[i];
             so.FindProperty("description").stringValue = descriptionKR[i];
-            so.FindProperty("skillEffect").boxedValue = new SynergyEffectContext()
-            {
-                EffectType = Enum.Parse<EffectType>(effectTypes[i]),
-                EffectValue = float.Parse(effectValues[i]),
-            };
+            so.FindProperty("effectType").enumValueIndex = (int)Enum.Parse<SynergyEffectType>(effectTypes[i]);
+            so.FindProperty("effectValue").floatValue = float.Parse(effectValues[i]);
 
             int fCnt = int.Parse(requiredFigureCounts[i]);
 
