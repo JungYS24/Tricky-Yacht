@@ -49,7 +49,7 @@ public class SynergyData : BaseItemDataSO
                 break;
 
             case SynergyEffectType.StartWithSnackPeppermint:
-                // 스낵
+                InventoryManager.Instance.AddItem(GameSaveManager.Instance.FindItemByName("페퍼민트"));
                 break;
 
             case SynergyEffectType.BurnDamageReductionUp:
@@ -89,7 +89,7 @@ public class SynergyData : BaseItemDataSO
                 break;
 
             case SynergyEffectType.StartWithSnackGarnish:
-                // 가니시
+                InventoryManager.Instance.AddItem(GameSaveManager.Instance.FindItemByName("가니쉬"));
                 break;
 
             case SynergyEffectType.BaseChipsUp:
@@ -101,11 +101,11 @@ public class SynergyData : BaseItemDataSO
                 break;
 
             case SynergyEffectType.StartWithSnackSteak:
-                // 스테이크
+                InventoryManager.Instance.AddItem(GameSaveManager.Instance.FindItemByName("스테이크"));
                 break;
 
             case SynergyEffectType.StartWithSnackCherry:
-                // 체리
+                InventoryManager.Instance.AddItem(GameSaveManager.Instance.FindItemByName("체리"));
                 break;
 
             default:
