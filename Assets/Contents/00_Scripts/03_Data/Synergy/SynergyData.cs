@@ -53,7 +53,10 @@ public class SynergyData : BaseItemDataSO
                 break;
 
             case SynergyEffectType.BurnDamageReductionUp:
-                // 화염대미지
+                ///
+                /// 
+                /// 
+                /// 
                 break;
 
             case SynergyEffectType.VictoryGoldChanceUp:
@@ -61,7 +64,7 @@ public class SynergyData : BaseItemDataSO
                 break;
 
             case SynergyEffectType.BurnPowerUp:
-                // 화상 부여량
+                diceManager.accumulatedFlameDamage += (int)effectValue;
                 break;
 
             case SynergyEffectType.StartGoldUp:
@@ -69,7 +72,7 @@ public class SynergyData : BaseItemDataSO
                 break;
 
             case SynergyEffectType.IncomingDamageDown:
-                // 받는 대미지 감소
+                diceManager.playerStatus.currentShield += (int)effectValue;
                 break;
 
             case SynergyEffectType.OnePairMultiplierUp:
@@ -85,7 +88,10 @@ public class SynergyData : BaseItemDataSO
                 break;
 
             case SynergyEffectType.StartWithDarkCoating:
-                // 다크코팅
+                var dice = diceManager.masterDeck[Random.Range(0, diceManager.masterDeck.Count)];
+                dice.isCoated = true;
+                dice.type = DiceType.Dark;
+                dice.diceColor = new Color(0x2B, 0x2A, 0x1A);
                 break;
 
             case SynergyEffectType.StartWithSnackGarnish:
@@ -93,11 +99,14 @@ public class SynergyData : BaseItemDataSO
                 break;
 
             case SynergyEffectType.BaseChipsUp:
-                // 칩
+                diceManager.snackBonusChips += (int)effectValue;
                 break;
 
             case SynergyEffectType.ShopPriceDiscountUp:
-                // 가격 낮추기
+                foreach (var slot in diceManager.shopManager.shopSlots)
+                {
+                    slot.priceMultiplier *= effectValue / 100;
+                }
                 break;
 
             case SynergyEffectType.StartWithSnackSteak:
