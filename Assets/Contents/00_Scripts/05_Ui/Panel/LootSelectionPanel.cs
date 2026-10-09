@@ -56,6 +56,7 @@ public class LootSelectionPanel : MonoBehaviour
         choiceSlots[2].Setup(shuffledDice[0], this);
 
         panelRoot.SetActive(true);
+        panelRoot.transform.SetAsLastSibling();
         IsPanelOpen = true;
     }
 
@@ -128,16 +129,19 @@ public class LootSelectionPanel : MonoBehaviour
             }
         }
 
-        // 티켓 선택이 끝났거나(창이 닫힘) 애초에 안 열렸다면 드디어 상점 열기
-        if (diceManager.shopManager != null)
-        {
-            diceManager.shopManager.OpenShop();
-        }
-
-        // 튜토리얼 두 번째 상점 진입일 경우 자동으로 23번 대사로 넘김
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
+            if (diceManager.shopManager != null)
+                diceManager.shopManager.OpenShop();
             TutorialManager.Instance.OnAutoShopEntered();
+        }
+        else if (diceManager.useMapFlow)
+        {
+            diceManager.OnMapLootFinished();
+        }
+        else if (diceManager.shopManager != null)
+        {
+            diceManager.shopManager.OpenShop();
         }
     }
 

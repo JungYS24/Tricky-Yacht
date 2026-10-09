@@ -81,11 +81,16 @@ public class SatelliteSelectionPanel : MonoBehaviour
         diceManager.ForceUpdateUI();
     }
 
+    public System.Action onClosed;
+
     public void ClosePanel()
     {
         IsPanelOpen = false;
-        panelRoot.SetActive(false);
+        if (panelRoot != null) panelRoot.SetActive(false);
         ClearSlots();
+        System.Action callback = onClosed;
+        onClosed = null;
+        callback?.Invoke();
     }
 
     private void ClearSlots()

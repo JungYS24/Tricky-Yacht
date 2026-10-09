@@ -45,6 +45,14 @@ public class SaveData
 
     public int currentStage;
     public int currentPlayerHP;
+
+    // 지도 진행. mapSaveVersion이 0이면 지도 도입 이전 세이브입니다.
+    public int mapSaveVersion;
+    public int runSeed;
+    public int biomeIndex;
+    public int currentNodeId = -1;
+    public bool currentNodeCleared;
+    public List<int> visitedNodeIds = new List<int>();
     public int playerMaxHP;
     public int currentGold;
 
@@ -211,6 +219,14 @@ public class GameSaveManager : MonoBehaviour
 
 
         data.currentStage = dice.currentStage;
+        data.mapSaveVersion = dice.useMapFlow ? 1 : 0;
+        data.runSeed = dice.stageProgression.runSeed;
+        data.biomeIndex = dice.stageProgression.biomeIndex;
+        data.currentNodeId = dice.stageProgression.currentNodeId;
+        data.currentNodeCleared = dice.stageProgression.currentNodeCleared;
+        data.visitedNodeIds = dice.stageProgression.visitedNodeIds != null
+            ? new List<int>(dice.stageProgression.visitedNodeIds)
+            : new List<int>();
         data.currentPlayerHP = dice.currentPlayerHP;
         data.currentGold = shop != null ? shop.currentGold : 0;
 

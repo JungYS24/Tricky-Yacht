@@ -1,0 +1,286 @@
+{
+  "mapConfig": [
+    {
+      "Key": "Min_Enemy_Count",
+      "Value": "8",
+      "Value_Type": "int",
+      "Desc_KR": "최단 루트의 적 수(지름길 = 적 8 + 상인 고정층 1)"
+    },
+    {
+      "Key": "Max_Path_Length",
+      "Value": "16",
+      "Value_Type": "int",
+      "Desc_KR": "일반 노드 층 수(0~15층). 보스는 16층"
+    },
+    {
+      "Key": "Grid_Width",
+      "Value": "7",
+      "Value_Type": "int",
+      "Desc_KR": "맵 가로 열 수"
+    },
+    {
+      "Key": "Lane_Count",
+      "Value": "6",
+      "Value_Type": "int",
+      "Desc_KR": "레인 수(레인 0 = 지름길, 나머지 = 일반 레인)"
+    },
+    {
+      "Key": "Start_Columns",
+      "Value": "1,3,5",
+      "Value_Type": "string",
+      "Desc_KR": "시작 노드 열. 레인 i는 Start_Columns[i % 개수]에서 출발 → 시작 선택지 항상 3개"
+    },
+    {
+      "Key": "Shop_Row",
+      "Value": "8",
+      "Value_Type": "int",
+      "Desc_KR": "상인 고정층. 이 층의 노드는 전부 상인이고 어떤 선도 이 층을 건너뛰지 못함"
+    },
+    {
+      "Key": "Skip_Chance",
+      "Value": "0.15",
+      "Value_Type": "float",
+      "Desc_KR": "일반 레인이 한 층을 건너뛸(dy=2) 확률(상인 고정층은 못 건너뜀)"
+    },
+    {
+      "Key": "Shortcut_Max_Skip",
+      "Value": "3",
+      "Value_Type": "int",
+      "Desc_KR": "지름길 레인의 최대 층 간격(dy 1~3)"
+    },
+    {
+      "Key": "Detour_Enemy_Ratio",
+      "Value": "0.2",
+      "Value_Type": "float",
+      "Desc_KR": "최단보다 길어진 칸 중 적이어야 하는 최소 비율(상인 고정층 칸은 길이에서 제외)"
+    },
+    {
+      "Key": "Max_Gen_Attempts",
+      "Value": "100",
+      "Value_Type": "int",
+      "Desc_KR": "검증 실패 시 재생성 최대 횟수"
+    },
+    {
+      "Key": "Rest_Heal_Percent",
+      "Value": "30",
+      "Value_Type": "int",
+      "Desc_KR": "휴식 노드 체력 회복량(최대 체력의 %)"
+    },
+    {
+      "Key": "Post_Battle_Shop",
+      "Value": "false",
+      "Value_Type": "bool",
+      "Desc_KR": "true면 전투 후 기존 상점 프롬프트 유지, false면 바로 맵으로"
+    },
+    {
+      "Key": "Biome_Count_To_Void",
+      "Value": "10",
+      "Value_Type": "int",
+      "Desc_KR": "이 수만큼 바이옴을 클리어하면 Void 진입"
+    }
+  ],
+  "nodeTypes": [
+    {
+      "Node_ID": "Node_Enemy",
+      "Name_Key": "CNT_Node_Enemy_NAME",
+      "Desc_Key": "CNT_Node_Enemy_DESC",
+      "Name_KR": "적",
+      "Desc_KR": "일반 몬스터와 전투합니다.",
+      "Icon_Key": "Icon_Map_Enemy",
+      "Is_Facility": false,
+      "Min_Row": 0,
+      "Min_Per_Map": 0,
+      "Max_Per_Map": 99
+    },
+    {
+      "Node_ID": "Node_Boss",
+      "Name_Key": "CNT_Node_Boss_NAME",
+      "Desc_Key": "CNT_Node_Boss_DESC",
+      "Name_KR": "보스",
+      "Desc_KR": "바이옴 보스와 전투합니다.",
+      "Icon_Key": "Icon_Map_Boss",
+      "Is_Facility": false,
+      "Min_Row": 16,
+      "Min_Per_Map": 1,
+      "Max_Per_Map": 1
+    },
+    {
+      "Node_ID": "Node_Encounter",
+      "Name_Key": "CNT_Node_Encounter_NAME",
+      "Desc_Key": "CNT_Node_Encounter_DESC",
+      "Name_KR": "조우자",
+      "Desc_KR": "미스터리 조우자를 만납니다.",
+      "Icon_Key": "Icon_Map_Encounter",
+      "Is_Facility": true,
+      "Min_Row": 1,
+      "Min_Per_Map": 2,
+      "Max_Per_Map": 8
+    },
+    {
+      "Node_ID": "Node_Shop",
+      "Name_Key": "CNT_Node_Shop_NAME",
+      "Desc_Key": "CNT_Node_Shop_DESC",
+      "Name_KR": "상인",
+      "Desc_KR": "상점을 엽니다.",
+      "Icon_Key": "Icon_Map_Shop",
+      "Is_Facility": true,
+      "Min_Row": 2,
+      "Min_Per_Map": 0,
+      "Max_Per_Map": 4
+    },
+    {
+      "Node_ID": "Node_Opel",
+      "Name_Key": "CNT_Node_Opel_NAME",
+      "Desc_Key": "CNT_Node_Opel_DESC",
+      "Name_KR": "오펠",
+      "Desc_KR": "위성 하나를 골라 강화합니다.",
+      "Icon_Key": "Icon_Map_Opel",
+      "Is_Facility": true,
+      "Min_Row": 3,
+      "Min_Per_Map": 0,
+      "Max_Per_Map": 0
+    },
+    {
+      "Node_ID": "Node_Rest",
+      "Name_Key": "CNT_Node_Rest_NAME",
+      "Desc_Key": "CNT_Node_Rest_DESC",
+      "Name_KR": "휴식",
+      "Desc_KR": "체력을 회복하거나 주사위를 파괴합니다.",
+      "Icon_Key": "Icon_Map_Rest",
+      "Is_Facility": true,
+      "Min_Row": 4,
+      "Min_Per_Map": 2,
+      "Max_Per_Map": 6
+    }
+  ],
+  "biomeWeights": [
+    {
+      "Biome": "Forest",
+      "Enemy_W": 50,
+      "Encounter_W": 15,
+      "Shop_W": 12,
+      "Opel_W": 10,
+      "Rest_W": 13
+    },
+    {
+      "Biome": "Meadow",
+      "Enemy_W": 48,
+      "Encounter_W": 14,
+      "Shop_W": 12,
+      "Opel_W": 10,
+      "Rest_W": 16
+    },
+    {
+      "Biome": "Temple",
+      "Enemy_W": 48,
+      "Encounter_W": 16,
+      "Shop_W": 10,
+      "Opel_W": 16,
+      "Rest_W": 10
+    },
+    {
+      "Biome": "Jungle",
+      "Enemy_W": 55,
+      "Encounter_W": 15,
+      "Shop_W": 10,
+      "Opel_W": 8,
+      "Rest_W": 12
+    },
+    {
+      "Biome": "Desert",
+      "Enemy_W": 52,
+      "Encounter_W": 12,
+      "Shop_W": 18,
+      "Opel_W": 8,
+      "Rest_W": 10
+    },
+    {
+      "Biome": "Ruins",
+      "Enemy_W": 48,
+      "Encounter_W": 22,
+      "Shop_W": 10,
+      "Opel_W": 10,
+      "Rest_W": 10
+    },
+    {
+      "Biome": "Cave",
+      "Enemy_W": 56,
+      "Encounter_W": 14,
+      "Shop_W": 8,
+      "Opel_W": 12,
+      "Rest_W": 10
+    },
+    {
+      "Biome": "Volcano",
+      "Enemy_W": 58,
+      "Encounter_W": 12,
+      "Shop_W": 10,
+      "Opel_W": 10,
+      "Rest_W": 10
+    },
+    {
+      "Biome": "Swamp",
+      "Enemy_W": 52,
+      "Encounter_W": 18,
+      "Shop_W": 10,
+      "Opel_W": 8,
+      "Rest_W": 12
+    },
+    {
+      "Biome": "Beach",
+      "Enemy_W": 46,
+      "Encounter_W": 14,
+      "Shop_W": 18,
+      "Opel_W": 8,
+      "Rest_W": 14
+    },
+    {
+      "Biome": "Ocean",
+      "Enemy_W": 50,
+      "Encounter_W": 16,
+      "Shop_W": 12,
+      "Opel_W": 12,
+      "Rest_W": 10
+    },
+    {
+      "Biome": "Abyss",
+      "Enemy_W": 56,
+      "Encounter_W": 16,
+      "Shop_W": 8,
+      "Opel_W": 12,
+      "Rest_W": 8
+    },
+    {
+      "Biome": "Snow",
+      "Enemy_W": 52,
+      "Encounter_W": 12,
+      "Shop_W": 10,
+      "Opel_W": 10,
+      "Rest_W": 16
+    },
+    {
+      "Biome": "Grave",
+      "Enemy_W": 54,
+      "Encounter_W": 20,
+      "Shop_W": 8,
+      "Opel_W": 10,
+      "Rest_W": 8
+    },
+    {
+      "Biome": "Circus",
+      "Enemy_W": 46,
+      "Encounter_W": 26,
+      "Shop_W": 12,
+      "Opel_W": 8,
+      "Rest_W": 8
+    },
+    {
+      "Biome": "Skyisland",
+      "Enemy_W": 46,
+      "Encounter_W": 14,
+      "Shop_W": 10,
+      "Opel_W": 22,
+      "Rest_W": 8
+    }
+  ]
+}

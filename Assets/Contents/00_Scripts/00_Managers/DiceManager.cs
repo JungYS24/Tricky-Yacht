@@ -118,6 +118,19 @@ public class DiceManager : MonoBehaviour
     [Header("조우자 이벤트 시스템")]
     public EncounterEventPanel encounterEventPanel;
 
+    [Header("지도 시스템")]
+    public bool useMapFlow;
+    public TextAsset mapTableAsset;
+    public MapPanel mapPanel;
+    public RestPanel restPanel;
+    public OpelPanel opelPanel;
+    public MapIconSet mapIconSet;
+
+    MapTableData cachedMapTable;
+    bool pendingBiomeTransition;
+
+    public bool UsesMapFlow => useMapFlow && (TutorialManager.Instance == null || !TutorialManager.Instance.isTutorialActive);
+
     [Header("조우자 특수 효과 상태 (임시 저장용)")]
     [HideInInspector] public bool isNextEnemyHPBoosted = false; // 눈먼 점술가 패널티
     [HideInInspector] public bool isNextCombatHPTiedToOne = false; // 숙원의 방랑자 패널티
@@ -271,7 +284,10 @@ public class DiceManager : MonoBehaviour
 
             // 첫 시작은 무조건 숲(Forest)으로 고정
             currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
-            StartNewStage();
+            if (UsesMapFlow)
+                BeginNewMapRun();
+            else
+                StartNewStage();
         }
 
         //튜토리얼 종료 후 메인 게임 진입 시, 현재 설정된 1스테이지(숲) 바이옴의 브금을 강제로 재생!
@@ -291,7 +307,25 @@ public class DiceManager : MonoBehaviour
         isRestoringSave = true;
         try
         {
-            GameStateRestorer.Restore(this, data, defaultMaxRerolls, ref pendingPeppermintSuccess);
+            bool resumeCombat = UsesMapFlow && data.mapSaveVersion >= 1 && !string.IsNullOrEmpty(data.savedMonsterName);
+            bool idleMap = UsesMapFlow && !resumeCombat;
+            GameStateRestorer.Restore(this, data, defaultMaxRerolls, ref pendingPeppermintSuccess, idleMap);
+            if (UsesMapFlow)
+                RestoreMapProgress(data);
+
+            if (idleMap)
+            {
+                isCalculating = false;
+                ShowMapScreen();
+                if (data.mapSaveVersion >= 1 && !stageProgression.currentNodeCleared && stageProgression.currentNodeId >= 0)
+                    OpenCurrentNode(stageProgression.FindNode(stageProgression.currentNodeId));
+                FigureEffectManager.Instance?.EvaluateLowHPTriggers(this, shopManager);
+                return;
+            }
+
+            if (UsesMapFlow)
+                ShowCombatScreen();
+
             if (board.TryRestoreState(data))
             {
                 // 새 라운드를 시작하지 않으므로 셔플/리롤/라운드 시작 효과를 재실행하지 않습니다.
@@ -323,7 +357,7 @@ public class DiceManager : MonoBehaviour
         board.CaptureForSave(data);
     }
 
-    void StartNewStage()
+    public void StartNewStage()
     {
         InventoryManager.Instance?.SnackUses.ResetForStage();
         isStageClearing = false;
@@ -691,6 +725,13 @@ public class DiceManager : MonoBehaviour
             return;
         }
 
+        // 지도에서는 조우자가 노드로만 나옵니다.
+        if (useMapFlow)
+        {
+            ShowLootSelection();
+            return;
+        }
+
         //7, 17, 27, 37... 등 10라운드 주기로 끝자리가 7인 스테이지 클리어 시 조우자 등장
         if (currentStage % 10 == 1 && encounterEventPanel != null)
         {
@@ -820,7 +861,14 @@ public class DiceManager : MonoBehaviour
 
     public void PromptShopChoice() { ui?.HideResult(); ui?.ShowShopChoice(); }
     public void GoToShop() { ui?.HideShopChoice(); shopManager?.OpenShop(); }
-    public void SkipShopAndNextStage() { ui?.HideShopChoice(); NextStage(); }
+    public void SkipShopAndNextStage()
+    {
+        ui?.HideShopChoice();
+        if (UsesMapFlow)
+            OnShopClosedDuringMap();
+        else
+            NextStage();
+    }
 
     //발표용 떄문에 튜토리얼 수정
     public void NextStage()
@@ -855,6 +903,27 @@ public class DiceManager : MonoBehaviour
         if (biomeSelectionPanel != null) biomeSelectionPanel.ClosePanel();
 
         stageProgression.SetNewBiome(biomeList, selectedType); // 이관된 로직
+        if (UsesMapFlow)
+        {
+            MapTableData table = GetMapTable();
+            if (selectedType == BiomeType.Void)
+            {
+                int voidStage = table != null ? table.Config.BiomeCountToVoid * 10 + 1 : 101;
+                currentStage = voidStage;
+                ShowCombatScreen();
+                StartNewStage();
+            }
+            else
+            {
+                stageProgression.BeginBiome(table, selectedType);
+                ShowMapScreen();
+            }
+
+            if (GameSaveManager.Instance != null)
+                GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
+            return;
+        }
+
         StartNewStage();
 
         if (GameSaveManager.Instance != null)
@@ -920,7 +989,10 @@ public class DiceManager : MonoBehaviour
         enemy.ResetMonsterIndex();
         stageProgression.InitFirstBiome(biomeList);
         // 새로운 스테이지 시작
-        StartNewStage();
+        if (UsesMapFlow)
+            BeginNewMapRun();
+        else
+            StartNewStage();
     }
 
     public IEnumerator ShowGameOverPanelDelayed()
@@ -931,5 +1003,595 @@ public class DiceManager : MonoBehaviour
         {
             gameOverPanel.SetupGameOver(currentStage);
         }
+    }
+
+    public MapTableData GetMapTable()
+    {
+        if (cachedMapTable == null && mapTableAsset != null)
+            cachedMapTable = MapTableData.Parse(mapTableAsset.text);
+        return cachedMapTable;
+    }
+
+    public string GetMapStageLabel(string biomeName)
+    {
+        if (!useMapFlow || stageProgression.currentMap == null) return null;
+        MapTableData table = GetMapTable();
+        int total = table != null ? table.Config.MaxPathLength : MapPathLength(stageProgression.currentMap);
+        MapNode node = stageProgression.FindNode(stageProgression.currentNodeId);
+        if (node == null) return biomeName;
+        if (node.type == MapNodeType.Boss) return $"{biomeName} BOSS";
+        return $"{biomeName} {node.row + 1}/{total}";
+    }
+
+    static int MapPathLength(MapData map)
+    {
+        int length = 1;
+        if (map == null || map.nodes == null) return length;
+        for (int i = 0; i < map.nodes.Count; i++)
+        {
+            if (map.nodes[i] != null && map.nodes[i].row > length)
+                length = map.nodes[i].row;
+        }
+        return length;
+    }
+
+    public bool IsMapNodeSelectable(int nodeId)
+    {
+        MapNode node = stageProgression.FindNode(nodeId);
+        if (node == null) return false;
+        if (stageProgression.currentNodeId < 0) return node.row == 0;
+        if (!stageProgression.currentNodeCleared) return false;
+        MapNode current = stageProgression.FindNode(stageProgression.currentNodeId);
+        return current != null && current.children.Contains(nodeId);
+    }
+
+    public void EnterMapNode(int nodeId)
+    {
+        if (!UsesMapFlow) return;
+        MapNode node = stageProgression.FindNode(nodeId);
+        if (node == null || !IsMapNodeSelectable(nodeId)) return;
+
+        stageProgression.currentNodeId = nodeId;
+        stageProgression.currentNodeCleared = false;
+        if (stageProgression.visitedNodeIds == null) stageProgression.visitedNodeIds = new List<int>();
+        if (!stageProgression.visitedNodeIds.Contains(nodeId))
+            stageProgression.visitedNodeIds.Add(nodeId);
+
+        pendingBiomeTransition = false;
+        MapTableData table = GetMapTable();
+        if (table != null) stageProgression.ApplyNodeDifficulty(node, table.Config);
+        SaveMapProgress();
+        OpenCurrentNode(node);
+    }
+
+    public void ReturnToMap()
+    {
+        stageProgression.currentNodeCleared = true;
+        pendingBiomeTransition = false;
+        isStageClearing = false;
+        isCalculating = false;
+        ShowMapScreen();
+        SaveMapProgress();
+    }
+
+    public void OnMapLootFinished()
+    {
+        MapNode node = stageProgression.FindNode(stageProgression.currentNodeId);
+        bool boss = node != null && node.type == MapNodeType.Boss;
+        if (boss) pendingBiomeTransition = true;
+
+        MapTableData table = GetMapTable();
+        if (table != null && table.Config.PostBattleShop)
+            PromptShopChoice();
+        else if (boss)
+            OpenBiomeTransition();
+        else
+            ReturnToMap();
+    }
+
+    public void OnShopClosedDuringMap()
+    {
+        if (pendingBiomeTransition)
+            OpenBiomeTransition();
+        else
+            ReturnToMap();
+    }
+
+    void BeginNewMapRun()
+    {
+        MapTableData table = GetMapTable();
+        if (table == null)
+        {
+            Debug.LogWarning("[Map] Map_Table이 없어 직선 진행으로 시작합니다.");
+            StartNewStage();
+            return;
+        }
+
+        stageProgression.BeginRun(UnityEngine.Random.Range(1, int.MaxValue));
+        if (currentBiome == null && biomeList != null)
+            currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
+        BiomeType biome = currentBiome != null ? currentBiome.biomeType : BiomeType.Forest;
+        stageProgression.BeginBiome(table, biome);
+        EnsureMapUi();
+        ShowMapScreen();
+        SaveMapProgress();
+    }
+
+    void RestoreMapProgress(SaveData data)
+    {
+        MapTableData table = GetMapTable();
+        if (data.mapSaveVersion < 1)
+        {
+            stageProgression.BeginRun(UnityEngine.Random.Range(1, int.MaxValue));
+            stageProgression.biomeIndex = Mathf.Max(0, (currentStage - 1) / 10);
+        }
+        else
+        {
+            stageProgression.runSeed = data.runSeed;
+            stageProgression.biomeIndex = data.biomeIndex;
+            stageProgression.currentNodeId = data.currentNodeId;
+            stageProgression.currentNodeCleared = data.currentNodeCleared;
+            stageProgression.visitedNodeIds = data.visitedNodeIds != null
+                ? new List<int>(data.visitedNodeIds)
+                : new List<int>();
+        }
+
+        BiomeType biome = currentBiome != null ? currentBiome.biomeType : BiomeType.Forest;
+        stageProgression.currentMap = biome == BiomeType.Void || table == null
+            ? null
+            : MapGenerator.Generate(stageProgression.runSeed, stageProgression.biomeIndex, biome, table);
+        if (!MapProgressMatches(stageProgression))
+        {
+            stageProgression.currentNodeId = -1;
+            stageProgression.currentNodeCleared = false;
+            if (stageProgression.visitedNodeIds == null) stageProgression.visitedNodeIds = new List<int>();
+            stageProgression.visitedNodeIds.Clear();
+        }
+        EnsureMapUi();
+    }
+
+    void OpenBiomeTransition()
+    {
+        pendingBiomeTransition = false;
+        stageProgression.currentNodeCleared = true;
+        stageProgression.biomeIndex++;
+        isStageClearing = false;
+        isCalculating = false;
+        HideMapOverlays();
+        SetBoardVisible(false);
+
+        MapTableData table = GetMapTable();
+        int threshold = table != null ? table.Config.BiomeCountToVoid : 10;
+        BiomeType current = currentBiome != null ? currentBiome.biomeType : BiomeType.Forest;
+        List<BiomeType> options = biomeNavigator.GetNextBiomeOptions(current, stageProgression.biomeIndex, threshold);
+        if (biomeSelectionPanel != null)
+            biomeSelectionPanel.OpenPanel(this, options);
+        SaveMapProgress();
+    }
+
+    void OpenCurrentNode(MapNode node)
+    {
+        if (node == null) return;
+        switch (node.type)
+        {
+            case MapNodeType.Enemy:
+            case MapNodeType.Boss:
+                ShowCombatScreen();
+                StartNewStage();
+                break;
+            case MapNodeType.Encounter:
+                HideMapOverlays();
+                SetBoardVisible(false);
+                if (encounterEventPanel != null && currentBiome != null)
+                    encounterEventPanel.StartEvent(currentBiome.biomeType);
+                else
+                    ReturnToMap();
+                PlaceTravelChrome();
+                SetHudActive("Book_Button", false);
+                SetHudActive("Deck_BTN", false);
+                break;
+            case MapNodeType.Shop:
+            case MapNodeType.Opel:
+                HideMapOverlays();
+                SetBoardVisible(false);
+                if (shopManager != null) shopManager.OpenMapShop();
+                else ReturnToMap();
+                PlaceTravelChrome();
+                break;
+            case MapNodeType.Rest:
+                HideMapOverlays();
+                SetBoardVisible(false);
+                if (restPanel != null) restPanel.Open(this);
+                else ReturnToMap();
+                PlaceTravelChrome();
+                break;
+        }
+    }
+
+    void ShowMapScreen()
+    {
+        EnsureMapUi();
+        if (restPanel != null) restPanel.Hide();
+        if (opelPanel != null) opelPanel.Hide();
+        SetBoardVisible(false);
+        if (mapPanel != null)
+        {
+            mapPanel.iconSet = mapIconSet;
+            mapPanel.Show(this);
+        }
+        PlaceTravelChrome();
+        UpdateMainUI("");
+    }
+
+    void ShowCombatScreen()
+    {
+        HideMapOverlays();
+        SetBoardVisible(true);
+    }
+
+    void HideMapOverlays()
+    {
+        if (mapPanel != null) mapPanel.Hide();
+        if (restPanel != null) restPanel.Hide();
+        if (opelPanel != null) opelPanel.Hide();
+    }
+
+    static bool MapProgressMatches(StageManager stage)
+    {
+        if (stage == null || stage.currentMap == null) return true;
+        if (stage.currentNodeId >= 0 && stage.FindNode(stage.currentNodeId) == null)
+            return false;
+        if (stage.visitedNodeIds == null) return true;
+        for (int i = 0; i < stage.visitedNodeIds.Count; i++)
+        {
+            if (stage.FindNode(stage.visitedNodeIds[i]) == null)
+                return false;
+        }
+        return true;
+    }
+
+    void SetBoardVisible(bool visible)
+    {
+        if (rollSlotParent != null) rollSlotParent.gameObject.SetActive(visible);
+        if (keepSlotParent != null) keepSlotParent.gameObject.SetActive(visible);
+        if (ui != null)
+        {
+            if (ui.rollButton != null) ui.rollButton.gameObject.SetActive(visible);
+            if (ui.finishButton != null) ui.finishButton.gameObject.SetActive(visible);
+            if (ui.flameStackRoot != null) ui.flameStackRoot.SetActive(visible);
+            if (ui.resultPanel != null && !visible) ui.resultPanel.SetActive(false);
+            if (!visible)
+            {
+                ui.HideResult();
+                ui.HideShopChoice();
+            }
+        }
+        SetCombatHud(visible);
+        if (visible)
+        {
+            CacheHud();
+            RestoreCombatChrome();
+            if (hudObjects.TryGetValue("ScorePanel", out GameObject score) && score != null)
+            {
+                Image scoreImage = score.GetComponent<Image>();
+                if (scoreImage != null) scoreImage.raycastTarget = true;
+            }
+        }
+        if (!visible && enemy != null)
+            enemy.gameObject.SetActive(false);
+        if (!visible)
+        {
+            HideBoardDice();
+            PlaceTravelChrome();
+        }
+    }
+
+    void PlaceTravelChrome()
+    {
+        CacheHud();
+        if (biomeBackgroundImage != null)
+        {
+            biomeBackgroundImage.gameObject.SetActive(true);
+            biomeBackgroundImage.enabled = true;
+            biomeBackgroundImage.transform.SetAsFirstSibling();
+            if (stageProgression != null && stageProgression.currentBiome != null && stageProgression.currentBiome.backgroundImage != null)
+                biomeBackgroundImage.sprite = stageProgression.currentBiome.backgroundImage;
+        }
+
+        if (mapPanel != null && mapPanel.gameObject.activeSelf)
+            mapPanel.transform.SetSiblingIndex(1);
+
+        RaiseHud("ScorePanel");
+        if (hudObjects.TryGetValue("ScorePanel", out GameObject score) && score != null)
+        {
+            Image scoreImage = score.GetComponent<Image>();
+            if (scoreImage != null) scoreImage.raycastTarget = false;
+        }
+        RaiseHud("FigureSlotArea");
+        RaiseHud("Setting_BTN");
+        EnableHudControl("Book_Button");
+        EnableHudControl("Deck_BTN");
+        EnableHudControl("Setting_BTN");
+        EnableHudControl("CoinPanel");
+        EnableHudControl("HeartPanel");
+        EnableHudControl("FigureSlotArea");
+        ApplyTravelChrome();
+    }
+
+    class HudRectSnapshot
+    {
+        public RectTransform rect;
+        public Transform parent;
+        public int siblingIndex;
+        public Vector2 anchorMin;
+        public Vector2 anchorMax;
+        public Vector2 pivot;
+        public Vector2 anchoredPosition;
+        public Vector2 sizeDelta;
+        public Vector3 localScale;
+        public bool raycast;
+        public bool hasImage;
+    }
+
+    readonly Dictionary<string, HudRectSnapshot> combatPlacements = new Dictionary<string, HudRectSnapshot>();
+    bool combatPlacementsSaved;
+    bool travelPlacementApplied;
+
+    static readonly string[] TravelPlacementNames = { "Book_Button", "Deck_BTN", "CoinPanel", "HeartPanel" };
+
+    void SaveCombatPlacements()
+    {
+        if (combatPlacementsSaved) return;
+        CacheHud();
+        combatPlacementsSaved = true;
+        for (int i = 0; i < TravelPlacementNames.Length; i++)
+        {
+            string objectName = TravelPlacementNames[i];
+            if (!hudObjects.TryGetValue(objectName, out GameObject target) || target == null) continue;
+            RectTransform rect = target.GetComponent<RectTransform>();
+            if (rect == null) continue;
+            Image image = target.GetComponent<Image>();
+            combatPlacements[objectName] = new HudRectSnapshot
+            {
+                rect = rect,
+                parent = rect.parent,
+                siblingIndex = rect.GetSiblingIndex(),
+                anchorMin = rect.anchorMin,
+                anchorMax = rect.anchorMax,
+                pivot = rect.pivot,
+                anchoredPosition = rect.anchoredPosition,
+                sizeDelta = rect.sizeDelta,
+                localScale = rect.localScale,
+                raycast = image != null && image.raycastTarget,
+                hasImage = image != null
+            };
+        }
+    }
+
+    void ApplyTravelChrome()
+    {
+        SaveCombatPlacements();
+        if (!hudObjects.TryGetValue("ScorePanel", out GameObject score) || score == null) return;
+        RectTransform canvas = score.transform.parent as RectTransform;
+        if (canvas == null) return;
+
+        RectTransform deck = PlacementRect("Deck_BTN");
+        RectTransform book = PlacementRect("Book_Button");
+        RectTransform coin = PlacementRect("CoinPanel");
+        RectTransform heart = PlacementRect("HeartPanel");
+
+        if (deck != null)
+            PlaceBottomLeftCenter(deck, canvas, new Vector2(130f, 120f));
+        if (book != null)
+            PlaceBottomLeftCenter(book, canvas, new Vector2(130f, 300f));
+        FitTravelStatusPanels(coin, heart);
+        Vector2 coinPos = new Vector2(342f, -32f);
+        Vector2 heartPos = new Vector2(329.6f, coinPos.y - 62f);
+        if (coin != null)
+        {
+            PlaceAnchored(coin, canvas, new Vector2(0f, 1f), coinPos);
+            SetPanelRaycast(coin, false);
+        }
+        if (heart != null)
+        {
+            PlaceAnchored(heart, canvas, new Vector2(0f, 1f), heartPos);
+            SetPanelRaycast(heart, false);
+        }
+        travelPlacementApplied = true;
+    }
+
+    void RestoreCombatChrome()
+    {
+        SaveCombatPlacements();
+        if (!travelPlacementApplied) return;
+        foreach (KeyValuePair<string, HudRectSnapshot> pair in combatPlacements)
+        {
+            HudRectSnapshot snap = pair.Value;
+            if (snap.rect == null) continue;
+            snap.rect.SetParent(snap.parent, false);
+            snap.rect.anchorMin = snap.anchorMin;
+            snap.rect.anchorMax = snap.anchorMax;
+            snap.rect.pivot = snap.pivot;
+            snap.rect.sizeDelta = snap.sizeDelta;
+            snap.rect.anchoredPosition = snap.anchoredPosition;
+            snap.rect.localScale = snap.localScale;
+            snap.rect.SetSiblingIndex(Mathf.Clamp(snap.siblingIndex, 0, snap.parent.childCount - 1));
+            if (snap.hasImage)
+            {
+                Image image = snap.rect.GetComponent<Image>();
+                if (image != null) image.raycastTarget = snap.raycast;
+            }
+        }
+        travelPlacementApplied = false;
+    }
+
+    void FitTravelStatusPanels(RectTransform coin, RectTransform heart)
+    {
+        float width = 0f;
+        if (coin != null && combatPlacements.TryGetValue("CoinPanel", out HudRectSnapshot coinSnap))
+            width = Mathf.Max(width, coinSnap.sizeDelta.x);
+        if (heart != null && combatPlacements.TryGetValue("HeartPanel", out HudRectSnapshot heartSnap))
+            width = Mathf.Max(width, heartSnap.sizeDelta.x);
+        ApplyTravelPanel(coin, "CoinPanel", width);
+        ApplyTravelPanel(heart, "HeartPanel", width);
+    }
+
+    void ApplyTravelPanel(RectTransform rect, string objectName, float width)
+    {
+        if (rect == null || !combatPlacements.TryGetValue(objectName, out HudRectSnapshot snap)) return;
+        Vector2 size = snap.sizeDelta;
+        if (width > 0f) size.x = width;
+        rect.sizeDelta = size;
+        rect.localScale = snap.localScale * 0.7f;
+    }
+
+    static void PlaceBottomLeftCenter(RectTransform rect, RectTransform canvas, Vector2 center)
+    {
+        rect.SetParent(canvas, false);
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.zero;
+        rect.anchoredPosition = center;
+        rect.SetAsLastSibling();
+    }
+
+    static void PlaceAnchored(RectTransform rect, RectTransform canvas, Vector2 anchor, Vector2 position)
+    {
+        rect.SetParent(canvas, false);
+        rect.anchorMin = anchor;
+        rect.anchorMax = anchor;
+        rect.anchoredPosition = position;
+        rect.SetAsLastSibling();
+    }
+
+    void HideBoardDice()
+    {
+        Dice[] dice = FindObjectsByType<Dice>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        for (int i = 0; i < dice.Length; i++)
+        {
+            if (dice[i] != null) dice[i].gameObject.SetActive(false);
+        }
+    }
+
+    void SetHudActive(string objectName, bool active)
+    {
+        if (!hudObjects.TryGetValue(objectName, out GameObject target) || target == null) return;
+        target.SetActive(active);
+    }
+
+    RectTransform PlacementRect(string objectName)
+    {
+        if (!hudObjects.TryGetValue(objectName, out GameObject target) || target == null) return null;
+        return target.GetComponent<RectTransform>();
+    }
+
+    static void SetPanelRaycast(RectTransform rect, bool enabled)
+    {
+        Image image = rect.GetComponent<Image>();
+        if (image != null) image.raycastTarget = enabled;
+    }
+
+    void RaiseHud(string objectName)
+    {
+        if (!hudObjects.TryGetValue(objectName, out GameObject target) || target == null) return;
+        target.SetActive(true);
+        target.transform.SetAsLastSibling();
+    }
+
+    void EnableHudControl(string objectName)
+    {
+        if (!hudObjects.TryGetValue(objectName, out GameObject target) || target == null) return;
+        target.SetActive(true);
+        Button button = target.GetComponent<Button>();
+        if (button != null) button.interactable = true;
+    }
+
+    static readonly string[] CombatHudNames =
+    {
+        "ScorePanel_Outer", "Hand Description Text", "Active Figure Text", "Stage_Panel",
+        "Drop_Rate_Panel", "slot_counter_Dice", "slot_counter_chip (1)", "plaque_chips_mult", "panel_score", "Snack"
+    };
+
+    static readonly string[] TravelHudNames =
+    {
+        "CoinPanel", "HeartPanel", "FigureSlotArea", "Setting_BTN", "Book_Button", "Deck_BTN"
+    };
+
+    readonly Dictionary<string, GameObject> hudObjects = new Dictionary<string, GameObject>();
+    bool hudCached;
+
+    void SetCombatHud(bool combat)
+    {
+        CacheHud();
+        for (int i = 0; i < CombatHudNames.Length; i++)
+        {
+            if (hudObjects.TryGetValue(CombatHudNames[i], out GameObject target) && target != null)
+                target.SetActive(combat);
+        }
+        if (hudObjects.TryGetValue("EnemyHPSlider", out GameObject enemyHp) && enemyHp != null)
+            enemyHp.SetActive(combat);
+        if (!combat)
+        {
+            for (int i = 0; i < TravelHudNames.Length; i++)
+            {
+                if (hudObjects.TryGetValue(TravelHudNames[i], out GameObject target) && target != null)
+                    target.SetActive(true);
+            }
+        }
+    }
+
+    void CacheHud()
+    {
+        if (hudCached) return;
+        hudCached = true;
+        var transforms = FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        var wanted = new HashSet<string>();
+        for (int i = 0; i < CombatHudNames.Length; i++) wanted.Add(CombatHudNames[i]);
+        for (int i = 0; i < TravelHudNames.Length; i++) wanted.Add(TravelHudNames[i]);
+        wanted.Add("ScorePanel");
+        wanted.Add("EnemyHPSlider");
+        for (int i = 0; i < transforms.Length; i++)
+        {
+            if (transforms[i] == null || !wanted.Contains(transforms[i].name)) continue;
+            if (!hudObjects.ContainsKey(transforms[i].name))
+                hudObjects[transforms[i].name] = transforms[i].gameObject;
+        }
+    }
+
+    void EnsureMapUi()
+    {
+        Canvas canvas = FindFirstObjectByType<Canvas>();
+        if (mapPanel == null && canvas != null)
+        {
+            var go = new GameObject("MapRoot", typeof(RectTransform), typeof(MapPanel));
+            go.transform.SetParent(canvas.transform, false);
+            mapPanel = go.GetComponent<MapPanel>();
+            go.SetActive(false);
+        }
+        if (restPanel == null && canvas != null)
+        {
+            var go = new GameObject("RestPanel", typeof(RectTransform), typeof(RestPanel));
+            go.transform.SetParent(canvas.transform, false);
+            restPanel = go.GetComponent<RestPanel>();
+            go.SetActive(false);
+        }
+        if (opelPanel == null && canvas != null)
+        {
+            var go = new GameObject("OpelPanel", typeof(RectTransform), typeof(OpelPanel));
+            go.transform.SetParent(canvas.transform, false);
+            opelPanel = go.GetComponent<OpelPanel>();
+            go.SetActive(false);
+        }
+        if (mapIconSet == null)
+        {
+            mapIconSet = ScriptableObject.CreateInstance<MapIconSet>();
+            mapIconSet.FillDefaultColors();
+        }
+        if (mapPanel != null) mapPanel.iconSet = mapIconSet;
+    }
+
+    void SaveMapProgress()
+    {
+        if (GameSaveManager.Instance != null)
+            GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
     }
 }

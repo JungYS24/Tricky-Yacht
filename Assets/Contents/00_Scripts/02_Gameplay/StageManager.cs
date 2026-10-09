@@ -7,6 +7,14 @@ public class StageManager
     public int currentStage = 1;
     public BiomeDataSO currentBiome;
 
+    // 지도 진행. currentMap은 시드로 다시 만들므로 세이브하지 않습니다.
+    public int runSeed;
+    public int biomeIndex;
+    [System.NonSerialized] public MapData currentMap;
+    public int currentNodeId = -1;
+    public bool currentNodeCleared;
+    public List<int> visitedNodeIds = new List<int>();
+
     // 게임 시작 시 첫 바이옴(숲)을 강제로 세팅하는 로직
     public void InitFirstBiome(List<BiomeDataSO> biomeList)
     {
@@ -52,5 +60,49 @@ public class StageManager
     public void SetNewBiome(List<BiomeDataSO> biomeList, BiomeType selectedType)
     {
         currentBiome = biomeList.Find(b => b.biomeType == selectedType);
+    }
+
+    public void BeginRun(int seed)
+    {
+        runSeed = seed;
+        biomeIndex = 0;
+        currentNodeId = -1;
+        currentNodeCleared = false;
+        if (visitedNodeIds == null) visitedNodeIds = new List<int>();
+        visitedNodeIds.Clear();
+        currentMap = null;
+    }
+
+    public void BeginBiome(MapTableData table, BiomeType biome)
+    {
+        currentNodeId = -1;
+        currentNodeCleared = false;
+        if (visitedNodeIds == null) visitedNodeIds = new List<int>();
+        visitedNodeIds.Clear();
+        currentMap = biome == BiomeType.Void || table == null
+            ? null
+            : MapGenerator.Generate(runSeed, biomeIndex, biome, table);
+    }
+
+    public MapNode FindNode(int nodeId)
+    {
+        if (currentMap == null || currentMap.nodes == null) return null;
+        if (nodeId < 0 || nodeId >= currentMap.nodes.Count) return null;
+        MapNode node = currentMap.nodes[nodeId];
+        return node != null && node.id == nodeId ? node : null;
+    }
+
+    // 층 위치로 기존 10스테이지 곡선을 맞춥니다. 보스는 10의 배수라서 보스 판정이 그대로 동작합니다.
+    public void ApplyNodeDifficulty(MapNode node, MapConfig config)
+    {
+        if (node == null || config == null) return;
+        if (node.type == MapNodeType.Boss)
+        {
+            currentStage = biomeIndex * 10 + 10;
+            return;
+        }
+
+        int span = Mathf.Max(1, config.MaxPathLength - 1);
+        currentStage = biomeIndex * 10 + 1 + (node.row * config.MinEnemyCount / span);
     }
 }

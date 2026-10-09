@@ -47,12 +47,26 @@ public class BiomeNavigator
 
     public List<BiomeType> GetNextBiomeOptions(BiomeType currentBiome, int currentStage)
     {
-        //100스테이지(바이옴 10개) 클리어 시 무조건 공허(Void) 3개로 고정하여 선택지에 띄움
+        // 직선 진행(기존 메인씬)은 스테이지 번호로 Void를 판정합니다.
         if (currentStage >= 100)
         {
-            return new List<BiomeType> { BiomeType.Void, BiomeType.Void, BiomeType.Void };
+            return VoidOptions();
         }
 
         return BiomeRoutes.ContainsKey(currentBiome) ? BiomeRoutes[currentBiome] : new List<BiomeType>();
+    }
+
+    // 지도 진행은 클리어한 바이옴 수로 Void를 판정합니다. 기준값은 Map_Table의 Biome_Count_To_Void입니다.
+    public List<BiomeType> GetNextBiomeOptions(BiomeType currentBiome, int biomeIndex, int biomeCountToVoid)
+    {
+        if (biomeIndex >= biomeCountToVoid)
+            return VoidOptions();
+
+        return BiomeRoutes.ContainsKey(currentBiome) ? BiomeRoutes[currentBiome] : new List<BiomeType>();
+    }
+
+    static List<BiomeType> VoidOptions()
+    {
+        return new List<BiomeType> { BiomeType.Void, BiomeType.Void, BiomeType.Void };
     }
 }

@@ -94,8 +94,15 @@ public class CollectionBookManager : MonoBehaviour
 
     public void OpenCollectionBook()
     {
+        if (collectionPanelRoot != null && collectionPanelRoot.activeSelf)
+        {
+            CloseCollectionBook();
+            return;
+        }
         collectionPanelRoot.SetActive(true);
         RefreshCollectionBoard();
+        GameObject bookButton = GameObject.Find("Book_Button");
+        if (bookButton != null) bookButton.transform.SetAsLastSibling();
     }
 
     public void CloseCollectionBook()
