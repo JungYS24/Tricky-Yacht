@@ -46,10 +46,8 @@ public class MapPanel : MonoBehaviour
         float width = pad * 2f + Mathf.Max(0, cfg.GridWidth - 1) * colSpacing;
         float height = pad * 2f + cfg.MaxPathLength * rowSpacing;
         content.sizeDelta = new Vector2(width, height);
-        Stretch(lineLayer);
-        Stretch(nodeLayer);
-        lineLayer.sizeDelta = content.sizeDelta;
-        nodeLayer.sizeDelta = content.sizeDelta;
+        FitLayer(lineLayer, content.sizeDelta);
+        FitLayer(nodeLayer, content.sizeDelta);
 
         var positions = new Dictionary<int, Vector2>(map.nodes.Count);
         for (int i = 0; i < map.nodes.Count; i++)
@@ -99,8 +97,10 @@ public class MapPanel : MonoBehaviour
 
         MapNodeTypeRow rule = table.GetNodeRule(node.type);
         string iconKey = rule != null ? rule.Icon_Key : null;
-        Sprite sprite = iconSet != null ? iconSet.GetSprite(iconKey, out Color tint) : null;
-        if (iconSet == null) tint = Color.white;
+        Color tint = Color.white;
+        Sprite sprite = null;
+        if (iconSet != null)
+            sprite = iconSet.GetSprite(iconKey, out tint);
         bool selectable = diceManager.IsMapNodeSelectable(node.id);
         bool current = node.id == diceManager.stageProgression.currentNodeId;
         bool visited = diceManager.stageProgression.visitedNodeIds != null && diceManager.stageProgression.visitedNodeIds.Contains(node.id);
@@ -202,6 +202,16 @@ public class MapPanel : MonoBehaviour
         if (parent == null) return;
         for (int i = parent.childCount - 1; i >= 0; i--)
             Destroy(parent.GetChild(i).gameObject);
+    }
+
+    static void FitLayer(RectTransform layer, Vector2 size)
+    {
+        layer.anchorMin = Vector2.zero;
+        layer.anchorMax = Vector2.zero;
+        layer.pivot = Vector2.zero;
+        layer.anchoredPosition = Vector2.zero;
+        layer.sizeDelta = size;
+        layer.localScale = Vector3.one;
     }
 
     static void Stretch(RectTransform rect)
