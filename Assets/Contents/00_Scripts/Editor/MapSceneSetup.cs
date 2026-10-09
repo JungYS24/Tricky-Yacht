@@ -20,13 +20,18 @@ public static class MapSceneSetup
 
     static void EnsureIfMapSceneIsOpen()
     {
-        if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+        if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling) return;
         var scene = EditorSceneManager.GetActiveScene();
         if (scene.path != ScenePath) return;
-        DiceManager dice = Object.FindFirstObjectByType<DiceManager>();
-        if (dice != null && dice.useMapFlow && dice.mapPanel != null && dice.mapTableAsset != null && dice.restPanel != null && dice.opelPanel != null)
-            return;
+        if (HierarchyReady()) return;
         SetupMainSceneMap();
+    }
+
+    static bool HierarchyReady()
+    {
+        MapPanel[] maps = Object.FindObjectsByType<MapPanel>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        if (maps == null || maps.Length == 0) return false;
+        return maps[0].transform.Find("MapScroll") != null && maps[0].transform.Find("Legend/Enemy") != null;
     }
 
     [MenuItem("Tools/Map/Setup MainScene_Map")]
@@ -35,7 +40,9 @@ public static class MapSceneSetup
         MapIconSet icons = LoadOrCreateIcons();
         MapNodeView prefab = LoadOrCreatePrefab();
 
-        var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        var scene = EditorSceneManager.GetActiveScene();
+        if (scene.path != ScenePath)
+            scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
         DiceManager dice = Object.FindFirstObjectByType<DiceManager>();
         if (dice == null)
         {
@@ -60,8 +67,14 @@ public static class MapSceneSetup
         restPanel.gameObject.SetActive(false);
         opelPanel.gameObject.SetActive(false);
 
+        MapUiHierarchy.EnsureMap(mapPanel);
+        MapUiHierarchy.EnsureRest(restPanel);
+        MapUiHierarchy.EnsureOpel(opelPanel);
         mapPanel.iconSet = icons;
         mapPanel.nodePrefab = prefab;
+        EditorUtility.SetDirty(mapPanel);
+        EditorUtility.SetDirty(restPanel);
+        EditorUtility.SetDirty(opelPanel);
 
         dice.useMapFlow = true;
         dice.mapTableAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(TablePath);
@@ -73,7 +86,7 @@ public static class MapSceneSetup
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         AssetDatabase.SaveAssets();
-        Debug.Log("[Map] MainScene_Map에 MapRoot, RestPanel, OpelPanel을 연결했습니다.");
+        Debug.Log("[Map] MainScene_Map 하이어라키에 MapScroll, Legend, RestPanel, OpelPanel을 배치했습니다.");
     }
 
     public static void BatchRun()

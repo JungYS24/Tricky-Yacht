@@ -6,15 +6,15 @@ using UnityEngine.UI;
 public class MapPanel : MonoBehaviour
 {
     public MapNodeView nodePrefab;
+    public MapNodeView nodeTemplate;
     public MapIconSet iconSet;
     public ScrollRect scrollRect;
+    public RectTransform content;
+    public RectTransform lineLayer;
+    public RectTransform nodeLayer;
+    public RectTransform legend;
 
-    RectTransform content;
-    RectTransform lineLayer;
-    RectTransform nodeLayer;
-    RectTransform legend;
     Sprite dotSprite;
-    bool built;
 
     public void Hide()
     {
@@ -25,78 +25,15 @@ public class MapPanel : MonoBehaviour
     {
         gameObject.SetActive(true);
         transform.SetAsLastSibling();
-        EnsureUi();
+        MapUiHierarchy.EnsureMap(this);
         Rebuild(diceManager);
-    }
-
-    void EnsureUi()
-    {
-        if (built) return;
-        built = true;
-
-        var root = GetComponent<RectTransform>();
-        if (root == null) root = gameObject.AddComponent<RectTransform>();
-        Stretch(root);
-
-        var background = GetComponent<Image>();
-        if (background == null) background = gameObject.AddComponent<Image>();
-        background.color = new Color(0.05f, 0.07f, 0.1f, 0.94f);
-
-        var scrollGo = new GameObject("MapScroll", typeof(RectTransform), typeof(Image), typeof(ScrollRect), typeof(Mask));
-        scrollGo.transform.SetParent(transform, false);
-        var scrollRectTransform = scrollGo.GetComponent<RectTransform>();
-        Stretch(scrollRectTransform);
-        scrollRectTransform.offsetMin = new Vector2(24f, 150f);
-        scrollRectTransform.offsetMax = new Vector2(-24f, -24f);
-        scrollGo.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.02f);
-        scrollGo.GetComponent<Mask>().showMaskGraphic = false;
-
-        var contentGo = new GameObject("Content", typeof(RectTransform));
-        contentGo.transform.SetParent(scrollGo.transform, false);
-        content = contentGo.GetComponent<RectTransform>();
-        content.anchorMin = new Vector2(0f, 0f);
-        content.anchorMax = new Vector2(0f, 0f);
-        content.pivot = new Vector2(0f, 0f);
-
-        var linesGo = new GameObject("Lines", typeof(RectTransform));
-        linesGo.transform.SetParent(content, false);
-        lineLayer = linesGo.GetComponent<RectTransform>();
-        Stretch(lineLayer);
-
-        var nodesGo = new GameObject("Nodes", typeof(RectTransform));
-        nodesGo.transform.SetParent(content, false);
-        nodeLayer = nodesGo.GetComponent<RectTransform>();
-        Stretch(nodeLayer);
-
-        scrollRect = scrollGo.GetComponent<ScrollRect>();
-        scrollRect.content = content;
-        scrollRect.viewport = scrollRectTransform;
-        scrollRect.horizontal = false;
-        scrollRect.vertical = true;
-        scrollRect.movementType = ScrollRect.MovementType.Clamped;
-        scrollRect.scrollSensitivity = 30f;
-
-        legend = CreateLegend();
-    }
-
-    RectTransform CreateLegend()
-    {
-        var legendGo = new GameObject("Legend", typeof(RectTransform));
-        legendGo.transform.SetParent(transform, false);
-        var rect = legendGo.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0f, 0f);
-        rect.anchorMax = new Vector2(1f, 0f);
-        rect.pivot = new Vector2(0.5f, 0f);
-        rect.sizeDelta = new Vector2(0f, 130f);
-        rect.anchoredPosition = new Vector2(0f, 8f);
-        return rect;
     }
 
     void Rebuild(DiceManager diceManager)
     {
+        if (lineLayer == null || nodeLayer == null || content == null) return;
         ClearChildren(lineLayer);
         ClearChildren(nodeLayer);
-        ClearChildren(legend);
 
         MapData map = diceManager.stageProgression.currentMap;
         MapTableData table = diceManager.GetMapTable();
@@ -141,16 +78,18 @@ public class MapPanel : MonoBehaviour
             CreateNode(diceManager, table, node, positions[node.id]);
         }
 
-        BuildLegend(table);
+        RefreshLegend(table);
         Canvas.ForceUpdateCanvases();
         if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
     }
 
     void CreateNode(DiceManager diceManager, MapTableData table, MapNode node, Vector2 position)
     {
-        MapNodeView view = nodePrefab != null
-            ? Instantiate(nodePrefab, nodeLayer)
+        MapNodeView source = nodeTemplate != null ? nodeTemplate : nodePrefab;
+        MapNodeView view = source != null
+            ? Instantiate(source, nodeLayer)
             : CreateRuntimeNode();
+        view.gameObject.SetActive(true);
         var rect = view.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(0f, 0f);
         rect.anchorMax = new Vector2(0f, 0f);
@@ -195,52 +134,26 @@ public class MapPanel : MonoBehaviour
         return view;
     }
 
-    void BuildLegend(MapTableData table)
+    void RefreshLegend(MapTableData table)
     {
+        if (legend == null || table == null) return;
         MapNodeType[] types =
         {
             MapNodeType.Enemy, MapNodeType.Boss, MapNodeType.Encounter,
             MapNodeType.Shop, MapNodeType.Opel, MapNodeType.Rest
         };
-        float width = legend.rect.width > 10f ? legend.rect.width : 1200f;
-        float step = width / types.Length;
-        for (int i = 0; i < types.Length; i++)
+        string[] names = { "Enemy", "Boss", "Encounter", "Shop", "Opel", "Rest" };
+        for (int i = 0; i < names.Length; i++)
         {
+            Transform item = legend.Find(names[i]);
+            if (item == null) continue;
             MapNodeTypeRow rule = table.GetNodeRule(types[i]);
             string iconKey = rule != null ? rule.Icon_Key : null;
             Sprite sprite = iconSet != null ? iconSet.GetSprite(iconKey, out _) : null;
-            var item = new GameObject(types[i].ToString(), typeof(RectTransform));
-            item.transform.SetParent(legend, false);
-            var rect = item.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0f, 0.5f);
-            rect.anchorMax = new Vector2(0f, 0.5f);
-            rect.pivot = new Vector2(0f, 0.5f);
-            rect.sizeDelta = new Vector2(step, 80f);
-            rect.anchoredPosition = new Vector2(i * step + 16f, 10f);
-
-            var iconGo = new GameObject("Icon", typeof(RectTransform), typeof(Image));
-            iconGo.transform.SetParent(item.transform, false);
-            var iconRect = iconGo.GetComponent<RectTransform>();
-            iconRect.anchorMin = new Vector2(0f, 0.5f);
-            iconRect.anchorMax = new Vector2(0f, 0.5f);
-            iconRect.sizeDelta = new Vector2(36f, 36f);
-            iconRect.anchoredPosition = new Vector2(18f, 0f);
-            iconGo.GetComponent<Image>().sprite = sprite;
-
-            var textGo = new GameObject("Label", typeof(RectTransform), typeof(Text));
-            textGo.transform.SetParent(item.transform, false);
-            var textRect = textGo.GetComponent<RectTransform>();
-            textRect.anchorMin = new Vector2(0f, 0.5f);
-            textRect.anchorMax = new Vector2(0f, 0.5f);
-            textRect.pivot = new Vector2(0f, 0.5f);
-            textRect.sizeDelta = new Vector2(step - 70f, 40f);
-            textRect.anchoredPosition = new Vector2(46f, 0f);
-            var text = textGo.GetComponent<Text>();
-            text.font = BuiltinFont();
-            text.fontSize = 22;
-            text.alignment = TextAnchor.MiddleLeft;
-            text.color = Color.white;
-            text.text = table.GetNodeName(types[i]);
+            Image icon = item.Find("Icon") != null ? item.Find("Icon").GetComponent<Image>() : null;
+            if (icon != null && sprite != null) icon.sprite = sprite;
+            Text label = item.Find("Label") != null ? item.Find("Label").GetComponent<Text>() : null;
+            if (label != null) label.text = table.GetNodeName(types[i]);
         }
     }
 
