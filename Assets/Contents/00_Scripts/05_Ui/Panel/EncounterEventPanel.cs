@@ -533,6 +533,9 @@ public class EncounterEventPanel : MonoBehaviour
         if (choiceRoot != null) choiceRoot.SetActive(false);
         gameObject.SetActive(false);
 
-        diceManager.ShowLootSelection();
+        if (diceManager != null && diceManager.useMapFlow && (TutorialManager.Instance == null || !TutorialManager.Instance.isTutorialActive))
+            diceManager.ReturnToMap();
+        else
+            diceManager.ShowLootSelection();
     }
 }

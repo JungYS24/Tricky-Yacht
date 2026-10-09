@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public static class GameStateRestorer
 {
     // 비공개 포획 대기 플래그는 참조로 받아 기존 복원 순서에서 초기화합니다.
-    public static void Restore(DiceManager dm, SaveData data, int defaultMaxRerolls, ref bool pendingPeppermintSuccess)
+    public static void Restore(DiceManager dm, SaveData data, int defaultMaxRerolls, ref bool pendingPeppermintSuccess, bool skipCombatBootstrap = false)
     {
         dm.stageContext.firstNormalAttackDone = data.firstNormalAttackDone;
 
@@ -159,8 +159,8 @@ public static class GameStateRestorer
                 BGMManager.Instance.ChangeBGM(dm.currentBiome.biomeBGM);
         }
 
-        // 싸우던 몬스터 복구
-        if (!string.IsNullOrEmpty(data.savedMonsterName))
+        // 싸우던 몬스터 복구. 지도에서 맵으로 돌아오는 세이브는 전투를 다시 열지 않습니다.
+        if (!skipCombatBootstrap && !string.IsNullOrEmpty(data.savedMonsterName))
         {
             MonsterDataSO savedMonster = GetMonsterDataByName(dm, data.savedMonsterName);
             if (savedMonster != null)
@@ -172,10 +172,16 @@ public static class GameStateRestorer
             dm.accumulatedFlameDamage = data.savedFlameDamage;
             dm.ui?.UpdateFlameStackUI(dm.accumulatedFlameDamage); //세이브 로드 시 스택 UI 갱신
         }
-        else
+        else if (!skipCombatBootstrap)
         {
             dm.enemy.Initialize(dm.currentStage, dm.currentBiome);
             dm.accumulatedFlameDamage = 0; // 새로 시작할 땐 확실하게 0으로 초기화
+            dm.ui?.UpdateFlameStackUI(0);
+        }
+        else if (dm.enemy != null)
+        {
+            dm.enemy.gameObject.SetActive(false);
+            dm.accumulatedFlameDamage = 0;
             dm.ui?.UpdateFlameStackUI(0);
         }
 

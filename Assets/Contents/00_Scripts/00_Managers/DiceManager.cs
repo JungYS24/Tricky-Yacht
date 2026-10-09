@@ -118,6 +118,19 @@ public class DiceManager : MonoBehaviour
     [Header("조우자 이벤트 시스템")]
     public EncounterEventPanel encounterEventPanel;
 
+    [Header("지도 시스템")]
+    public bool useMapFlow;
+    public TextAsset mapTableAsset;
+    public MapPanel mapPanel;
+    public RestPanel restPanel;
+    public OpelPanel opelPanel;
+    public MapIconSet mapIconSet;
+
+    MapTableData cachedMapTable;
+    bool pendingBiomeTransition;
+
+    public bool UsesMapFlow => useMapFlow && (TutorialManager.Instance == null || !TutorialManager.Instance.isTutorialActive);
+
     [Header("조우자 특수 효과 상태 (임시 저장용)")]
     [HideInInspector] public bool isNextEnemyHPBoosted = false; // 눈먼 점술가 패널티
     [HideInInspector] public bool isNextCombatHPTiedToOne = false; // 숙원의 방랑자 패널티
@@ -271,7 +284,10 @@ public class DiceManager : MonoBehaviour
 
             // 첫 시작은 무조건 숲(Forest)으로 고정
             currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
-            StartNewStage();
+            if (UsesMapFlow)
+                BeginNewMapRun();
+            else
+                StartNewStage();
         }
 
         //튜토리얼 종료 후 메인 게임 진입 시, 현재 설정된 1스테이지(숲) 바이옴의 브금을 강제로 재생!
@@ -291,7 +307,25 @@ public class DiceManager : MonoBehaviour
         isRestoringSave = true;
         try
         {
-            GameStateRestorer.Restore(this, data, defaultMaxRerolls, ref pendingPeppermintSuccess);
+            bool resumeCombat = UsesMapFlow && data.mapSaveVersion >= 1 && !string.IsNullOrEmpty(data.savedMonsterName);
+            bool idleMap = UsesMapFlow && !resumeCombat;
+            GameStateRestorer.Restore(this, data, defaultMaxRerolls, ref pendingPeppermintSuccess, idleMap);
+            if (UsesMapFlow)
+                RestoreMapProgress(data);
+
+            if (idleMap)
+            {
+                isCalculating = false;
+                ShowMapScreen();
+                if (data.mapSaveVersion >= 1 && !stageProgression.currentNodeCleared && stageProgression.currentNodeId >= 0)
+                    OpenCurrentNode(stageProgression.FindNode(stageProgression.currentNodeId));
+                FigureEffectManager.Instance?.EvaluateLowHPTriggers(this, shopManager);
+                return;
+            }
+
+            if (UsesMapFlow)
+                ShowCombatScreen();
+
             if (board.TryRestoreState(data))
             {
                 // 새 라운드를 시작하지 않으므로 셔플/리롤/라운드 시작 효과를 재실행하지 않습니다.
@@ -323,7 +357,7 @@ public class DiceManager : MonoBehaviour
         board.CaptureForSave(data);
     }
 
-    void StartNewStage()
+    public void StartNewStage()
     {
         InventoryManager.Instance?.SnackUses.ResetForStage();
         isStageClearing = false;
@@ -691,6 +725,13 @@ public class DiceManager : MonoBehaviour
             return;
         }
 
+        // 지도에서는 조우자가 노드로만 나옵니다.
+        if (useMapFlow)
+        {
+            ShowLootSelection();
+            return;
+        }
+
         //7, 17, 27, 37... 등 10라운드 주기로 끝자리가 7인 스테이지 클리어 시 조우자 등장
         if (currentStage % 10 == 1 && encounterEventPanel != null)
         {
@@ -820,7 +861,14 @@ public class DiceManager : MonoBehaviour
 
     public void PromptShopChoice() { ui?.HideResult(); ui?.ShowShopChoice(); }
     public void GoToShop() { ui?.HideShopChoice(); shopManager?.OpenShop(); }
-    public void SkipShopAndNextStage() { ui?.HideShopChoice(); NextStage(); }
+    public void SkipShopAndNextStage()
+    {
+        ui?.HideShopChoice();
+        if (UsesMapFlow)
+            OnShopClosedDuringMap();
+        else
+            NextStage();
+    }
 
     //발표용 떄문에 튜토리얼 수정
     public void NextStage()
@@ -855,6 +903,27 @@ public class DiceManager : MonoBehaviour
         if (biomeSelectionPanel != null) biomeSelectionPanel.ClosePanel();
 
         stageProgression.SetNewBiome(biomeList, selectedType); // 이관된 로직
+        if (UsesMapFlow)
+        {
+            MapTableData table = GetMapTable();
+            if (selectedType == BiomeType.Void)
+            {
+                int voidStage = table != null ? table.Config.BiomeCountToVoid * 10 + 1 : 101;
+                currentStage = voidStage;
+                ShowCombatScreen();
+                StartNewStage();
+            }
+            else
+            {
+                stageProgression.BeginBiome(table, selectedType);
+                ShowMapScreen();
+            }
+
+            if (GameSaveManager.Instance != null)
+                GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
+            return;
+        }
+
         StartNewStage();
 
         if (GameSaveManager.Instance != null)
@@ -920,7 +989,10 @@ public class DiceManager : MonoBehaviour
         enemy.ResetMonsterIndex();
         stageProgression.InitFirstBiome(biomeList);
         // 새로운 스테이지 시작
-        StartNewStage();
+        if (UsesMapFlow)
+            BeginNewMapRun();
+        else
+            StartNewStage();
     }
 
     public IEnumerator ShowGameOverPanelDelayed()
@@ -931,5 +1003,271 @@ public class DiceManager : MonoBehaviour
         {
             gameOverPanel.SetupGameOver(currentStage);
         }
+    }
+
+    public MapTableData GetMapTable()
+    {
+        if (cachedMapTable == null && mapTableAsset != null)
+            cachedMapTable = MapTableData.Parse(mapTableAsset.text);
+        return cachedMapTable;
+    }
+
+    public string GetMapStageLabel(string biomeName)
+    {
+        if (!useMapFlow || stageProgression.currentMap == null) return null;
+        MapTableData table = GetMapTable();
+        int total = table != null ? table.Config.MaxPathLength : 14;
+        MapNode node = stageProgression.FindNode(stageProgression.currentNodeId);
+        if (node == null) return biomeName;
+        if (node.type == MapNodeType.Boss) return $"{biomeName} BOSS";
+        return $"{biomeName} {node.row + 1}/{total}";
+    }
+
+    public bool IsMapNodeSelectable(int nodeId)
+    {
+        MapNode node = stageProgression.FindNode(nodeId);
+        if (node == null) return false;
+        if (stageProgression.currentNodeId < 0) return node.row == 0;
+        if (!stageProgression.currentNodeCleared) return false;
+        MapNode current = stageProgression.FindNode(stageProgression.currentNodeId);
+        return current != null && current.children.Contains(nodeId);
+    }
+
+    public void EnterMapNode(int nodeId)
+    {
+        if (!UsesMapFlow) return;
+        MapNode node = stageProgression.FindNode(nodeId);
+        if (node == null || !IsMapNodeSelectable(nodeId)) return;
+
+        stageProgression.currentNodeId = nodeId;
+        stageProgression.currentNodeCleared = false;
+        if (stageProgression.visitedNodeIds == null) stageProgression.visitedNodeIds = new List<int>();
+        if (!stageProgression.visitedNodeIds.Contains(nodeId))
+            stageProgression.visitedNodeIds.Add(nodeId);
+
+        pendingBiomeTransition = false;
+        MapTableData table = GetMapTable();
+        if (table != null) stageProgression.ApplyNodeDifficulty(node, table.Config);
+        SaveMapProgress();
+        OpenCurrentNode(node);
+    }
+
+    public void ReturnToMap()
+    {
+        stageProgression.currentNodeCleared = true;
+        pendingBiomeTransition = false;
+        isStageClearing = false;
+        isCalculating = false;
+        ShowMapScreen();
+        SaveMapProgress();
+    }
+
+    public void OnMapLootFinished()
+    {
+        MapNode node = stageProgression.FindNode(stageProgression.currentNodeId);
+        bool boss = node != null && node.type == MapNodeType.Boss;
+        if (boss) pendingBiomeTransition = true;
+
+        MapTableData table = GetMapTable();
+        if (table != null && table.Config.PostBattleShop)
+            PromptShopChoice();
+        else if (boss)
+            OpenBiomeTransition();
+        else
+            ReturnToMap();
+    }
+
+    public void OnShopClosedDuringMap()
+    {
+        if (pendingBiomeTransition)
+            OpenBiomeTransition();
+        else
+            ReturnToMap();
+    }
+
+    void BeginNewMapRun()
+    {
+        MapTableData table = GetMapTable();
+        if (table == null)
+        {
+            Debug.LogWarning("[Map] Map_Table이 없어 직선 진행으로 시작합니다.");
+            StartNewStage();
+            return;
+        }
+
+        stageProgression.BeginRun(UnityEngine.Random.Range(1, int.MaxValue));
+        if (currentBiome == null && biomeList != null)
+            currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
+        BiomeType biome = currentBiome != null ? currentBiome.biomeType : BiomeType.Forest;
+        stageProgression.BeginBiome(table, biome);
+        EnsureMapUi();
+        ShowMapScreen();
+        SaveMapProgress();
+    }
+
+    void RestoreMapProgress(SaveData data)
+    {
+        MapTableData table = GetMapTable();
+        if (data.mapSaveVersion < 1)
+        {
+            stageProgression.BeginRun(UnityEngine.Random.Range(1, int.MaxValue));
+            stageProgression.biomeIndex = Mathf.Max(0, (currentStage - 1) / 10);
+        }
+        else
+        {
+            stageProgression.runSeed = data.runSeed;
+            stageProgression.biomeIndex = data.biomeIndex;
+            stageProgression.currentNodeId = data.currentNodeId;
+            stageProgression.currentNodeCleared = data.currentNodeCleared;
+            stageProgression.visitedNodeIds = data.visitedNodeIds != null
+                ? new List<int>(data.visitedNodeIds)
+                : new List<int>();
+        }
+
+        BiomeType biome = currentBiome != null ? currentBiome.biomeType : BiomeType.Forest;
+        stageProgression.currentMap = biome == BiomeType.Void || table == null
+            ? null
+            : MapGenerator.Generate(stageProgression.runSeed, stageProgression.biomeIndex, biome, table);
+        EnsureMapUi();
+    }
+
+    void OpenBiomeTransition()
+    {
+        pendingBiomeTransition = false;
+        stageProgression.currentNodeCleared = true;
+        stageProgression.biomeIndex++;
+        isStageClearing = false;
+        isCalculating = false;
+        HideMapOverlays();
+        SetBoardVisible(false);
+
+        MapTableData table = GetMapTable();
+        int threshold = table != null ? table.Config.BiomeCountToVoid : 10;
+        BiomeType current = currentBiome != null ? currentBiome.biomeType : BiomeType.Forest;
+        List<BiomeType> options = biomeNavigator.GetNextBiomeOptions(current, stageProgression.biomeIndex, threshold);
+        if (biomeSelectionPanel != null)
+            biomeSelectionPanel.OpenPanel(this, options);
+        SaveMapProgress();
+    }
+
+    void OpenCurrentNode(MapNode node)
+    {
+        if (node == null) return;
+        switch (node.type)
+        {
+            case MapNodeType.Enemy:
+            case MapNodeType.Boss:
+                ShowCombatScreen();
+                StartNewStage();
+                break;
+            case MapNodeType.Encounter:
+                HideMapOverlays();
+                SetBoardVisible(false);
+                if (encounterEventPanel != null && currentBiome != null)
+                    encounterEventPanel.StartEvent(currentBiome.biomeType);
+                else
+                    ReturnToMap();
+                break;
+            case MapNodeType.Shop:
+                HideMapOverlays();
+                SetBoardVisible(false);
+                shopManager?.OpenShop();
+                break;
+            case MapNodeType.Opel:
+                HideMapOverlays();
+                SetBoardVisible(false);
+                if (opelPanel != null) opelPanel.Open(this);
+                else ReturnToMap();
+                break;
+            case MapNodeType.Rest:
+                HideMapOverlays();
+                SetBoardVisible(false);
+                if (restPanel != null) restPanel.Open(this);
+                else ReturnToMap();
+                break;
+        }
+    }
+
+    void ShowMapScreen()
+    {
+        EnsureMapUi();
+        if (restPanel != null) restPanel.Hide();
+        if (opelPanel != null) opelPanel.Hide();
+        SetBoardVisible(false);
+        if (mapPanel != null)
+        {
+            mapPanel.iconSet = mapIconSet;
+            mapPanel.Show(this);
+        }
+        UpdateMainUI("");
+    }
+
+    void ShowCombatScreen()
+    {
+        HideMapOverlays();
+        SetBoardVisible(true);
+    }
+
+    void HideMapOverlays()
+    {
+        if (mapPanel != null) mapPanel.Hide();
+        if (restPanel != null) restPanel.Hide();
+        if (opelPanel != null) opelPanel.Hide();
+    }
+
+    void SetBoardVisible(bool visible)
+    {
+        if (rollSlotParent != null) rollSlotParent.gameObject.SetActive(visible);
+        if (keepSlotParent != null) keepSlotParent.gameObject.SetActive(visible);
+        if (ui != null)
+        {
+            if (ui.rollButton != null) ui.rollButton.gameObject.SetActive(visible);
+            if (ui.finishButton != null) ui.finishButton.gameObject.SetActive(visible);
+            if (!visible)
+            {
+                ui.HideResult();
+                ui.HideShopChoice();
+            }
+        }
+        if (!visible && enemy != null)
+            enemy.gameObject.SetActive(false);
+    }
+
+    void EnsureMapUi()
+    {
+        Canvas canvas = FindFirstObjectByType<Canvas>();
+        if (mapPanel == null && canvas != null)
+        {
+            var go = new GameObject("MapRoot", typeof(RectTransform), typeof(MapPanel));
+            go.transform.SetParent(canvas.transform, false);
+            mapPanel = go.GetComponent<MapPanel>();
+            go.SetActive(false);
+        }
+        if (restPanel == null && canvas != null)
+        {
+            var go = new GameObject("RestPanel", typeof(RectTransform), typeof(RestPanel));
+            go.transform.SetParent(canvas.transform, false);
+            restPanel = go.GetComponent<RestPanel>();
+            go.SetActive(false);
+        }
+        if (opelPanel == null && canvas != null)
+        {
+            var go = new GameObject("OpelPanel", typeof(RectTransform), typeof(OpelPanel));
+            go.transform.SetParent(canvas.transform, false);
+            opelPanel = go.GetComponent<OpelPanel>();
+            go.SetActive(false);
+        }
+        if (mapIconSet == null)
+        {
+            mapIconSet = ScriptableObject.CreateInstance<MapIconSet>();
+            mapIconSet.FillDefaultColors();
+        }
+        if (mapPanel != null) mapPanel.iconSet = mapIconSet;
+    }
+
+    void SaveMapProgress()
+    {
+        if (GameSaveManager.Instance != null)
+            GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
     }
 }

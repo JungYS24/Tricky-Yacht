@@ -258,7 +258,10 @@ public class ShopManager : MonoBehaviour
         {
             //무료 스위치 끄기
             diceManager.isNextShopFree = false;
-            diceManager.NextStage();
+            if (diceManager.UsesMapFlow)
+                diceManager.OnShopClosedDuringMap();
+            else
+                diceManager.NextStage();
         }
     }
 

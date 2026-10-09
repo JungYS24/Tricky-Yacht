@@ -88,11 +88,16 @@ public class DiceDestructionPanel : MonoBehaviour
         ClosePanel();
     }
 
+    public System.Action onClosed;
+
     public void ClosePanel()
     {
         if (isBusy) return;
-        panelRoot.SetActive(false);
+        if (panelRoot != null) panelRoot.SetActive(false);
         ClearSlots();
+        System.Action callback = onClosed;
+        onClosed = null;
+        callback?.Invoke();
     }
 
     private void ClearSlots()
