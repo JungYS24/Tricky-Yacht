@@ -1016,11 +1016,23 @@ public class DiceManager : MonoBehaviour
     {
         if (!useMapFlow || stageProgression.currentMap == null) return null;
         MapTableData table = GetMapTable();
-        int total = table != null ? table.Config.MaxPathLength : 14;
+        int total = table != null ? table.Config.MaxPathLength : MapPathLength(stageProgression.currentMap);
         MapNode node = stageProgression.FindNode(stageProgression.currentNodeId);
         if (node == null) return biomeName;
         if (node.type == MapNodeType.Boss) return $"{biomeName} BOSS";
         return $"{biomeName} {node.row + 1}/{total}";
+    }
+
+    static int MapPathLength(MapData map)
+    {
+        int length = 1;
+        if (map == null || map.nodes == null) return length;
+        for (int i = 0; i < map.nodes.Count; i++)
+        {
+            if (map.nodes[i] != null && map.nodes[i].row > length)
+                length = map.nodes[i].row;
+        }
+        return length;
     }
 
     public bool IsMapNodeSelectable(int nodeId)

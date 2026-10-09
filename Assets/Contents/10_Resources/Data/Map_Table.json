@@ -4,37 +4,55 @@
       "Key": "Min_Enemy_Count",
       "Value": "8",
       "Value_Type": "int",
-      "Desc_KR": "최단 루트의 노드 수 = 모든 경로의 최소 적 수"
+      "Desc_KR": "최단 루트의 적 수(지름길 = 적 8 + 상인 고정층 1)"
     },
     {
       "Key": "Max_Path_Length",
-      "Value": "14",
+      "Value": "16",
       "Value_Type": "int",
-      "Desc_KR": "일반 노드 층 수(0~13층). 가장 긴 경로의 노드 수"
+      "Desc_KR": "일반 노드 층 수(0~15층). 보스는 16층"
     },
     {
       "Key": "Grid_Width",
-      "Value": "5",
+      "Value": "7",
       "Value_Type": "int",
       "Desc_KR": "맵 가로 열 수"
     },
     {
       "Key": "Lane_Count",
-      "Value": "4",
+      "Value": "6",
       "Value_Type": "int",
       "Desc_KR": "레인 수(레인 0 = 지름길, 나머지 = 일반 레인)"
+    },
+    {
+      "Key": "Start_Columns",
+      "Value": "1,3,5",
+      "Value_Type": "string",
+      "Desc_KR": "시작 노드 열. 레인 i는 Start_Columns[i % 개수]에서 출발 → 시작 선택지 항상 3개"
+    },
+    {
+      "Key": "Shop_Row",
+      "Value": "8",
+      "Value_Type": "int",
+      "Desc_KR": "상인 고정층. 이 층의 노드는 전부 상인이고 어떤 선도 이 층을 건너뛰지 못함"
     },
     {
       "Key": "Skip_Chance",
       "Value": "0.15",
       "Value_Type": "float",
-      "Desc_KR": "일반 레인이 한 층을 건너뛸(dy=2) 확률"
+      "Desc_KR": "일반 레인이 한 층을 건너뛸(dy=2) 확률(상인 고정층은 못 건너뜀)"
+    },
+    {
+      "Key": "Shortcut_Max_Skip",
+      "Value": "3",
+      "Value_Type": "int",
+      "Desc_KR": "지름길 레인의 최대 층 간격(dy 1~3)"
     },
     {
       "Key": "Detour_Enemy_Ratio",
-      "Value": "0.25",
+      "Value": "0.2",
       "Value_Type": "float",
-      "Desc_KR": "최단보다 길어진 칸 중 적이어야 하는 최소 비율"
+      "Desc_KR": "최단보다 길어진 칸 중 적이어야 하는 최소 비율(상인 고정층 칸은 길이에서 제외)"
     },
     {
       "Key": "Max_Gen_Attempts",
@@ -82,7 +100,7 @@
       "Desc_KR": "바이옴 보스와 전투합니다.",
       "Icon_Key": "Icon_Map_Boss",
       "Is_Facility": false,
-      "Min_Row": 14,
+      "Min_Row": 16,
       "Min_Per_Map": 1,
       "Max_Per_Map": 1
     },
@@ -95,8 +113,8 @@
       "Icon_Key": "Icon_Map_Encounter",
       "Is_Facility": true,
       "Min_Row": 1,
-      "Min_Per_Map": 1,
-      "Max_Per_Map": 4
+      "Min_Per_Map": 2,
+      "Max_Per_Map": 8
     },
     {
       "Node_ID": "Node_Shop",
@@ -107,8 +125,8 @@
       "Icon_Key": "Icon_Map_Shop",
       "Is_Facility": true,
       "Min_Row": 2,
-      "Min_Per_Map": 1,
-      "Max_Per_Map": 3
+      "Min_Per_Map": 0,
+      "Max_Per_Map": 4
     },
     {
       "Node_ID": "Node_Opel",
@@ -119,8 +137,8 @@
       "Icon_Key": "Icon_Map_Opel",
       "Is_Facility": true,
       "Min_Row": 3,
-      "Min_Per_Map": 1,
-      "Max_Per_Map": 2
+      "Min_Per_Map": 2,
+      "Max_Per_Map": 5
     },
     {
       "Node_ID": "Node_Rest",
@@ -131,8 +149,8 @@
       "Icon_Key": "Icon_Map_Rest",
       "Is_Facility": true,
       "Min_Row": 4,
-      "Min_Per_Map": 1,
-      "Max_Per_Map": 3
+      "Min_Per_Map": 2,
+      "Max_Per_Map": 6
     }
   ],
   "biomeWeights": [

@@ -61,11 +61,14 @@ public class MapTableJson
 public class MapConfig
 {
     public int MinEnemyCount = 8;
-    public int MaxPathLength = 14;
-    public int GridWidth = 5;
-    public int LaneCount = 4;
+    public int MaxPathLength = 16;
+    public int GridWidth = 7;
+    public int LaneCount = 6;
+    public int[] StartColumns = { 1, 3, 5 };
+    public int ShopRow = 8;
     public float SkipChance = 0.15f;
-    public float DetourEnemyRatio = 0.25f;
+    public int ShortcutMaxSkip = 3;
+    public float DetourEnemyRatio = 0.2f;
     public int MaxGenAttempts = 100;
     public int RestHealPercent = 30;
     public bool PostBattleShop;
@@ -115,8 +118,9 @@ public class MapTableData
 
         string[] required =
         {
-            "Min_Enemy_Count", "Max_Path_Length", "Grid_Width", "Lane_Count", "Skip_Chance",
-            "Detour_Enemy_Ratio", "Max_Gen_Attempts", "Rest_Heal_Percent", "Post_Battle_Shop", "Biome_Count_To_Void"
+            "Min_Enemy_Count", "Max_Path_Length", "Grid_Width", "Lane_Count", "Start_Columns", "Shop_Row",
+            "Skip_Chance", "Shortcut_Max_Skip", "Detour_Enemy_Ratio", "Max_Gen_Attempts",
+            "Rest_Heal_Percent", "Post_Battle_Shop", "Biome_Count_To_Void"
         };
         foreach (string key in required)
         {
@@ -133,7 +137,10 @@ public class MapTableData
             case "Max_Path_Length": Config.MaxPathLength = ParseInt(entry.Value, Config.MaxPathLength); break;
             case "Grid_Width": Config.GridWidth = ParseInt(entry.Value, Config.GridWidth); break;
             case "Lane_Count": Config.LaneCount = ParseInt(entry.Value, Config.LaneCount); break;
+            case "Start_Columns": Config.StartColumns = ParseIntList(entry.Value, Config.StartColumns); break;
+            case "Shop_Row": Config.ShopRow = ParseInt(entry.Value, Config.ShopRow); break;
             case "Skip_Chance": Config.SkipChance = ParseFloat(entry.Value, Config.SkipChance); break;
+            case "Shortcut_Max_Skip": Config.ShortcutMaxSkip = ParseInt(entry.Value, Config.ShortcutMaxSkip); break;
             case "Detour_Enemy_Ratio": Config.DetourEnemyRatio = ParseFloat(entry.Value, Config.DetourEnemyRatio); break;
             case "Max_Gen_Attempts": Config.MaxGenAttempts = ParseInt(entry.Value, Config.MaxGenAttempts); break;
             case "Rest_Heal_Percent": Config.RestHealPercent = ParseInt(entry.Value, Config.RestHealPercent); break;
@@ -155,6 +162,19 @@ public class MapTableData
     static bool ParseBool(string value)
     {
         return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase) || value == "1";
+    }
+
+    static int[] ParseIntList(string value, int[] fallback)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return fallback;
+        string[] parts = value.Split(',');
+        var list = new List<int>();
+        for (int i = 0; i < parts.Length; i++)
+        {
+            if (int.TryParse(parts[i].Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed))
+                list.Add(parsed);
+        }
+        return list.Count > 0 ? list.ToArray() : fallback;
     }
 
     public BiomeWeightRow GetWeights(BiomeType biome)
