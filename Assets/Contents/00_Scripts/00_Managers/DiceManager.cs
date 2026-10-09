@@ -1187,6 +1187,8 @@ public class DiceManager : MonoBehaviour
                 else
                     ReturnToMap();
                 PlaceTravelChrome();
+                SetHudActive("Book_Button", false);
+                SetHudActive("Deck_BTN", false);
                 break;
             case MapNodeType.Shop:
             case MapNodeType.Opel:
@@ -1278,7 +1280,10 @@ public class DiceManager : MonoBehaviour
         if (!visible && enemy != null)
             enemy.gameObject.SetActive(false);
         if (!visible)
+        {
+            HideBoardDice();
             PlaceTravelChrome();
+        }
     }
 
     void PlaceTravelChrome()
@@ -1370,27 +1375,26 @@ public class DiceManager : MonoBehaviour
         RectTransform canvas = score.transform.parent as RectTransform;
         if (canvas == null) return;
 
-        const float margin = 12f;
-        const float gap = 8f;
         RectTransform deck = PlacementRect("Deck_BTN");
         RectTransform book = PlacementRect("Book_Button");
         RectTransform coin = PlacementRect("CoinPanel");
         RectTransform heart = PlacementRect("HeartPanel");
 
         if (deck != null)
-            PlaceBottomLeftCenter(deck, canvas, new Vector2(130f, 170f));
+            PlaceBottomLeftCenter(deck, canvas, new Vector2(130f, 120f));
         if (book != null)
-            PlaceBottomLeftCenter(book, canvas, new Vector2(130f, 350f));
+            PlaceBottomLeftCenter(book, canvas, new Vector2(130f, 300f));
         FitTravelStatusPanels(coin, heart);
+        Vector2 coinPos = new Vector2(342f, -32f);
+        Vector2 heartPos = new Vector2(329.6f, coinPos.y - 62f);
         if (coin != null)
         {
-            StickToCorner(coin, canvas, new Vector2(0f, 1f), new Vector2(margin, margin));
+            PlaceAnchored(coin, canvas, new Vector2(0f, 1f), coinPos);
             SetPanelRaycast(coin, false);
         }
         if (heart != null)
         {
-            float coinHeight = coin != null ? ScaledSize(coin).y : 80f;
-            StickToCorner(heart, canvas, new Vector2(0f, 1f), new Vector2(margin, margin + coinHeight + gap));
+            PlaceAnchored(heart, canvas, new Vector2(0f, 1f), heartPos);
             SetPanelRaycast(heart, false);
         }
         travelPlacementApplied = true;
@@ -1450,24 +1454,28 @@ public class DiceManager : MonoBehaviour
         rect.SetAsLastSibling();
     }
 
-    static void StickToCorner(RectTransform rect, RectTransform canvas, Vector2 anchor, Vector2 margin)
+    static void PlaceAnchored(RectTransform rect, RectTransform canvas, Vector2 anchor, Vector2 position)
     {
-        Vector2 size = ScaledSize(rect);
-        Vector2 pivot = rect.pivot;
         rect.SetParent(canvas, false);
         rect.anchorMin = anchor;
         rect.anchorMax = anchor;
-        float x = margin.x + size.x * pivot.x;
-        float y = anchor.y < 0.5f
-            ? margin.y + size.y * pivot.y
-            : -margin.y - size.y * (1f - pivot.y);
-        rect.anchoredPosition = new Vector2(x, y);
+        rect.anchoredPosition = position;
         rect.SetAsLastSibling();
     }
 
-    static Vector2 ScaledSize(RectTransform rect)
+    void HideBoardDice()
     {
-        return Vector2.Scale(rect.rect.size, rect.localScale);
+        Dice[] dice = FindObjectsByType<Dice>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        for (int i = 0; i < dice.Length; i++)
+        {
+            if (dice[i] != null) dice[i].gameObject.SetActive(false);
+        }
+    }
+
+    void SetHudActive(string objectName, bool active)
+    {
+        if (!hudObjects.TryGetValue(objectName, out GameObject target) || target == null) return;
+        target.SetActive(active);
     }
 
     RectTransform PlacementRect(string objectName)

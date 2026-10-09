@@ -56,6 +56,7 @@ public class LootSelectionPanel : MonoBehaviour
         choiceSlots[2].Setup(shuffledDice[0], this);
 
         panelRoot.SetActive(true);
+        panelRoot.transform.SetAsLastSibling();
         IsPanelOpen = true;
     }
 

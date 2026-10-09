@@ -493,7 +493,13 @@ public class ShopManager : MonoBehaviour
         if (allTicketsPool.Count < 3) return;
 
         if (ticketSelectionPanel != null)
+        {
             ticketSelectionPanel.SetActive(true);
+            Transform dim = ticketSelectionPanel.transform.Find("DimPanel");
+            if (dim != null) dim.SetAsFirstSibling();
+            ticketSelectionPanel.transform.SetAsLastSibling();
+        }
+        SetTicketCombatButtonsHidden(true);
 
         // 전체 티켓 풀을 셔플
         List<TicketItemSO> shuffledTickets = new List<TicketItemSO>(allTicketsPool);
@@ -516,6 +522,39 @@ public class ShopManager : MonoBehaviour
     {
         if (ticketSelectionPanel != null)
             ticketSelectionPanel.SetActive(false);
+        SetTicketCombatButtonsHidden(false);
+    }
+
+    bool ticketHidRoll;
+    bool ticketHidFinish;
+    bool ticketRollWasActive;
+    bool ticketFinishWasActive;
+
+    void SetTicketCombatButtonsHidden(bool hidden)
+    {
+        if (diceManager == null || diceManager.ui == null) return;
+        if (hidden)
+        {
+            if (!ticketHidRoll && diceManager.ui.rollButton != null)
+            {
+                ticketRollWasActive = diceManager.ui.rollButton.gameObject.activeSelf;
+                diceManager.ui.rollButton.gameObject.SetActive(false);
+                ticketHidRoll = true;
+            }
+            if (!ticketHidFinish && diceManager.ui.finishButton != null)
+            {
+                ticketFinishWasActive = diceManager.ui.finishButton.gameObject.activeSelf;
+                diceManager.ui.finishButton.gameObject.SetActive(false);
+                ticketHidFinish = true;
+            }
+            return;
+        }
+        if (ticketHidRoll && diceManager.ui.rollButton != null && ticketRollWasActive)
+            diceManager.ui.rollButton.gameObject.SetActive(true);
+        if (ticketHidFinish && diceManager.ui.finishButton != null && ticketFinishWasActive)
+            diceManager.ui.finishButton.gameObject.SetActive(true);
+        ticketHidRoll = false;
+        ticketHidFinish = false;
     }
 
     public void ShowCoatingSelection(DiceType type, float mult, Color color)

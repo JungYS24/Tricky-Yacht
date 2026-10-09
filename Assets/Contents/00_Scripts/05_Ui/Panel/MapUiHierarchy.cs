@@ -16,6 +16,7 @@ public static class MapUiHierarchy
         if (newBackground) background = panel.gameObject.AddComponent<Image>();
         background.color = new Color(0f, 0f, 0f, 0f);
         background.raycastTarget = false;
+        EnsureMapDim(root);
         if (createScroll)
         {
             var scrollGo = new GameObject("MapScroll", typeof(RectTransform));
@@ -160,6 +161,31 @@ public static class MapUiHierarchy
         panel.marsButton = EnsureButton(box, "MarsButton", "화성", new Vector2(0f, 0f), created);
         panel.mercuryButton = EnsureButton(box, "MercuryButton", "수성", new Vector2(0f, -80f), created);
         panel.venusButton = EnsureButton(box, "VenusButton", "금성", new Vector2(0f, -160f), created);
+    }
+
+    static void EnsureMapDim(RectTransform root)
+    {
+        Transform dim = root.Find("MapDim");
+        if (dim == null)
+        {
+            var dimGo = new GameObject("MapDim", typeof(RectTransform), typeof(Image));
+            dimGo.transform.SetParent(root, false);
+            dim = dimGo.transform;
+            RectTransform dimRect = dim as RectTransform;
+            dimRect.anchorMin = Vector2.zero;
+            dimRect.anchorMax = Vector2.one;
+            dimRect.offsetMin = Vector2.zero;
+            dimRect.offsetMax = Vector2.zero;
+            Image image = dimGo.GetComponent<Image>();
+            image.raycastTarget = false;
+        }
+        Image dimImage = dim.GetComponent<Image>();
+        if (dimImage != null)
+        {
+            dimImage.color = new Color(0f, 0f, 0f, 0.52f);
+            dimImage.raycastTarget = false;
+        }
+        dim.SetAsFirstSibling();
     }
 
     static void EnsureLegendSlots(Transform legend)

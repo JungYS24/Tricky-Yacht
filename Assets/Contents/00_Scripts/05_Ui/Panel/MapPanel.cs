@@ -82,7 +82,7 @@ public class MapPanel : MonoBehaviour
         RefreshLegend(table);
         PlaceLegend();
         Canvas.ForceUpdateCanvases();
-        if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
+        FocusOnSelectable(diceManager, positions);
     }
 
     void CreateNode(DiceManager diceManager, MapTableData table, MapNode node, Vector2 position)
@@ -109,6 +109,8 @@ public class MapPanel : MonoBehaviour
         bool current = node.id == diceManager.stageProgression.currentNodeId;
         bool visited = diceManager.stageProgression.visitedNodeIds != null && diceManager.stageProgression.visitedNodeIds.Contains(node.id);
         view.Bind(diceManager, node.id, sprite, tint, selectable, current, visited);
+        if (node.type == MapNodeType.Boss)
+            view.transform.localScale = new Vector3(2.8f, 2.8f, 1f);
     }
 
     MapNodeView CreateRuntimeNode()
@@ -165,6 +167,40 @@ public class MapPanel : MonoBehaviour
             if (label != null) label.text = table.GetNodeName(types[i]);
             item.gameObject.SetActive(names[i] != "Opel");
         }
+    }
+
+    void FocusOnSelectable(DiceManager diceManager, Dictionary<int, Vector2> positions)
+    {
+        if (scrollRect == null || content == null) return;
+        float targetY = 0f;
+        bool found = false;
+        MapData map = diceManager.stageProgression.currentMap;
+        for (int i = 0; i < map.nodes.Count; i++)
+        {
+            int id = map.nodes[i].id;
+            if (!diceManager.IsMapNodeSelectable(id) || !positions.ContainsKey(id)) continue;
+            if (!found || positions[id].y < targetY)
+            {
+                targetY = positions[id].y;
+                found = true;
+            }
+        }
+        if (!found)
+        {
+            scrollRect.verticalNormalizedPosition = 0f;
+            return;
+        }
+
+        RectTransform viewport = scrollRect.viewport != null ? scrollRect.viewport : scrollRect.transform as RectTransform;
+        float viewHeight = viewport != null ? viewport.rect.height : 0f;
+        float scrollable = content.rect.height - viewHeight;
+        if (scrollable <= 1f)
+        {
+            scrollRect.verticalNormalizedPosition = 0f;
+            return;
+        }
+        float bottom = Mathf.Max(0f, targetY - 100f);
+        scrollRect.verticalNormalizedPosition = Mathf.Clamp01(bottom / scrollable);
     }
 
     void FitScrollToBottom()
