@@ -46,8 +46,8 @@ public class MapIconSet : ScriptableObject
         Entry entry = Find(iconKey);
         if (entry != null)
         {
-            tint = entry.fallbackColor;
             if (entry.sprite != null) return entry.sprite;
+            tint = entry.fallbackColor;
         }
         if (string.IsNullOrEmpty(iconKey)) return null;
         if (generated.TryGetValue(iconKey, out Sprite cached) && cached != null)

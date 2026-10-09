@@ -24,7 +24,6 @@ public class MapPanel : MonoBehaviour
     public void Show(DiceManager diceManager)
     {
         gameObject.SetActive(true);
-        transform.SetAsLastSibling();
         MapUiHierarchy.EnsureMap(this);
         Rebuild(diceManager);
     }
@@ -42,9 +41,13 @@ public class MapPanel : MonoBehaviour
         MapConfig cfg = table.Config;
         const float colSpacing = 168f;
         const float rowSpacing = 128f;
-        const float pad = 90f;
-        float width = pad * 2f + Mathf.Max(0, cfg.GridWidth - 1) * colSpacing;
-        float height = pad * 2f + cfg.MaxPathLength * rowSpacing;
+        const float leftPad = 280f;
+        const float rightPad = 80f;
+        const float bottomPad = 52f;
+        const float topPad = 80f;
+        FitScrollToBottom();
+        float width = leftPad + rightPad + Mathf.Max(0, cfg.GridWidth - 1) * colSpacing;
+        float height = bottomPad + topPad + cfg.MaxPathLength * rowSpacing;
         content.sizeDelta = new Vector2(width, height);
         FitLayer(lineLayer, content.sizeDelta);
         FitLayer(nodeLayer, content.sizeDelta);
@@ -56,7 +59,7 @@ public class MapPanel : MonoBehaviour
             var jitter = new System.Random(map.seed + node.id * 17);
             float jx = ((float)jitter.NextDouble() * 2f - 1f) * 16f;
             float jy = ((float)jitter.NextDouble() * 2f - 1f) * 10f;
-            positions[node.id] = new Vector2(pad + node.col * colSpacing + jx, pad + node.row * rowSpacing + jy);
+            positions[node.id] = new Vector2(leftPad + node.col * colSpacing + jx, bottomPad + node.row * rowSpacing + jy);
         }
 
         for (int i = 0; i < map.nodes.Count; i++)
@@ -77,6 +80,7 @@ public class MapPanel : MonoBehaviour
         }
 
         RefreshLegend(table);
+        PlaceLegend();
         Canvas.ForceUpdateCanvases();
         if (scrollRect != null) scrollRect.verticalNormalizedPosition = 0f;
     }
@@ -151,9 +155,59 @@ public class MapPanel : MonoBehaviour
             string iconKey = rule != null ? rule.Icon_Key : null;
             Sprite sprite = iconSet != null ? iconSet.GetSprite(iconKey, out _) : null;
             Image icon = item.Find("Icon") != null ? item.Find("Icon").GetComponent<Image>() : null;
-            if (icon != null && sprite != null) icon.sprite = sprite;
+            if (icon != null && sprite != null)
+            {
+                icon.sprite = sprite;
+                icon.color = Color.white;
+                icon.preserveAspect = true;
+            }
             Text label = item.Find("Label") != null ? item.Find("Label").GetComponent<Text>() : null;
             if (label != null) label.text = table.GetNodeName(types[i]);
+            item.gameObject.SetActive(names[i] != "Opel");
+        }
+    }
+
+    void FitScrollToBottom()
+    {
+        if (scrollRect == null) return;
+        RectTransform viewport = scrollRect.transform as RectTransform;
+        if (viewport == null) return;
+        viewport.anchorMin = Vector2.zero;
+        viewport.anchorMax = Vector2.one;
+        viewport.pivot = new Vector2(0.5f, 0.5f);
+        Vector2 min = viewport.offsetMin;
+        Vector2 max = viewport.offsetMax;
+        min.x = 205f;
+        max.x = -157f;
+        viewport.offsetMin = min;
+        viewport.offsetMax = max;
+    }
+
+    void PlaceLegend()
+    {
+        if (legend == null) return;
+        legend.anchorMin = new Vector2(1f, 0f);
+        legend.anchorMax = new Vector2(1f, 0f);
+        legend.pivot = new Vector2(1f, 0f);
+        legend.sizeDelta = new Vector2(240f, 300f);
+        legend.anchoredPosition = new Vector2(-28f, 28f);
+
+        string[] names = { "Enemy", "Boss", "Encounter", "Shop", "Opel", "Rest" };
+        int shown = 0;
+        for (int i = 0; i < names.Length; i++)
+        {
+            Transform item = legend.Find(names[i]);
+            if (item == null) continue;
+            bool visible = names[i] != "Opel";
+            item.gameObject.SetActive(visible);
+            if (!visible) continue;
+            RectTransform rect = item as RectTransform;
+            rect.anchorMin = new Vector2(0f, 0f);
+            rect.anchorMax = new Vector2(1f, 0f);
+            rect.pivot = new Vector2(0f, 0f);
+            rect.sizeDelta = new Vector2(-16f, 48f);
+            rect.anchoredPosition = new Vector2(8f, 8f + shown * 52f);
+            shown++;
         }
     }
 

@@ -137,8 +137,8 @@
       "Icon_Key": "Icon_Map_Opel",
       "Is_Facility": true,
       "Min_Row": 3,
-      "Min_Per_Map": 2,
-      "Max_Per_Map": 5
+      "Min_Per_Map": 0,
+      "Max_Per_Map": 0
     },
     {
       "Node_ID": "Node_Rest",

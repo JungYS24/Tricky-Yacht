@@ -1,4 +1,4 @@
-using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,7 +10,6 @@ public class MapNodeView : MonoBehaviour
     public Image ring;
     int nodeId;
     DiceManager owner;
-    Coroutine pulse;
 
     public void Bind(DiceManager diceManager, int id, Sprite sprite, Color color, bool interactable, bool current, bool visited)
     {
@@ -26,21 +25,26 @@ public class MapNodeView : MonoBehaviour
         }
         if (icon != null)
         {
+            icon.DOKill();
+            icon.type = Image.Type.Simple;
             icon.sprite = sprite;
-            icon.color = interactable || current ? Color.white : (visited ? new Color(1f, 1f, 1f, 0.55f) : new Color(1f, 1f, 1f, 0.35f));
-            if (sprite == null) icon.color = color;
+            icon.preserveAspect = sprite != null;
+            icon.color = sprite != null ? Color.white : color;
         }
-        if (ring != null)
-        {
-            ring.enabled = current || interactable;
-            ring.color = current ? new Color(1f, 0.92f, 0.4f, 1f) : new Color(1f, 1f, 1f, 0.9f);
-        }
+        if (ring != null) ring.enabled = false;
 
-        if (pulse != null) StopCoroutine(pulse);
-        pulse = null;
+        RectTransform rect = transform as RectTransform;
+        float size = interactable ? 108f : 56f;
+        if (rect != null) rect.sizeDelta = new Vector2(size, size);
         transform.localScale = Vector3.one;
-        if (interactable)
-            pulse = StartCoroutine(Pulse());
+        if (interactable && icon != null)
+        {
+            icon.DOFade(0.35f, 0.42f)
+                .SetLoops(-1, LoopType.Yoyo)
+                .SetEase(Ease.InOutSine)
+                .SetUpdate(true)
+                .SetLink(gameObject);
+        }
     }
 
     void OnClick()
@@ -48,14 +52,4 @@ public class MapNodeView : MonoBehaviour
         owner?.EnterMapNode(nodeId);
     }
 
-    IEnumerator Pulse()
-    {
-        while (true)
-        {
-            float t = (Mathf.Sin(Time.unscaledTime * 3.2f) + 1f) * 0.5f;
-            float scale = Mathf.Lerp(1f, 1.12f, t);
-            transform.localScale = new Vector3(scale, scale, 1f);
-            yield return null;
-        }
-    }
 }

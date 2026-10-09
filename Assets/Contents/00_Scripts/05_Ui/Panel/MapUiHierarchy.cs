@@ -14,8 +14,8 @@ public static class MapUiHierarchy
         Image background = panel.GetComponent<Image>();
         bool newBackground = background == null;
         if (newBackground) background = panel.gameObject.AddComponent<Image>();
-        if (newBackground || background.color.a < 0.01f)
-            background.color = new Color(0.05f, 0.07f, 0.1f, 0.94f);
+        background.color = new Color(0f, 0f, 0f, 0f);
+        background.raycastTarget = false;
         if (createScroll)
         {
             var scrollGo = new GameObject("MapScroll", typeof(RectTransform));
@@ -79,11 +79,11 @@ public static class MapUiHierarchy
             legendGo.transform.SetParent(root, false);
             legend = legendGo.transform;
             RectTransform legendRect = legend as RectTransform;
-            legendRect.anchorMin = new Vector2(0f, 0f);
-            legendRect.anchorMax = new Vector2(1f, 0f);
-            legendRect.pivot = new Vector2(0.5f, 0f);
-            legendRect.sizeDelta = new Vector2(0f, 130f);
-            legendRect.anchoredPosition = new Vector2(0f, 8f);
+        legendRect.anchorMin = new Vector2(1f, 0f);
+        legendRect.anchorMax = new Vector2(1f, 0f);
+        legendRect.pivot = new Vector2(1f, 0f);
+        legendRect.sizeDelta = new Vector2(240f, 300f);
+        legendRect.anchoredPosition = new Vector2(-28f, 28f);
         }
         EnsureLegendSlots(legend);
 
@@ -166,7 +166,6 @@ public static class MapUiHierarchy
     {
         string[] names = { "Enemy", "Boss", "Encounter", "Shop", "Opel", "Rest" };
         string[] labels = { "적", "보스", "조우자", "상인", "오펠", "휴식" };
-        float step = 300f;
         for (int i = 0; i < names.Length; i++)
         {
             Transform item = legend.Find(names[i]);
@@ -176,13 +175,13 @@ public static class MapUiHierarchy
                 var itemGo = new GameObject(names[i], typeof(RectTransform));
                 itemGo.transform.SetParent(legend, false);
                 item = itemGo.transform;
-                RectTransform rect = item as RectTransform;
-                rect.anchorMin = new Vector2(0f, 0.5f);
-                rect.anchorMax = new Vector2(0f, 0.5f);
-                rect.pivot = new Vector2(0f, 0.5f);
-                rect.sizeDelta = new Vector2(280f, 80f);
-                rect.anchoredPosition = new Vector2(24f + i * step, 0f);
             }
+            RectTransform rect = item as RectTransform;
+            rect.anchorMin = new Vector2(0f, 0f);
+            rect.anchorMax = new Vector2(1f, 0f);
+            rect.pivot = new Vector2(0f, 0f);
+            rect.sizeDelta = new Vector2(-16f, 48f);
+            rect.anchoredPosition = new Vector2(8f, 8f + i * 52f);
 
             if (item.Find("Icon") == null)
             {

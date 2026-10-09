@@ -9,6 +9,7 @@ public class MapNode
     public int col;
     public MapNodeType type;
     public bool isShortcut;
+    public bool isShopRow;
     public List<int> children = new List<int>();
     public List<int> parents = new List<int>();
 }
@@ -122,7 +123,7 @@ public static class MapGenerator
                 if (forcedRows == null) return false;
             }
 
-            int col = rng.Next(cfg.GridWidth);
+            int col = StartColumn(cfg, lane);
             MapNode current = GetOrCreate(nodes, lookup, cfg, 0, col, shortcut);
             if (shortcut)
             {
@@ -136,9 +137,7 @@ public static class MapGenerator
             {
                 while (current.row < lastRow)
                 {
-                    int dy = 1;
-                    if (current.row + 2 <= lastRow && rng.NextDouble() < cfg.SkipChance)
-                        dy = 2;
+                    int dy = NextLaneStep(rng, cfg, current.row, lastRow);
                     if (!TryStep(rng, nodes, lookup, edges, cfg, ref current, current.row + dy, false))
                         return false;
                 }
@@ -167,26 +166,74 @@ public static class MapGenerator
         return true;
     }
 
+    static int StartColumn(MapConfig cfg, int lane)
+    {
+        if (cfg.StartColumns == null || cfg.StartColumns.Length == 0)
+            return Mathf.Clamp(cfg.GridWidth / 2, 0, Mathf.Max(0, cfg.GridWidth - 1));
+        int col = cfg.StartColumns[lane % cfg.StartColumns.Length];
+        return Mathf.Clamp(col, 0, Mathf.Max(0, cfg.GridWidth - 1));
+    }
+
+    static int NextLaneStep(System.Random rng, MapConfig cfg, int row, int lastRow)
+    {
+        if (row + 2 > lastRow || rng.NextDouble() >= cfg.SkipChance)
+            return 1;
+        int skipped = row + 2;
+        if (row < cfg.ShopRow && skipped > cfg.ShopRow)
+            return 1;
+        return 2;
+    }
+
     static List<int> BuildShortcutRows(MapConfig cfg, System.Random rng)
     {
-        int twos = cfg.MaxPathLength - cfg.MinEnemyCount;
-        int ones = cfg.MinEnemyCount - 1 - twos;
-        if (twos < 0 || ones < 0) return null;
+        int last = cfg.MaxPathLength - 1;
+        int shop = cfg.ShopRow;
+        int maxSkip = Math.Max(1, cfg.ShortcutMaxSkip);
+        if (shop <= 0 || shop >= last) return null;
 
-        var gaps = new List<int>(twos + ones);
-        for (int i = 0; i < twos; i++) gaps.Add(2);
-        for (int i = 0; i < ones; i++) gaps.Add(1);
-        Shuffle(gaps, rng);
-
-        var rows = new List<int>(gaps.Count + 1) { 0 };
-        int row = 0;
-        for (int i = 0; i < gaps.Count; i++)
+        for (int attempt = 0; attempt < 200; attempt++)
         {
-            row += gaps[i];
-            rows.Add(row);
+            int before = 1 + rng.Next(7);
+            int after = cfg.MinEnemyCount - before;
+            if (after < 1) continue;
+
+            List<int> below = PickRows(rng, 0, shop - 1, before, 0);
+            List<int> above = PickRows(rng, shop + 1, last, after, last);
+            if (below == null || above == null) continue;
+
+            var rows = new List<int>(below.Count + above.Count + 1);
+            rows.AddRange(below);
+            rows.Add(shop);
+            rows.AddRange(above);
+            if (GapsFit(rows, maxSkip)) return rows;
         }
-        if (row != cfg.MaxPathLength - 1) return null;
-        return rows;
+        return null;
+    }
+
+    static List<int> PickRows(System.Random rng, int lo, int hi, int count, int required)
+    {
+        if (count < 1 || hi < lo || count > hi - lo + 1) return null;
+        var chosen = new List<int>();
+        if (required >= lo && required <= hi) chosen.Add(required);
+        var pool = new List<int>();
+        for (int row = lo; row <= hi; row++)
+            if (row != required) pool.Add(row);
+        Shuffle(pool, rng);
+        for (int i = 0; chosen.Count < count && i < pool.Count; i++)
+            chosen.Add(pool[i]);
+        if (chosen.Count != count) return null;
+        chosen.Sort();
+        return chosen;
+    }
+
+    static bool GapsFit(List<int> rows, int maxSkip)
+    {
+        for (int i = 1; i < rows.Count; i++)
+        {
+            int gap = rows[i] - rows[i - 1];
+            if (gap < 1 || gap > maxSkip) return false;
+        }
+        return true;
     }
 
     static bool TryStep(System.Random rng, List<MapNode> nodes, Dictionary<int, MapNode> lookup, List<Edge> edges, MapConfig cfg, ref MapNode current, int nextRow, bool shortcut)
@@ -222,16 +269,19 @@ public static class MapGenerator
         if (lookup.TryGetValue(key, out MapNode found))
         {
             if (shortcut) found.isShortcut = true;
+            found.isShopRow = found.row == cfg.ShopRow;
             return found;
         }
 
+        bool shopRow = row == cfg.ShopRow;
         var node = new MapNode
         {
             id = nodes.Count,
             row = row,
             col = col,
-            type = row == cfg.MaxPathLength ? MapNodeType.Boss : MapNodeType.Enemy,
-            isShortcut = shortcut
+            type = row == cfg.MaxPathLength ? MapNodeType.Boss : (shopRow ? MapNodeType.Shop : MapNodeType.Enemy),
+            isShortcut = shortcut,
+            isShopRow = shopRow
         };
         nodes.Add(node);
         lookup[key] = node;
@@ -304,6 +354,11 @@ public static class MapGenerator
                 counts[(int)MapNodeType.Boss]++;
                 continue;
             }
+            if (node.isShopRow)
+            {
+                node.type = MapNodeType.Shop;
+                continue;
+            }
             if (node.row == 0 || node.isShortcut)
             {
                 node.type = MapNodeType.Enemy;
@@ -316,7 +371,6 @@ public static class MapGenerator
             AddCandidate(pool, weights, nodes, node, MapNodeType.Enemy, counts, biome, table);
             AddCandidate(pool, weights, nodes, node, MapNodeType.Encounter, counts, biome, table);
             AddCandidate(pool, weights, nodes, node, MapNodeType.Shop, counts, biome, table);
-            AddCandidate(pool, weights, nodes, node, MapNodeType.Opel, counts, biome, table);
             AddCandidate(pool, weights, nodes, node, MapNodeType.Rest, counts, biome, table);
 
             MapNodeType picked = PickWeighted(rng, pool, weights);
@@ -338,6 +392,8 @@ public static class MapGenerator
         }
 
         int weight = table.GetWeight(biome, type);
+        if (type == MapNodeType.Shop)
+            weight += table.GetWeight(biome, MapNodeType.Opel);
         if (type == MapNodeType.Enemy && weight <= 0) weight = 1;
         if (weight <= 0) return;
         pool.Add(type);
@@ -418,6 +474,13 @@ public static class MapGenerator
         while (id >= 0 && pathLen >= 1)
         {
             MapNode node = nodes[id];
+            if (node.isShopRow)
+            {
+                Reach skipped = best[id][pathLen];
+                id = skipped.prevId;
+                pathLen = skipped.prevLen;
+                continue;
+            }
             MapNodeTypeRow rule = table.GetNodeRule(node.type);
             if (rule != null && rule.Is_Facility)
             {
@@ -471,10 +534,13 @@ public static class MapGenerator
                 {
                     int childId = node.children[c];
                     if (childId < 0 || childId >= nodes.Count) continue;
-                    if (nodes[childId].type == MapNodeType.Boss) continue;
-                    int nextLen = pathLen + 1;
+                    MapNode child = nodes[childId];
+                    if (child.type == MapNodeType.Boss) continue;
+                    int nextLen = child.isShopRow ? pathLen : pathLen + 1;
                     if (nextLen >= best[childId].Length) continue;
-                    int enemies = from[pathLen].enemies + (nodes[childId].type == MapNodeType.Enemy ? 1 : 0);
+                    int enemies = from[pathLen].enemies;
+                    if (!child.isShopRow && child.type == MapNodeType.Enemy)
+                        enemies++;
                     if (best[childId][nextLen].enemies < 0 || enemies < best[childId][nextLen].enemies)
                     {
                         best[childId][nextLen].enemies = enemies;
@@ -499,12 +565,16 @@ public static class MapGenerator
         MapConfig cfg = table.Config;
         var counts = new int[6];
         for (int i = 0; i < nodes.Count; i++)
+        {
+            if (nodes[i].isShopRow) continue;
             counts[(int)nodes[i].type]++;
+        }
 
         for (int t = 0; t < 6; t++)
         {
             MapNodeTypeRow rule = table.GetNodeRule((MapNodeType)t);
             if (rule == null) continue;
+            if ((MapNodeType)t == MapNodeType.Opel) continue;
             if (counts[t] < rule.Min_Per_Map) return false;
         }
 
@@ -528,22 +598,19 @@ public static class MapGenerator
         MapConfig cfg = table.Config;
         var nodes = new List<MapNode>();
         int col = Mathf.Max(0, cfg.GridWidth / 2);
-        int twos = Mathf.Max(0, cfg.MaxPathLength - cfg.MinEnemyCount);
-        int ones = Mathf.Max(0, cfg.MinEnemyCount - 1 - twos);
+        int last = cfg.MaxPathLength - 1;
+        int shop = Mathf.Clamp(cfg.ShopRow, 1, Mathf.Max(1, last - 1));
+        int maxSkip = Mathf.Max(1, cfg.ShortcutMaxSkip);
         var rows = new List<int> { 0 };
         int row = 0;
-        for (int i = 0; i < twos; i++)
+        while (row < last)
         {
-            row = Mathf.Min(cfg.MaxPathLength - 1, row + 2);
+            int step = Mathf.Min(maxSkip, last - row);
+            if (row < shop && row + step > shop)
+                step = shop - row;
+            row += step;
             rows.Add(row);
         }
-        for (int i = 0; i < ones; i++)
-        {
-            row = Mathf.Min(cfg.MaxPathLength - 1, row + 1);
-            rows.Add(row);
-        }
-        if (rows[rows.Count - 1] != cfg.MaxPathLength - 1)
-            rows.Add(cfg.MaxPathLength - 1);
 
         MapNode previous = null;
         for (int i = 0; i < rows.Count; i++)
@@ -553,8 +620,9 @@ public static class MapGenerator
                 id = nodes.Count,
                 row = rows[i],
                 col = col,
-                type = MapNodeType.Enemy,
-                isShortcut = true
+                type = rows[i] == cfg.ShopRow ? MapNodeType.Shop : MapNodeType.Enemy,
+                isShortcut = true,
+                isShopRow = rows[i] == cfg.ShopRow
             };
             nodes.Add(node);
             if (previous != null)

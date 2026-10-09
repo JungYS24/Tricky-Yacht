@@ -116,15 +116,17 @@ public static class MapSimulator
             {
                 int child = node.children[c];
                 if (child < 0 || child >= count || map.nodes[child].type == MapNodeType.Boss) continue;
-                int add = map.nodes[child].type == MapNodeType.Enemy ? 1 : 0;
-                int nextMin = minLen[index] + 1;
+                bool shopRow = map.nodes[child].isShopRow;
+                int add = !shopRow && map.nodes[child].type == MapNodeType.Enemy ? 1 : 0;
+                int step = shopRow ? 0 : 1;
+                int nextMin = minLen[index] + step;
                 int nextMinEnemy = minEnemy[index] + add;
                 if (nextMin < minLen[child] || (nextMin == minLen[child] && nextMinEnemy < minEnemy[child]))
                 {
                     minLen[child] = nextMin;
                     minEnemy[child] = nextMinEnemy;
                 }
-                int nextMax = maxLen[index] + 1;
+                int nextMax = maxLen[index] + step;
                 int nextMaxEnemy = maxEnemy[index] + add;
                 if (nextMax > maxLen[child] || (nextMax == maxLen[child] && nextMaxEnemy > maxEnemy[child]))
                 {

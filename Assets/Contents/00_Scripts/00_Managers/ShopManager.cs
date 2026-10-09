@@ -42,6 +42,17 @@ public class ShopManager : MonoBehaviour
     [Header("위성 선택 UI")]
     public SatelliteSelectionPanel satelliteSelectionPanel;
 
+    public enum MapMerchant
+    {
+        Louis,
+        Ronan,
+        Opel
+    }
+
+    public MapMerchant currentMerchant = MapMerchant.Louis;
+    bool mapMerchantActive;
+    TextMeshProUGUI merchantNameText;
+
     private void Awake()
     {
         if (tooltipRect == null && tooltipPanel != null)
@@ -74,23 +85,138 @@ public class ShopManager : MonoBehaviour
 
     public void OpenShop()
     {
+        OpenShopInternal(false);
+    }
+
+    public void OpenMapShop()
+    {
+        currentMerchant = (MapMerchant)UnityEngine.Random.Range(0, 3);
+        OpenShopInternal(true);
+    }
+
+    void OpenShopInternal(bool fromMap)
+    {
+        mapMerchantActive = fromMap;
         IsShopOpen = true;
-        if (shopUI != null) shopUI.SetActive(true);
+        RevealShop();
+        EnsureMerchantLabel();
+        if (merchantNameText != null)
+        {
+            merchantNameText.gameObject.SetActive(fromMap);
+            if (fromMap) merchantNameText.text = MerchantName(currentMerchant);
+        }
 
-        // 정적 UI 업데이트를 먼저 처리하여 데이터 싱크를 맞추기
         if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
-
-        // 그 후 DoTween 연출을 실행해야 숫자가 꼬임 없이 부드럽게 표현
         if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
 
         RefreshShop(false);
-
-        //리롤 할인 UI 갱신 및 상점 진입 피규어(복고양이) 기믹 발동
         UpdateRerollUI();
         if (FigureEffectManager.Instance != null)
-        {
             FigureEffectManager.Instance.EvaluateShopEnteredTriggers(diceManager, this);
+
+        Debug.Log($"[Map Shop] merchant={(fromMap ? currentMerchant.ToString() : "tutorial")} shopUI={(shopUI != null ? shopUI.name : "null")} active={shopUI != null && shopUI.activeInHierarchy}");
+    }
+
+    void RevealShop()
+    {
+        if (shopUI == null) return;
+        Transform cursor = shopUI.transform;
+        while (cursor != null)
+        {
+            if (!cursor.gameObject.activeSelf)
+                cursor.gameObject.SetActive(true);
+            if (cursor.GetComponent<Canvas>() != null) break;
+            cursor = cursor.parent;
         }
+        shopUI.transform.SetAsLastSibling();
+    }
+
+    void EnsureMerchantLabel()
+    {
+        if (shopUI == null) return;
+        Transform found = shopUI.transform.Find("MerchantName");
+        if (found == null)
+        {
+            var go = new GameObject("MerchantName", typeof(RectTransform));
+            go.transform.SetParent(shopUI.transform, false);
+            var rect = go.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 1f);
+            rect.anchorMax = new Vector2(0.5f, 1f);
+            rect.pivot = new Vector2(0.5f, 1f);
+            rect.anchoredPosition = new Vector2(0f, -12f);
+            rect.sizeDelta = new Vector2(640f, 72f);
+            merchantNameText = go.AddComponent<TextMeshProUGUI>();
+            merchantNameText.fontSize = 40;
+            merchantNameText.alignment = TextAlignmentOptions.Center;
+            merchantNameText.color = Color.white;
+            if (rerollCostText != null) merchantNameText.font = rerollCostText.font;
+        }
+        else
+        {
+            merchantNameText = found.GetComponent<TextMeshProUGUI>();
+        }
+    }
+
+    static string MerchantName(MapMerchant merchant)
+    {
+        switch (merchant)
+        {
+            case MapMerchant.Louis: return "루이";
+            case MapMerchant.Ronan: return "로난";
+            default: return "오펠";
+        }
+    }
+
+    bool MerchantSells(BaseItemDataSO item)
+    {
+        if (item == null) return false;
+        switch (currentMerchant)
+        {
+            case MapMerchant.Louis:
+                return item is FigureItemSO || item is SnackItemSO || item is TicketItemSO;
+            case MapMerchant.Ronan:
+                return item is DiceItemSO || item is CoatingItemSO || item is DiceDestroyItemSO || item is MaxHPItemSO || item is CoinItemSO;
+            default:
+                return item is SatelliteItemSO;
+        }
+    }
+
+    List<BaseItemDataSO> FilterMerchantStock(List<BaseItemDataSO> source)
+    {
+        var filtered = new List<BaseItemDataSO>();
+        for (int i = 0; i < source.Count; i++)
+        {
+            if (MerchantSells(source[i])) filtered.Add(source[i]);
+        }
+        if (currentMerchant == MapMerchant.Opel && filtered.Count == 0)
+            filtered.AddRange(SatelliteStock());
+        if (filtered.Count == 0)
+        {
+            Debug.LogWarning($"[Map Shop] {currentMerchant} 상품이 없어 전체 진열을 사용합니다.");
+            return source;
+        }
+        return filtered;
+    }
+
+    List<SatelliteItemSO> satelliteStock;
+
+    List<BaseItemDataSO> SatelliteStock()
+    {
+        if (satelliteStock == null)
+        {
+            satelliteStock = new List<SatelliteItemSO>();
+            SatelliteType[] types = { SatelliteType.Jupiter, SatelliteType.Mars, SatelliteType.Mercury, SatelliteType.Venus };
+            string[] names = { "목성", "화성", "수성", "금성" };
+            for (int i = 0; i < types.Length; i++)
+            {
+                var item = ScriptableObject.CreateInstance<SatelliteItemSO>();
+                item.satelliteType = types[i];
+                item.itemName = names[i];
+                item.price = 200;
+                satelliteStock.Add(item);
+            }
+        }
+        return new List<BaseItemDataSO>(satelliteStock);
     }
 
     public void RefreshShop(bool isReroll)
@@ -106,6 +232,9 @@ public class ShopManager : MonoBehaviour
             }
             validPool.Add(item);
         }
+
+        if (mapMerchantActive)
+            validPool = FilterMerchantStock(validPool);
 
         // 일반 상점을 위해 미리 모든 아이템을 섞어둡니다. (validPool 기준)
         List<BaseItemDataSO> shuffled = new List<BaseItemDataSO>(validPool);
@@ -252,6 +381,7 @@ public class ShopManager : MonoBehaviour
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return;
 
         IsShopOpen = false;
+        mapMerchantActive = false;
         if (shopUI != null) shopUI.SetActive(false);
 
         if (diceManager != null)
