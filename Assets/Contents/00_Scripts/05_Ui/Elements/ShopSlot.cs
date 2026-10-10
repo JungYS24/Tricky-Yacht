@@ -16,6 +16,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public bool isLocked = false;
 
     public BaseItemDataSO currentData;
+    int listedPrice = -1;
     private ShopManager manager;
 
     public bool isPurchased = false;
@@ -50,9 +51,10 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private float animTimer;
     private float animInterval = 0.7f;
 
-    public void SetupSlot(BaseItemDataSO data, ShopManager shopMgr)
+    public void SetupSlot(BaseItemDataSO data, ShopManager shopMgr, int listedPrice = -1)
     {
         currentData = data;
+        this.listedPrice = listedPrice;
         manager = shopMgr;
         isPurchased = false;
         isAnimating = false; // 새로운 아이템이 들어올 때 애니메이션 초기화
@@ -126,7 +128,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
         //할인된 최종 가격을 계산해서 ShopManager에게 결제를 요청
         int actualPrice = GetFinalPrice();
-        bool usedDiscount = !manager.diceManager.isNextShopFree && !isLuckyCatFree && actualPrice < Mathf.FloorToInt(currentData.price * shopPriceMultiplier);
+        bool usedDiscount = !manager.diceManager.isNextShopFree && !isLuckyCatFree && actualPrice < Mathf.FloorToInt(ListedUnitPrice() * shopPriceMultiplier);
         if (manager.PurchaseItem(currentData, actualPrice))
         {
             if (usedDiscount && currentData is CoatingItemSO) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.DiscountCoating);
@@ -150,6 +152,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         isLocked = true;
         isPurchased = false;
         isAnimating = false;
+        listedPrice = -1;
 
         if (lockUI != null) lockUI.SetActive(true); // 자물쇠 아이콘 켜기
         if (itemIcon != null) itemIcon.color = Color.clear; // 아이템 아이콘 투명하게 숨김
@@ -184,7 +187,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if ((manager != null && manager.diceManager != null && manager.diceManager.isNextShopFree) || isLuckyCatFree) return 0;
 
         // 원본 SO 가격은 유지, 배율 적용 후 소수점 버림, 이어서 기존 피규어 할인을 적용
-        int price = Mathf.Max(0, Mathf.FloorToInt(currentData.price * shopPriceMultiplier));
+        int price = Mathf.Max(0, Mathf.FloorToInt(ListedUnitPrice() * shopPriceMultiplier));
         // 코팅 및 위성 20% 할인 적용 (클래스 타입으로 안전하게 구분)
         if (currentData is CoatingItemSO)
         {   
@@ -201,6 +204,12 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         }
 
         return Mathf.Max(0, price);
+    }
+
+    int ListedUnitPrice()
+    {
+        if (listedPrice >= 0) return listedPrice;
+        return currentData != null ? currentData.price : 0;
     }
 
     // 복고양이 당첨 시 호출되는 함수

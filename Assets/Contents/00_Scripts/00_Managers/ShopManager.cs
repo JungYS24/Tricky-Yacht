@@ -11,6 +11,7 @@ public class ShopManager : MonoBehaviour
     [Header("참조 설정")]
     public DiceManager diceManager;
     public List<BaseItemDataSO> allItemsPool;
+    public TextAsset shopStockTable;
     public ShopSlot[] shopSlots;
     public GameObject shopUI;
 
@@ -52,6 +53,9 @@ public class ShopManager : MonoBehaviour
     public MapMerchant currentMerchant = MapMerchant.Louis;
     bool mapMerchantActive;
     TextMeshProUGUI merchantNameText;
+    ShopStockTable stockTable;
+    bool stockTableLogged;
+    readonly Dictionary<BaseItemDataSO, int> listedPrices = new Dictionary<BaseItemDataSO, int>();
 
     private void Awake()
     {
@@ -61,6 +65,7 @@ public class ShopManager : MonoBehaviour
         HideTooltip();
         if (allItemsPool == null) allItemsPool = new List<BaseItemDataSO>();
         SnackItemSO.RegisterResourceSnacks(allItemsPool);
+        BindShopStock();
 
         if (shopRerollButton != null)
             shopRerollButton.onClick.AddListener(RerollShop);
@@ -90,7 +95,10 @@ public class ShopManager : MonoBehaviour
 
     public void OpenMapShop()
     {
-        currentMerchant = (MapMerchant)UnityEngine.Random.Range(0, 3);
+        if (stockTable == null || !stockTable.Loaded) BindShopStock();
+        currentMerchant = stockTable != null && stockTable.Loaded
+            ? stockTable.RollMerchant()
+            : (MapMerchant)UnityEngine.Random.Range(0, 3);
         OpenShopInternal(true);
     }
 
@@ -167,56 +175,47 @@ public class ShopManager : MonoBehaviour
         }
     }
 
-    bool MerchantSells(BaseItemDataSO item)
+    void BindShopStock()
     {
-        if (item == null) return false;
-        switch (currentMerchant)
+        stockTable = ShopStockTable.Parse(shopStockTable != null ? shopStockTable.text : null);
+        if (stockTableLogged) return;
+        stockTableLogged = true;
+        if (stockTable == null || !stockTable.Loaded)
         {
-            case MapMerchant.Louis:
-                return item is FigureItemSO || item is SnackItemSO || item is TicketItemSO;
-            case MapMerchant.Ronan:
-                return item is DiceItemSO || item is CoatingItemSO || item is DiceDestroyItemSO || item is MaxHPItemSO || item is CoinItemSO;
-            default:
-                return item is SatelliteItemSO;
+            Debug.LogWarning("[Map Shop] Shop_Stock_Table.json을 읽지 못했습니다.");
+            return;
         }
+
+        Debug.Log($"[Map Shop] 미구현 품목 {stockTable.UnimplementedCount}개 제외");
+        List<string> missing = stockTable.MissingNames(allItemsPool);
+        for (int i = 0; i < missing.Count; i++)
+            Debug.LogWarning($"[Map Shop] 재고 표 품목을 풀에서 찾지 못했습니다: {missing[i]}");
     }
 
     List<BaseItemDataSO> FilterMerchantStock(List<BaseItemDataSO> source)
     {
+        listedPrices.Clear();
         var filtered = new List<BaseItemDataSO>();
+        var seen = new HashSet<BaseItemDataSO>();
+        if (stockTable == null || !stockTable.Loaded)
+        {
+            Debug.LogWarning("[Map Shop] 재고 표가 없어 지도 상인 진열을 비웁니다.");
+            return filtered;
+        }
+
         for (int i = 0; i < source.Count; i++)
         {
-            if (MerchantSells(source[i])) filtered.Add(source[i]);
+            BaseItemDataSO item = source[i];
+            if (item == null || !seen.Add(item)) continue;
+            ShopStockOffer offer = stockTable.Find(item);
+            if (offer == null || !offer.SellsTo(currentMerchant)) continue;
+            filtered.Add(item);
+            listedPrices[item] = offer.Row.Price;
         }
-        if (currentMerchant == MapMerchant.Opel && filtered.Count == 0)
-            filtered.AddRange(SatelliteStock());
+
         if (filtered.Count == 0)
-        {
-            Debug.LogWarning($"[Map Shop] {currentMerchant} 상품이 없어 전체 진열을 사용합니다.");
-            return source;
-        }
+            Debug.LogWarning($"[Map Shop] {currentMerchant} 판매 품목이 없습니다.");
         return filtered;
-    }
-
-    List<SatelliteItemSO> satelliteStock;
-
-    List<BaseItemDataSO> SatelliteStock()
-    {
-        if (satelliteStock == null)
-        {
-            satelliteStock = new List<SatelliteItemSO>();
-            SatelliteType[] types = { SatelliteType.Jupiter, SatelliteType.Mars, SatelliteType.Mercury, SatelliteType.Venus };
-            string[] names = { "목성", "화성", "수성", "금성" };
-            for (int i = 0; i < types.Length; i++)
-            {
-                var item = ScriptableObject.CreateInstance<SatelliteItemSO>();
-                item.satelliteType = types[i];
-                item.itemName = names[i];
-                item.price = 200;
-                satelliteStock.Add(item);
-            }
-        }
-        return new List<BaseItemDataSO>(satelliteStock);
     }
 
     public void RefreshShop(bool isReroll)
@@ -300,9 +299,14 @@ public class ShopManager : MonoBehaviour
 
 
 
-        // 스테이지에 따른 슬롯 해금 개수 계산 (기본 2개 + 2스테이지마다 1개씩 추가)
-        int unlockedCount = 6 + (diceManager.currentStage - 1) / 2;
-        unlockedCount = Mathf.Clamp(unlockedCount, 2, shopSlots.Length); // 최소 2개, 최대 6개(Length)로 고정
+        int unlockedCount;
+        if (mapMerchantActive && stockTable != null && stockTable.Loaded)
+            unlockedCount = Mathf.Clamp(stockTable.SlotCount, 1, shopSlots.Length);
+        else
+        {
+            unlockedCount = 6 + (diceManager.currentStage - 1) / 2;
+            unlockedCount = Mathf.Clamp(unlockedCount, 2, shopSlots.Length);
+        }
 
         // 주의: 이 for문 아래에 기존 for문이 또 남아있으면 안 됩니다!
         for (int i = 0; i < shopSlots.Length; i++)
@@ -323,7 +327,11 @@ public class ShopManager : MonoBehaviour
             // 해금된 슬롯에 정상적으로 아이템 배치
             if (dataIndex < shuffled.Count)
             {
-                shopSlots[i].SetupSlot(shuffled[dataIndex], this);
+                BaseItemDataSO item = shuffled[dataIndex];
+                int listed = -1;
+                if (mapMerchantActive && listedPrices.TryGetValue(item, out int tablePrice))
+                    listed = tablePrice;
+                shopSlots[i].SetupSlot(item, this, listed);
                 dataIndex++;
             }
             else if (!isReroll || !shopSlots[i].isPurchased)
