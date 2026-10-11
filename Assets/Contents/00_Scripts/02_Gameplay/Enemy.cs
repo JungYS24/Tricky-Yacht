@@ -447,6 +447,12 @@ public class Enemy : MonoBehaviour
     }
 
     // 포획/일반 사망이 Transform과 색상을 독점하도록 기존 피격·공격 연출을 종료합니다.
+    public IEnumerator WaitForHitPresentation()
+    {
+        var feedback = GetComponent<MonsterHitFeedback>();
+        while (isActiveAndEnabled && IsDead && feedback != null && feedback.IsPlaying) yield return null;
+    }
+
     public bool BeginDeathPresentation()
     {
         if (!IsDead || deathPresentationStarted) return false;

@@ -35,11 +35,12 @@ public sealed class MonsterHitFeedback : MonoBehaviour
     public float darkAnimationDuration = 0.56f;
     public float elementalSpriteSize = 1.8f;
     [Header("화염 접촉 타이밍")]
-    [Range(0.125f, 0.5f)] public float flameContactProgress = 0.3f;
-    public float flameBodyOffset = -0.18f;
-    public float flameSizeMultiplier = 1f;
+    [Range(0.125f, 0.5f)] public float flameContactProgress = 0.4f;
+    public float flameBodyOffset = 0.02f;
+    public float flameSizeMultiplier = 1.8f;
     private float flashStartedAt;
     public float FlameContactDelay => Mathf.Max(0.05f, flameFrames != null ? flameAnimationDuration : elementalDuration) * Mathf.Clamp(flameContactProgress, 0.125f, 0.5f);
+    public bool IsPlaying => tween != null && tween.IsActive();
     public bool IsFlamePlaying => activeKind == EnemyHitKind.Flame && tween != null && tween.IsActive();
 
     public void ShowFlameContact()
@@ -325,6 +326,12 @@ public sealed class MonsterHitFeedback : MonoBehaviour
         for (int i = 0; i < shards.Length; i++)
         {
             var piece = shards[i];
+            // 화염 시트에 불씨가 포함되어 있으므로 별도 파편을 중복 표시하지 않습니다.
+            if (flame && frames != null)
+            {
+                piece.color = Color.clear;
+                continue;
+            }
             if (flame)
             {
                 float x = (i - 2.5f) * size * 0.24f + Mathf.Sin(t * 5f + i) * size * 0.08f;
