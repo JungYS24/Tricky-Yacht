@@ -115,26 +115,9 @@ public static class MapUiHierarchy
     public static void EnsureRest(RestPanel panel)
     {
         if (panel == null) return;
-        Transform box = panel.transform.Find("Box");
-        bool created = box == null;
-        if (created)
-        {
-            Stretch(panel.transform as RectTransform);
-            Image dim = GetOrAdd<Image>(panel.gameObject);
-            dim.color = new Color(0.04f, 0.05f, 0.08f, 0.82f);
-            var boxGo = new GameObject("Box", typeof(RectTransform), typeof(Image));
-            boxGo.transform.SetParent(panel.transform, false);
-            box = boxGo.transform;
-            RectTransform boxRect = box as RectTransform;
-            boxRect.sizeDelta = new Vector2(640f, 420f);
-            boxRect.anchorMin = boxRect.anchorMax = new Vector2(0.5f, 0.5f);
-            boxGo.GetComponent<Image>().color = new Color(0.12f, 0.14f, 0.18f, 1f);
-        }
-
-        panel.titleText = EnsureLabel(box, "Title", "휴식", 36, new Vector2(0f, 140f), new Vector2(520f, 70f), created);
-        panel.descText = EnsureLabel(box, "Description", "체력을 회복하거나 주사위를 파괴합니다.", 22, new Vector2(0f, 70f), new Vector2(520f, 80f), created);
-        panel.healButton = EnsureButton(box, "HealButton", "체력 회복", new Vector2(0f, -20f), created);
-        panel.destroyButton = EnsureButton(box, "DestroyButton", "주사위 파괴", new Vector2(0f, -110f), created);
+        if (panel.titleText != null && panel.healButton != null && panel.destroyButton != null)
+            return;
+        Debug.LogWarning("[Map] RestPanel 하이어라키가 씬에 없습니다. MainScene_Map의 배치를 확인하세요.");
     }
 
     public static void EnsureOpel(OpelPanel panel)

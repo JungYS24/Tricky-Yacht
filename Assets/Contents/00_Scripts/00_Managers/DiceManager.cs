@@ -1567,13 +1567,8 @@ public class DiceManager : MonoBehaviour
             mapPanel = go.GetComponent<MapPanel>();
             go.SetActive(false);
         }
-        if (restPanel == null && canvas != null)
-        {
-            var go = new GameObject("RestPanel", typeof(RectTransform), typeof(RestPanel));
-            go.transform.SetParent(canvas.transform, false);
-            restPanel = go.GetComponent<RestPanel>();
-            go.SetActive(false);
-        }
+        if (restPanel == null)
+            Debug.LogWarning("[Map] RestPanel이 씬에 없습니다. MainScene_Map의 배치를 확인하세요.");
         if (opelPanel == null && canvas != null)
         {
             var go = new GameObject("OpelPanel", typeof(RectTransform), typeof(OpelPanel));

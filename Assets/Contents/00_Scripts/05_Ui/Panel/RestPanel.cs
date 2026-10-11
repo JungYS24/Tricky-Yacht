@@ -1,15 +1,38 @@
+using System;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 // 휴식 노드. 체력 회복 또는 주사위 하나 파괴 중 하나를 고릅니다.
 public class RestPanel : MonoBehaviour
 {
-    public Text titleText;
-    public Text descText;
+    public TMP_Text titleText;
     public Button healButton;
+    public TMP_Text healNameText;
+    public TMP_Text healDescText;
     public Button destroyButton;
+    public TMP_Text destroyNameText;
+    public TMP_Text destroyDescText;
 
     DiceManager diceManager;
+
+    void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
+    }
+
+    void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+    }
+
+    void OnLocaleChanged(Locale _)
+    {
+        if (isActiveAndEnabled)
+            RefreshTexts();
+    }
 
     public void Hide()
     {
@@ -19,7 +42,6 @@ public class RestPanel : MonoBehaviour
     public void Open(DiceManager manager)
     {
         diceManager = manager;
-        MapUiHierarchy.EnsureRest(this);
         Wire();
         RefreshTexts();
         gameObject.SetActive(true);
@@ -42,21 +64,27 @@ public class RestPanel : MonoBehaviour
 
     void RefreshTexts()
     {
-        MapTableData table = diceManager != null ? diceManager.GetMapTable() : null;
         if (titleText != null)
-            titleText.text = table != null ? table.GetNodeName(MapNodeType.Rest) : "휴식";
-        if (descText != null)
+            titleText.text = LocalizationManager.GetUi("UI_REST_TITLE", "Choose an Option");
+        if (healNameText != null)
+            healNameText.text = LocalizationManager.GetUi("UI_REST_HEAL_NAME", "Rest");
+        if (destroyNameText != null)
+            destroyNameText.text = LocalizationManager.GetUi("UI_REST_DESTROY_NAME", "Destroy");
+        if (destroyDescText != null)
+            destroyDescText.text = LocalizationManager.GetUi("UI_REST_DESTROY_DESC", "Remove a Die");
+        if (healDescText != null)
         {
-            MapNodeTypeRow rule = table != null ? table.GetNodeRule(MapNodeType.Rest) : null;
-            descText.text = rule != null && !string.IsNullOrEmpty(rule.Desc_KR)
-                ? rule.Desc_KR
-                : "체력을 회복하거나 주사위를 파괴합니다.";
-        }
-        if (healButton != null)
-        {
+            MapTableData table = diceManager != null ? diceManager.GetMapTable() : null;
             int percent = table != null ? table.Config.RestHealPercent : 30;
-            Text label = healButton.GetComponentInChildren<Text>();
-            if (label != null) label.text = $"체력 회복 ({percent}%)";
+            string template = LocalizationManager.GetUi("UI_REST_HEAL_DESC", "Recover HP (+{0}%)");
+            try
+            {
+                healDescText.text = string.Format(template, percent);
+            }
+            catch (FormatException)
+            {
+                healDescText.text = template;
+            }
         }
     }
 
