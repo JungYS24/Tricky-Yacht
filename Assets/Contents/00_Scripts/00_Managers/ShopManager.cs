@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Components;
+using UnityEngine.Localization.Settings;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -45,12 +48,15 @@ public class ShopManager : MonoBehaviour
 
     public enum MapMerchant
     {
-        Louis,
-        Ronan,
-        Opel
+        Nyaon = 0,
+        Ronan = 1,
+        Opel = 2
     }
 
-    public MapMerchant currentMerchant = MapMerchant.Louis;
+    public MapMerchant currentMerchant = MapMerchant.Nyaon;
+    public RuntimeAnimatorController nyaonAnimator;
+    public RuntimeAnimatorController ronanAnimator;
+    public RuntimeAnimatorController opelAnimator;
     bool mapMerchantActive;
     TextMeshProUGUI merchantNameText;
     ShopStockTable stockTable;
@@ -122,7 +128,25 @@ public class ShopManager : MonoBehaviour
         if (FigureEffectManager.Instance != null)
             FigureEffectManager.Instance.EvaluateShopEnteredTriggers(diceManager, this);
 
+        ApplyMerchantPresentation(fromMap);
+
         Debug.Log($"[Map Shop] merchant={(fromMap ? currentMerchant.ToString() : "tutorial")} shopUI={(shopUI != null ? shopUI.name : "null")} active={shopUI != null && shopUI.activeInHierarchy}");
+    }
+
+    void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnShopLocaleChanged;
+    }
+
+    void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnShopLocaleChanged;
+    }
+
+    void OnShopLocaleChanged(Locale _)
+    {
+        if (!IsShopOpen) return;
+        ApplyShopTitle(mapMerchantActive);
     }
 
     void RevealShop()
@@ -169,10 +193,180 @@ public class ShopManager : MonoBehaviour
     {
         switch (merchant)
         {
-            case MapMerchant.Louis: return "루이";
+            case MapMerchant.Nyaon: return "냐온 딜레마";
             case MapMerchant.Ronan: return "로난";
             default: return "오펠";
         }
+    }
+
+    TextMeshProUGUI shopTitleText;
+    LocalizeStringEvent shopTitleLocalize;
+    Image npcImage;
+    Animator npcAnimator;
+    bool npcRestSaved;
+    Vector2 npcAnchorMin, npcAnchorMax, npcPivot, npcAnchoredPosition, npcSizeDelta;
+    Vector3 npcLocalScale;
+    bool npcPreserveAspect;
+    Sprite npcSprite;
+    bool npcAnimatorEnabled;
+    RuntimeAnimatorController npcController;
+    float npcFootX, npcFootY, npcBodyHeight;
+
+    void ApplyMerchantPresentation(bool fromMap)
+    {
+        BindShopChrome();
+        if (fromMap)
+        {
+            ApplyNpc(currentMerchant);
+            ApplyShopTitle(true);
+        }
+        else
+        {
+            RestoreNpc();
+            ApplyShopTitle(false);
+        }
+    }
+
+    void BindShopChrome()
+    {
+        if (shopUI == null) return;
+        if (shopTitleText == null)
+        {
+            TextMeshProUGUI[] texts = shopUI.GetComponentsInChildren<TextMeshProUGUI>(true);
+            for (int i = 0; i < texts.Length; i++)
+            {
+                if (texts[i].gameObject.name != "Shop_TXT_Pannel") continue;
+                shopTitleText = texts[i];
+                shopTitleLocalize = texts[i].GetComponent<LocalizeStringEvent>();
+                break;
+            }
+        }
+        if (npcImage == null)
+        {
+            Image[] images = shopUI.GetComponentsInChildren<Image>(true);
+            for (int i = 0; i < images.Length; i++)
+            {
+                if (images[i].gameObject.name != "NPC_Image") continue;
+                npcImage = images[i];
+                npcAnimator = images[i].GetComponent<Animator>();
+                break;
+            }
+        }
+    }
+
+    void ApplyShopTitle(bool fromMap)
+    {
+        if (shopTitleText == null) return;
+        if (!fromMap)
+        {
+            if (shopTitleLocalize != null)
+            {
+                shopTitleLocalize.enabled = true;
+                shopTitleLocalize.RefreshString();
+            }
+            return;
+        }
+
+        if (shopTitleLocalize != null) shopTitleLocalize.enabled = false;
+        string key;
+        string fallback;
+        switch (currentMerchant)
+        {
+            case MapMerchant.Nyaon:
+                key = "UI_SHOP_TITLE_NYAON";
+                fallback = "냐온 딜레마, 기묘한 상점";
+                break;
+            case MapMerchant.Ronan:
+                key = "UI_SHOP_TITLE_RONAN";
+                fallback = "남작 로넌의 골동품 상점";
+                break;
+            default:
+                key = "UI_SHOP_TITLE_OPEL";
+                fallback = "오펠의 아르카나 상점";
+                break;
+        }
+        shopTitleText.text = LocalizationManager.GetUi(key, fallback);
+    }
+
+    RuntimeAnimatorController MerchantController(MapMerchant merchant)
+    {
+        switch (merchant)
+        {
+            case MapMerchant.Nyaon: return nyaonAnimator;
+            case MapMerchant.Ronan: return ronanAnimator;
+            default: return opelAnimator;
+        }
+    }
+
+    void SaveNpcRest()
+    {
+        if (npcRestSaved || npcImage == null) return;
+        RectTransform rect = npcImage.rectTransform;
+        npcAnchorMin = rect.anchorMin;
+        npcAnchorMax = rect.anchorMax;
+        npcPivot = rect.pivot;
+        npcAnchoredPosition = rect.anchoredPosition;
+        npcSizeDelta = rect.sizeDelta;
+        npcLocalScale = rect.localScale;
+        npcPreserveAspect = npcImage.preserveAspect;
+        npcSprite = npcImage.sprite;
+        npcAnimatorEnabled = npcAnimator != null && npcAnimator.enabled;
+        npcController = npcAnimator != null ? npcAnimator.runtimeAnimatorController : null;
+        float height = rect.rect.height * Mathf.Abs(rect.localScale.y);
+        float width = rect.rect.width * Mathf.Abs(rect.localScale.x);
+        npcBodyHeight = height;
+        npcFootY = rect.anchoredPosition.y - height * rect.pivot.y;
+        npcFootX = rect.anchoredPosition.x + width * (0.5f - rect.pivot.x);
+        npcRestSaved = true;
+    }
+
+    void ApplyNpc(MapMerchant merchant)
+    {
+        SaveNpcRest();
+        if (npcImage == null) return;
+        RuntimeAnimatorController controller = MerchantController(merchant);
+        if (npcAnimator != null && controller != null)
+        {
+            npcAnimator.enabled = true;
+            npcAnimator.runtimeAnimatorController = controller;
+            npcAnimator.Rebind();
+            npcAnimator.Update(0f);
+        }
+        FitNpcImage();
+    }
+
+    void FitNpcImage()
+    {
+        if (npcImage == null || npcImage.sprite == null || npcBodyHeight <= 1f) return;
+        Rect spriteRect = npcImage.sprite.rect;
+        float aspect = spriteRect.width / Mathf.Max(1f, spriteRect.height);
+        RectTransform rect = npcImage.rectTransform;
+        rect.localScale = Vector3.one;
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0f);
+        rect.sizeDelta = new Vector2(npcBodyHeight * aspect, npcBodyHeight);
+        rect.anchoredPosition = new Vector2(npcFootX, npcFootY);
+        npcImage.preserveAspect = true;
+    }
+
+    void RestoreNpc()
+    {
+        if (!npcRestSaved || npcImage == null) return;
+        if (npcAnimator != null)
+        {
+            npcAnimator.runtimeAnimatorController = npcController;
+            npcAnimator.enabled = npcAnimatorEnabled;
+        }
+        npcImage.sprite = npcSprite;
+        npcImage.preserveAspect = npcPreserveAspect;
+        RectTransform rect = npcImage.rectTransform;
+        rect.anchorMin = npcAnchorMin;
+        rect.anchorMax = npcAnchorMax;
+        rect.pivot = npcPivot;
+        rect.anchoredPosition = npcAnchoredPosition;
+        rect.sizeDelta = npcSizeDelta;
+        rect.localScale = npcLocalScale;
     }
 
     void BindShopStock()

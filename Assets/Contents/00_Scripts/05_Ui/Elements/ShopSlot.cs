@@ -9,6 +9,15 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public Image itemIcon;
     public TextMeshProUGUI priceText;
     public Button buyButton;
+    public Sprite coinIconSprite;
+
+    const float ItemIconSize = 128f;
+    const float CoinIconSize = 40f;
+    static readonly Color PriceColor = Color.white;
+    static readonly Color FreePriceColor = Color.yellow;
+
+    Image coinIcon;
+    RectTransform priceRow;
 
     // [자물쇠 아이콘
     [Header("잠금 UI")]
@@ -40,7 +49,88 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void RefreshPriceDisplay()
     {
         if (priceText == null || currentData == null || isLocked || isPurchased) return;
-        priceText.text = isLuckyCatFree ? "<color=#FFFF00>" + LocalizationManager.GetUi("UI_FREE", "0 G (무료!)") + "</color>" : LocalizationManager.GetUi("UI_GOLD_PRICE", "{0} G", GetFinalPrice());
+        int price = GetFinalPrice();
+        bool free = price <= 0;
+        SetPriceVisual(free ? "0" : price.ToString(), true, free);
+    }
+
+    void EnsurePriceRow()
+    {
+        if (priceRow != null || priceText == null) return;
+
+        RectTransform textRect = priceText.rectTransform;
+        float rowX = textRect.anchoredPosition.x;
+        int sibling = textRect.GetSiblingIndex();
+        Transform parent = textRect.parent;
+
+        var rowObject = new GameObject("PriceRow", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(ContentSizeFitter));
+        rowObject.transform.SetParent(parent, false);
+        rowObject.transform.SetSiblingIndex(sibling);
+        priceRow = rowObject.GetComponent<RectTransform>();
+        priceRow.anchorMin = new Vector2(0.5f, 0f);
+        priceRow.anchorMax = new Vector2(0.5f, 0f);
+        priceRow.pivot = new Vector2(0.5f, 0f);
+        priceRow.anchoredPosition = new Vector2(rowX, 36f);
+        priceRow.localScale = Vector3.one;
+
+        var layout = rowObject.GetComponent<HorizontalLayoutGroup>();
+        layout.childAlignment = TextAnchor.MiddleCenter;
+        layout.spacing = 6f;
+        layout.childControlWidth = false;
+        layout.childControlHeight = false;
+        layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = false;
+        layout.childScaleWidth = false;
+        layout.childScaleHeight = false;
+
+        var rowFitter = rowObject.GetComponent<ContentSizeFitter>();
+        rowFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        rowFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        textRect.SetParent(priceRow, false);
+        textRect.anchorMin = new Vector2(0f, 0.5f);
+        textRect.anchorMax = new Vector2(0f, 0.5f);
+        textRect.pivot = new Vector2(0f, 0.5f);
+        textRect.anchoredPosition = Vector2.zero;
+        textRect.localScale = Vector3.one;
+        priceText.enableAutoSizing = false;
+        priceText.fontSize = 40f;
+        priceText.alignment = TextAlignmentOptions.MidlineLeft;
+        priceText.margin = Vector4.zero;
+        priceText.enableWordWrapping = false;
+        priceText.raycastTarget = false;
+        var textFitter = priceText.GetComponent<ContentSizeFitter>();
+        if (textFitter == null) textFitter = priceText.gameObject.AddComponent<ContentSizeFitter>();
+        textFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        textFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        var iconObject = new GameObject("CoinIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(LayoutElement));
+        iconObject.transform.SetParent(priceRow, false);
+        coinIcon = iconObject.GetComponent<Image>();
+        coinIcon.sprite = coinIconSprite;
+        coinIcon.preserveAspect = true;
+        coinIcon.raycastTarget = false;
+        var iconRect = coinIcon.rectTransform;
+        iconRect.sizeDelta = new Vector2(CoinIconSize, CoinIconSize);
+        var iconLayout = iconObject.GetComponent<LayoutElement>();
+        iconLayout.preferredWidth = CoinIconSize;
+        iconLayout.preferredHeight = CoinIconSize;
+    }
+
+    void SetPriceVisual(string text, bool showCoin, bool free)
+    {
+        EnsurePriceRow();
+        if (priceText == null) return;
+        Color color = free ? FreePriceColor : PriceColor;
+        priceText.text = text;
+        priceText.color = color;
+        if (coinIcon != null)
+        {
+            coinIcon.color = color;
+            coinIcon.gameObject.SetActive(showCoin && coinIcon.sprite != null);
+        }
+        if (priceRow != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(priceRow);
     }
 
     // --- 애니메이션 제어용 변수 (코루틴 대체) ---
@@ -50,6 +140,23 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private int currentAnimIndex;
     private float animTimer;
     private float animInterval = 0.7f;
+
+    void Awake()
+    {
+        FitItemIcon();
+        EnsurePriceRow();
+    }
+
+    void FitItemIcon()
+    {
+        if (itemIcon == null) return;
+        itemIcon.preserveAspect = true;
+        RectTransform rect = itemIcon.rectTransform;
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.sizeDelta = new Vector2(ItemIconSize, ItemIconSize);
+        rect.localScale = Vector3.one;
+    }
 
     public void SetupSlot(BaseItemDataSO data, ShopManager shopMgr, int listedPrice = -1)
     {
@@ -97,6 +204,8 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             if (itemIcon != null) itemIcon.sprite = data.icon;
         }
 
+        FitItemIcon();
+
         //가격 및 버튼 설정
         isLuckyCatFree = false; // 슬롯 세팅 시 무료 스위치 초기화
         RefreshPriceDisplay();
@@ -117,6 +226,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
                 animTimer = 0f;
                 currentAnimIndex = (currentAnimIndex + 1) % animFaces.Length;
                 itemIcon.sprite = animSprites[animFaces[currentAnimIndex] - 1];
+                FitItemIcon();
             }
         }
     }
@@ -138,9 +248,10 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             isAnimating = false; //아이템을 구매하면 즉시 애니메이션 연산을 정지    
 
             if (itemIcon != null) itemIcon.color = new Color(0.3f, 0.3f, 0.3f, 1f);
+            FitItemIcon();
 
             buyButton.interactable = false;
-            if (priceText != null) priceText.text = LocalizationManager.GetUi("UI_SOLD_OUT", "Sold Out");
+            SetPriceVisual(LocalizationManager.GetUi("UI_SOLD_OUT", "Sold Out"), false, false);
 
             manager.HideTooltip();
         }
@@ -156,7 +267,8 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
         if (lockUI != null) lockUI.SetActive(true); // 자물쇠 아이콘 켜기
         if (itemIcon != null) itemIcon.color = Color.clear; // 아이템 아이콘 투명하게 숨김
-        if (priceText != null) priceText.text = LocalizationManager.GetUi("UI_UNKNOWN", "???");
+        FitItemIcon();
+        SetPriceVisual(LocalizationManager.GetUi("UI_UNKNOWN", "???"), false, false);
 
         buyButton.interactable = false; // 버튼 클릭 방지
         buyButton.onClick.RemoveAllListeners();
@@ -216,7 +328,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void ApplyLuckyCatFree()
     {
         isLuckyCatFree = true;
-        if (priceText != null) priceText.text = "<color=#FFFF00>" + LocalizationManager.GetUi("UI_FREE", "0 G (무료!)") + "</color>";
+        RefreshPriceDisplay();
         Debug.Log($"[복고양이] {currentData.itemName} 무료 적용!");
     }
 }

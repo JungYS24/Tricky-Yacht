@@ -5,7 +5,7 @@ using UnityEngine;
 [Serializable]
 public class ShopMerchantWeights
 {
-    public int Rui = 1;
+    public int Nyaon = 1;
     public int Ronan = 1;
     public int Opel = 1;
 }
@@ -20,7 +20,7 @@ public class ShopStockRow
     public string SO_Class;
     public string Item_ID;
     public int Price;
-    public bool Rui;
+    public bool Nyaon;
     public bool Ronan;
     public bool Opel;
     public bool Implemented;
@@ -44,7 +44,7 @@ public class ShopStockOffer
         if (Row == null) return false;
         switch (merchant)
         {
-            case ShopManager.MapMerchant.Louis: return Row.Rui;
+            case ShopManager.MapMerchant.Nyaon: return Row.Nyaon;
             case ShopManager.MapMerchant.Ronan: return Row.Ronan;
             default: return Row.Opel;
         }
@@ -116,7 +116,7 @@ public class ShopStockTable
         if (row == null) return false;
         switch (merchant)
         {
-            case ShopManager.MapMerchant.Louis: return row.Rui;
+            case ShopManager.MapMerchant.Nyaon: return row.Nyaon;
             case ShopManager.MapMerchant.Ronan: return row.Ronan;
             default: return row.Opel;
         }
@@ -137,15 +137,15 @@ public class ShopStockTable
 
     public ShopManager.MapMerchant RollMerchant()
     {
-        int rui = Mathf.Max(0, Weights.Rui);
+        int nyaon = Mathf.Max(0, Weights.Nyaon);
         int ronan = Mathf.Max(0, Weights.Ronan);
         int opel = Mathf.Max(0, Weights.Opel);
-        int total = rui + ronan + opel;
+        int total = nyaon + ronan + opel;
         if (total <= 0) return (ShopManager.MapMerchant)UnityEngine.Random.Range(0, 3);
 
         int roll = UnityEngine.Random.Range(0, total);
-        if (roll < rui) return ShopManager.MapMerchant.Louis;
-        if (roll < rui + ronan) return ShopManager.MapMerchant.Ronan;
+        if (roll < nyaon) return ShopManager.MapMerchant.Nyaon;
+        if (roll < nyaon + ronan) return ShopManager.MapMerchant.Ronan;
         return ShopManager.MapMerchant.Opel;
     }
 

@@ -279,6 +279,7 @@ MonoBehaviour:
   lockUI: {fileID: 7811667960378942597}
   isLocked: 0
   isPurchased: 0
+  coinIconSprite: {fileID: -8945879103972220755, guid: 2646dbb2c239df944add56d6b97a0f53, type: 3}
 --- !u!1 &5669669773342700630
 GameObject:
   m_ObjectHideFlags: 0
