@@ -2,6 +2,7 @@
 UI,UI_START_BUTTON,시작하기,Start,スタート,开始,
 UI,UI_REROLLS_LEFT,남은 굴리기: {0},Rolls left: {0},残りロール: {0},剩余投骰: {0},
 UI,UI_REROLL_COST,리롤 : {0} G,Reroll : {0} G,リロール: {0} G,重投: {0} G,
+UI,UI_REROLL,리롤,Reroll,リロール,重投,
 UI,UI_GAME_OVER,게임 오버,Game Over,ゲームオーバー,游戏结束,
 UI,UI_ROLL_BUTTON,굴리기,Roll,振る,投骰,
 UI,UI_FINISH_BUTTON,끝내기,Finish,終了,结束,

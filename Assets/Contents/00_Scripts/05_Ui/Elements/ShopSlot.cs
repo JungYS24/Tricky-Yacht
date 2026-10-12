@@ -11,13 +11,18 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public Button buyButton;
     public Sprite coinIconSprite;
 
-    const float ItemIconSize = 128f;
+    const float ItemIconSize = 192f;
     const float CoinIconSize = 40f;
+    const string CoinIconAssetPath = "Assets/Contents/06_UI/Sprites/Icon/Coin_Icon.png";
     static readonly Color PriceColor = Color.white;
     static readonly Color FreePriceColor = Color.yellow;
 
     Image coinIcon;
     RectTransform priceRow;
+    bool iconBaseSaved;
+    Vector2 iconBasePosition;
+    bool priceCenterSaved;
+    float priceCenterX;
 
     // [자물쇠 아이콘
     [Header("잠금 UI")]
@@ -54,67 +59,53 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         SetPriceVisual(free ? "0" : price.ToString(), true, free);
     }
 
+    public Sprite ResolvedCoinIcon()
+    {
+        if (coinIconSprite != null) return coinIconSprite;
+#if UNITY_EDITOR
+        coinIconSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(CoinIconAssetPath);
+#endif
+        return coinIconSprite;
+    }
+
     void EnsurePriceRow()
     {
         if (priceRow != null || priceText == null) return;
 
         RectTransform textRect = priceText.rectTransform;
-        float rowX = textRect.anchoredPosition.x;
-        int sibling = textRect.GetSiblingIndex();
-        Transform parent = textRect.parent;
+        if (!priceCenterSaved)
+        {
+            priceCenterX = textRect.anchoredPosition.x;
+            priceCenterSaved = true;
+        }
 
-        var rowObject = new GameObject("PriceRow", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(ContentSizeFitter));
+        Transform parent = textRect.parent;
+        var rowObject = new GameObject("PriceRow", typeof(RectTransform));
+        rowObject.layer = parent.gameObject.layer;
         rowObject.transform.SetParent(parent, false);
-        rowObject.transform.SetSiblingIndex(sibling);
         priceRow = rowObject.GetComponent<RectTransform>();
         priceRow.anchorMin = new Vector2(0.5f, 0f);
         priceRow.anchorMax = new Vector2(0.5f, 0f);
         priceRow.pivot = new Vector2(0.5f, 0f);
-        priceRow.anchoredPosition = new Vector2(rowX, 36f);
+        priceRow.anchoredPosition = new Vector2(priceCenterX, 28f);
+        priceRow.sizeDelta = new Vector2(CoinIconSize, CoinIconSize);
         priceRow.localScale = Vector3.one;
+        priceRow.SetAsLastSibling();
 
-        var layout = rowObject.GetComponent<HorizontalLayoutGroup>();
-        layout.childAlignment = TextAnchor.MiddleCenter;
-        layout.spacing = 6f;
-        layout.childControlWidth = false;
-        layout.childControlHeight = false;
-        layout.childForceExpandWidth = false;
-        layout.childForceExpandHeight = false;
-        layout.childScaleWidth = false;
-        layout.childScaleHeight = false;
-
-        var rowFitter = rowObject.GetComponent<ContentSizeFitter>();
-        rowFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-        rowFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        textRect.SetParent(priceRow, false);
-        textRect.anchorMin = new Vector2(0f, 0.5f);
-        textRect.anchorMax = new Vector2(0f, 0.5f);
-        textRect.pivot = new Vector2(0f, 0.5f);
-        textRect.anchoredPosition = Vector2.zero;
-        textRect.localScale = Vector3.one;
-        priceText.enableAutoSizing = false;
-        priceText.fontSize = 40f;
-        priceText.alignment = TextAlignmentOptions.MidlineLeft;
-        priceText.margin = Vector4.zero;
-        priceText.enableWordWrapping = false;
-        priceText.raycastTarget = false;
-        var textFitter = priceText.GetComponent<ContentSizeFitter>();
-        if (textFitter == null) textFitter = priceText.gameObject.AddComponent<ContentSizeFitter>();
-        textFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-        textFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        var iconObject = new GameObject("CoinIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(LayoutElement));
+        var iconObject = new GameObject("CoinIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        iconObject.layer = rowObject.layer;
         iconObject.transform.SetParent(priceRow, false);
         coinIcon = iconObject.GetComponent<Image>();
-        coinIcon.sprite = coinIconSprite;
+        coinIcon.sprite = ResolvedCoinIcon();
         coinIcon.preserveAspect = true;
         coinIcon.raycastTarget = false;
-        var iconRect = coinIcon.rectTransform;
+        coinIcon.color = PriceColor;
+        RectTransform iconRect = coinIcon.rectTransform;
+        iconRect.anchorMin = new Vector2(0.5f, 0f);
+        iconRect.anchorMax = new Vector2(0.5f, 0f);
+        iconRect.pivot = new Vector2(0f, 0f);
         iconRect.sizeDelta = new Vector2(CoinIconSize, CoinIconSize);
-        var iconLayout = iconObject.GetComponent<LayoutElement>();
-        iconLayout.preferredWidth = CoinIconSize;
-        iconLayout.preferredHeight = CoinIconSize;
+        iconRect.localScale = Vector3.one;
     }
 
     void SetPriceVisual(string text, bool showCoin, bool free)
@@ -122,15 +113,48 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         EnsurePriceRow();
         if (priceText == null) return;
         Color color = free ? FreePriceColor : PriceColor;
+        priceText.enableAutoSizing = false;
+        priceText.fontSize = 40f;
+        priceText.alignment = TextAlignmentOptions.MidlineLeft;
+        priceText.margin = Vector4.zero;
+        priceText.enableWordWrapping = false;
+        priceText.overflowMode = TextOverflowModes.Overflow;
+        priceText.raycastTarget = false;
         priceText.text = text;
         priceText.color = color;
+        priceText.ForceMeshUpdate();
+
+        Vector2 preferred = priceText.GetPreferredValues(text);
+        float textW = Mathf.Ceil(Mathf.Max(1f, preferred.x));
+        float textH = Mathf.Ceil(Mathf.Max(preferred.y, priceText.fontSize));
+        bool visible = showCoin && coinIcon != null && (coinIcon.sprite != null || ResolvedCoinIcon() != null);
+        float gap = visible ? 6f : 0f;
+        float iconW = visible ? CoinIconSize : 0f;
+        float total = textW + gap + iconW;
+        float left = priceCenterX - total * 0.5f;
+        float bottom = priceRow != null ? priceRow.anchoredPosition.y : 28f;
+        float textY = bottom + Mathf.Max(0f, (CoinIconSize - textH) * 0.5f);
+
+        RectTransform textRect = priceText.rectTransform;
+        textRect.anchorMin = new Vector2(0.5f, 0f);
+        textRect.anchorMax = new Vector2(0.5f, 0f);
+        textRect.pivot = new Vector2(0f, 0f);
+        textRect.sizeDelta = new Vector2(textW, textH);
+        textRect.anchoredPosition = new Vector2(left, textY);
+
         if (coinIcon != null)
         {
+            if (coinIcon.sprite == null) coinIcon.sprite = ResolvedCoinIcon();
             coinIcon.color = color;
-            coinIcon.gameObject.SetActive(showCoin && coinIcon.sprite != null);
+            coinIcon.enabled = true;
+            coinIcon.gameObject.SetActive(visible && coinIcon.sprite != null);
+            RectTransform iconRect = coinIcon.rectTransform;
+            iconRect.anchorMin = new Vector2(0.5f, 0f);
+            iconRect.anchorMax = new Vector2(0.5f, 0f);
+            iconRect.pivot = new Vector2(0f, 0f);
+            iconRect.sizeDelta = new Vector2(CoinIconSize, CoinIconSize);
+            iconRect.anchoredPosition = new Vector2(left + textW + gap - priceCenterX, 0f);
         }
-        if (priceRow != null)
-            LayoutRebuilder.ForceRebuildLayoutImmediate(priceRow);
     }
 
     // --- 애니메이션 제어용 변수 (코루틴 대체) ---
@@ -152,10 +176,27 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if (itemIcon == null) return;
         itemIcon.preserveAspect = true;
         RectTransform rect = itemIcon.rectTransform;
+        if (!iconBaseSaved)
+        {
+            iconBasePosition = rect.anchoredPosition;
+            iconBaseSaved = true;
+        }
         rect.anchorMin = new Vector2(0.5f, 0.5f);
         rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.sizeDelta = new Vector2(ItemIconSize, ItemIconSize);
         rect.localScale = Vector3.one;
+
+        float y = iconBasePosition.y;
+        RectTransform parent = rect.parent as RectTransform;
+        if (parent != null)
+        {
+            float half = ItemIconSize * 0.5f;
+            float parentHalf = parent.rect.height * 0.5f;
+            float priceTop = -parentHalf + 36f + CoinIconSize + 12f;
+            if (y - half < priceTop)
+                y = priceTop + half;
+        }
+        rect.anchoredPosition = new Vector2(iconBasePosition.x, y);
     }
 
     public void SetupSlot(BaseItemDataSO data, ShopManager shopMgr, int listedPrice = -1)

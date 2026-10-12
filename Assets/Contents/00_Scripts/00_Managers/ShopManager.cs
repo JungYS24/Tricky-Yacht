@@ -27,6 +27,8 @@ public class ShopManager : MonoBehaviour
     public int currentGold = 3000;
     public Button shopRerollButton;
     public TextMeshProUGUI rerollCostText;
+    public TextMeshProUGUI rerollCostLabel;
+    public Image rerollCostIcon;
     public int rerollCost = 100;
 
     [Header("상점 제어 버튼")]
@@ -76,8 +78,7 @@ public class ShopManager : MonoBehaviour
         if (shopRerollButton != null)
             shopRerollButton.onClick.AddListener(RerollShop);
 
-        if (rerollCostText != null)
-            rerollCostText.text = LocalizationManager.GetUi("UI_REROLL_COST", "리롤 : {0} G", rerollCost);
+        UpdateRerollUI();
 
         if (nextStageButton != null)
             nextStageButton.onClick.AddListener(CloseShopAndGoNext);
@@ -147,6 +148,7 @@ public class ShopManager : MonoBehaviour
     {
         if (!IsShopOpen) return;
         ApplyShopTitle(mapMerchantActive);
+        UpdateRerollUI();
     }
 
     void RevealShop()
@@ -570,6 +572,7 @@ public class ShopManager : MonoBehaviour
                 ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_GOLD_NOT_ENOUGH", "골드가 부족합니다."));
         }
         if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
+        UpdateRerollUI();
     }
 
     public void CloseShopAndGoNext()
@@ -781,8 +784,120 @@ public class ShopManager : MonoBehaviour
 
     public void UpdateRerollUI()
     {
+        ApplyRerollButtonWord();
+        EnsureRerollCostRow();
         int finalCost = GetFinalRerollCost();
-        if (rerollCostText != null) rerollCostText.text = LocalizationManager.GetUi("UI_REROLL_COST", "리롤 : {0} G", finalCost);
+        if (rerollCostLabel == null) return;
+
+        rerollCostLabel.text = finalCost.ToString();
+        Color color = Color.white;
+        if (currentGold < finalCost)
+            color = new Color(1f, 0.32f, 0.28f, 1f);
+        else if (finalCost < rerollCost)
+            color = new Color(0.4f, 0.92f, 0.38f, 1f);
+        rerollCostLabel.color = color;
+        if (rerollCostIcon != null)
+        {
+            if (rerollCostIcon.sprite == null) rerollCostIcon.sprite = FindCoinSprite();
+            rerollCostIcon.color = color;
+            rerollCostIcon.gameObject.SetActive(rerollCostIcon.sprite != null);
+        }
+        if (rerollCostLabel.transform.parent is RectTransform row)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(row);
+    }
+
+    void ApplyRerollButtonWord()
+    {
+        if (rerollCostText == null) return;
+        LocalizeStringEvent localize = rerollCostText.GetComponent<LocalizeStringEvent>();
+        if (localize != null) localize.enabled = false;
+        rerollCostText.text = LocalizationManager.GetUi("UI_REROLL", "리롤");
+    }
+
+    void EnsureRerollCostRow()
+    {
+        if (rerollCostLabel != null && rerollCostIcon != null) return;
+        if (shopRerollButton == null) return;
+
+        RectTransform buttonRect = shopRerollButton.transform as RectTransform;
+        if (buttonRect == null || buttonRect.parent == null) return;
+
+        var rowObject = new GameObject("RerollCost_Row", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(ContentSizeFitter));
+        rowObject.layer = buttonRect.gameObject.layer;
+        rowObject.transform.SetParent(buttonRect.parent, false);
+        RectTransform row = rowObject.GetComponent<RectTransform>();
+        row.anchorMin = buttonRect.anchorMin;
+        row.anchorMax = buttonRect.anchorMax;
+        row.pivot = new Vector2(0.5f, 1f);
+        float height = buttonRect.sizeDelta.y * buttonRect.localScale.y;
+        float bottom = buttonRect.anchoredPosition.y - buttonRect.pivot.y * height;
+        row.anchoredPosition = new Vector2(buttonRect.anchoredPosition.x, bottom - 8f);
+        row.localScale = Vector3.one;
+        row.SetSiblingIndex(buttonRect.GetSiblingIndex() + 1);
+
+        HorizontalLayoutGroup layout = rowObject.GetComponent<HorizontalLayoutGroup>();
+        layout.childAlignment = TextAnchor.MiddleCenter;
+        layout.spacing = 6f;
+        layout.childControlWidth = false;
+        layout.childControlHeight = false;
+        layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = false;
+        layout.childScaleWidth = false;
+        layout.childScaleHeight = false;
+
+        ContentSizeFitter rowFitter = rowObject.GetComponent<ContentSizeFitter>();
+        rowFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        rowFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        float fontSize = 28f;
+        if (rerollCostText != null)
+            fontSize = Mathf.Max(18f, rerollCostText.fontSize * buttonRect.localScale.y * 0.7f);
+
+        var labelObject = new GameObject("Label", typeof(RectTransform));
+        labelObject.layer = rowObject.layer;
+        labelObject.transform.SetParent(row, false);
+        rerollCostLabel = labelObject.AddComponent<TextMeshProUGUI>();
+        if (rerollCostText != null) rerollCostLabel.font = rerollCostText.font;
+        rerollCostLabel.fontSize = fontSize;
+        rerollCostLabel.alignment = TextAlignmentOptions.MidlineLeft;
+        rerollCostLabel.enableWordWrapping = false;
+        rerollCostLabel.raycastTarget = false;
+        ContentSizeFitter labelFitter = labelObject.AddComponent<ContentSizeFitter>();
+        labelFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        labelFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        var iconObject = new GameObject("CoinIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(LayoutElement));
+        iconObject.layer = rowObject.layer;
+        iconObject.transform.SetParent(row, false);
+        rerollCostIcon = iconObject.GetComponent<Image>();
+        rerollCostIcon.sprite = FindCoinSprite();
+        rerollCostIcon.preserveAspect = true;
+        rerollCostIcon.raycastTarget = false;
+        float iconSize = fontSize;
+        rerollCostIcon.rectTransform.sizeDelta = new Vector2(iconSize, iconSize);
+        LayoutElement iconLayout = iconObject.GetComponent<LayoutElement>();
+        iconLayout.preferredWidth = iconSize;
+        iconLayout.preferredHeight = iconSize;
+        iconLayout.minWidth = iconSize;
+        iconLayout.minHeight = iconSize;
+    }
+
+    Sprite FindCoinSprite()
+    {
+        if (shopSlots != null)
+        {
+            for (int i = 0; i < shopSlots.Length; i++)
+            {
+                if (shopSlots[i] == null) continue;
+                Sprite sprite = shopSlots[i].ResolvedCoinIcon();
+                if (sprite != null) return sprite;
+            }
+        }
+#if UNITY_EDITOR
+        return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Contents/06_UI/Sprites/Icon/Coin_Icon.png");
+#else
+        return null;
+#endif
     }
 
     // 복고양이 효과: 진열된 아이템 중 하나를 무작위로 0원 처리
