@@ -128,7 +128,7 @@ public static class CombatFlowController
 
             if (flameDamage > 0)
             {
-                dm.enemy.TakeDamage(flameDamage, dm.OnEnemyKilled, hitKind: EnemyHitKind.Flame);
+                yield return dm.enemy.PlayFlameDamage(flameDamage, dm.OnEnemyKilled);
                 dm.UpdateMainUI(LocalizationManager.GetUi(
                     "UI_FLAME_DAMAGE",
                     "화염 데미지! <color=#FF4500>-{0}</color>",

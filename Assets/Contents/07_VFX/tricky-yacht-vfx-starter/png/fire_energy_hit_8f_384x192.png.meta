@@ -1,0 +1,715 @@
+fileFormatVersion: 2
+guid: ba1facb52f3d5004f87acae7a794dde1
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1148248531522002506
+    second: fire_energy_hit_8f_384x192_0
+  - first:
+      213: 6799990559634225838
+    second: fire_energy_hit_8f_384x192_1
+  - first:
+      213: -761555681378780815
+    second: fire_energy_hit_8f_384x192_2
+  - first:
+      213: -1233480564917675630
+    second: fire_energy_hit_8f_384x192_3
+  - first:
+      213: 5011490830409712027
+    second: fire_energy_hit_8f_384x192_4
+  - first:
+      213: 322757221918009283
+    second: fire_energy_hit_8f_384x192_5
+  - first:
+      213: -3852434309257967303
+    second: fire_energy_hit_8f_384x192_6
+  - first:
+      213: -840227731637772272
+    second: fire_energy_hit_8f_384x192_7
+  - first:
+      213: 3450359447473452180
+    second: fire_energy_hit_8f_384x192_8
+  - first:
+      213: -4442142328136293846
+    second: fire_energy_hit_8f_384x192_9
+  - first:
+      213: 6490674209744550973
+    second: fire_energy_hit_8f_384x192_10
+  - first:
+      213: -8000196745226011297
+    second: fire_energy_hit_8f_384x192_11
+  - first:
+      213: -2643667918426202317
+    second: fire_energy_hit_8f_384x192_12
+  - first:
+      213: -8145808841020346400
+    second: fire_energy_hit_8f_384x192_13
+  - first:
+      213: -8118558087577255554
+    second: fire_energy_hit_8f_384x192_14
+  - first:
+      213: -6630158477618925545
+    second: fire_energy_hit_8f_384x192_15
+  - first:
+      213: 3523846301056612887
+    second: fire_energy_hit_8f_384x192_16
+  - first:
+      213: 253805774059332783
+    second: fire_energy_hit_8f_384x192_17
+  - first:
+      213: 2020433504262700884
+    second: fire_energy_hit_8f_384x192_18
+  - first:
+      213: 5014316168995743364
+    second: fire_energy_hit_8f_384x192_19
+  - first:
+      213: -4307348535976430687
+    second: fire_energy_hit_8f_384x192_20
+  - first:
+      213: 1924432093795503532
+    second: fire_energy_hit_8f_384x192_21
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_0
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 105
+        width: 50
+        height: 65
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4e9b3ba4f56fef00800000000000000
+      internalID: 1148248531522002506
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_1
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 106
+        width: 98
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eaaf107d26b6e5e50800000000000000
+      internalID: 6799990559634225838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_2
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 105
+        width: 64
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 179bcb684296e65f0800000000000000
+      internalID: -761555681378780815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_3
+      rect:
+        serializedVersion: 2
+        x: 303
+        y: 109
+        width: 68
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 299dbb226fbc1eee0800000000000000
+      internalID: -1233480564917675630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_4
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 13
+        width: 71
+        height: 71
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b91c2b5bb546c8540800000000000000
+      internalID: 5011490830409712027
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_5
+      rect:
+        serializedVersion: 2
+        x: 131
+        y: 73
+        width: 16
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c76d19bbf9aa7400800000000000000
+      internalID: 322757221918009283
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_6
+      rect:
+        serializedVersion: 2
+        x: 154
+        y: 39
+        width: 28
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 939c6242867698ac0800000000000000
+      internalID: -3852434309257967303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_7
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 60
+        width: 42
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0106c4d6459e654f0800000000000000
+      internalID: -840227731637772272
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_8
+      rect:
+        serializedVersion: 2
+        x: 253
+        y: 48
+        width: 17
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 494711ef2a322ef20800000000000000
+      internalID: 3450359447473452180
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_9
+      rect:
+        serializedVersion: 2
+        x: 297
+        y: 30
+        width: 45
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a22a5b986175a52c0800000000000000
+      internalID: -4442142328136293846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_10
+      rect:
+        serializedVersion: 2
+        x: 126
+        y: 56
+        width: 14
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d3cfc900ec1831a50800000000000000
+      internalID: 6490674209744550973
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_11
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 63
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5d3193727799f090800000000000000
+      internalID: -8000196745226011297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_12
+      rect:
+        serializedVersion: 2
+        x: 334
+        y: 13
+        width: 36
+        height: 56
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 33f1c12f80ecf4bd0800000000000000
+      internalID: -2643667918426202317
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_13
+      rect:
+        serializedVersion: 2
+        x: 105
+        y: 31
+        width: 32
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0efeeb6740644fe80800000000000000
+      internalID: -8145808841020346400
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_14
+      rect:
+        serializedVersion: 2
+        x: 140
+        y: 45
+        width: 12
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e71459dee66155f80800000000000000
+      internalID: -8118558087577255554
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_15
+      rect:
+        serializedVersion: 2
+        x: 143
+        y: 25
+        width: 23
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 710baf02ef1fcf3a0800000000000000
+      internalID: -6630158477618925545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_16
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 40
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71abd896a8737e030800000000000000
+      internalID: 3523846301056612887
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_17
+      rect:
+        serializedVersion: 2
+        x: 223
+        y: 31
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fa4efbcb103b58300800000000000000
+      internalID: 253805774059332783
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_18
+      rect:
+        serializedVersion: 2
+        x: 241
+        y: 12
+        width: 29
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 45f30e141950a0c10800000000000000
+      internalID: 2020433504262700884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_19
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 26
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4862d7c1dfd669540800000000000000
+      internalID: 5014316168995743364
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_20
+      rect:
+        serializedVersion: 2
+        x: 131
+        y: 26
+        width: 8
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a3735de3593934c0800000000000000
+      internalID: -4307348535976430687
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fire_energy_hit_8f_384x192_21
+      rect:
+        serializedVersion: 2
+        x: 212
+        y: 12
+        width: 27
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cadca011bc4f4ba10800000000000000
+      internalID: 1924432093795503532
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      fire_energy_hit_8f_384x192_0: 1148248531522002506
+      fire_energy_hit_8f_384x192_1: 6799990559634225838
+      fire_energy_hit_8f_384x192_10: 6490674209744550973
+      fire_energy_hit_8f_384x192_11: -8000196745226011297
+      fire_energy_hit_8f_384x192_12: -2643667918426202317
+      fire_energy_hit_8f_384x192_13: -8145808841020346400
+      fire_energy_hit_8f_384x192_14: -8118558087577255554
+      fire_energy_hit_8f_384x192_15: -6630158477618925545
+      fire_energy_hit_8f_384x192_16: 3523846301056612887
+      fire_energy_hit_8f_384x192_17: 253805774059332783
+      fire_energy_hit_8f_384x192_18: 2020433504262700884
+      fire_energy_hit_8f_384x192_19: 5014316168995743364
+      fire_energy_hit_8f_384x192_2: -761555681378780815
+      fire_energy_hit_8f_384x192_20: -4307348535976430687
+      fire_energy_hit_8f_384x192_21: 1924432093795503532
+      fire_energy_hit_8f_384x192_3: -1233480564917675630
+      fire_energy_hit_8f_384x192_4: 5011490830409712027
+      fire_energy_hit_8f_384x192_5: 322757221918009283
+      fire_energy_hit_8f_384x192_6: -3852434309257967303
+      fire_energy_hit_8f_384x192_7: -840227731637772272
+      fire_energy_hit_8f_384x192_8: 3450359447473452180
+      fire_energy_hit_8f_384x192_9: -4442142328136293846
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

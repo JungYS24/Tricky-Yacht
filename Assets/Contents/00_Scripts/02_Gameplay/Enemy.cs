@@ -247,11 +247,27 @@ public class Enemy : MonoBehaviour
     }
 
 
-    public void TakeDamage(int damage,System.Action onDeathCallback,bool isFirstNormalAttack = false, EnemyHitKind hitKind = EnemyHitKind.Other, bool includesDark = false)
+    // 불꽃이 커지는 프레임까지 예고만 재생하고, 실제 피해는 기존 TakeDamage를 한 번 호출합니다.
+    public IEnumerator PlayFlameDamage(int damage, System.Action onDeathCallback)
+    {
+        if (IsDead || damage <= 0 || !isActiveAndEnabled) yield break;
+        StopAttackPresentation();
+        int monsterIndex = currentMonsterIndex;
+        var feedback = MonsterHitFeedback.Get(this);
+        float hitStrength = 1f + 0.35f * Mathf.Clamp01((float)damage / Mathf.Max(1, MaxHP));
+        feedback.Play(monsterImage, false, monsterAnimator, hitStrength, EnemyHitKind.Flame, prepareFlame: true);
+        yield return new WaitForSecondsRealtime(feedback.FlameContactDelay);
+        if (IsDead || !isActiveAndEnabled || currentMonsterIndex != monsterIndex) yield break;
+        TakeDamage(damage, onDeathCallback, hitKind: EnemyHitKind.Flame, preserveFlameVisual: true);
+    }
+
+    public void TakeDamage(int damage,System.Action onDeathCallback,bool isFirstNormalAttack = false, EnemyHitKind hitKind = EnemyHitKind.Other, bool includesDark = false, bool preserveFlameVisual = false)
     {
         if (IsDead || damage <= 0) return;
         StopAttackPresentation();
-        GetComponent<MonsterHitFeedback>()?.Stop();
+        var currentFeedback = GetComponent<MonsterHitFeedback>();
+        bool continueFlame = preserveFlameVisual && hitKind == EnemyHitKind.Flame && currentFeedback != null && currentFeedback.IsFlamePlaying;
+        if (!continueFlame) currentFeedback?.Stop();
 
         // 적 체력보다 큰 공격도 실제 감소한 체력까지만 피해로 인정
         int actualDamage = Mathf.Min(CurrentHP, damage);
@@ -283,13 +299,14 @@ public class Enemy : MonoBehaviour
             if (hitKind != EnemyHitKind.Other)
                 {
                 float strength = 1f + 0.35f * Mathf.Clamp01((float)damage / Mathf.Max(1, MaxHP));
-                MonsterHitFeedback.Get(this).Play(monsterImage, CurrentHP > 0, monsterAnimator, strength, hitKind, includesDark);
+                if (continueFlame) currentFeedback.ShowFlameContact();
+                else MonsterHitFeedback.Get(this).Play(monsterImage, CurrentHP > 0, monsterAnimator, strength, hitKind, includesDark);
                 if (hitKind == EnemyHitKind.Normal) CameraShake.Instance?.ShakeImpact(strength);
-                else CameraShake.Instance?.ShakeElemental();
+                else if (hitKind == EnemyHitKind.Dark) CameraShake.Instance?.ShakeElemental();
             }
 
             // ===== 데미지 텍스트 생성 호출 =====
-            ShowDamageText(damage);
+            ShowDamageText(damage, hitKind == EnemyHitKind.Flame);
 
         }
 
@@ -312,7 +329,7 @@ public class Enemy : MonoBehaviour
     }
 
     // 데미지 텍스트 생성 함수
-    private void ShowDamageText(int damage)
+    private void ShowDamageText(int damage, bool smallFlame = false)
     {
         if (damageTextPrefab == null || uiCanvas == null) return;
 
@@ -327,7 +344,7 @@ public class Enemy : MonoBehaviour
         {
             // 데미지 수치에 따라 크기 배율 결정
             // 예: 기준 데미지를 20으로 잡고, 데미지가 클수록 배율 증가
-            float sizeMultiplier = 1f + (damage / 20f) * 0.5f;
+            float sizeMultiplier = smallFlame ? 0.85f : 1f + (damage / 20f) * 0.5f;
             dmgTextScript.Setup(damage, sizeMultiplier);
         }
     }
@@ -430,6 +447,12 @@ public class Enemy : MonoBehaviour
     }
 
     // 포획/일반 사망이 Transform과 색상을 독점하도록 기존 피격·공격 연출을 종료합니다.
+    public IEnumerator WaitForHitPresentation()
+    {
+        var feedback = GetComponent<MonsterHitFeedback>();
+        while (isActiveAndEnabled && IsDead && feedback != null && feedback.IsPlaying) yield return null;
+    }
+
     public bool BeginDeathPresentation()
     {
         if (!IsDead || deathPresentationStarted) return false;

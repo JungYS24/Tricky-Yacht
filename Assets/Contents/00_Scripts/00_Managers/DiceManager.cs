@@ -653,7 +653,10 @@ public class DiceManager : MonoBehaviour
     {
         // 사망 판정·포획 확률은 OnEnemyKilled에서 한 번만 처리합니다.
         // 연출 시작 전에 피격/색상/Animator를 정리하여 흡수 도중 사라지는 충돌을 막습니다.
-        if (defeatedEnemy == null || !defeatedEnemy.BeginDeathPresentation()) yield break;
+        if (defeatedEnemy == null) yield break;
+        // 사망은 이미 확정했지만 마지막 타격의 섬광/화염/다크가 끝날 때까지 유지합니다.
+        yield return defeatedEnemy.WaitForHitPresentation();
+        if (defeatedEnemy == null || enemy != defeatedEnemy || !defeatedEnemy.BeginDeathPresentation()) yield break;
         if (showCapture)
         {
             yield return peppermintCaptureEffect.PlayCapture(
