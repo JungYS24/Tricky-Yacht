@@ -10,12 +10,17 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public TextMeshProUGUI priceText;
     public Button buyButton;
 
+    const float ItemIconSize = 192f;
+    static readonly Color PriceColor = Color.white;
+    static readonly Color FreePriceColor = Color.yellow;
+
     // [자물쇠 아이콘
     [Header("잠금 UI")]
     public GameObject lockUI;
     public bool isLocked = false;
 
     public BaseItemDataSO currentData;
+    int listedPrice = -1;
     private ShopManager manager;
 
     public bool isPurchased = false;
@@ -39,7 +44,16 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void RefreshPriceDisplay()
     {
         if (priceText == null || currentData == null || isLocked || isPurchased) return;
-        priceText.text = isLuckyCatFree ? "<color=#FFFF00>" + LocalizationManager.GetUi("UI_FREE", "0 G (무료!)") + "</color>" : LocalizationManager.GetUi("UI_GOLD_PRICE", "{0} G", GetFinalPrice());
+        int price = GetFinalPrice();
+        bool free = price <= 0;
+        SetPriceVisual(free ? "0" : price.ToString(), free);
+    }
+
+    void SetPriceVisual(string text, bool free)
+    {
+        if (priceText == null) return;
+        priceText.text = text;
+        priceText.color = free ? FreePriceColor : PriceColor;
     }
 
     // --- 애니메이션 제어용 변수 (코루틴 대체) ---
@@ -50,9 +64,26 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private float animTimer;
     private float animInterval = 0.7f;
 
-    public void SetupSlot(BaseItemDataSO data, ShopManager shopMgr)
+    void Awake()
+    {
+        FitItemIcon();
+    }
+
+    void FitItemIcon()
+    {
+        if (itemIcon == null) return;
+        itemIcon.preserveAspect = true;
+        RectTransform rect = itemIcon.rectTransform;
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.sizeDelta = new Vector2(ItemIconSize, ItemIconSize);
+        rect.localScale = Vector3.one;
+    }
+
+    public void SetupSlot(BaseItemDataSO data, ShopManager shopMgr, int listedPrice = -1)
     {
         currentData = data;
+        this.listedPrice = listedPrice;
         manager = shopMgr;
         isPurchased = false;
         isAnimating = false; // 새로운 아이템이 들어올 때 애니메이션 초기화
@@ -95,6 +126,8 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             if (itemIcon != null) itemIcon.sprite = data.icon;
         }
 
+        FitItemIcon();
+
         //가격 및 버튼 설정
         isLuckyCatFree = false; // 슬롯 세팅 시 무료 스위치 초기화
         RefreshPriceDisplay();
@@ -115,6 +148,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
                 animTimer = 0f;
                 currentAnimIndex = (currentAnimIndex + 1) % animFaces.Length;
                 itemIcon.sprite = animSprites[animFaces[currentAnimIndex] - 1];
+                FitItemIcon();
             }
         }
     }
@@ -126,7 +160,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
         //할인된 최종 가격을 계산해서 ShopManager에게 결제를 요청
         int actualPrice = GetFinalPrice();
-        bool usedDiscount = !manager.diceManager.isNextShopFree && !isLuckyCatFree && actualPrice < Mathf.FloorToInt(currentData.price * shopPriceMultiplier);
+        bool usedDiscount = !manager.diceManager.isNextShopFree && !isLuckyCatFree && actualPrice < Mathf.FloorToInt(ListedUnitPrice() * shopPriceMultiplier);
         if (manager.PurchaseItem(currentData, actualPrice))
         {
             if (usedDiscount && currentData is CoatingItemSO) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.DiscountCoating);
@@ -136,9 +170,10 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             isAnimating = false; //아이템을 구매하면 즉시 애니메이션 연산을 정지    
 
             if (itemIcon != null) itemIcon.color = new Color(0.3f, 0.3f, 0.3f, 1f);
+            FitItemIcon();
 
             buyButton.interactable = false;
-            if (priceText != null) priceText.text = LocalizationManager.GetUi("UI_SOLD_OUT", "Sold Out");
+            SetPriceVisual(LocalizationManager.GetUi("UI_SOLD_OUT", "Sold Out"), false);
 
             manager.HideTooltip();
         }
@@ -150,10 +185,12 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         isLocked = true;
         isPurchased = false;
         isAnimating = false;
+        listedPrice = -1;
 
         if (lockUI != null) lockUI.SetActive(true); // 자물쇠 아이콘 켜기
         if (itemIcon != null) itemIcon.color = Color.clear; // 아이템 아이콘 투명하게 숨김
-        if (priceText != null) priceText.text = LocalizationManager.GetUi("UI_UNKNOWN", "???");
+        FitItemIcon();
+        SetPriceVisual(LocalizationManager.GetUi("UI_UNKNOWN", "???"), false);
 
         buyButton.interactable = false; // 버튼 클릭 방지
         buyButton.onClick.RemoveAllListeners();
@@ -184,7 +221,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if ((manager != null && manager.diceManager != null && manager.diceManager.isNextShopFree) || isLuckyCatFree) return 0;
 
         // 원본 SO 가격은 유지, 배율 적용 후 소수점 버림, 이어서 기존 피규어 할인을 적용
-        int price = Mathf.Max(0, Mathf.FloorToInt(currentData.price * shopPriceMultiplier));
+        int price = Mathf.Max(0, Mathf.FloorToInt(ListedUnitPrice() * shopPriceMultiplier));
         // 코팅 및 위성 20% 할인 적용 (클래스 타입으로 안전하게 구분)
         if (currentData is CoatingItemSO)
         {   
@@ -203,11 +240,17 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         return Mathf.Max(0, price);
     }
 
+    int ListedUnitPrice()
+    {
+        if (listedPrice >= 0) return listedPrice;
+        return currentData != null ? currentData.price : 0;
+    }
+
     // 복고양이 당첨 시 호출되는 함수
     public void ApplyLuckyCatFree()
     {
         isLuckyCatFree = true;
-        if (priceText != null) priceText.text = "<color=#FFFF00>" + LocalizationManager.GetUi("UI_FREE", "0 G (무료!)") + "</color>";
+        RefreshPriceDisplay();
         Debug.Log($"[복고양이] {currentData.itemName} 무료 적용!");
     }
 }

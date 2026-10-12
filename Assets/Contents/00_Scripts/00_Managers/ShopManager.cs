@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Components;
+using UnityEngine.Localization.Settings;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,6 +14,7 @@ public class ShopManager : MonoBehaviour
     [Header("참조 설정")]
     public DiceManager diceManager;
     public List<BaseItemDataSO> allItemsPool;
+    public TextAsset shopStockTable;
     public ShopSlot[] shopSlots;
     public GameObject shopUI;
 
@@ -23,6 +27,8 @@ public class ShopManager : MonoBehaviour
     public int currentGold = 3000;
     public Button shopRerollButton;
     public TextMeshProUGUI rerollCostText;
+    public TextMeshProUGUI rerollCostLabel;
+    public Image rerollCostIcon;
     public int rerollCost = 100;
 
     [Header("상점 제어 버튼")]
@@ -44,14 +50,20 @@ public class ShopManager : MonoBehaviour
 
     public enum MapMerchant
     {
-        Louis,
-        Ronan,
-        Opel
+        Nyaon = 0,
+        Ronan = 1,
+        Opel = 2
     }
 
-    public MapMerchant currentMerchant = MapMerchant.Louis;
+    public MapMerchant currentMerchant = MapMerchant.Nyaon;
+    public RuntimeAnimatorController nyaonAnimator;
+    public RuntimeAnimatorController ronanAnimator;
+    public RuntimeAnimatorController opelAnimator;
     bool mapMerchantActive;
     TextMeshProUGUI merchantNameText;
+    ShopStockTable stockTable;
+    bool stockTableLogged;
+    readonly Dictionary<BaseItemDataSO, int> listedPrices = new Dictionary<BaseItemDataSO, int>();
 
     private void Awake()
     {
@@ -61,12 +73,12 @@ public class ShopManager : MonoBehaviour
         HideTooltip();
         if (allItemsPool == null) allItemsPool = new List<BaseItemDataSO>();
         SnackItemSO.RegisterResourceSnacks(allItemsPool);
+        BindShopStock();
 
         if (shopRerollButton != null)
             shopRerollButton.onClick.AddListener(RerollShop);
 
-        if (rerollCostText != null)
-            rerollCostText.text = LocalizationManager.GetUi("UI_REROLL_COST", "리롤 : {0} G", rerollCost);
+        UpdateRerollUI();
 
         if (nextStageButton != null)
             nextStageButton.onClick.AddListener(CloseShopAndGoNext);
@@ -90,7 +102,10 @@ public class ShopManager : MonoBehaviour
 
     public void OpenMapShop()
     {
-        currentMerchant = (MapMerchant)UnityEngine.Random.Range(0, 3);
+        if (stockTable == null || !stockTable.Loaded) BindShopStock();
+        currentMerchant = stockTable != null && stockTable.Loaded
+            ? stockTable.RollMerchant()
+            : (MapMerchant)UnityEngine.Random.Range(0, 3);
         OpenShopInternal(true);
     }
 
@@ -114,7 +129,26 @@ public class ShopManager : MonoBehaviour
         if (FigureEffectManager.Instance != null)
             FigureEffectManager.Instance.EvaluateShopEnteredTriggers(diceManager, this);
 
+        ApplyMerchantPresentation(fromMap);
+
         Debug.Log($"[Map Shop] merchant={(fromMap ? currentMerchant.ToString() : "tutorial")} shopUI={(shopUI != null ? shopUI.name : "null")} active={shopUI != null && shopUI.activeInHierarchy}");
+    }
+
+    void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnShopLocaleChanged;
+    }
+
+    void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnShopLocaleChanged;
+    }
+
+    void OnShopLocaleChanged(Locale _)
+    {
+        if (!IsShopOpen) return;
+        ApplyShopTitle(mapMerchantActive);
+        UpdateRerollUI();
     }
 
     void RevealShop()
@@ -161,62 +195,223 @@ public class ShopManager : MonoBehaviour
     {
         switch (merchant)
         {
-            case MapMerchant.Louis: return "루이";
+            case MapMerchant.Nyaon: return "냐온 딜레마";
             case MapMerchant.Ronan: return "로난";
             default: return "오펠";
         }
     }
 
-    bool MerchantSells(BaseItemDataSO item)
+    TextMeshProUGUI shopTitleText;
+    LocalizeStringEvent shopTitleLocalize;
+    Image npcImage;
+    Animator npcAnimator;
+    bool npcRestSaved;
+    Vector2 npcAnchorMin, npcAnchorMax, npcPivot, npcAnchoredPosition, npcSizeDelta;
+    Vector3 npcLocalScale;
+    bool npcPreserveAspect;
+    Sprite npcSprite;
+    bool npcAnimatorEnabled;
+    RuntimeAnimatorController npcController;
+    float npcFootX, npcFootY, npcBodyHeight;
+
+    void ApplyMerchantPresentation(bool fromMap)
     {
-        if (item == null) return false;
+        BindShopChrome();
+        if (fromMap)
+        {
+            ApplyNpc(currentMerchant);
+            ApplyShopTitle(true);
+        }
+        else
+        {
+            RestoreNpc();
+            ApplyShopTitle(false);
+        }
+    }
+
+    void BindShopChrome()
+    {
+        if (shopUI == null) return;
+        if (shopTitleText == null)
+        {
+            TextMeshProUGUI[] texts = shopUI.GetComponentsInChildren<TextMeshProUGUI>(true);
+            for (int i = 0; i < texts.Length; i++)
+            {
+                if (texts[i].gameObject.name != "Shop_TXT_Pannel") continue;
+                shopTitleText = texts[i];
+                shopTitleLocalize = texts[i].GetComponent<LocalizeStringEvent>();
+                break;
+            }
+        }
+        if (npcImage == null)
+        {
+            Image[] images = shopUI.GetComponentsInChildren<Image>(true);
+            for (int i = 0; i < images.Length; i++)
+            {
+                if (images[i].gameObject.name != "NPC_Image") continue;
+                npcImage = images[i];
+                npcAnimator = images[i].GetComponent<Animator>();
+                break;
+            }
+        }
+    }
+
+    void ApplyShopTitle(bool fromMap)
+    {
+        if (shopTitleText == null) return;
+        if (!fromMap)
+        {
+            if (shopTitleLocalize != null)
+            {
+                shopTitleLocalize.enabled = true;
+                shopTitleLocalize.RefreshString();
+            }
+            return;
+        }
+
+        if (shopTitleLocalize != null) shopTitleLocalize.enabled = false;
+        string key;
+        string fallback;
         switch (currentMerchant)
         {
-            case MapMerchant.Louis:
-                return item is FigureItemSO || item is SnackItemSO || item is TicketItemSO;
+            case MapMerchant.Nyaon:
+                key = "UI_SHOP_TITLE_NYAON";
+                fallback = "냐온 딜레마, 기묘한 상점";
+                break;
             case MapMerchant.Ronan:
-                return item is DiceItemSO || item is CoatingItemSO || item is DiceDestroyItemSO || item is MaxHPItemSO || item is CoinItemSO;
+                key = "UI_SHOP_TITLE_RONAN";
+                fallback = "남작 로넌의 골동품 상점";
+                break;
             default:
-                return item is SatelliteItemSO;
+                key = "UI_SHOP_TITLE_OPEL";
+                fallback = "오펠의 아르카나 상점";
+                break;
         }
+        shopTitleText.text = LocalizationManager.GetUi(key, fallback);
+    }
+
+    RuntimeAnimatorController MerchantController(MapMerchant merchant)
+    {
+        switch (merchant)
+        {
+            case MapMerchant.Nyaon: return nyaonAnimator;
+            case MapMerchant.Ronan: return ronanAnimator;
+            default: return opelAnimator;
+        }
+    }
+
+    void SaveNpcRest()
+    {
+        if (npcRestSaved || npcImage == null) return;
+        RectTransform rect = npcImage.rectTransform;
+        npcAnchorMin = rect.anchorMin;
+        npcAnchorMax = rect.anchorMax;
+        npcPivot = rect.pivot;
+        npcAnchoredPosition = rect.anchoredPosition;
+        npcSizeDelta = rect.sizeDelta;
+        npcLocalScale = rect.localScale;
+        npcPreserveAspect = npcImage.preserveAspect;
+        npcSprite = npcImage.sprite;
+        npcAnimatorEnabled = npcAnimator != null && npcAnimator.enabled;
+        npcController = npcAnimator != null ? npcAnimator.runtimeAnimatorController : null;
+        float height = rect.rect.height * Mathf.Abs(rect.localScale.y);
+        float width = rect.rect.width * Mathf.Abs(rect.localScale.x);
+        npcBodyHeight = height;
+        npcFootY = rect.anchoredPosition.y - height * rect.pivot.y;
+        npcFootX = rect.anchoredPosition.x + width * (0.5f - rect.pivot.x);
+        npcRestSaved = true;
+    }
+
+    void ApplyNpc(MapMerchant merchant)
+    {
+        SaveNpcRest();
+        if (npcImage == null) return;
+        RuntimeAnimatorController controller = MerchantController(merchant);
+        if (npcAnimator != null && controller != null)
+        {
+            npcAnimator.enabled = true;
+            npcAnimator.runtimeAnimatorController = controller;
+            npcAnimator.Rebind();
+            npcAnimator.Update(0f);
+        }
+        FitNpcImage();
+    }
+
+    void FitNpcImage()
+    {
+        if (npcImage == null || npcImage.sprite == null || npcBodyHeight <= 1f) return;
+        Rect spriteRect = npcImage.sprite.rect;
+        float aspect = spriteRect.width / Mathf.Max(1f, spriteRect.height);
+        RectTransform rect = npcImage.rectTransform;
+        rect.localScale = Vector3.one;
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0f);
+        rect.sizeDelta = new Vector2(npcBodyHeight * aspect, npcBodyHeight);
+        rect.anchoredPosition = new Vector2(npcFootX, npcFootY);
+        npcImage.preserveAspect = true;
+    }
+
+    void RestoreNpc()
+    {
+        if (!npcRestSaved || npcImage == null) return;
+        if (npcAnimator != null)
+        {
+            npcAnimator.runtimeAnimatorController = npcController;
+            npcAnimator.enabled = npcAnimatorEnabled;
+        }
+        npcImage.sprite = npcSprite;
+        npcImage.preserveAspect = npcPreserveAspect;
+        RectTransform rect = npcImage.rectTransform;
+        rect.anchorMin = npcAnchorMin;
+        rect.anchorMax = npcAnchorMax;
+        rect.pivot = npcPivot;
+        rect.anchoredPosition = npcAnchoredPosition;
+        rect.sizeDelta = npcSizeDelta;
+        rect.localScale = npcLocalScale;
+    }
+
+    void BindShopStock()
+    {
+        stockTable = ShopStockTable.Parse(shopStockTable != null ? shopStockTable.text : null);
+        if (stockTableLogged) return;
+        stockTableLogged = true;
+        if (stockTable == null || !stockTable.Loaded)
+        {
+            Debug.LogWarning("[Map Shop] Shop_Stock_Table.json을 읽지 못했습니다.");
+            return;
+        }
+
+        Debug.Log($"[Map Shop] 미구현 품목 {stockTable.UnimplementedCount}개 제외");
+        List<string> missing = stockTable.MissingNames(allItemsPool);
+        for (int i = 0; i < missing.Count; i++)
+            Debug.LogWarning($"[Map Shop] 재고 표 품목을 풀에서 찾지 못했습니다: {missing[i]}");
     }
 
     List<BaseItemDataSO> FilterMerchantStock(List<BaseItemDataSO> source)
     {
+        listedPrices.Clear();
         var filtered = new List<BaseItemDataSO>();
+        var seen = new HashSet<BaseItemDataSO>();
+        if (stockTable == null || !stockTable.Loaded)
+        {
+            Debug.LogWarning("[Map Shop] 재고 표가 없어 지도 상인 진열을 비웁니다.");
+            return filtered;
+        }
+
         for (int i = 0; i < source.Count; i++)
         {
-            if (MerchantSells(source[i])) filtered.Add(source[i]);
+            BaseItemDataSO item = source[i];
+            if (item == null || !seen.Add(item)) continue;
+            ShopStockOffer offer = stockTable.Find(item);
+            if (offer == null || !offer.SellsTo(currentMerchant)) continue;
+            filtered.Add(item);
+            listedPrices[item] = offer.Row.Price;
         }
-        if (currentMerchant == MapMerchant.Opel && filtered.Count == 0)
-            filtered.AddRange(SatelliteStock());
+
         if (filtered.Count == 0)
-        {
-            Debug.LogWarning($"[Map Shop] {currentMerchant} 상품이 없어 전체 진열을 사용합니다.");
-            return source;
-        }
+            Debug.LogWarning($"[Map Shop] {currentMerchant} 판매 품목이 없습니다.");
         return filtered;
-    }
-
-    List<SatelliteItemSO> satelliteStock;
-
-    List<BaseItemDataSO> SatelliteStock()
-    {
-        if (satelliteStock == null)
-        {
-            satelliteStock = new List<SatelliteItemSO>();
-            SatelliteType[] types = { SatelliteType.Jupiter, SatelliteType.Mars, SatelliteType.Mercury, SatelliteType.Venus };
-            string[] names = { "목성", "화성", "수성", "금성" };
-            for (int i = 0; i < types.Length; i++)
-            {
-                var item = ScriptableObject.CreateInstance<SatelliteItemSO>();
-                item.satelliteType = types[i];
-                item.itemName = names[i];
-                item.price = 200;
-                satelliteStock.Add(item);
-            }
-        }
-        return new List<BaseItemDataSO>(satelliteStock);
     }
 
     public void RefreshShop(bool isReroll)
@@ -300,9 +495,14 @@ public class ShopManager : MonoBehaviour
 
 
 
-        // 스테이지에 따른 슬롯 해금 개수 계산 (기본 2개 + 2스테이지마다 1개씩 추가)
-        int unlockedCount = 6 + (diceManager.currentStage - 1) / 2;
-        unlockedCount = Mathf.Clamp(unlockedCount, 2, shopSlots.Length); // 최소 2개, 최대 6개(Length)로 고정
+        int unlockedCount;
+        if (mapMerchantActive && stockTable != null && stockTable.Loaded)
+            unlockedCount = Mathf.Clamp(stockTable.SlotCount, 1, shopSlots.Length);
+        else
+        {
+            unlockedCount = 6 + (diceManager.currentStage - 1) / 2;
+            unlockedCount = Mathf.Clamp(unlockedCount, 2, shopSlots.Length);
+        }
 
         // 주의: 이 for문 아래에 기존 for문이 또 남아있으면 안 됩니다!
         for (int i = 0; i < shopSlots.Length; i++)
@@ -323,7 +523,11 @@ public class ShopManager : MonoBehaviour
             // 해금된 슬롯에 정상적으로 아이템 배치
             if (dataIndex < shuffled.Count)
             {
-                shopSlots[i].SetupSlot(shuffled[dataIndex], this);
+                BaseItemDataSO item = shuffled[dataIndex];
+                int listed = -1;
+                if (mapMerchantActive && listedPrices.TryGetValue(item, out int tablePrice))
+                    listed = tablePrice;
+                shopSlots[i].SetupSlot(item, this, listed);
                 dataIndex++;
             }
             else if (!isReroll || !shopSlots[i].isPurchased)
@@ -368,6 +572,7 @@ public class ShopManager : MonoBehaviour
                 ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_GOLD_NOT_ENOUGH", "골드가 부족합니다."));
         }
         if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
+        UpdateRerollUI();
     }
 
     public void CloseShopAndGoNext()
@@ -579,8 +784,111 @@ public class ShopManager : MonoBehaviour
 
     public void UpdateRerollUI()
     {
+        ApplyRerollButtonWord();
+        EnsureRerollCostRow();
         int finalCost = GetFinalRerollCost();
-        if (rerollCostText != null) rerollCostText.text = LocalizationManager.GetUi("UI_REROLL_COST", "리롤 : {0} G", finalCost);
+        if (rerollCostLabel == null) return;
+
+        rerollCostLabel.text = finalCost.ToString();
+        Color color = Color.white;
+        if (currentGold < finalCost)
+            color = new Color(1f, 0.32f, 0.28f, 1f);
+        else if (finalCost < rerollCost)
+            color = new Color(0.4f, 0.92f, 0.38f, 1f);
+        rerollCostLabel.color = color;
+        if (rerollCostIcon != null)
+        {
+            if (rerollCostIcon.sprite == null) rerollCostIcon.sprite = FindCoinSprite();
+            rerollCostIcon.color = color;
+            rerollCostIcon.gameObject.SetActive(rerollCostIcon.sprite != null);
+        }
+        if (rerollCostLabel.transform.parent is RectTransform row)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(row);
+    }
+
+    void ApplyRerollButtonWord()
+    {
+        if (rerollCostText == null) return;
+        LocalizeStringEvent localize = rerollCostText.GetComponent<LocalizeStringEvent>();
+        if (localize != null) localize.enabled = false;
+        rerollCostText.text = LocalizationManager.GetUi("UI_REROLL", "리롤");
+    }
+
+    void EnsureRerollCostRow()
+    {
+        if (rerollCostLabel != null && rerollCostIcon != null) return;
+        if (shopRerollButton == null) return;
+
+        RectTransform buttonRect = shopRerollButton.transform as RectTransform;
+        if (buttonRect == null || buttonRect.parent == null) return;
+
+        var rowObject = new GameObject("RerollCost_Row", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(ContentSizeFitter));
+        rowObject.layer = buttonRect.gameObject.layer;
+        rowObject.transform.SetParent(buttonRect.parent, false);
+        RectTransform row = rowObject.GetComponent<RectTransform>();
+        row.anchorMin = buttonRect.anchorMin;
+        row.anchorMax = buttonRect.anchorMax;
+        row.pivot = new Vector2(0.5f, 1f);
+        float height = buttonRect.sizeDelta.y * buttonRect.localScale.y;
+        float bottom = buttonRect.anchoredPosition.y - buttonRect.pivot.y * height;
+        row.anchoredPosition = new Vector2(buttonRect.anchoredPosition.x, bottom - 8f);
+        row.localScale = Vector3.one;
+        row.SetSiblingIndex(buttonRect.GetSiblingIndex() + 1);
+
+        HorizontalLayoutGroup layout = rowObject.GetComponent<HorizontalLayoutGroup>();
+        layout.childAlignment = TextAnchor.MiddleCenter;
+        layout.spacing = 6f;
+        layout.childControlWidth = false;
+        layout.childControlHeight = false;
+        layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = false;
+        layout.childScaleWidth = false;
+        layout.childScaleHeight = false;
+
+        ContentSizeFitter rowFitter = rowObject.GetComponent<ContentSizeFitter>();
+        rowFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        rowFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        float fontSize = 28f;
+        if (rerollCostText != null)
+            fontSize = Mathf.Max(18f, rerollCostText.fontSize * buttonRect.localScale.y * 0.7f);
+
+        var labelObject = new GameObject("Label", typeof(RectTransform));
+        labelObject.layer = rowObject.layer;
+        labelObject.transform.SetParent(row, false);
+        rerollCostLabel = labelObject.AddComponent<TextMeshProUGUI>();
+        if (rerollCostText != null) rerollCostLabel.font = rerollCostText.font;
+        rerollCostLabel.fontSize = fontSize;
+        rerollCostLabel.alignment = TextAlignmentOptions.MidlineLeft;
+        rerollCostLabel.enableWordWrapping = false;
+        rerollCostLabel.raycastTarget = false;
+        ContentSizeFitter labelFitter = labelObject.AddComponent<ContentSizeFitter>();
+        labelFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        labelFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        var iconObject = new GameObject("CoinIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(LayoutElement));
+        iconObject.layer = rowObject.layer;
+        iconObject.transform.SetParent(row, false);
+        rerollCostIcon = iconObject.GetComponent<Image>();
+        rerollCostIcon.sprite = FindCoinSprite();
+        rerollCostIcon.preserveAspect = true;
+        rerollCostIcon.raycastTarget = false;
+        float iconSize = fontSize;
+        rerollCostIcon.rectTransform.sizeDelta = new Vector2(iconSize, iconSize);
+        LayoutElement iconLayout = iconObject.GetComponent<LayoutElement>();
+        iconLayout.preferredWidth = iconSize;
+        iconLayout.preferredHeight = iconSize;
+        iconLayout.minWidth = iconSize;
+        iconLayout.minHeight = iconSize;
+    }
+
+    Sprite FindCoinSprite()
+    {
+#if UNITY_EDITOR
+        return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Contents/06_UI/Sprites/Icon/Coin_Icon.png");
+#else
+        return null;
+#endif
     }
 
     // 복고양이 효과: 진열된 아이템 중 하나를 무작위로 0원 처리
