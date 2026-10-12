@@ -884,15 +884,6 @@ public class ShopManager : MonoBehaviour
 
     Sprite FindCoinSprite()
     {
-        if (shopSlots != null)
-        {
-            for (int i = 0; i < shopSlots.Length; i++)
-            {
-                if (shopSlots[i] == null) continue;
-                Sprite sprite = shopSlots[i].ResolvedCoinIcon();
-                if (sprite != null) return sprite;
-            }
-        }
 #if UNITY_EDITOR
         return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Contents/06_UI/Sprites/Icon/Coin_Icon.png");
 #else
