@@ -6,13 +6,21 @@ using DG.Tweening;
 public class HpBarFxConfig : ScriptableObject
 {
     [Header("색")]
-    public Color fillColor = Rgb(0xE0, 0x48, 0x48);
+    public Color fillColor = Rgb(0x5C, 0xC8, 0x5A);
+    public Color emptyColor = Rgb(0x7A, 0x1E, 0x1E);
     public Color ghostColor = Rgb(0xF6, 0xEE, 0xDC);
-    public Color flashColor = Color.white;
+    public Color flashColor = Rgb(0xFF, 0xFF, 0xFF);
     public Color glowColor = Rgb(0xFF, 0x30, 0x30);
-    public Color healGhostColor = Rgb(0x6E, 0xE7, 0xA0);
-    public Color lowFillColor = Rgb(0xB0, 0x28, 0x28);
+    public Color healGhostColor = Rgb(0xC8, 0xFF, 0xD0);
+    public Color lowFillColor = Rgb(0xE8, 0xA2, 0x3A);
     public Color deathFrameColor = Rgb(0x6B, 0x6B, 0x6B);
+    public Color textColor = Rgb(0xFF, 0xFF, 0xFF);
+    public Color textOutlineColor = Rgb(0x1A, 0x0E, 0x0A);
+    public float textOutlineWidth = 0.2f;
+    public float textHeightRatio = 0.7f;
+    [Tooltip("안쪽 구멍 패딩(px). x=왼쪽, y=아래, z=오른쪽, w=위")]
+    public Vector4 innerPadding = new Vector4(10f, 10f, 10f, 10f);
+    public float glowOutset = 4f;
 
     [Header("피격 (피해 < 20%)")]
     public float hitFillDuration = 0.12f;
@@ -83,12 +91,13 @@ public class HpBarFxConfig : ScriptableObject
     public float sparkDistanceMax = 42f;
     public float sparkSizeMin = 6f;
     public float sparkSizeMax = 12f;
+    public Color sparkStartColor = Rgb(0xFF, 0xFF, 0xFF);
     public Color sparkEndColor = Rgb(0xE0, 0x48, 0x48);
     public float healDurationMin = 0.5f;
     public float healDurationMax = 0.9f;
     public float healRiseMin = 25f;
     public float healRiseMax = 55f;
-    public Color healParticleColor = Color.white;
+    public Color healParticleColor = Rgb(0xFF, 0xFF, 0xFF);
 
     public static Color Rgb(byte r, byte g, byte b)
     {

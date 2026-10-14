@@ -28,7 +28,7 @@ public class HpBarFx : MonoBehaviour
 
     bool baselinesReady;
     bool lowHpActive;
-    Color originalFrameColor = Color.white;
+    Color originalFrameColor;
     Vector3 textBaseScale = Vector3.one;
 
     Tween fillTween;
@@ -361,7 +361,7 @@ public class HpBarFx : MonoBehaviour
             bit.rect.localRotation = Quaternion.Euler(0f, 0f, Random.Range(-40f, 40f));
             Vector2 start = new Vector2(x + Random.Range(-4f, 4f), Random.Range(-height * 0.15f, height * 0.15f));
             bit.rect.anchoredPosition = start;
-            bit.image.color = Color.white;
+            bit.image.color = config.sparkStartColor;
 
             Vector2 dir = Random.insideUnitCircle;
             if (dir.sqrMagnitude < 0.01f) dir = Vector2.up;
