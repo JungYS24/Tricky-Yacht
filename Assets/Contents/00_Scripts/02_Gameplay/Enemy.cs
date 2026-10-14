@@ -76,6 +76,7 @@ public class Enemy : MonoBehaviour
     public bool useExternalDeathSequence = false;
     private Coroutine hitEffectCoroutine;
     private Coroutine hpCoroutine;
+    private HpBarFx hpBarFx;
     private bool deathPresentationStarted;
     private bool deathAnimatorPaused;
     private bool deathAnimatorWasEnabled;
@@ -95,6 +96,8 @@ public class Enemy : MonoBehaviour
                 enemyHPSlider = sliderObj.GetComponent<Slider>();
             }
         }
+
+        BindHpBarFx();
 
         //공격력 텍스트 자동 할당 코드
         if (attackPowerText == null)
@@ -270,6 +273,7 @@ public class Enemy : MonoBehaviour
         if (!continueFlame) currentFeedback?.Stop();
 
         // 적 체력보다 큰 공격도 실제 감소한 체력까지만 피해로 인정
+        int previousHP = CurrentHP;
         int actualDamage = Mathf.Min(CurrentHP, damage);
         CurrentHP -= actualDamage;
 
@@ -281,9 +285,22 @@ public class Enemy : MonoBehaviour
             FigureEffectManager.Instance?.EvaluateEnemyDamageTriggers(dm,actualDamage,isFirstNormalAttack);
         }
 
-        // 데미지를 입었으니 HP바 깎는 코루틴 실행!
-        if (hpCoroutine != null) StopCoroutine(hpCoroutine);
-        hpCoroutine = StartCoroutine(ShrinkHPBarRoutine());
+        // 데미지를 입었으니 HP바를 갱신한다. 연출 컴포넌트가 있으면 그쪽으로 넘긴다.
+        BindHpBarFx();
+        if (hpBarFx != null)
+        {
+            if (hpCoroutine != null)
+            {
+                StopCoroutine(hpCoroutine);
+                hpCoroutine = null;
+            }
+            hpBarFx.OnHpChanged(previousHP, CurrentHP, MaxHP);
+        }
+        else
+        {
+            if (hpCoroutine != null) StopCoroutine(hpCoroutine);
+            hpCoroutine = StartCoroutine(ShrinkHPBarRoutine());
+        }
 
         if (damage > 0)
         {
@@ -422,11 +439,23 @@ public class Enemy : MonoBehaviour
         StopAttackPresentation();
     }
 
+    void BindHpBarFx()
+    {
+        if (hpBarFx == null && enemyHPSlider != null)
+            hpBarFx = enemyHPSlider.GetComponent<HpBarFx>();
+    }
+
     private void UpdateHPBar(bool immediate)
     {
         if (enemyHPSlider == null) return;
+        BindHpBarFx();
         enemyHPSlider.maxValue = MaxHP;
-        if (immediate) enemyHPSlider.value = CurrentHP;
+        if (!immediate) return;
+        enemyHPSlider.value = CurrentHP;
+        if (hpBarFx == null) return;
+        // 사망 연출이 이미 재생 중이면 BeginDeathPresentation의 즉시 갱신이 페이드를 지우지 않게 둔다.
+        if (CurrentHP <= 0 && hpBarFx.IsDeathSequenceActive) return;
+        hpBarFx.SetImmediate(CurrentHP, MaxHP);
     }
 
     private IEnumerator HitEffectRoutine()
