@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 // 결산 결과를 한 번에 담아 전달할 구조체
 public struct TurnCalcResult
@@ -206,8 +207,25 @@ public static class TurnCalculator
             switch (d.myData.stampType)
             {
                 case StampType.Spade:
-                    res.stampBonusChips += 20;
-                    res.stampDamage += d.currentValue;
+                    var rank = CalculateHand(
+                        targetDice.Select(d => d.currentValue).ToList(),
+                        DiceManager.Instance,
+                        out _);
+                    int[] group = new int[5];
+                    HandResolutionFeedback.GetEmphasisGroups(
+                        rank,
+                        targetDice.Select(d => d.currentValue).ToArray(),
+                        group,
+                        new int[5]);
+                    int index = targetDice.IndexOf(d);
+                    if (group[index] >= 0)
+                    {
+                        res.stampBonusChips += 20;
+                    }
+                    else
+                    {
+                        res.stampDamage += d.currentValue;
+                    }
                     break;
 
                 case StampType.Heart:
