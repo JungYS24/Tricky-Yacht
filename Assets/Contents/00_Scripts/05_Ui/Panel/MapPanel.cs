@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 // 세로로 스크롤하는 분기 맵입니다. 노드와 점선은 열·층 좌표에 다시 그립니다.
@@ -13,10 +14,13 @@ public class MapPanel : MonoBehaviour
     public RectTransform content;
     public RectTransform lineLayer;
     public RectTransform nodeLayer;
-    public RectTransform legend;
+    // 노드 설명 패널(Node_Des). 예전 필드 이름 legend의 씬 연결을 유지한다.
+    [FormerlySerializedAs("legend")]
+    public RectTransform nodeDes;
     public Button journeyRollButton;
     public Image journeyResultImage;
-    public Text journeyResultText;
+    // 여정 주사위 보드 이미지(Journey_Result_Slot 배경). 빌드에서는 여기 연결한 값만 쓴다.
+    public Sprite journeyBoardSprite;
 
     Sprite dotSprite;
     DiceManager boundDice;
@@ -34,7 +38,9 @@ public class MapPanel : MonoBehaviour
         StopJourneyRoll();
         boundDice = diceManager;
         gameObject.SetActive(true);
-        MapUiHierarchy.EnsureMap(this);
+        // 굴리기 버튼은 전투의 Reroll_BTN을 복제해 쓴다.
+        Button combatRoll = diceManager != null && diceManager.ui != null ? diceManager.ui.rollButton : null;
+        MapUiHierarchy.EnsureMap(this, combatRoll);
         Rebuild(diceManager);
     }
 
@@ -97,8 +103,8 @@ public class MapPanel : MonoBehaviour
             CreateNode(diceManager, table, node, positions[node.id]);
         }
 
-        RefreshLegend(table);
-        PlaceLegend();
+        RefreshNodeDes(table);
+        PlaceNodeDes();
         RefreshJourneyChrome(diceManager);
         Canvas.ForceUpdateCanvases();
         FocusOnPlayer(diceManager, positions);
@@ -160,17 +166,17 @@ public class MapPanel : MonoBehaviour
         return view;
     }
 
-    void RefreshLegend(MapTableData table)
+    void RefreshNodeDes(MapTableData table)
     {
-        if (legend == null || table == null) return;
+        if (nodeDes == null || table == null) return;
         for (int i = 0; i < MapLegend.Retired.Length; i++)
         {
-            Transform retired = legend.Find(MapLegend.Retired[i]);
+            Transform retired = nodeDes.Find(MapLegend.Retired[i]);
             if (retired != null) retired.gameObject.SetActive(false);
         }
         for (int i = 0; i < MapLegend.Names.Length; i++)
         {
-            Transform item = legend.Find(MapLegend.Names[i]);
+            Transform item = nodeDes.Find(MapLegend.Names[i]);
             if (item == null) continue;
             item.gameObject.SetActive(true);
             MapNodeTypeRow rule = table.GetNodeRule(MapLegend.Types[i]);
@@ -247,29 +253,31 @@ public class MapPanel : MonoBehaviour
         viewport.offsetMax = max;
     }
 
-    void PlaceLegend()
+    // 노드 설명 패널: 오른쪽 위에 두고, 항목은 MapLegend 순서대로 위에서 아래로 쌓는다.
+    // 패널 위치는 설정 버튼(Setting_BTN) 바로 아래로 MapUiHierarchy가 맞춘다.
+    void PlaceNodeDes()
     {
-        if (legend == null) return;
-        legend.anchorMin = new Vector2(1f, 0f);
-        legend.anchorMax = new Vector2(1f, 0f);
-        legend.pivot = new Vector2(1f, 0f);
+        if (nodeDes == null) return;
+        nodeDes.anchorMin = new Vector2(1f, 1f);
+        nodeDes.anchorMax = new Vector2(1f, 1f);
+        nodeDes.pivot = new Vector2(1f, 1f);
         const float rowStep = 42f;
         int shown = 0;
         for (int i = 0; i < MapLegend.Names.Length; i++)
         {
-            Transform item = legend.Find(MapLegend.Names[i]);
+            Transform item = nodeDes.Find(MapLegend.Names[i]);
             if (item == null) continue;
             item.gameObject.SetActive(true);
             RectTransform rect = item as RectTransform;
-            rect.anchorMin = new Vector2(0f, 0f);
-            rect.anchorMax = new Vector2(1f, 0f);
-            rect.pivot = new Vector2(0f, 0f);
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = new Vector2(1f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
             rect.sizeDelta = new Vector2(-16f, 40f);
-            rect.anchoredPosition = new Vector2(8f, 8f + shown * rowStep);
+            rect.anchoredPosition = new Vector2(8f, -(8f + shown * rowStep));
             shown++;
         }
-        legend.sizeDelta = new Vector2(240f, 16f + shown * rowStep);
-        legend.anchoredPosition = new Vector2(-28f, 210f);
+        nodeDes.sizeDelta = new Vector2(240f, 16f + shown * rowStep);
+        MapUiHierarchy.PlaceNodeDesBelowSetting(nodeDes);
     }
 
     void RefreshJourneyChrome(DiceManager diceManager)
@@ -287,39 +295,18 @@ public class MapPanel : MonoBehaviour
         {
             // 대기 중인 이동 칸 수는 눈 값과 같으므로 그 면 스프라이트를 다시 보여 준다(불러오기 직후에도 동일).
             Sprite pendingFace = diceManager.GetJourneyFaceSprite(diceManager.GetJourneyDiceData(), pending);
-            SetJourneyResult(pendingFace, FormatJourneyMove(pending));
+            SetJourneyResult(pendingFace);
         }
         else
-            SetJourneyResult(null, "");
+            SetJourneyResult(null);
     }
 
-    // 결과 슬롯: 면 스프라이트가 주인공이고, 글자는 보조 정보다.
-    void SetJourneyResult(Sprite face, string label)
+    // 결과 슬롯: 보드 위에 굴린 면 스프라이트만 크게 보여 준다. 스프라이트가 없으면 면 이미지를 끈다.
+    void SetJourneyResult(Sprite face)
     {
-        if (journeyResultImage != null)
-        {
-            journeyResultImage.sprite = face;
-            journeyResultImage.enabled = face != null;
-        }
-        if (journeyResultText != null) journeyResultText.text = label;
-    }
-
-    static string FormatJourneyMove(int steps)
-    {
-        return steps <= 1
-            ? LocalizationManager.GetUi("UI_MAP_JOURNEY_MOVE_ONE", "1칸")
-            : LocalizationManager.GetUi("UI_MAP_JOURNEY_MOVE_RANGE", "1~{0}칸", steps);
-    }
-
-    static string FormatJourneyResult(JourneyRollResult result)
-    {
-        switch (result.outcome)
-        {
-            case JourneyOutcome.Damage: return "-" + result.amount;
-            case JourneyOutcome.Heal: return "+" + result.amount;
-            case JourneyOutcome.Gold: return LocalizationManager.GetUi("UI_MAP_JOURNEY_GOLD", "+{0}G", result.amount);
-            default: return FormatJourneyMove(result.amount);
-        }
+        if (journeyResultImage == null) return;
+        journeyResultImage.sprite = face;
+        journeyResultImage.enabled = face != null;
     }
 
     IEnumerator PlayJourneyRoll()
@@ -329,7 +316,7 @@ public class MapPanel : MonoBehaviour
         MapTableData table = boundDice != null ? boundDice.GetMapTable() : null;
         float seconds = table != null ? Mathf.Max(0.05f, table.Config.JourneyRollSeconds) : 0.5f;
         float elapsed = 0f;
-        // 굴리는 동안 여정 주사위의 면 스프라이트를 빠르게 바꿔 보여 준다(글자는 비움).
+        // 굴리는 동안 여정 주사위의 면 스프라이트를 빠르게 바꿔 보여 준다.
         const float faceSwapInterval = 0.06f;
         float swapTimer = faceSwapInterval;
         while (elapsed < seconds)
@@ -338,7 +325,7 @@ public class MapPanel : MonoBehaviour
             if (boundDice != null && swapTimer >= faceSwapInterval)
             {
                 swapTimer = 0f;
-                SetJourneyResult(boundDice.RandomJourneyFaceSprite(), "");
+                SetJourneyResult(boundDice.RandomJourneyFaceSprite());
             }
             elapsed += Time.unscaledDeltaTime;
             yield return null;
@@ -355,7 +342,7 @@ public class MapPanel : MonoBehaviour
         journeyRollRoutine = null;
         if (boundDice == null) yield break;
 
-        SetJourneyResult(result.faceSprite, FormatJourneyResult(result));
+        SetJourneyResult(result.faceSprite);
         if (move)
             Rebuild(boundDice);
         else if (journeyRollButton != null)
