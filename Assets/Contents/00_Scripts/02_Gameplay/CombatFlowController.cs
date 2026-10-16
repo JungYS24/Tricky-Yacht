@@ -4,7 +4,7 @@ using System.Collections;
 public static class CombatFlowController
 {
     // 메인 턴 결산 흐름 
-    public static IEnumerator ProcessTurnResolution(DiceManager dm, int finalDamage, int darkDamage, int finalHeal, int expectedGold, int flameDamage, string handName)
+    public static IEnumerator ProcessTurnResolution(DiceManager dm, int finalDamage, int darkDamage, int finalHeal, int expectedGold, int flameDamage, string handName, int selfDamage = 0)
     {
         //플레이어 회복
         if (finalHeal > 0)
@@ -19,6 +19,24 @@ public static class CombatFlowController
         if (expectedGold > 0 && dm.shopManager != null)
         {
             dm.shopManager.GrantGold(expectedGold);
+        }
+
+        // 가시 면 피해: 회복·골드와 같은 시점에 플레이어 체력을 직접 깎는다(보호막은 거치지 않음).
+        if (selfDamage > 0)
+        {
+            int hpBeforeThorn = dm.currentPlayerHP;
+            dm.currentPlayerHP = Mathf.Max(0, hpBeforeThorn - selfDamage);
+            int thornHpDamage = Mathf.Max(0, hpBeforeThorn - dm.currentPlayerHP);
+            HurtVignetteController.Get(dm).PlayShieldOrHealthHit(dm.ui, 0, thornHpDamage, dm.playerStatus.currentShield);
+            if (thornHpDamage > 0) dm.PlayPlayerHurtSound();
+
+            // 체력이 0이 되면 적 공격 전에 기존 사망 처리(부활 피규어 포함)를 그대로 탄다.
+            if (dm.currentPlayerHP <= 0)
+            {
+                yield return dm.StartCoroutine(HandlePlayerDeath(dm));
+                yield break;
+            }
+            FigureEffectManager.Instance?.EvaluateLowHPTriggers(dm, dm.shopManager);
         }
 
         //화염 스택 누적

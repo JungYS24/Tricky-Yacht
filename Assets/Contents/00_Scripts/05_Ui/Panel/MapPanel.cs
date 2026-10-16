@@ -283,12 +283,43 @@ public class MapPanel : MonoBehaviour
         }
         if (journeyRolling) return;
         int pending = diceManager.stageProgression.pendingJourneyMove;
-        SetJourneyResult(pending > 0 ? pending.ToString() : "");
+        if (pending > 0)
+        {
+            // 대기 중인 이동 칸 수는 눈 값과 같으므로 그 면 스프라이트를 다시 보여 준다(불러오기 직후에도 동일).
+            Sprite pendingFace = diceManager.GetJourneyFaceSprite(diceManager.GetJourneyDiceData(), pending);
+            SetJourneyResult(pendingFace, FormatJourneyMove(pending));
+        }
+        else
+            SetJourneyResult(null, "");
     }
 
-    void SetJourneyResult(string label)
+    // 결과 슬롯: 면 스프라이트가 주인공이고, 글자는 보조 정보다.
+    void SetJourneyResult(Sprite face, string label)
     {
+        if (journeyResultImage != null)
+        {
+            journeyResultImage.sprite = face;
+            journeyResultImage.enabled = face != null;
+        }
         if (journeyResultText != null) journeyResultText.text = label;
+    }
+
+    static string FormatJourneyMove(int steps)
+    {
+        return steps <= 1
+            ? LocalizationManager.GetUi("UI_MAP_JOURNEY_MOVE_ONE", "1칸")
+            : LocalizationManager.GetUi("UI_MAP_JOURNEY_MOVE_RANGE", "1~{0}칸", steps);
+    }
+
+    static string FormatJourneyResult(JourneyRollResult result)
+    {
+        switch (result.outcome)
+        {
+            case JourneyOutcome.Damage: return "-" + result.amount;
+            case JourneyOutcome.Heal: return "+" + result.amount;
+            case JourneyOutcome.Gold: return LocalizationManager.GetUi("UI_MAP_JOURNEY_GOLD", "+{0}G", result.amount);
+            default: return FormatJourneyMove(result.amount);
+        }
     }
 
     IEnumerator PlayJourneyRoll()
@@ -298,30 +329,37 @@ public class MapPanel : MonoBehaviour
         MapTableData table = boundDice != null ? boundDice.GetMapTable() : null;
         float seconds = table != null ? Mathf.Max(0.05f, table.Config.JourneyRollSeconds) : 0.5f;
         float elapsed = 0f;
+        // 굴리는 동안 여정 주사위의 면 스프라이트를 빠르게 바꿔 보여 준다(글자는 비움).
+        const float faceSwapInterval = 0.06f;
+        float swapTimer = faceSwapInterval;
         while (elapsed < seconds)
         {
-            if (table != null && table.JourneyDice != null && table.JourneyDice.Count > 0)
+            swapTimer += Time.unscaledDeltaTime;
+            if (boundDice != null && swapTimer >= faceSwapInterval)
             {
-                JourneyDiceFace spinning = table.JourneyDice[Random.Range(0, table.JourneyDice.Count)];
-                SetJourneyResult(MapTableData.FormatJourneyFace(spinning));
+                swapTimer = 0f;
+                SetJourneyResult(boundDice.RandomJourneyFaceSprite(), "");
             }
             elapsed += Time.unscaledDeltaTime;
             yield return null;
         }
 
-        JourneyDiceFace face = boundDice != null ? boundDice.RollJourneyFace() : null;
-        bool move = face != null && boundDice != null && boundDice.ApplyJourneyFace(face);
+        bool move = false;
+        JourneyRollResult result = default;
+        if (boundDice != null)
+        {
+            result = boundDice.RollJourneyFace();
+            move = boundDice.ApplyJourneyResult(result);
+        }
         journeyRolling = false;
         journeyRollRoutine = null;
         if (boundDice == null) yield break;
+
+        SetJourneyResult(result.faceSprite, FormatJourneyResult(result));
         if (move)
             Rebuild(boundDice);
-        else
-        {
-            SetJourneyResult(MapTableData.FormatJourneyFace(face));
-            if (journeyRollButton != null)
-                journeyRollButton.interactable = boundDice.CanRollJourney();
-        }
+        else if (journeyRollButton != null)
+            journeyRollButton.interactable = boundDice.CanRollJourney();
     }
 
     void StopJourneyRoll()

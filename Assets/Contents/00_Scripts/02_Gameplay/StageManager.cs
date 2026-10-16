@@ -92,18 +92,22 @@ public class StageManager
         return node != null && node.id == nodeId ? node : null;
     }
 
-    // 층 위치로 기존 10스테이지 곡선을 맞춥니다. 보스는 10의 배수라서 보스 판정이 그대로 동작합니다.
+    // 층 위치를 바이옴당 스테이지 번호 폭(Stages_Per_Biome)에 맞춥니다.
+    // 일반 노드는 항상 바이옴 시작+1 ~ 시작+(폭-1) 안에 들어오고, 보스는 폭의 배수라서 보스 판정이 그대로 동작합니다.
     public void ApplyNodeDifficulty(MapNode node, MapConfig config)
     {
         if (node == null || config == null) return;
+        int perBiome = Mathf.Max(3, config.StagesPerBiome);
+        int baseStage = biomeIndex * perBiome;
         if (node.type == MapNodeType.Boss)
         {
-            currentStage = biomeIndex * 10 + 10;
+            currentStage = baseStage + perBiome;
             return;
         }
 
         int span = Mathf.Max(1, config.MaxPathLength - 1);
-        currentStage = biomeIndex * 10 + 1 + (node.row * config.MinEnemyCount / span);
+        int offset = node.row * (perBiome - 2) / span;
+        currentStage = baseStage + 1 + Mathf.Clamp(offset, 0, perBiome - 2);
     }
 
     public void ClearMapTrail()

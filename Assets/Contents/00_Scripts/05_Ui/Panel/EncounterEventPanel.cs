@@ -220,7 +220,8 @@ public class EncounterEventPanel : MonoBehaviour
         switch (type)
         {
             case EncounterType.Clown: return diceManager.masterDeck.Count >= 4;
-            case EncounterType.SacrificedGirl: return diceManager.masterDeck.Count >= 2;
+            // 여정 주사위는 희생할 수 없으므로 지울 수 있는 주사위가 2개 이상 있어야 한다.
+            case EncounterType.SacrificedGirl: return diceManager.deckManager.RemovableCount() >= 2;
             default: return true;
         }
     }
@@ -322,10 +323,12 @@ public class EncounterEventPanel : MonoBehaviour
 
             case EncounterType.SacrificedGirl:
                 // 덱에서 무작위 주사위 2개 소모 (코팅 여부 무관)
-                if (diceManager.masterDeck.Count >= 2)
+                // 여정 주사위는 희생 대상에서 제외
+                List<DiceData1> sacrificed = diceManager.deckManager.GetRandomDiceForDestruction(2);
+                if (sacrificed.Count >= 2)
                 {
-                    diceManager.masterDeck.RemoveAt(Random.Range(0, diceManager.masterDeck.Count));
-                    diceManager.masterDeck.RemoveAt(Random.Range(0, diceManager.masterDeck.Count));
+                    diceManager.masterDeck.Remove(sacrificed[0]);
+                    diceManager.masterDeck.Remove(sacrificed[1]);
                 }
                 // 제물소녀 전용 피규어 지급
                 if (sacrificedGirlFigureSO != null)
@@ -347,6 +350,9 @@ public class EncounterEventPanel : MonoBehaviour
                         case DiceType.Dark: d.diceColor = new Color32(43, 42, 26, 255); break;
                         case DiceType.Ice: d.diceColor = Color.cyan; break;
                     }
+
+                    // 여정 주사위는 눈금·외형을 바꾸지 않는다(코팅만 받는다).
+                    if (DeckManager.IsProtected(d)) continue;
 
                     // 2. 주사위 눈금 종류 랜덤 (로우, 하이, 홀수, 짝수, 고정, 기본)
                     int diceStyle = Random.Range(0, 6);

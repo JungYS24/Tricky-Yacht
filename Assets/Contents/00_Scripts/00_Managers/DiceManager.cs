@@ -286,7 +286,7 @@ public class DiceManager : MonoBehaviour
         else
         {
             currentPlayerHP = playerMaxHP;
-            deckManager.InitializeMasterDeck();
+            deckManager.InitializeMasterDeck(JourneyDice.FindSource());
 
             // 첫 시작은 무조건 숲(Forest)으로 고정
             currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
@@ -610,7 +610,7 @@ public class DiceManager : MonoBehaviour
         int expectedGold = calcResult.expectedGold; // 코인 주사위 등에서 얻은 골드
 
         // 완벽하게 쪼개진 수치들을 전투 지휘관(CombatFlowController)에게 전달
-        yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, total.damage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName
+        yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, total.damage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName, calcResult.selfDamage
         ));
         ui?.ClearMergedHandDamageText();
     }
@@ -964,8 +964,8 @@ public class DiceManager : MonoBehaviour
         // 낡은 변수 대신 우리가 만든 상태 초기화 함수를 씀
         playerStatus.ResetStatus(100);
 
-        //덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 20개로)
-        deckManager.InitializeMasterDeck();
+        //덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 11개 + 여정 주사위 1개로)
+        deckManager.InitializeMasterDeck(JourneyDice.FindSource());
 
         //골드 초기화 (ShopManager 참조)
         if (shopManager != null)
@@ -1094,49 +1094,114 @@ public class DiceManager : MonoBehaviour
         OpenCurrentNode(node);
     }
 
-    public JourneyDiceFace RollJourneyFace()
+    // 지도 굴림에 쓰는 덱의 여정 주사위. 못 찾으면 null이며, 굴림은 기본 면 구성으로 대신한다.
+    public DiceData1 GetJourneyDiceData() => JourneyDice.Find(deckManager.masterDeck);
+
+    // 여정 주사위 면 스프라이트. 에셋 스프라이트가 없으면 기본 주사위 눈금 이미지로 대신한다.
+    public Sprite GetJourneyFaceSprite(DiceData1 die, int pips)
     {
-        MapTableData table = GetMapTable();
-        if (table == null || table.JourneyDice == null || table.JourneyDice.Count == 0) return null;
-        return table.JourneyDice[UnityEngine.Random.Range(0, table.JourneyDice.Count)];
+        if (die != null && die.customFaceSprites != null && die.customFaceSprites.Length > 0)
+        {
+            int index = die.customFaceSprites.Length == 1 ? 0 : Mathf.Clamp(pips - 1, 0, die.customFaceSprites.Length - 1);
+            if (die.customFaceSprites[index] != null) return die.customFaceSprites[index];
+        }
+        Dice prefabDice = dicePrefab != null ? dicePrefab.GetComponent<Dice>() : null;
+        if (prefabDice != null && prefabDice.diceFaceSprites != null && prefabDice.diceFaceSprites.Length > 0)
+            return prefabDice.diceFaceSprites[Mathf.Clamp(pips - 1, 0, prefabDice.diceFaceSprites.Length - 1)];
+        return null;
     }
 
-    public bool ApplyJourneyFace(JourneyDiceFace face)
+    // 굴림 연출 중 빠르게 바꿔 보여 줄 면 스프라이트 하나(무작위 면)
+    public Sprite RandomJourneyFaceSprite()
     {
-        if (face == null || !CanRollJourney()) return false;
-        bool move = MapTableData.IsJourneyMove(face);
+        DiceData1 die = GetJourneyDiceData() ?? JourneyDice.CreateDefault();
+        int pips = die.faceValues[JourneyDice.RollFaceIndex(die)];
+        return GetJourneyFaceSprite(die, pips);
+    }
+
+    // 여정 주사위의 면 하나를 굴려 결과를 계산한다. 상태는 바꾸지 않는다.
+    // 덱에서 여정 주사위를 못 찾아도 기본 면 구성({1~6}, {없음×3, 가시, 하트, 코인})으로 굴려 멈추지 않는다.
+    public JourneyRollResult RollJourneyFace()
+    {
+        DiceData1 die = GetJourneyDiceData();
+        if (die == null || die.faceValues == null || die.faceValues.Length == 0)
+            die = JourneyDice.CreateDefault();
+
+        int faceIndex = JourneyDice.RollFaceIndex(die);
+        int pips = die.faceValues[faceIndex];
+        SpecialDieEffect effect = die.GetFaceEffect(faceIndex);
+        MapTableData table = GetMapTable();
+
+        var result = new JourneyRollResult
+        {
+            faceIndex = faceIndex,
+            pips = pips,
+            effect = effect,
+            faceSprite = GetJourneyFaceSprite(die, pips)
+        };
+
+        // 지도에서는 면 효과만 쓴다. 코팅·위성 효과는 전투 결산에서만 적용한다.
+        switch (effect)
+        {
+            case SpecialDieEffect.Thorn:
+                result.outcome = JourneyOutcome.Damage;
+                result.amount = Mathf.Max(0, pips);
+                break;
+            case SpecialDieEffect.Heart:
+                result.outcome = JourneyOutcome.Heal;
+                float healMult = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetHealMultiplier() : 1f;
+                result.amount = Mathf.Max(0, TurnCalculator.CalculateHeartHeal(pips, healMult));
+                break;
+            case SpecialDieEffect.Coin:
+                result.outcome = JourneyOutcome.Gold;
+                int goldPerPip = table != null ? table.Config.JourneyMapGoldPerPip : 10;
+                result.amount = Mathf.Max(0, pips * goldPerPip);
+                break;
+            default:
+                result.outcome = JourneyOutcome.Move;
+                result.amount = Mathf.Max(1, pips);
+                break;
+        }
+        return result;
+    }
+
+    // 굴림 결과를 적용한다. 이동이면 true(이동 칸 수 대기), 그 외 효과는 바로 적용하고 false를 돌려준다.
+    public bool ApplyJourneyResult(JourneyRollResult result)
+    {
+        if (!CanRollJourney()) return false;
+        bool move = result.outcome == JourneyOutcome.Move;
         if (move)
-            stageProgression.pendingJourneyMove = Mathf.Max(1, face.Value);
+            stageProgression.pendingJourneyMove = Mathf.Max(1, result.amount);
         else
         {
             stageProgression.pendingJourneyMove = 0;
-            ApplyJourneyEffect(face);
+            ApplyJourneyEffect(result);
         }
         SaveMapProgress();
         return move;
     }
 
-    void ApplyJourneyEffect(JourneyDiceFace face)
+    void ApplyJourneyEffect(JourneyRollResult result)
     {
-        if (!MapTableData.TryParseJourneyType(face.Type, out JourneyFaceType kind)) return;
         MapTableData table = GetMapTable();
-        switch (kind)
+        switch (result.outcome)
         {
-            case JourneyFaceType.Damage:
+            case JourneyOutcome.Damage:
+                // 지도 피해는 최소 체력 아래로 내려가지 않는다. 이미 그보다 낮으면 더 깎지 않는다.
                 int minHp = table != null ? table.Config.JourneyDamageMinHp : 1;
-                currentPlayerHP = Mathf.Max(minHp, currentPlayerHP - Mathf.Max(0, face.Value));
+                currentPlayerHP = Mathf.Min(currentPlayerHP, Mathf.Max(minHp, currentPlayerHP - result.amount));
                 UpdateMainUI("");
                 break;
-            case JourneyFaceType.Gold:
+            case JourneyOutcome.Gold:
                 if (shopManager != null)
                 {
-                    shopManager.currentGold += Mathf.Max(0, face.Value);
+                    shopManager.currentGold += result.amount;
                     ui?.UpdateGoldUI(shopManager.currentGold);
                     if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
                 }
                 break;
-            case JourneyFaceType.Heal:
-                playerStatus.Heal(Mathf.Max(0, face.Value));
+            case JourneyOutcome.Heal:
+                playerStatus.Heal(result.amount);
                 UpdateMainUI("");
                 break;
         }

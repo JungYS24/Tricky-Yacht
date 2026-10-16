@@ -9,6 +9,8 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 {
     [Header("상태 데이터")]
     public int currentValue;
+    // 현재 눈이 나온 면 번호(0~5). 면별 효과를 찾을 때 쓰고, 모르면 -1이다.
+    public int currentFaceIndex = -1;
     public bool isKept = false;
     public int currentKeepIndex = -1;
     public Vector3 rollPos;
@@ -54,7 +56,17 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         RefreshHoverJuice();
     }
 
-    public void SetData(DiceData1 data, int initialValue)
+    // 면 효과 계산용 면 번호. 기록된 번호가 현재 눈과 어긋나면 눈 값이 같은 첫 면으로 대신한다.
+    // SetData/PlayRollEffect의 faceIndex는 확실할 때만 넘기고, 모르면(복원·튜토리얼 강제값 등) -1을 넘긴다.
+    public int ResolveFaceIndex()
+    {
+        if (myData == null || myData.faceValues == null) return -1;
+        if (currentFaceIndex >= 0 && currentFaceIndex < myData.faceValues.Length && myData.faceValues[currentFaceIndex] == currentValue)
+            return currentFaceIndex;
+        return myData.FindFaceIndex(currentValue);
+    }
+
+    public void SetData(DiceData1 data, int initialValue, int faceIndex = -1)
     {
         if (isKept) return;
         myData = data;
@@ -77,6 +89,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         useNumberSprite = isFixed || isOddEven;
 
         currentValue = initialValue;
+        currentFaceIndex = faceIndex >= 0 ? faceIndex : myData.FindFaceIndex(initialValue);
         UpdateSprite(initialValue);
 
         ApplyDiceColor();
@@ -163,7 +176,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         }
     }
 
-    public void PlayRollEffect(int finalValue)
+    public void PlayRollEffect(int finalValue, int faceIndex = -1)
     {
         if (isKept) return;
 
@@ -174,11 +187,11 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         }
 
         if (rollCoroutine != null) StopCoroutine(rollCoroutine);
-        rollCoroutine = StartCoroutine(RollRoutine(finalValue));
+        rollCoroutine = StartCoroutine(RollRoutine(finalValue, faceIndex));
         RefreshHoverJuice();
     }
 
-    private IEnumerator RollRoutine(int finalValue)
+    private IEnumerator RollRoutine(int finalValue, int faceIndex)
     {
         Vector3 startPos = transform.position;
         float elapsed = 0f;
@@ -209,6 +222,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         transform.SetPositionAndRotation(startPos, Quaternion.identity);
         transform.localScale = originalScale;
         currentValue = finalValue;
+        currentFaceIndex = faceIndex >= 0 ? faceIndex : (myData != null ? myData.FindFaceIndex(finalValue) : -1);
         UpdateSprite(finalValue);
 
         // 팝업 이펙트 및 파티클

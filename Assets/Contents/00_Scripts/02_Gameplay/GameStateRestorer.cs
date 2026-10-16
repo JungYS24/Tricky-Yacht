@@ -82,6 +82,19 @@ public static class GameStateRestorer
                 newDice.specialEffect = (SpecialDieEffect)dData.specialEffect;
             }
 
+            // 면별 효과와 여정 주사위 표시를 복원합니다. 구버전 저장에는 없으므로 에셋 값을 그대로 둡니다.
+            if (newDice != null)
+            {
+                if (dData.isJourneyDice) newDice.isJourneyDice = true;
+                if (dData.faceEffects != null && dData.faceEffects.Length == 6)
+                {
+                    var restoredEffects = new SpecialDieEffect[6];
+                    for (int e = 0; e < restoredEffects.Length; e++)
+                        restoredEffects[e] = (SpecialDieEffect)dData.faceEffects[e];
+                    newDice.faceEffects = restoredEffects;
+                }
+            }
+
             // 세이브 파일에 있던 코팅 상태를 덮어씌움
             if (newDice != null && dData.isCoated)
             {
@@ -101,6 +114,10 @@ public static class GameStateRestorer
                 }
             }
         }
+
+        // 여정 주사위가 없는 구버전 저장은 기본 주사위 1개를 여정 주사위로 바꿔 보정합니다. 덱 개수와 순서는 그대로입니다.
+        dm.deckManager.EnsureJourneyDice(JourneyDice.FindSource());
+
         InventoryManager.Instance.ClearAllSlots();
 
         //최적화된 ID 기반으로 피규어 복원

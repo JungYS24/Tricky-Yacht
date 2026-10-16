@@ -94,7 +94,19 @@
       "Key": "Journey_Roll_Seconds",
       "Value": "0.5",
       "Value_Type": "float",
-      "Desc_KR": "여정 주사위가 멈추기 전에 숫자가 바뀌는 시간(초)"
+      "Desc_KR": "여정 주사위가 멈추기 전에 면이 바뀌는 시간(초)"
+    },
+    {
+      "Key": "Journey_Map_Gold_Per_Pip",
+      "Value": "10",
+      "Value_Type": "int",
+      "Desc_KR": "지도에서 코인 면이 나왔을 때 눈 1개당 얻는 골드(기본 10이면 전투 코인과 같은 눈×10)"
+    },
+    {
+      "Key": "Stages_Per_Biome",
+      "Value": "10",
+      "Value_Type": "int",
+      "Desc_KR": "바이옴 하나가 차지하는 스테이지 번호 폭. 일반 노드는 +1~+(폭-1), 보스는 +폭"
     }
   ],
   "nodeTypes": [
@@ -336,13 +348,5 @@
       "Elite_W": 10,
       "Rest_W": 8
     }
-  ],
-  "journeyDice": [
-    { "Face": 1, "Type": "Move", "Value": 1, "Desc_KR": "1칸 이동" },
-    { "Face": 2, "Type": "Move", "Value": 2, "Desc_KR": "1~2칸 중 선택 이동" },
-    { "Face": 3, "Type": "Move", "Value": 3, "Desc_KR": "1~3칸 중 선택 이동" },
-    { "Face": 4, "Type": "Damage", "Value": 4, "Desc_KR": "해골: 체력 4 감소 후 다시 굴림" },
-    { "Face": 5, "Type": "Gold", "Value": 5, "Desc_KR": "골드 5 획득 후 다시 굴림" },
-    { "Face": 6, "Type": "Heal", "Value": 6, "Desc_KR": "하트: 체력 6 회복 후 다시 굴림" }
   ]
 }

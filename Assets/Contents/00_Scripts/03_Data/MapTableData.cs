@@ -16,14 +16,6 @@ public enum MapNodeType
     Rest
 }
 
-public enum JourneyFaceType
-{
-    Move,
-    Damage,
-    Gold,
-    Heal
-}
-
 // Map_Table.json 한 줄을 그대로 받는 그릇입니다. Value는 문자열이므로 타입은 따로 해석합니다.
 [Serializable]
 public class MapConfigEntry
@@ -61,21 +53,11 @@ public class BiomeWeightRow
 }
 
 [Serializable]
-public class JourneyDiceFace
-{
-    public int Face;
-    public string Type;
-    public int Value;
-    public string Desc_KR;
-}
-
-[Serializable]
 public class MapTableJson
 {
     public List<MapConfigEntry> mapConfig = new List<MapConfigEntry>();
     public List<MapNodeTypeRow> nodeTypes = new List<MapNodeTypeRow>();
     public List<BiomeWeightRow> biomeWeights = new List<BiomeWeightRow>();
-    public List<JourneyDiceFace> journeyDice = new List<JourneyDiceFace>();
 }
 
 // 시트 값을 코드에서 쓰기 좋게 풀어 둔 전역 설정입니다.
@@ -97,6 +79,8 @@ public class MapConfig
     public bool ShopRowForceStop = true;
     public int JourneyDamageMinHp = 1;
     public float JourneyRollSeconds = 0.5f;
+    public int JourneyMapGoldPerPip = 10; // 지도에서 코인 면이 나왔을 때 눈 1개당 골드
+    public int StagesPerBiome = 10;       // 바이옴 하나가 차지하는 스테이지 번호 폭(마지막 번호는 보스)
 }
 
 public class MapTableData
@@ -104,7 +88,6 @@ public class MapTableData
     public MapConfig Config = new MapConfig();
     public List<MapNodeTypeRow> NodeTypes = new List<MapNodeTypeRow>();
     public List<BiomeWeightRow> BiomeWeights = new List<BiomeWeightRow>();
-    public List<JourneyDiceFace> JourneyDice = new List<JourneyDiceFace>();
 
     public static MapTableData Parse(string json)
     {
@@ -124,13 +107,6 @@ public class MapTableData
 
         if (raw.nodeTypes != null) data.NodeTypes = raw.nodeTypes;
         if (raw.biomeWeights != null) data.BiomeWeights = raw.biomeWeights;
-        if (raw.journeyDice != null && raw.journeyDice.Count > 0)
-            data.JourneyDice = raw.journeyDice;
-        else
-        {
-            Debug.LogWarning("[Map] journeyDice가 없어 기본 주사위 면을 사용합니다.");
-            data.JourneyDice = DefaultJourneyDice();
-        }
         data.ApplyConfig(raw.mapConfig);
         return data;
     }
@@ -153,7 +129,8 @@ public class MapTableData
             "Min_Enemy_Count", "Max_Path_Length", "Grid_Width", "Lane_Count", "Start_Columns", "Shop_Row",
             "Skip_Chance", "Shortcut_Max_Skip", "Detour_Enemy_Ratio", "Max_Gen_Attempts",
             "Rest_Heal_Percent", "Post_Battle_Shop", "Biome_Count_To_Void",
-            "Shop_Row_Force_Stop", "Journey_Damage_Min_Hp", "Journey_Roll_Seconds"
+            "Shop_Row_Force_Stop", "Journey_Damage_Min_Hp", "Journey_Roll_Seconds", "Journey_Map_Gold_Per_Pip",
+            "Stages_Per_Biome"
         };
         foreach (string key in required)
         {
@@ -182,6 +159,8 @@ public class MapTableData
             case "Shop_Row_Force_Stop": Config.ShopRowForceStop = ParseBool(entry.Value); break;
             case "Journey_Damage_Min_Hp": Config.JourneyDamageMinHp = ParseInt(entry.Value, Config.JourneyDamageMinHp); break;
             case "Journey_Roll_Seconds": Config.JourneyRollSeconds = ParseFloat(entry.Value, Config.JourneyRollSeconds); break;
+            case "Journey_Map_Gold_Per_Pip": Config.JourneyMapGoldPerPip = ParseInt(entry.Value, Config.JourneyMapGoldPerPip); break;
+            case "Stages_Per_Biome": Config.StagesPerBiome = Mathf.Max(3, ParseInt(entry.Value, Config.StagesPerBiome)); break;
         }
     }
 
@@ -292,50 +271,6 @@ public class MapTableData
     public static bool IsCombatNode(MapNodeType type)
     {
         return type == MapNodeType.Enemy || type == MapNodeType.Elite || type == MapNodeType.Portal;
-    }
-
-    public static bool TryParseJourneyType(string type, out JourneyFaceType faceType)
-    {
-        faceType = JourneyFaceType.Move;
-        if (string.IsNullOrEmpty(type)) return false;
-        return Enum.TryParse(type, true, out faceType);
-    }
-
-    public static bool IsJourneyMove(JourneyDiceFace face)
-    {
-        return face != null && TryParseJourneyType(face.Type, out JourneyFaceType kind) && kind == JourneyFaceType.Move;
-    }
-
-    public static string FormatJourneyFace(JourneyDiceFace face)
-    {
-        if (face == null) return "";
-        if (!TryParseJourneyType(face.Type, out JourneyFaceType kind))
-            return face.Value.ToString(CultureInfo.InvariantCulture);
-        switch (kind)
-        {
-            case JourneyFaceType.Damage: return "-" + face.Value.ToString(CultureInfo.InvariantCulture);
-            case JourneyFaceType.Gold: return "+" + face.Value.ToString(CultureInfo.InvariantCulture) + "G";
-            case JourneyFaceType.Heal: return "+" + face.Value.ToString(CultureInfo.InvariantCulture);
-            default: return face.Value.ToString(CultureInfo.InvariantCulture);
-        }
-    }
-
-    static List<JourneyDiceFace> DefaultJourneyDice()
-    {
-        return new List<JourneyDiceFace>
-        {
-            Face(1, "Move", 1, "1칸 이동"),
-            Face(2, "Move", 2, "1~2칸 중 선택 이동"),
-            Face(3, "Move", 3, "1~3칸 중 선택 이동"),
-            Face(4, "Damage", 4, "해골: 체력 4 감소 후 다시 굴림"),
-            Face(5, "Gold", 5, "골드 5 획득 후 다시 굴림"),
-            Face(6, "Heal", 6, "하트: 체력 6 회복 후 다시 굴림")
-        };
-    }
-
-    static JourneyDiceFace Face(int face, string type, int value, string desc)
-    {
-        return new JourneyDiceFace { Face = face, Type = type, Value = value, Desc_KR = desc };
     }
 
     public string GetNodeName(MapNodeType type)

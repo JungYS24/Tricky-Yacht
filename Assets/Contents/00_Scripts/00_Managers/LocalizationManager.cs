@@ -372,6 +372,10 @@ public class LocalizationManager : MonoBehaviour
         if (dice == null)
             return null;
 
+        // 여정 주사위는 면별 효과라 주사위 전체 효과(specialEffect)로는 구분되지 않는다.
+        if (dice.isJourneyDice)
+            return "Journey";
+
         switch (dice.specialEffect)
         {
             case SpecialDieEffect.Coin: return "Coin";

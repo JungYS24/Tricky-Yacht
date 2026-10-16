@@ -8,6 +8,7 @@ public struct TurnCalcResult
     public int expectedGold;
     public int expectedHeal;
     public int flameDamageThisTurn;
+    public int selfDamage; // 가시 면 등으로 플레이어가 받는 피해
 
     public int iceBonusChips;
     public float prismMultTotal;
@@ -56,6 +57,12 @@ public struct TurnScoreResult
 public static class TurnCalculator
 {
     public const int GoldPerPip = 10;
+
+    // 하트 면 회복량. 전투 결산과 지도 굴림이 같은 계산을 쓴다.
+    public static int CalculateHeartHeal(int pips, float healMultiplier)
+    {
+        return Mathf.FloorToInt(pips * healMultiplier);
+    }
 
     public static TurnScoreResult CalculateScore(TurnCalcResult dice, float handMult, TurnScoreBonuses bonuses)
     {
@@ -144,16 +151,20 @@ public static class TurnCalculator
         {
             res.baseSum += d.currentValue;
 
-            switch (d.myData.specialEffect)
+            // 주사위 전체 효과 대신 이번에 나온 면의 효과로 분기한다(면별 효과가 없으면 기존 효과와 같다).
+            switch (d.myData.GetFaceEffect(d.ResolveFaceIndex()))
             {
                 case SpecialDieEffect.Coin:
                     res.expectedGold += d.currentValue * GoldPerPip;
                     break;
                 case SpecialDieEffect.Heart:
-                    res.expectedHeal += Mathf.FloorToInt(d.currentValue * healMultiplier);
+                    res.expectedHeal += CalculateHeartHeal(d.currentValue, healMultiplier);
                     break;
                 case SpecialDieEffect.Flame:
                     res.flameDamageThisTurn += (d.currentValue * 2);
+                    break;
+                case SpecialDieEffect.Thorn:
+                    res.selfDamage += d.currentValue;
                     break;
             }
 

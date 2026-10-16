@@ -213,11 +213,34 @@ public static class MapUiHierarchy
         slotRect.anchoredPosition = new Vector2(-28f, 102f);
         Text resultText = EnsureLabel(slot, "Text", "", 32, Vector2.zero, new Vector2(200f, 72f), true);
         resultText.alignment = TextAnchor.MiddleCenter;
+        // 글자는 보조 정보라 오른쪽에 두고, 왼쪽에는 굴려서 나온 면 스프라이트를 보여 준다.
+        resultText.fontSize = 26;
+        resultText.resizeTextForBestFit = true;
+        resultText.resizeTextMinSize = 14;
+        resultText.resizeTextMaxSize = 26;
         RectTransform resultRect = resultText.rectTransform;
         resultRect.anchorMin = Vector2.zero;
         resultRect.anchorMax = Vector2.one;
-        resultRect.offsetMin = Vector2.zero;
-        resultRect.offsetMax = Vector2.zero;
+        resultRect.offsetMin = new Vector2(88f, 0f);
+        resultRect.offsetMax = new Vector2(-8f, 0f);
+
+        Transform face = slot.Find("Face");
+        if (face == null)
+        {
+            var faceGo = new GameObject("Face", typeof(RectTransform), typeof(Image));
+            faceGo.transform.SetParent(slot, false);
+            face = faceGo.transform;
+        }
+        RectTransform faceRect = face as RectTransform;
+        faceRect.anchorMin = new Vector2(0f, 0.5f);
+        faceRect.anchorMax = new Vector2(0f, 0.5f);
+        faceRect.pivot = new Vector2(0f, 0.5f);
+        faceRect.sizeDelta = new Vector2(72f, 72f);
+        faceRect.anchoredPosition = new Vector2(8f, 0f);
+        Image faceImage = face.GetComponent<Image>();
+        faceImage.preserveAspect = true;
+        faceImage.raycastTarget = false;
+        faceImage.enabled = faceImage.sprite != null;
 
         Transform button = root.Find("Journey_Roll_BTN");
         bool created = button == null;
@@ -246,7 +269,7 @@ public static class MapUiHierarchy
 
         slot.SetAsLastSibling();
         button.SetAsLastSibling();
-        panel.journeyResultImage = slot.GetComponent<Image>();
+        panel.journeyResultImage = faceImage;
         panel.journeyResultText = resultText;
         panel.journeyRollButton = roll;
         roll.onClick.RemoveAllListeners();
