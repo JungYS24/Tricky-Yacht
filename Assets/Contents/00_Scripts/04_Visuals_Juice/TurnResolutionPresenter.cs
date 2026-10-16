@@ -261,6 +261,14 @@ public sealed class TurnResolutionPresenter
             yield return AnimateSnackBonuses(false, multBeforeFigures);
             yield return AnimateBonus(false, bonuses.stageMult, LocalizationManager.GetUi("UI_BONUS_STAGE", "전투 누적"));
 
+            // 모든 가산 배수를 반영한 뒤 저주를 하나씩 곱한다.
+            foreach (var die in keptDice)
+            {
+                if (die == null || die.myData == null || die.myData.debuffType != DebuffDiceType.Curse) continue;
+                float factor = Mathf.Clamp01(1f - die.currentValue * 0.05f);
+                yield return AnimateBonus(false, shownMult * (factor - 1f), die.myData.diceName, die);
+            }
+
             // 표시의 최종값을 실제 계산 결과에 맞춤
             if (ui.chipsSumText != null)
                 UiCountUpText.On(ui.chipsSumText, UiCountUpText.FormatKind.Chips)?.SetInstant(total.chips);

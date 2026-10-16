@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -127,55 +127,72 @@ public class DeckManager
         return masterDeck.Where(x => !IsProtected(x)).OrderBy(x => Random.value).Take(count).ToList();
     }
 
-    // --- 가짜 주사위 (보스 기믹) 관리 ---
-    public void ApplyFakeDice(Sprite fakeShell, Sprite fakeFace, ref DiceData1 originalBossDice, ref int fakeDiceIndex, int restoredIndex = -1)
+    // 전투 시작 시 PrepareDeckForNewStage 전에 호출한다.
+    // 기존 주사위를 교체하지 않고 원본 덱에 추가하며, 드로우 더미는 이후 준비 단계에서 구성한다.
+    // SO가 있으면 해당 설정을 사용하고, 없으면 종류별 기본 구성으로 생성한다.
+    public DiceData1 AddDebuffDice(DebuffDiceType debuffType, DiceItemSO source = null)
     {
-        if (masterDeck.Count == 0 || restoredIndex >= masterDeck.Count) return;
-
-        // 여정 주사위는 가짜 주사위로 바뀌지 않는다. 저장된 위치가 여정 주사위면 다른 주사위를 다시 고른다.
-        int pickedIndex = restoredIndex;
-        if (pickedIndex < 0 || IsProtected(masterDeck[pickedIndex]))
+        if (source != null)
         {
-            var candidates = new List<int>(masterDeck.Count);
-            for (int i = 0; i < masterDeck.Count; i++) if (!IsProtected(masterDeck[i])) candidates.Add(i);
-            if (candidates.Count == 0) return;
-            pickedIndex = candidates[Random.Range(0, candidates.Count)];
+            if (debuffType == DebuffDiceType.None || source.debuffType != debuffType)
+                throw new System.ArgumentException("디버프 종류와 SO 설정이 일치해야 합니다.", nameof(source));
+            DiceData1 fromAsset = source.CreateDiceData();
+            masterDeck.Add(fromAsset);
+            return fromAsset;
+        }
+        string name;
+        int[] faces;
+        switch (debuffType)
+        {
+            case DebuffDiceType.Fake:
+                name = "가짜 주사위";
+                faces = new int[] { 0, 0, 0, 0, 0, 0 };
+                break;
+            case DebuffDiceType.Spine:
+                name = "가시 주사위";
+                faces = new int[] { 1, 2, 3, 4, 5, 6 };
+                break;
+            case DebuffDiceType.Curse:
+                name = "저주 주사위";
+                faces = new int[] { 1, 2, 3, 4, 5, 6 };
+                break;
+            case DebuffDiceType.Thief:
+                name = "도둑 주사위";
+                faces = new int[] { 1, 1, 1, 1, 1, 1 };
+                break;
+            case DebuffDiceType.Shackle:
+                name = "족쇄 주사위";
+                faces = new int[] { 1, 1, 1, 1, 1, 1 };
+                break;
+            default:
+                throw new System.ArgumentOutOfRangeException(nameof(debuffType), debuffType, "추가할 디버프 종류가 필요합니다.");
         }
 
-        fakeDiceIndex = pickedIndex;
-        originalBossDice = masterDeck[fakeDiceIndex];
-
-        DiceData1 fakeDice = new DiceData1("가짜 주사위", new int[] { 0, 0, 0, 0, 0, 0 });
-        fakeDice.customDiceShell = fakeShell;
-        fakeDice.customFaceSprites = new Sprite[] { fakeFace, fakeFace, fakeFace, fakeFace, fakeFace, fakeFace };
-
-        fakeDice.isCoated = false;
-        fakeDice.type = DiceType.Normal;
-        fakeDice.specialEffect = SpecialDieEffect.None;
-        fakeDice.diceColor = Color.white;
-        fakeDice.multiplier = 1.0f;
-
-        masterDeck[fakeDiceIndex] = fakeDice;
-        Debug.Log($"<color=red>[보스 기믹]</color> {originalBossDice.diceName}이(가) 가짜 주사위로 변했습니다!");
+        DiceData1 die = new DiceData1(name, faces);
+        die.debuffType = debuffType;
+        masterDeck.Add(die);
+        return die;
     }
 
-    public void RestoreFakeDice(ref DiceData1 originalBossDice, ref int fakeDiceIndex)
+    // 전투 종료 시 호출한다. 영구 디버프와 일반 주사위는 유지한다.
+    // 보드에 남은 주사위 오브젝트 정리는 호출 측에서 처리해야 한다.
+    public int RemoveTemporaryDebuffDice()
     {
-        if (originalBossDice == null || fakeDiceIndex < 0) return;
-
-        // 인덱스를 신뢰할 수 없는 상황(덱 개수 변경)을 대비한 방어 코드
-        if (fakeDiceIndex < masterDeck.Count)
-        {
-            masterDeck[fakeDiceIndex] = originalBossDice;
-        }
-        else
-        {
-            // 인덱스가 밀렸다면, 맨 뒤에라도 안전하게 원본을 다시 넣어줌
-            masterDeck.Add(originalBossDice);
-        }
-
-        // 복구 완료 후 참조 비우기
-        originalBossDice = null;
-        fakeDiceIndex = -1;
+        return RemoveDebuffDiceMatching(die => die != null && die.IsTemporaryDebuff);
     }
+
+    // 디버프 제거 피규어 등에서 사용할 전체 디버프 제거 경로.
+    public int RemoveAllDebuffDice()
+    {
+        return RemoveDebuffDiceMatching(die => die != null && die.IsDebuff);
+    }
+
+    private int RemoveDebuffDiceMatching(System.Predicate<DiceData1> match)
+    {
+        int removed = masterDeck.RemoveAll(match);
+        drawPile.RemoveAll(match);
+        discardPile.RemoveAll(match);
+        return removed; // 원본 덱에서 제거한 개수만 반환한다.
+    }
+
 }

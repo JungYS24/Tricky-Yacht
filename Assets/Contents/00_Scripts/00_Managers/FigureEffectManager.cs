@@ -362,10 +362,10 @@ public class FigureEffectManager : MonoBehaviour
                 case FigureEffectType.AddExtraAttack: diceManager.extraAttackCount += Mathf.FloorToInt(actualValue); ReportApplied(Mathf.FloorToInt(actualValue) > 0); break;
                 case FigureEffectType.NullifyEnemySkill:
                     diceManager.isEnemySkillNullified = true; ReportApplied(true);
-                    if (diceManager.enemy != null && diceManager.enemy.CurrentBossAbility == BossAbilityType.FakeDice) diceManager.deckManager.RestoreFakeDice(ref diceManager.originalBossDice, ref diceManager.fakeDiceIndex);
+                    diceManager.RemoveCombatDebuffs(currentEnemyOnly: true);
                     break;
                 case FigureEffectType.FixEnemyAttackToOne: diceManager.isNextEnemyAttackFixedToOne = true; ReportApplied(true); break;
-                case FigureEffectType.DestroyDebuffDice: diceManager.deckManager.RestoreFakeDice(ref diceManager.originalBossDice, ref diceManager.fakeDiceIndex); break;
+                case FigureEffectType.DestroyDebuffDice: diceManager.RemoveCombatDebuffs(); break;
                 case FigureEffectType.AddFlameDamage:
                     diceManager.figureBonusFlameDamage += Mathf.FloorToInt(actualValue); ReportApplied(Mathf.FloorToInt(actualValue) > 0);
                     break;

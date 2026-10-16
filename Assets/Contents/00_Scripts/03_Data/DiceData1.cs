@@ -9,7 +9,19 @@ public enum SpecialDieEffect
     Odd,
     Even,
     Flame,
-    Thorn   // 저장 데이터에 int로 기록되므로 기존 순서를 바꾸지 말고 항상 맨 뒤에만 추가한다.
+    Thorn
+}
+
+// 기존 특수 면 효과(여정 주사위의 Thorn 등)와 별도로 구분한다.
+// 저장 호환성을 위해 기존 값을 바꾸지 않고 새 종류는 뒤에 추가한다.
+public enum DebuffDiceType
+{
+    None = 0,
+    Fake = 1,    // 가짜: 영구, 눈 0
+    Spine = 2,   // 가시: 영구, 킵 결산 시 피해
+    Curse = 3,   // 저주: 영구, 킵 결산 시 배수 감소
+    Thief = 4,   // 도둑: 해당 전투 한정, 뽑는 즉시 발동
+    Shackle = 5  // 족쇄: 해당 전투 한정, 뽑는 즉시 발동
 }
 
 public enum SatelliteType
@@ -32,7 +44,7 @@ public enum DiceType
 [System.Serializable]
 public class DiceData1
 {
-    // 1. 변수 선언부에 이름을 추가하고 기본값을 넣어줍니다.
+    //변수 선언부에 이름을 추가하고 기본값을 넣어줍니다.
     public string diceName = "기본 주사위";
 
     public bool isCoated = false;
@@ -41,6 +53,13 @@ public class DiceData1
     public DiceType type = DiceType.Normal;
 
     public SpecialDieEffect specialEffect = SpecialDieEffect.None;
+
+    public DebuffDiceType debuffType = DebuffDiceType.None;
+
+    public bool IsDebuff => debuffType != DebuffDiceType.None;
+    public bool IsTemporaryDebuff => debuffType == DebuffDiceType.Thief || debuffType == DebuffDiceType.Shackle;
+    // 발동 시점 판별용. 실제 효과 적용은 드로우 처리에서 연결한다.
+    public bool TriggersDebuffOnDraw => debuffType == DebuffDiceType.Thief || debuffType == DebuffDiceType.Shackle;
 
     // 면마다 다른 효과가 필요한 주사위용(길이 6, null 허용). 없으면 specialEffect를 모든 면에 쓴다.
     public SpecialDieEffect[] faceEffects;

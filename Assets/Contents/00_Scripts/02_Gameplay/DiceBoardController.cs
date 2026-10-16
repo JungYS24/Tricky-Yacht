@@ -41,11 +41,13 @@ public sealed class DiceBoardController
     private readonly Transform[] rollSlots;
     private readonly Dice[] keepSlotOccupants;
     private readonly List<Dice> dicePool = new List<Dice>();
+    private readonly Action<DiceData1> onDiceDrawn;
 
-    public DiceBoardController(GameObject prefab, Transform keepParent, Transform rollParent, List<Dice> activeDice, DeckManager deck)
+    public DiceBoardController(GameObject prefab, Transform keepParent, Transform rollParent, List<Dice> activeDice, DeckManager deck, Action<DiceData1> onDraw = null)
     {
         dicePrefab = prefab;
         deckManager = deck;
+        onDiceDrawn = onDraw;
         ActiveDice = activeDice;
         keepSlots = ReadSlots(keepParent);
         rollSlots = ReadSlots(rollParent);
@@ -73,7 +75,22 @@ public sealed class DiceBoardController
         }
     }
 
-    public void SpawnDice(bool returnPreviousDiceToDiscard, int currentStage)
+    public void RemoveDiceMatching(Predicate<DiceData1> match)
+    {
+        for (int i = ActiveDice.Count - 1; i >= 0; i--)
+        {
+            Dice die = ActiveDice[i];
+            if (die == null || !match(die.myData)) continue;
+            ReleaseFromKeepSlot(die);
+            die.isKept = false;
+            die.RefreshHoverJuice();
+            die.gameObject.SetActive(false);
+            dicePool.Add(die);
+            ActiveDice.RemoveAt(i);
+        }
+    }
+
+    public void SpawnDice(bool returnPreviousDiceToDiscard, int currentStage, bool applyDrawEffects = true)
     {
         //기존 활성화된 주사위들을 파괴하지 않고 비활성화하여 풀(Pool)에 보관
         foreach (var d in ActiveDice)
@@ -151,6 +168,7 @@ public sealed class DiceBoardController
             // 복잡했던 덱 리필 및 드로우 로직이 단 한 줄로 끝납니다.
             DiceData1 drawnData = deckManager.DrawOneDice();
             if (drawnData == null) break;
+            if (applyDrawEffects) onDiceDrawn?.Invoke(drawnData);
 
             // Instantiate 대신 풀에서 대기 중인 주사위 꺼내 쓰기
             Dice d;
@@ -217,7 +235,7 @@ public sealed class DiceBoardController
     {
         if (data.boardSaveVersion != 1 || data.boardDice == null || data.boardDice.Count == 0 || data.boardDice.Count > rollSlots.Length || data.drawPileIndices == null || data.discardPileIndices == null) return false;
         int count = deckManager.masterDeck.Count;
-        if (data.savedFakeDiceIndex < -1 || data.savedFakeDiceIndex >= count || data.savedCurrentRerolls < 0 || data.savedMaxRerolls < 0) return false;
+        if (data.savedCurrentRerolls < 0 || data.savedMaxRerolls < 0) return false;
         var usedDice = new bool[count];
         var usedRollSlots = new bool[rollSlots.Length];
         var usedKeepSlots = new bool[keepSlots.Length];
@@ -339,6 +357,7 @@ public sealed class DiceBoardController
         {
             DiceData1 drawn = deckManager.DrawOneDice();
             if (drawn == null) break;
+            onDiceDrawn?.Invoke(drawn);
             replacements.Add(drawn);
         }
 

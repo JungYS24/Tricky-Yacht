@@ -44,6 +44,7 @@ public class StageContext
 
 public class TurnContext
 {
+    public int debuffRerollPenalty;
     public float snackBonusMult = 0f;
     public int snackBonusChips = 0;
     public int snackBonusRerolls = 0;
@@ -51,6 +52,7 @@ public class TurnContext
 
     public void ResetForNewTurn()
     {
+        debuffRerollPenalty = 0;
         snackBonusMult = 0f;
         snackBonusChips = 0;
         snackBonusRerolls = 0;
@@ -144,8 +146,6 @@ public class DiceManager : MonoBehaviour
     [HideInInspector] public int perfumerWeaknessTurns = 0; // 조향사 시련 턴 수
     [HideInInspector] public bool isNextShopFree = false; //녹슨 닻의 선장 무료 상점
 
-    [HideInInspector] public DiceData1 originalBossDice = null;
-    [HideInInspector] public int fakeDiceIndex = -1;
 
     [HideInInspector] public bool isStageClearing = false; // 중복 클리어 방지용 스위치
 
@@ -258,7 +258,7 @@ public class DiceManager : MonoBehaviour
             enemy = Instantiate(enemyPrefab, enemySpawnPoint.position, Quaternion.identity);
         }
 
-        board = new DiceBoardController(dicePrefab, keepSlotParent, rollSlotParent, serializedActiveDice, deckManager);
+        board = new DiceBoardController(dicePrefab, keepSlotParent, rollSlotParent, serializedActiveDice, deckManager, ApplyDrawDebuff);
 
         // 주사위 상태 변경 이벤트 구독 연동
         Dice.OnDiceStateChanged += HandleDiceChanged;
@@ -309,6 +309,7 @@ public class DiceManager : MonoBehaviour
     {
         SaveData data = GameSaveManager.Instance.LoadSaveData();
         if (data == null) return;
+        bool hasSavedTurnState = data.debuffSaveVersion >= 1 || data.boardSaveVersion == 1;
 
         isRestoringSave = true;
         try
@@ -345,6 +346,12 @@ public class DiceManager : MonoBehaviour
             {
                 // 보드 기록이 없는 구버전 저장은 기존 방식으로 호환합니다.
                 StartNewRound(isFromLoad: true, returnPreviousDiceToDiscard: false);
+                if (hasSavedTurnState)
+                {
+                    currentRerolls = Mathf.Max(0, data.savedCurrentRerolls);
+                    maxRerolls = Mathf.Max(0, data.savedMaxRerolls);
+                }
+                HandleDiceChanged();
             }
             // 사용 기록은 유지한 채, 아직 미사용인 낮은 체력 효과만 검사
             FigureEffectManager.Instance?.EvaluateLowHPTriggers(this, shopManager);
@@ -359,8 +366,100 @@ public class DiceManager : MonoBehaviour
         if (enemy == null || enemy.IsDead || isStageClearing) return;
         data.savedCurrentRerolls = currentRerolls;
         data.savedMaxRerolls = maxRerolls;
-        data.savedFakeDiceIndex = originalBossDice != null ? fakeDiceIndex : -1;
         board.CaptureForSave(data);
+    }
+
+    internal readonly List<DiceData1> currentCombatDebuffs = new List<DiceData1>();
+
+    private void AddNodeDebuffs()
+    {
+        MapNode node = stageProgression.FindNode(stageProgression.currentNodeId);
+        if (node == null) return;
+        switch (node.type)
+        {
+            case MapNodeType.Elite:
+                for (int i = 0; i < 3; i++)
+                    AddCombatDebuff(UnityEngine.Random.Range(0, 2) == 0 ? DebuffDiceType.Thief : DebuffDiceType.Shackle);
+                break;
+            case MapNodeType.Portal:
+                AddCombatDebuff(UnityEngine.Random.Range(0, 2) == 0 ? DebuffDiceType.Spine : DebuffDiceType.Curse);
+                break;
+            case MapNodeType.Boss:
+                AddCombatDebuff(DebuffDiceType.Fake);
+                break;
+        }
+    }
+
+    private void AddCombatDebuff(DebuffDiceType type)
+    {
+        DiceItemSO source = FindDebuffSource(type);
+        DiceData1 die = deckManager.AddDebuffDice(type, source);
+        if (source == null) ApplyDebuffAppearance(die);
+        currentCombatDebuffs.Add(die);
+    }
+
+    private DiceItemSO FindDebuffSource(DebuffDiceType type)
+    {
+        var database = GameSaveManager.Instance != null ? GameSaveManager.Instance.masterItemDatabase : null;
+        return database != null ? database.Find(item => item is DiceItemSO dice && dice.debuffType == type) as DiceItemSO : null;
+    }
+
+    // 기존 아이템 DB의 눈별 에셋에서 외형을 모은다. 디버프 종류와 눈 값은 덱 생성 규칙을 유지한다.
+    internal void ApplyDebuffAppearance(DiceData1 die)
+    {
+        DiceItemSO sourceAsset = FindDebuffSource(die.debuffType);
+        if (sourceAsset != null)
+        {
+            die.customDiceShell = sourceAsset.customDiceShell;
+            die.customFaceSprites = sourceAsset.customFaceSprites != null ? (Sprite[])sourceAsset.customFaceSprites.Clone() : null;
+            return;
+        }
+        if (die.debuffType == DebuffDiceType.Fake)
+        {
+            die.customDiceShell = fakeDiceShell;
+            die.customFaceSprites = new Sprite[] { fakeDiceFace, fakeDiceFace, fakeDiceFace, fakeDiceFace, fakeDiceFace, fakeDiceFace };
+            return;
+        }
+        string assetName;
+        switch (die.debuffType)
+        {
+            case DebuffDiceType.Thief: assetName = "Thief Dice"; break;
+            case DebuffDiceType.Shackle: assetName = "Captive Dice"; break;
+            case DebuffDiceType.Spine: assetName = "Spine_Dice_"; break;
+            case DebuffDiceType.Curse: assetName = "Cursed Dice_"; break;
+            default: return;
+        }
+        bool numbered = die.debuffType == DebuffDiceType.Spine || die.debuffType == DebuffDiceType.Curse;
+        var sprites = new Sprite[6];
+        for (int i = 0; i < 6; i++)
+        {
+            string sourceName = assetName + (numbered ? (i + 1).ToString() : "");
+            DiceItemSO source = GameSaveManager.Instance != null
+                ? GameSaveManager.Instance.masterItemDatabase.Find(item => item is DiceItemSO && item.name == sourceName) as DiceItemSO
+                : null;
+            if (source == null) continue;
+            if (i == 0) die.customDiceShell = source.customDiceShell;
+            sprites[i] = source.customFaceSprites != null && source.customFaceSprites.Length > 0
+                ? source.customFaceSprites[0] : null;
+        }
+        die.customFaceSprites = sprites;
+    }
+
+    public void RemoveCombatDebuffs(bool temporaryOnly = false, bool currentEnemyOnly = false)
+    {
+        System.Predicate<DiceData1> match = die => die != null && die.IsDebuff
+            && (!temporaryOnly || die.IsTemporaryDebuff)
+            && (!currentEnemyOnly || currentCombatDebuffs.Contains(die));
+        board?.RemoveDiceMatching(match);
+        if (currentEnemyOnly)
+        {
+            deckManager.masterDeck.RemoveAll(match);
+            deckManager.drawPile.RemoveAll(match);
+            deckManager.discardPile.RemoveAll(match);
+        }
+        else if (temporaryOnly) deckManager.RemoveTemporaryDebuffDice();
+        else deckManager.RemoveAllDebuffDice();
+        currentCombatDebuffs.RemoveAll(match);
     }
 
     public void StartNewStage()
@@ -377,8 +476,8 @@ public class DiceManager : MonoBehaviour
         ui?.UpdateShieldUI(playerStatus.currentShield);
         ui?.UpdateFlameStackUI(stageContext.accumulatedFlameDamage);
 
-        // 기존에 가짜 주사위 기믹이 남아있다면 원상복구
-        deckManager.RestoreFakeDice(ref originalBossDice, ref fakeDiceIndex);
+        RemoveCombatDebuffs(temporaryOnly: true);
+        currentCombatDebuffs.Clear();
 
         //(숙원의 방랑자 패널티 적용)
         if (isNextCombatHPTiedToOne)
@@ -404,10 +503,7 @@ public class DiceManager : MonoBehaviour
         if (currentBiome != null) enemy.Initialize(currentStage, currentBiome);
         else enemy.Initialize(currentStage, null);
 
-        if (enemy.CurrentBossAbility == BossAbilityType.FakeDice)
-        {
-            deckManager.ApplyFakeDice(fakeDiceShell, fakeDiceFace, ref originalBossDice, ref fakeDiceIndex);
-        }
+        AddNodeDebuffs();
 
         // 몬스터 생성 완료 직후 로직
         if (FigureEffectManager.Instance != null)
@@ -432,7 +528,7 @@ public class DiceManager : MonoBehaviour
             turnContext.ResetForNewTurn(); // 로드해서 들어올 때는 증발하지 않도록 스킵
         }
 
-        board.SpawnDice(returnPreviousDiceToDiscard, currentStage);
+        board.SpawnDice(returnPreviousDiceToDiscard, currentStage, applyDrawEffects: !isFromLoad);
         HandleDiceChanged();
 
         //주사위 세팅이 끝나고 새로운 라운드(턴)가 본격적으로 시작되는 시점
@@ -441,6 +537,20 @@ public class DiceManager : MonoBehaviour
         {
             FigureEffectManager.Instance.EvaluateRoundStartTriggers(this, shopManager);
         }
+    }
+
+    public int RemainingRerolls => Mathf.Max(0, maxRerolls + snackBonusRerolls + figureBonusRerolls - turnContext.debuffRerollPenalty - currentRerolls);
+
+    private void ApplyDrawDebuff(DiceData1 die)
+    {
+        if (die == null || !die.TriggersDebuffOnDraw) return;
+        if (die.debuffType == DebuffDiceType.Thief && shopManager != null)
+        {
+            shopManager.currentGold = Mathf.Max(0, shopManager.currentGold - 100);
+            shopManager.SyncGoldDisplay();
+        }
+        else if (die.debuffType == DebuffDiceType.Shackle)
+            turnContext.debuffRerollPenalty++;
     }
 
     public void ForceUpdateUI() => HandleDiceChanged();
@@ -462,7 +572,7 @@ public class DiceManager : MonoBehaviour
     public void OnRollButtonClick()
     {
         // 결산 중(isCalculating)일 때 리롤 진입 완벽 차단 방어막 추가
-        if (isRolling || isCalculating || currentRerolls >= (maxRerolls + snackBonusRerolls + figureBonusRerolls) || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return;
+        if (isRolling || isCalculating || RemainingRerolls <= 0 || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return;
 
         GameSaveManager.Instance?.SaveGame(this, InventoryManager.Instance, shopManager); // 강제 종료 시에도 굴리기 전 정상 상태 유지
         isRolling = true; // 굴림 상태 켜기
@@ -618,7 +728,7 @@ public class DiceManager : MonoBehaviour
         }
 
         // 완벽하게 쪼개진 수치들을 전투 지휘관(CombatFlowController)에게 전달
-        yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, total.damage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName, calcResult.selfDamage, coinDice
+        yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, total.damage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName, calcResult.selfDamage, coinDice, calcResult.debuffSelfDamage
         ));
         ui?.ClearMergedHandDamageText();
     }
@@ -695,8 +805,8 @@ public class DiceManager : MonoBehaviour
         if (isStageClearing) return; //이미 클리어 처리 중이면 중복 실행 방지
         isStageClearing = true;
 
-        // 보스를 잡자마자 가장 먼저 가짜 주사위 원상 복구 (상점/이벤트 가기 전 덱 정상화)
-        deckManager.RestoreFakeDice(ref originalBossDice, ref fakeDiceIndex);
+        RemoveCombatDebuffs(temporaryOnly: true);
+        currentCombatDebuffs.Clear();
 
         // 공허 바이옴에서 보스를 잡았다면 최종 게임 클리어 처리
         if (currentBiome != null && currentBiome.biomeType == BiomeType.Void)
@@ -818,7 +928,7 @@ public class DiceManager : MonoBehaviour
         UpdateMainUI("");
         bool canAct = !isRolling && !isCalculating && currentPlayerHP > 0 && enemy != null && !enemy.IsDead && !isStageClearing;
 
-        ui?.SetRollButtonInteractable(canAct && currentRerolls < maxRerolls + snackBonusRerolls + figureBonusRerolls && hasDiceToRoll);
+        ui?.SetRollButtonInteractable(canAct && RemainingRerolls > 0 && hasDiceToRoll);
 
         ui?.SetFinishButtonInteractable(canAct && keptCount == 5);
 
@@ -966,8 +1076,7 @@ public class DiceManager : MonoBehaviour
     {
         permanentFigureMultiplier = 0f;
         //재시작시 가짜 주사위 참조 안전하게 비우기
-        originalBossDice = null;
-        fakeDiceIndex = -1;
+        currentCombatDebuffs.Clear();
 
         // 낡은 변수 대신 우리가 만든 상태 초기화 함수를 씀
         playerStatus.ResetStatus(100);
@@ -1014,6 +1123,8 @@ public class DiceManager : MonoBehaviour
 
     public IEnumerator ShowGameOverPanelDelayed()
     {
+        RemoveCombatDebuffs(temporaryOnly: true);
+        currentCombatDebuffs.Clear();
         yield return new WaitForSeconds(1.2f); // "게임 오버"
 
         if (gameOverPanel != null)

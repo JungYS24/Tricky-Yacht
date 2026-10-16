@@ -6,7 +6,7 @@ public static class CombatFlowController
 {
     // 메인 턴 결산 흐름 
     // coinDice: 면 효과가 Coin이라 골드를 준 주사위들(코인 날아가기 연출용). 없으면 골드 숫자를 바로 갱신한다.
-    public static IEnumerator ProcessTurnResolution(DiceManager dm, int finalDamage, int darkDamage, int finalHeal, int expectedGold, int flameDamage, string handName, int selfDamage = 0, List<Dice> coinDice = null)
+    public static IEnumerator ProcessTurnResolution(DiceManager dm, int finalDamage, int darkDamage, int finalHeal, int expectedGold, int flameDamage, string handName, int selfDamage = 0, List<Dice> coinDice = null, int debuffSelfDamage = 0)
     {
         //플레이어 회복
         if (finalHeal > 0)
@@ -28,6 +28,13 @@ public static class CombatFlowController
         {
             dm.accumulatedFlameDamage += flameDamage;
             dm.ui?.UpdateFlameStackUI(dm.accumulatedFlameDamage);
+        }
+
+        // 가시 디버프는 결산 시 체력에 직접 적용한다. 여정 가시의 처치 시 생존 보정과 분리한다.
+        if (ApplyThornDamage(dm, debuffSelfDamage, false))
+        {
+            yield return dm.StartCoroutine(HandlePlayerDeath(dm));
+            yield break;
         }
 
         // 반복 공격 기능은 사용하지 않음
