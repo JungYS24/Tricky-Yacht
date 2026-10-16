@@ -219,6 +219,8 @@ public class GameSaveManager : MonoBehaviour
     public void SaveGame(DiceManager dice, InventoryManager inv, ShopManager shop)
     {
         if (dice == null || inv == null || dice.currentPlayerHP <= 0) return;
+        // 초기화/복원이 끝나기 전이나 복원이 실패한 상태로 정상 세이브를 덮어쓰지 않는다.
+        if (!dice.CanSaveProgress) return;
         // 굴리기/정산 중에는 직전 정상 세이브를 보존하고 안정된 시점에 다시 저장합니다.
         if (!dice.IsSaveStateStable) { savePending = true; return; }
         savePending = false;
@@ -371,7 +373,8 @@ public class GameSaveManager : MonoBehaviour
 
     public BaseItemDataSO FindItemByName(string name)
     {
-        return masterItemDatabase.FirstOrDefault(x => x.itemName == name);
+        if (string.IsNullOrEmpty(name) || masterItemDatabase == null) return null;
+        return masterItemDatabase.FirstOrDefault(x => x != null && x.itemName == name);
     }
 
     public void DeleteSave() { savePending = false; PlayerPrefs.DeleteKey("TrickYacht_Save"); }

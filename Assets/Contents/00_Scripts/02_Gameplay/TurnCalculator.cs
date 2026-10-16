@@ -9,7 +9,6 @@ public struct TurnCalcResult
     public int expectedHeal;
     public int flameDamageThisTurn;
     public int selfDamage; // 가시 면 등으로 플레이어가 받는 피해
-    public int debuffSelfDamage; // 가시 디버프: 눈 x 2, 처치 시 피해 면제 없음
     public float curseMultiplier;
 
     public int iceBonusChips;
@@ -142,6 +141,18 @@ public static class TurnCalculator
         return rank;
     }
 
+    // 가시 디버프 피해: 킵한 가시 주사위의 눈 x 2. 결산을 시작하자마자 회복보다 먼저 적용하며, 처치 시 피해 면제가 없다.
+    public static int CalculateSpineDamage(List<Dice> targetDice)
+    {
+        int damage = 0;
+        foreach (var d in targetDice)
+        {
+            if (d != null && d.myData != null && d.myData.debuffType == DebuffDiceType.Spine)
+                damage += Mathf.Max(0, d.currentValue) * 2;
+        }
+        return damage;
+    }
+
     // 결산 및 UI 갱신 시 주사위 개별 효과들을 한 번에 합산해주는 순수 연산 함수
     public static TurnCalcResult CalculateDiceEffects(List<Dice> targetDice, int currentEnemyHP, float healMultiplier, List<DiceScoreBonus> bonusSteps = null)
     {
@@ -153,9 +164,7 @@ public static class TurnCalculator
         foreach (var d in targetDice)
         {
             res.baseSum += d.currentValue;
-            if (d.myData.debuffType == DebuffDiceType.Spine)
-                res.debuffSelfDamage += d.currentValue * 2;
-            else if (d.myData.debuffType == DebuffDiceType.Curse)
+            if (d.myData.debuffType == DebuffDiceType.Curse)
                 res.curseMultiplier *= Mathf.Clamp01(1f - d.currentValue * 0.05f);
 
             // 주사위 전체 효과 대신 이번에 나온 면의 효과로 분기한다(면별 효과가 없으면 기존 효과와 같다).

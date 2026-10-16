@@ -6,7 +6,8 @@ public static class CombatFlowController
 {
     // 메인 턴 결산 흐름 
     // coinDice: 면 효과가 Coin이라 골드를 준 주사위들(코인 날아가기 연출용). 없으면 골드 숫자를 바로 갱신한다.
-    public static IEnumerator ProcessTurnResolution(DiceManager dm, int finalDamage, int darkDamage, int finalHeal, int expectedGold, int flameDamage, string handName, int selfDamage = 0, List<Dice> coinDice = null, int debuffSelfDamage = 0)
+    // 가시 디버프 피해는 여기가 아니라 결산 시작 때 ProcessDebuffThorn에서 먼저 적용한다.
+    public static IEnumerator ProcessTurnResolution(DiceManager dm, int finalDamage, int darkDamage, int finalHeal, int expectedGold, int flameDamage, string handName, int selfDamage = 0, List<Dice> coinDice = null)
     {
         //플레이어 회복
         if (finalHeal > 0)
@@ -28,13 +29,6 @@ public static class CombatFlowController
         {
             dm.accumulatedFlameDamage += flameDamage;
             dm.ui?.UpdateFlameStackUI(dm.accumulatedFlameDamage);
-        }
-
-        // 가시 디버프는 결산 시 체력에 직접 적용한다. 여정 가시의 처치 시 생존 보정과 분리한다.
-        if (ApplyThornDamage(dm, debuffSelfDamage, false))
-        {
-            yield return dm.StartCoroutine(HandlePlayerDeath(dm));
-            yield break;
         }
 
         // 반복 공격 기능은 사용하지 않음
@@ -139,6 +133,23 @@ public static class CombatFlowController
         CoinFlyFeedback.RefreshCounter(shop);
     }
 
+    // 가시 디버프: 킵한 주사위 눈이 뜬 직후, 회복·점수 계산보다 먼저 체력에 적용한다. 여정 가시의 처치 시 생존 보정과 분리한다.
+    // 파편이 체력 표시에 닿는 순간 피해가 들어가고, 체력이 0이 되면 사망 처리(부활 피규어 포함)까지 마친 뒤 onPlayerDown을 부른다.
+    public static IEnumerator ProcessDebuffThorn(DiceManager dm, List<Dice> spineDice, int damage, System.Action onPlayerDown)
+    {
+        if (damage <= 0) yield break;
+        Transform heart = dm.ui != null && dm.ui.heartText != null ? dm.ui.heartText.transform : null;
+        yield return DebuffFeedback.PlayThornBurst(spineDice, heart);
+        if (ApplyThornDamage(dm, damage, false))
+        {
+            onPlayerDown?.Invoke();
+            yield return dm.StartCoroutine(HandlePlayerDeath(dm));
+            yield break;
+        }
+        // 체력 감소를 읽을 시간을 두고 족보 연출로 넘어갑니다.
+        yield return new WaitForSeconds(DebuffFeedback.Scaled(0.3f));
+    }
+
     // 가시 피해를 플레이어 체력에 직접 적용한다(보호막은 거치지 않음). 피격 연출·피격음·저체력 피규어 검사까지 함께 처리한다.
     // enemyDefeated가 true면 체력은 1 아래로 내려가지 않는다. 체력이 0이 되어 사망 처리가 필요하면 true를 돌려준다.
     private static bool ApplyThornDamage(DiceManager dm, int selfDamage, bool enemyDefeated)
@@ -149,6 +160,8 @@ public static class CombatFlowController
         int newHp = Mathf.Max(0, hpBefore - selfDamage);
         if (enemyDefeated) newHp = Mathf.Min(hpBefore, Mathf.Max(1, newHp));
         dm.currentPlayerHP = newHp;
+        // 피격 연출은 체력 숫자를 고치지 않으므로, 피해가 들어가는 순간 체력 표시도 바로 갱신한다.
+        dm.ui?.UpdateShieldUI(dm.playerStatus.currentShield);
 
         int hpDamage = Mathf.Max(0, hpBefore - newHp);
         HurtVignetteController.Get(dm).PlayShieldOrHealthHit(dm.ui, 0, hpDamage, dm.playerStatus.currentShield);

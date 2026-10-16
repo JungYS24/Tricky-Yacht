@@ -205,12 +205,13 @@ public class DiceManager : MonoBehaviour
     private bool pendingPeppermintSuccess = false;
     private bool enemyDeathHandled = false;
     private bool isRolling = false; // 주사위 굴러가는중 
-    public bool IsDiceInputLocked => isRolling || isCalculating || currentPlayerHP <= 0 || enemy == null || enemy.IsDead || isStageClearing;
+    private bool isStartingCombat;
+    public bool IsDiceInputLocked => isStartingCombat || isRolling || isCalculating || currentPlayerHP <= 0 || enemy == null || enemy.IsDead || isStageClearing;
     public bool HasRollingDice => board != null && board.HasRollingDice;
     public bool CanReplaceUnkeptDiceFromDeck => board != null && board.CanReplaceUnkeptFromDeck;
     private bool isRestoringSave;
     private bool isResolvingTurn;
-    public bool IsSaveStateStable => !isRolling && !isRestoringSave && !isResolvingTurn && (!isCalculating || isStageClearing) && (board == null || !board.HasRollingDice);
+    public bool IsSaveStateStable => !isStartingCombat && !isRolling && !isRestoringSave && !isResolvingTurn && (!isCalculating || isStageClearing) && (board == null || !board.HasRollingDice);
     public bool isCalculating = false;  //끝내기 버튼                                
     public Dictionary<string, int> figureKillCounts = new Dictionary<string, int>();// 피규어 획득 후 처치 기록. 스테이지가 바뀌어도 유지
     public float permanentFigureMultiplier = 0f;
@@ -276,6 +277,9 @@ public class DiceManager : MonoBehaviour
         }
     }
 
+    private bool saveStateReady;
+    public bool CanSaveProgress => saveStateReady && !isRestoringSave;
+
     void Start()
     {
         // 세이브 파일이 있고, 로비에서 이어하기(1)를 눌렀다면 세이브를 불러옴
@@ -290,6 +294,7 @@ public class DiceManager : MonoBehaviour
 
             // 첫 시작은 무조건 숲(Forest)으로 고정
             currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
+            saveStateReady = true;
             if (UsesMapFlow)
                 BeginNewMapRun();
             else
@@ -303,10 +308,15 @@ public class DiceManager : MonoBehaviour
         }
     }
 
-    void OnDestroy() => Dice.OnDiceStateChanged -= HandleDiceChanged;
+    void OnDestroy()
+    {
+        Dice.OnDiceStateChanged -= HandleDiceChanged;
+        DebuffFeedback.EndIntro();
+    }
 
     void LoadSavedGame()
     {
+        saveStateReady = false;
         SaveData data = GameSaveManager.Instance.LoadSaveData();
         if (data == null) return;
         bool hasSavedTurnState = data.debuffSaveVersion >= 1 || data.boardSaveVersion == 1;
@@ -327,6 +337,7 @@ public class DiceManager : MonoBehaviour
                 if (data.mapSaveVersion >= 1 && !stageProgression.currentNodeCleared && stageProgression.currentNodeId >= 0)
                     OpenCurrentNode(stageProgression.FindNode(stageProgression.currentNodeId));
                 FigureEffectManager.Instance?.EvaluateLowHPTriggers(this, shopManager);
+                saveStateReady = true;
                 return;
             }
 
@@ -355,6 +366,7 @@ public class DiceManager : MonoBehaviour
             }
             // 사용 기록은 유지한 채, 아직 미사용인 낮은 체력 효과만 검사
             FigureEffectManager.Instance?.EvaluateLowHPTriggers(this, shopManager);
+            saveStateReady = true;
         }
         finally { isRestoringSave = false; }
     }
@@ -464,6 +476,9 @@ public class DiceManager : MonoBehaviour
 
     public void StartNewStage()
     {
+        if (isStartingCombat) return;
+        board.ClearBoard();
+        DiscardDrawTriggers();
         InventoryManager.Instance?.SnackUses.ResetForStage();
         isStageClearing = false;
         enemyDeathHandled = false;
@@ -511,9 +526,58 @@ public class DiceManager : MonoBehaviour
             FigureEffectManager.Instance.EvaluateCombatStartTriggers(this, shopManager);
         }
 
-        // 드로우 리스트 초기화 및 셔플
-        deckManager.PrepareDeckForNewStage();
-        StartNewRound(returnPreviousDiceToDiscard: false); FigureEffectManager.Instance?.EvaluateLowHPTriggers(this, shopManager);
+        // 소지 중인 영구 디버프가 아니라, 이번 전투에서 실제로 추가하는 주사위만 연출한다.
+        // 전투 시작 피규어가 무효화/제거한 주사위는 이 목록에서 이미 빠져 있다.
+        if (currentCombatDebuffs.Count > 0 && currentPlayerHP > 0 && !enemy.IsDead)
+        {
+            var incoming = new List<DiceData1>(currentCombatDebuffs);
+            foreach (var die in incoming) deckManager.masterDeck.Remove(die);
+            isStartingCombat = true;
+            HandleDiceChanged();
+            StartCoroutine(PlayCombatIntro(incoming));
+        }
+        else
+        {
+            deckManager.PrepareDeckForNewStage();
+            StartNewRound(returnPreviousDiceToDiscard: false);
+            FigureEffectManager.Instance?.EvaluateLowHPTriggers(this, shopManager);
+        }
+    }
+
+    private IEnumerator PlayCombatIntro(List<DiceData1> incoming)
+    {
+        CacheHud();
+        hudObjects.TryGetValue("Deck_BTN", out GameObject deckButton);
+        Transform target = deckButton != null ? deckButton.transform : null;
+        bool committed = false;
+        try
+        {
+            yield return DebuffFeedback.PlayArrival(enemy, incoming, target, rollSlotParent, NormalDiceFace());
+            deckManager.masterDeck.AddRange(incoming);
+            committed = true;
+            deckManager.PrepareDeckForNewStage();
+            StartNewRound(returnPreviousDiceToDiscard: false);
+            yield return DebuffFeedback.PlayFirstDraw(activeDiceList, target);
+            FigureEffectManager.Instance?.EvaluateLowHPTriggers(this, shopManager);
+        }
+        finally
+        {
+            // 연출 도중 중단돼도 지급 예정 주사위를 잃지 않는다.
+            if (!committed) deckManager.masterDeck.AddRange(incoming);
+            DebuffFeedback.EndIntro();
+            isStartingCombat = false;
+            HandleDiceChanged();
+        }
+        // 첫 손패가 제자리에 놓인 뒤 뽑을 때 발동한 디버프를 보여 준다.
+        FlushDrawTriggers();
+    }
+
+    // 보스 등장 연출에서 가짜 주사위로 바뀌기 전에 보여 줄 일반 주사위 눈(6).
+    Sprite NormalDiceFace()
+    {
+        Dice template = dicePrefab != null ? dicePrefab.GetComponent<Dice>() : null;
+        if (template == null || template.diceFaceSprites == null || template.diceFaceSprites.Length == 0) return null;
+        return template.diceFaceSprites[template.diceFaceSprites.Length - 1];
     }
 
     void StartNewRound(bool isFromLoad = false, bool returnPreviousDiceToDiscard = true)
@@ -530,6 +594,8 @@ public class DiceManager : MonoBehaviour
 
         board.SpawnDice(returnPreviousDiceToDiscard, currentStage, applyDrawEffects: !isFromLoad);
         HandleDiceChanged();
+        // 전투 시작 연출 중이면 첫 드로우 연출이 끝난 뒤 PlayCombatIntro가 보여 준다.
+        if (!isStartingCombat) StartCoroutine(FlushDrawTriggersAfter(0.15f));
 
         //주사위 세팅이 끝나고 새로운 라운드(턴)가 본격적으로 시작되는 시점
         // 이어하기는 새 라운드 발동 효과를 다시 지급하지 않음
@@ -541,23 +607,53 @@ public class DiceManager : MonoBehaviour
 
     public int RemainingRerolls => Mathf.Max(0, maxRerolls + snackBonusRerolls + figureBonusRerolls - turnContext.debuffRerollPenalty - currentRerolls);
 
+    // 뽑는 즉시 효과를 적용하고, 화면 연출은 주사위가 보드에 놓인 뒤 FlushDrawTriggers에서 보여 준다.
+    private readonly List<DebuffFeedback.DrawTrigger> pendingDrawTriggers = new List<DebuffFeedback.DrawTrigger>();
+
     private void ApplyDrawDebuff(DiceData1 die)
     {
         if (die == null || !die.TriggersDebuffOnDraw) return;
         if (die.debuffType == DebuffDiceType.Thief && shopManager != null)
         {
-            shopManager.currentGold = Mathf.Max(0, shopManager.currentGold - 100);
-            shopManager.SyncGoldDisplay();
+            int stolen = Mathf.Min(100, Mathf.Max(0, shopManager.currentGold));
+            shopManager.currentGold -= stolen;
+            // 화면 골드 숫자는 코인이 빠져나가는 연출에서 내린다.
+            pendingDrawTriggers.Add(new DebuffFeedback.DrawTrigger { data = die, stolenGold = stolen });
         }
         else if (die.debuffType == DebuffDiceType.Shackle)
+        {
             turnContext.debuffRerollPenalty++;
+            pendingDrawTriggers.Add(new DebuffFeedback.DrawTrigger { data = die });
+        }
+    }
+
+    private void FlushDrawTriggers()
+    {
+        if (pendingDrawTriggers.Count == 0) return;
+        var triggers = new List<DebuffFeedback.DrawTrigger>(pendingDrawTriggers);
+        pendingDrawTriggers.Clear();
+        DebuffFeedback.PlayDrawTriggers(triggers, activeDiceList, ui, shopManager);
+    }
+
+    private IEnumerator FlushDrawTriggersAfter(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        FlushDrawTriggers();
+    }
+
+    // 연출을 보여 주지 못하고 넘어가는 경우(새 전투·재시작) 화면 골드만 실제 값에 맞춘다.
+    private void DiscardDrawTriggers()
+    {
+        if (pendingDrawTriggers.Count == 0) return;
+        pendingDrawTriggers.Clear();
+        shopManager?.SyncGoldDisplay();
     }
 
     public void ForceUpdateUI() => HandleDiceChanged();
 
     public bool TryReplaceUnkeptDiceFromDeck()
     {
-        if (board == null || isRolling || isCalculating || currentPlayerHP <= 0 || enemy == null || enemy.IsDead || isStageClearing) return false;
+        if (board == null || IsDiceInputLocked) return false;
         if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return false;
         if (!board.ReplaceUnkeptDiceFromDeck()) return false;
 
@@ -566,13 +662,14 @@ public class DiceManager : MonoBehaviour
         ui?.SetFinishButtonInteractable(false);
         if (CameraShake.Instance != null) CameraShake.Instance.Shake(0.1f, 0.1f);
         StartCoroutine(HandleDiceChangedDelayed());
+        StartCoroutine(FlushDrawTriggersAfter(0.5f)); // 새로 뽑힌 주사위가 다 굴러간 뒤
         return true;
     }
 
     public void OnRollButtonClick()
     {
         // 결산 중(isCalculating)일 때 리롤 진입 완벽 차단 방어막 추가
-        if (isRolling || isCalculating || RemainingRerolls <= 0 || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return;
+        if (IsDiceInputLocked || RemainingRerolls <= 0 || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return;
 
         GameSaveManager.Instance?.SaveGame(this, InventoryManager.Instance, shopManager); // 강제 종료 시에도 굴리기 전 정상 상태 유지
         isRolling = true; // 굴림 상태 켜기
@@ -597,7 +694,7 @@ public class DiceManager : MonoBehaviour
 
     public void OnFinishButtonClick()
     {
-        if (isRolling || isCalculating || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || enemy == null || enemy.IsDead || currentPlayerHP <= 0 || isStageClearing) return;
+        if (IsDiceInputLocked || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return;
 
         // 버튼 상태와 별개로 직접 호출도 5개 킵 조건을 검증합니다.
         board.SyncKeepSlots(out int keptCount, out _);
@@ -656,7 +753,22 @@ public class DiceManager : MonoBehaviour
         currentHandRank = handRank;
         string handName = LocalizationManager.GetHandDisplayName(handRank);
 
-        yield return resolutionPresenter.PlayOpening(this, keptDice, handRank, handMult, resolutionTiming);
+        yield return resolutionPresenter.PlayDiceValues(keptDice, resolutionTiming);
+
+        // 가시 디버프는 눈이 뜬 직후 회복·점수 계산보다 먼저 찌른다. 체력이 0이 되면 남은 결산 없이 사망 처리로 끝낸다.
+        var spineDice = new List<Dice>();
+        foreach (var d in keptDice)
+            if (d != null && d.myData != null && d.myData.debuffType == DebuffDiceType.Spine && d.currentValue > 0) spineDice.Add(d);
+        bool downedByThorn = false;
+        yield return CombatFlowController.ProcessDebuffThorn(this, spineDice, TurnCalculator.CalculateSpineDamage(keptDice), () => downedByThorn = true);
+        if (downedByThorn)
+        {
+            if (snacks != null) yield return snacks.CompleteResolution();
+            ui?.ClearMergedHandDamageText();
+            yield break;
+        }
+
+        yield return resolutionPresenter.PlayHand(this, keptDice, handRank, handMult, resolutionTiming);
 
         // 피규어 계산에 필요한 기본 눈금 합만 먼저 구함
         int baseSumBeforeFigures = 0;
@@ -728,7 +840,7 @@ public class DiceManager : MonoBehaviour
         }
 
         // 완벽하게 쪼개진 수치들을 전투 지휘관(CombatFlowController)에게 전달
-        yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, total.damage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName, calcResult.selfDamage, coinDice, calcResult.debuffSelfDamage
+        yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, total.damage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName, calcResult.selfDamage, coinDice
         ));
         ui?.ClearMergedHandDamageText();
     }
@@ -805,8 +917,18 @@ public class DiceManager : MonoBehaviour
         if (isStageClearing) return; //이미 클리어 처리 중이면 중복 실행 방지
         isStageClearing = true;
 
+        // 이번 전투 한정 디버프(도둑·족쇄)를 제거하고, 덱 버튼에서 연기처럼 사라지는 모습을 보여 준다.
+        var vanishing = new List<Sprite>();
+        foreach (var die in deckManager.masterDeck)
+            if (die != null && die.IsTemporaryDebuff) vanishing.Add(DebuffFeedback.DieSprite(die));
         RemoveCombatDebuffs(temporaryOnly: true);
         currentCombatDebuffs.Clear();
+        if (vanishing.Count > 0)
+        {
+            CacheHud();
+            hudObjects.TryGetValue("Deck_BTN", out GameObject deckButton);
+            DebuffFeedback.PlayTemporaryVanish(deckButton != null ? deckButton.transform : null, vanishing);
+        }
 
         // 공허 바이옴에서 보스를 잡았다면 최종 게임 클리어 처리
         if (currentBiome != null && currentBiome.biomeType == BiomeType.Void)
@@ -926,7 +1048,7 @@ public class DiceManager : MonoBehaviour
 
         board.SyncKeepSlots(out int keptCount, out bool hasDiceToRoll);
         UpdateMainUI("");
-        bool canAct = !isRolling && !isCalculating && currentPlayerHP > 0 && enemy != null && !enemy.IsDead && !isStageClearing;
+        bool canAct = !IsDiceInputLocked;
 
         ui?.SetRollButtonInteractable(canAct && RemainingRerolls > 0 && hasDiceToRoll);
 
@@ -1062,6 +1184,7 @@ public class DiceManager : MonoBehaviour
 
     public void GoToMainMenu()
     {
+        if (isStartingCombat) return;
         if (GameSaveManager.Instance != null)
         {
             GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
@@ -1074,9 +1197,11 @@ public class DiceManager : MonoBehaviour
     //재시작
     public void RestartGame()
     {
+        if (isStartingCombat) return;
         permanentFigureMultiplier = 0f;
         //재시작시 가짜 주사위 참조 안전하게 비우기
         currentCombatDebuffs.Clear();
+        pendingDrawTriggers.Clear(); // 골드는 아래에서 초기값으로 다시 맞춘다
 
         // 낡은 변수 대신 우리가 만든 상태 초기화 함수를 씀
         playerStatus.ResetStatus(100);

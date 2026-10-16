@@ -92,6 +92,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         currentFaceIndex = faceIndex >= 0 ? faceIndex : myData.FindFaceIndex(initialValue);
         UpdateSprite(initialValue);
 
+        spriteRenderer.DOKill(); // 지난 결산의 가짜 주사위 흐림 연출이 남지 않도록 정리
         ApplyDiceColor();
 
         // 필드 대기 상태 애니메이션 추가
@@ -388,6 +389,14 @@ public class Dice : MonoBehaviour, IPointerDownHandler
     {
         // 최초 눈금과 강화 누적 숫자의 생성·정리는 같은 담당자가 처리합니다.
         DiceBonusLabel.Get(this).ShowBaseValue(bonusValue);
+    }
+
+    // 가짜 주사위가 결산에서 흐릿하게 꺼지는 연출. 다음 SetData에서 원래 색으로 돌아옵니다.
+    public void FadeAsFake()
+    {
+        if (spriteRenderer == null) return;
+        spriteRenderer.DOKill();
+        spriteRenderer.DOColor(new Color(0.5f, 0.5f, 0.55f, 0.45f), 0.35f).SetUpdate(true).SetLink(gameObject);
     }
 
 }

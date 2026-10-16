@@ -35,7 +35,7 @@ public class CharacterApply : MonoBehaviour
         if (apply)
         {
             CharacterStatus status = new(data.CharacterName, data.InitialHP, data.DedicateDiceData, data.DedicateFigureData);
-            SceneManager.LoadScene("MainScene");
+            SceneManager.LoadScene("MainScene_Map");
         }
         else
         {

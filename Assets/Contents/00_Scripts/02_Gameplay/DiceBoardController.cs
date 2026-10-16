@@ -90,7 +90,7 @@ public sealed class DiceBoardController
         }
     }
 
-    public void SpawnDice(bool returnPreviousDiceToDiscard, int currentStage, bool applyDrawEffects = true)
+    public void ClearBoard(bool returnPreviousDiceToDiscard = false)
     {
         //기존 활성화된 주사위들을 파괴하지 않고 비활성화하여 풀(Pool)에 보관
         foreach (var d in ActiveDice)
@@ -111,6 +111,11 @@ public sealed class DiceBoardController
         }
         ActiveDice.Clear();
         Array.Clear(keepSlotOccupants, 0, keepSlotOccupants.Length);
+    }
+
+    public void SpawnDice(bool returnPreviousDiceToDiscard, int currentStage, bool applyDrawEffects = true)
+    {
+        ClearBoard(returnPreviousDiceToDiscard);
 
         // 덱 리필 검사 로직 한 줄로 압축! (DeckManager에게 위임)
         deckManager.CheckAndRefillDrawPile(5);

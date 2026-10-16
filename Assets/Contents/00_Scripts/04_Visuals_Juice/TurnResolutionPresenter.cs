@@ -66,24 +66,29 @@ public sealed class TurnResolutionPresenter
     private readonly int[] scoreHandGroups = new int[5];
     private readonly int[] scoreHandOrder = new int[5];
 
-    public IEnumerator PlayOpening(DiceManager manager, List<Dice> keptDice, HandRank rank, float handMult, TurnResolutionTiming timing)
+    // 정산 시작: 킵한 주사위 눈을 띄웁니다. 이 직후 가시 디버프가 먼저 발동하고, 그다음 PlayHand로 족보 연출을 이어갑니다.
+    public IEnumerator PlayDiceValues(List<Dice> keptDice, TurnResolutionTiming timing)
     {
         timing.pacing = timing.pacing ?? new ScorePacing();
         timing.pacing.UpgradeImpactDefaults();
         // 매 정산마다 주사위별 누적값을 초기화합니다. 표시 오브젝트는 재사용합니다.
         foreach (var die in keptDice)
             if (die != null) die.GetComponent<DiceBonusLabel>()?.ResetTotals();
-        // 달성한 족보의 이펙트 재생
         foreach (var d in keptDice)
         {
             if (d == null || d.myData == null) continue;
 
+            // 가짜 주사위는 흐릿하게 꺼지며 0으로 보입니다.
+            if (d.myData.debuffType == DebuffDiceType.Fake) DebuffFeedback.PlayFakeFade(d);
             d.ShowFloatingText(d.currentValue);
         }
 
-        // 숫자 표시 시작 후 설정된 간격을 두고 족보 연출 시작
+        // 숫자 표시 시작 후 설정된 간격을 두고 다음 연출 시작
         yield return new WaitForSeconds(timing.pacing.beforeHandDelay);
+    }
 
+    public IEnumerator PlayHand(DiceManager manager, List<Dice> keptDice, HandRank rank, float handMult, TurnResolutionTiming timing)
+    {
         // 달성한 족보의 이펙트 재생
         yield return HandResolutionFeedback.Get(manager).Play(keptDice, rank, manager.ui);
 
@@ -110,7 +115,8 @@ public sealed class TurnResolutionPresenter
         float pendingPause = 0f;
 
         // 칩과 배수의 보너스를 항목별로 표시
-        IEnumerator AnimateBonus(bool isChips, float amount, string label, Dice source = null, bool reactHand = false, SnackUseEntry snack = null)
+        // factorText가 있으면 더하는 값 대신 곱하는 비율(저주 ×0.85 등)로 표시합니다.
+        IEnumerator AnimateBonus(bool isChips, float amount, string label, Dice source = null, bool reactHand = false, SnackUseEntry snack = null, string factorText = null)
         {
             if (Mathf.Approximately(amount, 0f))
             {
@@ -153,7 +159,9 @@ public sealed class TurnResolutionPresenter
             else if (source != null)
             {
                 source.PlayScoreFeedback(duration);
-                DiceBonusLabel.Get(source).Add(isChips, amount, duration, ui.handInfoText != null ? ui.handInfoText.font : null);
+                var labelFont = ui.handInfoText != null ? ui.handInfoText.font : null;
+                if (factorText != null) DiceBonusLabel.Get(source).ShowFactor(factorText, DebuffFeedback.CurseColor, duration, labelFont);
+                else DiceBonusLabel.Get(source).Add(isChips, amount, duration, labelFont);
             }
 
 
@@ -165,7 +173,7 @@ public sealed class TurnResolutionPresenter
 
             if (logText != null)
             {
-                string amountText = isChips ? amount.ToString("+0;-0;0") : amount.ToString("+0.0;-0.0;0.0");
+                string amountText = factorText ?? (isChips ? amount.ToString("+0;-0;0") : amount.ToString("+0.0;-0.0;0.0"));
 
                 logText.text = string.IsNullOrEmpty(label) ? "" : $"{label} ({amountText})";
             }
@@ -266,7 +274,8 @@ public sealed class TurnResolutionPresenter
             {
                 if (die == null || die.myData == null || die.myData.debuffType != DebuffDiceType.Curse) continue;
                 float factor = Mathf.Clamp01(1f - die.currentValue * 0.05f);
-                yield return AnimateBonus(false, shownMult * (factor - 1f), die.myData.diceName, die);
+                DebuffFeedback.PlayCurse(die, ui.multSumText != null ? ui.multSumText.transform : null);
+                yield return AnimateBonus(false, shownMult * (factor - 1f), die.myData.diceName, die, factorText: $"×{factor:0.##}");
             }
 
             // 표시의 최종값을 실제 계산 결과에 맞춤
