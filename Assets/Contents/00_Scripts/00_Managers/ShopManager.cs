@@ -61,7 +61,6 @@ public class ShopManager : MonoBehaviour
     public RuntimeAnimatorController ronanAnimator;
     public RuntimeAnimatorController opelAnimator;
     bool mapMerchantActive;
-    TextMeshProUGUI merchantNameText;
     ShopStockTable stockTable;
     bool stockTableLogged;
     readonly Dictionary<BaseItemDataSO, int> listedPrices = new Dictionary<BaseItemDataSO, int>();
@@ -112,12 +111,7 @@ public class ShopManager : MonoBehaviour
         mapMerchantActive = fromMap;
         IsShopOpen = true;
         RevealShop();
-        EnsureMerchantLabel();
-        if (merchantNameText != null)
-        {
-            merchantNameText.gameObject.SetActive(fromMap);
-            if (fromMap) merchantNameText.text = MerchantName(currentMerchant);
-        }
+        RemoveLegacyMerchantLabel();
 
         if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
         if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
@@ -163,40 +157,12 @@ public class ShopManager : MonoBehaviour
         shopUI.transform.SetAsLastSibling();
     }
 
-    void EnsureMerchantLabel()
+    // 상점 제목에 상인 이름이 나오므로 예전에 만들어져 씬에 저장된 하단 MerchantName 라벨은 지운다.
+    void RemoveLegacyMerchantLabel()
     {
         if (shopUI == null) return;
-        Transform found = shopUI.transform.Find("MerchantName");
-        if (found == null)
-        {
-            var go = new GameObject("MerchantName", typeof(RectTransform));
-            go.transform.SetParent(shopUI.transform, false);
-            var rect = go.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 1f);
-            rect.anchorMax = new Vector2(0.5f, 1f);
-            rect.pivot = new Vector2(0.5f, 1f);
-            rect.anchoredPosition = new Vector2(0f, -12f);
-            rect.sizeDelta = new Vector2(640f, 72f);
-            merchantNameText = go.AddComponent<TextMeshProUGUI>();
-            merchantNameText.fontSize = 40;
-            merchantNameText.alignment = TextAlignmentOptions.Center;
-            merchantNameText.color = Color.white;
-            if (rerollCostText != null) merchantNameText.font = rerollCostText.font;
-        }
-        else
-        {
-            merchantNameText = found.GetComponent<TextMeshProUGUI>();
-        }
-    }
-
-    static string MerchantName(MapMerchant merchant)
-    {
-        switch (merchant)
-        {
-            case MapMerchant.Nyaon: return "냐온 딜레마";
-            case MapMerchant.Ronan: return "로난";
-            default: return "오펠";
-        }
+        Transform legacy = shopUI.transform.Find("MerchantName");
+        if (legacy != null) Destroy(legacy.gameObject);
     }
 
     TextMeshProUGUI shopTitleText;
