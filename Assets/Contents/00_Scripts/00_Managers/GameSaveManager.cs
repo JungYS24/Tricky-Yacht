@@ -8,6 +8,8 @@ public class SavedDiceData
     public string diceName;
     public int[] faceValues; // 강화/고정 눈금도 저장 당시 그대로 복원
     public int specialEffect;
+    public int debuffType;
+    public bool isCurrentCombatDebuff;
     public int[] faceEffects;       // 면별 효과(SpecialDieEffect의 int 값). 없으면 null
     public bool isJourneyDice;      // 덱에 항상 유지되는 여정 주사위 여부
     public bool isCoated;
@@ -36,6 +38,37 @@ public sealed class SavedBoardDie
 
 public class SaveData
 {
+    // 1부터 디버프를 덱 인스턴스로 저장한다. 0은 교체형 가짜 주사위 저장과의 호환용.
+    public int debuffSaveVersion;
+    public bool isEnemySkillNullified;
+
+    public void MigrateLegacyDebuffs(bool resumeCombat)
+    {
+        if (debuffSaveVersion >= 1) return;
+        // 3~4단계에서 작성된 버전 없는 새 형식 저장은 이미 디버프를 포함하고 있다.
+        bool hasDebuffs = deckDiceList != null && deckDiceList.Exists(d => d != null && d.debuffType != 0);
+        if (resumeCombat && !hasDebuffs && deckDiceList != null
+            && savedFakeDiceIndex >= 0 && savedFakeDiceIndex < deckDiceList.Count)
+        {
+            SavedDiceData original = deckDiceList[savedFakeDiceIndex];
+            if (original != null && !original.isJourneyDice)
+            {
+                int originalIndex = deckDiceList.Count;
+                deckDiceList.Add(original);
+                // 기존 보드/더미 인덱스는 가짜 주사위를 계속 가리키고 원본만 덱 끝에 복구한다.
+                deckDiceList[savedFakeDiceIndex] = new SavedDiceData
+                {
+                    diceName = "가짜 주사위", faceValues = new int[6],
+                    debuffType = (int)DebuffDiceType.Fake, isCurrentCombatDebuff = true,
+                    multiplier = 1f, diceColor = Color.white
+                };
+                if (boardSaveVersion == 1 && drawPileIndices != null) drawPileIndices.Add(originalIndex);
+            }
+        }
+        savedFakeDiceIndex = -1;
+        debuffSaveVersion = 1;
+    }
+
     // 0은 구버전 세이브. 1은 보드와 덱 순서를 그대로 복원합니다.
     public int boardSaveVersion;
     public List<SavedBoardDie> boardDice = new List<SavedBoardDie>();
@@ -43,6 +76,7 @@ public class SaveData
     public List<int> discardPileIndices = new List<int>();
     public int savedCurrentRerolls;
     public int savedMaxRerolls;
+    public int debuffRerollPenalty;
     public int savedFakeDiceIndex = -1;
 
     public int currentStage;
@@ -189,6 +223,8 @@ public class GameSaveManager : MonoBehaviour
         if (!dice.IsSaveStateStable) { savePending = true; return; }
         savePending = false;
         SaveData data = new SaveData();
+        data.debuffSaveVersion = 1;
+        data.isEnemySkillNullified = dice.isEnemySkillNullified;
 
         data.permanentFigureMultiplier =
     dice.permanentFigureMultiplier;
@@ -214,6 +250,7 @@ public class GameSaveManager : MonoBehaviour
         data.snackBonusRerolls = dice.snackBonusRerolls;
         data.snackBonusFigureDropRate = dice.snackBonusFigureDropRate;
         data.figureBonusRerolls = dice.figureBonusRerolls;
+        data.debuffRerollPenalty = dice.turnContext.debuffRerollPenalty;
         data.isPeppermintActive = dice.isPeppermintActive;
 
         if (dice.currentBiome != null)
@@ -266,16 +303,11 @@ public class GameSaveManager : MonoBehaviour
         {
             DiceData1 targetToSave = d;
 
-            //가짜 주사위라면 원본 주사위를 대신 저장시킴!
-            if (d.diceName == "가짜 주사위" && dice.originalBossDice != null)
-            {
-                targetToSave = dice.originalBossDice;
-            }
-
-
             SavedDiceData sdd = new SavedDiceData();
+            sdd.debuffType = (int)targetToSave.debuffType;
+            sdd.isCurrentCombatDebuff = dice.currentCombatDebuffs.Contains(d);
             sdd.diceName = targetToSave.diceName;
-            sdd.faceValues = targetToSave.faceValues;
+            sdd.faceValues = targetToSave.faceValues != null ? (int[])targetToSave.faceValues.Clone() : null;
             sdd.specialEffect = (int)targetToSave.specialEffect;
             sdd.isJourneyDice = targetToSave.isJourneyDice;
             if (targetToSave.faceEffects != null && targetToSave.faceEffects.Length > 0)

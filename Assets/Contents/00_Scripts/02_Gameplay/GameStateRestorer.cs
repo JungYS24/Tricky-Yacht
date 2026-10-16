@@ -8,6 +8,8 @@ public static class GameStateRestorer
     // 비공개 포획 대기 플래그는 참조로 받아 기존 복원 순서에서 초기화합니다.
     public static void Restore(DiceManager dm, SaveData data, int defaultMaxRerolls, ref bool pendingPeppermintSuccess, bool skipCombatBootstrap = false)
     {
+        data.MigrateLegacyDebuffs(!skipCombatBootstrap && !string.IsNullOrEmpty(data.savedMonsterName));
+        dm.isEnemySkillNullified = !skipCombatBootstrap && data.isEnemySkillNullified;
         dm.stageContext.firstNormalAttackDone = data.firstNormalAttackDone;
 
         dm.stageContext.usedFigureNodes.Clear();
@@ -50,6 +52,7 @@ public static class GameStateRestorer
 
         // 덱 복구 (코팅 정보 복원 포함)
         dm.masterDeck.Clear();
+        dm.currentCombatDebuffs.Clear();
         foreach (var dData in data.deckDiceList)
         {
             DiceData1 newDice = null;
@@ -64,8 +67,8 @@ public static class GameStateRestorer
                 DiceItemSO diceSO = GameSaveManager.Instance.FindItemByName(dData.diceName) as DiceItemSO;
                 if (diceSO != null)
                 {
-                    diceSO.ApplyItemEffect(dm);
-                    newDice = dm.masterDeck[dm.masterDeck.Count - 1]; // 방금 추가된 주사위를 가져옴
+                    newDice = diceSO.CreateDiceData();
+                    dm.masterDeck.Add(newDice);
                 }
             }
 
@@ -78,13 +81,17 @@ public static class GameStateRestorer
             }
             if (newDice != null && dData.faceValues != null && dData.faceValues.Length == 6)
             {
-                newDice.faceValues = dData.faceValues;
+                newDice.faceValues = (int[])dData.faceValues.Clone();
                 newDice.specialEffect = (SpecialDieEffect)dData.specialEffect;
             }
 
             // 면별 효과와 여정 주사위 표시를 복원합니다. 구버전 저장에는 없으므로 에셋 값을 그대로 둡니다.
             if (newDice != null)
             {
+                newDice.debuffType = System.Enum.IsDefined(typeof(DebuffDiceType), dData.debuffType)
+                    ? (DebuffDiceType)dData.debuffType : DebuffDiceType.None;
+                if (newDice.IsDebuff) dm.ApplyDebuffAppearance(newDice);
+                if (newDice.IsDebuff && dData.isCurrentCombatDebuff) dm.currentCombatDebuffs.Add(newDice);
                 if (dData.isJourneyDice) newDice.isJourneyDice = true;
                 if (dData.faceEffects != null && dData.faceEffects.Length == 6)
                 {
@@ -117,6 +124,14 @@ public static class GameStateRestorer
 
         // 여정 주사위가 없는 구버전 저장은 기본 주사위 1개를 여정 주사위로 바꿔 보정합니다. 덱 개수와 순서는 그대로입니다.
         dm.deckManager.EnsureJourneyDice(JourneyDice.FindSource());
+
+        if (skipCombatBootstrap)
+        {
+            // 지도에서 이어갈 때는 전투 한정 디버프가 남지 않아야 한다.
+            dm.deckManager.RemoveTemporaryDebuffDice();
+            dm.currentCombatDebuffs.Clear();
+            data.boardSaveVersion = 0;
+        }
 
         InventoryManager.Instance.ClearAllSlots();
 
@@ -162,6 +177,7 @@ public static class GameStateRestorer
         dm.snackBonusRerolls = data.snackBonusRerolls;
         dm.snackBonusFigureDropRate = data.snackBonusFigureDropRate;
         dm.figureBonusRerolls = data.figureBonusRerolls;
+        dm.turnContext.debuffRerollPenalty = skipCombatBootstrap ? 0 : Mathf.Max(0, data.debuffRerollPenalty);
         dm.isPeppermintActive = data.isPeppermintActive;
 
         if (dm.biomeList.Count > 0)
@@ -202,17 +218,12 @@ public static class GameStateRestorer
             dm.ui?.UpdateFlameStackUI(0);
         }
 
-        bool restoreBoard = data.boardSaveVersion == 1 && data.deckDiceList.Count == dm.masterDeck.Count && dm.CanRestoreBoard(data);
+        bool restoreBoard = !skipCombatBootstrap && data.boardSaveVersion == 1 && data.deckDiceList.Count == dm.masterDeck.Count && dm.CanRestoreBoard(data);
         if (data.boardSaveVersion != 0 && !restoreBoard)
             Debug.LogWarning("[이어하기] 보드 기록이 유효하지 않아 기존 라운드 복원 방식으로 진행합니다.");
         if (!restoreBoard) data.boardSaveVersion = 0;
 
-        //세이브 로드 시에도 적 능력을 체크. 새 저장은 가짜 주사위 위치를 다시 추첨하지 않습니다.
-        if (dm.enemy.CurrentBossAbility == BossAbilityType.FakeDice)
-        {
-            if (!restoreBoard || data.savedFakeDiceIndex >= 0)
-                dm.deckManager.ApplyFakeDice(dm.fakeDiceShell, dm.fakeDiceFace, ref dm.originalBossDice, ref dm.fakeDiceIndex, restoreBoard ? data.savedFakeDiceIndex : -1);
-        }
+        // 디버프는 저장된 덱에서 복원한다. 이어하기에서 다시 지급하거나 기존 주사위를 교체하지 않는다.
 
         if (restoreBoard)
         {
