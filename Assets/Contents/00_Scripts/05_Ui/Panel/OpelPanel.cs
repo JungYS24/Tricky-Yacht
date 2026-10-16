@@ -44,9 +44,8 @@ public class OpelPanel : MonoBehaviour
 
     void RefreshTexts()
     {
-        MapTableData table = diceManager != null ? diceManager.GetMapTable() : null;
         if (titleText != null)
-            titleText.text = table != null ? table.GetNodeName(MapNodeType.Opel) : "오펠";
+            titleText.text = "오펠";
         SetButtonLabel(jupiterButton, SatelliteType.Jupiter, "목성");
         SetButtonLabel(marsButton, SatelliteType.Mars, "화성");
         SetButtonLabel(mercuryButton, SatelliteType.Mercury, "수성");

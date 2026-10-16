@@ -126,6 +126,12 @@ public class DiceManager : MonoBehaviour
     public OpelPanel opelPanel;
     public MapIconSet mapIconSet;
 
+    // 다음 전투에 강제할 몬스터. Enemy.Initialize가 쓰면 비웁니다.
+    [System.NonSerialized] public MonsterDataSO pendingForcedMonster;
+    // TODO: 엘리트 몬스터 풀
+    [System.NonSerialized] public bool isEliteBattle;
+    [System.NonSerialized] public bool mapBossBattle;
+
     MapTableData cachedMapTable;
     bool pendingBiomeTransition;
 
@@ -1038,14 +1044,24 @@ public class DiceManager : MonoBehaviour
         return length;
     }
 
+    public bool CanRollJourney()
+    {
+        if (!UsesMapFlow) return false;
+        if (stageProgression.pendingJourneyMove > 0) return false;
+        if (stageProgression.currentNodeId >= 0 && !stageProgression.currentNodeCleared) return false;
+        return true;
+    }
+
     public bool IsMapNodeSelectable(int nodeId)
     {
         MapNode node = stageProgression.FindNode(nodeId);
         if (node == null) return false;
-        if (stageProgression.currentNodeId < 0) return node.row == 0;
-        if (!stageProgression.currentNodeCleared) return false;
-        MapNode current = stageProgression.FindNode(stageProgression.currentNodeId);
-        return current != null && current.children.Contains(nodeId);
+        int move = stageProgression.pendingJourneyMove;
+        if (move <= 0) return false;
+        if (stageProgression.currentNodeId >= 0 && !stageProgression.currentNodeCleared) return false;
+        MapTableData table = GetMapTable();
+        bool forceStop = table == null || table.Config.ShopRowForceStop;
+        return MapJourney.IsReachable(stageProgression.currentMap, stageProgression.currentNodeId, nodeId, move, forceStop);
     }
 
     public void EnterMapNode(int nodeId)
@@ -1054,6 +1070,18 @@ public class DiceManager : MonoBehaviour
         MapNode node = stageProgression.FindNode(nodeId);
         if (node == null || !IsMapNodeSelectable(nodeId)) return;
 
+        MapTableData table = GetMapTable();
+        bool forceStop = table == null || table.Config.ShopRowForceStop;
+        int move = stageProgression.pendingJourneyMove;
+        List<int> passed = MapJourney.PassedOnWay(stageProgression.currentMap, stageProgression.currentNodeId, nodeId, move, forceStop);
+        if (stageProgression.passedNodeIds == null) stageProgression.passedNodeIds = new List<int>();
+        for (int i = 0; i < passed.Count; i++)
+        {
+            if (!stageProgression.passedNodeIds.Contains(passed[i]))
+                stageProgression.passedNodeIds.Add(passed[i]);
+        }
+
+        stageProgression.pendingJourneyMove = 0;
         stageProgression.currentNodeId = nodeId;
         stageProgression.currentNodeCleared = false;
         if (stageProgression.visitedNodeIds == null) stageProgression.visitedNodeIds = new List<int>();
@@ -1061,10 +1089,83 @@ public class DiceManager : MonoBehaviour
             stageProgression.visitedNodeIds.Add(nodeId);
 
         pendingBiomeTransition = false;
-        MapTableData table = GetMapTable();
         if (table != null) stageProgression.ApplyNodeDifficulty(node, table.Config);
         SaveMapProgress();
         OpenCurrentNode(node);
+    }
+
+    public JourneyDiceFace RollJourneyFace()
+    {
+        MapTableData table = GetMapTable();
+        if (table == null || table.JourneyDice == null || table.JourneyDice.Count == 0) return null;
+        return table.JourneyDice[UnityEngine.Random.Range(0, table.JourneyDice.Count)];
+    }
+
+    public bool ApplyJourneyFace(JourneyDiceFace face)
+    {
+        if (face == null || !CanRollJourney()) return false;
+        bool move = MapTableData.IsJourneyMove(face);
+        if (move)
+            stageProgression.pendingJourneyMove = Mathf.Max(1, face.Value);
+        else
+        {
+            stageProgression.pendingJourneyMove = 0;
+            ApplyJourneyEffect(face);
+        }
+        SaveMapProgress();
+        return move;
+    }
+
+    void ApplyJourneyEffect(JourneyDiceFace face)
+    {
+        if (!MapTableData.TryParseJourneyType(face.Type, out JourneyFaceType kind)) return;
+        MapTableData table = GetMapTable();
+        switch (kind)
+        {
+            case JourneyFaceType.Damage:
+                int minHp = table != null ? table.Config.JourneyDamageMinHp : 1;
+                currentPlayerHP = Mathf.Max(minHp, currentPlayerHP - Mathf.Max(0, face.Value));
+                UpdateMainUI("");
+                break;
+            case JourneyFaceType.Gold:
+                if (shopManager != null)
+                {
+                    shopManager.currentGold += Mathf.Max(0, face.Value);
+                    ui?.UpdateGoldUI(shopManager.currentGold);
+                    if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
+                }
+                break;
+            case JourneyFaceType.Heal:
+                playerStatus.Heal(Mathf.Max(0, face.Value));
+                UpdateMainUI("");
+                break;
+        }
+    }
+
+    public MonsterDataSO RollPortalMonster(MapNode node)
+    {
+        var pool = new List<MonsterDataSO>();
+        if (biomeList == null || node == null) return null;
+        for (int i = 0; i < biomeList.Count; i++)
+        {
+            BiomeDataSO biome = biomeList[i];
+            if (biome == null || biome.biomeType == BiomeType.Void) continue;
+            if (biome.biomeMonsters != null)
+            {
+                for (int m = 0; m < biome.biomeMonsters.Count; m++)
+                {
+                    if (biome.biomeMonsters[m] != null)
+                        pool.Add(biome.biomeMonsters[m]);
+                }
+            }
+            if (biome.bossMonster != null)
+                pool.Add(biome.bossMonster);
+        }
+        if (pool.Count == 0) return null;
+
+        int mapSeed = stageProgression.currentMap != null ? stageProgression.currentMap.seed : 0;
+        var rng = new System.Random(unchecked(mapSeed + node.id));
+        return pool[rng.Next(pool.Count)];
     }
 
     public void ReturnToMap()
@@ -1137,6 +1238,10 @@ public class DiceManager : MonoBehaviour
             stageProgression.visitedNodeIds = data.visitedNodeIds != null
                 ? new List<int>(data.visitedNodeIds)
                 : new List<int>();
+            stageProgression.passedNodeIds = data.passedNodeIds != null
+                ? new List<int>(data.passedNodeIds)
+                : new List<int>();
+            stageProgression.pendingJourneyMove = data.pendingJourneyMove;
         }
 
         BiomeType biome = currentBiome != null ? currentBiome.biomeType : BiomeType.Forest;
@@ -1147,8 +1252,7 @@ public class DiceManager : MonoBehaviour
         {
             stageProgression.currentNodeId = -1;
             stageProgression.currentNodeCleared = false;
-            if (stageProgression.visitedNodeIds == null) stageProgression.visitedNodeIds = new List<int>();
-            stageProgression.visitedNodeIds.Clear();
+            stageProgression.ClearMapTrail();
         }
         EnsureMapUi();
     }
@@ -1178,9 +1282,17 @@ public class DiceManager : MonoBehaviour
         switch (node.type)
         {
             case MapNodeType.Enemy:
+                BeginMapCombat(false, false, null);
+                break;
+            case MapNodeType.Elite:
+                // TODO: 엘리트 몬스터 풀
+                BeginMapCombat(true, false, null);
+                break;
             case MapNodeType.Boss:
-                ShowCombatScreen();
-                StartNewStage();
+                BeginMapCombat(false, true, null);
+                break;
+            case MapNodeType.Portal:
+                BeginMapCombat(false, false, RollPortalMonster(node));
                 break;
             case MapNodeType.Encounter:
                 HideMapOverlays();
@@ -1193,12 +1305,15 @@ public class DiceManager : MonoBehaviour
                 SetHudActive("Book_Button", false);
                 SetHudActive("Deck_BTN", false);
                 break;
-            case MapNodeType.Shop:
-            case MapNodeType.Opel:
+            case MapNodeType.ShopNyaon:
+            case MapNodeType.ShopRonan:
+            case MapNodeType.ShopOpel:
                 HideMapOverlays();
                 SetBoardVisible(false);
-                if (shopManager != null) shopManager.OpenMapShop();
-                else ReturnToMap();
+                if (shopManager != null)
+                    shopManager.OpenMapShop(MerchantFor(node.type));
+                else
+                    ReturnToMap();
                 PlaceTravelChrome();
                 break;
             case MapNodeType.Rest:
@@ -1208,6 +1323,25 @@ public class DiceManager : MonoBehaviour
                 else ReturnToMap();
                 PlaceTravelChrome();
                 break;
+        }
+    }
+
+    void BeginMapCombat(bool elite, bool boss, MonsterDataSO forcedMonster)
+    {
+        isEliteBattle = elite;
+        mapBossBattle = boss;
+        pendingForcedMonster = forcedMonster;
+        ShowCombatScreen();
+        StartNewStage();
+    }
+
+    static ShopManager.MapMerchant MerchantFor(MapNodeType type)
+    {
+        switch (type)
+        {
+            case MapNodeType.ShopRonan: return ShopManager.MapMerchant.Ronan;
+            case MapNodeType.ShopOpel: return ShopManager.MapMerchant.Opel;
+            default: return ShopManager.MapMerchant.Nyaon;
         }
     }
 
@@ -1244,10 +1378,17 @@ public class DiceManager : MonoBehaviour
         if (stage == null || stage.currentMap == null) return true;
         if (stage.currentNodeId >= 0 && stage.FindNode(stage.currentNodeId) == null)
             return false;
-        if (stage.visitedNodeIds == null) return true;
-        for (int i = 0; i < stage.visitedNodeIds.Count; i++)
+        if (!NodeListMatches(stage, stage.visitedNodeIds)) return false;
+        if (!NodeListMatches(stage, stage.passedNodeIds)) return false;
+        return true;
+    }
+
+    static bool NodeListMatches(StageManager stage, List<int> ids)
+    {
+        if (ids == null) return true;
+        for (int i = 0; i < ids.Count; i++)
         {
-            if (stage.FindNode(stage.visitedNodeIds[i]) == null)
+            if (stage.FindNode(ids[i]) == null)
                 return false;
         }
         return true;

@@ -53,6 +53,8 @@ public class SaveData
     public int currentNodeId = -1;
     public bool currentNodeCleared;
     public List<int> visitedNodeIds = new List<int>();
+    public List<int> passedNodeIds = new List<int>();
+    public int pendingJourneyMove;
     public int playerMaxHP;
     public int currentGold;
 
@@ -227,6 +229,10 @@ public class GameSaveManager : MonoBehaviour
         data.visitedNodeIds = dice.stageProgression.visitedNodeIds != null
             ? new List<int>(dice.stageProgression.visitedNodeIds)
             : new List<int>();
+        data.passedNodeIds = dice.stageProgression.passedNodeIds != null
+            ? new List<int>(dice.stageProgression.passedNodeIds)
+            : new List<int>();
+        data.pendingJourneyMove = dice.stageProgression.pendingJourneyMove;
         data.currentPlayerHP = dice.currentPlayerHP;
         data.currentGold = shop != null ? shop.currentGold : 0;
 

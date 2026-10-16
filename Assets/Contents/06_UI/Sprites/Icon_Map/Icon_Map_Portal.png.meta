@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 802bc57674720e14c8f41e80cc247932
+guid: 6b1d0c9e8f7a4523910abcde12345678
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1918075102574025836
-    second: Icon_Map_Shop_0
+      213: 1893021988176337049
+    second: Icon_Map_Enemy_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Icon_Map_Shop_0
+      name: Icon_Map_Enemy_0
       rect:
         serializedVersion: 2
         x: 5
-        y: 1
-        width: 56
-        height: 60
+        y: 7
+        width: 54
+        height: 52
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 493ed8a4bd0a165e0800000000000000
-      internalID: -1918075102574025836
+      spriteID: 9981145f77d554a10800000000000000
+      internalID: 1893021988176337049
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Icon_Map_Shop_0: -1918075102574025836
+      Icon_Map_Enemy_0: 1893021988176337049
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

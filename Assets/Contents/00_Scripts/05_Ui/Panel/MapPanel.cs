@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,19 +14,36 @@ public class MapPanel : MonoBehaviour
     public RectTransform lineLayer;
     public RectTransform nodeLayer;
     public RectTransform legend;
+    public Button journeyRollButton;
+    public Image journeyResultImage;
+    public Text journeyResultText;
 
     Sprite dotSprite;
+    DiceManager boundDice;
+    Coroutine journeyRollRoutine;
+    bool journeyRolling;
 
     public void Hide()
     {
+        StopJourneyRoll();
         gameObject.SetActive(false);
     }
 
     public void Show(DiceManager diceManager)
     {
+        StopJourneyRoll();
+        boundDice = diceManager;
         gameObject.SetActive(true);
         MapUiHierarchy.EnsureMap(this);
         Rebuild(diceManager);
+    }
+
+    public void OnJourneyRoll()
+    {
+        if (journeyRolling || boundDice == null || !boundDice.CanRollJourney()) return;
+        journeyRolling = true;
+        if (journeyRollButton != null) journeyRollButton.interactable = false;
+        journeyRollRoutine = StartCoroutine(PlayJourneyRoll());
     }
 
     void Rebuild(DiceManager diceManager)
@@ -81,8 +99,9 @@ public class MapPanel : MonoBehaviour
 
         RefreshLegend(table);
         PlaceLegend();
+        RefreshJourneyChrome(diceManager);
         Canvas.ForceUpdateCanvases();
-        FocusOnSelectable(diceManager, positions);
+        FocusOnPlayer(diceManager, positions);
     }
 
     void CreateNode(DiceManager diceManager, MapTableData table, MapNode node, Vector2 position)
@@ -107,7 +126,8 @@ public class MapPanel : MonoBehaviour
             sprite = iconSet.GetSprite(iconKey, out tint);
         bool selectable = diceManager.IsMapNodeSelectable(node.id);
         bool current = node.id == diceManager.stageProgression.currentNodeId;
-        bool visited = diceManager.stageProgression.visitedNodeIds != null && diceManager.stageProgression.visitedNodeIds.Contains(node.id);
+        bool visited = ListHas(diceManager.stageProgression.visitedNodeIds, node.id)
+            || ListHas(diceManager.stageProgression.passedNodeIds, node.id);
         view.Bind(diceManager, node.id, sprite, tint, selectable, current, visited);
         if (node.type == MapNodeType.Boss)
             view.transform.localScale = new Vector3(2.8f, 2.8f, 1f);
@@ -143,17 +163,17 @@ public class MapPanel : MonoBehaviour
     void RefreshLegend(MapTableData table)
     {
         if (legend == null || table == null) return;
-        MapNodeType[] types =
+        for (int i = 0; i < MapLegend.Retired.Length; i++)
         {
-            MapNodeType.Enemy, MapNodeType.Boss, MapNodeType.Encounter,
-            MapNodeType.Shop, MapNodeType.Opel, MapNodeType.Rest
-        };
-        string[] names = { "Enemy", "Boss", "Encounter", "Shop", "Opel", "Rest" };
-        for (int i = 0; i < names.Length; i++)
+            Transform retired = legend.Find(MapLegend.Retired[i]);
+            if (retired != null) retired.gameObject.SetActive(false);
+        }
+        for (int i = 0; i < MapLegend.Names.Length; i++)
         {
-            Transform item = legend.Find(names[i]);
+            Transform item = legend.Find(MapLegend.Names[i]);
             if (item == null) continue;
-            MapNodeTypeRow rule = table.GetNodeRule(types[i]);
+            item.gameObject.SetActive(true);
+            MapNodeTypeRow rule = table.GetNodeRule(MapLegend.Types[i]);
             string iconKey = rule != null ? rule.Icon_Key : null;
             Sprite sprite = iconSet != null ? iconSet.GetSprite(iconKey, out _) : null;
             Image icon = item.Find("Icon") != null ? item.Find("Icon").GetComponent<Image>() : null;
@@ -164,25 +184,33 @@ public class MapPanel : MonoBehaviour
                 icon.preserveAspect = true;
             }
             Text label = item.Find("Label") != null ? item.Find("Label").GetComponent<Text>() : null;
-            if (label != null) label.text = table.GetNodeName(types[i]);
-            item.gameObject.SetActive(names[i] != "Opel");
+            if (label != null) label.text = table.GetNodeName(MapLegend.Types[i]);
         }
     }
 
-    void FocusOnSelectable(DiceManager diceManager, Dictionary<int, Vector2> positions)
+    void FocusOnPlayer(DiceManager diceManager, Dictionary<int, Vector2> positions)
     {
         if (scrollRect == null || content == null) return;
         float targetY = 0f;
         bool found = false;
-        MapData map = diceManager.stageProgression.currentMap;
-        for (int i = 0; i < map.nodes.Count; i++)
+        int currentId = diceManager.stageProgression.currentNodeId;
+        if (currentId >= 0 && positions.ContainsKey(currentId))
         {
-            int id = map.nodes[i].id;
-            if (!diceManager.IsMapNodeSelectable(id) || !positions.ContainsKey(id)) continue;
-            if (!found || positions[id].y < targetY)
+            targetY = positions[currentId].y;
+            found = true;
+        }
+        else
+        {
+            MapData map = diceManager.stageProgression.currentMap;
+            for (int i = 0; i < map.nodes.Count; i++)
             {
-                targetY = positions[id].y;
-                found = true;
+                MapNode node = map.nodes[i];
+                if (node.row != 0 || !positions.ContainsKey(node.id)) continue;
+                if (!found || positions[node.id].y < targetY)
+                {
+                    targetY = positions[node.id].y;
+                    found = true;
+                }
             }
         }
         if (!found)
@@ -225,26 +253,88 @@ public class MapPanel : MonoBehaviour
         legend.anchorMin = new Vector2(1f, 0f);
         legend.anchorMax = new Vector2(1f, 0f);
         legend.pivot = new Vector2(1f, 0f);
-        legend.sizeDelta = new Vector2(240f, 300f);
-        legend.anchoredPosition = new Vector2(-28f, 28f);
-
-        string[] names = { "Enemy", "Boss", "Encounter", "Shop", "Opel", "Rest" };
+        const float rowStep = 42f;
         int shown = 0;
-        for (int i = 0; i < names.Length; i++)
+        for (int i = 0; i < MapLegend.Names.Length; i++)
         {
-            Transform item = legend.Find(names[i]);
+            Transform item = legend.Find(MapLegend.Names[i]);
             if (item == null) continue;
-            bool visible = names[i] != "Opel";
-            item.gameObject.SetActive(visible);
-            if (!visible) continue;
+            item.gameObject.SetActive(true);
             RectTransform rect = item as RectTransform;
             rect.anchorMin = new Vector2(0f, 0f);
             rect.anchorMax = new Vector2(1f, 0f);
             rect.pivot = new Vector2(0f, 0f);
-            rect.sizeDelta = new Vector2(-16f, 48f);
-            rect.anchoredPosition = new Vector2(8f, 8f + shown * 52f);
+            rect.sizeDelta = new Vector2(-16f, 40f);
+            rect.anchoredPosition = new Vector2(8f, 8f + shown * rowStep);
             shown++;
         }
+        legend.sizeDelta = new Vector2(240f, 16f + shown * rowStep);
+        legend.anchoredPosition = new Vector2(-28f, 210f);
+    }
+
+    void RefreshJourneyChrome(DiceManager diceManager)
+    {
+        if (journeyRollButton != null)
+        {
+            Text label = journeyRollButton.GetComponentInChildren<Text>();
+            if (label != null)
+                label.text = LocalizationManager.GetUi("UI_MAP_JOURNEY_ROLL", "굴리기");
+            journeyRollButton.interactable = !journeyRolling && diceManager.CanRollJourney();
+        }
+        if (journeyRolling) return;
+        int pending = diceManager.stageProgression.pendingJourneyMove;
+        SetJourneyResult(pending > 0 ? pending.ToString() : "");
+    }
+
+    void SetJourneyResult(string label)
+    {
+        if (journeyResultText != null) journeyResultText.text = label;
+    }
+
+    IEnumerator PlayJourneyRoll()
+    {
+        journeyRolling = true;
+        if (journeyRollButton != null) journeyRollButton.interactable = false;
+        MapTableData table = boundDice != null ? boundDice.GetMapTable() : null;
+        float seconds = table != null ? Mathf.Max(0.05f, table.Config.JourneyRollSeconds) : 0.5f;
+        float elapsed = 0f;
+        while (elapsed < seconds)
+        {
+            if (table != null && table.JourneyDice != null && table.JourneyDice.Count > 0)
+            {
+                JourneyDiceFace spinning = table.JourneyDice[Random.Range(0, table.JourneyDice.Count)];
+                SetJourneyResult(MapTableData.FormatJourneyFace(spinning));
+            }
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        JourneyDiceFace face = boundDice != null ? boundDice.RollJourneyFace() : null;
+        bool move = face != null && boundDice != null && boundDice.ApplyJourneyFace(face);
+        journeyRolling = false;
+        journeyRollRoutine = null;
+        if (boundDice == null) yield break;
+        if (move)
+            Rebuild(boundDice);
+        else
+        {
+            SetJourneyResult(MapTableData.FormatJourneyFace(face));
+            if (journeyRollButton != null)
+                journeyRollButton.interactable = boundDice.CanRollJourney();
+        }
+    }
+
+    void StopJourneyRoll()
+    {
+        if (journeyRollRoutine != null)
+            StopCoroutine(journeyRollRoutine);
+        journeyRollRoutine = null;
+        journeyRolling = false;
+    }
+
+    static bool ListHas(List<int> ids, int id)
+    {
+        return ids != null && ids.Contains(id);
     }
 
     void DrawDottedLine(Vector2 from, Vector2 to)

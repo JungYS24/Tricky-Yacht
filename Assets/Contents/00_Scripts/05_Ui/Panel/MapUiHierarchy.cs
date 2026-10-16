@@ -1,6 +1,27 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+public static class MapLegend
+{
+    public static readonly string[] Names =
+    {
+        "Enemy", "Elite", "Boss", "Encounter", "ShopNyaon", "ShopRonan", "ShopOpel", "Portal", "Rest"
+    };
+
+    public static readonly string[] Labels =
+    {
+        "적", "엘리트", "보스", "조우자", "냐온", "로넌", "오펠", "차원문", "휴식"
+    };
+
+    public static readonly MapNodeType[] Types =
+    {
+        MapNodeType.Enemy, MapNodeType.Elite, MapNodeType.Boss, MapNodeType.Encounter,
+        MapNodeType.ShopNyaon, MapNodeType.ShopRonan, MapNodeType.ShopOpel, MapNodeType.Portal, MapNodeType.Rest
+    };
+
+    public static readonly string[] Retired = { "Shop", "Opel" };
+}
+
 // 씬에 없는 지도 UI만 채웁니다. 이미 하이어라키에 있으면 그 오브젝트를 그대로 씁니다.
 public static class MapUiHierarchy
 {
@@ -87,6 +108,7 @@ public static class MapUiHierarchy
         legendRect.anchoredPosition = new Vector2(-28f, 28f);
         }
         EnsureLegendSlots(legend);
+        EnsureJourneyControls(panel, root);
 
         Transform template = root.Find("NodeTemplate");
         if (template == null)
@@ -171,10 +193,76 @@ public static class MapUiHierarchy
         dim.SetAsFirstSibling();
     }
 
+    static void EnsureJourneyControls(MapPanel panel, RectTransform root)
+    {
+        Transform slot = root.Find("Journey_Result_Slot");
+        if (slot == null)
+        {
+            var slotGo = new GameObject("Journey_Result_Slot", typeof(RectTransform), typeof(Image));
+            slotGo.transform.SetParent(root, false);
+            slot = slotGo.transform;
+            Image image = slotGo.GetComponent<Image>();
+            image.color = new Color(0.08f, 0.1f, 0.14f, 0.92f);
+            image.raycastTarget = false;
+        }
+        RectTransform slotRect = slot as RectTransform;
+        slotRect.anchorMin = new Vector2(1f, 0f);
+        slotRect.anchorMax = new Vector2(1f, 0f);
+        slotRect.pivot = new Vector2(1f, 0f);
+        slotRect.sizeDelta = new Vector2(220f, 88f);
+        slotRect.anchoredPosition = new Vector2(-28f, 102f);
+        Text resultText = EnsureLabel(slot, "Text", "", 32, Vector2.zero, new Vector2(200f, 72f), true);
+        resultText.alignment = TextAnchor.MiddleCenter;
+        RectTransform resultRect = resultText.rectTransform;
+        resultRect.anchorMin = Vector2.zero;
+        resultRect.anchorMax = Vector2.one;
+        resultRect.offsetMin = Vector2.zero;
+        resultRect.offsetMax = Vector2.zero;
+
+        Transform button = root.Find("Journey_Roll_BTN");
+        bool created = button == null;
+        if (created)
+        {
+            var buttonGo = new GameObject("Journey_Roll_BTN", typeof(RectTransform));
+            buttonGo.transform.SetParent(root, false);
+            button = buttonGo.transform;
+        }
+        RectTransform buttonRect = button as RectTransform;
+        buttonRect.anchorMin = new Vector2(1f, 0f);
+        buttonRect.anchorMax = new Vector2(1f, 0f);
+        buttonRect.pivot = new Vector2(1f, 0f);
+        buttonRect.sizeDelta = new Vector2(220f, 64f);
+        buttonRect.anchoredPosition = new Vector2(-28f, 28f);
+        Image buttonImage = GetOrAdd<Image>(button.gameObject);
+        buttonImage.color = new Color(0.22f, 0.28f, 0.36f, 1f);
+        Button roll = GetOrAdd<Button>(button.gameObject);
+        roll.targetGraphic = buttonImage;
+        Text label = EnsureLabel(button, "Text", "굴리기", 26, Vector2.zero, new Vector2(200f, 64f), true);
+        RectTransform labelRect = label.rectTransform;
+        labelRect.anchorMin = Vector2.zero;
+        labelRect.anchorMax = Vector2.one;
+        labelRect.offsetMin = Vector2.zero;
+        labelRect.offsetMax = Vector2.zero;
+
+        slot.SetAsLastSibling();
+        button.SetAsLastSibling();
+        panel.journeyResultImage = slot.GetComponent<Image>();
+        panel.journeyResultText = resultText;
+        panel.journeyRollButton = roll;
+        roll.onClick.RemoveAllListeners();
+        roll.onClick.AddListener(panel.OnJourneyRoll);
+    }
+
     static void EnsureLegendSlots(Transform legend)
     {
-        string[] names = { "Enemy", "Boss", "Encounter", "Shop", "Opel", "Rest" };
-        string[] labels = { "적", "보스", "조우자", "상인", "오펠", "휴식" };
+        for (int i = 0; i < MapLegend.Retired.Length; i++)
+        {
+            Transform retired = legend.Find(MapLegend.Retired[i]);
+            if (retired != null) retired.gameObject.SetActive(false);
+        }
+
+        string[] names = MapLegend.Names;
+        string[] labels = MapLegend.Labels;
         for (int i = 0; i < names.Length; i++)
         {
             Transform item = legend.Find(names[i]);

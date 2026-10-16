@@ -27,10 +27,13 @@ public class MapIconSet : ScriptableObject
         entries = new List<Entry>
         {
             New("Icon_Map_Enemy", new Color(0.85f, 0.25f, 0.22f)),
+            New("Icon_Map_Elite", new Color(0.75f, 0.15f, 0.18f)),
             New("Icon_Map_Boss", new Color(0.55f, 0.2f, 0.75f)),
             New("Icon_Map_Encounter", new Color(0.95f, 0.75f, 0.2f)),
-            New("Icon_Map_Shop", new Color(0.25f, 0.7f, 0.4f)),
-            New("Icon_Map_Opel", new Color(0.3f, 0.55f, 0.95f)),
+            New("Icon_Map_Shop_Nyaon", new Color(0.25f, 0.7f, 0.4f)),
+            New("Icon_Map_Shop_Ronan", new Color(0.85f, 0.65f, 0.25f)),
+            New("Icon_Map_Shop_Opel", new Color(0.3f, 0.55f, 0.95f)),
+            New("Icon_Map_Portal", new Color(0.35f, 0.45f, 0.95f)),
             New("Icon_Map_Rest", new Color(0.75f, 0.85f, 0.95f))
         };
     }

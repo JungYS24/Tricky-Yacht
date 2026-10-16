@@ -2,15 +2,15 @@
   "mapConfig": [
     {
       "Key": "Min_Enemy_Count",
-      "Value": "8",
+      "Value": "16",
       "Value_Type": "int",
-      "Desc_KR": "최단 루트의 적 수(지름길 = 적 8 + 상인 고정층 1)"
+      "Desc_KR": "최단 루트의 전투 수(적·엘리트·차원문). 지름길 = 전투 16 + 상인 고정층 1"
     },
     {
       "Key": "Max_Path_Length",
-      "Value": "16",
+      "Value": "32",
       "Value_Type": "int",
-      "Desc_KR": "일반 노드 층 수(0~15층). 보스는 16층"
+      "Desc_KR": "일반 노드 층 수(0~31층). 보스는 32층"
     },
     {
       "Key": "Grid_Width",
@@ -32,9 +32,9 @@
     },
     {
       "Key": "Shop_Row",
-      "Value": "8",
+      "Value": "16",
       "Value_Type": "int",
-      "Desc_KR": "상인 고정층. 이 층의 노드는 전부 상인이고 어떤 선도 이 층을 건너뛰지 못함"
+      "Desc_KR": "상인 고정층. 이 층의 노드는 상점 3종이고 어떤 선도 이 층을 건너뛰지 못함"
     },
     {
       "Key": "Skip_Chance",
@@ -77,6 +77,24 @@
       "Value": "10",
       "Value_Type": "int",
       "Desc_KR": "이 수만큼 바이옴을 클리어하면 Void 진입"
+    },
+    {
+      "Key": "Shop_Row_Force_Stop",
+      "Value": "true",
+      "Value_Type": "bool",
+      "Desc_KR": "true면 여정 주사위 이동이 상인 고정층과 보스 노드를 넘어가지 않고 그 노드에서 멈춤"
+    },
+    {
+      "Key": "Journey_Damage_Min_Hp",
+      "Value": "1",
+      "Value_Type": "int",
+      "Desc_KR": "여정 주사위 해골 피해로 내려갈 수 있는 최소 체력"
+    },
+    {
+      "Key": "Journey_Roll_Seconds",
+      "Value": "0.5",
+      "Value_Type": "float",
+      "Desc_KR": "여정 주사위가 멈추기 전에 숫자가 바뀌는 시간(초)"
     }
   ],
   "nodeTypes": [
@@ -100,7 +118,7 @@
       "Desc_KR": "바이옴 보스와 전투합니다.",
       "Icon_Key": "Icon_Map_Boss",
       "Is_Facility": false,
-      "Min_Row": 16,
+      "Min_Row": 32,
       "Min_Per_Map": 1,
       "Max_Per_Map": 1
     },
@@ -113,32 +131,68 @@
       "Icon_Key": "Icon_Map_Encounter",
       "Is_Facility": true,
       "Min_Row": 1,
-      "Min_Per_Map": 2,
-      "Max_Per_Map": 8
+      "Min_Per_Map": 4,
+      "Max_Per_Map": 16
     },
     {
-      "Node_ID": "Node_Shop",
-      "Name_Key": "CNT_Node_Shop_NAME",
-      "Desc_Key": "CNT_Node_Shop_DESC",
-      "Name_KR": "상인",
-      "Desc_KR": "상점을 엽니다.",
-      "Icon_Key": "Icon_Map_Shop",
-      "Is_Facility": true,
-      "Min_Row": 2,
-      "Min_Per_Map": 0,
+      "Node_ID": "Node_Elite",
+      "Name_Key": "CNT_Node_Elite_NAME",
+      "Desc_Key": "CNT_Node_Elite_DESC",
+      "Name_KR": "엘리트",
+      "Desc_KR": "강한 적과 전투합니다.",
+      "Icon_Key": "Icon_Map_Elite",
+      "Is_Facility": false,
+      "Min_Row": 6,
+      "Min_Per_Map": 2,
       "Max_Per_Map": 4
     },
     {
-      "Node_ID": "Node_Opel",
-      "Name_Key": "CNT_Node_Opel_NAME",
-      "Desc_Key": "CNT_Node_Opel_DESC",
-      "Name_KR": "오펠",
-      "Desc_KR": "위성 하나를 골라 강화합니다.",
-      "Icon_Key": "Icon_Map_Opel",
+      "Node_ID": "Node_Shop_Nyaon",
+      "Name_Key": "CNT_Node_Shop_Nyaon_NAME",
+      "Desc_Key": "CNT_Node_Shop_Nyaon_DESC",
+      "Name_KR": "냐온 딜레마",
+      "Desc_KR": "냐온의 상점을 엽니다.",
+      "Icon_Key": "Icon_Map_Shop_Nyaon",
       "Is_Facility": true,
-      "Min_Row": 3,
+      "Min_Row": 2,
       "Min_Per_Map": 0,
-      "Max_Per_Map": 0
+      "Max_Per_Map": 8
+    },
+    {
+      "Node_ID": "Node_Shop_Ronan",
+      "Name_Key": "CNT_Node_Shop_Ronan_NAME",
+      "Desc_Key": "CNT_Node_Shop_Ronan_DESC",
+      "Name_KR": "로넌",
+      "Desc_KR": "로넌의 상점을 엽니다.",
+      "Icon_Key": "Icon_Map_Shop_Ronan",
+      "Is_Facility": true,
+      "Min_Row": 2,
+      "Min_Per_Map": 0,
+      "Max_Per_Map": 8
+    },
+    {
+      "Node_ID": "Node_Shop_Opel",
+      "Name_Key": "CNT_Node_Shop_Opel_NAME",
+      "Desc_Key": "CNT_Node_Shop_Opel_DESC",
+      "Name_KR": "오펠",
+      "Desc_KR": "오펠의 상점을 엽니다.",
+      "Icon_Key": "Icon_Map_Shop_Opel",
+      "Is_Facility": true,
+      "Min_Row": 2,
+      "Min_Per_Map": 0,
+      "Max_Per_Map": 8
+    },
+    {
+      "Node_ID": "Node_Portal",
+      "Name_Key": "CNT_Node_Portal_NAME",
+      "Desc_Key": "CNT_Node_Portal_DESC",
+      "Name_KR": "차원문",
+      "Desc_KR": "다른 차원의 몬스터와 전투합니다.",
+      "Icon_Key": "Icon_Map_Portal",
+      "Is_Facility": false,
+      "Min_Row": 4,
+      "Min_Per_Map": 2,
+      "Max_Per_Map": 2
     },
     {
       "Node_ID": "Node_Rest",
@@ -149,8 +203,8 @@
       "Icon_Key": "Icon_Map_Rest",
       "Is_Facility": true,
       "Min_Row": 4,
-      "Min_Per_Map": 2,
-      "Max_Per_Map": 6
+      "Min_Per_Map": 4,
+      "Max_Per_Map": 12
     }
   ],
   "biomeWeights": [
@@ -159,7 +213,7 @@
       "Enemy_W": 50,
       "Encounter_W": 15,
       "Shop_W": 12,
-      "Opel_W": 10,
+      "Elite_W": 10,
       "Rest_W": 13
     },
     {
@@ -167,7 +221,7 @@
       "Enemy_W": 48,
       "Encounter_W": 14,
       "Shop_W": 12,
-      "Opel_W": 10,
+      "Elite_W": 10,
       "Rest_W": 16
     },
     {
@@ -175,7 +229,7 @@
       "Enemy_W": 48,
       "Encounter_W": 16,
       "Shop_W": 10,
-      "Opel_W": 16,
+      "Elite_W": 10,
       "Rest_W": 10
     },
     {
@@ -183,7 +237,7 @@
       "Enemy_W": 55,
       "Encounter_W": 15,
       "Shop_W": 10,
-      "Opel_W": 8,
+      "Elite_W": 10,
       "Rest_W": 12
     },
     {
@@ -191,7 +245,7 @@
       "Enemy_W": 52,
       "Encounter_W": 12,
       "Shop_W": 18,
-      "Opel_W": 8,
+      "Elite_W": 10,
       "Rest_W": 10
     },
     {
@@ -199,7 +253,7 @@
       "Enemy_W": 48,
       "Encounter_W": 22,
       "Shop_W": 10,
-      "Opel_W": 10,
+      "Elite_W": 10,
       "Rest_W": 10
     },
     {
@@ -207,7 +261,7 @@
       "Enemy_W": 56,
       "Encounter_W": 14,
       "Shop_W": 8,
-      "Opel_W": 12,
+      "Elite_W": 10,
       "Rest_W": 10
     },
     {
@@ -215,7 +269,7 @@
       "Enemy_W": 58,
       "Encounter_W": 12,
       "Shop_W": 10,
-      "Opel_W": 10,
+      "Elite_W": 10,
       "Rest_W": 10
     },
     {
@@ -223,7 +277,7 @@
       "Enemy_W": 52,
       "Encounter_W": 18,
       "Shop_W": 10,
-      "Opel_W": 8,
+      "Elite_W": 10,
       "Rest_W": 12
     },
     {
@@ -231,7 +285,7 @@
       "Enemy_W": 46,
       "Encounter_W": 14,
       "Shop_W": 18,
-      "Opel_W": 8,
+      "Elite_W": 10,
       "Rest_W": 14
     },
     {
@@ -239,7 +293,7 @@
       "Enemy_W": 50,
       "Encounter_W": 16,
       "Shop_W": 12,
-      "Opel_W": 12,
+      "Elite_W": 10,
       "Rest_W": 10
     },
     {
@@ -247,7 +301,7 @@
       "Enemy_W": 56,
       "Encounter_W": 16,
       "Shop_W": 8,
-      "Opel_W": 12,
+      "Elite_W": 10,
       "Rest_W": 8
     },
     {
@@ -255,7 +309,7 @@
       "Enemy_W": 52,
       "Encounter_W": 12,
       "Shop_W": 10,
-      "Opel_W": 10,
+      "Elite_W": 10,
       "Rest_W": 16
     },
     {
@@ -263,7 +317,7 @@
       "Enemy_W": 54,
       "Encounter_W": 20,
       "Shop_W": 8,
-      "Opel_W": 10,
+      "Elite_W": 10,
       "Rest_W": 8
     },
     {
@@ -271,7 +325,7 @@
       "Enemy_W": 46,
       "Encounter_W": 26,
       "Shop_W": 12,
-      "Opel_W": 8,
+      "Elite_W": 10,
       "Rest_W": 8
     },
     {
@@ -279,8 +333,16 @@
       "Enemy_W": 46,
       "Encounter_W": 14,
       "Shop_W": 10,
-      "Opel_W": 22,
+      "Elite_W": 10,
       "Rest_W": 8
     }
+  ],
+  "journeyDice": [
+    { "Face": 1, "Type": "Move", "Value": 1, "Desc_KR": "1칸 이동" },
+    { "Face": 2, "Type": "Move", "Value": 2, "Desc_KR": "1~2칸 중 선택 이동" },
+    { "Face": 3, "Type": "Move", "Value": 3, "Desc_KR": "1~3칸 중 선택 이동" },
+    { "Face": 4, "Type": "Damage", "Value": 4, "Desc_KR": "해골: 체력 4 감소 후 다시 굴림" },
+    { "Face": 5, "Type": "Gold", "Value": 5, "Desc_KR": "골드 5 획득 후 다시 굴림" },
+    { "Face": 6, "Type": "Heal", "Value": 6, "Desc_KR": "하트: 체력 6 회복 후 다시 굴림" }
   ]
 }

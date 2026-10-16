@@ -100,12 +100,9 @@ public class ShopManager : MonoBehaviour
         OpenShopInternal(false);
     }
 
-    public void OpenMapShop()
+    public void OpenMapShop(MapMerchant merchant)
     {
-        if (stockTable == null || !stockTable.Loaded) BindShopStock();
-        currentMerchant = stockTable != null && stockTable.Loaded
-            ? stockTable.RollMerchant()
-            : (MapMerchant)UnityEngine.Random.Range(0, 3);
+        currentMerchant = merchant;
         OpenShopInternal(true);
     }
 

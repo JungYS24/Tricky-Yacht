@@ -26,7 +26,7 @@ public static class MapSimulator
         int totalSuccess = 0;
         int totalAttempts = 0;
         bool deterministic = true;
-        var typeNames = new[] { "적", "보스", "조우", "상점", "오펠", "휴식" };
+        var typeNames = new[] { "적", "엘리트", "보스", "조우", "냐온", "로넌", "오펠", "차원문", "휴식" };
 
         foreach (BiomeWeightRow weight in table.BiomeWeights)
         {
@@ -36,7 +36,7 @@ public static class MapSimulator
             int runs = 200;
             int success = 0;
             int attemptSum = 0;
-            var typeSum = new int[6];
+            var typeSum = new int[typeNames.Length];
             int shortestEnemy = int.MaxValue;
             int longestEnemy = 0;
 
@@ -56,10 +56,12 @@ public static class MapSimulator
 
             totalSuccess += success;
             totalAttempts += attemptSum;
-            float facility = (typeSum[2] + typeSum[3] + typeSum[4] + typeSum[5]) / (float)runs;
+            float facility = FacilityCount(table, typeSum) / (float)runs;
             report.AppendLine(
-                $"{weight.Biome}: 성공 {success}/{runs} ({success * 100f / runs:0.#}%), 평균 시도 {attemptSum / (float)runs:0.0}, 시설 {facility:0.0}, 최단 적 {shortestEnemy}, 최장 적 {longestEnemy} | " +
-                $"{typeNames[0]} {typeSum[0] / (float)runs:0.0}, {typeNames[2]} {typeSum[2] / (float)runs:0.0}, {typeNames[3]} {typeSum[3] / (float)runs:0.0}, {typeNames[4]} {typeSum[4] / (float)runs:0.0}, {typeNames[5]} {typeSum[5] / (float)runs:0.0}");
+                $"{weight.Biome}: 성공 {success}/{runs} ({success * 100f / runs:0.#}%), 평균 시도 {attemptSum / (float)runs:0.0}, 시설 {facility:0.0}, 최단 전투 {shortestEnemy}, 최장 전투 {longestEnemy} | " +
+                $"{typeNames[0]} {Avg(typeSum, 0, runs)}, {typeNames[1]} {Avg(typeSum, 1, runs)}, {typeNames[3]} {Avg(typeSum, 3, runs)}, " +
+                $"{typeNames[4]} {Avg(typeSum, 4, runs)}, {typeNames[5]} {Avg(typeSum, 5, runs)}, {typeNames[6]} {Avg(typeSum, 6, runs)}, " +
+                $"{typeNames[7]} {Avg(typeSum, 7, runs)}, {typeNames[8]} {Avg(typeSum, 8, runs)}");
         }
 
         report.AppendLine($"전체 성공 {totalSuccess}/{totalRuns} ({(totalRuns == 0 ? 0f : totalSuccess * 100f / totalRuns):0.#}%), 평균 시도 {(totalRuns == 0 ? 0f : totalAttempts / (float)totalRuns):0.0}");
@@ -70,7 +72,7 @@ public static class MapSimulator
     static void Accumulate(MapData map, int[] typeSum, ref int shortestEnemy, ref int longestEnemy)
     {
         if (map == null) return;
-        var counts = new int[6];
+        var counts = new int[typeSum.Length];
         for (int i = 0; i < map.nodes.Count; i++)
             counts[(int)map.nodes[i].type]++;
         for (int i = 0; i < counts.Length; i++) typeSum[i] += counts[i];
@@ -108,7 +110,7 @@ public static class MapSimulator
             if (node.row == 0)
             {
                 minLen[index] = maxLen[index] = 1;
-                minEnemy[index] = maxEnemy[index] = node.type == MapNodeType.Enemy ? 1 : 0;
+                minEnemy[index] = maxEnemy[index] = MapTableData.IsCombatNode(node.type) ? 1 : 0;
             }
             if (minLen[index] == int.MaxValue) continue;
 
@@ -117,7 +119,7 @@ public static class MapSimulator
                 int child = node.children[c];
                 if (child < 0 || child >= count || map.nodes[child].type == MapNodeType.Boss) continue;
                 bool shopRow = map.nodes[child].isShopRow;
-                int add = !shopRow && map.nodes[child].type == MapNodeType.Enemy ? 1 : 0;
+                int add = !shopRow && MapTableData.IsCombatNode(map.nodes[child].type) ? 1 : 0;
                 int step = shopRow ? 0 : 1;
                 int nextMin = minLen[index] + step;
                 int nextMinEnemy = minEnemy[index] + add;
@@ -165,6 +167,25 @@ public static class MapSimulator
                 longestEnemy = Mathf.Max(longestEnemy, maxEnemy[i]);
             }
         }
+    }
+
+    static string Avg(int[] sum, int index, int runs)
+    {
+        if (sum == null || index < 0 || index >= sum.Length || runs <= 0) return "0.0";
+        return (sum[index] / (float)runs).ToString("0.0");
+    }
+
+    static int FacilityCount(MapTableData table, int[] typeSum)
+    {
+        int total = 0;
+        int count = System.Enum.GetValues(typeof(MapNodeType)).Length;
+        for (int i = 0; i < count && i < typeSum.Length; i++)
+        {
+            MapNodeTypeRow rule = table.GetNodeRule((MapNodeType)i);
+            if (rule != null && rule.Is_Facility)
+                total += typeSum[i];
+        }
+        return total;
     }
 }
 #endif

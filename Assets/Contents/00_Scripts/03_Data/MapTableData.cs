@@ -6,11 +6,22 @@ using UnityEngine;
 public enum MapNodeType
 {
     Enemy,
+    Elite,
     Boss,
     Encounter,
-    Shop,
-    Opel,
+    ShopNyaon,
+    ShopRonan,
+    ShopOpel,
+    Portal,
     Rest
+}
+
+public enum JourneyFaceType
+{
+    Move,
+    Damage,
+    Gold,
+    Heal
 }
 
 // Map_Table.json 한 줄을 그대로 받는 그릇입니다. Value는 문자열이므로 타입은 따로 해석합니다.
@@ -45,8 +56,17 @@ public class BiomeWeightRow
     public int Enemy_W;
     public int Encounter_W;
     public int Shop_W;
-    public int Opel_W;
+    public int Elite_W;
     public int Rest_W;
+}
+
+[Serializable]
+public class JourneyDiceFace
+{
+    public int Face;
+    public string Type;
+    public int Value;
+    public string Desc_KR;
 }
 
 [Serializable]
@@ -55,6 +75,7 @@ public class MapTableJson
     public List<MapConfigEntry> mapConfig = new List<MapConfigEntry>();
     public List<MapNodeTypeRow> nodeTypes = new List<MapNodeTypeRow>();
     public List<BiomeWeightRow> biomeWeights = new List<BiomeWeightRow>();
+    public List<JourneyDiceFace> journeyDice = new List<JourneyDiceFace>();
 }
 
 // 시트 값을 코드에서 쓰기 좋게 풀어 둔 전역 설정입니다.
@@ -73,6 +94,9 @@ public class MapConfig
     public int RestHealPercent = 30;
     public bool PostBattleShop;
     public int BiomeCountToVoid = 10;
+    public bool ShopRowForceStop = true;
+    public int JourneyDamageMinHp = 1;
+    public float JourneyRollSeconds = 0.5f;
 }
 
 public class MapTableData
@@ -80,6 +104,7 @@ public class MapTableData
     public MapConfig Config = new MapConfig();
     public List<MapNodeTypeRow> NodeTypes = new List<MapNodeTypeRow>();
     public List<BiomeWeightRow> BiomeWeights = new List<BiomeWeightRow>();
+    public List<JourneyDiceFace> JourneyDice = new List<JourneyDiceFace>();
 
     public static MapTableData Parse(string json)
     {
@@ -99,6 +124,13 @@ public class MapTableData
 
         if (raw.nodeTypes != null) data.NodeTypes = raw.nodeTypes;
         if (raw.biomeWeights != null) data.BiomeWeights = raw.biomeWeights;
+        if (raw.journeyDice != null && raw.journeyDice.Count > 0)
+            data.JourneyDice = raw.journeyDice;
+        else
+        {
+            Debug.LogWarning("[Map] journeyDice가 없어 기본 주사위 면을 사용합니다.");
+            data.JourneyDice = DefaultJourneyDice();
+        }
         data.ApplyConfig(raw.mapConfig);
         return data;
     }
@@ -120,7 +152,8 @@ public class MapTableData
         {
             "Min_Enemy_Count", "Max_Path_Length", "Grid_Width", "Lane_Count", "Start_Columns", "Shop_Row",
             "Skip_Chance", "Shortcut_Max_Skip", "Detour_Enemy_Ratio", "Max_Gen_Attempts",
-            "Rest_Heal_Percent", "Post_Battle_Shop", "Biome_Count_To_Void"
+            "Rest_Heal_Percent", "Post_Battle_Shop", "Biome_Count_To_Void",
+            "Shop_Row_Force_Stop", "Journey_Damage_Min_Hp", "Journey_Roll_Seconds"
         };
         foreach (string key in required)
         {
@@ -146,6 +179,9 @@ public class MapTableData
             case "Rest_Heal_Percent": Config.RestHealPercent = ParseInt(entry.Value, Config.RestHealPercent); break;
             case "Post_Battle_Shop": Config.PostBattleShop = ParseBool(entry.Value); break;
             case "Biome_Count_To_Void": Config.BiomeCountToVoid = ParseInt(entry.Value, Config.BiomeCountToVoid); break;
+            case "Shop_Row_Force_Stop": Config.ShopRowForceStop = ParseBool(entry.Value); break;
+            case "Journey_Damage_Min_Hp": Config.JourneyDamageMinHp = ParseInt(entry.Value, Config.JourneyDamageMinHp); break;
+            case "Journey_Roll_Seconds": Config.JourneyRollSeconds = ParseFloat(entry.Value, Config.JourneyRollSeconds); break;
         }
     }
 
@@ -195,12 +231,17 @@ public class MapTableData
         switch (type)
         {
             case MapNodeType.Enemy: return row.Enemy_W;
+            case MapNodeType.Elite: return row.Elite_W;
             case MapNodeType.Encounter: return row.Encounter_W;
-            case MapNodeType.Shop: return row.Shop_W;
-            case MapNodeType.Opel: return row.Opel_W;
             case MapNodeType.Rest: return row.Rest_W;
             default: return 0;
         }
+    }
+
+    public int GetShopWeight(BiomeType biome)
+    {
+        BiomeWeightRow row = GetWeights(biome);
+        return row != null ? row.Shop_W : 0;
     }
 
     public MapNodeTypeRow GetNodeRule(MapNodeType type)
@@ -219,10 +260,13 @@ public class MapTableData
         switch (type)
         {
             case MapNodeType.Enemy: return "Node_Enemy";
+            case MapNodeType.Elite: return "Node_Elite";
             case MapNodeType.Boss: return "Node_Boss";
             case MapNodeType.Encounter: return "Node_Encounter";
-            case MapNodeType.Shop: return "Node_Shop";
-            case MapNodeType.Opel: return "Node_Opel";
+            case MapNodeType.ShopNyaon: return "Node_Shop_Nyaon";
+            case MapNodeType.ShopRonan: return "Node_Shop_Ronan";
+            case MapNodeType.ShopOpel: return "Node_Shop_Opel";
+            case MapNodeType.Portal: return "Node_Portal";
             case MapNodeType.Rest: return "Node_Rest";
             default: return "Node_Enemy";
         }
@@ -233,13 +277,65 @@ public class MapTableData
         switch (nodeId)
         {
             case "Node_Enemy": type = MapNodeType.Enemy; return true;
+            case "Node_Elite": type = MapNodeType.Elite; return true;
             case "Node_Boss": type = MapNodeType.Boss; return true;
             case "Node_Encounter": type = MapNodeType.Encounter; return true;
-            case "Node_Shop": type = MapNodeType.Shop; return true;
-            case "Node_Opel": type = MapNodeType.Opel; return true;
+            case "Node_Shop_Nyaon": type = MapNodeType.ShopNyaon; return true;
+            case "Node_Shop_Ronan": type = MapNodeType.ShopRonan; return true;
+            case "Node_Shop_Opel": type = MapNodeType.ShopOpel; return true;
+            case "Node_Portal": type = MapNodeType.Portal; return true;
             case "Node_Rest": type = MapNodeType.Rest; return true;
             default: type = MapNodeType.Enemy; return false;
         }
+    }
+
+    public static bool IsCombatNode(MapNodeType type)
+    {
+        return type == MapNodeType.Enemy || type == MapNodeType.Elite || type == MapNodeType.Portal;
+    }
+
+    public static bool TryParseJourneyType(string type, out JourneyFaceType faceType)
+    {
+        faceType = JourneyFaceType.Move;
+        if (string.IsNullOrEmpty(type)) return false;
+        return Enum.TryParse(type, true, out faceType);
+    }
+
+    public static bool IsJourneyMove(JourneyDiceFace face)
+    {
+        return face != null && TryParseJourneyType(face.Type, out JourneyFaceType kind) && kind == JourneyFaceType.Move;
+    }
+
+    public static string FormatJourneyFace(JourneyDiceFace face)
+    {
+        if (face == null) return "";
+        if (!TryParseJourneyType(face.Type, out JourneyFaceType kind))
+            return face.Value.ToString(CultureInfo.InvariantCulture);
+        switch (kind)
+        {
+            case JourneyFaceType.Damage: return "-" + face.Value.ToString(CultureInfo.InvariantCulture);
+            case JourneyFaceType.Gold: return "+" + face.Value.ToString(CultureInfo.InvariantCulture) + "G";
+            case JourneyFaceType.Heal: return "+" + face.Value.ToString(CultureInfo.InvariantCulture);
+            default: return face.Value.ToString(CultureInfo.InvariantCulture);
+        }
+    }
+
+    static List<JourneyDiceFace> DefaultJourneyDice()
+    {
+        return new List<JourneyDiceFace>
+        {
+            Face(1, "Move", 1, "1칸 이동"),
+            Face(2, "Move", 2, "1~2칸 중 선택 이동"),
+            Face(3, "Move", 3, "1~3칸 중 선택 이동"),
+            Face(4, "Damage", 4, "해골: 체력 4 감소 후 다시 굴림"),
+            Face(5, "Gold", 5, "골드 5 획득 후 다시 굴림"),
+            Face(6, "Heal", 6, "하트: 체력 6 회복 후 다시 굴림")
+        };
+    }
+
+    static JourneyDiceFace Face(int face, string type, int value, string desc)
+    {
+        return new JourneyDiceFace { Face = face, Type = type, Value = value, Desc_KR = desc };
     }
 
     public string GetNodeName(MapNodeType type)

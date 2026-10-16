@@ -14,6 +14,8 @@ public class StageManager
     public int currentNodeId = -1;
     public bool currentNodeCleared;
     public List<int> visitedNodeIds = new List<int>();
+    public List<int> passedNodeIds = new List<int>();
+    public int pendingJourneyMove;
 
     // 게임 시작 시 첫 바이옴(숲)을 강제로 세팅하는 로직
     public void InitFirstBiome(List<BiomeDataSO> biomeList)
@@ -68,8 +70,7 @@ public class StageManager
         biomeIndex = 0;
         currentNodeId = -1;
         currentNodeCleared = false;
-        if (visitedNodeIds == null) visitedNodeIds = new List<int>();
-        visitedNodeIds.Clear();
+        ClearMapTrail();
         currentMap = null;
     }
 
@@ -77,8 +78,7 @@ public class StageManager
     {
         currentNodeId = -1;
         currentNodeCleared = false;
-        if (visitedNodeIds == null) visitedNodeIds = new List<int>();
-        visitedNodeIds.Clear();
+        ClearMapTrail();
         currentMap = biome == BiomeType.Void || table == null
             ? null
             : MapGenerator.Generate(runSeed, biomeIndex, biome, table);
@@ -104,5 +104,14 @@ public class StageManager
 
         int span = Mathf.Max(1, config.MaxPathLength - 1);
         currentStage = biomeIndex * 10 + 1 + (node.row * config.MinEnemyCount / span);
+    }
+
+    public void ClearMapTrail()
+    {
+        pendingJourneyMove = 0;
+        if (visitedNodeIds == null) visitedNodeIds = new List<int>();
+        visitedNodeIds.Clear();
+        if (passedNodeIds == null) passedNodeIds = new List<int>();
+        passedNodeIds.Clear();
     }
 }
