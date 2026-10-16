@@ -17,8 +17,8 @@ public class DiceDestructionPanel : MonoBehaviour
         if (isBusy) return;
         diceManager = dm;
 
-        // 덱에서 주사위를 랜덤으로 최대 5개 추출 (GetRandomDiceForCoating 재사용)
-        List<DiceData1> options = dm.deckManager.GetRandomDiceForCoating(5);
+        // 덱에서 주사위를 랜덤으로 최대 5개 추출 (여정 주사위는 파괴 후보에서 제외)
+        List<DiceData1> options = dm.deckManager.GetRandomDiceForDestruction(5);
 
         if (options.Count == 0)
         {
@@ -54,6 +54,9 @@ public class DiceDestructionPanel : MonoBehaviour
     {
         if (isBusy) return;
         if (diceManager == null || selectedDice == null) return;
+
+        // 여정 주사위는 어떤 경로로도 파괴할 수 없다(방어 코드).
+        if (DeckManager.IsProtected(selectedDice)) return;
 
         // 선택한 주사위를 덱(masterDeck)에서 영구 삭제
         if (diceManager.masterDeck.Remove(selectedDice))

@@ -135,20 +135,6 @@ public class ShopStockTable
         return count;
     }
 
-    public ShopManager.MapMerchant RollMerchant()
-    {
-        int nyaon = Mathf.Max(0, Weights.Nyaon);
-        int ronan = Mathf.Max(0, Weights.Ronan);
-        int opel = Mathf.Max(0, Weights.Opel);
-        int total = nyaon + ronan + opel;
-        if (total <= 0) return (ShopManager.MapMerchant)UnityEngine.Random.Range(0, 3);
-
-        int roll = UnityEngine.Random.Range(0, total);
-        if (roll < nyaon) return ShopManager.MapMerchant.Nyaon;
-        if (roll < nyaon + ronan) return ShopManager.MapMerchant.Ronan;
-        return ShopManager.MapMerchant.Opel;
-    }
-
     public List<string> MissingNames(IList<BaseItemDataSO> pool)
     {
         var have = new HashSet<string>();

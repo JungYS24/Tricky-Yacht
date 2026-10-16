@@ -126,6 +126,12 @@ public class DiceManager : MonoBehaviour
     public OpelPanel opelPanel;
     public MapIconSet mapIconSet;
 
+    // 다음 전투에 강제할 몬스터. Enemy.Initialize가 쓰면 비웁니다.
+    [System.NonSerialized] public MonsterDataSO pendingForcedMonster;
+    // TODO: 엘리트 몬스터 풀
+    [System.NonSerialized] public bool isEliteBattle;
+    [System.NonSerialized] public bool mapBossBattle;
+
     MapTableData cachedMapTable;
     bool pendingBiomeTransition;
 
@@ -280,7 +286,7 @@ public class DiceManager : MonoBehaviour
         else
         {
             currentPlayerHP = playerMaxHP;
-            deckManager.InitializeMasterDeck();
+            deckManager.InitializeMasterDeck(JourneyDice.FindSource());
 
             // 첫 시작은 무조건 숲(Forest)으로 고정
             currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
@@ -603,8 +609,16 @@ public class DiceManager : MonoBehaviour
         int finalHeal = calcResult.expectedHeal;
         int expectedGold = calcResult.expectedGold; // 코인 주사위 등에서 얻은 골드
 
+        // 면 효과가 Coin이라 골드를 준 주사위(코인 날아가기 연출 대상)
+        var coinDice = new List<Dice>();
+        foreach (var d in keptDice)
+        {
+            if (d == null || d.myData == null || d.currentValue <= 0) continue;
+            if (d.myData.GetFaceEffect(d.ResolveFaceIndex()) == SpecialDieEffect.Coin) coinDice.Add(d);
+        }
+
         // 완벽하게 쪼개진 수치들을 전투 지휘관(CombatFlowController)에게 전달
-        yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, total.damage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName
+        yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, total.damage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName, calcResult.selfDamage, coinDice
         ));
         ui?.ClearMergedHandDamageText();
     }
@@ -958,8 +972,8 @@ public class DiceManager : MonoBehaviour
         // 낡은 변수 대신 우리가 만든 상태 초기화 함수를 씀
         playerStatus.ResetStatus(100);
 
-        //덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 20개로)
-        deckManager.InitializeMasterDeck();
+        //덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 11개 + 여정 주사위 1개로)
+        deckManager.InitializeMasterDeck(JourneyDice.FindSource());
 
         //골드 초기화 (ShopManager 참조)
         if (shopManager != null)
@@ -1038,14 +1052,24 @@ public class DiceManager : MonoBehaviour
         return length;
     }
 
+    public bool CanRollJourney()
+    {
+        if (!UsesMapFlow) return false;
+        if (stageProgression.pendingJourneyMove > 0) return false;
+        if (stageProgression.currentNodeId >= 0 && !stageProgression.currentNodeCleared) return false;
+        return true;
+    }
+
     public bool IsMapNodeSelectable(int nodeId)
     {
         MapNode node = stageProgression.FindNode(nodeId);
         if (node == null) return false;
-        if (stageProgression.currentNodeId < 0) return node.row == 0;
-        if (!stageProgression.currentNodeCleared) return false;
-        MapNode current = stageProgression.FindNode(stageProgression.currentNodeId);
-        return current != null && current.children.Contains(nodeId);
+        int move = stageProgression.pendingJourneyMove;
+        if (move <= 0) return false;
+        if (stageProgression.currentNodeId >= 0 && !stageProgression.currentNodeCleared) return false;
+        MapTableData table = GetMapTable();
+        bool forceStop = table == null || table.Config.ShopRowForceStop;
+        return MapJourney.IsReachable(stageProgression.currentMap, stageProgression.currentNodeId, nodeId, move, forceStop);
     }
 
     public void EnterMapNode(int nodeId)
@@ -1054,6 +1078,18 @@ public class DiceManager : MonoBehaviour
         MapNode node = stageProgression.FindNode(nodeId);
         if (node == null || !IsMapNodeSelectable(nodeId)) return;
 
+        MapTableData table = GetMapTable();
+        bool forceStop = table == null || table.Config.ShopRowForceStop;
+        int move = stageProgression.pendingJourneyMove;
+        List<int> passed = MapJourney.PassedOnWay(stageProgression.currentMap, stageProgression.currentNodeId, nodeId, move, forceStop);
+        if (stageProgression.passedNodeIds == null) stageProgression.passedNodeIds = new List<int>();
+        for (int i = 0; i < passed.Count; i++)
+        {
+            if (!stageProgression.passedNodeIds.Contains(passed[i]))
+                stageProgression.passedNodeIds.Add(passed[i]);
+        }
+
+        stageProgression.pendingJourneyMove = 0;
         stageProgression.currentNodeId = nodeId;
         stageProgression.currentNodeCleared = false;
         if (stageProgression.visitedNodeIds == null) stageProgression.visitedNodeIds = new List<int>();
@@ -1061,10 +1097,165 @@ public class DiceManager : MonoBehaviour
             stageProgression.visitedNodeIds.Add(nodeId);
 
         pendingBiomeTransition = false;
-        MapTableData table = GetMapTable();
         if (table != null) stageProgression.ApplyNodeDifficulty(node, table.Config);
         SaveMapProgress();
         OpenCurrentNode(node);
+    }
+
+    // 지도 굴림에 쓰는 덱의 여정 주사위. 못 찾으면 null이며, 굴림은 기본 면 구성으로 대신한다.
+    public DiceData1 GetJourneyDiceData() => JourneyDice.Find(deckManager.masterDeck);
+
+    // 여정 주사위 면 스프라이트. 에셋 스프라이트가 없으면 기본 주사위 눈금 이미지로 대신한다.
+    public Sprite GetJourneyFaceSprite(DiceData1 die, int pips)
+    {
+        if (die != null && die.customFaceSprites != null && die.customFaceSprites.Length > 0)
+        {
+            int index = die.customFaceSprites.Length == 1 ? 0 : Mathf.Clamp(pips - 1, 0, die.customFaceSprites.Length - 1);
+            if (die.customFaceSprites[index] != null) return die.customFaceSprites[index];
+        }
+        Dice prefabDice = dicePrefab != null ? dicePrefab.GetComponent<Dice>() : null;
+        if (prefabDice != null && prefabDice.diceFaceSprites != null && prefabDice.diceFaceSprites.Length > 0)
+            return prefabDice.diceFaceSprites[Mathf.Clamp(pips - 1, 0, prefabDice.diceFaceSprites.Length - 1)];
+        return null;
+    }
+
+    // 굴림 연출 중 빠르게 바꿔 보여 줄 면 스프라이트 하나(무작위 면)
+    public Sprite RandomJourneyFaceSprite()
+    {
+        DiceData1 die = GetJourneyDiceData() ?? JourneyDice.CreateDefault();
+        int pips = die.faceValues[JourneyDice.RollFaceIndex(die)];
+        return GetJourneyFaceSprite(die, pips);
+    }
+
+    // 여정 주사위의 면 하나를 굴려 결과를 계산한다. 상태는 바꾸지 않는다.
+    // 덱에서 여정 주사위를 못 찾아도 기본 면 구성({1~6}, {없음×3, 가시, 하트, 코인})으로 굴려 멈추지 않는다.
+    public JourneyRollResult RollJourneyFace()
+    {
+        DiceData1 die = GetJourneyDiceData();
+        if (die == null || die.faceValues == null || die.faceValues.Length == 0)
+            die = JourneyDice.CreateDefault();
+
+        int faceIndex = JourneyDice.RollFaceIndex(die);
+        int pips = die.faceValues[faceIndex];
+        SpecialDieEffect effect = die.GetFaceEffect(faceIndex);
+        MapTableData table = GetMapTable();
+
+        var result = new JourneyRollResult
+        {
+            faceIndex = faceIndex,
+            pips = pips,
+            effect = effect,
+            faceSprite = GetJourneyFaceSprite(die, pips)
+        };
+
+        // 지도에서는 면 효과만 쓴다. 코팅·위성 효과는 전투 결산에서만 적용한다.
+        switch (effect)
+        {
+            case SpecialDieEffect.Thorn:
+                result.outcome = JourneyOutcome.Damage;
+                result.amount = Mathf.Max(0, pips);
+                break;
+            case SpecialDieEffect.Heart:
+                result.outcome = JourneyOutcome.Heal;
+                float healMult = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetHealMultiplier() : 1f;
+                result.amount = Mathf.Max(0, TurnCalculator.CalculateHeartHeal(pips, healMult));
+                break;
+            case SpecialDieEffect.Coin:
+                result.outcome = JourneyOutcome.Gold;
+                int goldPerPip = table != null ? table.Config.JourneyMapGoldPerPip : 10;
+                result.amount = Mathf.Max(0, pips * goldPerPip);
+                break;
+            default:
+                result.outcome = JourneyOutcome.Move;
+                result.amount = Mathf.Max(1, pips);
+                break;
+        }
+        return result;
+    }
+
+    // 굴림 결과를 적용한다. 이동이면 true(이동 칸 수 대기), 그 외 효과는 바로 적용하고 false를 돌려준다.
+    public bool ApplyJourneyResult(JourneyRollResult result)
+    {
+        return ApplyJourneyResult(result, out _, false);
+    }
+
+    // appliedAmount: 실제로 깎인 체력 / 회복된 체력 / 지급된 골드(이동이면 0)
+    // deferGoldUi: 골드 숫자 갱신을 코인 날아가기 연출에 맡길 때 true(실제 골드는 바로 올라간다)
+    public bool ApplyJourneyResult(JourneyRollResult result, out int appliedAmount, bool deferGoldUi)
+    {
+        appliedAmount = 0;
+        if (!CanRollJourney()) return false;
+        bool move = result.outcome == JourneyOutcome.Move;
+        if (move)
+            stageProgression.pendingJourneyMove = Mathf.Max(1, result.amount);
+        else
+        {
+            stageProgression.pendingJourneyMove = 0;
+            appliedAmount = ApplyJourneyEffect(result, deferGoldUi);
+        }
+        SaveMapProgress();
+        return move;
+    }
+
+    int ApplyJourneyEffect(JourneyRollResult result, bool deferGoldUi)
+    {
+        MapTableData table = GetMapTable();
+        switch (result.outcome)
+        {
+            case JourneyOutcome.Damage:
+                {
+                    // 지도 피해는 최소 체력 아래로 내려가지 않는다. 이미 그보다 낮으면 더 깎지 않는다.
+                    int minHp = table != null ? table.Config.JourneyDamageMinHp : 1;
+                    int hpBefore = currentPlayerHP;
+                    currentPlayerHP = Mathf.Min(currentPlayerHP, Mathf.Max(minHp, currentPlayerHP - result.amount));
+                    int hpLost = Mathf.Max(0, hpBefore - currentPlayerHP);
+                    UpdateMainUI("");
+                    // 몬스터에게 맞았을 때와 같은 화면 붉어짐·피격음(실제로 깎인 체력이 있을 때만)
+                    if (hpLost > 0)
+                    {
+                        HurtVignetteController.Get(this).PlayShieldOrHealthHit(ui, 0, hpLost, playerStatus.currentShield);
+                        PlayPlayerHurtSound();
+                    }
+                    return hpLost;
+                }
+            case JourneyOutcome.Gold:
+                // 전투와 같은 경로로 지급한다(피규어 골드 증가 효과 포함). 화면 숫자는 deferGoldUi면 코인 연출이 올린다.
+                return shopManager != null ? shopManager.GrantGold(result.amount, deferGoldUi) : 0;
+            case JourneyOutcome.Heal:
+                {
+                    int hpBefore = currentPlayerHP;
+                    playerStatus.Heal(result.amount);
+                    UpdateMainUI("");
+                    return Mathf.Max(0, currentPlayerHP - hpBefore);
+                }
+        }
+        return 0;
+    }
+
+    public MonsterDataSO RollPortalMonster(MapNode node)
+    {
+        var pool = new List<MonsterDataSO>();
+        if (biomeList == null || node == null) return null;
+        for (int i = 0; i < biomeList.Count; i++)
+        {
+            BiomeDataSO biome = biomeList[i];
+            if (biome == null || biome.biomeType == BiomeType.Void) continue;
+            if (biome.biomeMonsters != null)
+            {
+                for (int m = 0; m < biome.biomeMonsters.Count; m++)
+                {
+                    if (biome.biomeMonsters[m] != null)
+                        pool.Add(biome.biomeMonsters[m]);
+                }
+            }
+            if (biome.bossMonster != null)
+                pool.Add(biome.bossMonster);
+        }
+        if (pool.Count == 0) return null;
+
+        int mapSeed = stageProgression.currentMap != null ? stageProgression.currentMap.seed : 0;
+        var rng = new System.Random(unchecked(mapSeed + node.id));
+        return pool[rng.Next(pool.Count)];
     }
 
     public void ReturnToMap()
@@ -1137,6 +1328,10 @@ public class DiceManager : MonoBehaviour
             stageProgression.visitedNodeIds = data.visitedNodeIds != null
                 ? new List<int>(data.visitedNodeIds)
                 : new List<int>();
+            stageProgression.passedNodeIds = data.passedNodeIds != null
+                ? new List<int>(data.passedNodeIds)
+                : new List<int>();
+            stageProgression.pendingJourneyMove = data.pendingJourneyMove;
         }
 
         BiomeType biome = currentBiome != null ? currentBiome.biomeType : BiomeType.Forest;
@@ -1147,8 +1342,7 @@ public class DiceManager : MonoBehaviour
         {
             stageProgression.currentNodeId = -1;
             stageProgression.currentNodeCleared = false;
-            if (stageProgression.visitedNodeIds == null) stageProgression.visitedNodeIds = new List<int>();
-            stageProgression.visitedNodeIds.Clear();
+            stageProgression.ClearMapTrail();
         }
         EnsureMapUi();
     }
@@ -1178,9 +1372,17 @@ public class DiceManager : MonoBehaviour
         switch (node.type)
         {
             case MapNodeType.Enemy:
+                BeginMapCombat(false, false, null);
+                break;
+            case MapNodeType.Elite:
+                // TODO: 엘리트 몬스터 풀
+                BeginMapCombat(true, false, null);
+                break;
             case MapNodeType.Boss:
-                ShowCombatScreen();
-                StartNewStage();
+                BeginMapCombat(false, true, null);
+                break;
+            case MapNodeType.Portal:
+                BeginMapCombat(false, false, RollPortalMonster(node));
                 break;
             case MapNodeType.Encounter:
                 HideMapOverlays();
@@ -1193,12 +1395,15 @@ public class DiceManager : MonoBehaviour
                 SetHudActive("Book_Button", false);
                 SetHudActive("Deck_BTN", false);
                 break;
-            case MapNodeType.Shop:
-            case MapNodeType.Opel:
+            case MapNodeType.ShopNyaon:
+            case MapNodeType.ShopRonan:
+            case MapNodeType.ShopOpel:
                 HideMapOverlays();
                 SetBoardVisible(false);
-                if (shopManager != null) shopManager.OpenMapShop();
-                else ReturnToMap();
+                if (shopManager != null)
+                    shopManager.OpenMapShop(MerchantFor(node.type));
+                else
+                    ReturnToMap();
                 PlaceTravelChrome();
                 break;
             case MapNodeType.Rest:
@@ -1208,6 +1413,25 @@ public class DiceManager : MonoBehaviour
                 else ReturnToMap();
                 PlaceTravelChrome();
                 break;
+        }
+    }
+
+    void BeginMapCombat(bool elite, bool boss, MonsterDataSO forcedMonster)
+    {
+        isEliteBattle = elite;
+        mapBossBattle = boss;
+        pendingForcedMonster = forcedMonster;
+        ShowCombatScreen();
+        StartNewStage();
+    }
+
+    static ShopManager.MapMerchant MerchantFor(MapNodeType type)
+    {
+        switch (type)
+        {
+            case MapNodeType.ShopRonan: return ShopManager.MapMerchant.Ronan;
+            case MapNodeType.ShopOpel: return ShopManager.MapMerchant.Opel;
+            default: return ShopManager.MapMerchant.Nyaon;
         }
     }
 
@@ -1244,10 +1468,17 @@ public class DiceManager : MonoBehaviour
         if (stage == null || stage.currentMap == null) return true;
         if (stage.currentNodeId >= 0 && stage.FindNode(stage.currentNodeId) == null)
             return false;
-        if (stage.visitedNodeIds == null) return true;
-        for (int i = 0; i < stage.visitedNodeIds.Count; i++)
+        if (!NodeListMatches(stage, stage.visitedNodeIds)) return false;
+        if (!NodeListMatches(stage, stage.passedNodeIds)) return false;
+        return true;
+    }
+
+    static bool NodeListMatches(StageManager stage, List<int> ids)
+    {
+        if (ids == null) return true;
+        for (int i = 0; i < ids.Count; i++)
         {
-            if (stage.FindNode(stage.visitedNodeIds[i]) == null)
+            if (stage.FindNode(ids[i]) == null)
                 return false;
         }
         return true;

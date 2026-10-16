@@ -29,9 +29,12 @@ public class MapNodeView : MonoBehaviour
             icon.type = Image.Type.Simple;
             icon.sprite = sprite;
             icon.preserveAspect = sprite != null;
-            icon.color = sprite != null ? Color.white : color;
+            Color shown = sprite != null ? Color.white : color;
+            if (visited && !current && !interactable)
+                shown.a = 0.42f;
+            icon.color = shown;
         }
-        if (ring != null) ring.enabled = false;
+        if (ring != null) ring.enabled = current;
 
         RectTransform rect = transform as RectTransform;
         float size = interactable ? 108f : 56f;

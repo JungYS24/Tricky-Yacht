@@ -159,6 +159,8 @@ public static class MapGenerator
             return false;
         if (!RepairDetours(nodes, table))
             return false;
+        if (!PlacePortals(rng, nodes, table))
+            return false;
         if (!Validate(nodes, boss.id, table))
             return false;
 
@@ -279,7 +281,7 @@ public static class MapGenerator
             id = nodes.Count,
             row = row,
             col = col,
-            type = row == cfg.MaxPathLength ? MapNodeType.Boss : (shopRow ? MapNodeType.Shop : MapNodeType.Enemy),
+            type = row == cfg.MaxPathLength ? MapNodeType.Boss : MapNodeType.Enemy,
             isShortcut = shortcut,
             isShopRow = shopRow
         };
@@ -342,9 +344,12 @@ public static class MapGenerator
             return row != 0 ? row : nodes[a].col.CompareTo(nodes[b].col);
         });
 
-        var counts = new int[6];
-        var pool = new List<MapNodeType>(5);
-        var weights = new List<int>(5);
+        AssignShopRow(rng, nodes);
+
+        int typeCount = System.Enum.GetValues(typeof(MapNodeType)).Length;
+        var counts = new int[typeCount];
+        var options = new List<GenOption>(6);
+        var shopChoices = new List<MapNodeType>(3);
 
         for (int i = 0; i < order.Count; i++)
         {
@@ -355,10 +360,7 @@ public static class MapGenerator
                 continue;
             }
             if (node.isShopRow)
-            {
-                node.type = MapNodeType.Shop;
                 continue;
-            }
             if (node.row == 0 || node.isShortcut)
             {
                 node.type = MapNodeType.Enemy;
@@ -366,38 +368,115 @@ public static class MapGenerator
                 continue;
             }
 
-            pool.Clear();
-            weights.Clear();
-            AddCandidate(pool, weights, nodes, node, MapNodeType.Enemy, counts, biome, table);
-            AddCandidate(pool, weights, nodes, node, MapNodeType.Encounter, counts, biome, table);
-            AddCandidate(pool, weights, nodes, node, MapNodeType.Shop, counts, biome, table);
-            AddCandidate(pool, weights, nodes, node, MapNodeType.Rest, counts, biome, table);
+            options.Clear();
+            shopChoices.Clear();
+            AddCandidate(options, nodes, node, MapNodeType.Enemy, counts, biome, table);
+            AddCandidate(options, nodes, node, MapNodeType.Elite, counts, biome, table);
+            AddCandidate(options, nodes, node, MapNodeType.Encounter, counts, biome, table);
+            AddCandidate(options, nodes, node, MapNodeType.Rest, counts, biome, table);
+            CollectShopChoices(shopChoices, nodes, node, counts, table);
+            if (shopChoices.Count > 0)
+            {
+                int shopWeight = table.GetShopWeight(biome);
+                if (shopWeight > 0)
+                    options.Add(new GenOption { shopBucket = true, weight = shopWeight });
+            }
 
-            MapNodeType picked = PickWeighted(rng, pool, weights);
+            MapNodeType picked = PickOption(rng, options, shopChoices);
             node.type = picked;
-            counts[(int)picked]++;
+            if ((int)picked >= 0 && (int)picked < counts.Length)
+                counts[(int)picked]++;
         }
         return true;
     }
 
-    static void AddCandidate(List<MapNodeType> pool, List<int> weights, List<MapNode> nodes, MapNode node, MapNodeType type, int[] counts, BiomeType biome, MapTableData table)
+    struct GenOption
     {
-        if (type != MapNodeType.Enemy)
-        {
-            MapNodeTypeRow rule = table.GetNodeRule(type);
-            if (rule == null) return;
-            if (node.row < rule.Min_Row) return;
-            if (counts[(int)type] >= rule.Max_Per_Map) return;
-            if (rule.Is_Facility && ParentHasType(nodes, node, type)) return;
-        }
+        public bool shopBucket;
+        public MapNodeType type;
+        public int weight;
+    }
 
+    static readonly MapNodeType[] ShopKinds =
+    {
+        MapNodeType.ShopNyaon, MapNodeType.ShopRonan, MapNodeType.ShopOpel
+    };
+
+    // 상인 고정층은 3종을 깔아 둔다. 노드가 3개 이상이면 각 상인이 최소 한 번씩 나온다.
+    static void AssignShopRow(System.Random rng, List<MapNode> nodes)
+    {
+        var shops = new List<MapNode>();
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            if (nodes[i] != null && nodes[i].isShopRow)
+                shops.Add(nodes[i]);
+        }
+        if (shops.Count == 0) return;
+
+        Shuffle(shops, rng);
+        var kinds = new List<MapNodeType>(ShopKinds);
+        Shuffle(kinds, rng);
+        bool coverAll = shops.Count >= kinds.Count;
+        for (int i = 0; i < shops.Count; i++)
+        {
+            shops[i].type = coverAll && i < kinds.Count
+                ? kinds[i]
+                : kinds[rng.Next(kinds.Count)];
+        }
+    }
+
+    static void AddCandidate(List<GenOption> options, List<MapNode> nodes, MapNode node, MapNodeType type, int[] counts, BiomeType biome, MapTableData table)
+    {
+        if (!CanPlace(nodes, node, type, counts, table)) return;
         int weight = table.GetWeight(biome, type);
-        if (type == MapNodeType.Shop)
-            weight += table.GetWeight(biome, MapNodeType.Opel);
         if (type == MapNodeType.Enemy && weight <= 0) weight = 1;
         if (weight <= 0) return;
-        pool.Add(type);
-        weights.Add(weight);
+        options.Add(new GenOption { type = type, weight = weight });
+    }
+
+    static void CollectShopChoices(List<MapNodeType> shopChoices, List<MapNode> nodes, MapNode node, int[] counts, MapTableData table)
+    {
+        for (int i = 0; i < ShopKinds.Length; i++)
+        {
+            if (CanPlace(nodes, node, ShopKinds[i], counts, table))
+                shopChoices.Add(ShopKinds[i]);
+        }
+    }
+
+    static bool CanPlace(List<MapNode> nodes, MapNode node, MapNodeType type, int[] counts, MapTableData table)
+    {
+        if (type == MapNodeType.Enemy) return true;
+        MapNodeTypeRow rule = table.GetNodeRule(type);
+        if (rule == null) return false;
+        if (node.row < rule.Min_Row) return false;
+        int index = (int)type;
+        if (index < 0 || index >= counts.Length) return false;
+        if (counts[index] >= rule.Max_Per_Map) return false;
+        if (rule.Is_Facility && ParentHasType(nodes, node, type)) return false;
+        return true;
+    }
+
+    static bool PlacePortals(System.Random rng, List<MapNode> nodes, MapTableData table)
+    {
+        MapNodeTypeRow rule = table.GetNodeRule(MapNodeType.Portal);
+        if (rule == null || rule.Max_Per_Map <= 0) return rule == null || rule.Min_Per_Map <= 0;
+
+        var candidates = new List<MapNode>();
+        int bossRow = table.Config.MaxPathLength;
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            MapNode node = nodes[i];
+            if (node == null || node.type != MapNodeType.Enemy || node.isShopRow) continue;
+            if (node.row < rule.Min_Row || node.row >= bossRow) continue;
+            candidates.Add(node);
+        }
+        if (candidates.Count < rule.Min_Per_Map) return false;
+
+        Shuffle(candidates, rng);
+        int place = Math.Min(rule.Max_Per_Map, candidates.Count);
+        for (int i = 0; i < place; i++)
+            candidates[i].type = MapNodeType.Portal;
+        return place >= rule.Min_Per_Map;
     }
 
     static bool ParentHasType(List<MapNode> nodes, MapNode node, MapNodeType type)
@@ -411,18 +490,21 @@ public static class MapGenerator
         return false;
     }
 
-    static MapNodeType PickWeighted(System.Random rng, List<MapNodeType> pool, List<int> weights)
+    static MapNodeType PickOption(System.Random rng, List<GenOption> options, List<MapNodeType> shopChoices)
     {
         int sum = 0;
-        for (int i = 0; i < weights.Count; i++) sum += weights[i];
-        if (sum <= 0 || pool.Count == 0) return MapNodeType.Enemy;
+        for (int i = 0; i < options.Count; i++) sum += options[i].weight;
+        if (sum <= 0 || options.Count == 0) return MapNodeType.Enemy;
 
         int roll = rng.Next(sum);
         int acc = 0;
-        for (int i = 0; i < pool.Count; i++)
+        for (int i = 0; i < options.Count; i++)
         {
-            acc += weights[i];
-            if (roll < acc) return pool[i];
+            acc += options[i].weight;
+            if (roll >= acc) continue;
+            if (!options[i].shopBucket) return options[i].type;
+            if (shopChoices == null || shopChoices.Count == 0) return MapNodeType.Enemy;
+            return shopChoices[rng.Next(shopChoices.Count)];
         }
         return MapNodeType.Enemy;
     }
@@ -521,7 +603,7 @@ public static class MapGenerator
 
             if (node.row == 0)
             {
-                best[index][1].enemies = node.type == MapNodeType.Enemy ? 1 : 0;
+                best[index][1].enemies = MapTableData.IsCombatNode(node.type) ? 1 : 0;
                 best[index][1].prevId = -1;
                 best[index][1].prevLen = 0;
             }
@@ -539,7 +621,7 @@ public static class MapGenerator
                     int nextLen = child.isShopRow ? pathLen : pathLen + 1;
                     if (nextLen >= best[childId].Length) continue;
                     int enemies = from[pathLen].enemies;
-                    if (!child.isShopRow && child.type == MapNodeType.Enemy)
+                    if (!child.isShopRow && MapTableData.IsCombatNode(child.type))
                         enemies++;
                     if (best[childId][nextLen].enemies < 0 || enemies < best[childId][nextLen].enemies)
                     {
@@ -563,18 +645,19 @@ public static class MapGenerator
     static bool Validate(List<MapNode> nodes, int bossId, MapTableData table)
     {
         MapConfig cfg = table.Config;
-        var counts = new int[6];
+        int typeCount = System.Enum.GetValues(typeof(MapNodeType)).Length;
+        var counts = new int[typeCount];
         for (int i = 0; i < nodes.Count; i++)
         {
             if (nodes[i].isShopRow) continue;
-            counts[(int)nodes[i].type]++;
+            int index = (int)nodes[i].type;
+            if (index >= 0 && index < counts.Length) counts[index]++;
         }
 
-        for (int t = 0; t < 6; t++)
+        for (int t = 0; t < typeCount; t++)
         {
             MapNodeTypeRow rule = table.GetNodeRule((MapNodeType)t);
             if (rule == null) continue;
-            if ((MapNodeType)t == MapNodeType.Opel) continue;
             if (counts[t] < rule.Min_Per_Map) return false;
         }
 
@@ -612,6 +695,8 @@ public static class MapGenerator
             rows.Add(row);
         }
 
+        var rng = new System.Random(mapSeed);
+        MapNodeType shopType = ShopKinds[rng.Next(ShopKinds.Length)];
         MapNode previous = null;
         for (int i = 0; i < rows.Count; i++)
         {
@@ -620,7 +705,7 @@ public static class MapGenerator
                 id = nodes.Count,
                 row = rows[i],
                 col = col,
-                type = rows[i] == cfg.ShopRow ? MapNodeType.Shop : MapNodeType.Enemy,
+                type = rows[i] == cfg.ShopRow ? shopType : MapNodeType.Enemy,
                 isShortcut = true,
                 isShopRow = rows[i] == cfg.ShopRow
             };
@@ -647,7 +732,29 @@ public static class MapGenerator
             boss.parents.Add(previous.id);
         }
 
+        SprinkleSafety(nodes, table, rng, MapNodeType.Portal);
+        SprinkleSafety(nodes, table, rng, MapNodeType.Elite);
         return new MapData { nodes = nodes, bossId = boss.id, seed = mapSeed };
+    }
+
+    static void SprinkleSafety(List<MapNode> nodes, MapTableData table, System.Random rng, MapNodeType type)
+    {
+        MapNodeTypeRow rule = table.GetNodeRule(type);
+        if (rule == null || rule.Min_Per_Map <= 0) return;
+
+        var candidates = new List<MapNode>();
+        int bossRow = table.Config.MaxPathLength;
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            MapNode node = nodes[i];
+            if (node.type != MapNodeType.Enemy || node.isShopRow) continue;
+            if (node.row < rule.Min_Row || node.row >= bossRow) continue;
+            candidates.Add(node);
+        }
+        Shuffle(candidates, rng);
+        int place = Math.Min(rule.Min_Per_Map, candidates.Count);
+        for (int i = 0; i < place; i++)
+            candidates[i].type = type;
     }
 
     static void Shuffle<T>(IList<T> list, System.Random rng)

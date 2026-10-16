@@ -1,5 +1,8 @@
+using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 // 세로로 스크롤하는 분기 맵입니다. 노드와 점선은 열·층 좌표에 다시 그립니다.
@@ -12,20 +15,45 @@ public class MapPanel : MonoBehaviour
     public RectTransform content;
     public RectTransform lineLayer;
     public RectTransform nodeLayer;
-    public RectTransform legend;
+    // 노드 설명 패널(Node_Des). 예전 필드 이름 legend의 씬 연결을 유지한다.
+    [FormerlySerializedAs("legend")]
+    public RectTransform nodeDes;
+    public Button journeyRollButton;
+    public Image journeyResultImage;
+    // 여정 주사위 보드 이미지(Journey_Result_Slot 배경). 빌드에서는 여기 연결한 값만 쓴다.
+    public Sprite journeyBoardSprite;
 
     Sprite dotSprite;
+    DiceManager boundDice;
+    Coroutine journeyRollRoutine;
+    bool journeyRolling;
+    Tween resultPopupTween;
+    GameObject resultPopupObject;
 
     public void Hide()
     {
+        StopJourneyRoll();
         gameObject.SetActive(false);
     }
 
     public void Show(DiceManager diceManager)
     {
+        StopJourneyRoll();
+        boundDice = diceManager;
         gameObject.SetActive(true);
-        MapUiHierarchy.EnsureMap(this);
+        // 굴리기 버튼은 전투의 Reroll_BTN을 복제해 쓴다.
+        Button combatRoll = diceManager != null && diceManager.ui != null ? diceManager.ui.rollButton : null;
+        MapUiHierarchy.EnsureMap(this, combatRoll);
         Rebuild(diceManager);
+    }
+
+    public void OnJourneyRoll()
+    {
+        if (journeyRolling || boundDice == null || !boundDice.CanRollJourney()) return;
+        KillResultPopup(); // 팝업이 떠 있는 동안 다시 굴리면 이전 트윈은 끄고 새로 띄운다
+        journeyRolling = true;
+        if (journeyRollButton != null) journeyRollButton.interactable = false;
+        journeyRollRoutine = StartCoroutine(PlayJourneyRoll());
     }
 
     void Rebuild(DiceManager diceManager)
@@ -79,10 +107,11 @@ public class MapPanel : MonoBehaviour
             CreateNode(diceManager, table, node, positions[node.id]);
         }
 
-        RefreshLegend(table);
-        PlaceLegend();
+        RefreshNodeDes(table);
+        PlaceNodeDes();
+        RefreshJourneyChrome(diceManager);
         Canvas.ForceUpdateCanvases();
-        FocusOnSelectable(diceManager, positions);
+        FocusOnPlayer(diceManager, positions);
     }
 
     void CreateNode(DiceManager diceManager, MapTableData table, MapNode node, Vector2 position)
@@ -107,7 +136,8 @@ public class MapPanel : MonoBehaviour
             sprite = iconSet.GetSprite(iconKey, out tint);
         bool selectable = diceManager.IsMapNodeSelectable(node.id);
         bool current = node.id == diceManager.stageProgression.currentNodeId;
-        bool visited = diceManager.stageProgression.visitedNodeIds != null && diceManager.stageProgression.visitedNodeIds.Contains(node.id);
+        bool visited = ListHas(diceManager.stageProgression.visitedNodeIds, node.id)
+            || ListHas(diceManager.stageProgression.passedNodeIds, node.id);
         view.Bind(diceManager, node.id, sprite, tint, selectable, current, visited);
         if (node.type == MapNodeType.Boss)
             view.transform.localScale = new Vector3(2.8f, 2.8f, 1f);
@@ -140,20 +170,20 @@ public class MapPanel : MonoBehaviour
         return view;
     }
 
-    void RefreshLegend(MapTableData table)
+    void RefreshNodeDes(MapTableData table)
     {
-        if (legend == null || table == null) return;
-        MapNodeType[] types =
+        if (nodeDes == null || table == null) return;
+        for (int i = 0; i < MapLegend.Retired.Length; i++)
         {
-            MapNodeType.Enemy, MapNodeType.Boss, MapNodeType.Encounter,
-            MapNodeType.Shop, MapNodeType.Opel, MapNodeType.Rest
-        };
-        string[] names = { "Enemy", "Boss", "Encounter", "Shop", "Opel", "Rest" };
-        for (int i = 0; i < names.Length; i++)
+            Transform retired = nodeDes.Find(MapLegend.Retired[i]);
+            if (retired != null) retired.gameObject.SetActive(false);
+        }
+        for (int i = 0; i < MapLegend.Names.Length; i++)
         {
-            Transform item = legend.Find(names[i]);
+            Transform item = nodeDes.Find(MapLegend.Names[i]);
             if (item == null) continue;
-            MapNodeTypeRow rule = table.GetNodeRule(types[i]);
+            item.gameObject.SetActive(true);
+            MapNodeTypeRow rule = table.GetNodeRule(MapLegend.Types[i]);
             string iconKey = rule != null ? rule.Icon_Key : null;
             Sprite sprite = iconSet != null ? iconSet.GetSprite(iconKey, out _) : null;
             Image icon = item.Find("Icon") != null ? item.Find("Icon").GetComponent<Image>() : null;
@@ -164,25 +194,33 @@ public class MapPanel : MonoBehaviour
                 icon.preserveAspect = true;
             }
             Text label = item.Find("Label") != null ? item.Find("Label").GetComponent<Text>() : null;
-            if (label != null) label.text = table.GetNodeName(types[i]);
-            item.gameObject.SetActive(names[i] != "Opel");
+            if (label != null) label.text = table.GetNodeName(MapLegend.Types[i]);
         }
     }
 
-    void FocusOnSelectable(DiceManager diceManager, Dictionary<int, Vector2> positions)
+    void FocusOnPlayer(DiceManager diceManager, Dictionary<int, Vector2> positions)
     {
         if (scrollRect == null || content == null) return;
         float targetY = 0f;
         bool found = false;
-        MapData map = diceManager.stageProgression.currentMap;
-        for (int i = 0; i < map.nodes.Count; i++)
+        int currentId = diceManager.stageProgression.currentNodeId;
+        if (currentId >= 0 && positions.ContainsKey(currentId))
         {
-            int id = map.nodes[i].id;
-            if (!diceManager.IsMapNodeSelectable(id) || !positions.ContainsKey(id)) continue;
-            if (!found || positions[id].y < targetY)
+            targetY = positions[currentId].y;
+            found = true;
+        }
+        else
+        {
+            MapData map = diceManager.stageProgression.currentMap;
+            for (int i = 0; i < map.nodes.Count; i++)
             {
-                targetY = positions[id].y;
-                found = true;
+                MapNode node = map.nodes[i];
+                if (node.row != 0 || !positions.ContainsKey(node.id)) continue;
+                if (!found || positions[node.id].y < targetY)
+                {
+                    targetY = positions[node.id].y;
+                    found = true;
+                }
             }
         }
         if (!found)
@@ -219,32 +257,208 @@ public class MapPanel : MonoBehaviour
         viewport.offsetMax = max;
     }
 
-    void PlaceLegend()
+    // 노드 설명 패널: 오른쪽 위에 두고, 항목은 MapLegend 순서대로 위에서 아래로 쌓는다.
+    // 패널 위치는 설정 버튼(Setting_BTN) 바로 아래로 MapUiHierarchy가 맞춘다.
+    void PlaceNodeDes()
     {
-        if (legend == null) return;
-        legend.anchorMin = new Vector2(1f, 0f);
-        legend.anchorMax = new Vector2(1f, 0f);
-        legend.pivot = new Vector2(1f, 0f);
-        legend.sizeDelta = new Vector2(240f, 300f);
-        legend.anchoredPosition = new Vector2(-28f, 28f);
-
-        string[] names = { "Enemy", "Boss", "Encounter", "Shop", "Opel", "Rest" };
+        if (nodeDes == null) return;
+        nodeDes.anchorMin = new Vector2(1f, 1f);
+        nodeDes.anchorMax = new Vector2(1f, 1f);
+        nodeDes.pivot = new Vector2(1f, 1f);
+        const float rowStep = 42f;
         int shown = 0;
-        for (int i = 0; i < names.Length; i++)
+        for (int i = 0; i < MapLegend.Names.Length; i++)
         {
-            Transform item = legend.Find(names[i]);
+            Transform item = nodeDes.Find(MapLegend.Names[i]);
             if (item == null) continue;
-            bool visible = names[i] != "Opel";
-            item.gameObject.SetActive(visible);
-            if (!visible) continue;
+            item.gameObject.SetActive(true);
             RectTransform rect = item as RectTransform;
-            rect.anchorMin = new Vector2(0f, 0f);
-            rect.anchorMax = new Vector2(1f, 0f);
-            rect.pivot = new Vector2(0f, 0f);
-            rect.sizeDelta = new Vector2(-16f, 48f);
-            rect.anchoredPosition = new Vector2(8f, 8f + shown * 52f);
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = new Vector2(1f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.sizeDelta = new Vector2(-16f, 40f);
+            rect.anchoredPosition = new Vector2(8f, -(8f + shown * rowStep));
             shown++;
         }
+        nodeDes.sizeDelta = new Vector2(240f, 16f + shown * rowStep);
+        MapUiHierarchy.PlaceNodeDesBelowSetting(nodeDes);
+    }
+
+    void RefreshJourneyChrome(DiceManager diceManager)
+    {
+        if (journeyRollButton != null)
+        {
+            Text label = journeyRollButton.GetComponentInChildren<Text>();
+            if (label != null)
+                label.text = LocalizationManager.GetUi("UI_MAP_JOURNEY_ROLL", "굴리기");
+            journeyRollButton.interactable = !journeyRolling && diceManager.CanRollJourney();
+        }
+        if (journeyRolling) return;
+        int pending = diceManager.stageProgression.pendingJourneyMove;
+        if (pending > 0)
+        {
+            // 대기 중인 이동 칸 수는 눈 값과 같으므로 그 면 스프라이트를 다시 보여 준다(불러오기 직후에도 동일).
+            Sprite pendingFace = diceManager.GetJourneyFaceSprite(diceManager.GetJourneyDiceData(), pending);
+            SetJourneyResult(pendingFace);
+        }
+        else
+            SetJourneyResult(null);
+    }
+
+    // 결과 슬롯: 보드 위에 굴린 면 스프라이트만 크게 보여 준다. 스프라이트가 없으면 면 이미지를 끈다.
+    void SetJourneyResult(Sprite face)
+    {
+        if (journeyResultImage == null) return;
+        journeyResultImage.sprite = face;
+        journeyResultImage.enabled = face != null;
+    }
+
+    IEnumerator PlayJourneyRoll()
+    {
+        journeyRolling = true;
+        if (journeyRollButton != null) journeyRollButton.interactable = false;
+        MapTableData table = boundDice != null ? boundDice.GetMapTable() : null;
+        float seconds = table != null ? Mathf.Max(0.05f, table.Config.JourneyRollSeconds) : 0.5f;
+        float elapsed = 0f;
+        // 굴리는 동안 여정 주사위의 면 스프라이트를 빠르게 바꿔 보여 준다.
+        const float faceSwapInterval = 0.06f;
+        float swapTimer = faceSwapInterval;
+        while (elapsed < seconds)
+        {
+            swapTimer += Time.unscaledDeltaTime;
+            if (boundDice != null && swapTimer >= faceSwapInterval)
+            {
+                swapTimer = 0f;
+                SetJourneyResult(boundDice.RandomJourneyFaceSprite());
+            }
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        bool move = false;
+        int applied = 0;
+        bool flyGold = false;
+        JourneyRollResult result = default;
+        if (boundDice != null)
+        {
+            result = boundDice.RollJourneyFace();
+            // 코인이면 화면 골드 숫자는 코인 날아가기 연출이 올린다(연출을 쓸 수 있을 때만, 실제 골드는 바로 오른다).
+            flyGold = result.outcome == JourneyOutcome.Gold && CoinFlyFeedback.CanPlay(boundDice.shopManager);
+            move = boundDice.ApplyJourneyResult(result, out applied, flyGold);
+        }
+        journeyRolling = false;
+        journeyRollRoutine = null;
+        if (boundDice == null) yield break;
+
+        SetJourneyResult(result.faceSprite);
+        PlayJourneyOutcomeFeedback(result, applied, flyGold);
+        if (move)
+            Rebuild(boundDice);
+        else if (journeyRollButton != null)
+            journeyRollButton.interactable = boundDice.CanRollJourney();
+    }
+
+    void StopJourneyRoll()
+    {
+        if (journeyRollRoutine != null)
+            StopCoroutine(journeyRollRoutine);
+        journeyRollRoutine = null;
+        journeyRolling = false;
+        KillResultPopup();
+    }
+
+    // 해골·하트·코인 결과 연출. 이동 눈은 연출 없이 둔다. 숫자는 실제로 적용된 값이다.
+    void PlayJourneyOutcomeFeedback(JourneyRollResult result, int applied, bool flyGold)
+    {
+        switch (result.outcome)
+        {
+            case JourneyOutcome.Damage:
+                // 해골: 검정 글씨에 흰 아웃라인. 화면 붉어짐과 피격음은 DiceManager가 이미 재생했다.
+                if (applied > 0) ShowResultPopup("-" + applied, Color.black, new Color(1f, 1f, 1f, 0.95f));
+                break;
+            case JourneyOutcome.Heal:
+                if (applied > 0) ShowResultPopup("+" + applied, new Color(0.95f, 0.2f, 0.2f, 1f), new Color(0.1f, 0.03f, 0.03f, 0.95f));
+                break;
+            case JourneyOutcome.Gold:
+                if (applied > 0)
+                {
+                    ShowResultPopup("+" + applied, new Color(1f, 0.86f, 0.15f, 1f), new Color(0.15f, 0.1f, 0f, 0.95f));
+                    // 코인 아이콘이 주사위 면 위치에서 튀어나와 골드 패널로 날아간다(눈 값만큼).
+                    if (flyGold && journeyResultImage != null)
+                        CoinFlyFeedback.Play(journeyResultImage.transform.position, Mathf.Max(1, result.pips), applied);
+                    else if (flyGold)
+                        CoinFlyFeedback.RefreshCounter(boundDice.shopManager);
+                }
+                else if (flyGold)
+                    CoinFlyFeedback.RefreshCounter(boundDice.shopManager);
+                break;
+        }
+    }
+
+    // 주사위 면 바로 위에 숫자를 띄운다. 0.35초 동안 0.6→1.15→1 크기로 커지며 60px 위로 올라가고, 0.25초 페이드아웃 뒤 지운다.
+    void ShowResultPopup(string message, Color textColor, Color outlineColor)
+    {
+        KillResultPopup();
+        if (journeyResultImage == null) return;
+
+        Transform slot = journeyResultImage.transform.parent;
+        var go = new GameObject("Journey_Result_Popup", typeof(RectTransform), typeof(Text));
+        go.transform.SetParent(slot, false);
+        var rect = (RectTransform)go.transform;
+        rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.sizeDelta = new Vector2(260f, 80f);
+        RectTransform faceRect = journeyResultImage.rectTransform;
+        float startY = faceRect.anchoredPosition.y + faceRect.sizeDelta.y * 0.5f + 36f;
+        rect.anchoredPosition = new Vector2(0f, startY);
+        rect.localScale = Vector3.one * 0.6f;
+
+        Text text = go.GetComponent<Text>();
+        text.font = BuiltinFont();
+        text.fontSize = 56;
+        text.fontStyle = FontStyle.Bold;
+        text.alignment = TextAnchor.MiddleCenter;
+        text.horizontalOverflow = HorizontalWrapMode.Overflow;
+        text.verticalOverflow = VerticalWrapMode.Overflow;
+        text.raycastTarget = false;
+        text.color = textColor;
+        text.text = message;
+
+        // 보드 위에서도 읽히도록 어두운(또는 밝은) 아웃라인을 넣는다. 글자 알파를 따라 같이 사라진다.
+        Outline outline = go.AddComponent<Outline>();
+        outline.effectColor = outlineColor;
+        outline.effectDistance = new Vector2(3f, -3f);
+
+        resultPopupObject = go;
+        resultPopupTween = DOTween.Sequence().SetUpdate(true).SetLink(go);
+        var seq = (Sequence)resultPopupTween;
+        seq.Append(rect.DOScale(1.15f, 0.2f).SetEase(Ease.OutQuad));
+        seq.Append(rect.DOScale(1f, 0.15f).SetEase(Ease.InOutQuad));
+        seq.Insert(0f, rect.DOAnchorPosY(startY + 60f, 0.35f).SetEase(Ease.OutQuad));
+        seq.Append(text.DOFade(0f, 0.25f));
+        seq.OnComplete(() =>
+        {
+            if (go != null) Destroy(go);
+            if (resultPopupObject == go) resultPopupObject = null;
+            resultPopupTween = null;
+        });
+    }
+
+    void KillResultPopup()
+    {
+        if (resultPopupTween != null && resultPopupTween.IsActive()) resultPopupTween.Kill();
+        resultPopupTween = null;
+        if (resultPopupObject != null) Destroy(resultPopupObject);
+        resultPopupObject = null;
+    }
+
+    void OnDisable()
+    {
+        KillResultPopup();
+    }
+
+    static bool ListHas(List<int> ids, int id)
+    {
+        return ids != null && ids.Contains(id);
     }
 
     void DrawDottedLine(Vector2 from, Vector2 to)

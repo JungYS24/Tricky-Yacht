@@ -29,6 +29,8 @@ public class ShopManager : MonoBehaviour
     public TextMeshProUGUI rerollCostText;
     public TextMeshProUGUI rerollCostLabel;
     public Image rerollCostIcon;
+    public Sprite coinIconSprite; // 리롤 비용 옆 코인 아이콘. 빌드에서도 보이도록 씬에서 연결한다. 코인 날아가기 연출도 이 스프라이트를 쓴다.
+    public AudioEvent coinArriveSound; // 코인 날아가기 연출에서 코인이 골드 패널에 닿을 때 나는 소리(비워 두면 소리 없음)
     public int rerollCost = 100;
 
     [Header("상점 제어 버튼")]
@@ -60,7 +62,6 @@ public class ShopManager : MonoBehaviour
     public RuntimeAnimatorController ronanAnimator;
     public RuntimeAnimatorController opelAnimator;
     bool mapMerchantActive;
-    TextMeshProUGUI merchantNameText;
     ShopStockTable stockTable;
     bool stockTableLogged;
     readonly Dictionary<BaseItemDataSO, int> listedPrices = new Dictionary<BaseItemDataSO, int>();
@@ -100,12 +101,9 @@ public class ShopManager : MonoBehaviour
         OpenShopInternal(false);
     }
 
-    public void OpenMapShop()
+    public void OpenMapShop(MapMerchant merchant)
     {
-        if (stockTable == null || !stockTable.Loaded) BindShopStock();
-        currentMerchant = stockTable != null && stockTable.Loaded
-            ? stockTable.RollMerchant()
-            : (MapMerchant)UnityEngine.Random.Range(0, 3);
+        currentMerchant = merchant;
         OpenShopInternal(true);
     }
 
@@ -114,12 +112,7 @@ public class ShopManager : MonoBehaviour
         mapMerchantActive = fromMap;
         IsShopOpen = true;
         RevealShop();
-        EnsureMerchantLabel();
-        if (merchantNameText != null)
-        {
-            merchantNameText.gameObject.SetActive(fromMap);
-            if (fromMap) merchantNameText.text = MerchantName(currentMerchant);
-        }
+        RemoveLegacyMerchantLabel();
 
         if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
         if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
@@ -165,40 +158,12 @@ public class ShopManager : MonoBehaviour
         shopUI.transform.SetAsLastSibling();
     }
 
-    void EnsureMerchantLabel()
+    // 상점 제목에 상인 이름이 나오므로 예전에 만들어져 씬에 저장된 하단 MerchantName 라벨은 지운다.
+    void RemoveLegacyMerchantLabel()
     {
         if (shopUI == null) return;
-        Transform found = shopUI.transform.Find("MerchantName");
-        if (found == null)
-        {
-            var go = new GameObject("MerchantName", typeof(RectTransform));
-            go.transform.SetParent(shopUI.transform, false);
-            var rect = go.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 1f);
-            rect.anchorMax = new Vector2(0.5f, 1f);
-            rect.pivot = new Vector2(0.5f, 1f);
-            rect.anchoredPosition = new Vector2(0f, -12f);
-            rect.sizeDelta = new Vector2(640f, 72f);
-            merchantNameText = go.AddComponent<TextMeshProUGUI>();
-            merchantNameText.fontSize = 40;
-            merchantNameText.alignment = TextAlignmentOptions.Center;
-            merchantNameText.color = Color.white;
-            if (rerollCostText != null) merchantNameText.font = rerollCostText.font;
-        }
-        else
-        {
-            merchantNameText = found.GetComponent<TextMeshProUGUI>();
-        }
-    }
-
-    static string MerchantName(MapMerchant merchant)
-    {
-        switch (merchant)
-        {
-            case MapMerchant.Nyaon: return "냐온 딜레마";
-            case MapMerchant.Ronan: return "로난";
-            default: return "오펠";
-        }
+        Transform legacy = shopUI.transform.Find("MerchantName");
+        if (legacy != null) Destroy(legacy.gameObject);
     }
 
     TextMeshProUGUI shopTitleText;
@@ -884,7 +849,9 @@ public class ShopManager : MonoBehaviour
 
     Sprite FindCoinSprite()
     {
+        if (coinIconSprite != null) return coinIconSprite;
 #if UNITY_EDITOR
+        // 필드가 비어 있을 때만 에디터에서 직접 찾는다(빌드에서는 필드 연결이 필요).
         return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Contents/06_UI/Sprites/Icon/Coin_Icon.png");
 #else
         return null;
@@ -904,7 +871,8 @@ public class ShopManager : MonoBehaviour
 
     // 골드 획득 시 사용. 증가 효과 적용과 UI 갱신을 한 곳에서 처리
     // 반환값은 보너스까지 반영해 실제로 지급한 골드
-    public int GrantGold(int baseAmount)
+    // deferUi가 true면 실제 골드(currentGold)만 바로 올리고 화면 숫자 갱신은 호출한 쪽(코인 날아가기 연출)이 맡는다.
+    public int GrantGold(int baseAmount, bool deferUi = false)
     {
         if (baseAmount <= 0) return 0;
 
@@ -918,14 +886,20 @@ public class ShopManager : MonoBehaviour
         currentGold += grantedAmount;
         if (grantedAmount > baseAmount) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.IncreaseGoldGainPercent);
 
+        if (!deferUi) SyncGoldDisplay();
+
+        return grantedAmount;
+    }
+
+    // 화면의 골드 숫자를 현재 골드에 맞춘다(골드 카운터가 있으면 올라가는 연출 포함).
+    public void SyncGoldDisplay()
+    {
         diceManager?.ui?.UpdateGoldUI(currentGold);
 
         if (GoldCounter.Instance != null)
         {
             GoldCounter.Instance.SetGold(currentGold);
         }
-
-        return grantedAmount;
     }
 
     public void HideTooltip() => tooltipPanel.SetActive(false);

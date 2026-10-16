@@ -6,10 +6,13 @@ using UnityEngine;
 public enum MapNodeType
 {
     Enemy,
+    Elite,
     Boss,
     Encounter,
-    Shop,
-    Opel,
+    ShopNyaon,
+    ShopRonan,
+    ShopOpel,
+    Portal,
     Rest
 }
 
@@ -45,7 +48,7 @@ public class BiomeWeightRow
     public int Enemy_W;
     public int Encounter_W;
     public int Shop_W;
-    public int Opel_W;
+    public int Elite_W;
     public int Rest_W;
 }
 
@@ -73,6 +76,11 @@ public class MapConfig
     public int RestHealPercent = 30;
     public bool PostBattleShop;
     public int BiomeCountToVoid = 10;
+    public bool ShopRowForceStop = true;
+    public int JourneyDamageMinHp = 1;
+    public float JourneyRollSeconds = 0.5f;
+    public int JourneyMapGoldPerPip = 10; // 지도에서 코인 면이 나왔을 때 눈 1개당 골드
+    public int StagesPerBiome = 10;       // 바이옴 하나가 차지하는 스테이지 번호 폭(마지막 번호는 보스)
 }
 
 public class MapTableData
@@ -120,7 +128,9 @@ public class MapTableData
         {
             "Min_Enemy_Count", "Max_Path_Length", "Grid_Width", "Lane_Count", "Start_Columns", "Shop_Row",
             "Skip_Chance", "Shortcut_Max_Skip", "Detour_Enemy_Ratio", "Max_Gen_Attempts",
-            "Rest_Heal_Percent", "Post_Battle_Shop", "Biome_Count_To_Void"
+            "Rest_Heal_Percent", "Post_Battle_Shop", "Biome_Count_To_Void",
+            "Shop_Row_Force_Stop", "Journey_Damage_Min_Hp", "Journey_Roll_Seconds", "Journey_Map_Gold_Per_Pip",
+            "Stages_Per_Biome"
         };
         foreach (string key in required)
         {
@@ -146,6 +156,11 @@ public class MapTableData
             case "Rest_Heal_Percent": Config.RestHealPercent = ParseInt(entry.Value, Config.RestHealPercent); break;
             case "Post_Battle_Shop": Config.PostBattleShop = ParseBool(entry.Value); break;
             case "Biome_Count_To_Void": Config.BiomeCountToVoid = ParseInt(entry.Value, Config.BiomeCountToVoid); break;
+            case "Shop_Row_Force_Stop": Config.ShopRowForceStop = ParseBool(entry.Value); break;
+            case "Journey_Damage_Min_Hp": Config.JourneyDamageMinHp = ParseInt(entry.Value, Config.JourneyDamageMinHp); break;
+            case "Journey_Roll_Seconds": Config.JourneyRollSeconds = ParseFloat(entry.Value, Config.JourneyRollSeconds); break;
+            case "Journey_Map_Gold_Per_Pip": Config.JourneyMapGoldPerPip = ParseInt(entry.Value, Config.JourneyMapGoldPerPip); break;
+            case "Stages_Per_Biome": Config.StagesPerBiome = Mathf.Max(3, ParseInt(entry.Value, Config.StagesPerBiome)); break;
         }
     }
 
@@ -195,12 +210,17 @@ public class MapTableData
         switch (type)
         {
             case MapNodeType.Enemy: return row.Enemy_W;
+            case MapNodeType.Elite: return row.Elite_W;
             case MapNodeType.Encounter: return row.Encounter_W;
-            case MapNodeType.Shop: return row.Shop_W;
-            case MapNodeType.Opel: return row.Opel_W;
             case MapNodeType.Rest: return row.Rest_W;
             default: return 0;
         }
+    }
+
+    public int GetShopWeight(BiomeType biome)
+    {
+        BiomeWeightRow row = GetWeights(biome);
+        return row != null ? row.Shop_W : 0;
     }
 
     public MapNodeTypeRow GetNodeRule(MapNodeType type)
@@ -219,10 +239,13 @@ public class MapTableData
         switch (type)
         {
             case MapNodeType.Enemy: return "Node_Enemy";
+            case MapNodeType.Elite: return "Node_Elite";
             case MapNodeType.Boss: return "Node_Boss";
             case MapNodeType.Encounter: return "Node_Encounter";
-            case MapNodeType.Shop: return "Node_Shop";
-            case MapNodeType.Opel: return "Node_Opel";
+            case MapNodeType.ShopNyaon: return "Node_Shop_Nyaon";
+            case MapNodeType.ShopRonan: return "Node_Shop_Ronan";
+            case MapNodeType.ShopOpel: return "Node_Shop_Opel";
+            case MapNodeType.Portal: return "Node_Portal";
             case MapNodeType.Rest: return "Node_Rest";
             default: return "Node_Enemy";
         }
@@ -233,13 +256,21 @@ public class MapTableData
         switch (nodeId)
         {
             case "Node_Enemy": type = MapNodeType.Enemy; return true;
+            case "Node_Elite": type = MapNodeType.Elite; return true;
             case "Node_Boss": type = MapNodeType.Boss; return true;
             case "Node_Encounter": type = MapNodeType.Encounter; return true;
-            case "Node_Shop": type = MapNodeType.Shop; return true;
-            case "Node_Opel": type = MapNodeType.Opel; return true;
+            case "Node_Shop_Nyaon": type = MapNodeType.ShopNyaon; return true;
+            case "Node_Shop_Ronan": type = MapNodeType.ShopRonan; return true;
+            case "Node_Shop_Opel": type = MapNodeType.ShopOpel; return true;
+            case "Node_Portal": type = MapNodeType.Portal; return true;
             case "Node_Rest": type = MapNodeType.Rest; return true;
             default: type = MapNodeType.Enemy; return false;
         }
+    }
+
+    public static bool IsCombatNode(MapNodeType type)
+    {
+        return type == MapNodeType.Enemy || type == MapNodeType.Elite || type == MapNodeType.Portal;
     }
 
     public string GetNodeName(MapNodeType type)

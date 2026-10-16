@@ -14,6 +14,8 @@ public class StageManager
     public int currentNodeId = -1;
     public bool currentNodeCleared;
     public List<int> visitedNodeIds = new List<int>();
+    public List<int> passedNodeIds = new List<int>();
+    public int pendingJourneyMove;
 
     // 게임 시작 시 첫 바이옴(숲)을 강제로 세팅하는 로직
     public void InitFirstBiome(List<BiomeDataSO> biomeList)
@@ -68,8 +70,7 @@ public class StageManager
         biomeIndex = 0;
         currentNodeId = -1;
         currentNodeCleared = false;
-        if (visitedNodeIds == null) visitedNodeIds = new List<int>();
-        visitedNodeIds.Clear();
+        ClearMapTrail();
         currentMap = null;
     }
 
@@ -77,8 +78,7 @@ public class StageManager
     {
         currentNodeId = -1;
         currentNodeCleared = false;
-        if (visitedNodeIds == null) visitedNodeIds = new List<int>();
-        visitedNodeIds.Clear();
+        ClearMapTrail();
         currentMap = biome == BiomeType.Void || table == null
             ? null
             : MapGenerator.Generate(runSeed, biomeIndex, biome, table);
@@ -92,17 +92,30 @@ public class StageManager
         return node != null && node.id == nodeId ? node : null;
     }
 
-    // 층 위치로 기존 10스테이지 곡선을 맞춥니다. 보스는 10의 배수라서 보스 판정이 그대로 동작합니다.
+    // 층 위치를 바이옴당 스테이지 번호 폭(Stages_Per_Biome)에 맞춥니다.
+    // 일반 노드는 항상 바이옴 시작+1 ~ 시작+(폭-1) 안에 들어오고, 보스는 폭의 배수라서 보스 판정이 그대로 동작합니다.
     public void ApplyNodeDifficulty(MapNode node, MapConfig config)
     {
         if (node == null || config == null) return;
+        int perBiome = Mathf.Max(3, config.StagesPerBiome);
+        int baseStage = biomeIndex * perBiome;
         if (node.type == MapNodeType.Boss)
         {
-            currentStage = biomeIndex * 10 + 10;
+            currentStage = baseStage + perBiome;
             return;
         }
 
         int span = Mathf.Max(1, config.MaxPathLength - 1);
-        currentStage = biomeIndex * 10 + 1 + (node.row * config.MinEnemyCount / span);
+        int offset = node.row * (perBiome - 2) / span;
+        currentStage = baseStage + 1 + Mathf.Clamp(offset, 0, perBiome - 2);
+    }
+
+    public void ClearMapTrail()
+    {
+        pendingJourneyMove = 0;
+        if (visitedNodeIds == null) visitedNodeIds = new List<int>();
+        visitedNodeIds.Clear();
+        if (passedNodeIds == null) passedNodeIds = new List<int>();
+        passedNodeIds.Clear();
     }
 }

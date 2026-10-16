@@ -143,16 +143,27 @@ public class Enemy : MonoBehaviour
         int finalAttack = 10;
         MonsterDataSO nextMonsterData = null;
 
+        DiceManager dice = DiceManager.Instance;
+        MonsterDataSO forcedMonster = dice != null ? dice.pendingForcedMonster : null;
+        if (dice != null) dice.pendingForcedMonster = null;
+
         // 튜토리얼 중이라면 매니저에서 튜토리얼용 데이터를 가져옵니다 ---
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
             nextMonsterData = TutorialManager.Instance.GetTutorialMonster(currentStage);
         }
-
+        else if (forcedMonster != null)
+        {
+            // 차원문 등, 바이옴 목록보다 먼저 강제 몬스터를 씁니다. 보스 몬스터면 bossAbility도 같이 적용됩니다.
+            nextMonsterData = forcedMonster;
+        }
         else if (currentBiome != null)
         {
-            //보스 여기서 바꾸면 됨
-            if (currentStage % 10 == 0 && currentBiome.bossMonster != null)
+            // 지도의 일반 전투는 층 번호가 10의 배수여도 보스전으로 보지 않습니다.
+            bool bossStage = currentStage % 10 == 0;
+            if (dice != null && dice.UsesMapFlow)
+                bossStage = dice.mapBossBattle;
+            if (bossStage && currentBiome.bossMonster != null)
             {
                 nextMonsterData = currentBiome.bossMonster;
             }

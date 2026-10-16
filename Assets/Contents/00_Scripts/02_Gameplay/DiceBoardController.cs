@@ -115,10 +115,11 @@ public sealed class DiceBoardController
             // 3스테이지 보스 반격 후 체력 회복 튜토리얼 (하트 주사위 확정)
             else if (currentStage == 3 && TutorialManager.Instance.currentStepIndex >= 28 && TutorialManager.Instance.currentStepIndex <= 30)
             {
-                int heartIdx = deckManager.drawPile.FindIndex(d => d.specialEffect == SpecialDieEffect.Heart);
+                // 하트 주사위는 전체 효과가 하트인 주사위만 찾는다. 5면만 하트인 여정 주사위는 제외.
+                int heartIdx = deckManager.drawPile.FindIndex(d => d.specialEffect == SpecialDieEffect.Heart && !d.isJourneyDice);
                 if (heartIdx == -1)
                 {
-                    int discardIdx = deckManager.discardPile.FindIndex(d => d.specialEffect == SpecialDieEffect.Heart);
+                    int discardIdx = deckManager.discardPile.FindIndex(d => d.specialEffect == SpecialDieEffect.Heart && !d.isJourneyDice);
                     if (discardIdx != -1)
                     {
                         deckManager.drawPile.Insert(0, deckManager.discardPile[discardIdx]);
@@ -167,16 +168,17 @@ public sealed class DiceBoardController
             }
 
             d.rollPos = rollSlots[i].position;
-            int initialVal = drawnData.faceValues[UnityEngine.Random.Range(0, 6)];
+            int initialFace = UnityEngine.Random.Range(0, 6);
+            int initialVal = drawnData.faceValues[initialFace];
 
             //튜토리얼 추가
             if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
             {
                 int forcedVal = TutorialManager.Instance.GetForcedDiceValue(i);
-                if (forcedVal != -1) initialVal = forcedVal;
+                if (forcedVal != -1) { initialVal = forcedVal; initialFace = -1; }
             }
 
-            d.SetData(drawnData, initialVal);
+            d.SetData(drawnData, initialVal, initialFace);
             ActiveDice.Add(d);
         }
     }
@@ -301,16 +303,17 @@ public sealed class DiceBoardController
         foreach (var d in ActiveDice)
         {
             if (d == null || d.isKept) continue;
-            int finalResult = d.myData.faceValues[UnityEngine.Random.Range(0, 6)];
+            int finalFace = UnityEngine.Random.Range(0, 6);
+            int finalResult = d.myData.faceValues[finalFace];
             //튜토리얼 추가
             if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
             {
                 int diceIndex = ActiveDice.IndexOf(d);
                 int forcedVal = TutorialManager.Instance.GetForcedDiceValue(diceIndex);
-                if (forcedVal != -1) finalResult = forcedVal;
+                if (forcedVal != -1) { finalResult = forcedVal; finalFace = -1; }
             }
 
-            d.PlayRollEffect(finalResult);
+            d.PlayRollEffect(finalResult, finalFace);
         }
 
     }
@@ -354,9 +357,10 @@ public sealed class DiceBoardController
         for (int i = 0; i < unkept.Count; i++)
         {
             DiceData1 data = replacements[i];
-            int finalValue = data.faceValues[UnityEngine.Random.Range(0, 6)];
-            unkept[i].SetData(data, finalValue);
-            unkept[i].PlayRollEffect(finalValue);
+            int finalFace = UnityEngine.Random.Range(0, 6);
+            int finalValue = data.faceValues[finalFace];
+            unkept[i].SetData(data, finalValue, finalFace);
+            unkept[i].PlayRollEffect(finalValue, finalFace);
         }
         return true;
     }

@@ -31,7 +31,9 @@ public static class MapSceneSetup
     {
         MapPanel[] maps = Object.FindObjectsByType<MapPanel>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         if (maps == null || maps.Length == 0) return false;
-        return maps[0].transform.Find("MapScroll") != null && maps[0].transform.Find("Legend/Enemy") != null;
+        // 노드 설명 패널은 예전 이름(Legend)으로 남은 씬도 준비된 것으로 본다.
+        return maps[0].transform.Find("MapScroll") != null
+            && (maps[0].transform.Find("Node_Des/Enemy") != null || maps[0].transform.Find("Legend/Enemy") != null);
     }
 
     [MenuItem("Tools/Map/Setup MainScene_Map")]
@@ -86,7 +88,7 @@ public static class MapSceneSetup
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         AssetDatabase.SaveAssets();
-        Debug.Log("[Map] MainScene_Map 하이어라키에 MapScroll, Legend, RestPanel, OpelPanel을 배치했습니다.");
+        Debug.Log("[Map] MainScene_Map 하이어라키에 MapScroll, Node_Des, RestPanel, OpelPanel을 배치했습니다.");
     }
 
     public static void BatchRun()

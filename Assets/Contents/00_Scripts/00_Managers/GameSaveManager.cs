@@ -8,6 +8,8 @@ public class SavedDiceData
     public string diceName;
     public int[] faceValues; // 강화/고정 눈금도 저장 당시 그대로 복원
     public int specialEffect;
+    public int[] faceEffects;       // 면별 효과(SpecialDieEffect의 int 값). 없으면 null
+    public bool isJourneyDice;      // 덱에 항상 유지되는 여정 주사위 여부
     public bool isCoated;
     public int type;
     public float multiplier;
@@ -53,6 +55,8 @@ public class SaveData
     public int currentNodeId = -1;
     public bool currentNodeCleared;
     public List<int> visitedNodeIds = new List<int>();
+    public List<int> passedNodeIds = new List<int>();
+    public int pendingJourneyMove;
     public int playerMaxHP;
     public int currentGold;
 
@@ -227,6 +231,10 @@ public class GameSaveManager : MonoBehaviour
         data.visitedNodeIds = dice.stageProgression.visitedNodeIds != null
             ? new List<int>(dice.stageProgression.visitedNodeIds)
             : new List<int>();
+        data.passedNodeIds = dice.stageProgression.passedNodeIds != null
+            ? new List<int>(dice.stageProgression.passedNodeIds)
+            : new List<int>();
+        data.pendingJourneyMove = dice.stageProgression.pendingJourneyMove;
         data.currentPlayerHP = dice.currentPlayerHP;
         data.currentGold = shop != null ? shop.currentGold : 0;
 
@@ -269,6 +277,13 @@ public class GameSaveManager : MonoBehaviour
             sdd.diceName = targetToSave.diceName;
             sdd.faceValues = targetToSave.faceValues;
             sdd.specialEffect = (int)targetToSave.specialEffect;
+            sdd.isJourneyDice = targetToSave.isJourneyDice;
+            if (targetToSave.faceEffects != null && targetToSave.faceEffects.Length > 0)
+            {
+                sdd.faceEffects = new int[targetToSave.faceEffects.Length];
+                for (int i = 0; i < sdd.faceEffects.Length; i++)
+                    sdd.faceEffects[i] = (int)targetToSave.faceEffects[i];
+            }
             sdd.isCoated = targetToSave.isCoated;
             sdd.type = (int)targetToSave.type;
             sdd.multiplier = targetToSave.multiplier;
