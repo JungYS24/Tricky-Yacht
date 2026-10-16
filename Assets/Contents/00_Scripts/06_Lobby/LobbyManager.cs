@@ -55,7 +55,7 @@ public class LobbyManager : MonoBehaviour
         PlayerPrefs.SetInt("LoadGame", 1);
 
         StopAllCoroutines();
-        StartCoroutine(GlitchAndLoad("MainScene"));
+        StartCoroutine(GlitchAndLoad("MainScene_Map"));
     }
 
     public void OnTutorialButtonClick()

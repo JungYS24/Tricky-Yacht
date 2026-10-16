@@ -4,7 +4,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 
-// MainScene_Map에 지도 화면 루트와 참조를 붙입니다. MainScene은 열지 않습니다.
+// MainScene_Map에 지도 화면 루트와 참조를 붙입니다.
 [InitializeOnLoad]
 public static class MapSceneSetup
 {

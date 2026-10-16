@@ -40,6 +40,22 @@ public sealed class DiceBonusLabel : MonoBehaviour
         float start = isChips ? chips : multiplier;
         float target = start + amount;
         if (isChips) chips = target; else multiplier = target;
+        PrepareLabel(isChips ? chipsColor : multiplierColor, font);
+        SetValue(start, isChips);
+        PlayRise(duration);
+        animation.Insert(0f, DOVirtual.Float(start, target, duration, value => SetValue(value, isChips)).SetEase(Ease.OutQuad));
+    }
+
+    // 배수에 곱해지는 값(저주 ×0.85 등)을 더하지 않고 그대로 한 번 표시합니다.
+    public void ShowFactor(string text, Color color, float duration, TMP_FontAsset font = null)
+    {
+        PrepareLabel(color, font);
+        label.text = text;
+        PlayRise(duration);
+    }
+
+    private void PrepareLabel(Color color, TMP_FontAsset font)
+    {
         animation?.Kill();
         if (body == null) body = GetComponent<SpriteRenderer>();
         if (label == null)
@@ -50,15 +66,17 @@ public sealed class DiceBonusLabel : MonoBehaviour
         if (font != null) label.font = font;
         label.fontSize = fontSize;
         label.transform.localScale = transform.lossyScale;
-        label.color = isChips ? chipsColor : multiplierColor;
+        label.color = color;
         label.gameObject.SetActive(true);
         height = body != null ? body.bounds.size.y : Mathf.Abs(transform.lossyScale.y);
         rise = 0f;
         UpdatePosition();
-        SetValue(start, isChips);
+    }
+
+    private void PlayRise(float duration)
+    {
         float lifetime = Mathf.Max(minimumVisibleTime, duration + 0.12f);
         animation = DOTween.Sequence().SetUpdate(true);
-        animation.Append(DOVirtual.Float(start, target, duration, value => SetValue(value, isChips)).SetEase(Ease.OutQuad));
         animation.Insert(0f, DOVirtual.Float(0f, riseDistance * height, lifetime, value => rise = value).SetEase(Ease.OutQuad));
         animation.Insert(lifetime - 0.12f, label.DOFade(0f, 0.12f));
         animation.OnComplete(() => { if (label != null) label.gameObject.SetActive(false); });
