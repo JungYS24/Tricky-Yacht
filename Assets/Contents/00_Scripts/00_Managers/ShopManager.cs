@@ -29,6 +29,7 @@ public class ShopManager : MonoBehaviour
     public TextMeshProUGUI rerollCostText;
     public TextMeshProUGUI rerollCostLabel;
     public Image rerollCostIcon;
+    public Sprite coinIconSprite; // 리롤 비용 옆 코인 아이콘. 빌드에서도 보이도록 씬에서 연결한다.
     public int rerollCost = 100;
 
     [Header("상점 제어 버튼")]
@@ -881,7 +882,9 @@ public class ShopManager : MonoBehaviour
 
     Sprite FindCoinSprite()
     {
+        if (coinIconSprite != null) return coinIconSprite;
 #if UNITY_EDITOR
+        // 필드가 비어 있을 때만 에디터에서 직접 찾는다(빌드에서는 필드 연결이 필요).
         return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Contents/06_UI/Sprites/Icon/Coin_Icon.png");
 #else
         return null;

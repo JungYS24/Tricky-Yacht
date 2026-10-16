@@ -21,24 +21,6 @@ public static class CombatFlowController
             dm.shopManager.GrantGold(expectedGold);
         }
 
-        // 가시 면 피해: 회복·골드와 같은 시점에 플레이어 체력을 직접 깎는다(보호막은 거치지 않음).
-        if (selfDamage > 0)
-        {
-            int hpBeforeThorn = dm.currentPlayerHP;
-            dm.currentPlayerHP = Mathf.Max(0, hpBeforeThorn - selfDamage);
-            int thornHpDamage = Mathf.Max(0, hpBeforeThorn - dm.currentPlayerHP);
-            HurtVignetteController.Get(dm).PlayShieldOrHealthHit(dm.ui, 0, thornHpDamage, dm.playerStatus.currentShield);
-            if (thornHpDamage > 0) dm.PlayPlayerHurtSound();
-
-            // 체력이 0이 되면 적 공격 전에 기존 사망 처리(부활 피규어 포함)를 그대로 탄다.
-            if (dm.currentPlayerHP <= 0)
-            {
-                yield return dm.StartCoroutine(HandlePlayerDeath(dm));
-                yield break;
-            }
-            FigureEffectManager.Instance?.EvaluateLowHPTriggers(dm, dm.shopManager);
-        }
-
         //화염 스택 누적
         if (flameDamage > 0)
         {
@@ -52,6 +34,8 @@ public static class CombatFlowController
         // 피규어 효과로 이미 처치된 경우에는 공격하지 않음
         if (dm.enemy.IsDead || dm.enemy.CurrentHP <= 0)
         {
+            // 적을 처치한 판이므로 가시 피해는 들어가되 체력은 1 아래로 내려가지 않는다.
+            ApplyThornDamage(dm, selfDamage, true);
             dm.OnEnemyKilled();
             yield break;
         }
@@ -69,6 +53,15 @@ public static class CombatFlowController
             yield break;
         }
 
+        // 가시 면 피해: 플레이어 공격이 끝난 뒤에 적용한다.
+        // 이번 공격으로 적이 죽었다면 체력은 1 아래로 내려가지 않아 적을 잡은 판에 가시로 죽지 않는다.
+        bool enemyDefeatedByAttack = dm.enemy.IsDead || dm.enemy.CurrentHP <= 0;
+        if (ApplyThornDamage(dm, selfDamage, enemyDefeatedByAttack))
+        {
+            // 적이 살아 있는데 체력이 0이 되면 기존 사망 처리(부활 피규어 포함)를 타고 끝낸다. 적 반격은 하지 않는다.
+            yield return dm.StartCoroutine(HandlePlayerDeath(dm));
+            yield break;
+        }
 
         // 적 사망 여부 확정 판정 (포획 이벤트 포함)
         if (dm.enemy.IsDead || dm.enemy.CurrentHP <= 0)
@@ -81,6 +74,26 @@ public static class CombatFlowController
         yield return dm.StartCoroutine(ProcessEnemyTurnRoutine(dm, handName, dm.accumulatedFlameDamage));
     }
 
+
+    // 가시 피해를 플레이어 체력에 직접 적용한다(보호막은 거치지 않음). 피격 연출·피격음·저체력 피규어 검사까지 함께 처리한다.
+    // enemyDefeated가 true면 체력은 1 아래로 내려가지 않는다. 체력이 0이 되어 사망 처리가 필요하면 true를 돌려준다.
+    private static bool ApplyThornDamage(DiceManager dm, int selfDamage, bool enemyDefeated)
+    {
+        if (selfDamage <= 0) return false;
+
+        int hpBefore = dm.currentPlayerHP;
+        int newHp = Mathf.Max(0, hpBefore - selfDamage);
+        if (enemyDefeated) newHp = Mathf.Min(hpBefore, Mathf.Max(1, newHp));
+        dm.currentPlayerHP = newHp;
+
+        int hpDamage = Mathf.Max(0, hpBefore - newHp);
+        HurtVignetteController.Get(dm).PlayShieldOrHealthHit(dm.ui, 0, hpDamage, dm.playerStatus.currentShield);
+        if (hpDamage > 0) dm.PlayPlayerHurtSound();
+
+        if (newHp <= 0) return true;
+        FigureEffectManager.Instance?.EvaluateLowHPTriggers(dm, dm.shopManager);
+        return false;
+    }
 
     //플레이어 공격 연출
     private static IEnumerator ProcessPlayerAttack(

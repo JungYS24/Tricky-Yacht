@@ -1193,12 +1193,8 @@ public class DiceManager : MonoBehaviour
                 UpdateMainUI("");
                 break;
             case JourneyOutcome.Gold:
-                if (shopManager != null)
-                {
-                    shopManager.currentGold += result.amount;
-                    ui?.UpdateGoldUI(shopManager.currentGold);
-                    if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
-                }
+                // 전투와 같은 경로로 지급한다(피규어 골드 증가 효과, UI 갱신, 골드 카운터 연출은 GrantGold가 처리).
+                if (shopManager != null) shopManager.GrantGold(result.amount);
                 break;
             case JourneyOutcome.Heal:
                 playerStatus.Heal(result.amount);
