@@ -609,8 +609,16 @@ public class DiceManager : MonoBehaviour
         int finalHeal = calcResult.expectedHeal;
         int expectedGold = calcResult.expectedGold; // 코인 주사위 등에서 얻은 골드
 
+        // 면 효과가 Coin이라 골드를 준 주사위(코인 날아가기 연출 대상)
+        var coinDice = new List<Dice>();
+        foreach (var d in keptDice)
+        {
+            if (d == null || d.myData == null || d.currentValue <= 0) continue;
+            if (d.myData.GetFaceEffect(d.ResolveFaceIndex()) == SpecialDieEffect.Coin) coinDice.Add(d);
+        }
+
         // 완벽하게 쪼개진 수치들을 전투 지휘관(CombatFlowController)에게 전달
-        yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, total.damage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName, calcResult.selfDamage
+        yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, total.damage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName, calcResult.selfDamage, coinDice
         ));
         ui?.ClearMergedHandDamageText();
     }
@@ -1168,6 +1176,14 @@ public class DiceManager : MonoBehaviour
     // 굴림 결과를 적용한다. 이동이면 true(이동 칸 수 대기), 그 외 효과는 바로 적용하고 false를 돌려준다.
     public bool ApplyJourneyResult(JourneyRollResult result)
     {
+        return ApplyJourneyResult(result, out _, false);
+    }
+
+    // appliedAmount: 실제로 깎인 체력 / 회복된 체력 / 지급된 골드(이동이면 0)
+    // deferGoldUi: 골드 숫자 갱신을 코인 날아가기 연출에 맡길 때 true(실제 골드는 바로 올라간다)
+    public bool ApplyJourneyResult(JourneyRollResult result, out int appliedAmount, bool deferGoldUi)
+    {
+        appliedAmount = 0;
         if (!CanRollJourney()) return false;
         bool move = result.outcome == JourneyOutcome.Move;
         if (move)
@@ -1175,32 +1191,45 @@ public class DiceManager : MonoBehaviour
         else
         {
             stageProgression.pendingJourneyMove = 0;
-            ApplyJourneyEffect(result);
+            appliedAmount = ApplyJourneyEffect(result, deferGoldUi);
         }
         SaveMapProgress();
         return move;
     }
 
-    void ApplyJourneyEffect(JourneyRollResult result)
+    int ApplyJourneyEffect(JourneyRollResult result, bool deferGoldUi)
     {
         MapTableData table = GetMapTable();
         switch (result.outcome)
         {
             case JourneyOutcome.Damage:
-                // 지도 피해는 최소 체력 아래로 내려가지 않는다. 이미 그보다 낮으면 더 깎지 않는다.
-                int minHp = table != null ? table.Config.JourneyDamageMinHp : 1;
-                currentPlayerHP = Mathf.Min(currentPlayerHP, Mathf.Max(minHp, currentPlayerHP - result.amount));
-                UpdateMainUI("");
-                break;
+                {
+                    // 지도 피해는 최소 체력 아래로 내려가지 않는다. 이미 그보다 낮으면 더 깎지 않는다.
+                    int minHp = table != null ? table.Config.JourneyDamageMinHp : 1;
+                    int hpBefore = currentPlayerHP;
+                    currentPlayerHP = Mathf.Min(currentPlayerHP, Mathf.Max(minHp, currentPlayerHP - result.amount));
+                    int hpLost = Mathf.Max(0, hpBefore - currentPlayerHP);
+                    UpdateMainUI("");
+                    // 몬스터에게 맞았을 때와 같은 화면 붉어짐·피격음(실제로 깎인 체력이 있을 때만)
+                    if (hpLost > 0)
+                    {
+                        HurtVignetteController.Get(this).PlayShieldOrHealthHit(ui, 0, hpLost, playerStatus.currentShield);
+                        PlayPlayerHurtSound();
+                    }
+                    return hpLost;
+                }
             case JourneyOutcome.Gold:
-                // 전투와 같은 경로로 지급한다(피규어 골드 증가 효과, UI 갱신, 골드 카운터 연출은 GrantGold가 처리).
-                if (shopManager != null) shopManager.GrantGold(result.amount);
-                break;
+                // 전투와 같은 경로로 지급한다(피규어 골드 증가 효과 포함). 화면 숫자는 deferGoldUi면 코인 연출이 올린다.
+                return shopManager != null ? shopManager.GrantGold(result.amount, deferGoldUi) : 0;
             case JourneyOutcome.Heal:
-                playerStatus.Heal(result.amount);
-                UpdateMainUI("");
-                break;
+                {
+                    int hpBefore = currentPlayerHP;
+                    playerStatus.Heal(result.amount);
+                    UpdateMainUI("");
+                    return Mathf.Max(0, currentPlayerHP - hpBefore);
+                }
         }
+        return 0;
     }
 
     public MonsterDataSO RollPortalMonster(MapNode node)

@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public static class CombatFlowController
 {
     // 메인 턴 결산 흐름 
-    public static IEnumerator ProcessTurnResolution(DiceManager dm, int finalDamage, int darkDamage, int finalHeal, int expectedGold, int flameDamage, string handName, int selfDamage = 0)
+    // coinDice: 면 효과가 Coin이라 골드를 준 주사위들(코인 날아가기 연출용). 없으면 골드 숫자를 바로 갱신한다.
+    public static IEnumerator ProcessTurnResolution(DiceManager dm, int finalDamage, int darkDamage, int finalHeal, int expectedGold, int flameDamage, string handName, int selfDamage = 0, List<Dice> coinDice = null)
     {
         //플레이어 회복
         if (finalHeal > 0)
@@ -18,7 +20,7 @@ public static class CombatFlowController
         //골드 획득 처리
         if (expectedGold > 0 && dm.shopManager != null)
         {
-            dm.shopManager.GrantGold(expectedGold);
+            GrantResolutionGold(dm, expectedGold, coinDice);
         }
 
         //화염 스택 누적
@@ -74,6 +76,61 @@ public static class CombatFlowController
         yield return dm.StartCoroutine(ProcessEnemyTurnRoutine(dm, handName, dm.accumulatedFlameDamage));
     }
 
+
+    // 결산 골드 지급. 실제 골드는 한 번에 바로 올리고(지급액·세이브·상점 판단은 즉시 맞음),
+    // 코인 면 주사위가 있으면 화면 골드 숫자만 코인이 도착할 때 올라가게 미룬다. 연출은 기다리지 않는다.
+    // 골드 코팅·금성 위성 등 다른 경로의 골드는 지금처럼 바로 카운터에 반영한다.
+    private static void GrantResolutionGold(DiceManager dm, int expectedGold, List<Dice> coinDice)
+    {
+        ShopManager shop = dm.shopManager;
+
+        int coinBase = 0;
+        if (coinDice != null)
+        {
+            for (int i = 0; i < coinDice.Count; i++)
+            {
+                if (coinDice[i] != null) coinBase += Mathf.Max(0, coinDice[i].currentValue) * TurnCalculator.GoldPerPip;
+            }
+        }
+
+        if (coinBase <= 0 || !CoinFlyFeedback.CanPlay(shop))
+        {
+            shop.GrantGold(expectedGold);
+            return;
+        }
+
+        int granted = shop.GrantGold(expectedGold, true);
+
+        // 피규어 배율이 섞인 실제 지급액을 코인 몫으로 나눈다(합계는 granted를 넘지 않는다).
+        float coinRatio = Mathf.Clamp01((float)coinBase / Mathf.Max(1, expectedGold));
+        int remainingShare = Mathf.Min(granted, Mathf.RoundToInt(granted * coinRatio));
+
+        int playedCount = 0;
+        int lastIndex = -1;
+        for (int i = 0; i < coinDice.Count; i++)
+        {
+            if (coinDice[i] != null && coinDice[i].currentValue > 0) lastIndex = i;
+        }
+
+        for (int i = 0; i < coinDice.Count; i++)
+        {
+            Dice die = coinDice[i];
+            if (die == null || die.currentValue <= 0) continue;
+
+            int dieBase = die.currentValue * TurnCalculator.GoldPerPip;
+            int share = i == lastIndex
+                ? remainingShare
+                : Mathf.Min(remainingShare, Mathf.RoundToInt(granted * coinRatio * dieBase / coinBase));
+            remainingShare -= share;
+
+            // 주사위마다 0.1초씩 늦게 출발한다. 코인 수는 눈 값(최대 8개).
+            CoinFlyFeedback.Play(die.transform.position, Mathf.Min(die.currentValue, 8), share, playedCount * 0.1f);
+            playedCount++;
+        }
+
+        // 코인으로 오르는 몫을 뺀 나머지(코팅·위성 골드)는 바로 카운터에 반영한다.
+        CoinFlyFeedback.RefreshCounter(shop);
+    }
 
     // 가시 피해를 플레이어 체력에 직접 적용한다(보호막은 거치지 않음). 피격 연출·피격음·저체력 피규어 검사까지 함께 처리한다.
     // enemyDefeated가 true면 체력은 1 아래로 내려가지 않는다. 체력이 0이 되어 사망 처리가 필요하면 true를 돌려준다.

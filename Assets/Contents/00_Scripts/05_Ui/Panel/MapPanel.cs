@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
@@ -26,6 +27,8 @@ public class MapPanel : MonoBehaviour
     DiceManager boundDice;
     Coroutine journeyRollRoutine;
     bool journeyRolling;
+    Tween resultPopupTween;
+    GameObject resultPopupObject;
 
     public void Hide()
     {
@@ -47,6 +50,7 @@ public class MapPanel : MonoBehaviour
     public void OnJourneyRoll()
     {
         if (journeyRolling || boundDice == null || !boundDice.CanRollJourney()) return;
+        KillResultPopup(); // 팝업이 떠 있는 동안 다시 굴리면 이전 트윈은 끄고 새로 띄운다
         journeyRolling = true;
         if (journeyRollButton != null) journeyRollButton.interactable = false;
         journeyRollRoutine = StartCoroutine(PlayJourneyRoll());
@@ -332,17 +336,22 @@ public class MapPanel : MonoBehaviour
         }
 
         bool move = false;
+        int applied = 0;
+        bool flyGold = false;
         JourneyRollResult result = default;
         if (boundDice != null)
         {
             result = boundDice.RollJourneyFace();
-            move = boundDice.ApplyJourneyResult(result);
+            // 코인이면 화면 골드 숫자는 코인 날아가기 연출이 올린다(연출을 쓸 수 있을 때만, 실제 골드는 바로 오른다).
+            flyGold = result.outcome == JourneyOutcome.Gold && CoinFlyFeedback.CanPlay(boundDice.shopManager);
+            move = boundDice.ApplyJourneyResult(result, out applied, flyGold);
         }
         journeyRolling = false;
         journeyRollRoutine = null;
         if (boundDice == null) yield break;
 
         SetJourneyResult(result.faceSprite);
+        PlayJourneyOutcomeFeedback(result, applied, flyGold);
         if (move)
             Rebuild(boundDice);
         else if (journeyRollButton != null)
@@ -355,6 +364,96 @@ public class MapPanel : MonoBehaviour
             StopCoroutine(journeyRollRoutine);
         journeyRollRoutine = null;
         journeyRolling = false;
+        KillResultPopup();
+    }
+
+    // 해골·하트·코인 결과 연출. 이동 눈은 연출 없이 둔다. 숫자는 실제로 적용된 값이다.
+    void PlayJourneyOutcomeFeedback(JourneyRollResult result, int applied, bool flyGold)
+    {
+        switch (result.outcome)
+        {
+            case JourneyOutcome.Damage:
+                // 해골: 검정 글씨에 흰 아웃라인. 화면 붉어짐과 피격음은 DiceManager가 이미 재생했다.
+                if (applied > 0) ShowResultPopup("-" + applied, Color.black, new Color(1f, 1f, 1f, 0.95f));
+                break;
+            case JourneyOutcome.Heal:
+                if (applied > 0) ShowResultPopup("+" + applied, new Color(0.95f, 0.2f, 0.2f, 1f), new Color(0.1f, 0.03f, 0.03f, 0.95f));
+                break;
+            case JourneyOutcome.Gold:
+                if (applied > 0)
+                {
+                    ShowResultPopup("+" + applied, new Color(1f, 0.86f, 0.15f, 1f), new Color(0.15f, 0.1f, 0f, 0.95f));
+                    // 코인 아이콘이 주사위 면 위치에서 튀어나와 골드 패널로 날아간다(눈 값만큼).
+                    if (flyGold && journeyResultImage != null)
+                        CoinFlyFeedback.Play(journeyResultImage.transform.position, Mathf.Max(1, result.pips), applied);
+                    else if (flyGold)
+                        CoinFlyFeedback.RefreshCounter(boundDice.shopManager);
+                }
+                else if (flyGold)
+                    CoinFlyFeedback.RefreshCounter(boundDice.shopManager);
+                break;
+        }
+    }
+
+    // 주사위 면 바로 위에 숫자를 띄운다. 0.35초 동안 0.6→1.15→1 크기로 커지며 60px 위로 올라가고, 0.25초 페이드아웃 뒤 지운다.
+    void ShowResultPopup(string message, Color textColor, Color outlineColor)
+    {
+        KillResultPopup();
+        if (journeyResultImage == null) return;
+
+        Transform slot = journeyResultImage.transform.parent;
+        var go = new GameObject("Journey_Result_Popup", typeof(RectTransform), typeof(Text));
+        go.transform.SetParent(slot, false);
+        var rect = (RectTransform)go.transform;
+        rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.sizeDelta = new Vector2(260f, 80f);
+        RectTransform faceRect = journeyResultImage.rectTransform;
+        float startY = faceRect.anchoredPosition.y + faceRect.sizeDelta.y * 0.5f + 36f;
+        rect.anchoredPosition = new Vector2(0f, startY);
+        rect.localScale = Vector3.one * 0.6f;
+
+        Text text = go.GetComponent<Text>();
+        text.font = BuiltinFont();
+        text.fontSize = 56;
+        text.fontStyle = FontStyle.Bold;
+        text.alignment = TextAnchor.MiddleCenter;
+        text.horizontalOverflow = HorizontalWrapMode.Overflow;
+        text.verticalOverflow = VerticalWrapMode.Overflow;
+        text.raycastTarget = false;
+        text.color = textColor;
+        text.text = message;
+
+        // 보드 위에서도 읽히도록 어두운(또는 밝은) 아웃라인을 넣는다. 글자 알파를 따라 같이 사라진다.
+        Outline outline = go.AddComponent<Outline>();
+        outline.effectColor = outlineColor;
+        outline.effectDistance = new Vector2(3f, -3f);
+
+        resultPopupObject = go;
+        resultPopupTween = DOTween.Sequence().SetUpdate(true).SetLink(go);
+        var seq = (Sequence)resultPopupTween;
+        seq.Append(rect.DOScale(1.15f, 0.2f).SetEase(Ease.OutQuad));
+        seq.Append(rect.DOScale(1f, 0.15f).SetEase(Ease.InOutQuad));
+        seq.Insert(0f, rect.DOAnchorPosY(startY + 60f, 0.35f).SetEase(Ease.OutQuad));
+        seq.Append(text.DOFade(0f, 0.25f));
+        seq.OnComplete(() =>
+        {
+            if (go != null) Destroy(go);
+            if (resultPopupObject == go) resultPopupObject = null;
+            resultPopupTween = null;
+        });
+    }
+
+    void KillResultPopup()
+    {
+        if (resultPopupTween != null && resultPopupTween.IsActive()) resultPopupTween.Kill();
+        resultPopupTween = null;
+        if (resultPopupObject != null) Destroy(resultPopupObject);
+        resultPopupObject = null;
+    }
+
+    void OnDisable()
+    {
+        KillResultPopup();
     }
 
     static bool ListHas(List<int> ids, int id)
