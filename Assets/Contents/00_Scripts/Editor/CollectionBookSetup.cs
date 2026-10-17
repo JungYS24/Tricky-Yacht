@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using TMPro;
 using UnityEditor;
+using UnityEditor.Events;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Localization.Components;
@@ -58,6 +59,9 @@ public static class CollectionBookSetup
     const float TabCenterX = -865f;
     static readonly float[] TabCenterY = { 330f, 262f, 194f };
     static readonly Vector4 TabRaycastPadding = new Vector4(10f, 69.5f, 14.6f, 69.5f);
+    // 책 이미지는 책갈피 위에 그려지지만, 리본이 튀어나온 왼쪽만 클릭을 통과시킨다.
+    // 탭 클릭 오른쪽 끝은 -779.6, 양피지 왼쪽은 -765이므로 레이캐스트는 -768부터 시작한다.
+    const float BookRaycastLeftInset = 232f;
     static readonly Vector2 TabLabelOffsetMin = new Vector2(34f, 69.5f);
     static readonly Vector2 TabLabelOffsetMax = new Vector2(-80f, -69.5f);
 
@@ -374,6 +378,10 @@ public static class CollectionBookSetup
         SetParent(bookImage, bookRoot);
         Stretch((RectTransform)bookImage);
         SetSibling(bookImage, 1);
+        // 순서를 바꾸면 책갈피가 책 위로 올라온다. 그리기 순서는 두고 겹치는 왼쪽만 클릭에서 뺀다.
+        Image bookGraphic = bookImage.GetComponent<Image>();
+        Vector4 bookPadding = new Vector4(BookRaycastLeftInset, 0f, 0f, 0f);
+        if (bookGraphic.raycastPadding != bookPadding) bookGraphic.raycastPadding = bookPadding;
 
         RectTransform figurePage = EnsureContainer(bookRoot, "Page_Figure");
         SetSibling(figurePage, 2);
@@ -473,7 +481,6 @@ public static class CollectionBookSetup
             SetCenterRect((RectTransform)tab, new Vector2(TabCenterX, TabCenterY[i]), TabSize);
 
             Button button = tab.GetComponent<Button>();
-            ClearPersistentOnClick(button);
             Image image = tab.GetComponent<Image>();
             image.raycastPadding = TabRaycastPadding;
             image.preserveAspect = false;
@@ -497,12 +504,41 @@ public static class CollectionBookSetup
             labels[i] = label;
         }
 
-        manager.figureTabButton = figureTab.GetComponent<Button>();
-        manager.synergyTabButton = synergyTab.GetComponent<Button>();
-        manager.achievementTabButton = achievementTab.GetComponent<Button>();
+        Button figureButton = figureTab.GetComponent<Button>();
+        Button synergyButton = synergyTab.GetComponent<Button>();
+        Button achievementButton = achievementTab.GetComponent<Button>();
+        // 업적 탭은 아직 기능이 없어 연결하지 않는다.
+        ClearPersistentOnClick(achievementButton);
+        EnsurePersistent(figureButton, manager.ShowFigurePage, nameof(CollectionBookManager.ShowFigurePage));
+        EnsurePersistent(synergyButton, manager.ShowSynergyPage, nameof(CollectionBookManager.ShowSynergyPage));
+
+        manager.figureTabButton = figureButton;
+        manager.synergyTabButton = synergyButton;
+        manager.achievementTabButton = achievementButton;
         manager.figureTabLabel = labels[0];
         manager.synergyTabLabel = labels[1];
         manager.achievementTabLabel = labels[2];
+
+        LogPersistent(figureButton, "TabButton_Figure");
+        LogPersistent(synergyButton, "TabButton_Synergy");
+        LogPersistent(achievementButton, "TabButton_Achievement");
+    }
+
+    static void EnsurePersistent(Button button, UnityEngine.Events.UnityAction action, string methodName)
+    {
+        for (int i = 0; i < button.onClick.GetPersistentEventCount(); i++)
+        {
+            if (button.onClick.GetPersistentMethodName(i) == methodName) return;
+        }
+        UnityEventTools.AddPersistentListener(button.onClick, action);
+    }
+
+    static void LogPersistent(Button button, string name)
+    {
+        int count = button.onClick.GetPersistentEventCount();
+        var methods = new string[count];
+        for (int i = 0; i < count; i++) methods[i] = button.onClick.GetPersistentMethodName(i);
+        Debug.Log("[CollectionBook] " + name + " persistent=" + count + (count > 0 ? " " + string.Join(", ", methods) : ""));
     }
 
     static void SetupFigurePage(Transform panel, RectTransform page, Transform closeButton, CollectionBookManager manager)
