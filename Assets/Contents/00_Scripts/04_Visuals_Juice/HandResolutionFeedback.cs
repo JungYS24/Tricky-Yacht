@@ -92,8 +92,7 @@ public sealed class HandResolutionFeedback : MonoBehaviour
         int firstPair = -1;
         for (int i = 0; i < 5; i++)
         {
-            int same = 0;
-            for (int j = 0; j < 5; j++) if (values[i] == values[j]) same++;
+            int same = HandRankUtil.CountValues(values, values[i], 5);
             groups[i] = -1;
             switch (rank)
             {

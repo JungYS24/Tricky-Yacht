@@ -102,26 +102,21 @@ public static class TurnCalculator
             return HandRank.HighCard;
         }
 
-        // 최대 5개인 주사위는 작은 중첩 루프가 Dictionary/List 생성보다 간단하고 할당이 없습니다.
+        // 각 눈금을 한 번씩 집계합니다. 개수 세기는 강조 그룹 판정과 같은 함수를 씁니다.
         int pairs = 0;
         bool triple = false, four = false, yacht = false, hasZero = false;
         int uniqueCount = 0, minimum = int.MaxValue, maximum = int.MinValue;
         for (int i = 0; i < values.Count; i++)
         {
             int value = values[i];
-            bool alreadyCounted = false;
-            for (int j = 0; j < i; j++)
-            {
-                if (values[j] == value) { alreadyCounted = true; break; }
-            }
-            if (alreadyCounted) continue;
+            // 앞에서 처리한 눈금이면 중복 집계를 건너뜁니다.
+            if (HandRankUtil.CountValues(values, value, i) > 0) continue;
 
             uniqueCount++;
             if (value == 0) hasZero = true;
             if (value < minimum) minimum = value;
             if (value > maximum) maximum = value;
-            int count = 1;
-            for (int j = i + 1; j < values.Count; j++) if (values[j] == value) count++;
+            int count = HandRankUtil.CountValues(values, value, values.Count);
             if (count == 2) pairs++;
             else if (count == 3) triple = true;
             else if (count == 4) four = true;
