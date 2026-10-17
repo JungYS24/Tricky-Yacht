@@ -83,6 +83,15 @@ public class CollectionBookManager : MonoBehaviour
 
     public TextMeshProUGUI currentFilterText;
 
+    private static bool HasPersistentMethod(Button button, string methodName)
+    {
+        for (int i = 0; i < button.onClick.GetPersistentEventCount(); i++)
+        {
+            if (button.onClick.GetPersistentMethodName(i) == methodName) return true;
+        }
+        return false;
+    }
+
     private bool UsePaging => prevPageButton != null && nextPageButton != null && slotsPerPage > 0;
     private bool UseBiomeStepper => prevBiomeButton != null && nextBiomeButton != null;
 
@@ -105,8 +114,11 @@ public class CollectionBookManager : MonoBehaviour
         GenerateFilterButtons(); // 시작할 때 필터 버튼 자동 생성
 
         if (dimButton != null) dimButton.onClick.AddListener(CloseCollectionBook);
-        if (figureTabButton != null) figureTabButton.onClick.AddListener(ShowFigurePage);
-        if (synergyTabButton != null) synergyTabButton.onClick.AddListener(ShowSynergyPage);
+        // 씬에 저장된 호출이 있으면 런타임에 또 붙이지 않는다. 없으면 예전 씬도 동작하게 붙인다.
+        if (figureTabButton != null && !HasPersistentMethod(figureTabButton, nameof(ShowFigurePage)))
+            figureTabButton.onClick.AddListener(ShowFigurePage);
+        if (synergyTabButton != null && !HasPersistentMethod(synergyTabButton, nameof(ShowSynergyPage)))
+            synergyTabButton.onClick.AddListener(ShowSynergyPage);
         if (prevBiomeButton != null) prevBiomeButton.onClick.AddListener(() => StepBiomeFilter(-1));
         if (nextBiomeButton != null) nextBiomeButton.onClick.AddListener(() => StepBiomeFilter(1));
         if (prevPageButton != null) prevPageButton.onClick.AddListener(() => ChangePage(-1));
@@ -181,6 +193,9 @@ public class CollectionBookManager : MonoBehaviour
 
     public void ShowFigurePage()
     {
+#if UNITY_EDITOR
+        Debug.Log("[CollectionBook] tab -> figure");
+#endif
         isSynergyPageOpen = false;
         if (figurePageRoot != null) figurePageRoot.SetActive(true);
         if (synergyPageRoot != null) synergyPageRoot.SetActive(false);
@@ -190,6 +205,9 @@ public class CollectionBookManager : MonoBehaviour
 
     public void ShowSynergyPage()
     {
+#if UNITY_EDITOR
+        Debug.Log("[CollectionBook] tab -> synergy");
+#endif
         if (synergyPageRoot == null) return;
 
         isSynergyPageOpen = true;
