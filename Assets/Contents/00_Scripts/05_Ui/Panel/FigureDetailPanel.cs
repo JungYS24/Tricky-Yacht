@@ -231,7 +231,11 @@ public class FigureDetailPanel : MonoBehaviour
         bool showExtra = isEncountered;
         if (dropMonsterRoot != null) dropMonsterRoot.SetActive(showExtra);
         if (relatedSynergyRoot != null) relatedSynergyRoot.SetActive(showExtra);
-        if (!showExtra) return;
+        if (!showExtra)
+        {
+            LayoutBookDescription();
+            return;
+        }
 
         if (dropMonsterLabel != null)
             dropMonsterLabel.text = LocalizationManager.GetUi("UI_DROP_MONSTER", "드롭 몬스터");
@@ -252,6 +256,7 @@ public class FigureDetailPanel : MonoBehaviour
         }
         ShowDrop();
         ShowRelatedSynergies(figure);
+        LayoutBookDescription();
     }
 
     private void StepDrop(int direction)
@@ -435,6 +440,58 @@ public class FigureDetailPanel : MonoBehaviour
         return result;
     }
 
+    // 설명이 길면 칸을 늘리고, 획득 바이옴·구분선·하단 묶음을 같은 만큼 내린다.
+    // 그래도 페이지를 넘치면 글자를 24에서 20까지 2pt씩 줄인다.
+    private void LayoutBookDescription()
+    {
+        if (descText == null || dropMonsterRoot == null) return;
+
+        const float descTop = -52f;
+        const float descWidth = 580f;
+        const float baseHeight = 56f;
+        const float locationBase = -128f;
+        const float dividerBase = -152f;
+        const float columnBase = -279f;
+        const float monsterBottomOffset = -9.3f - 128f * 1.5f * 0.5f;
+        const float pageBottom = -414f;
+
+        descText.textWrappingMode = TextWrappingModes.Normal;
+        descText.overflowMode = TextOverflowModes.Overflow;
+        descText.enableAutoSizing = false;
+
+        float height = baseHeight;
+        foreach (float size in new float[] { 24f, 22f, 20f })
+        {
+            descText.fontSize = size;
+            descText.ForceMeshUpdate();
+            float preferred = Mathf.Max(baseHeight, descText.preferredHeight);
+            float bottom = columnBase - (preferred - baseHeight) + monsterBottomOffset;
+            height = preferred;
+            if (bottom >= pageBottom) break;
+        }
+
+        RectTransform descRect = descText.rectTransform;
+        if (descRect.pivot != new Vector2(0.5f, 1f)) descRect.pivot = new Vector2(0.5f, 1f);
+        descRect.anchoredPosition = new Vector2(0f, descTop);
+        descRect.sizeDelta = new Vector2(descWidth, height);
+        LayoutElement element = descText.GetComponent<LayoutElement>();
+        if (element != null) element.preferredHeight = height;
+
+        float delta = height - baseHeight;
+        if (locationText != null)
+            locationText.rectTransform.anchoredPosition = new Vector2(locationText.rectTransform.anchoredPosition.x, locationBase - delta);
+        Transform divider = transform.Find("Divider");
+        if (divider is RectTransform dividerRect)
+            dividerRect.anchoredPosition = new Vector2(dividerRect.anchoredPosition.x, dividerBase - delta);
+        var dropRect = (RectTransform)dropMonsterRoot.transform;
+        dropRect.anchoredPosition = new Vector2(dropRect.anchoredPosition.x, columnBase - delta);
+        if (relatedSynergyRoot != null)
+        {
+            var synergyRect = (RectTransform)relatedSynergyRoot.transform;
+            synergyRect.anchoredPosition = new Vector2(synergyRect.anchoredPosition.x, columnBase - delta);
+        }
+    }
+
     // 박스에 들어가는 가장 큰 정수 배로 키운다. 원본이 박스보다 크면 박스에 맞추고 비율은 유지한다.
     private static void FitSpriteBox(Image image, float box)
     {
@@ -449,9 +506,15 @@ public class FigureDetailPanel : MonoBehaviour
     private static void PlaceShadow(Image shadow, Image body)
     {
         if (shadow == null || body == null) return;
-        float width = Mathf.Max(48f, body.rectTransform.sizeDelta.x * 0.72f);
-        shadow.rectTransform.sizeDelta = new Vector2(width, Mathf.Max(16f, width * 0.22f));
-        shadow.rectTransform.anchoredPosition = new Vector2(body.rectTransform.anchoredPosition.x, body.rectTransform.anchoredPosition.y - body.rectTransform.sizeDelta.y * 0.42f);
+        float scaleX = Mathf.Abs(body.rectTransform.localScale.x);
+        float scaleY = Mathf.Abs(body.rectTransform.localScale.y);
+        float width = Mathf.Max(48f, body.rectTransform.sizeDelta.x * scaleX * 0.72f);
+        float height = Mathf.Max(16f, width * 0.22f);
+        shadow.rectTransform.sizeDelta = new Vector2(width, height);
+        float bodyHeight = body.rectTransform.sizeDelta.y * scaleY;
+        shadow.rectTransform.anchoredPosition = new Vector2(
+            body.rectTransform.anchoredPosition.x,
+            body.rectTransform.anchoredPosition.y - bodyHeight * 0.42f);
     }
 
     private class MonsterDrop

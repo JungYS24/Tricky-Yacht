@@ -30,7 +30,7 @@ public static class CollectionBookSetup
     const string UiCsvPath = "Assets/Contents/11_Localization/Source/localization_csv/UI.csv";
     const string ArrowSpritePath = "Assets/Contents/06_UI/Sprites/Button/CrossBTN.png";
     const string IconFrameSpritePath = "Assets/Contents/06_UI/Sprites/score_panel_sprites/slot_dark_small_1.png";
-    const string LockSpritePath = "Assets/Contents/06_UI/Sprites/Icon/자물쇠-removebg-preview.png";
+    const string LockSpritePath = "Assets/Contents/06_UI/book_ui_buttons/Icon_Lock.png";
     const string BookUiFolder = "Assets/Contents/06_UI/book_ui_buttons";
     const string DropdownUiFolder = BookUiFolder + "/dropdown_ui";
     // CrossBTN, slot_dark_small_1 과 같은 PPU.
@@ -68,14 +68,16 @@ public static class CollectionBookSetup
 
     // 책갈피 스프라이트(300x250)는 리본이 x 5%~92.7%, y 36%~64%만 차지한다.
     static readonly Vector2 TabSize = new Vector2(200f, 193f);
-    const float TabCenterX = -865f;
+    const float TabCenterX = -846f;
     static readonly float[] TabCenterY = { 330f, 262f, 194f };
     static readonly Vector4 TabRaycastPadding = new Vector4(10f, 69.5f, 14.6f, 69.5f);
     // 책 이미지는 책갈피 위에 그려지지만, 리본이 튀어나온 왼쪽만 클릭을 통과시킨다.
     // 탭 클릭 오른쪽 끝은 -779.6, 양피지 왼쪽은 -765이므로 레이캐스트는 -768부터 시작한다.
     const float BookRaycastLeftInset = 232f;
-    static readonly Vector2 TabLabelOffsetMin = new Vector2(34f, 69.5f);
-    static readonly Vector2 TabLabelOffsetMax = new Vector2(-80f, -69.5f);
+    static readonly Vector2 TabLabelOffsetMin = new Vector2(55f, 69.5f);
+    static readonly Vector2 TabLabelOffsetMax = new Vector2(-59f, -69.5f);
+    static readonly Vector3 TabScale = new Vector3(0.9f, 1f, 1f);
+    static readonly Vector3 TabLabelScale = new Vector3(1.075f, 1f, 1f);
 
     [MenuItem("Tools/UI/Setup CollectionBook")]
     public static void SetupFromMenu()
@@ -387,27 +389,27 @@ public static class CollectionBookSetup
         VerticalLayoutGroup tabLayout = tabGroup.GetComponent<VerticalLayoutGroup>();
         if (tabLayout != null && tabLayout.enabled) tabLayout.enabled = false;
 
-        // 책갈피는 책 뒤에 깔려서 가장자리 밖으로만 보이도록 책 이미지보다 먼저 둔다.
-        SetParent(tabGroup, bookRoot);
-        Stretch((RectTransform)tabGroup);
-        SetSibling(tabGroup, 0);
+        // 책갈피는 사용자가 책 위로 올려 둔 순서를 유지한다. 책, 페이지, 닫기, 탭.
         SetParent(bookImage, bookRoot);
         Stretch((RectTransform)bookImage);
-        SetSibling(bookImage, 1);
+        SetSibling(bookImage, 0);
         // 순서를 바꾸면 책갈피가 책 위로 올라온다. 그리기 순서는 두고 겹치는 왼쪽만 클릭에서 뺀다.
         Image bookGraphic = bookImage.GetComponent<Image>();
         Vector4 bookPadding = new Vector4(BookRaycastLeftInset, 0f, 0f, 0f);
         if (bookGraphic.raycastPadding != bookPadding) bookGraphic.raycastPadding = bookPadding;
 
         RectTransform figurePage = EnsureContainer(bookRoot, "Page_Figure");
-        SetSibling(figurePage, 2);
+        SetSibling(figurePage, 1);
         SetActive(figurePage.gameObject, true);
         RectTransform synergyPage = EnsureContainer(bookRoot, "Page_Synergy");
-        SetSibling(synergyPage, 3);
+        SetSibling(synergyPage, 2);
 
         SetParent(closeButton, bookRoot);
         SetCenterRect((RectTransform)closeButton, new Vector2(797f, 403f), CloseButtonSize);
-        SetSibling(closeButton, 4);
+        SetSibling(closeButton, 3);
+        SetParent(tabGroup, bookRoot);
+        Stretch((RectTransform)tabGroup);
+        SetSibling(tabGroup, 4);
         ApplySpriteSwap(closeButton.GetComponent<Button>(), LoadBookSprite("Btn_Close"), LoadBookSprite("Btn_Close_Pressed"), null);
 
         SetupTabs(tabGroup, manager);
@@ -495,7 +497,7 @@ public static class CollectionBookSetup
             Transform tab = tabs[i];
             SetActive(tab.gameObject, true);
             SetSibling(tab, i);
-            SetCenterRect((RectTransform)tab, new Vector2(TabCenterX, TabCenterY[i]), TabSize);
+            SetCenterRect((RectTransform)tab, new Vector2(TabCenterX, TabCenterY[i]), TabSize, TabScale);
 
             Button button = tab.GetComponent<Button>();
             Image image = tab.GetComponent<Image>();
@@ -506,7 +508,7 @@ public static class CollectionBookSetup
             // 라벨은 LocalizationManager.GetUi로 넣으므로 패키지 로컬라이저는 끈다.
             LocalizeStringEvent localizer = label.GetComponent<LocalizeStringEvent>();
             if (localizer != null) localizer.enabled = false;
-            SetAnchors(label.rectTransform, Vector2.zero, Vector2.one, TabLabelOffsetMin, TabLabelOffsetMax);
+            SetAnchors(label.rectTransform, Vector2.zero, Vector2.one, TabLabelOffsetMin, TabLabelOffsetMax, TabLabelScale);
             label.text = defaultLabels[i];
             label.color = Color.white;
             label.fontSize = 24f;
@@ -584,11 +586,32 @@ public static class CollectionBookSetup
         progress.text = "0 / 0";
 
         // 제목(y 360, 높이 56)과 화살표가 맞닿아 있어서 바이옴 줄만 16 내린다. 제목·수집률은 그대로.
+        // 가장 긴 이름: 한국어 스페셜·서커스·하늘섬(3자), 영어 Snowfield·Skyisland(9자), 일본어 ジャングル(6자).
+        // 패널 폭 220은 그 이름을 폰트 28 안에 두고, 바이옴을 넘겨도 크기가 바뀌지 않는다.
         float biomeY = 286f;
-        TextMeshProUGUI biomeName = EnsureText(textTemplate, page, "BiomeNameText", new Vector2(LeftPageCenterX, biomeY), new Vector2(240f, 52f), 30f, HorizontalAlignmentOptions.Center);
+        const float biomePlateWidth = 220f;
+        float biomePlateHeight = arrowSize.y;
+        const float biomeGap = 8f;
+        float biomeArrowX = biomePlateWidth * 0.5f + biomeGap + arrowSize.x * 0.5f;
+        Sprite biomePlateSprite = LoadBookSprite("Plate_Biome");
+        if (biomePlateSprite == null) throw new InvalidOperationException("Plate_Biome 스프라이트를 찾지 못했습니다.");
+        Image biomePlate = EnsureImage(page, "BiomePlate", biomePlateSprite, new Vector2(LeftPageCenterX, biomeY), new Vector2(biomePlateWidth, biomePlateHeight), Color.white);
+        if (biomePlate.type != Image.Type.Sliced) biomePlate.type = Image.Type.Sliced;
+        biomePlate.raycastTarget = false;
+        if (Mathf.Abs(biomePlate.pixelsPerUnitMultiplier - 1f) > 0.001f) biomePlate.pixelsPerUnitMultiplier = 1f;
+        TextMeshProUGUI biomeName = EnsureText(textTemplate, page, "BiomeNameText", new Vector2(LeftPageCenterX, biomeY), new Vector2(biomePlateWidth - 32f, biomePlateHeight - 16f), 28f, HorizontalAlignmentOptions.Center);
         biomeName.text = "전체";
-        Button prevBiome = EnsureArrowButton(closeButton, page, "PrevBiomeButton", arrowLeft, new Vector2(LeftPageCenterX - 150f, biomeY), arrowSize);
-        Button nextBiome = EnsureArrowButton(closeButton, page, "NextBiomeButton", arrowRight, new Vector2(LeftPageCenterX + 150f, biomeY), arrowSize);
+        biomeName.fontStyle = FontStyles.Bold;
+        biomeName.enableAutoSizing = true;
+        biomeName.fontSizeMin = 18f;
+        biomeName.fontSizeMax = 28f;
+        biomeName.color = new Color(246f / 255f, 228f / 255f, 194f / 255f, 1f);
+        biomeName.raycastTarget = false;
+        int biomeTextIndex = biomeName.transform.GetSiblingIndex();
+        if (biomePlate.transform.GetSiblingIndex() != biomeTextIndex - 1)
+            SetSibling(biomePlate.transform, biomeTextIndex);
+        Button prevBiome = EnsureArrowButton(closeButton, page, "PrevBiomeButton", arrowLeft, new Vector2(LeftPageCenterX - biomeArrowX, biomeY), arrowSize);
+        Button nextBiome = EnsureArrowButton(closeButton, page, "NextBiomeButton", arrowRight, new Vector2(LeftPageCenterX + biomeArrowX, biomeY), arrowSize);
         ApplySpriteSwap(prevBiome, arrowLeft, arrowLeftPressed, null);
         ApplySpriteSwap(nextBiome, arrowRight, arrowRightPressed, null);
 
@@ -606,7 +629,9 @@ public static class CollectionBookSetup
         RectTransform viewport = (RectTransform)Require(scrollView, "Viewport");
         Stretch(viewport);
         RectTransform content = (RectTransform)Require(viewport, "Content");
-        SetRect(content, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0f, gridHeight), content.localScale);
+        // 그리드 내용 높이는 하이어라키 값을 유지한다. 스크롤은 꺼져 있어서 뷰포트가 칸을 보여 준다.
+        Vector2 contentSize = content.anchorMin.y > 0.5f ? content.sizeDelta : new Vector2(0f, gridHeight);
+        SetRect(content, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, contentSize, content.localScale);
         GridLayoutGroup grid = content.GetComponent<GridLayoutGroup>();
         grid.cellSize = new Vector2(128f, 164f);
         grid.spacing = new Vector2(11f, 14f);
@@ -696,15 +721,27 @@ public static class CollectionBookSetup
 
         // 아이콘이 커진 만큼 효과 설명·획득 바이옴·구분선을 아래로 민다.
         const float descHeight = 56f;
-        float descY = iconY - iconBox * 0.5f - 12f - descHeight * 0.5f;
+        const float descWidth = 580f;
+        float descTop = iconY - iconBox * 0.5f - 12f;
         TextMeshProUGUI descText = panel.descText;
-        SetCenterRect(descText.rectTransform, new Vector2(0f, descY), new Vector2(580f, descHeight));
+        // 위쪽을 고정하고 내용만큼 아래로 늘어나게 피벗을 둔다. 짧은 글은 56을 유지한다.
+        SetRect(descText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 1f),
+            new Vector2(0f, descTop), new Vector2(descWidth, descHeight), Vector3.one);
         StyleText(descText, 24f, HorizontalAlignmentOptions.Center, VerticalAlignmentOptions.Top);
         descText.textWrappingMode = TextWrappingModes.Normal;
-        descText.overflowMode = TextOverflowModes.Ellipsis;
+        descText.overflowMode = TextOverflowModes.Overflow;
+        descText.enableAutoSizing = false;
+        descText.fontSizeMin = 20f;
+        descText.fontSizeMax = 24f;
+        ContentSizeFitter descFitter = GetOrAdd<ContentSizeFitter>(descText.gameObject);
+        if (descFitter.horizontalFit != ContentSizeFitter.FitMode.Unconstrained) descFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        if (descFitter.verticalFit != ContentSizeFitter.FitMode.PreferredSize) descFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        LayoutElement descElement = GetOrAdd<LayoutElement>(descText.gameObject);
+        if (!Near(descElement.minHeight, descHeight)) descElement.minHeight = descHeight;
+        if (descElement.preferredHeight >= 0f) descElement.preferredHeight = -1f;
 
         const float locationHeight = 32f;
-        float locationY = descY - descHeight * 0.5f - 4f - locationHeight * 0.5f;
+        float locationY = descTop - descHeight - 4f - locationHeight * 0.5f;
         TextMeshProUGUI locationText = panel.locationText;
         SetCenterRect(locationText.rectTransform, new Vector2(0f, locationY), new Vector2(580f, locationHeight));
         StyleText(locationText, 22f, HorizontalAlignmentOptions.Center, VerticalAlignmentOptions.Middle);
@@ -714,7 +751,7 @@ public static class CollectionBookSetup
         float dividerY = locationY - locationHeight * 0.5f - 8f;
         SetupDetailExtras(detail, panel, nameText, iconY, dividerY);
         Debug.Log("[CollectionBook] figure detail nameY=" + nameY + " iconY=" + iconY + " iconBox=" + iconBox
-            + " descY=" + descY + " locationY=" + locationY + " dividerY=" + dividerY);
+            + " descTop=" + descTop + " locationY=" + locationY + " dividerY=" + dividerY);
     }
 
     static void SetupSynergyPage(RectTransform page, GameObject synergyPagePrefab, CollectionBookManager manager)
@@ -857,23 +894,43 @@ public static class CollectionBookSetup
         return component != null ? component : go.AddComponent<T>();
     }
 
+    static bool Near(float a, float b)
+    {
+        return Mathf.Abs(a - b) < 0.01f;
+    }
+
+    static bool Near(Vector2 a, Vector2 b)
+    {
+        return Near(a.x, b.x) && Near(a.y, b.y);
+    }
+
+    static bool Near(Vector3 a, Vector3 b)
+    {
+        return Near(a.x, b.x) && Near(a.y, b.y) && Near(a.z, b.z);
+    }
+
     // 같은 값을 다시 쓰면 부동소수 오차로 씬 diff가 생기므로 다를 때만 쓴다.
     static void SetRect(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta, Vector3 scale)
     {
-        if (rect.anchorMin != anchorMin) rect.anchorMin = anchorMin;
-        if (rect.anchorMax != anchorMax) rect.anchorMax = anchorMax;
-        if (rect.pivot != pivot) rect.pivot = pivot;
-        if (rect.localScale != scale) rect.localScale = scale;
+        if (!Near(rect.anchorMin, anchorMin)) rect.anchorMin = anchorMin;
+        if (!Near(rect.anchorMax, anchorMax)) rect.anchorMax = anchorMax;
+        if (!Near(rect.pivot, pivot)) rect.pivot = pivot;
+        if (!Near(rect.localScale, scale)) rect.localScale = scale;
         if (rect.localRotation != Quaternion.identity) rect.localRotation = Quaternion.identity;
-        if (rect.anchoredPosition != anchoredPosition) rect.anchoredPosition = anchoredPosition;
-        if (rect.localPosition.z != 0f) rect.anchoredPosition3D = new Vector3(anchoredPosition.x, anchoredPosition.y, 0f);
-        if (rect.sizeDelta != sizeDelta) rect.sizeDelta = sizeDelta;
+        if (!Near(rect.anchoredPosition, anchoredPosition)) rect.anchoredPosition = anchoredPosition;
+        if (!Near(rect.localPosition.z, 0f)) rect.anchoredPosition3D = new Vector3(anchoredPosition.x, anchoredPosition.y, 0f);
+        if (!Near(rect.sizeDelta, sizeDelta)) rect.sizeDelta = sizeDelta;
     }
 
     static void SetCenterRect(RectTransform rect, Vector2 position, Vector2 size)
     {
+        SetCenterRect(rect, position, size, Vector3.one);
+    }
+
+    static void SetCenterRect(RectTransform rect, Vector2 position, Vector2 size, Vector3 scale)
+    {
         Vector2 center = new Vector2(0.5f, 0.5f);
-        SetRect(rect, center, center, center, position, size, Vector3.one);
+        SetRect(rect, center, center, center, position, size, scale);
     }
 
     static void SetAnchors(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax)
@@ -884,8 +941,13 @@ public static class CollectionBookSetup
     // 피벗이 가운데일 때 offsetMin/Max를 위치·크기로 바꿔 쓴다. offsetMin/Max 세터는 오차가 생겨서 쓰지 않는다.
     static void SetAnchors(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)
     {
+        SetAnchors(rect, anchorMin, anchorMax, offsetMin, offsetMax, Vector3.one);
+    }
+
+    static void SetAnchors(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax, Vector3 scale)
+    {
         Vector2 center = new Vector2(0.5f, 0.5f);
-        SetRect(rect, anchorMin, anchorMax, center, (offsetMin + offsetMax) * 0.5f, offsetMax - offsetMin, Vector3.one);
+        SetRect(rect, anchorMin, anchorMax, center, (offsetMin + offsetMax) * 0.5f, offsetMax - offsetMin, scale);
     }
 
     static void Stretch(RectTransform rect)
@@ -965,6 +1027,7 @@ public static class CollectionBookSetup
             string name = System.IO.Path.GetFileNameWithoutExtension(path);
             Vector4 border = Vector4.zero;
             if (name == "Badge_Count") border = new Vector4(12f, 12f, 12f, 12f);
+            else if (name == "Plate_Biome") border = new Vector4(16f, 16f, 16f, 16f);
             else if (name.StartsWith("SynergyRow")) border = new Vector4(82f, 10f, 14f, 10f);
 
             bool changed = false;
@@ -1094,19 +1157,22 @@ public static class CollectionBookSetup
         float dropLocal = -columnY;
         TextMeshProUGUI dropLabel = EnsureText(template.transform, dropRoot, "Label", new Vector2(0f, labelY + dropLocal), new Vector2(260f, labelHeight), 18f, HorizontalAlignmentOptions.Center);
         dropLabel.color = new Color(0.45f, 0.32f, 0.2f, 1f);
-        TextMeshProUGUI dropName = EnsureText(template.transform, dropRoot, "Name", new Vector2(0f, dropNameY + dropLocal), new Vector2(260f, dropNameHeight), 24f, HorizontalAlignmentOptions.Center);
-        dropName.fontStyle = FontStyles.Bold;
-        dropName.enableAutoSizing = false;
-        dropName.fontSizeMin = 18f;
-        dropName.fontSizeMax = 24f;
-        dropName.textWrappingMode = TextWrappingModes.NoWrap;
-        dropName.overflowMode = TextOverflowModes.Overflow;
-        TextMeshProUGUI dropBiome = EnsureText(template.transform, dropRoot, "Biome", new Vector2(0f, biomeTextY + dropLocal), new Vector2(260f, biomeHeight), 18f, HorizontalAlignmentOptions.Center);
-        dropBiome.color = new Color(0.45f, 0.32f, 0.2f, 1f);
-        Image monsterImage = EnsureImage(dropRoot, "MonsterImage", null, new Vector2(0f, monsterY + dropLocal), new Vector2(monsterBox, monsterBox), Color.white);
+        // 하이어라키에서 지운 몬스터 이름·출현 바이옴은 다시 만들지 않는다.
+        // 스프라이트 배율 1.5와 위치는 사용자가 맞춘 값을 유지하고, 미리 넣어 둔 스프라이트는 지우지 않는다.
+        Transform monsterTransform = FindDirect(dropRoot, "MonsterImage");
+        if (monsterTransform == null) monsterTransform = NewImage(dropRoot, "MonsterImage");
+        Image monsterImage = monsterTransform.GetComponent<Image>();
         monsterImage.preserveAspect = true;
-        float monsterShadowWidth = monsterBox * 0.72f;
-        Image monsterShadow = EnsureImage(dropRoot, "MonsterShadow", knob, new Vector2(0f, monsterY + dropLocal - monsterBox * 0.42f), new Vector2(monsterShadowWidth, monsterShadowWidth * 0.22f), new Color(0f, 0f, 0f, 0.28f));
+        monsterImage.raycastTarget = false;
+        if (monsterImage.color != Color.white) monsterImage.color = Color.white;
+        SetCenterRect(monsterImage.rectTransform, new Vector2(0f, -9.3f), new Vector2(monsterBox, monsterBox), new Vector3(1.5f, 1.5f, 1.5f));
+        // 피규어 아이콘 그림자와 같은 옅은 타원. 보이는 폭의 약 70%, 발밑, 스프라이트보다 뒤.
+        float monsterVisual = monsterBox * 1.5f;
+        float monsterShadowWidth = monsterVisual * 0.72f;
+        Image monsterShadow = EnsureImage(dropRoot, "MonsterShadow", knob,
+            new Vector2(0f, -9.3f - monsterVisual * 0.42f),
+            new Vector2(monsterShadowWidth, monsterShadowWidth * 0.22f),
+            new Color(0f, 0f, 0f, 0.28f));
         int monsterIndex = monsterImage.transform.GetSiblingIndex();
         if (monsterShadow.transform.GetSiblingIndex() != monsterIndex - 1)
             SetSibling(monsterShadow.transform, monsterIndex);
@@ -1138,8 +1204,8 @@ public static class CollectionBookSetup
         panel.figureShadow = figureShadow;
         panel.dropMonsterRoot = dropRoot.gameObject;
         panel.dropMonsterLabel = dropLabel;
-        panel.dropMonsterName = dropName;
-        panel.dropMonsterBiome = dropBiome;
+        if (panel.dropMonsterName != null) panel.dropMonsterName = null;
+        if (panel.dropMonsterBiome != null) panel.dropMonsterBiome = null;
         panel.dropMonsterImage = monsterImage;
         panel.dropMonsterShadow = monsterShadow;
         panel.dropMonsterPrev = dropPrev;
