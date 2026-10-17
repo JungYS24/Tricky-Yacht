@@ -32,6 +32,7 @@ public static class CollectionBookSetup
     const string IconFrameSpritePath = "Assets/Contents/06_UI/Sprites/score_panel_sprites/slot_dark_small_1.png";
     const string LockSpritePath = "Assets/Contents/06_UI/Sprites/Icon/자물쇠-removebg-preview.png";
     const string BookUiFolder = "Assets/Contents/06_UI/book_ui_buttons";
+    const string DropdownUiFolder = BookUiFolder + "/dropdown_ui";
     // CrossBTN, slot_dark_small_1 과 같은 PPU.
     const float BookSpritePpu = 100f;
     static readonly Vector2 ArrowButtonSize = new Vector2(64f, 64f);
@@ -95,6 +96,7 @@ public static class CollectionBookSetup
             ImportUiStrings();
             ConfigureBookSprites();
             ConfigureSlotPanel();
+            ConfigureDropdownSprites();
             SetupSlotPrefab();
 
             Scene scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
@@ -976,6 +978,36 @@ public static class CollectionBookSetup
         Debug.Log("[CollectionBook] slot_dark_small_1 172x162 border=20 Point uncompressed");
     }
 
+    static void ConfigureDropdownSprites()
+    {
+        foreach (string file in System.IO.Directory.GetFiles(DropdownUiFolder, "*.png"))
+        {
+            string path = file.Replace('\\', '/');
+            int assets = path.IndexOf("Assets/", StringComparison.Ordinal);
+            if (assets >= 0) path = path.Substring(assets);
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer == null) continue;
+            string name = System.IO.Path.GetFileNameWithoutExtension(path);
+            Vector4 border = Vector4.zero;
+            if (name == "Dropdown_Field" || name == "Dropdown_Field_Pressed" || name == "Dropdown_List")
+                border = new Vector4(12f, 12f, 12f, 12f);
+            else if (name == "Dropdown_Item_Highlight")
+                border = new Vector4(8f, 8f, 8f, 8f);
+
+            bool changed = false;
+            if (importer.textureType != TextureImporterType.Sprite) { importer.textureType = TextureImporterType.Sprite; changed = true; }
+            if (importer.spriteImportMode != SpriteImportMode.Single) { importer.spriteImportMode = SpriteImportMode.Single; changed = true; }
+            if (importer.mipmapEnabled) { importer.mipmapEnabled = false; changed = true; }
+            if (importer.filterMode != FilterMode.Point) { importer.filterMode = FilterMode.Point; changed = true; }
+            if (importer.textureCompression != TextureImporterCompression.Uncompressed) { importer.textureCompression = TextureImporterCompression.Uncompressed; changed = true; }
+            if (importer.crunchedCompression) { importer.crunchedCompression = false; changed = true; }
+            if (Mathf.Abs(importer.spritePixelsPerUnit - BookSpritePpu) > 0.01f) { importer.spritePixelsPerUnit = BookSpritePpu; changed = true; }
+            if (importer.spriteBorder != border) { importer.spriteBorder = border; changed = true; }
+            if (changed) importer.SaveAndReimport();
+        }
+        Debug.Log("[CollectionBook] dropdown sprites Point uncompressed PPU=" + BookSpritePpu);
+    }
+
     static Sprite LoadBookSprite(string name)
     {
         return AssetDatabase.LoadAssetAtPath<Sprite>(BookUiFolder + "/" + name + ".png");
@@ -1219,11 +1251,16 @@ public static class CollectionBookSetup
         detailDescription.verticalAlignment = VerticalAlignmentOptions.Top;
         detailDescription.textWrappingMode = TextWrappingModes.Normal;
         detailDescription.overflowMode = TextOverflowModes.Overflow;
-        SetSibling(header, 0);
-        SetSibling(detailDescription.transform, 1);
+        // 헤더-설명 간격(12)은 유지하고, 설명과 칸 사이에만 32px를 더한다.
+        // 사이 간격 = 12 + 스페이서 20 + 12 = 44.
+        Transform spacer = EnsureChild(detail, "FigureGap");
+        LayoutElement gap = GetOrAdd<LayoutElement>(spacer.gameObject);
+        gap.minHeight = 20f;
+        gap.preferredHeight = 20f;
+        gap.flexibleHeight = 0f;
+        gap.flexibleWidth = 1f;
 
         Transform figures = EnsureChild(detail, "Figures");
-        SetSibling(figures, 2);
         LayoutElement figuresElement = GetOrAdd<LayoutElement>(figures.gameObject);
         figuresElement.preferredHeight = FigureCellMax * 2f + FigureSpacing;
         figuresElement.flexibleWidth = 1f;
@@ -1263,7 +1300,168 @@ public static class CollectionBookSetup
         so.FindProperty("detailFigureRoot").objectReferenceValue = figures;
         so.FindProperty("detailFigureTemplate").objectReferenceValue = slotTemplate;
         so.FindProperty("figureAreaWidth").floatValue = innerWidth;
-        Debug.Log("[CollectionBook] synergy figures max=" + maxFigures + " cellAtMax=" + cellAtMax.ToString("0.##") + " inner=" + innerWidth);
+        SetSibling(header, 0);
+        SetSibling(detailDescription.transform, 1);
+        SetSibling(spacer, 2);
+        SetSibling(figures, 3);
+        SetLastSibling(slotTemplate.transform);
+        StyleSynergyControls(order, toggle, textTemplate, template.Find("Name").GetComponent<TextMeshProUGUI>());
+        Debug.Log("[CollectionBook] synergy figures max=" + maxFigures + " cellAtMax=" + cellAtMax.ToString("0.##") + " inner=" + innerWidth + " descToFigures=44");
+    }
+
+    static readonly Color DropdownInk = new Color(70f / 255f, 40f / 255f, 26f / 255f, 1f);
+
+    // 정렬 드롭다운과 역순 토글에 dropdown_ui 스프라이트를 붙인다. 본체 위치·크기는 바꾸지 않는다.
+    static void StyleSynergyControls(RectTransform order, RectTransform toggle, TextMeshProUGUI reverseLabel, TextMeshProUGUI rowFont)
+    {
+        Sprite field = LoadDropdownSprite("Dropdown_Field");
+        Sprite pressed = LoadDropdownSprite("Dropdown_Field_Pressed");
+        Sprite arrowSprite = LoadDropdownSprite("Dropdown_Arrow");
+        Sprite list = LoadDropdownSprite("Dropdown_List");
+        Sprite highlight = LoadDropdownSprite("Dropdown_Item_Highlight");
+        Sprite check = LoadDropdownSprite("Dropdown_Check");
+        Sprite toggleBox = LoadDropdownSprite("Toggle_Box");
+        Sprite toggleCheck = LoadDropdownSprite("Toggle_Check");
+
+        Image fieldImage = order.GetComponent<Image>();
+        ApplyImage(fieldImage, field, Image.Type.Sliced, false, Color.white);
+        if (Mathf.Abs(fieldImage.pixelsPerUnitMultiplier - 1f) > 0.001f) fieldImage.pixelsPerUnitMultiplier = 1f;
+        TMP_Dropdown dropdown = order.GetComponent<TMP_Dropdown>();
+        if (dropdown.targetGraphic != fieldImage) dropdown.targetGraphic = fieldImage;
+        ApplySpriteSwap(dropdown, field, pressed);
+
+        RectTransform arrow = (RectTransform)Require(order, "Arrow");
+        Image arrowImage = arrow.GetComponent<Image>();
+        ApplyImage(arrowImage, arrowSprite, Image.Type.Simple, true, Color.white);
+        SetRect(arrow, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-6f, 0f), new Vector2(36f, 28f), Vector3.one);
+
+        Transform template = Require(order, "Template");
+        Image listImage = template.GetComponent<Image>();
+        ApplyImage(listImage, list, Image.Type.Sliced, false, Color.white);
+        if (Mathf.Abs(listImage.pixelsPerUnitMultiplier - 1f) > 0.001f) listImage.pixelsPerUnitMultiplier = 1f;
+        RectTransform templateRect = (RectTransform)template;
+        // 내용보다 짧게 시작하면 TMP가 늘리지 않고 아래 항목을 자른다. 길면 내용 높이에 맞춰 줄어든다.
+        if (Mathf.Abs(templateRect.sizeDelta.y - 220f) > 0.01f)
+            templateRect.sizeDelta = new Vector2(templateRect.sizeDelta.x, 220f);
+        // 뷰포트를 줄이면 TMP가 목록 높이를 내용에 맞춘 뒤 마스크가 마지막 항목을 자른다.
+        RectTransform viewport = (RectTransform)Require(template, "Viewport");
+        SetAnchors(viewport, Vector2.zero, Vector2.one);
+        ScrollRect listScroll = template.GetComponent<ScrollRect>();
+        if (listScroll.verticalScrollbarVisibility != ScrollRect.ScrollbarVisibility.AutoHide)
+            listScroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+        Transform scrollbar = template.Find("Scrollbar");
+        if (scrollbar != null) SetActive(scrollbar.gameObject, false);
+
+        Canvas listCanvas = GetOrAdd<Canvas>(template.gameObject);
+        if (!listCanvas.overrideSorting) listCanvas.overrideSorting = true;
+        if (listCanvas.sortingOrder != 500) listCanvas.sortingOrder = 500;
+        AdditionalCanvasShaderChannels channels = AdditionalCanvasShaderChannels.TexCoord1
+            | AdditionalCanvasShaderChannels.Normal | AdditionalCanvasShaderChannels.Tangent;
+        if ((listCanvas.additionalShaderChannels & channels) != channels)
+            listCanvas.additionalShaderChannels |= channels;
+        GetOrAdd<GraphicRaycaster>(template.gameObject);
+        SetActive(template.gameObject, false);
+
+        // 내용이 항목보다 짧으면 TMP가 마지막 줄을 목록 아래로 밀어 글자가 잘린다.
+        const float itemHeight = 44f;
+        const float listPad = 8f;
+        RectTransform content = (RectTransform)Require(template, "Viewport/Content");
+        RectTransform item = (RectTransform)Require(content, "Item");
+        SetRect(item, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -listPad), new Vector2(0f, itemHeight), Vector3.one);
+        SetRect(content, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+            Vector2.zero, new Vector2(0f, itemHeight + listPad * 2f), Vector3.one);
+        Image itemBackground = Require(item, "Item Background").GetComponent<Image>();
+        ApplyImage(itemBackground, highlight, Image.Type.Sliced, false, Color.white);
+        if (Mathf.Abs(itemBackground.pixelsPerUnitMultiplier - 1f) > 0.001f) itemBackground.pixelsPerUnitMultiplier = 1f;
+        Toggle itemToggle = item.GetComponent<Toggle>();
+        if (itemToggle.targetGraphic != itemBackground) itemToggle.targetGraphic = itemBackground;
+        if (itemToggle.transition != Selectable.Transition.ColorTint) itemToggle.transition = Selectable.Transition.ColorTint;
+        ColorBlock colors = itemToggle.colors;
+        Color hidden = new Color(1f, 1f, 1f, 0f);
+        if (colors.normalColor != hidden || colors.highlightedColor != Color.white || colors.pressedColor != Color.white || colors.selectedColor != Color.white)
+        {
+            colors.normalColor = hidden;
+            colors.highlightedColor = Color.white;
+            colors.pressedColor = Color.white;
+            colors.selectedColor = Color.white;
+            colors.disabledColor = hidden;
+            colors.colorMultiplier = 1f;
+            itemToggle.colors = colors;
+        }
+        RectTransform itemCheck = (RectTransform)Require(item, "Item Checkmark");
+        ApplyImage(itemCheck.GetComponent<Image>(), check, Image.Type.Simple, true, Color.white);
+        SetRect(itemCheck, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(22f, 0f), new Vector2(32f, 32f), Vector3.one);
+        SetAnchors(((RectTransform)Require(item, "Item Label")), Vector2.zero, Vector2.one, new Vector2(42f, 1f), new Vector2(-8f, -2f));
+
+        // 화살표 36px가 오른쪽을 차지하므로 글자 영역을 그 안쪽으로 두고, 칸 높이(44)에 맞게 26으로 키운다.
+        TextMeshProUGUI caption = dropdown.captionText as TextMeshProUGUI;
+        TextMeshProUGUI itemLabel = dropdown.itemText as TextMeshProUGUI;
+        if (caption == null || itemLabel == null) throw new InvalidOperationException("드롭다운 글자가 TextMeshProUGUI가 아닙니다.");
+        // 늘어나는 앵커의 음수 크기는 페이지가 꺼진 동안 너비가 0이 되어 글자가 안 그려진다.
+        SetRect(caption.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f),
+            new Vector2(14f, 0f), new Vector2(156f, 36f), Vector3.one);
+        ApplyDropdownLabel(caption, rowFont, 22f);
+        if (caption.overflowMode != TextOverflowModes.Overflow) caption.overflowMode = TextOverflowModes.Overflow;
+        ApplyDropdownLabel(itemLabel, rowFont, 22f);
+        if (itemLabel.overflowMode != TextOverflowModes.Overflow) itemLabel.overflowMode = TextOverflowModes.Overflow;
+        ApplyDropdownLabel(reverseLabel, rowFont, reverseLabel.fontSize);
+
+        Image box = Require(toggle, "Background").GetComponent<Image>();
+        ApplyImage(box, toggleBox, Image.Type.Simple, true, Color.white);
+        RectTransform boxRect = box.rectTransform;
+        if (boxRect.sizeDelta != new Vector2(36f, 36f)) boxRect.sizeDelta = new Vector2(36f, 36f);
+        Image mark = Require(toggle, "Background/Checkmark").GetComponent<Image>();
+        ApplyImage(mark, toggleCheck, Image.Type.Simple, true, Color.white);
+    }
+
+    static void ApplyDropdownLabel(TextMeshProUGUI text, TextMeshProUGUI fontSource, float fontSize)
+    {
+        if (text.font != fontSource.font) text.font = fontSource.font;
+        if (fontSource.fontSharedMaterial != null && text.fontSharedMaterial != fontSource.fontSharedMaterial)
+            text.fontSharedMaterial = fontSource.fontSharedMaterial;
+        if (text.enableAutoSizing) text.enableAutoSizing = false;
+        if (Mathf.Abs(text.fontSize - fontSize) > 0.01f) text.fontSize = fontSize;
+        if (text.color != DropdownInk) text.color = DropdownInk;
+        if (text.horizontalAlignment != HorizontalAlignmentOptions.Left) text.horizontalAlignment = HorizontalAlignmentOptions.Left;
+        if (text.verticalAlignment != VerticalAlignmentOptions.Middle) text.verticalAlignment = VerticalAlignmentOptions.Middle;
+        if (text.textWrappingMode != TextWrappingModes.NoWrap) text.textWrappingMode = TextWrappingModes.NoWrap;
+        if (text.overflowMode != TextOverflowModes.Ellipsis) text.overflowMode = TextOverflowModes.Ellipsis;
+        if (text.raycastTarget) text.raycastTarget = false;
+    }
+
+    static void ApplyImage(Image image, Sprite sprite, Image.Type type, bool preserveAspect, Color color)
+    {
+        if (image.sprite != sprite) image.sprite = sprite;
+        if (image.type != type) image.type = type;
+        if (image.preserveAspect != preserveAspect) image.preserveAspect = preserveAspect;
+        if (image.color != color) image.color = color;
+    }
+
+    static void ApplySpriteSwap(Selectable selectable, Sprite normal, Sprite pressed)
+    {
+        if (selectable.transition != Selectable.Transition.SpriteSwap) selectable.transition = Selectable.Transition.SpriteSwap;
+        SpriteState state = selectable.spriteState;
+        if (state.highlightedSprite == normal && state.pressedSprite == pressed && state.selectedSprite == normal && state.disabledSprite == normal)
+            return;
+        state.highlightedSprite = normal;
+        state.pressedSprite = pressed;
+        state.selectedSprite = normal;
+        state.disabledSprite = normal;
+        selectable.spriteState = state;
+    }
+
+    static Sprite LoadDropdownSprite(string name)
+    {
+        Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(DropdownUiFolder + "/" + name + ".png");
+        if (sprite == null) throw new InvalidOperationException(name + " 스프라이트를 찾지 못했습니다.");
+        return sprite;
+    }
+
+    // 칸의 75%. preserveAspect가 어떤 스프라이트든 이 박스 안에 넣는다.
+    static void FitIconBox(RectTransform rect)
+    {
+        SetRect(rect, new Vector2(0.125f, 0.125f), new Vector2(0.875f, 0.875f), new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero, Vector3.one);
     }
 
     static GameObject EnsureFigureSlot(Transform detail, Sprite slotSprite)
@@ -1294,12 +1492,12 @@ public static class CollectionBookSetup
         Image icon = slot.Find("Icon").GetComponent<Image>();
         icon.preserveAspect = true;
         icon.raycastTarget = false;
-        SetCenterRect(icon.rectTransform, Vector2.zero, new Vector2(72f, 72f));
+        FitIconBox(icon.rectTransform);
         Image silhouette = slot.Find("Silhouette").GetComponent<Image>();
         silhouette.color = new Color(0f, 0f, 0f, 0.9019608f);
         silhouette.preserveAspect = true;
         silhouette.raycastTarget = false;
-        SetCenterRect(silhouette.rectTransform, Vector2.zero, new Vector2(72f, 72f));
+        FitIconBox(silhouette.rectTransform);
         SetActive(silhouette.gameObject, false);
         return slot.gameObject;
     }

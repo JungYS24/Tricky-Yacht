@@ -139,6 +139,12 @@ public class SynergyWikiDisplayer : MonoBehaviour
                 orderDropdown.options[i].text = LocalizationManager.GetUi(OrderLabelKeys[i].key, OrderLabelKeys[i].fallback);
             }
             orderDropdown.RefreshShownValue();
+            if (orderDropdown.captionText != null && orderDropdown.options.Count > 0)
+            {
+                int shown = Mathf.Clamp(orderDropdown.value, 0, orderDropdown.options.Count - 1);
+                orderDropdown.captionText.text = orderDropdown.options[shown].text;
+                orderDropdown.captionText.ForceMeshUpdate();
+            }
         }
 
         if (reverseLabel != null)
@@ -459,14 +465,30 @@ public class SynergyWikiDisplayer : MonoBehaviour
         icon.sprite = figure.icon;
         icon.color = Color.white;
         icon.preserveAspect = true;
-        FitInteger(icon, cell * 0.75f);
+        // 원본이 칸보다 커도(바나나 471px) 우드 패널 안 75% 박스에 맞춘다.
+        FitIconBox(icon.rectTransform);
         silhouette.sprite = figure.icon;
         silhouette.color = new Color(0f, 0f, 0f, 0.9019608f);
         silhouette.preserveAspect = true;
-        silhouette.rectTransform.sizeDelta = icon.rectTransform.sizeDelta;
+        FitIconBox(silhouette.rectTransform);
         // 보유는 저장 목록 + 이번 판 인벤토리. 없으면 스프라이트 형태의 어두운 실루엣.
         silhouette.gameObject.SetActive(!ownedFigures.Contains(figure));
         FitSlotFrame(plate, cell);
+    }
+
+    // 칸의 75%. preserveAspect가 스프라이트를 이 박스 안에 넣는다.
+    private static void FitIconBox(RectTransform rect)
+    {
+        if (rect == null) return;
+        Vector2 min = new Vector2(0.125f, 0.125f);
+        Vector2 max = new Vector2(0.875f, 0.875f);
+        Vector2 pivot = new Vector2(0.5f, 0.5f);
+        if (rect.anchorMin != min) rect.anchorMin = min;
+        if (rect.anchorMax != max) rect.anchorMax = max;
+        if (rect.pivot != pivot) rect.pivot = pivot;
+        if (rect.anchoredPosition != Vector2.zero) rect.anchoredPosition = Vector2.zero;
+        if (rect.sizeDelta != Vector2.zero) rect.sizeDelta = Vector2.zero;
+        if (rect.localScale != Vector3.one) rect.localScale = Vector3.one;
     }
 
     // 테두리 픽셀이 칸 크기에 비례하게 남도록 9-slice 배율을 맞춘다.
