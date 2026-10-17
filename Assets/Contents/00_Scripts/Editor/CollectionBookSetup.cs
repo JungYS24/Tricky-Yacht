@@ -583,7 +583,8 @@ public static class CollectionBookSetup
         TextMeshProUGUI progress = EnsureText(textTemplate, page, "ProgressText", new Vector2(LeftPageCenterX, headerY), new Vector2(LeftPageWidth, 56f), 30f, HorizontalAlignmentOptions.Right);
         progress.text = "0 / 0";
 
-        float biomeY = 302f;
+        // 제목(y 360, 높이 56)과 화살표가 맞닿아 있어서 바이옴 줄만 16 내린다. 제목·수집률은 그대로.
+        float biomeY = 286f;
         TextMeshProUGUI biomeName = EnsureText(textTemplate, page, "BiomeNameText", new Vector2(LeftPageCenterX, biomeY), new Vector2(240f, 52f), 30f, HorizontalAlignmentOptions.Center);
         biomeName.text = "전체";
         Button prevBiome = EnsureArrowButton(closeButton, page, "PrevBiomeButton", arrowLeft, new Vector2(LeftPageCenterX - 150f, biomeY), arrowSize);
@@ -591,9 +592,12 @@ public static class CollectionBookSetup
         ApplySpriteSwap(prevBiome, arrowLeft, arrowLeftPressed, null);
         ApplySpriteSwap(nextBiome, arrowRight, arrowRightPressed, null);
 
-        // 그리드: 5열 x 3행 = 15칸, 스크롤 대신 페이지 넘김
+        // 그리드: 5열 x 3행 = 15칸, 스크롤 대신 페이지 넘김.
+        // 바이옴 화살표 아래끝(254)과 그리드 위끝(254)이 맞닿아서 그리드도 16 내린다. 3행 높이 520은 유지한다.
         SetParent(scrollView, page);
-        SetCenterRect((RectTransform)scrollView, new Vector2(LeftPageCenterX, -6f), new Vector2(LeftPageWidth, 520f));
+        const float gridY = -22f;
+        const float gridHeight = 520f;
+        SetCenterRect((RectTransform)scrollView, new Vector2(LeftPageCenterX, gridY), new Vector2(LeftPageWidth, gridHeight));
         ScrollRect scrollRect = scrollView.GetComponent<ScrollRect>();
         if (scrollRect != null) scrollRect.enabled = false;
         DeactivateIfFound(scrollView, "Scrollbar Horizontal");
@@ -602,7 +606,7 @@ public static class CollectionBookSetup
         RectTransform viewport = (RectTransform)Require(scrollView, "Viewport");
         Stretch(viewport);
         RectTransform content = (RectTransform)Require(viewport, "Content");
-        SetRect(content, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0f, 520f), content.localScale);
+        SetRect(content, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0f, gridHeight), content.localScale);
         GridLayoutGroup grid = content.GetComponent<GridLayoutGroup>();
         grid.cellSize = new Vector2(128f, 164f);
         grid.spacing = new Vector2(11f, 14f);
@@ -613,8 +617,8 @@ public static class CollectionBookSetup
         grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         grid.constraintCount = 5;
 
-        // 페이지 넘김 ◀ 1 / 8 ▶
-        float pagerY = -318f;
+        // 페이지 넘김. 그리드 아래끝(-282)과 화살표가 겹치지 않게 8 더 내린다. 화살표 아래끝 -358, 양피지 아래 -409.
+        float pagerY = -326f;
         TextMeshProUGUI pageText = EnsureText(textTemplate, page, "PageText", new Vector2(LeftPageCenterX, pagerY), new Vector2(160f, 52f), 28f, HorizontalAlignmentOptions.Center);
         pageText.text = "1 / 1";
         Button prevPage = EnsureArrowButton(closeButton, page, "PrevPageButton", arrowLeft, new Vector2(LeftPageCenterX - 110f, pagerY), arrowSize);
@@ -667,14 +671,22 @@ public static class CollectionBookSetup
         DeactivateIfFound(detail, "LeftButton");
         DeactivateIfFound(detail, "RightButton");
 
+        // 이름 72칸의 아래끝에서 12px 띄우고, 그 아래에 아이콘 박스를 둔다.
+        // 100px 그림은 3배(300), 85px(끈끈이 공)는 3배(255), 바나나는 박스 안에 맞춘다.
+        const float nameY = 308f;
+        const float nameHeight = 72f;
+        float iconBox = FigureDetailPanel.BookFigureIconBox;
+        float iconY = nameY - nameHeight * 0.5f - 12f - iconBox * 0.5f;
+
         Image figureImage = panel.figureImage;
         figureImage.preserveAspect = true;
         figureImage.raycastTarget = false;
-        SetCenterRect(figureImage.rectTransform, new Vector2(0f, 120f), new Vector2(160f, 160f));
+        SetCenterRect(figureImage.rectTransform, new Vector2(0f, iconY), new Vector2(iconBox, iconBox));
 
         TextMeshProUGUI nameText = panel.nameText;
-        SetCenterRect(nameText.rectTransform, new Vector2(0f, 292f), new Vector2(620f, 72f));
+        SetCenterRect(nameText.rectTransform, new Vector2(0f, nameY), new Vector2(620f, nameHeight));
         StyleText(nameText, 42f, HorizontalAlignmentOptions.Center, VerticalAlignmentOptions.Middle);
+        nameText.fontStyle = FontStyles.Bold;
         nameText.enableAutoSizing = true;
         nameText.fontSizeMin = 24f;
         nameText.fontSizeMax = 42f;
@@ -682,19 +694,27 @@ public static class CollectionBookSetup
         nameText.overflowMode = TextOverflowModes.Ellipsis;
         nameText.transform.SetAsLastSibling();
 
+        // 아이콘이 커진 만큼 효과 설명·획득 바이옴·구분선을 아래로 민다.
+        const float descHeight = 56f;
+        float descY = iconY - iconBox * 0.5f - 12f - descHeight * 0.5f;
         TextMeshProUGUI descText = panel.descText;
-        SetCenterRect(descText.rectTransform, new Vector2(0f, -8f), new Vector2(580f, 96f));
+        SetCenterRect(descText.rectTransform, new Vector2(0f, descY), new Vector2(580f, descHeight));
         StyleText(descText, 24f, HorizontalAlignmentOptions.Center, VerticalAlignmentOptions.Top);
         descText.textWrappingMode = TextWrappingModes.Normal;
         descText.overflowMode = TextOverflowModes.Ellipsis;
 
+        const float locationHeight = 32f;
+        float locationY = descY - descHeight * 0.5f - 4f - locationHeight * 0.5f;
         TextMeshProUGUI locationText = panel.locationText;
-        SetCenterRect(locationText.rectTransform, new Vector2(0f, -78f), new Vector2(580f, 40f));
+        SetCenterRect(locationText.rectTransform, new Vector2(0f, locationY), new Vector2(580f, locationHeight));
         StyleText(locationText, 22f, HorizontalAlignmentOptions.Center, VerticalAlignmentOptions.Middle);
         locationText.color = new Color(0.45f, 0.32f, 0.2f, 1f);
         locationText.textWrappingMode = TextWrappingModes.Normal;
 
-        SetupDetailExtras(detail, panel, nameText);
+        float dividerY = locationY - locationHeight * 0.5f - 8f;
+        SetupDetailExtras(detail, panel, nameText, iconY, dividerY);
+        Debug.Log("[CollectionBook] figure detail nameY=" + nameY + " iconY=" + iconY + " iconBox=" + iconBox
+            + " descY=" + descY + " locationY=" + locationY + " dividerY=" + dividerY);
     }
 
     static void SetupSynergyPage(RectTransform page, GameObject synergyPagePrefab, CollectionBookManager manager)
@@ -1030,7 +1050,7 @@ public static class CollectionBookSetup
         button.spriteState = state;
     }
 
-    static void SetupDetailExtras(Transform detail, FigureDetailPanel panel, TextMeshProUGUI template)
+    static void SetupDetailExtras(Transform detail, FigureDetailPanel panel, TextMeshProUGUI template, float iconY, float dividerY)
     {
         Sprite knob = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
         Sprite white = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
@@ -1040,46 +1060,80 @@ public static class CollectionBookSetup
         Sprite arrowRightPressed = LoadBookSprite("Btn_Arrow_R_Pressed");
         Sprite badge = LoadBookSprite("Badge_Count");
 
-        Image figureShadow = EnsureImage(detail, "FigureShadow", knob, new Vector2(0f, 52f), new Vector2(120f, 28f), new Color(0f, 0f, 0f, 0.28f));
+        float iconBox = FigureDetailPanel.BookFigureIconBox;
+        float shadowWidth = iconBox * 0.72f;
+        Image figureShadow = EnsureImage(detail, "FigureShadow", knob, new Vector2(0f, iconY - iconBox * 0.42f), new Vector2(shadowWidth, shadowWidth * 0.22f), new Color(0f, 0f, 0f, 0.28f));
         int figureIndex = panel.figureImage.transform.GetSiblingIndex();
         if (figureShadow.transform.GetSiblingIndex() != figureIndex - 1)
             SetSibling(figureShadow.transform, figureIndex);
 
-        Image divider = EnsureImage(detail, "Divider", white, new Vector2(0f, -112f), new Vector2(560f, 3f), new Color(Ink.r, Ink.g, Ink.b, 0.35f));
+        Image divider = EnsureImage(detail, "Divider", white, new Vector2(0f, dividerY), new Vector2(560f, 3f), new Color(Ink.r, Ink.g, Ink.b, 0.35f));
         divider.raycastTarget = false;
 
+        // 드롭 몬스터: 라벨·이름·출현 바이옴을 4px 간격으로 붙인다.
+        // 굵은 글꼴 줄 높이(포인트 30에서 43.4)가 칸보다 크면 말줄임이 한 줄을 통째로 지운다. 이름 칸은 줄 높이보다 크게 둔다.
+        // 몬스터 128px를 2배(256)로 키우면 양피지 아래(-409)를 넘는다. 페이지 안에 남는 정수 배는 1배다.
+        const float labelHeight = 28f;
+        const float dropNameHeight = 40f;
+        const float biomeHeight = 28f;
+        const float textGap = 4f;
+        const float monsterGap = 6f;
+        float monsterBox = FigureDetailPanel.BookMonsterIconBox;
+        float labelY = dividerY - 8f - labelHeight * 0.5f;
+        float dropNameY = labelY - labelHeight * 0.5f - textGap - dropNameHeight * 0.5f;
+        float biomeTextY = dropNameY - dropNameHeight * 0.5f - textGap - biomeHeight * 0.5f;
+        float monsterY = biomeTextY - biomeHeight * 0.5f - monsterGap - monsterBox * 0.5f;
+        float contentTop = labelY + labelHeight * 0.5f;
+        float contentBottom = monsterY - monsterBox * 0.5f;
+        float columnY = (contentTop + contentBottom) * 0.5f;
+        float columnHeight = contentTop - contentBottom + 8f;
+        const float columnWidth = 300f;
+
         Transform dropRoot = EnsureChild(detail, "DropMonsterRoot");
-        SetCenterRect((RectTransform)dropRoot, new Vector2(-160f, -270f), new Vector2(280f, 280f));
-        TextMeshProUGUI dropLabel = EnsureText(template.transform, dropRoot, "Label", new Vector2(0f, 110f), new Vector2(260f, 28f), 18f, HorizontalAlignmentOptions.Center);
+        SetCenterRect((RectTransform)dropRoot, new Vector2(-160f, columnY), new Vector2(columnWidth, columnHeight));
+        float dropLocal = -columnY;
+        TextMeshProUGUI dropLabel = EnsureText(template.transform, dropRoot, "Label", new Vector2(0f, labelY + dropLocal), new Vector2(260f, labelHeight), 18f, HorizontalAlignmentOptions.Center);
         dropLabel.color = new Color(0.45f, 0.32f, 0.2f, 1f);
-        TextMeshProUGUI dropName = EnsureText(template.transform, dropRoot, "Name", new Vector2(0f, 78f), new Vector2(200f, 36f), 26f, HorizontalAlignmentOptions.Center);
+        TextMeshProUGUI dropName = EnsureText(template.transform, dropRoot, "Name", new Vector2(0f, dropNameY + dropLocal), new Vector2(260f, dropNameHeight), 24f, HorizontalAlignmentOptions.Center);
         dropName.fontStyle = FontStyles.Bold;
-        TextMeshProUGUI dropBiome = EnsureText(template.transform, dropRoot, "Biome", new Vector2(0f, 44f), new Vector2(260f, 28f), 18f, HorizontalAlignmentOptions.Center);
+        dropName.enableAutoSizing = false;
+        dropName.fontSizeMin = 18f;
+        dropName.fontSizeMax = 24f;
+        dropName.textWrappingMode = TextWrappingModes.NoWrap;
+        dropName.overflowMode = TextOverflowModes.Overflow;
+        TextMeshProUGUI dropBiome = EnsureText(template.transform, dropRoot, "Biome", new Vector2(0f, biomeTextY + dropLocal), new Vector2(260f, biomeHeight), 18f, HorizontalAlignmentOptions.Center);
         dropBiome.color = new Color(0.45f, 0.32f, 0.2f, 1f);
-        Image monsterImage = EnsureImage(dropRoot, "MonsterImage", null, new Vector2(0f, -40f), new Vector2(128f, 128f), Color.white);
+        Image monsterImage = EnsureImage(dropRoot, "MonsterImage", null, new Vector2(0f, monsterY + dropLocal), new Vector2(monsterBox, monsterBox), Color.white);
         monsterImage.preserveAspect = true;
-        Image monsterShadow = EnsureImage(dropRoot, "MonsterShadow", knob, new Vector2(0f, -96f), new Vector2(96f, 22f), new Color(0f, 0f, 0f, 0.28f));
+        float monsterShadowWidth = monsterBox * 0.72f;
+        Image monsterShadow = EnsureImage(dropRoot, "MonsterShadow", knob, new Vector2(0f, monsterY + dropLocal - monsterBox * 0.42f), new Vector2(monsterShadowWidth, monsterShadowWidth * 0.22f), new Color(0f, 0f, 0f, 0.28f));
         int monsterIndex = monsterImage.transform.GetSiblingIndex();
         if (monsterShadow.transform.GetSiblingIndex() != monsterIndex - 1)
             SetSibling(monsterShadow.transform, monsterIndex);
-        Button dropPrev = EnsureBookArrow(dropRoot, "Prev", arrowLeft, new Vector2(-96f, -40f));
-        Button dropNext = EnsureBookArrow(dropRoot, "Next", arrowRight, new Vector2(96f, -40f));
+        float arrowX = monsterBox * 0.5f + 16f + ArrowButtonSize.x * 0.5f;
+        Button dropPrev = EnsureBookArrow(dropRoot, "Prev", arrowLeft, new Vector2(-arrowX, monsterY + dropLocal));
+        Button dropNext = EnsureBookArrow(dropRoot, "Next", arrowRight, new Vector2(arrowX, monsterY + dropLocal));
         ApplySpriteSwap(dropPrev, arrowLeft, arrowLeftPressed, null);
         ApplySpriteSwap(dropNext, arrowRight, arrowRightPressed, null);
 
         Transform synergyRoot = EnsureChild(detail, "RelatedSynergyRoot");
-        SetCenterRect((RectTransform)synergyRoot, new Vector2(160f, -270f), new Vector2(280f, 280f));
-        TextMeshProUGUI synergyLabel = EnsureText(template.transform, synergyRoot, "Label", new Vector2(0f, 110f), new Vector2(260f, 28f), 18f, HorizontalAlignmentOptions.Center);
+        SetCenterRect((RectTransform)synergyRoot, new Vector2(160f, columnY), new Vector2(columnWidth, columnHeight));
+        TextMeshProUGUI synergyLabel = EnsureText(template.transform, synergyRoot, "Label", new Vector2(0f, labelY + dropLocal), new Vector2(260f, labelHeight), 18f, HorizontalAlignmentOptions.Center);
         synergyLabel.color = new Color(0.45f, 0.32f, 0.2f, 1f);
         RectTransform content = (RectTransform)EnsureChild(synergyRoot, "Content");
-        SetCenterRect(content, new Vector2(0f, -20f), new Vector2(260f, 180f));
-        HorizontalLayoutGroup row = GetOrAdd<HorizontalLayoutGroup>(content.gameObject);
-        row.spacing = 12f;
-        row.childAlignment = TextAnchor.UpperCenter;
-        row.childControlWidth = false;
-        row.childControlHeight = false;
+        // 제목 아래 8px에서 시작한다. 가로 2칸(96+12)이 페이지 안에 들어가고, 넘치면 런타임에서 줄을 바꾼다.
+        float cardTop = labelY + dropLocal - labelHeight * 0.5f - 8f;
+        SetRect(content, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 1f),
+            new Vector2(0f, cardTop), new Vector2(276f, FigureCellMax * 2f + FigureSpacing), Vector3.one);
+        HorizontalLayoutGroup oldRow = content.GetComponent<HorizontalLayoutGroup>();
+        if (oldRow != null) Object.DestroyImmediate(oldRow);
+        GridLayoutGroup oldGrid = content.GetComponent<GridLayoutGroup>();
+        if (oldGrid != null) Object.DestroyImmediate(oldGrid);
         GameObject card = EnsureSynergyCard(synergyRoot, template, badge);
         SetActive(card, false);
+        Debug.Log("[CollectionBook] drop columnY=" + columnY.ToString("0.##") + " labelY=" + (labelY + dropLocal).ToString("0.##")
+            + " nameY=" + (dropNameY + dropLocal).ToString("0.##") + " biomeY=" + (biomeTextY + dropLocal).ToString("0.##")
+            + " monsterY=" + (monsterY + dropLocal).ToString("0.##") + " monsterBottomBook=" + (monsterY - monsterBox * 0.5f + PageCenterY).ToString("0.##"));
 
         panel.figureShadow = figureShadow;
         panel.dropMonsterRoot = dropRoot.gameObject;
@@ -1116,26 +1170,32 @@ public static class CollectionBookSetup
         }
 
         RectTransform rect = (RectTransform)found;
-        rect.sizeDelta = new Vector2(96f, 140f);
+        if (rect.sizeDelta != new Vector2(FigureCellMax, FigureCellMax)) rect.sizeDelta = new Vector2(FigureCellMax, FigureCellMax);
         Image plate = found.GetComponent<Image>();
-        plate.color = new Color(1f, 1f, 1f, 0f);
+        Sprite slotSprite = LoadSprite(IconFrameSpritePath, null);
+        if (slotSprite == null) throw new InvalidOperationException("slot_dark_small_1 스프라이트를 찾지 못했습니다.");
+        ApplyImage(plate, slotSprite, Image.Type.Sliced, false, Color.white);
+        if (Mathf.Abs(plate.pixelsPerUnitMultiplier - 1f) > 0.001f) plate.pixelsPerUnitMultiplier = 1f;
         plate.raycastTarget = true;
         Button button = found.GetComponent<Button>();
         button.targetGraphic = plate;
         if (button.transition != Selectable.Transition.None) button.transition = Selectable.Transition.None;
 
         Image icon = found.Find("Icon").GetComponent<Image>();
-        SetCenterRect(icon.rectTransform, new Vector2(0f, 28f), new Vector2(64f, 64f));
         icon.preserveAspect = true;
         icon.raycastTarget = false;
+        if (icon.color != Color.white) icon.color = Color.white;
+        FitIconBox(icon.rectTransform);
 
+        // 배지 원본은 68x36, 테두리 12. 52x28로 줄이면 가운데가 찌그러져 깨져 보인다.
         Image badge = found.Find("Badge").GetComponent<Image>();
         badge.sprite = badgeSprite;
         badge.type = Image.Type.Sliced;
         badge.color = Color.white;
         badge.raycastTarget = false;
         if (Mathf.Abs(badge.pixelsPerUnitMultiplier - 1f) > 0.001f) badge.pixelsPerUnitMultiplier = 1f;
-        SetCenterRect(badge.rectTransform, new Vector2(22f, 8f), new Vector2(52f, 28f));
+        SetRect(badge.rectTransform, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0.5f),
+            new Vector2(-18f, 8f), new Vector2(68f, 36f), Vector3.one);
         TextMeshProUGUI count = badge.GetComponentInChildren<TextMeshProUGUI>(true);
         SetAnchors(count.rectTransform, Vector2.zero, Vector2.one);
         count.fontSize = 16f;
@@ -1143,12 +1203,12 @@ public static class CollectionBookSetup
         count.alignment = TextAlignmentOptions.Center;
         count.color = new Color(0.9647f, 0.9176f, 0.8157f, 1f);
         count.raycastTarget = false;
+        count.textWrappingMode = TextWrappingModes.NoWrap;
+        count.overflowMode = TextOverflowModes.Overflow;
 
+        // 이름 칸의 말줄임(…)이 화면의 •••로 보였다. 시너지 이름은 표시하지 않는다.
         TextMeshProUGUI cardName = found.Find("Name").GetComponent<TextMeshProUGUI>();
-        SetCenterRect(cardName.rectTransform, new Vector2(0f, -48f), new Vector2(96f, 32f));
-        StyleText(cardName, 16f, HorizontalAlignmentOptions.Center, VerticalAlignmentOptions.Top);
-        cardName.textWrappingMode = TextWrappingModes.NoWrap;
-        cardName.overflowMode = TextOverflowModes.Ellipsis;
+        if (cardName.gameObject.activeSelf) cardName.gameObject.SetActive(false);
         return found.gameObject;
     }
 

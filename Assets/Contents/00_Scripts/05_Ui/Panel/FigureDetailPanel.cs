@@ -35,6 +35,11 @@ public class FigureDetailPanel : MonoBehaviour
     public Sprite countBadgeSprite;
     [NonSerialized] public Action<SynergyData> synergyClicked;
 
+    // 도감 오른쪽 아이콘 박스. 100px 그림은 3배, 그보다 큰 그림(바나나)은 이 박스 안에 맞춘다.
+    public const float BookFigureIconBox = 300f;
+    // 128px 몬스터를 2배(256)로 키우면 양피지 아래로 나간다. 페이지에 남는 정수 배는 128이다.
+    public const float BookMonsterIconBox = 128f;
+
     public Button leftButton;
     public Button rightButton;
     public Button closeButton;
@@ -220,7 +225,7 @@ public class FigureDetailPanel : MonoBehaviour
     {
         if (dropMonsterRoot == null && relatedSynergyRoot == null) return;
 
-        FitInteger(figureImage, 160f);
+        FitSpriteBox(figureImage, BookFigureIconBox);
         PlaceShadow(figureShadow, figureImage);
 
         bool showExtra = isEncountered;
@@ -261,7 +266,7 @@ public class FigureDetailPanel : MonoBehaviour
         if (dropMonsterRoot == null || !dropMonsterRoot.activeSelf || currentDrops.Count == 0) return;
 
         MonsterDrop drop = currentDrops[dropIndex];
-        if (dropMonsterName != null) dropMonsterName.text = drop.monster.monsterName;
+        if (dropMonsterName != null) dropMonsterName.text = LocalizationManager.GetMonsterDisplayName(drop.monster);
         if (dropMonsterBiome != null)
         {
             string grade = LocalizationManager.GetUi(
@@ -274,7 +279,7 @@ public class FigureDetailPanel : MonoBehaviour
         {
             dropMonsterImage.sprite = drop.monster.monsterSprite;
             dropMonsterImage.enabled = drop.monster.monsterSprite != null;
-            FitInteger(dropMonsterImage, 128f);
+            FitSpriteBox(dropMonsterImage, BookMonsterIconBox);
             PlaceShadow(dropMonsterShadow, dropMonsterImage);
         }
         bool many = currentDrops.Count > 1;
@@ -304,14 +309,56 @@ public class FigureDetailPanel : MonoBehaviour
             Image icon = card.transform.Find("Icon").GetComponent<Image>();
             icon.sprite = synergy.icon;
             icon.enabled = synergy.icon != null;
+            icon.preserveAspect = true;
             int required = synergy.RequiredFigures.Count;
             int have = synergy.RequiredFigures.Count(owned.Contains);
             card.transform.Find("Badge/Text").GetComponent<TextMeshProUGUI>().text = have + "/" + required;
-            card.transform.Find("Name").GetComponent<TextMeshProUGUI>().text = synergy.SynergyName;
+            Transform nameLabel = card.transform.Find("Name");
+            if (nameLabel != null) nameLabel.gameObject.SetActive(false);
 
             SynergyData captured = synergy;
             Button button = card.GetComponent<Button>();
             button.onClick.AddListener(() => synergyClicked?.Invoke(captured));
+        }
+
+        LayoutSynergyCards();
+    }
+
+    // 칸을 제목 아래 가운데로 놓고, 너비를 넘치면 다음 줄로 넘긴다.
+    private void LayoutSynergyCards()
+    {
+        if (relatedSynergyContent == null) return;
+        float cell = synergyCardTemplate != null
+            ? ((RectTransform)synergyCardTemplate.transform).sizeDelta.x
+            : 96f;
+        if (cell < 1f) cell = 96f;
+        const float spacing = 12f;
+        float width = relatedSynergyContent.rect.width;
+        if (width < cell) width = relatedSynergyContent.sizeDelta.x;
+        if (width < cell) width = cell;
+        int columns = Mathf.Max(1, Mathf.FloorToInt((width + spacing) / (cell + spacing)));
+
+        var cards = new List<RectTransform>();
+        for (int i = 0; i < relatedSynergyContent.childCount; i++)
+        {
+            RectTransform child = relatedSynergyContent.GetChild(i) as RectTransform;
+            if (child != null && child.gameObject.activeSelf) cards.Add(child);
+        }
+
+        int rows = Mathf.CeilToInt(cards.Count / (float)columns);
+        for (int index = 0; index < cards.Count; index++)
+        {
+            int row = index / columns;
+            int column = index % columns;
+            int rowCount = row == rows - 1 ? cards.Count - row * columns : columns;
+            float rowWidth = rowCount * cell + (rowCount - 1) * spacing;
+            float x = -rowWidth * 0.5f + cell * 0.5f + column * (cell + spacing);
+            float y = -cell * 0.5f - row * (cell + spacing);
+            RectTransform card = cards[index];
+            card.anchorMin = card.anchorMax = new Vector2(0.5f, 1f);
+            card.pivot = new Vector2(0.5f, 0.5f);
+            card.sizeDelta = new Vector2(cell, cell);
+            card.anchoredPosition = new Vector2(x, y);
         }
     }
 
@@ -388,13 +435,15 @@ public class FigureDetailPanel : MonoBehaviour
         return result;
     }
 
-    // 원본 픽셀의 정수 배로만 키운다.
-    private static void FitInteger(Image image, float maxSize)
+    // 박스에 들어가는 가장 큰 정수 배로 키운다. 원본이 박스보다 크면 박스에 맞추고 비율은 유지한다.
+    private static void FitSpriteBox(Image image, float box)
     {
         if (image == null || image.sprite == null) return;
+        image.preserveAspect = true;
         float longest = Mathf.Max(image.sprite.rect.width, image.sprite.rect.height);
-        int scale = Mathf.Max(1, Mathf.FloorToInt(maxSize / longest));
-        image.rectTransform.sizeDelta = image.sprite.rect.size * scale;
+        int scale = Mathf.FloorToInt(box / Mathf.Max(1f, longest));
+        Vector2 size = scale >= 1 ? image.sprite.rect.size * scale : new Vector2(box, box);
+        if (image.rectTransform.sizeDelta != size) image.rectTransform.sizeDelta = size;
     }
 
     private static void PlaceShadow(Image shadow, Image body)
