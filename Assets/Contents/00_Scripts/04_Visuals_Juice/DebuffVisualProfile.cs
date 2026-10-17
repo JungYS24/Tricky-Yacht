@@ -22,6 +22,29 @@ public sealed class DebuffVisualProfile : ScriptableObject
     public float eliteIconSize = 115f;
     public float bossIconSize = 154f;
 
+    [Header("차원문 주사위 움직임")]
+    [Tooltip("소용돌이 가운데에서 판 위 착지 지점까지 떨어지는 거리")]
+    public float portalDrop = 144f;
+    [Tooltip("문을 나올 때 커지는 배율. 착지해 보여 준 뒤 덱으로 가면서 작아짐")]
+    public float emphasisScale = 1.3f;
+    [Tooltip("착지한 디버프 주사위를 보여 주는 시간(기본 속도 기준 초)")]
+    public float confirmHold = 0.35f;
+
+    [Header("켜기/끄기 (어색하면 하나씩 꺼 보며 비교)")]
+    [Tooltip("등장 연출 동안 화면을 살짝 어둡게 해서 소환에 시선을 모음")]
+    public bool dimScreen = true;
+    [Range(0f, 0.9f)] public float dimAlpha = 0.35f;
+    [Tooltip("등장 연출 동안 몬스터 애니메이션을 멈춤")]
+    public bool pauseMonster = true;
+    [Tooltip("착지·변신 순간 화면을 짧게 흔듦")]
+    public bool cameraShake = true;
+    [Tooltip("디버프 주사위 테두리에 자주색·붉은색 빛")]
+    public bool edgeGlow = true;
+    public Color edgeGlowColor = new Color(0.85f, 0.2f, 0.6f);
+    [Tooltip("디버프 주사위가 덱에 들어갈 때 덱 버튼이 흔들리며 보랏빛으로 물듦")]
+    public bool deckReaction = true;
+    public Color deckGlowColor = new Color(0.72f, 0.45f, 1f);
+
     [Header("차원문 (아치와 소용돌이를 겹쳐 씀. 둘 중 하나라도 없으면 통짜 이미지)")]
     public Sprite portal;
     public Sprite portalArch;
