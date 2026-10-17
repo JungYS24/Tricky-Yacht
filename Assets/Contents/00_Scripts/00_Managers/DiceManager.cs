@@ -682,7 +682,11 @@ public class DiceManager : MonoBehaviour
 
         board.RollUnkept();
 
-        currentRerolls++;
+        // 클로버 스탬프가 찍힌 주사위가 있으면 리롤 횟수 유지
+        if (board.ActiveDice.All(d => d.myData.stampType != StampType.Clover) ||
+            UnityEngine.Random.Range(0, 10) >= 3)
+            currentRerolls++;
+
         //리롤 시 발동(OnDiceReroll)하는 6번 카테고리 피규어 발동
         if (FigureEffectManager.Instance != null)
         {
