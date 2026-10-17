@@ -90,6 +90,12 @@ public static class CollectionBookSetup
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
+
+            // 꺼진 패널 아래 RectTransform은 씬을 다시 열 때 소수점이 한 번 다시 계산된다.
+            // 한 번 다시 열어 저장해 두면 다음 실행에서 diff가 생기지 않는다.
+            scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
             AssetDatabase.SaveAssets();
             Debug.Log("[CollectionBook] setup OK");
             ExitIfBatch(fromBatch, 0);
@@ -158,18 +164,14 @@ public static class CollectionBookSetup
                 markGo.name = "EncounteredMark";
                 mark = markGo.transform;
             }
-            mark.SetAsLastSibling();
-            RectTransform markRect = (RectTransform)mark;
-            markRect.anchorMin = markRect.anchorMax = Vector2.one;
-            markRect.pivot = Vector2.one;
-            markRect.anchoredPosition = new Vector2(-8f, -8f);
-            markRect.sizeDelta = new Vector2(28f, 28f);
+            SetLastSibling(mark);
+            SetRect((RectTransform)mark, Vector2.one, Vector2.one, Vector2.one, new Vector2(-8f, -8f), new Vector2(28f, 28f), Vector3.one);
             Image markImage = mark.GetComponent<Image>();
             markImage.sprite = LoadSprite(LockSpritePath, null);
             markImage.color = Color.white;
             markImage.preserveAspect = true;
             markImage.raycastTarget = false;
-            mark.gameObject.SetActive(false);
+            SetActive(mark.gameObject, false);
             slot.encounteredMark = mark.gameObject;
 
             PrefabUtility.SaveAsPrefabAsset(root, SlotPrefabPath);
@@ -202,8 +204,7 @@ public static class CollectionBookSetup
             root.GetComponent<Image>().enabled = false;
 
             RectTransform description = (RectTransform)Require(root.transform, "Description");
-            description.offsetMin = new Vector2(SynergyDescriptionLeft, description.offsetMin.y);
-            description.offsetMax = new Vector2(0f, description.offsetMax.y);
+            SetHorizontalOffsets(description, SynergyDescriptionLeft, 0f);
 
             Require(root.transform, "Description/DescriptionBackground").GetComponent<Image>().enabled = false;
             Require(root.transform, "Description/DescriptionBackground/Name").GetComponent<TextMeshProUGUI>().color = Ink;
@@ -242,11 +243,16 @@ public static class CollectionBookSetup
             SetAnchors(empty, new Vector2(0f, 0f), new Vector2(0.47f, 1f));
             empty.GetComponent<TextMeshProUGUI>().color = new Color(Ink.r, Ink.g, Ink.b, 0.6f);
 
-            Require(root.transform, "Toggle/Label").GetComponent<TextMeshProUGUI>().color = Ink;
+            TextMeshProUGUI reverseLabel = Require(root.transform, "Toggle/Label").GetComponent<TextMeshProUGUI>();
+            reverseLabel.color = Ink;
+            TMP_Dropdown orderDropdown = Require(root.transform, "Order Option").GetComponent<TMP_Dropdown>();
+            if (orderDropdown == null) throw new InvalidOperationException("Order Option에 TMP_Dropdown이 없습니다.");
 
             SynergyWikiDisplayer displayer = root.GetComponent<SynergyWikiDisplayer>();
             SerializedObject so = new SerializedObject(displayer);
             so.FindProperty("componentObj").objectReferenceValue = elementPrefab;
+            so.FindProperty("orderDropdown").objectReferenceValue = orderDropdown;
+            so.FindProperty("reverseLabel").objectReferenceValue = reverseLabel;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             PrefabUtility.SaveAsPrefabAsset(root, SynergyPagePrefabPath);
@@ -357,23 +363,27 @@ public static class CollectionBookSetup
         if (bookImage == null || tabGroup == null || closeButton == null)
             throw new InvalidOperationException("Backgrounf_Book / TabButtonGroup / Close_BTN 중 하나를 찾지 못했습니다.");
 
+        // 탭 위치는 고정 좌표로 잡으므로 옮기기 전에 레이아웃이 다시 계산하지 않게 끈다.
+        VerticalLayoutGroup tabLayout = tabGroup.GetComponent<VerticalLayoutGroup>();
+        if (tabLayout != null && tabLayout.enabled) tabLayout.enabled = false;
+
         // 책갈피는 책 뒤에 깔려서 가장자리 밖으로만 보이도록 책 이미지보다 먼저 둔다.
-        tabGroup.SetParent(bookRoot, false);
+        SetParent(tabGroup, bookRoot);
         Stretch((RectTransform)tabGroup);
-        tabGroup.SetSiblingIndex(0);
-        bookImage.SetParent(bookRoot, false);
+        SetSibling(tabGroup, 0);
+        SetParent(bookImage, bookRoot);
         Stretch((RectTransform)bookImage);
-        bookImage.SetSiblingIndex(1);
+        SetSibling(bookImage, 1);
 
         RectTransform figurePage = EnsureContainer(bookRoot, "Page_Figure");
-        figurePage.SetSiblingIndex(2);
-        figurePage.gameObject.SetActive(true);
+        SetSibling(figurePage, 2);
+        SetActive(figurePage.gameObject, true);
         RectTransform synergyPage = EnsureContainer(bookRoot, "Page_Synergy");
-        synergyPage.SetSiblingIndex(3);
+        SetSibling(synergyPage, 3);
 
-        closeButton.SetParent(bookRoot, false);
+        SetParent(closeButton, bookRoot);
         SetCenterRect((RectTransform)closeButton, new Vector2(797f, 403f), ((RectTransform)closeButton).sizeDelta);
-        closeButton.SetSiblingIndex(4);
+        SetSibling(closeButton, 4);
 
         SetupTabs(tabGroup, manager);
         SetupFigurePage(panel, figurePage, closeButton, manager);
@@ -405,19 +415,13 @@ public static class CollectionBookSetup
             dim = Object.Instantiate(template.gameObject, panel).transform;
             dim.name = "Dim";
         }
-        dim.SetSiblingIndex(0);
-        dim.gameObject.SetActive(true);
+        SetSibling(dim, 0);
+        SetActive(dim.gameObject, true);
 
         // 패널이 화면보다 안쪽으로 잡혀 있어서 그만큼 바깥으로 늘려 화면 전체를 덮는다.
         RectTransform panelRect = (RectTransform)panel;
-        RectTransform dimRect = (RectTransform)dim;
-        const float margin = 40f;
-        dimRect.anchorMin = Vector2.zero;
-        dimRect.anchorMax = Vector2.one;
-        dimRect.pivot = new Vector2(0.5f, 0.5f);
-        dimRect.localScale = Vector3.one;
-        dimRect.offsetMin = -panelRect.offsetMin - new Vector2(margin, margin);
-        dimRect.offsetMax = -panelRect.offsetMax + new Vector2(margin, margin);
+        Vector2 margin = new Vector2(40f, 40f);
+        SetAnchors((RectTransform)dim, Vector2.zero, Vector2.one, -panelRect.offsetMin - margin, -panelRect.offsetMax + margin);
 
         Image image = dim.GetComponent<Image>();
         image.sprite = null;
@@ -438,16 +442,13 @@ public static class CollectionBookSetup
     {
         RectTransform bookRoot = EnsureContainer(panel, "BookRoot");
         SetCenterRect(bookRoot, BookRootPosition, BookSize);
-        bookRoot.SetSiblingIndex(1);
-        bookRoot.gameObject.SetActive(true);
+        SetSibling(bookRoot, 1);
+        SetActive(bookRoot.gameObject, true);
         return bookRoot;
     }
 
     static void SetupTabs(Transform tabGroup, CollectionBookManager manager)
     {
-        VerticalLayoutGroup layout = tabGroup.GetComponent<VerticalLayoutGroup>();
-        if (layout != null) layout.enabled = false;
-
         Transform biomeTab = Require(tabGroup, "TabButton_Biome");
         Transform figureTab = FindDirect(tabGroup, "TabButton_Figure");
         if (figureTab == null)
@@ -459,7 +460,7 @@ public static class CollectionBookSetup
         Transform achievementTab = Require(tabGroup, "TabButton_Achievement");
 
         // 현재 바이옴 탭은 바이옴 필터와 역할이 겹쳐 끈다.
-        biomeTab.gameObject.SetActive(false);
+        SetActive(biomeTab.gameObject, false);
 
         Transform[] tabs = { figureTab, synergyTab, achievementTab };
         string[] defaultLabels = { "피규어", "시너지", "업적" };
@@ -467,8 +468,8 @@ public static class CollectionBookSetup
         for (int i = 0; i < tabs.Length; i++)
         {
             Transform tab = tabs[i];
-            tab.gameObject.SetActive(true);
-            tab.SetSiblingIndex(i);
+            SetActive(tab.gameObject, true);
+            SetSibling(tab, i);
             SetCenterRect((RectTransform)tab, new Vector2(TabCenterX, TabCenterY[i]), TabSize);
 
             Button button = tab.GetComponent<Button>();
@@ -481,12 +482,7 @@ public static class CollectionBookSetup
             // 라벨은 LocalizationManager.GetUi로 넣으므로 패키지 로컬라이저는 끈다.
             LocalizeStringEvent localizer = label.GetComponent<LocalizeStringEvent>();
             if (localizer != null) localizer.enabled = false;
-            RectTransform labelRect = label.rectTransform;
-            labelRect.anchorMin = Vector2.zero;
-            labelRect.anchorMax = Vector2.one;
-            labelRect.pivot = new Vector2(0.5f, 0.5f);
-            labelRect.offsetMin = TabLabelOffsetMin;
-            labelRect.offsetMax = TabLabelOffsetMax;
+            SetAnchors(label.rectTransform, Vector2.zero, Vector2.one, TabLabelOffsetMin, TabLabelOffsetMax);
             label.text = defaultLabels[i];
             label.color = Color.white;
             label.fontSize = 24f;
@@ -537,7 +533,7 @@ public static class CollectionBookSetup
         Button nextBiome = EnsureArrowButton(closeButton, page, "NextBiomeButton", arrowRight, new Vector2(LeftPageCenterX + 150f, biomeY), arrowSize);
 
         // 그리드: 5열 x 3행 = 15칸, 스크롤 대신 페이지 넘김
-        scrollView.SetParent(page, false);
+        SetParent(scrollView, page);
         SetCenterRect((RectTransform)scrollView, new Vector2(LeftPageCenterX, -6f), new Vector2(LeftPageWidth, 520f));
         ScrollRect scrollRect = scrollView.GetComponent<ScrollRect>();
         if (scrollRect != null) scrollRect.enabled = false;
@@ -547,11 +543,7 @@ public static class CollectionBookSetup
         RectTransform viewport = (RectTransform)Require(scrollView, "Viewport");
         Stretch(viewport);
         RectTransform content = (RectTransform)Require(viewport, "Content");
-        content.anchorMin = new Vector2(0f, 1f);
-        content.anchorMax = new Vector2(1f, 1f);
-        content.pivot = new Vector2(0.5f, 1f);
-        content.anchoredPosition = Vector2.zero;
-        content.sizeDelta = new Vector2(0f, 520f);
+        SetRect(content, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0f, 520f), content.localScale);
         GridLayoutGroup grid = content.GetComponent<GridLayoutGroup>();
         grid.cellSize = new Vector2(128f, 164f);
         grid.spacing = new Vector2(11f, 14f);
@@ -585,8 +577,8 @@ public static class CollectionBookSetup
     // 오른쪽 페이지: 아이콘 액자 → 이름 → 효과 → 획득 바이옴. 인벤토리용 FigureDetailPanel은 건드리지 않는다.
     static void SetupDetail(Transform detail, RectTransform page)
     {
-        detail.SetParent(page, false);
-        detail.SetAsLastSibling();
+        SetParent(detail, page);
+        SetLastSibling(detail);
         SetCenterRect((RectTransform)detail, new Vector2(RightPageCenterX, PageCenterY), new Vector2(RightPageWidth, PageHeight));
 
         // 중첩 캔버스가 정렬을 따로 잡으면 도감 캔버스(400) 아래로 깔리므로 부모를 따르게 한다.
@@ -609,8 +601,8 @@ public static class CollectionBookSetup
             iconFrame = Object.Instantiate(woodBlock.gameObject, detail).transform;
             iconFrame.name = "IconFrame";
         }
-        woodBlock.gameObject.SetActive(false);
-        iconFrame.gameObject.SetActive(true);
+        SetActive(woodBlock.gameObject, false);
+        SetActive(iconFrame.gameObject, true);
         Image frameImage = iconFrame.GetComponent<Image>();
         frameImage.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(IconFrameSpritePath);
         frameImage.color = Color.white;
@@ -621,8 +613,8 @@ public static class CollectionBookSetup
         figureImage.preserveAspect = true;
         figureImage.raycastTarget = false;
         SetCenterRect(figureImage.rectTransform, new Vector2(0f, 238f), new Vector2(170f, 170f));
-        iconFrame.SetSiblingIndex(woodBlock.GetSiblingIndex() + 1);
-        figureImage.transform.SetSiblingIndex(iconFrame.GetSiblingIndex() + 1);
+        SetSibling(iconFrame, woodBlock.GetSiblingIndex() + 1);
+        SetSibling(figureImage.transform, iconFrame.GetSiblingIndex() + 1);
 
         TextMeshProUGUI nameText = panel.nameText;
         SetCenterRect(nameText.rectTransform, new Vector2(0f, 88f), new Vector2(620f, 64f));
@@ -657,11 +649,12 @@ public static class CollectionBookSetup
 
         RectTransform rect = (RectTransform)instance;
         float width = SpreadRight - SpreadLeft;
-        SetCenterRect(rect, new Vector2((SpreadLeft + SpreadRight) * 0.5f, PageCenterY),
-            new Vector2(width / SynergyPageScale, PageHeight / SynergyPageScale));
-        rect.localScale = new Vector3(SynergyPageScale, SynergyPageScale, 1f);
-        instance.gameObject.SetActive(true);
-        page.gameObject.SetActive(false);
+        Vector2 center = new Vector2(0.5f, 0.5f);
+        SetRect(rect, center, center, center, new Vector2((SpreadLeft + SpreadRight) * 0.5f, PageCenterY),
+            new Vector2(width / SynergyPageScale, PageHeight / SynergyPageScale),
+            new Vector3(SynergyPageScale, SynergyPageScale, 1f));
+        SetActive(instance.gameObject, true);
+        SetActive(page.gameObject, false);
 
         manager.synergyWiki = instance.GetComponent<SynergyWikiDisplayer>();
     }
@@ -706,7 +699,7 @@ public static class CollectionBookSetup
             found = Object.Instantiate(template.gameObject, parent).transform;
             found.name = name;
         }
-        found.gameObject.SetActive(true);
+        SetActive(found.gameObject, true);
         TextMeshProUGUI text = found.GetComponent<TextMeshProUGUI>();
         SetCenterRect(text.rectTransform, position, size);
         StyleText(text, fontSize, alignment, VerticalAlignmentOptions.Middle);
@@ -733,7 +726,7 @@ public static class CollectionBookSetup
             found = Object.Instantiate(template.gameObject, parent).transform;
             found.name = name;
         }
-        found.gameObject.SetActive(true);
+        SetActive(found.gameObject, true);
         SetCenterRect((RectTransform)found, position, size);
         Image image = found.GetComponent<Image>();
         image.sprite = sprite;
@@ -785,37 +778,78 @@ public static class CollectionBookSetup
         return component != null ? component : go.AddComponent<T>();
     }
 
+    // 같은 값을 다시 쓰면 부동소수 오차로 씬 diff가 생기므로 다를 때만 쓴다.
+    static void SetRect(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta, Vector3 scale)
+    {
+        if (rect.anchorMin != anchorMin) rect.anchorMin = anchorMin;
+        if (rect.anchorMax != anchorMax) rect.anchorMax = anchorMax;
+        if (rect.pivot != pivot) rect.pivot = pivot;
+        if (rect.localScale != scale) rect.localScale = scale;
+        if (rect.localRotation != Quaternion.identity) rect.localRotation = Quaternion.identity;
+        if (rect.anchoredPosition != anchoredPosition) rect.anchoredPosition = anchoredPosition;
+        if (rect.localPosition.z != 0f) rect.anchoredPosition3D = new Vector3(anchoredPosition.x, anchoredPosition.y, 0f);
+        if (rect.sizeDelta != sizeDelta) rect.sizeDelta = sizeDelta;
+    }
+
     static void SetCenterRect(RectTransform rect, Vector2 position, Vector2 size)
     {
-        rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.localScale = Vector3.one;
-        rect.localRotation = Quaternion.identity;
-        rect.anchoredPosition3D = new Vector3(position.x, position.y, 0f);
-        rect.sizeDelta = size;
+        Vector2 center = new Vector2(0.5f, 0.5f);
+        SetRect(rect, center, center, center, position, size, Vector3.one);
     }
 
     static void SetAnchors(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax)
     {
-        rect.anchorMin = anchorMin;
-        rect.anchorMax = anchorMax;
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-        rect.localScale = Vector3.one;
+        SetAnchors(rect, anchorMin, anchorMax, Vector2.zero, Vector2.zero);
+    }
+
+    // 피벗이 가운데일 때 offsetMin/Max를 위치·크기로 바꿔 쓴다. offsetMin/Max 세터는 오차가 생겨서 쓰지 않는다.
+    static void SetAnchors(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax, Vector2 offsetMin, Vector2 offsetMax)
+    {
+        Vector2 center = new Vector2(0.5f, 0.5f);
+        SetRect(rect, anchorMin, anchorMax, center, (offsetMin + offsetMax) * 0.5f, offsetMax - offsetMin, Vector3.one);
     }
 
     static void Stretch(RectTransform rect)
     {
         SetAnchors(rect, Vector2.zero, Vector2.one);
-        rect.localRotation = Quaternion.identity;
-        rect.anchoredPosition3D = Vector3.zero;
     }
 
+    // 가로 앵커는 그대로 두고 offsetMin.x / offsetMax.x에 해당하는 값만 맞춘다.
+    static void SetHorizontalOffsets(RectTransform rect, float offsetMinX, float offsetMaxX)
+    {
+        float width = offsetMaxX - offsetMinX;
+        float x = offsetMinX + width * rect.pivot.x;
+        Vector2 position = new Vector2(x, rect.anchoredPosition.y);
+        Vector2 size = new Vector2(width, rect.sizeDelta.y);
+        if (rect.anchoredPosition != position) rect.anchoredPosition = position;
+        if (rect.sizeDelta != size) rect.sizeDelta = size;
+    }
+
+    static void SetParent(Transform child, Transform parent)
+    {
+        if (child.parent != parent) child.SetParent(parent, false);
+    }
+
+    static void SetSibling(Transform child, int index)
+    {
+        if (child.GetSiblingIndex() != index) child.SetSiblingIndex(index);
+    }
+
+    static void SetLastSibling(Transform child)
+    {
+        SetSibling(child, child.parent.childCount - 1);
+    }
+
+    static void SetActive(GameObject go, bool active)
+    {
+        if (go.activeSelf != active) go.SetActive(active);
+    }
+
+    // 끄는 오브젝트는 활성 상태만 바꾸고 RectTransform은 건드리지 않는다(롤백 시 원래 자리 그대로).
     static void DeactivateIfFound(Transform root, string name)
     {
         Transform found = FindAnywhere(root, name);
-        if (found != null) found.gameObject.SetActive(false);
+        if (found != null) SetActive(found.gameObject, false);
     }
 
     static Transform Require(Transform parent, string path)

@@ -123,8 +123,10 @@ public class CollectionBookManager : MonoBehaviour
         Keyboard keyboard = Keyboard.current;
         if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame) return;
 
-        // 상세 → 필터창 → 도감 순서로 하나씩 닫는다.
-        if (detailPanel != null && detailPanel.panelRoot != null && detailPanel.panelRoot.activeSelf)
+        // 정렬 드롭다운 → 상세 → 필터창 → 도감 순서로 하나씩 닫는다.
+        if (isSynergyPageOpen && synergyWiki != null && synergyWiki.IsOrderDropdownExpanded)
+            synergyWiki.CloseOrderDropdown();
+        else if (detailPanel != null && detailPanel.panelRoot != null && detailPanel.panelRoot.activeSelf)
             detailPanel.ClosePanel();
         else if (biomeFilterPanelRoot != null && biomeFilterPanelRoot.activeSelf)
             CloseBiomeFilterPanel();

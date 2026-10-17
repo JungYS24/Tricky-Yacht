@@ -1127,6 +1127,8 @@ MonoBehaviour:
   noSynergyMessageObj: {fileID: 5434438825472276855}
   componentObj: {fileID: 5143055160817179372, guid: 06fcde6c92514904ca5051a9ba9acc63, type: 3}
   figureFrameObj: {fileID: 3759507345532874606, guid: fdb333a4d27598e40959d2aa44dc689e, type: 3}
+  orderDropdown: {fileID: 4385096786772049341}
+  reverseLabel: {fileID: 9031022188110240035}
 --- !u!1 &4389610685006058036
 GameObject:
   m_ObjectHideFlags: 0

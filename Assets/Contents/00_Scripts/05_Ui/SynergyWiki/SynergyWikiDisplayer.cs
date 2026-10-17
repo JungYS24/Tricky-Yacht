@@ -14,6 +14,19 @@ public class SynergyWikiDisplayer : MonoBehaviour
 
     [SerializeField] private GameObject figureFrameObj;
 
+    [Header("정렬 UI 라벨 (비어 있으면 건너뜀)")]
+    [SerializeField] private TMP_Dropdown orderDropdown;
+
+    [SerializeField] private TextMeshProUGUI reverseLabel;
+
+    // 드롭다운 옵션 순서는 OrderType 순서와 같다.
+    private static readonly (string key, string fallback)[] OrderLabelKeys =
+    {
+        ("UI_SYNERGY_SORT_NAME", "이름"),
+        ("UI_SYNERGY_SORT_OWNED", "보유율"),
+        ("UI_SYNERGY_SORT_COUNT", "피규어 수"),
+    };
+
     private readonly List<(Transform, SynergyData)> components = new();
 
     private HashSet<FigureItemSO> ownedFigures = new();
@@ -23,6 +36,16 @@ public class SynergyWikiDisplayer : MonoBehaviour
     private bool isReversed;
 
     private bool hasLoaded;
+
+    public bool IsOrderDropdownExpanded => orderDropdown != null && orderDropdown.IsExpanded;
+
+    public void CloseOrderDropdown()
+    {
+        if (orderDropdown != null)
+        {
+            orderDropdown.Hide();
+        }
+    }
     
     public void OrderReverse(bool reverse)
     {
@@ -56,6 +79,7 @@ public class SynergyWikiDisplayer : MonoBehaviour
     public void Refresh()
     {
         hasLoaded = true;
+        ApplyLocalizedLabels();
         ClearWiki();
         LoadWiki();
         SortComponents();
@@ -64,6 +88,24 @@ public class SynergyWikiDisplayer : MonoBehaviour
         if (noSynergyMessageObj != null)
         {
             noSynergyMessageObj.SetActive(components.Count == 0);
+        }
+    }
+
+    private void ApplyLocalizedLabels()
+    {
+        if (orderDropdown != null)
+        {
+            int count = Mathf.Min(orderDropdown.options.Count, OrderLabelKeys.Length);
+            for (int i = 0; i < count; i++)
+            {
+                orderDropdown.options[i].text = LocalizationManager.GetUi(OrderLabelKeys[i].key, OrderLabelKeys[i].fallback);
+            }
+            orderDropdown.RefreshShownValue();
+        }
+
+        if (reverseLabel != null)
+        {
+            reverseLabel.text = LocalizationManager.GetUi("UI_SYNERGY_SORT_REVERSE", "역순");
         }
     }
 
