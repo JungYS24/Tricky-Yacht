@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Coffee.UIEffects;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -49,14 +50,40 @@ public static class DebuffFeedback
 
     // ---------- 전투 시작: 디버프 주사위 등장 ----------
 
+    // 등장 연출 하나를 만드는 동안 단계들이 함께 쓰는 값.
+    sealed class ArrivalContext
+    {
+        public Sequence seq;
+        public RectTransform stage;        // 등장 아이콘이 놓이는 곳. 착지 흔들림도 여기에 줍니다.
+        public Vector2 row;                // 주사위 굴림 줄
+        public Vector2 deck;               // 덱 버튼 위치
+        public Transform deckTarget;
+        public Graphic deckGraphic;
+        public Color deckColor;
+        public Vector3 deckScale;
+        public Vector3 deckPosition;
+        public float firstLaunch = float.MaxValue; // 어둡게 한 화면을 걷어낼 시점(첫 주사위가 덱으로 출발할 때)
+    }
+
+    // 디버프 주사위 아이콘: 이동용 부모 → 크기용 자식 → (테두리 빛, 주사위 그림).
+    // 이동·포물선은 부모가, 커짐·찌그러짐은 크기용 자식이 맡아 서로 부딪히지 않습니다.
+    sealed class DieVisual
+    {
+        public RectTransform mover;
+        public RectTransform scaler;
+        public Image glow;
+        public Image body;
+    }
+
     // 이번 전투에서 새로 들어오는 디버프만 보여 준다. 엘리트(도둑·족쇄), 차원문(가시·저주), 보스(가짜)를 종류별로 연출한다.
-    // 모든 등장 연출은 주사위가 굴러가는 줄(등장 중에는 비어 있음)에서 재생합니다.
+    // 모든 등장 연출은 주사위가 굴러가는 줄(등장 중에는 비어 있음)에서 재생하고, 주사위는 마지막에 덱으로 들어갑니다.
     public static IEnumerator PlayArrival(Enemy enemy, List<DiceData1> incoming, Transform deckTarget, Transform rollRow, Sprite normalFace)
     {
         if (incoming == null || incoming.Count == 0 || enemy == null) yield break;
-        RectTransform phase = NewContainer("Arrival", BeginIntro());
-        Vector2 deck = UiToLocal(deckTarget, new Vector2(0.08f, 0.15f));
-        Vector2 row = ArrivalRow(rollRow, enemy);
+        var p = Profile;
+        RectTransform root = BeginIntro();
+        Image dim = p == null || p.dimScreen ? CreateDim(root) : null; // 등장 아이콘보다 먼저 만들어 그 아래에 깝니다.
+        RectTransform stage = NewContainer("Arrival", root);
 
         var elite = new List<DiceData1>();
         var portal = new List<DiceData1>();
@@ -69,28 +96,40 @@ public static class DebuffFeedback
             else elite.Add(die);
         }
 
-        Sequence seq = NewIntroTween();
+        var ctx = new ArrivalContext
+        {
+            seq = NewIntroTween(),
+            stage = stage,
+            row = ArrivalRow(rollRow, enemy),
+            deck = UiToLocal(deckTarget, new Vector2(0.08f, 0.15f)),
+            deckTarget = deckTarget
+        };
+        PrepareDeck(ctx);
+        if (p == null || p.pauseMonster) PauseMonster(enemy);
+
         Transform monster = enemy.transform;
-        if (boss.Count > 0) InsertMonsterShake(seq, monster, enemy.monsterImage, 0f);
-        else InsertMonsterSquash(seq, monster, 0f);
+        if (boss.Count > 0) InsertMonsterShake(ctx.seq, monster, enemy.monsterImage, 0f);
+        else InsertMonsterSquash(ctx.seq, monster, 0f);
 
         float end = 0.1f;
-        if (elite.Count > 0) end = InsertElite(seq, phase, elite, row, deck, end);
-        if (portal.Count > 0) end = InsertPortal(seq, phase, portal, row, deck, Mathf.Max(0.1f, end - 0.3f));
-        if (boss.Count > 0) end = InsertBoss(seq, phase, boss, row, deck, normalFace, Mathf.Max(0.1f, end - 0.3f));
+        if (elite.Count > 0) end = InsertElite(ctx, elite, end);
+        if (portal.Count > 0) end = InsertPortal(ctx, portal, Mathf.Max(0.1f, end - 0.3f));
+        if (boss.Count > 0) end = InsertBoss(ctx, boss, normalFace, Mathf.Max(0.1f, end - 0.3f));
 
-        if (deckTarget != null)
+        if (dim != null)
         {
-            Vector3 deckScale = deckTarget.localScale;
-            introResets.Add(() => { if (deckTarget != null) deckTarget.localScale = deckScale; });
-            seq.Insert(Mathf.Max(0f, end - 0.05f), deckTarget.DOPunchScale(Vector3.one * 0.12f, 0.2f, 1, 0.5f));
+            float alpha = p != null ? p.dimAlpha : 0.35f;
+            ctx.seq.Insert(0f, dim.DOFade(alpha, 0.2f));
+            // 주사위가 덱으로 출발할 때 걷어 내 덱 버튼 반응이 어둡게 가려지지 않게 합니다.
+            ctx.seq.Insert(Mathf.Min(ctx.firstLaunch, end), dim.DOFade(0f, 0.25f));
         }
 
-        try { yield return seq.WaitForCompletion(); }
+        try { yield return ctx.seq.WaitForCompletion(); }
         finally
         {
             KillIntroTween();
-            if (phase != null) UnityEngine.Object.Destroy(phase.gameObject);
+            if (stage != null) UnityEngine.Object.Destroy(stage.gameObject);
+            if (dim != null) UnityEngine.Object.Destroy(dim.gameObject);
         }
     }
 
@@ -128,46 +167,51 @@ public static class DebuffFeedback
         skipRequested = false;
     }
 
-    // 도둑·족쇄 아이콘이 주사위 줄에 한 줄로 나타났다가 하나씩 덱으로 날아간다.
-    static float InsertElite(Sequence seq, RectTransform parent, List<DiceData1> dice, Vector2 row, Vector2 deck, float start)
+    // 도둑·족쇄 아이콘이 주사위 줄에 한 줄로 나타났다가 하나씩 덱으로 들어간다.
+    static float InsertElite(ArrivalContext ctx, List<DiceData1> dice, float start)
     {
         var p = Profile;
         Vector2 size = EliteIconSize;
         int count = dice.Count;
         float launch = start + 0.65f;
+        float end = start;
         for (int i = 0; i < count; i++)
         {
-            Image icon = CreateImage("Incoming " + dice[i].debuffType, DieSprite(dice[i]), size, parent);
-            RectTransform rect = icon.rectTransform;
-            Vector2 slot = row + new Vector2((i - (count - 1) * 0.5f) * (size.x + 16f), 0f);
-            rect.anchoredPosition = slot;
-            rect.localScale = Vector3.zero;
+            DieVisual visual = CreateDieVisual("Incoming " + dice[i].debuffType, DieSprite(dice[i]), size, ctx.stage);
+            Vector2 slot = ctx.row + new Vector2((i - (count - 1) * 0.5f) * (size.x + 16f), 0f);
+            visual.mover.anchoredPosition = slot;
+            visual.scaler.localScale = Vector3.zero;
             float appear = start + i * 0.1f;
-            seq.Insert(appear, rect.DOScale(1f, 0.22f).SetEase(Ease.OutBack));
+            ctx.seq.Insert(appear, visual.scaler.DOScale(1f, 0.22f).SetEase(Ease.OutBack));
+            if (visual.glow != null) ctx.seq.Insert(appear, visual.glow.DOFade(GlowAlpha, 0.22f));
             if (p != null)
             {
                 Color smoke = dice[i].debuffType == DebuffDiceType.Thief ? p.thiefSmoke : p.vanishSmoke;
-                seq.InsertCallback(appear, () => Smoke(slot, smoke, 0f, 2, size.x * 0.55f));
+                ctx.seq.InsertCallback(appear, () => Smoke(slot, smoke, 0f, 2, size.x * 0.55f));
             }
-            InsertFly(seq, icon, deck, launch + i * 0.15f);
+            end = Mathf.Max(end, InsertDieFly(ctx, visual, launch + i * 0.15f));
         }
-        return launch + (count - 1) * 0.15f + FlyTime;
+        return end + 0.2f;
     }
 
-    // 주사위 줄 위에 차원문이 솟아오르고, 소용돌이 속 보라 실루엣이 밝아지며 다가오다 문틀을 넘어 판 위에 떨어진 뒤 문이 닫힌다.
+    // 주사위 줄 위에 차원문이 솟아오르고, 소용돌이 속 어두운 주사위가 밝아지며 커지다 문틀을 넘어
+    // 앞쪽 판 위에 떨어진다. 잠깐 크게 보여 준 뒤 문이 닫히고, 주사위는 작아지며 덱으로 들어간다.
     // 그리는 순서: 바닥 그림자 → 아치(안쪽 어둠) → 소용돌이 → 주사위 → 돌 문틀. 주사위가 문을 넘는 순간 문틀 앞으로 올라옵니다.
-    static float InsertPortal(Sequence seq, RectTransform parent, List<DiceData1> dice, Vector2 row, Vector2 deck, float start)
+    static float InsertPortal(ArrivalContext ctx, List<DiceData1> dice, float start)
     {
         var p = Profile;
+        Sequence seq = ctx.seq;
+        RectTransform parent = ctx.stage;
         bool split = p != null && p.portalArch != null && p.portalVortex != null;
         Sprite archSprite = split ? p.portalArch : p != null ? p.portal : null;
-        if (archSprite == null) return InsertElite(seq, parent, dice, row, deck, start);
+        if (archSprite == null) return InsertElite(ctx, dice, start);
 
         Vector2 size = PortalSize;
-        Vector2 iconSize = PortalDieSize;
-        // 문 아랫변을 착지한 주사위의 아랫변에 맞춰, 주사위가 문턱 앞에 놓이게 합니다.
-        Vector2 doorBase = new Vector2(row.x, row.y - iconSize.y * 0.5f);
+        Vector2 dieSize = PortalDieSize;
+        float emphasis = p.emphasisScale;
+        Vector2 doorBase = new Vector2(ctx.row.x, ctx.row.y - dieSize.y * 0.5f);
         Vector2 vortexCenter = doorBase + Vector2.up * size.y * 0.5f;
+        Vector2 threshold = vortexCenter + Vector2.down * size.y * 0.18f; // 소용돌이 아래쪽, 문을 빠져나오는 지점
         Vector2 closedScale = new Vector2(0.6f, 0f);
 
         Image floorShadow = CreateShadow("Portal Shadow", size.x * 0.95f, parent);
@@ -190,83 +234,294 @@ public static class DebuffFeedback
             vortexRect.anchoredPosition = vortexCenter;
             vortexRect.localScale = Vector3.zero;
             seq.Insert(start + 0.12f, vortexRect.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
-            // 주사위가 나오기 직전 소용돌이가 빠르게 두근거리며 예고합니다.
-            seq.Insert(start + 0.4f, vortexRect.DOScale(1.08f, 0.07f).SetEase(Ease.InOutSine).SetLoops(4, LoopType.Yoyo));
+            // 주사위가 나오기 직전 짧게 두근거리며 예고합니다.
+            seq.Insert(start + 0.3f, vortexRect.DOScale(1.08f, 0.07f).SetEase(Ease.InOutSine).SetLoops(2, LoopType.Yoyo));
         }
 
         int count = dice.Count;
-        var icons = new Image[count];
-        var iconShadows = new Image[count];
+        var visuals = new DieVisual[count];
+        var dieShadows = new Image[count];
         float lastLand = start;
         for (int i = 0; i < count; i++)
         {
-            Image dieShadow = CreateShadow("Landing Shadow", iconSize.x * 0.9f, parent);
-            Image icon = CreateImage("Incoming " + dice[i].debuffType, DieSprite(dice[i]), iconSize, parent);
-            RectTransform rect = icon.rectTransform;
-            rect.anchoredPosition = vortexCenter;
-            rect.localScale = Vector3.one * 0.15f;
-            icon.color = new Color(0.35f, 0.22f, 0.5f, 0f); // 소용돌이 속 보라 실루엣
-            Vector2 landed = row + new Vector2((i - (count - 1) * 0.5f) * (iconSize.x + 16f), 0f);
+            Image dieShadow = CreateShadow("Landing Shadow", dieSize.x * 0.9f, parent);
+            DieVisual visual = CreateDieVisual("Incoming " + dice[i].debuffType, DieSprite(dice[i]), dieSize, parent);
+            visual.mover.anchoredPosition = vortexCenter;
+            visual.scaler.localScale = Vector3.one * 0.5f;
+            visual.body.color = new Color(0.35f, 0.22f, 0.5f, 0f); // 소용돌이 속 어두운 보라 실루엣
+            Vector2 landed = new Vector2(ctx.row.x + (i - (count - 1) * 0.5f) * (dieSize.x * emphasis + 16f), vortexCenter.y - p.portalDrop);
+            Vector2 shadowStart = new Vector2(threshold.x, doorBase.y);
+            Vector2 shadowEnd = landed + Vector2.down * dieSize.y * emphasis * 0.45f;
             if (dieShadow != null)
             {
-                dieShadow.rectTransform.anchoredPosition = landed + Vector2.down * iconSize.y * 0.45f;
+                dieShadow.rectTransform.anchoredPosition = shadowStart;
                 dieShadow.rectTransform.localScale = new Vector3(0f, 1f, 1f);
             }
 
-            float emerge = start + 0.5f + i * 0.12f;
-            seq.Insert(emerge, rect.DOScale(0.75f, 0.28f).SetEase(Ease.OutQuad));
-            seq.Insert(emerge, icon.DOColor(Color.white, 0.28f));
+            // 문 안쪽: 어두운 실루엣이 밝아지며 커지고 문턱 쪽으로 다가옵니다(아직 돌 문틀 뒤).
+            float emerge = start + 0.4f + i * 0.12f;
+            seq.Insert(emerge, visual.body.DOColor(Color.white, 0.22f));
+            seq.Insert(emerge, visual.scaler.DOScale(emphasis, 0.22f).SetEase(Ease.OutQuad));
+            seq.Insert(emerge, visual.mover.DOAnchorPos(threshold, 0.22f).SetEase(Ease.OutQuad));
+            if (visual.glow != null) seq.Insert(emerge, visual.glow.DOFade(GlowAlpha, 0.22f));
 
-            float cross = emerge + 0.28f;
-            Image crossing = icon;
+            // 문을 넘는 순간: 문틀 앞으로 올라오며 작은 보라 섬광.
+            float cross = emerge + 0.22f;
+            DieVisual crossing = visual;
+            Image crossingShadow = dieShadow;
             seq.InsertCallback(cross, () =>
             {
-                if (crossing != null) crossing.transform.SetAsLastSibling();
-                Smoke(vortexCenter, p.portalSmoke, 0f, 3, 64f);
+                if (crossingShadow != null) crossingShadow.transform.SetAsLastSibling();
+                if (crossing.mover != null) crossing.mover.SetAsLastSibling();
+                Smoke(threshold, p.portalSmoke, 0f, 2, 48f);
             });
-            // 문턱을 넘어 살짝 떠올랐다가 판 위에 떨어지는 포물선
+
+            // 낮은 포물선으로 앞쪽 판 위에 떨어지고, 그림자는 판 위 경로를 따라옵니다.
+            RectTransform mover = visual.mover;
             seq.Insert(cross, DOTween.To(() => 0f, t =>
             {
-                if (rect != null) rect.anchoredPosition = Vector2.Lerp(vortexCenter, landed, t) + Vector2.up * 26f * 4f * t * (1f - t);
-            }, 1f, 0.24f).SetEase(Ease.Linear));
-            seq.Insert(cross, rect.DOScale(1f, 0.24f).SetEase(Ease.OutBack));
-
-            float land = cross + 0.24f;
-            Image landingShadow = dieShadow;
-            seq.InsertCallback(land, () =>
+                if (mover != null) mover.anchoredPosition = Vector2.Lerp(threshold, landed, t) + Vector2.up * 16f * 4f * t * (1f - t);
+            }, 1f, 0.24f).SetEase(Ease.InQuad));
+            if (dieShadow != null)
             {
-                Smoke(landed + Vector2.down * iconSize.y * 0.4f, p.vanishSmoke, 0f, 2, 40f);
-                if (landingShadow != null) landingShadow.transform.SetAsLastSibling();
-                if (crossing != null) crossing.transform.SetAsLastSibling();
-            });
-            if (dieShadow != null) seq.Insert(land, dieShadow.rectTransform.DOScaleX(1f, 0.1f));
-            icons[i] = icon;
-            iconShadows[i] = dieShadow;
+                seq.Insert(cross, dieShadow.rectTransform.DOAnchorPos(shadowEnd, 0.24f).SetEase(Ease.InQuad));
+                seq.Insert(cross, dieShadow.rectTransform.DOScaleX(emphasis, 0.24f).SetEase(Ease.InQuad));
+            }
+
+            // 착지: 가로로 살짝 눌렸다 복귀, 먼지, 짧은 흔들림.
+            float land = cross + 0.24f;
+            seq.Insert(land, visual.scaler.DOScale(new Vector3(emphasis * 1.08f, emphasis * 0.92f, 1f), 0.05f));
+            seq.Insert(land + 0.05f, visual.scaler.DOScale(emphasis, 0.08f).SetEase(Ease.OutQuad));
+            seq.InsertCallback(land, () => Smoke(shadowEnd, p.vanishSmoke, 0f, 2, 40f));
+            InsertImpact(ctx, land);
+            // 보여 주는 동안 테두리 빛이 한 번 숨쉬듯 옅어졌다 돌아옵니다.
+            if (visual.glow != null) seq.Insert(land + 0.13f, visual.glow.DOFade(GlowAlpha * 0.45f, p.confirmHold * 0.5f).SetLoops(2, LoopType.Yoyo));
+
+            visuals[i] = visual;
+            dieShadows[i] = dieShadow;
             lastLand = land;
         }
 
-        float close = lastLand + 0.2f;
         // 돌 문틀은 주사위보다 나중에 만들어 맨 위에 그립니다. 문 안쪽에 있는 동안 주사위가 문틀 뒤에 보입니다.
+        float close = lastLand + 0.1f;
         if (p.portalFrame != null)
         {
             RectTransform frameRect = CreateDoorPart("Portal Frame", p.portalFrame, size, doorBase, closedScale, parent);
             InsertDoorOpen(seq, frameRect, start);
-            InsertDoorClose(seq, frameRect, close + 0.08f);
+            InsertDoorClose(seq, frameRect, close + 0.05f);
         }
 
-        if (vortexRect != null) seq.Insert(close, vortexRect.DOScale(0f, 0.15f).SetEase(Ease.InBack));
-        InsertDoorClose(seq, archRect, close + 0.08f);
-        if (floorShadow != null) seq.Insert(close + 0.1f, floorShadow.rectTransform.DOScaleX(0f, 0.18f).SetEase(Ease.InQuad));
-        seq.InsertCallback(close + 0.2f, () => Smoke(vortexCenter + Vector2.down * size.y * 0.2f, p.portalSmoke, 0f, 3, 64f));
+        // 문은 주사위를 보여 주는 동안 작고 빠르게 닫힙니다. 시선은 착지한 주사위에 남깁니다.
+        if (vortexRect != null) seq.Insert(close, vortexRect.DOScale(0f, 0.12f).SetEase(Ease.InBack));
+        InsertDoorClose(seq, archRect, close + 0.05f);
+        if (floorShadow != null) seq.Insert(close + 0.05f, floorShadow.rectTransform.DOScaleX(0f, 0.15f).SetEase(Ease.InQuad));
+        seq.InsertCallback(close + 0.15f, () => Smoke(vortexCenter + Vector2.down * size.y * 0.2f, p.portalSmoke, 0f, 1, 44f));
 
-        float launch = close + 0.06f;
+        float launch = lastLand + 0.13f + p.confirmHold;
+        float end = launch;
         for (int i = 0; i < count; i++)
         {
             float at = launch + i * 0.1f;
-            InsertFly(seq, icons[i], deck, at);
-            if (iconShadows[i] != null) seq.Insert(at, iconShadows[i].DOFade(0f, 0.1f));
+            if (dieShadows[i] != null) seq.Insert(at, dieShadows[i].DOFade(0f, 0.1f));
+            end = Mathf.Max(end, InsertDieFly(ctx, visuals[i], at));
         }
-        return launch + (count - 1) * 0.1f + FlyTime;
+        return end + 0.2f;
+    }
+
+    // 일반 주사위가 주사위 줄에 나타나 좌우로 두세 번 떨린 뒤, 하얀 연기와 함께 한 번에 가짜 주사위로 바뀐다.
+    static float InsertBoss(ArrivalContext ctx, List<DiceData1> dice, Sprite normalFace, float start)
+    {
+        Sequence seq = ctx.seq;
+        Vector2 size = BossIconSize;
+        float end = start;
+        for (int i = 0; i < dice.Count; i++)
+        {
+            Sprite fake = DieSprite(dice[i]);
+            DieVisual visual = CreateDieVisual("Incoming Fake", fake, size, ctx.stage);
+            if (normalFace != null) visual.body.sprite = normalFace; // 테두리 빛은 가짜 모양으로 미리 만들어 두고 변신 때 켭니다.
+            RectTransform mover = visual.mover;
+            Vector2 slot = ctx.row + new Vector2((i - (dice.Count - 1) * 0.5f) * (size.x + 16f), 0f);
+            mover.anchoredPosition = slot;
+            visual.scaler.localScale = Vector3.zero;
+            float at = start + i * 0.15f;
+            seq.Insert(at, visual.scaler.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
+
+            // 회전 대신 좌우 이동으로만 떨어 픽셀이 깨지지 않게 합니다.
+            float amplitude = size.x * 0.07f;
+            seq.Insert(at + 0.35f, DOTween.To(() => 0f, t =>
+            {
+                if (mover != null) mover.anchoredPosition = slot + Vector2.right * Mathf.Sin(t * Mathf.PI * 6f) * amplitude * (1f - t * 0.4f);
+            }, 1f, 0.4f).SetEase(Ease.Linear));
+
+            float reveal = at + 0.78f;
+            Image body = visual.body;
+            seq.InsertCallback(reveal, () =>
+            {
+                if (mover != null) mover.anchoredPosition = slot;
+                if (body != null && fake != null) body.sprite = fake;
+                Smoke(slot, Color.white, 0f, 4, size.x * 0.5f);
+            });
+            seq.Insert(reveal, visual.scaler.DOPunchScale(Vector3.one * 0.25f, 0.3f, 4, 0.6f));
+            if (visual.glow != null) seq.Insert(reveal, visual.glow.DOFade(GlowAlpha, 0.15f));
+            InsertImpact(ctx, reveal);
+            end = Mathf.Max(end, InsertDieFly(ctx, visual, reveal + 0.37f));
+        }
+        return end + 0.2f;
+    }
+
+    // 덱으로 날아가며 작아지고, 도착하는 순간 덱 버튼이 반응합니다. 도착 시각을 돌려줍니다.
+    static float InsertDieFly(ArrivalContext ctx, DieVisual visual, float at)
+    {
+        ctx.firstLaunch = Mathf.Min(ctx.firstLaunch, at);
+        ctx.seq.Insert(at, visual.mover.DOAnchorPos(ctx.deck, FlyTime).SetEase(Ease.InOutCubic));
+        ctx.seq.Insert(at, visual.scaler.DOScale(0.35f, FlyTime).SetEase(Ease.InQuad));
+        ctx.seq.Insert(at + FlyTime - 0.1f, visual.body.DOFade(0f, 0.1f));
+        if (visual.glow != null) ctx.seq.Insert(at + FlyTime - 0.1f, visual.glow.DOFade(0f, 0.1f));
+        float arrive = at + FlyTime;
+        InsertDeckReaction(ctx, arrive);
+        return arrive;
+    }
+
+    static DieVisual CreateDieVisual(string name, Sprite sprite, Vector2 size, RectTransform parent)
+    {
+        var visual = new DieVisual();
+        visual.mover = NewPoint(name, parent);
+        visual.scaler = NewPoint("Scale", visual.mover);
+        var p = Profile;
+        if (p != null && p.edgeGlow && sprite != null)
+        {
+            // 같은 모양을 단색으로 칠해 살짝 크게 뒤에 깔면 테두리가 빛나 보입니다.
+            visual.glow = CreateImage("Edge Glow", sprite, size, visual.scaler);
+            visual.glow.rectTransform.localScale = Vector3.one * 1.14f;
+            var effect = visual.glow.gameObject.AddComponent<UIEffect>();
+            effect.colorFilter = ColorFilter.Replace;
+            effect.color = p.edgeGlowColor;
+            effect.colorIntensity = 1f;
+            visual.glow.color = new Color(1f, 1f, 1f, 0f);
+        }
+        visual.body = CreateImage("Die", sprite, size, visual.scaler);
+        return visual;
+    }
+
+    const float GlowAlpha = 0.85f;
+
+    static RectTransform NewPoint(string name, Transform parent)
+    {
+        var rect = (RectTransform)new GameObject(name, typeof(RectTransform)).transform;
+        rect.SetParent(parent, false);
+        rect.sizeDelta = Vector2.zero;
+        return rect;
+    }
+
+    static Image CreateDim(RectTransform parent)
+    {
+        Image dim = CreateImage("Intro Dim", null, Vector2.zero, parent);
+        Stretch(dim.rectTransform);
+        dim.color = new Color(0f, 0f, 0f, 0f);
+        return dim;
+    }
+
+    // 등장 연출 동안 몬스터 애니메이션을 멈춰 시선이 판 위 소환으로 모이게 합니다. 끝나면 원래 속도로 돌아옵니다.
+    static void PauseMonster(Enemy enemy)
+    {
+        Animator animator = enemy != null ? enemy.monsterAnimator : null;
+        if (animator == null) return;
+        float speed = animator.speed;
+        animator.speed = 0f;
+        introResets.Add(() => { if (animator != null) animator.speed = speed; });
+    }
+
+    // 착지·변신 순간의 짧은 흔들림. 월드는 기존 카메라 흔들림(난수 없음)을, 등장 아이콘은 같은 박자로 함께 흔듭니다.
+    static void InsertImpact(ArrivalContext ctx, float at)
+    {
+        var p = Profile;
+        if (p != null && !p.cameraShake) return;
+        ctx.seq.InsertCallback(at, () =>
+        {
+            if (CameraShake.Instance != null) CameraShake.Instance.ShakeImpact();
+        });
+        RectTransform stage = ctx.stage;
+        ctx.seq.Insert(at, DOTween.To(() => 0f, t =>
+        {
+            if (stage == null) return;
+            float damping = (1f - t) * (1f - t);
+            stage.anchoredPosition = new Vector2(Mathf.Sin(t * Mathf.PI * 4f) * 6f, Mathf.Sin(t * Mathf.PI * 2f) * 2.4f) * damping;
+        }, 1f, 0.2f).SetEase(Ease.Linear));
+    }
+
+    // 덱 버튼 원래 상태를 기억해 두고, 연출이 끝나거나 끊기면 되돌립니다.
+    static void PrepareDeck(ArrivalContext ctx)
+    {
+        Transform deck = ctx.deckTarget;
+        if (deck == null) return;
+        Vector3 scale = deck.localScale;
+        Vector3 position = deck.localPosition;
+        Graphic graphic = deck.GetComponent<Graphic>();
+        Color color = graphic != null ? graphic.color : Color.white;
+        ctx.deckGraphic = graphic;
+        ctx.deckColor = color;
+        ctx.deckScale = scale;
+        ctx.deckPosition = position;
+        introResets.Add(() =>
+        {
+            if (deck != null) { deck.localScale = scale; deck.localPosition = position; }
+            if (graphic != null) graphic.color = color;
+        });
+    }
+
+    // 디버프 주사위가 덱에 들어가는 순간: 덱 버튼이 튕기며 좌우로 흔들리고, 잠깐 보랏빛으로 물들며 보라 빛 조각이 튑니다.
+    // 여러 개가 연달아 들어와도 원래 상태를 기준으로 계산해 크기·위치가 어긋나지 않습니다.
+    static void InsertDeckReaction(ArrivalContext ctx, float at)
+    {
+        var p = Profile;
+        Transform deck = ctx.deckTarget;
+        if (deck == null || (p != null && !p.deckReaction)) return;
+        Color glow = p != null ? p.deckGlowColor : new Color(0.72f, 0.45f, 1f);
+        Vector3 scale = ctx.deckScale;
+        Vector3 position = ctx.deckPosition;
+        ctx.seq.Insert(at, DOTween.To(() => 0f, t =>
+        {
+            if (deck == null) return;
+            float pulse = Mathf.Sin(t * Mathf.PI) * (1f - t * 0.5f);
+            deck.localScale = scale * (1f + 0.14f * pulse);
+            deck.localPosition = position + Vector3.right * Mathf.Sin(t * Mathf.PI * 6f) * 6f * (1f - t);
+        }, 1f, 0.35f).SetEase(Ease.Linear));
+        Graphic graphic = ctx.deckGraphic;
+        if (graphic != null)
+        {
+            Color baseColor = ctx.deckColor;
+            Color tint = Color.Lerp(baseColor, glow, 0.65f);
+            ctx.seq.Insert(at, DOTween.To(() => 0f, t =>
+            {
+                if (graphic != null) graphic.color = Color.Lerp(tint, baseColor, t);
+            }, 1f, 0.45f).SetEase(Ease.InQuad));
+        }
+        Vector2 center = ctx.deck;
+        ctx.seq.InsertCallback(at, () =>
+        {
+            Sparks(center, glow, 8, 70f);
+            Smoke(center, glow, 0f, 2, 48f);
+        });
+    }
+
+    // 사방으로 튀는 작은 사각 빛 조각(이미지 없이 단색 사각형).
+    static void Sparks(Vector2 position, Color color, int count, float distance)
+    {
+        Sequence seq = NewSequence(Layer.gameObject);
+        for (int i = 0; i < count; i++)
+        {
+            Image spark = CreateImage("Debuff Spark", null, new Vector2(8f, 8f), Layer);
+            spark.color = color;
+            RectTransform rect = spark.rectTransform;
+            rect.anchoredPosition = position;
+            float angle = i * Mathf.PI * 2f / count + 0.3f;
+            float reach = distance * (i % 2 == 0 ? 1f : 0.7f);
+            Vector2 target = position + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * reach;
+            seq.Insert(0f, rect.DOAnchorPos(target, 0.35f).SetEase(Ease.OutQuad));
+            seq.Insert(0f, rect.DOScale(0.2f, 0.35f));
+            seq.Insert(0.15f, spark.DOFade(0f, 0.2f));
+            seq.InsertCallback(0.36f, () => { if (spark != null) UnityEngine.Object.Destroy(spark.gameObject); });
+        }
     }
 
     // 아랫변을 기준으로 솟아오르고 납작해지며 닫히는 차원문 조각(아치·문틀 공용).
@@ -301,44 +556,6 @@ public static class DebuffFeedback
         return shadow;
     }
 
-    // 일반 주사위가 주사위 줄에 나타나 좌우로 두세 번 떨린 뒤, 하얀 연기와 함께 한 번에 가짜 주사위로 바뀐다.
-    static float InsertBoss(Sequence seq, RectTransform parent, List<DiceData1> dice, Vector2 row, Vector2 deck, Sprite normalFace, float start)
-    {
-        Vector2 size = BossIconSize;
-        float end = start;
-        for (int i = 0; i < dice.Count; i++)
-        {
-            Sprite fake = DieSprite(dice[i]);
-            Image icon = CreateImage("Incoming Fake", normalFace != null ? normalFace : fake, size, parent);
-            RectTransform rect = icon.rectTransform;
-            Vector2 slot = row + new Vector2((i - (dice.Count - 1) * 0.5f) * (size.x + 16f), 0f);
-            rect.anchoredPosition = slot;
-            rect.localScale = Vector3.zero;
-            float at = start + i * 0.15f;
-            seq.Insert(at, rect.DOScale(1f, 0.25f).SetEase(Ease.OutBack));
-
-            // 회전 대신 좌우 이동으로만 떨어 픽셀이 깨지지 않게 합니다.
-            float amplitude = size.x * 0.07f;
-            seq.Insert(at + 0.35f, DOTween.To(() => 0f, t =>
-            {
-                if (rect != null) rect.anchoredPosition = slot + Vector2.right * Mathf.Sin(t * Mathf.PI * 6f) * amplitude * (1f - t * 0.4f);
-            }, 1f, 0.4f).SetEase(Ease.Linear));
-
-            float reveal = at + 0.78f;
-            seq.InsertCallback(reveal, () =>
-            {
-                if (rect != null) rect.anchoredPosition = slot;
-                if (icon != null && fake != null) icon.sprite = fake;
-                Smoke(slot, Color.white, 0f, 4, size.x * 0.5f);
-            });
-            seq.Insert(reveal, rect.DOPunchScale(Vector3.one * 0.25f, 0.3f, 4, 0.6f));
-            float launch = reveal + 0.37f;
-            InsertFly(seq, icon, deck, launch);
-            end = Mathf.Max(end, launch + FlyTime);
-        }
-        return end;
-    }
-
     static void InsertMonsterSquash(Sequence seq, Transform monster, float at)
     {
         if (monster == null) return;
@@ -359,14 +576,6 @@ public static class DebuffFeedback
         {
             if (monster != null) monster.position = position + Vector3.right * Mathf.Sin(t * Mathf.PI * 8f) * amplitude * (1f - t);
         }, 1f, 0.32f).SetEase(Ease.Linear));
-    }
-
-    static void InsertFly(Sequence seq, Image icon, Vector2 deck, float at)
-    {
-        RectTransform rect = icon.rectTransform;
-        seq.Insert(at, rect.DOAnchorPos(deck, FlyTime).SetEase(Ease.InOutCubic));
-        seq.Insert(at, rect.DOScale(0.3f, FlyTime).SetEase(Ease.InQuad));
-        seq.Insert(at + FlyTime - 0.1f, icon.DOFade(0f, 0.1f));
     }
 
     // 등장 연출의 기준점: 주사위가 굴러가는 줄(굴림 칸들의 가운데). 굴림 칸이 없으면 몬스터 HP바 아래로 대신합니다.
