@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -144,7 +145,11 @@ public class SynergyWikiDisplayer : MonoBehaviour
         switch (orderType)
         {
             case OrderType.Name:
-                components.Sort((x, y) => x.Item2.SynergyName.CompareTo(y.Item2.SynergyName));
+                // 코드 포인트 순이라 RE:VIVE 같은 라틴 이름이 한글보다 앞에 온다.
+                components.Sort((x, y) => string.Compare(
+                    x.Item2.SynergyName,
+                    y.Item2.SynergyName,
+                    StringComparison.Ordinal));
                 return true;
 
             case OrderType.OwnedFigurePercentile:
@@ -228,7 +233,7 @@ public class SynergyWikiDisplayer : MonoBehaviour
 
         ownedFigures = CollectOwnedFigures();
         var synergies = SynergyManager.Instance.GetAllSynergies()
-            .OrderBy(s => s.SynergyName);
+            .OrderBy(s => s.SynergyName, StringComparer.Ordinal);
 
         if (rowTemplate != null)
         {
