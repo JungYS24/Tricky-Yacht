@@ -123,6 +123,7 @@ public class CollectionBookManager : MonoBehaviour
         if (nextBiomeButton != null) nextBiomeButton.onClick.AddListener(() => StepBiomeFilter(1));
         if (prevPageButton != null) prevPageButton.onClick.AddListener(() => ChangePage(-1));
         if (nextPageButton != null) nextPageButton.onClick.AddListener(() => ChangePage(1));
+        if (detailPanel != null) detailPanel.synergyClicked = ShowSynergy;
 
         foreach (var tab in new[] { figureTabButton, synergyTabButton, achievementTabButton })
         {
@@ -216,9 +217,17 @@ public class CollectionBookManager : MonoBehaviour
         CloseBiomeFilterPanel();
 
         if (figurePageRoot != null) figurePageRoot.SetActive(false);
+        SetPagerVisible(false);
         synergyPageRoot.SetActive(true);
         if (synergyWiki != null) synergyWiki.Refresh();
         UpdateTabVisuals();
+    }
+
+    // 관련 시너지 카드에서 들어온다. 피규어 페이지의 필터와 페이지는 바꾸지 않는다.
+    public void ShowSynergy(SynergyData synergy)
+    {
+        if (synergyWiki != null) synergyWiki.ArmFocus(synergy);
+        ShowSynergyPage();
     }
 
     public void OpenBiomeFilterPanel()
@@ -352,10 +361,20 @@ public class CollectionBookManager : MonoBehaviour
 
     private void UpdatePager(int pageCount)
     {
+        bool show = pageCount > 1;
+        SetPagerVisible(show);
+        if (!show) return;
         if (pageText != null)
             pageText.text = LocalizationManager.GetUi("UI_PAGE_INDICATOR", "{0} / {1}", currentPage + 1, pageCount);
         if (prevPageButton != null) prevPageButton.interactable = currentPage > 0;
         if (nextPageButton != null) nextPageButton.interactable = currentPage < pageCount - 1;
+    }
+
+    private void SetPagerVisible(bool visible)
+    {
+        if (prevPageButton != null) prevPageButton.gameObject.SetActive(visible);
+        if (nextPageButton != null) nextPageButton.gameObject.SetActive(visible);
+        if (pageText != null) pageText.gameObject.SetActive(visible);
     }
 
     private void UpdateTabVisuals()

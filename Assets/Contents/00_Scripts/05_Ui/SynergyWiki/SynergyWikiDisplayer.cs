@@ -19,6 +19,24 @@ public class SynergyWikiDisplayer : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI reverseLabel;
 
+    [Header("왼쪽 목록 (비어 있으면 예전 펼침 줄)")]
+    [SerializeField] private GameObject rowTemplate;
+
+    [SerializeField] private Sprite rowNormalSprite;
+
+    [SerializeField] private Sprite rowSelectedSprite;
+
+    [SerializeField] private ScrollRect listScroll;
+
+    [Header("오른쪽 상세")]
+    [SerializeField] private TextMeshProUGUI detailName;
+
+    [SerializeField] private TextMeshProUGUI detailDescription;
+
+    [SerializeField] private Image detailIcon;
+
+    [SerializeField] private Transform detailFigureRoot;
+
     // 드롭다운 옵션 순서는 OrderType 순서와 같다.
     private static readonly (string key, string fallback)[] OrderLabelKeys =
     {
@@ -36,6 +54,16 @@ public class SynergyWikiDisplayer : MonoBehaviour
     private bool isReversed;
 
     private bool hasLoaded;
+
+    private SynergyData pendingFocus;
+
+    private SynergyData selectedSynergy;
+
+    // 새로고침 뒤에 이 시너지 줄을 선택한다. 이름은 겹칠 수 있어 참조로 찾는다.
+    public void ArmFocus(SynergyData synergy)
+    {
+        pendingFocus = synergy;
+    }
 
     public bool IsOrderDropdownExpanded => orderDropdown != null && orderDropdown.IsExpanded;
 
@@ -89,6 +117,8 @@ public class SynergyWikiDisplayer : MonoBehaviour
         {
             noSynergyMessageObj.SetActive(components.Count == 0);
         }
+
+        ApplyFocus();
     }
 
     private void ApplyLocalizedLabels()
@@ -200,6 +230,12 @@ public class SynergyWikiDisplayer : MonoBehaviour
         var synergies = SynergyManager.Instance.GetAllSynergies()
             .OrderBy(s => s.SynergyName);
 
+        if (rowTemplate != null)
+        {
+            LoadRows(synergies);
+            return;
+        }
+
         foreach (var synergy in synergies)
         {
             var component = Instantiate(componentObj, viewport).transform;
@@ -228,6 +264,101 @@ public class SynergyWikiDisplayer : MonoBehaviour
                 figureFrame.Find("Silhouette").gameObject.SetActive(!ownedFigures.Contains(figure));
             }
         }
+    }
+
+    private void LoadRows(IOrderedEnumerable<SynergyData> synergies)
+    {
+        foreach (SynergyData synergy in synergies)
+        {
+            Transform row = Instantiate(rowTemplate, viewport).transform;
+            row.gameObject.SetActive(true);
+            Image background = row.GetComponent<Image>();
+            if (background != null && rowNormalSprite != null)
+            {
+                background.sprite = rowNormalSprite;
+                background.color = Color.white;
+            }
+
+            Image icon = row.Find("Icon").GetComponent<Image>();
+            icon.sprite = synergy.icon;
+            icon.enabled = synergy.icon != null;
+            row.Find("Name").GetComponent<TextMeshProUGUI>().text = synergy.SynergyName;
+
+            SynergyData captured = synergy;
+            row.GetComponent<Button>().onClick.AddListener(() => Select(captured, true));
+            components.Add((row, synergy));
+        }
+    }
+
+    private void ApplyFocus()
+    {
+        if (rowTemplate == null || components.Count == 0) return;
+
+        SynergyData target = pendingFocus;
+        pendingFocus = null;
+        if (target == null || components.All(item => item.Item2 != target))
+            target = selectedSynergy != null && components.Any(item => item.Item2 == selectedSynergy)
+                ? selectedSynergy
+                : components[0].Item2;
+        Select(target, true);
+    }
+
+    private void Select(SynergyData target, bool scroll)
+    {
+        Transform row = null;
+        foreach (var (component, data) in components)
+        {
+            bool chosen = data == target;
+            Image background = component.GetComponent<Image>();
+            if (background != null && rowNormalSprite != null)
+                background.sprite = chosen && rowSelectedSprite != null ? rowSelectedSprite : rowNormalSprite;
+            if (chosen) row = component;
+        }
+
+        selectedSynergy = target;
+        if (scroll && row is RectTransform rect)
+            ScrollTo(rect);
+        ShowDetail(target);
+    }
+
+    private void ShowDetail(SynergyData synergy)
+    {
+        if (synergy == null) return;
+        if (detailName != null) detailName.text = synergy.SynergyName;
+        if (detailDescription != null) detailDescription.text = synergy.SynergyDescription;
+        if (detailIcon != null)
+        {
+            detailIcon.sprite = synergy.icon;
+            detailIcon.enabled = synergy.icon != null;
+        }
+        if (detailFigureRoot == null || figureFrameObj == null) return;
+
+        for (int i = detailFigureRoot.childCount - 1; i >= 0; i--)
+        {
+            GameObject child = detailFigureRoot.GetChild(i).gameObject;
+            child.SetActive(false);
+            Destroy(child);
+        }
+
+        foreach (FigureItemSO figure in synergy.RequiredFigures)
+        {
+            if (figure == null) continue;
+            Transform frame = Instantiate(figureFrameObj, detailFigureRoot).transform;
+            frame.GetComponentInChildren<Image>().sprite = figure.icon;
+            frame.GetComponentInChildren<TextMeshProUGUI>().text = LocalizationManager.GetItemDisplayName(figure);
+            Transform silhouette = frame.Find("Silhouette");
+            if (silhouette != null) silhouette.gameObject.SetActive(!ownedFigures.Contains(figure));
+        }
+    }
+
+    private void ScrollTo(RectTransform row)
+    {
+        if (listScroll == null || listScroll.content == null || listScroll.viewport == null) return;
+        Canvas.ForceUpdateCanvases();
+        float hidden = listScroll.content.rect.height - listScroll.viewport.rect.height;
+        if (hidden <= 0f) return;
+        float fromTop = Mathf.Max(0f, -row.anchoredPosition.y - listScroll.viewport.rect.height * 0.5f);
+        listScroll.verticalNormalizedPosition = 1f - Mathf.Clamp01(fromTop / hidden);
     }
 
     // 저장 데이터의 보유 목록에 현재 런의 인벤토리를 더한다. 저장 전에 얻은 피규어도 바로 반영된다.

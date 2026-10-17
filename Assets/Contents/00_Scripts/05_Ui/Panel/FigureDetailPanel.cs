@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,6 +18,23 @@ public class FigureDetailPanel : MonoBehaviour
     [Header("도감용 UI")]
     public TextMeshProUGUI locationText;
 
+    [Header("도감 오른쪽 페이지 (비어 있으면 인벤토리 팝업은 그대로)")]
+    public Image figureShadow;
+    public GameObject dropMonsterRoot;
+    public TextMeshProUGUI dropMonsterLabel;
+    public TextMeshProUGUI dropMonsterName;
+    public TextMeshProUGUI dropMonsterBiome;
+    public Image dropMonsterImage;
+    public Image dropMonsterShadow;
+    public Button dropMonsterPrev;
+    public Button dropMonsterNext;
+    public GameObject relatedSynergyRoot;
+    public TextMeshProUGUI relatedSynergyLabel;
+    public RectTransform relatedSynergyContent;
+    public GameObject synergyCardTemplate;
+    public Sprite countBadgeSprite;
+    [NonSerialized] public Action<SynergyData> synergyClicked;
+
     public Button leftButton;
     public Button rightButton;
     public Button closeButton;
@@ -30,12 +48,17 @@ public class FigureDetailPanel : MonoBehaviour
     // 보유 중인 피규어 리스트와 현재 보고 있는 피규어 인덱스
     private List<FigureItemSO> currentOwnedFigures;
     private int currentIndex;
+    private readonly List<MonsterDrop> currentDrops = new List<MonsterDrop>();
+    private int dropIndex;
+    private static Dictionary<FigureItemSO, List<MonsterDrop>> dropsByFigure;
 
     private void Awake()
     {
         if (closeButton != null) closeButton.onClick.AddListener(ClosePanel);
         if (leftButton != null) leftButton.onClick.AddListener(ShowPrevious);
         if (rightButton != null) rightButton.onClick.AddListener(ShowNext);
+        if (dropMonsterPrev != null) dropMonsterPrev.onClick.AddListener(() => StepDrop(-1));
+        if (dropMonsterNext != null) dropMonsterNext.onClick.AddListener(() => StepDrop(1));
 
         panelRoot.SetActive(false); // 시작 시 패널 숨기기
         IsPanelOpen = false;        // 상태 초기화
@@ -146,6 +169,8 @@ public class FigureDetailPanel : MonoBehaviour
         if (useCustomTextColors)
             ApplyCustomTextColors(isEncountered);
 
+        RefreshBookSections(currentFigure, isEncountered);
+
         // 첫 번째거나 마지막 피규어면 화살표 비활성화 (버튼이 있을 때만 실행)
         if (leftButton != null)
             leftButton.interactable = (currentIndex > 0);
@@ -188,5 +213,202 @@ public class FigureDetailPanel : MonoBehaviour
     {
         IsPanelOpen = false; // 패널이 닫혔음을 알림 (조작 차단 해제)
         panelRoot.SetActive(false);
+    }
+
+    // 도감 인스턴스에만 드롭 몬스터와 관련 시너지를 채운다.
+    private void RefreshBookSections(FigureItemSO figure, bool isEncountered)
+    {
+        if (dropMonsterRoot == null && relatedSynergyRoot == null) return;
+
+        FitInteger(figureImage, 160f);
+        PlaceShadow(figureShadow, figureImage);
+
+        bool showExtra = isEncountered;
+        if (dropMonsterRoot != null) dropMonsterRoot.SetActive(showExtra);
+        if (relatedSynergyRoot != null) relatedSynergyRoot.SetActive(showExtra);
+        if (!showExtra) return;
+
+        if (dropMonsterLabel != null)
+            dropMonsterLabel.text = LocalizationManager.GetUi("UI_DROP_MONSTER", "드롭 몬스터");
+        if (relatedSynergyLabel != null)
+            relatedSynergyLabel.text = LocalizationManager.GetUi("UI_RELATED_SYNERGY", "관련 시너지");
+
+        currentDrops.Clear();
+        currentDrops.AddRange(GetDrops(figure));
+        dropIndex = 0;
+        bool hasDrop = currentDrops.Count > 0;
+        if (dropMonsterRoot != null) dropMonsterRoot.SetActive(hasDrop);
+        if (relatedSynergyRoot != null)
+        {
+            var rect = (RectTransform)relatedSynergyRoot.transform;
+            var position = rect.anchoredPosition;
+            position.x = hasDrop ? 160f : 0f;
+            rect.anchoredPosition = position;
+        }
+        ShowDrop();
+        ShowRelatedSynergies(figure);
+    }
+
+    private void StepDrop(int direction)
+    {
+        if (currentDrops.Count <= 1) return;
+        dropIndex = (dropIndex + direction + currentDrops.Count) % currentDrops.Count;
+        ShowDrop();
+    }
+
+    private void ShowDrop()
+    {
+        if (dropMonsterRoot == null || !dropMonsterRoot.activeSelf || currentDrops.Count == 0) return;
+
+        MonsterDrop drop = currentDrops[dropIndex];
+        if (dropMonsterName != null) dropMonsterName.text = drop.monster.monsterName;
+        if (dropMonsterBiome != null)
+        {
+            string grade = LocalizationManager.GetUi(
+                drop.boss ? "UI_MONSTER_GRADE_BOSS" : "UI_MONSTER_GRADE_NORMAL",
+                drop.boss ? "보스" : "일반");
+            string biomes = drop.biomeNames.Count > 0 ? string.Join(", ", drop.biomeNames) : "-";
+            dropMonsterBiome.text = LocalizationManager.GetUi("UI_MONSTER_APPEARANCE", "출현 바이옴 : {0} · {1}", biomes, grade);
+        }
+        if (dropMonsterImage != null)
+        {
+            dropMonsterImage.sprite = drop.monster.monsterSprite;
+            dropMonsterImage.enabled = drop.monster.monsterSprite != null;
+            FitInteger(dropMonsterImage, 128f);
+            PlaceShadow(dropMonsterShadow, dropMonsterImage);
+        }
+        bool many = currentDrops.Count > 1;
+        if (dropMonsterPrev != null) dropMonsterPrev.gameObject.SetActive(many);
+        if (dropMonsterNext != null) dropMonsterNext.gameObject.SetActive(many);
+    }
+
+    private void ShowRelatedSynergies(FigureItemSO figure)
+    {
+        if (relatedSynergyContent == null || synergyCardTemplate == null) return;
+
+        for (int i = relatedSynergyContent.childCount - 1; i >= 0; i--)
+        {
+            GameObject child = relatedSynergyContent.GetChild(i).gameObject;
+            child.SetActive(false);
+            Destroy(child);
+        }
+
+        if (SynergyManager.Instance == null) return;
+        var owned = CollectOwnedFigures();
+        foreach (SynergyData synergy in SynergyManager.Instance.GetAllSynergies())
+        {
+            if (synergy == null || synergy.RequiredFigures == null || !synergy.RequiredFigures.Contains(figure)) continue;
+
+            GameObject card = Instantiate(synergyCardTemplate, relatedSynergyContent);
+            card.SetActive(true);
+            Image icon = card.transform.Find("Icon").GetComponent<Image>();
+            icon.sprite = synergy.icon;
+            icon.enabled = synergy.icon != null;
+            int required = synergy.RequiredFigures.Count;
+            int have = synergy.RequiredFigures.Count(owned.Contains);
+            card.transform.Find("Badge/Text").GetComponent<TextMeshProUGUI>().text = have + "/" + required;
+            card.transform.Find("Name").GetComponent<TextMeshProUGUI>().text = synergy.SynergyName;
+
+            SynergyData captured = synergy;
+            Button button = card.GetComponent<Button>();
+            button.onClick.AddListener(() => synergyClicked?.Invoke(captured));
+        }
+    }
+
+    private static List<MonsterDrop> GetDrops(FigureItemSO figure)
+    {
+        EnsureDropIndex();
+        if (dropsByFigure != null && dropsByFigure.TryGetValue(figure, out List<MonsterDrop> found))
+            return found;
+        return new List<MonsterDrop>();
+    }
+
+    // 피규어를 떨어뜨리는 몬스터와 출현 바이옴은 바이옴 데이터에 연결된 몬스터 SO에서 역으로 모은다.
+    private static void EnsureDropIndex()
+    {
+        if (dropsByFigure != null) return;
+        dropsByFigure = new Dictionary<FigureItemSO, List<MonsterDrop>>();
+
+        DiceManager diceManager = DiceManager.Instance;
+        if (diceManager == null || diceManager.biomeList == null) return;
+
+        foreach (BiomeDataSO biome in diceManager.biomeList)
+        {
+            if (biome == null) continue;
+            string biomeName = LocalizationManager.GetBiomeDisplayName(biome.biomeType);
+            if (biome.biomeMonsters != null)
+            {
+                foreach (MonsterDataSO monster in biome.biomeMonsters)
+                    AddDrop(monster, biomeName, false);
+            }
+            AddDrop(biome.bossMonster, biomeName, true);
+        }
+    }
+
+    private static void AddDrop(MonsterDataSO monster, string biomeName, bool boss)
+    {
+        if (monster == null || monster.dropFigureData == null) return;
+        if (!dropsByFigure.TryGetValue(monster.dropFigureData, out List<MonsterDrop> list))
+        {
+            list = new List<MonsterDrop>();
+            dropsByFigure[monster.dropFigureData] = list;
+        }
+
+        MonsterDrop drop = list.FirstOrDefault(item => item.monster == monster);
+        if (drop == null)
+        {
+            drop = new MonsterDrop { monster = monster };
+            list.Add(drop);
+        }
+        drop.boss |= boss;
+        if (!string.IsNullOrEmpty(biomeName) && !drop.biomeNames.Contains(biomeName))
+            drop.biomeNames.Add(biomeName);
+    }
+
+    private static HashSet<FigureItemSO> CollectOwnedFigures()
+    {
+        var result = new HashSet<FigureItemSO>();
+        GameSaveManager saveManager = GameSaveManager.Instance;
+        var data = saveManager != null ? saveManager.LoadSaveData() : null;
+        if (data != null && data.ownedFigureIDs != null)
+        {
+            foreach (string id in data.ownedFigureIDs)
+            {
+                FigureItemSO figure = saveManager.FindFigureByID(id);
+                if (figure != null) result.Add(figure);
+            }
+        }
+        if (InventoryManager.Instance != null && InventoryManager.Instance.ownedFigures != null)
+        {
+            foreach (FigureItemSO figure in InventoryManager.Instance.ownedFigures)
+            {
+                if (figure != null) result.Add(figure);
+            }
+        }
+        return result;
+    }
+
+    // 원본 픽셀의 정수 배로만 키운다.
+    private static void FitInteger(Image image, float maxSize)
+    {
+        if (image == null || image.sprite == null) return;
+        float longest = Mathf.Max(image.sprite.rect.width, image.sprite.rect.height);
+        int scale = Mathf.Max(1, Mathf.FloorToInt(maxSize / longest));
+        image.rectTransform.sizeDelta = image.sprite.rect.size * scale;
+    }
+
+    private static void PlaceShadow(Image shadow, Image body)
+    {
+        if (shadow == null || body == null) return;
+        float width = Mathf.Max(48f, body.rectTransform.sizeDelta.x * 0.72f);
+        shadow.rectTransform.sizeDelta = new Vector2(width, Mathf.Max(16f, width * 0.22f));
+        shadow.rectTransform.anchoredPosition = new Vector2(body.rectTransform.anchoredPosition.x, body.rectTransform.anchoredPosition.y - body.rectTransform.sizeDelta.y * 0.42f);
+    }
+
+    private class MonsterDrop
+    {
+        public MonsterDataSO monster;
+        public readonly List<string> biomeNames = new List<string>();
+        public bool boss;
     }
 }

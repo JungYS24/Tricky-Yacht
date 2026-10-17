@@ -31,6 +31,11 @@ public static class CollectionBookSetup
     const string ArrowSpritePath = "Assets/Contents/06_UI/Sprites/Button/CrossBTN.png";
     const string IconFrameSpritePath = "Assets/Contents/06_UI/Sprites/score_panel_sprites/slot_dark_small_1.png";
     const string LockSpritePath = "Assets/Contents/06_UI/Sprites/Icon/자물쇠-removebg-preview.png";
+    const string BookUiFolder = "Assets/Contents/06_UI/book_ui_buttons";
+    // CrossBTN, slot_dark_small_1 과 같은 PPU.
+    const float BookSpritePpu = 100f;
+    static readonly Vector2 ArrowButtonSize = new Vector2(64f, 64f);
+    static readonly Vector2 CloseButtonSize = new Vector2(96f, 64f);
 
     const int PanelSortingOrder = 400;
 
@@ -82,6 +87,7 @@ public static class CollectionBookSetup
         try
         {
             ImportUiStrings();
+            ConfigureBookSprites();
             SetupSlotPrefab();
 
             Scene scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
@@ -257,6 +263,7 @@ public static class CollectionBookSetup
             so.FindProperty("componentObj").objectReferenceValue = elementPrefab;
             so.FindProperty("orderDropdown").objectReferenceValue = orderDropdown;
             so.FindProperty("reverseLabel").objectReferenceValue = reverseLabel;
+            SetupSynergyList(root, displayer, so, reverseLabel);
             so.ApplyModifiedPropertiesWithoutUndo();
 
             PrefabUtility.SaveAsPrefabAsset(root, SynergyPagePrefabPath);
@@ -390,8 +397,9 @@ public static class CollectionBookSetup
         SetSibling(synergyPage, 3);
 
         SetParent(closeButton, bookRoot);
-        SetCenterRect((RectTransform)closeButton, new Vector2(797f, 403f), ((RectTransform)closeButton).sizeDelta);
+        SetCenterRect((RectTransform)closeButton, new Vector2(797f, 403f), CloseButtonSize);
         SetSibling(closeButton, 4);
+        ApplySpriteSwap(closeButton.GetComponent<Button>(), LoadBookSprite("Btn_Close"), LoadBookSprite("Btn_Close_Pressed"), null);
 
         SetupTabs(tabGroup, manager);
         SetupFigurePage(panel, figurePage, closeButton, manager);
@@ -550,10 +558,14 @@ public static class CollectionBookSetup
         if (textTemplate == null || scrollView == null || detail == null)
             throw new InvalidOperationException("CurrentFilterText / Scroll View / SlotFigureDetailPanel 중 하나를 찾지 못했습니다.");
 
-        Sprite arrowLeft = LoadSprite(ArrowSpritePath, "CrossBTN_0");
-        Sprite arrowRight = LoadSprite(ArrowSpritePath, "CrossBTN_1");
-        if (arrowLeft == null || arrowRight == null) throw new InvalidOperationException("CrossBTN 화살표 스프라이트를 찾지 못했습니다.");
-        Vector2 arrowSize = new Vector2(44f, 52f);
+        Sprite arrowLeft = LoadBookSprite("Btn_Arrow_L");
+        Sprite arrowLeftPressed = LoadBookSprite("Btn_Arrow_L_Pressed");
+        Sprite arrowLeftDisabled = LoadBookSprite("Btn_Arrow_L_Disabled");
+        Sprite arrowRight = LoadBookSprite("Btn_Arrow_R");
+        Sprite arrowRightPressed = LoadBookSprite("Btn_Arrow_R_Pressed");
+        Sprite arrowRightDisabled = LoadBookSprite("Btn_Arrow_R_Disabled");
+        if (arrowLeft == null || arrowRight == null) throw new InvalidOperationException("도감 화살표 스프라이트를 찾지 못했습니다.");
+        Vector2 arrowSize = ArrowButtonSize;
 
         // 헤더: 제목(왼쪽) + 수집률(오른쪽), 그 아래 ◀ 바이옴 ▶
         float headerY = 360f;
@@ -567,6 +579,8 @@ public static class CollectionBookSetup
         biomeName.text = "전체";
         Button prevBiome = EnsureArrowButton(closeButton, page, "PrevBiomeButton", arrowLeft, new Vector2(LeftPageCenterX - 150f, biomeY), arrowSize);
         Button nextBiome = EnsureArrowButton(closeButton, page, "NextBiomeButton", arrowRight, new Vector2(LeftPageCenterX + 150f, biomeY), arrowSize);
+        ApplySpriteSwap(prevBiome, arrowLeft, arrowLeftPressed, null);
+        ApplySpriteSwap(nextBiome, arrowRight, arrowRightPressed, null);
 
         // 그리드: 5열 x 3행 = 15칸, 스크롤 대신 페이지 넘김
         SetParent(scrollView, page);
@@ -596,6 +610,8 @@ public static class CollectionBookSetup
         pageText.text = "1 / 1";
         Button prevPage = EnsureArrowButton(closeButton, page, "PrevPageButton", arrowLeft, new Vector2(LeftPageCenterX - 110f, pagerY), arrowSize);
         Button nextPage = EnsureArrowButton(closeButton, page, "NextPageButton", arrowRight, new Vector2(LeftPageCenterX + 110f, pagerY), arrowSize);
+        ApplySpriteSwap(prevPage, arrowLeft, arrowLeftPressed, arrowLeftDisabled);
+        ApplySpriteSwap(nextPage, arrowRight, arrowRightPressed, arrowRightDisabled);
 
         SetupDetail(detail, page);
 
@@ -638,39 +654,38 @@ public static class CollectionBookSetup
             iconFrame.name = "IconFrame";
         }
         SetActive(woodBlock.gameObject, false);
-        SetActive(iconFrame.gameObject, true);
-        Image frameImage = iconFrame.GetComponent<Image>();
-        frameImage.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(IconFrameSpritePath);
-        frameImage.color = Color.white;
-        frameImage.raycastTarget = false;
-        SetCenterRect((RectTransform)iconFrame, new Vector2(0f, 238f), new Vector2(236f, 222f));
+        SetActive(iconFrame.gameObject, false);
+        DeactivateIfFound(detail, "LeftButton");
+        DeactivateIfFound(detail, "RightButton");
 
         Image figureImage = panel.figureImage;
         figureImage.preserveAspect = true;
         figureImage.raycastTarget = false;
-        SetCenterRect(figureImage.rectTransform, new Vector2(0f, 238f), new Vector2(170f, 170f));
-        SetSibling(iconFrame, woodBlock.GetSiblingIndex() + 1);
-        SetSibling(figureImage.transform, iconFrame.GetSiblingIndex() + 1);
+        SetCenterRect(figureImage.rectTransform, new Vector2(0f, 120f), new Vector2(160f, 160f));
 
         TextMeshProUGUI nameText = panel.nameText;
-        SetCenterRect(nameText.rectTransform, new Vector2(0f, 88f), new Vector2(620f, 64f));
-        StyleText(nameText, 38f, HorizontalAlignmentOptions.Center, VerticalAlignmentOptions.Middle);
+        SetCenterRect(nameText.rectTransform, new Vector2(0f, 292f), new Vector2(620f, 72f));
+        StyleText(nameText, 42f, HorizontalAlignmentOptions.Center, VerticalAlignmentOptions.Middle);
         nameText.enableAutoSizing = true;
         nameText.fontSizeMin = 24f;
-        nameText.fontSizeMax = 38f;
+        nameText.fontSizeMax = 42f;
         nameText.textWrappingMode = TextWrappingModes.NoWrap;
         nameText.overflowMode = TextOverflowModes.Ellipsis;
+        nameText.transform.SetAsLastSibling();
 
         TextMeshProUGUI descText = panel.descText;
-        SetCenterRect(descText.rectTransform, new Vector2(0f, -78f), new Vector2(600f, 240f));
-        StyleText(descText, 26f, HorizontalAlignmentOptions.Left, VerticalAlignmentOptions.Top);
+        SetCenterRect(descText.rectTransform, new Vector2(0f, -8f), new Vector2(580f, 96f));
+        StyleText(descText, 24f, HorizontalAlignmentOptions.Center, VerticalAlignmentOptions.Top);
         descText.textWrappingMode = TextWrappingModes.Normal;
         descText.overflowMode = TextOverflowModes.Ellipsis;
 
         TextMeshProUGUI locationText = panel.locationText;
-        SetCenterRect(locationText.rectTransform, new Vector2(0f, -262f), new Vector2(600f, 72f));
-        StyleText(locationText, 24f, HorizontalAlignmentOptions.Left, VerticalAlignmentOptions.Top);
+        SetCenterRect(locationText.rectTransform, new Vector2(0f, -78f), new Vector2(580f, 40f));
+        StyleText(locationText, 22f, HorizontalAlignmentOptions.Center, VerticalAlignmentOptions.Middle);
+        locationText.color = new Color(0.45f, 0.32f, 0.2f, 1f);
         locationText.textWrappingMode = TextWrappingModes.Normal;
+
+        SetupDetailExtras(detail, panel, nameText);
     }
 
     static void SetupSynergyPage(RectTransform page, GameObject synergyPagePrefab, CollectionBookManager manager)
@@ -687,8 +702,7 @@ public static class CollectionBookSetup
         float width = SpreadRight - SpreadLeft;
         Vector2 center = new Vector2(0.5f, 0.5f);
         SetRect(rect, center, center, center, new Vector2((SpreadLeft + SpreadRight) * 0.5f, PageCenterY),
-            new Vector2(width / SynergyPageScale, PageHeight / SynergyPageScale),
-            new Vector3(SynergyPageScale, SynergyPageScale, 1f));
+            new Vector2(width, PageHeight), Vector3.one);
         SetActive(instance.gameObject, true);
         SetActive(page.gameObject, false);
 
@@ -909,6 +923,326 @@ public static class CollectionBookSetup
     static Transform FindAnywhere(Transform root, string name)
     {
         return root.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == name && t != root);
+    }
+
+    static void ConfigureBookSprites()
+    {
+        foreach (string file in System.IO.Directory.GetFiles(BookUiFolder, "*.png"))
+        {
+            string path = file.Replace('\\', '/');
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer == null) continue;
+
+            string name = System.IO.Path.GetFileNameWithoutExtension(path);
+            Vector4 border = Vector4.zero;
+            if (name == "Badge_Count") border = new Vector4(12f, 12f, 12f, 12f);
+            else if (name.StartsWith("SynergyRow")) border = new Vector4(82f, 10f, 14f, 10f);
+
+            bool changed = false;
+            if (importer.textureType != TextureImporterType.Sprite) { importer.textureType = TextureImporterType.Sprite; changed = true; }
+            if (importer.spriteImportMode != SpriteImportMode.Single) { importer.spriteImportMode = SpriteImportMode.Single; changed = true; }
+            if (importer.mipmapEnabled) { importer.mipmapEnabled = false; changed = true; }
+            if (importer.filterMode != FilterMode.Point) { importer.filterMode = FilterMode.Point; changed = true; }
+            if (importer.textureCompression != TextureImporterCompression.Uncompressed) { importer.textureCompression = TextureImporterCompression.Uncompressed; changed = true; }
+            if (Mathf.Abs(importer.spritePixelsPerUnit - BookSpritePpu) > 0.01f) { importer.spritePixelsPerUnit = BookSpritePpu; changed = true; }
+            if (importer.spriteBorder != border) { importer.spriteBorder = border; changed = true; }
+            if (changed) importer.SaveAndReimport();
+        }
+        Debug.Log("[CollectionBook] book sprites PPU=" + BookSpritePpu + " (CrossBTN, slot_dark_small_1)");
+    }
+
+    static Sprite LoadBookSprite(string name)
+    {
+        return AssetDatabase.LoadAssetAtPath<Sprite>(BookUiFolder + "/" + name + ".png");
+    }
+
+    static void ApplySpriteSwap(Button button, Sprite normal, Sprite pressed, Sprite disabled)
+    {
+        if (button == null || normal == null) return;
+        Image image = button.GetComponent<Image>();
+        if (image.sprite != normal) image.sprite = normal;
+        if (image.type != Image.Type.Simple) image.type = Image.Type.Simple;
+        if (button.transition != Selectable.Transition.SpriteSwap) button.transition = Selectable.Transition.SpriteSwap;
+        SpriteState state = button.spriteState;
+        if (state.highlightedSprite == normal && state.pressedSprite == pressed && state.selectedSprite == normal && state.disabledSprite == disabled)
+            return;
+        state.highlightedSprite = normal;
+        state.pressedSprite = pressed;
+        state.selectedSprite = normal;
+        state.disabledSprite = disabled;
+        button.spriteState = state;
+    }
+
+    static void SetupDetailExtras(Transform detail, FigureDetailPanel panel, TextMeshProUGUI template)
+    {
+        Sprite knob = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+        Sprite white = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
+        Sprite arrowLeft = LoadBookSprite("Btn_Arrow_L");
+        Sprite arrowLeftPressed = LoadBookSprite("Btn_Arrow_L_Pressed");
+        Sprite arrowRight = LoadBookSprite("Btn_Arrow_R");
+        Sprite arrowRightPressed = LoadBookSprite("Btn_Arrow_R_Pressed");
+        Sprite badge = LoadBookSprite("Badge_Count");
+
+        Image figureShadow = EnsureImage(detail, "FigureShadow", knob, new Vector2(0f, 52f), new Vector2(120f, 28f), new Color(0f, 0f, 0f, 0.28f));
+        int figureIndex = panel.figureImage.transform.GetSiblingIndex();
+        if (figureShadow.transform.GetSiblingIndex() != figureIndex - 1)
+            SetSibling(figureShadow.transform, figureIndex);
+
+        Image divider = EnsureImage(detail, "Divider", white, new Vector2(0f, -112f), new Vector2(560f, 3f), new Color(Ink.r, Ink.g, Ink.b, 0.35f));
+        divider.raycastTarget = false;
+
+        Transform dropRoot = EnsureChild(detail, "DropMonsterRoot");
+        SetCenterRect((RectTransform)dropRoot, new Vector2(-160f, -270f), new Vector2(280f, 280f));
+        TextMeshProUGUI dropLabel = EnsureText(template.transform, dropRoot, "Label", new Vector2(0f, 110f), new Vector2(260f, 28f), 18f, HorizontalAlignmentOptions.Center);
+        dropLabel.color = new Color(0.45f, 0.32f, 0.2f, 1f);
+        TextMeshProUGUI dropName = EnsureText(template.transform, dropRoot, "Name", new Vector2(0f, 78f), new Vector2(200f, 36f), 26f, HorizontalAlignmentOptions.Center);
+        dropName.fontStyle = FontStyles.Bold;
+        TextMeshProUGUI dropBiome = EnsureText(template.transform, dropRoot, "Biome", new Vector2(0f, 44f), new Vector2(260f, 28f), 18f, HorizontalAlignmentOptions.Center);
+        dropBiome.color = new Color(0.45f, 0.32f, 0.2f, 1f);
+        Image monsterImage = EnsureImage(dropRoot, "MonsterImage", null, new Vector2(0f, -40f), new Vector2(128f, 128f), Color.white);
+        monsterImage.preserveAspect = true;
+        Image monsterShadow = EnsureImage(dropRoot, "MonsterShadow", knob, new Vector2(0f, -96f), new Vector2(96f, 22f), new Color(0f, 0f, 0f, 0.28f));
+        int monsterIndex = monsterImage.transform.GetSiblingIndex();
+        if (monsterShadow.transform.GetSiblingIndex() != monsterIndex - 1)
+            SetSibling(monsterShadow.transform, monsterIndex);
+        Button dropPrev = EnsureBookArrow(dropRoot, "Prev", arrowLeft, new Vector2(-96f, -40f));
+        Button dropNext = EnsureBookArrow(dropRoot, "Next", arrowRight, new Vector2(96f, -40f));
+        ApplySpriteSwap(dropPrev, arrowLeft, arrowLeftPressed, null);
+        ApplySpriteSwap(dropNext, arrowRight, arrowRightPressed, null);
+
+        Transform synergyRoot = EnsureChild(detail, "RelatedSynergyRoot");
+        SetCenterRect((RectTransform)synergyRoot, new Vector2(160f, -270f), new Vector2(280f, 280f));
+        TextMeshProUGUI synergyLabel = EnsureText(template.transform, synergyRoot, "Label", new Vector2(0f, 110f), new Vector2(260f, 28f), 18f, HorizontalAlignmentOptions.Center);
+        synergyLabel.color = new Color(0.45f, 0.32f, 0.2f, 1f);
+        RectTransform content = (RectTransform)EnsureChild(synergyRoot, "Content");
+        SetCenterRect(content, new Vector2(0f, -20f), new Vector2(260f, 180f));
+        HorizontalLayoutGroup row = GetOrAdd<HorizontalLayoutGroup>(content.gameObject);
+        row.spacing = 12f;
+        row.childAlignment = TextAnchor.UpperCenter;
+        row.childControlWidth = false;
+        row.childControlHeight = false;
+        GameObject card = EnsureSynergyCard(synergyRoot, template, badge);
+        SetActive(card, false);
+
+        panel.figureShadow = figureShadow;
+        panel.dropMonsterRoot = dropRoot.gameObject;
+        panel.dropMonsterLabel = dropLabel;
+        panel.dropMonsterName = dropName;
+        panel.dropMonsterBiome = dropBiome;
+        panel.dropMonsterImage = monsterImage;
+        panel.dropMonsterShadow = monsterShadow;
+        panel.dropMonsterPrev = dropPrev;
+        panel.dropMonsterNext = dropNext;
+        panel.relatedSynergyRoot = synergyRoot.gameObject;
+        panel.relatedSynergyLabel = synergyLabel;
+        panel.relatedSynergyContent = content;
+        panel.synergyCardTemplate = card;
+        panel.countBadgeSprite = badge;
+        EditorUtility.SetDirty(panel);
+    }
+
+    static GameObject EnsureSynergyCard(Transform parent, TextMeshProUGUI template, Sprite badgeSprite)
+    {
+        Transform found = FindDirect(parent, "SynergyCardTemplate");
+        if (found == null)
+        {
+            GameObject go = new GameObject("SynergyCardTemplate", typeof(RectTransform), typeof(Image), typeof(Button));
+            go.layer = parent.gameObject.layer;
+            go.transform.SetParent(parent, false);
+            found = go.transform;
+            NewImage(found, "Icon");
+            Transform badgeRoot = NewImage(found, "Badge");
+            TextMeshProUGUI badgeText = Object.Instantiate(template, badgeRoot);
+            badgeText.name = "Text";
+            TextMeshProUGUI name = Object.Instantiate(template, found);
+            name.name = "Name";
+        }
+
+        RectTransform rect = (RectTransform)found;
+        rect.sizeDelta = new Vector2(96f, 140f);
+        Image plate = found.GetComponent<Image>();
+        plate.color = new Color(1f, 1f, 1f, 0f);
+        plate.raycastTarget = true;
+        Button button = found.GetComponent<Button>();
+        button.targetGraphic = plate;
+        if (button.transition != Selectable.Transition.None) button.transition = Selectable.Transition.None;
+
+        Image icon = found.Find("Icon").GetComponent<Image>();
+        SetCenterRect(icon.rectTransform, new Vector2(0f, 28f), new Vector2(64f, 64f));
+        icon.preserveAspect = true;
+        icon.raycastTarget = false;
+
+        Image badge = found.Find("Badge").GetComponent<Image>();
+        badge.sprite = badgeSprite;
+        badge.type = Image.Type.Sliced;
+        badge.color = Color.white;
+        badge.raycastTarget = false;
+        if (Mathf.Abs(badge.pixelsPerUnitMultiplier - 1f) > 0.001f) badge.pixelsPerUnitMultiplier = 1f;
+        SetCenterRect(badge.rectTransform, new Vector2(22f, 8f), new Vector2(52f, 28f));
+        TextMeshProUGUI count = badge.GetComponentInChildren<TextMeshProUGUI>(true);
+        SetAnchors(count.rectTransform, Vector2.zero, Vector2.one);
+        count.fontSize = 16f;
+        count.fontStyle = FontStyles.Bold;
+        count.alignment = TextAlignmentOptions.Center;
+        count.color = new Color(0.9647f, 0.9176f, 0.8157f, 1f);
+        count.raycastTarget = false;
+
+        TextMeshProUGUI cardName = found.Find("Name").GetComponent<TextMeshProUGUI>();
+        SetCenterRect(cardName.rectTransform, new Vector2(0f, -48f), new Vector2(96f, 32f));
+        StyleText(cardName, 16f, HorizontalAlignmentOptions.Center, VerticalAlignmentOptions.Top);
+        cardName.textWrappingMode = TextWrappingModes.NoWrap;
+        cardName.overflowMode = TextOverflowModes.Ellipsis;
+        return found.gameObject;
+    }
+
+    static void SetupSynergyList(GameObject root, SynergyWikiDisplayer displayer, SerializedObject so, TextMeshProUGUI textTemplate)
+    {
+        Sprite normal = LoadBookSprite("SynergyRow_Normal");
+        Sprite selected = LoadBookSprite("SynergyRow_Selected");
+        RectTransform scroll = (RectTransform)Require(root.transform, "Scroll View");
+        SetAnchors(scroll, new Vector2(0.02f, 0.08f), new Vector2(0.47f, 0.78f));
+        ScrollRect scrollRect = scroll.GetComponent<ScrollRect>();
+
+        RectTransform order = (RectTransform)Require(root.transform, "Order Option");
+        SetCenterRect(order, new Vector2(-250f, 330f), new Vector2(220f, 44f));
+        RectTransform toggle = (RectTransform)Require(root.transform, "Toggle");
+        SetCenterRect(toggle, new Vector2(-40f, 330f), toggle.sizeDelta);
+
+        RectTransform content = (RectTransform)Require(root.transform, "Scroll View/Viewport/Content");
+        GridLayoutGroup grid = content.GetComponent<GridLayoutGroup>();
+        if (grid != null && grid.enabled) grid.enabled = false;
+        VerticalLayoutGroup layout = GetOrAdd<VerticalLayoutGroup>(content.gameObject);
+        layout.spacing = 8f;
+        layout.childAlignment = TextAnchor.UpperCenter;
+        layout.childControlWidth = true;
+        layout.childControlHeight = true;
+        layout.childForceExpandWidth = true;
+        layout.childForceExpandHeight = false;
+        if (content.pivot != new Vector2(0.5f, 1f)) content.pivot = new Vector2(0.5f, 1f);
+        if (content.anchorMin != new Vector2(0f, 1f)) content.anchorMin = new Vector2(0f, 1f);
+        if (content.anchorMax != new Vector2(1f, 1f)) content.anchorMax = new Vector2(1f, 1f);
+        ContentSizeFitter fitter = GetOrAdd<ContentSizeFitter>(content.gameObject);
+        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        Transform template = EnsureSynergyRow(root.transform, textTemplate, normal);
+        Transform detail = EnsureChild(root.transform, "SynergyDetail");
+        SetAnchors((RectTransform)detail, new Vector2(0.52f, 0.08f), new Vector2(0.98f, 0.94f));
+        Image detailIcon = EnsureImage(detail, "Icon", null, new Vector2(0f, 250f), new Vector2(72f, 72f), Color.white);
+        detailIcon.preserveAspect = true;
+        TextMeshProUGUI detailName = EnsureText(textTemplate.transform, detail, "Name", new Vector2(0f, 180f), new Vector2(560f, 56f), 36f, HorizontalAlignmentOptions.Center);
+        TextMeshProUGUI detailDescription = EnsureText(textTemplate.transform, detail, "Description", new Vector2(0f, 40f), new Vector2(560f, 180f), 24f, HorizontalAlignmentOptions.Center);
+        detailDescription.textWrappingMode = TextWrappingModes.Normal;
+        Transform figures = EnsureChild(detail, "Figures");
+        SetCenterRect((RectTransform)figures, new Vector2(0f, -180f), new Vector2(560f, 160f));
+        HorizontalLayoutGroup figureRow = GetOrAdd<HorizontalLayoutGroup>(figures.gameObject);
+        figureRow.spacing = 8f;
+        figureRow.childAlignment = TextAnchor.MiddleCenter;
+        figureRow.childControlWidth = false;
+        figureRow.childControlHeight = false;
+
+        so.FindProperty("rowTemplate").objectReferenceValue = template.gameObject;
+        so.FindProperty("rowNormalSprite").objectReferenceValue = normal;
+        so.FindProperty("rowSelectedSprite").objectReferenceValue = selected;
+        so.FindProperty("listScroll").objectReferenceValue = scrollRect;
+        so.FindProperty("detailName").objectReferenceValue = detailName;
+        so.FindProperty("detailDescription").objectReferenceValue = detailDescription;
+        so.FindProperty("detailIcon").objectReferenceValue = detailIcon;
+        so.FindProperty("detailFigureRoot").objectReferenceValue = figures;
+        Debug.Log("[CollectionBook] synergy row pixelsPerUnitMultiplier=1 arrow=64x64 close=96x64");
+    }
+
+    static Transform EnsureSynergyRow(Transform parent, TextMeshProUGUI template, Sprite normal)
+    {
+        Transform row = FindDirect(parent, "SynergyRowTemplate");
+        if (row == null)
+        {
+            GameObject go = new GameObject("SynergyRowTemplate", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button), typeof(LayoutElement));
+            go.layer = parent.gameObject.layer;
+            go.transform.SetParent(parent, false);
+            row = go.transform;
+            NewImage(row, "Icon");
+            TextMeshProUGUI name = Object.Instantiate(template, row);
+            name.name = "Name";
+        }
+
+        SetActive(row.gameObject, false);
+        LayoutElement element = row.GetComponent<LayoutElement>();
+        element.preferredHeight = 88f;
+        element.flexibleWidth = 1f;
+        Image background = row.GetComponent<Image>();
+        background.sprite = normal;
+        background.type = Image.Type.Sliced;
+        background.color = Color.white;
+        if (Mathf.Abs(background.pixelsPerUnitMultiplier - 1f) > 0.001f) background.pixelsPerUnitMultiplier = 1f;
+        Button button = row.GetComponent<Button>();
+        button.targetGraphic = background;
+        if (button.transition != Selectable.Transition.None) button.transition = Selectable.Transition.None;
+
+        Image icon = row.Find("Icon").GetComponent<Image>();
+        RectTransform iconRect = icon.rectTransform;
+        iconRect.anchorMin = iconRect.anchorMax = new Vector2(0f, 0.5f);
+        iconRect.pivot = new Vector2(0f, 0.5f);
+        if (iconRect.anchoredPosition != new Vector2(9f, 0f)) iconRect.anchoredPosition = new Vector2(9f, 0f);
+        if (iconRect.sizeDelta != new Vector2(64f, 64f)) iconRect.sizeDelta = new Vector2(64f, 64f);
+        icon.preserveAspect = true;
+        icon.raycastTarget = false;
+
+        TextMeshProUGUI label = row.Find("Name").GetComponent<TextMeshProUGUI>();
+        SetAnchors(label.rectTransform, Vector2.zero, Vector2.one, new Vector2(96f, 8f), new Vector2(-16f, -8f));
+        StyleText(label, 26f, HorizontalAlignmentOptions.Left, VerticalAlignmentOptions.Middle);
+        label.textWrappingMode = TextWrappingModes.NoWrap;
+        label.overflowMode = TextOverflowModes.Ellipsis;
+        return row;
+    }
+
+    static Button EnsureBookArrow(Transform parent, string name, Sprite sprite, Vector2 position)
+    {
+        Transform found = FindDirect(parent, name);
+        if (found == null)
+        {
+            found = NewImage(parent, name);
+            found.gameObject.AddComponent<Button>();
+        }
+        SetCenterRect((RectTransform)found, position, ArrowButtonSize);
+        Image image = found.GetComponent<Image>();
+        image.sprite = sprite;
+        image.preserveAspect = true;
+        image.raycastTarget = true;
+        image.color = Color.white;
+        Button button = found.GetComponent<Button>();
+        button.targetGraphic = image;
+        return button;
+    }
+
+    static Image EnsureImage(Transform parent, string name, Sprite sprite, Vector2 position, Vector2 size, Color color)
+    {
+        Transform found = FindDirect(parent, name);
+        if (found == null) found = NewImage(parent, name);
+        Image image = found.GetComponent<Image>();
+        if (image.sprite != sprite) image.sprite = sprite;
+        if (image.color != color) image.color = color;
+        image.raycastTarget = false;
+        SetCenterRect(image.rectTransform, position, size);
+        return image;
+    }
+
+    static Transform NewImage(Transform parent, string name)
+    {
+        GameObject go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        go.layer = parent.gameObject.layer;
+        go.transform.SetParent(parent, false);
+        return go.transform;
+    }
+
+    static Transform EnsureChild(Transform parent, string name)
+    {
+        Transform found = FindDirect(parent, name);
+        if (found != null) return found;
+        GameObject go = new GameObject(name, typeof(RectTransform));
+        go.layer = parent.gameObject.layer;
+        go.transform.SetParent(parent, false);
+        return go.transform;
     }
 
     static string ChildNames(Transform parent)
