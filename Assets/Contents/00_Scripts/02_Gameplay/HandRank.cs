@@ -12,6 +12,18 @@ public enum HandRank
 
 public static class HandRankUtil
 {
+    // 앞의 count개 눈금 중 value와 같은 눈금의 개수를 셉니다.
+    // List와 배열을 모두 받으며, 복사나 임시 컬렉션을 만들지 않습니다.
+    public static int CountValues(System.Collections.Generic.IReadOnlyList<int> values, int value, int count)
+    {
+        int matches = 0;
+        for (int i = 0; i < count; i++)
+        {
+            if (values[i] == value) matches++;
+        }
+        return matches;
+    }
+
     public static string GetLocKey(HandRank rank)
     {
         switch (rank)

@@ -260,6 +260,7 @@ public class DiceManager : MonoBehaviour
         }
 
         board = new DiceBoardController(dicePrefab, keepSlotParent, rollSlotParent, serializedActiveDice, deckManager, ApplyDrawDebuff);
+        DebuffTrackerHud.Create(this); // 덱의 디버프 주사위를 왼쪽 위에 종류별로 보여 주는 표시
 
         // 주사위 상태 변경 이벤트 구독 연동
         Dice.OnDiceStateChanged += HandleDiceChanged;
@@ -300,6 +301,9 @@ public class DiceManager : MonoBehaviour
             else
                 StartNewStage();
         }
+
+        // 지도 흐름이 아닌 경우(튜토리얼 등)에도 디버프 표시가 화면에 자리 잡도록 한 번 배치합니다.
+        if (DebuffTrackerHud.Instance != null) DebuffTrackerHud.Instance.Place(travelScreen);
 
         //튜토리얼 종료 후 메인 게임 진입 시, 현재 설정된 1스테이지(숲) 바이옴의 브금을 강제로 재생!
         if (BGMManager.Instance != null && currentBiome != null)
@@ -410,7 +414,7 @@ public class DiceManager : MonoBehaviour
         currentCombatDebuffs.Add(die);
     }
 
-    private DiceItemSO FindDebuffSource(DebuffDiceType type)
+    internal DiceItemSO FindDebuffSource(DebuffDiceType type)
     {
         var database = GameSaveManager.Instance != null ? GameSaveManager.Instance.masterItemDatabase : null;
         return database != null ? database.Find(item => item is DiceItemSO dice && dice.debuffType == type) as DiceItemSO : null;
@@ -654,7 +658,7 @@ public class DiceManager : MonoBehaviour
     public bool TryReplaceUnkeptDiceFromDeck()
     {
         if (board == null || IsDiceInputLocked) return false;
-        if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return false;
+        if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || DebuffDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return false;
         if (!board.ReplaceUnkeptDiceFromDeck()) return false;
 
         isRolling = true;
@@ -669,7 +673,7 @@ public class DiceManager : MonoBehaviour
     public void OnRollButtonClick()
     {
         // 결산 중(isCalculating)일 때 리롤 진입 완벽 차단 방어막 추가
-        if (IsDiceInputLocked || RemainingRerolls <= 0 || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return;
+        if (IsDiceInputLocked || RemainingRerolls <= 0 || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || DebuffDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return;
 
         GameSaveManager.Instance?.SaveGame(this, InventoryManager.Instance, shopManager); // 강제 종료 시에도 굴리기 전 정상 상태 유지
         isRolling = true; // 굴림 상태 켜기
@@ -694,7 +698,7 @@ public class DiceManager : MonoBehaviour
 
     public void OnFinishButtonClick()
     {
-        if (IsDiceInputLocked || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return;
+        if (IsDiceInputLocked || ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || DebuffDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen) return;
 
         // 버튼 상태와 별개로 직접 호출도 5개 킵 조건을 검증합니다.
         board.SyncKeepSlots(out int keptCount, out _);
@@ -917,10 +921,10 @@ public class DiceManager : MonoBehaviour
         if (isStageClearing) return; //이미 클리어 처리 중이면 중복 실행 방지
         isStageClearing = true;
 
-        // 이번 전투 한정 디버프(도둑·족쇄)를 제거하고, 덱 버튼에서 연기처럼 사라지는 모습을 보여 준다.
-        var vanishing = new List<Sprite>();
+        // 이번 전투 한정 디버프(도둑·족쇄)를 제거하고, 왼쪽 위 디버프 표시에서 연기처럼 사라지는 모습을 보여 준다.
+        var vanishing = new List<DiceData1>();
         foreach (var die in deckManager.masterDeck)
-            if (die != null && die.IsTemporaryDebuff) vanishing.Add(DebuffFeedback.DieSprite(die));
+            if (die != null && die.IsTemporaryDebuff) vanishing.Add(die);
         RemoveCombatDebuffs(temporaryOnly: true);
         currentCombatDebuffs.Clear();
         if (vanishing.Count > 0)
@@ -929,6 +933,7 @@ public class DiceManager : MonoBehaviour
             hudObjects.TryGetValue("Deck_BTN", out GameObject deckButton);
             DebuffFeedback.PlayTemporaryVanish(deckButton != null ? deckButton.transform : null, vanishing);
         }
+        DebuffTrackerHud.Instance?.Refresh();
 
         // 공허 바이옴에서 보스를 잡았다면 최종 게임 클리어 처리
         if (currentBiome != null && currentBiome.biomeType == BiomeType.Void)
@@ -1754,6 +1759,18 @@ public class DiceManager : MonoBehaviour
             HideBoardDice();
             PlaceTravelChrome();
         }
+        // 디버프 표시는 전투 화면에서는 나무 패널 옆, 지도 화면에서는 체력 칸 아래로 옮깁니다.
+        travelScreen = !visible;
+        if (DebuffTrackerHud.Instance != null) DebuffTrackerHud.Instance.Place(travelScreen);
+    }
+
+    bool travelScreen;
+
+    // 디버프 표시처럼 실행 중에 붙는 HUD가 기존 HUD 위치를 기준으로 자리를 잡을 때 씁니다.
+    internal RectTransform HudRect(string objectName)
+    {
+        CacheHud();
+        return PlacementRect(objectName);
     }
 
     void PlaceTravelChrome()

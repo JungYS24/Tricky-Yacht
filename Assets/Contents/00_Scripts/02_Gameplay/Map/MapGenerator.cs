@@ -167,7 +167,7 @@ public static class MapGenerator
         //foreach (MapNode node in nodes)
         //{
         //    if (node.type == MapNodeType.Enemy)
-        //        node.type = MapNodeType.Portal;
+        //        node.type = MapNodeType.Elite;
         //}
         //이쪽 포탈, 엘리트, 보스 테스트용
 
