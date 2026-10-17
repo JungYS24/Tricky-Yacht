@@ -41,13 +41,11 @@ public class SynergyDataImportFromTSV : ImportDataFromTSV
         {
             var synergyData = CreateInstance<SynergyData>();
             SerializedObject so = new(synergyData);
-            so.FindProperty("synergyName").stringValue = nameKR[i];
-            so.FindProperty("synergyDescription").stringValue = descriptionKR[i];
-            so.FindProperty("skillEffect").boxedValue = new SynergyEffectContext()
-            {
-                EffectType = Enum.Parse<EffectType>(effectTypes[i]),
-                EffectValue = float.Parse(effectValues[i]),
-            };
+            so.FindProperty("Item_ID").stringValue = itemIDs[i];
+            so.FindProperty("itemName").stringValue = nameKR[i];
+            so.FindProperty("description").stringValue = descriptionKR[i];
+            so.FindProperty("effectType").enumValueIndex = (int)Enum.Parse<SynergyEffectType>(effectTypes[i]);
+            so.FindProperty("effectValue").floatValue = float.Parse(effectValues[i]);
 
             int fCnt = int.Parse(requiredFigureCounts[i]);
 
@@ -65,7 +63,12 @@ public class SynergyDataImportFromTSV : ImportDataFromTSV
             }
 
             so.ApplyModifiedProperties();
-            AssetDatabase.CreateAsset(synergyData, Path.Join(importDirectory, itemIDs[i] + ".asset"));
+            var path = Path.Join(importDirectory, itemIDs[i] + ".asset");
+            if (AssetDatabase.AssetPathExists(path))
+            {
+                AssetDatabase.DeleteAsset(path);
+            }
+            AssetDatabase.CreateAsset(synergyData, path);
         }
     }
 }
