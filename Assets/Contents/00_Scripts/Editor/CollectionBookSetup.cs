@@ -51,6 +51,12 @@ public static class CollectionBookSetup
     const float PageHeight = 756f;
     const float SpreadLeft = -720f;
     const float SpreadRight = 749f;
+    // 오른쪽 페이지 안쪽. 양옆 28px를 빼 아이콘이 양피지 안에 남게 한다.
+    const float RightDetailWidth = 620f;
+    const float RightDetailHeight = 700f;
+    const float DetailPadding = 8f;
+    const float FigureSpacing = 12f;
+    const float FigureCellMax = 96f;
 
     // 시너지 행은 왼쪽 페이지에 피규어, 오른쪽 페이지에 설명이 오도록 펼침면 전체에 축소 배치한다.
     const float SynergyPageScale = 0.76f;
@@ -88,6 +94,7 @@ public static class CollectionBookSetup
         {
             ImportUiStrings();
             ConfigureBookSprites();
+            ConfigureSlotPanel();
             SetupSlotPrefab();
 
             Scene scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
@@ -951,6 +958,24 @@ public static class CollectionBookSetup
         Debug.Log("[CollectionBook] book sprites PPU=" + BookSpritePpu + " (CrossBTN, slot_dark_small_1)");
     }
 
+    // 172x162 직사각형. 테두리 약 20px라 칸에 늘릴 때 9-slice로 쓴다.
+    static void ConfigureSlotPanel()
+    {
+        TextureImporter importer = AssetImporter.GetAtPath(IconFrameSpritePath) as TextureImporter;
+        if (importer == null) throw new InvalidOperationException("slot_dark_small_1 임포터를 찾지 못했습니다.");
+        Vector4 border = new Vector4(20f, 20f, 20f, 20f);
+        bool changed = false;
+        if (importer.textureType != TextureImporterType.Sprite) { importer.textureType = TextureImporterType.Sprite; changed = true; }
+        if (importer.spriteImportMode != SpriteImportMode.Single) { importer.spriteImportMode = SpriteImportMode.Single; changed = true; }
+        if (importer.mipmapEnabled) { importer.mipmapEnabled = false; changed = true; }
+        if (importer.filterMode != FilterMode.Point) { importer.filterMode = FilterMode.Point; changed = true; }
+        if (importer.textureCompression != TextureImporterCompression.Uncompressed) { importer.textureCompression = TextureImporterCompression.Uncompressed; changed = true; }
+        if (importer.crunchedCompression) { importer.crunchedCompression = false; changed = true; }
+        if (importer.spriteBorder != border) { importer.spriteBorder = border; changed = true; }
+        if (changed) importer.SaveAndReimport();
+        Debug.Log("[CollectionBook] slot_dark_small_1 172x162 border=20 Point uncompressed");
+    }
+
     static Sprite LoadBookSprite(string name)
     {
         return AssetDatabase.LoadAssetAtPath<Sprite>(BookUiFolder + "/" + name + ".png");
@@ -1100,17 +1125,41 @@ public static class CollectionBookSetup
         Sprite normal = LoadBookSprite("SynergyRow_Normal");
         Sprite selected = LoadBookSprite("SynergyRow_Selected");
         RectTransform scroll = (RectTransform)Require(root.transform, "Scroll View");
-        SetAnchors(scroll, new Vector2(0.02f, 0.08f), new Vector2(0.47f, 0.78f));
         ScrollRect scrollRect = scroll.GetComponent<ScrollRect>();
 
-        RectTransform order = (RectTransform)Require(root.transform, "Order Option");
-        SetCenterRect(order, new Vector2(-250f, 330f), new Vector2(220f, 44f));
+        // 시너지 페이지는 책 중앙에서 (14.5, 14)에 있다. 피규어 제목(책 -378, 360)과 같은 높이.
+        float offsetX = (SpreadLeft + SpreadRight) * 0.5f;
+        float headerY = 360f - PageCenterY;
+        float left0 = LeftPageCenterX - LeftPageWidth * 0.5f - offsetX;
+        float left1 = LeftPageCenterX + LeftPageWidth * 0.5f - offsetX;
+        float pageLeft = -(SpreadRight - SpreadLeft) * 0.5f;
+        float pageBottom = -PageHeight * 0.5f;
+        float pageWidth = SpreadRight - SpreadLeft;
+        const float inset = 16f;
+        float scrollTop = headerY - 44f;
+        SetAnchors(scroll,
+            new Vector2((left0 + inset - pageLeft) / pageWidth, 24f / PageHeight),
+            new Vector2((left1 - inset - pageLeft) / pageWidth, (scrollTop - pageBottom) / PageHeight));
+
+        TextMeshProUGUI listTitle = EnsureText(textTemplate.transform, root.transform, "ListTitle",
+            new Vector2(left0 + inset + 100f, headerY), new Vector2(200f, 56f), 38f, HorizontalAlignmentOptions.Left);
+        listTitle.text = "시너지";
+
         RectTransform toggle = (RectTransform)Require(root.transform, "Toggle");
-        SetCenterRect(toggle, new Vector2(-40f, 330f), toggle.sizeDelta);
+        Vector2 toggleSize = toggle.sizeDelta.x > 1f ? toggle.sizeDelta : new Vector2(150f, 50f);
+        float toggleX = left1 - inset - toggleSize.x * 0.5f;
+        SetCenterRect(toggle, new Vector2(toggleX, headerY), toggleSize);
+        RectTransform order = (RectTransform)Require(root.transform, "Order Option");
+        Vector2 orderSize = new Vector2(220f, 44f);
+        float orderX = toggleX - toggleSize.x * 0.5f - 12f - orderSize.x * 0.5f;
+        SetCenterRect(order, new Vector2(orderX, headerY), orderSize);
+        SetLastSibling(listTitle.transform);
+        SetLastSibling(order);
+        SetLastSibling(toggle);
 
         RectTransform content = (RectTransform)Require(root.transform, "Scroll View/Viewport/Content");
-        GridLayoutGroup grid = content.GetComponent<GridLayoutGroup>();
-        if (grid != null && grid.enabled) grid.enabled = false;
+        GridLayoutGroup contentGrid = content.GetComponent<GridLayoutGroup>();
+        if (contentGrid != null && contentGrid.enabled) contentGrid.enabled = false;
         VerticalLayoutGroup layout = GetOrAdd<VerticalLayoutGroup>(content.gameObject);
         layout.spacing = 8f;
         layout.childAlignment = TextAnchor.UpperCenter;
@@ -1127,29 +1176,132 @@ public static class CollectionBookSetup
 
         Transform template = EnsureSynergyRow(root.transform, textTemplate, normal);
         Transform detail = EnsureChild(root.transform, "SynergyDetail");
-        SetAnchors((RectTransform)detail, new Vector2(0.52f, 0.08f), new Vector2(0.98f, 0.94f));
-        Image detailIcon = EnsureImage(detail, "Icon", null, new Vector2(0f, 250f), new Vector2(72f, 72f), Color.white);
-        detailIcon.preserveAspect = true;
-        TextMeshProUGUI detailName = EnsureText(textTemplate.transform, detail, "Name", new Vector2(0f, 180f), new Vector2(560f, 56f), 36f, HorizontalAlignmentOptions.Center);
-        TextMeshProUGUI detailDescription = EnsureText(textTemplate.transform, detail, "Description", new Vector2(0f, 40f), new Vector2(560f, 180f), 24f, HorizontalAlignmentOptions.Center);
-        detailDescription.textWrappingMode = TextWrappingModes.Normal;
-        Transform figures = EnsureChild(detail, "Figures");
-        SetCenterRect((RectTransform)figures, new Vector2(0f, -180f), new Vector2(560f, 160f));
-        HorizontalLayoutGroup figureRow = GetOrAdd<HorizontalLayoutGroup>(figures.gameObject);
-        figureRow.spacing = 8f;
-        figureRow.childAlignment = TextAnchor.MiddleCenter;
-        figureRow.childControlWidth = false;
-        figureRow.childControlHeight = false;
+        float detailX = RightPageCenterX - offsetX;
+        SetCenterRect((RectTransform)detail, new Vector2(detailX, 0f), new Vector2(RightDetailWidth, RightDetailHeight));
+        VerticalLayoutGroup column = GetOrAdd<VerticalLayoutGroup>(detail.gameObject);
+        if (column.padding.left != (int)DetailPadding || column.padding.right != (int)DetailPadding || column.padding.top != 12 || column.padding.bottom != 12)
+            column.padding = new RectOffset((int)DetailPadding, (int)DetailPadding, 12, 12);
+        column.spacing = 12f;
+        column.childAlignment = TextAnchor.UpperCenter;
+        column.childControlWidth = true;
+        column.childControlHeight = true;
+        column.childForceExpandWidth = true;
+        column.childForceExpandHeight = false;
 
+        Transform header = EnsureChild(detail, "Header");
+        LayoutElement headerElement = GetOrAdd<LayoutElement>(header.gameObject);
+        headerElement.preferredHeight = 88f;
+        headerElement.flexibleWidth = 1f;
+        HorizontalLayoutGroup headerRow = GetOrAdd<HorizontalLayoutGroup>(header.gameObject);
+        headerRow.spacing = 16f;
+        headerRow.childAlignment = TextAnchor.MiddleCenter;
+        headerRow.childControlWidth = false;
+        headerRow.childControlHeight = false;
+        headerRow.childForceExpandWidth = false;
+        headerRow.childForceExpandHeight = false;
+        Transform existingIcon = FindDirect(detail, "Icon");
+        if (existingIcon != null) SetParent(existingIcon, header);
+        Transform existingName = FindDirect(detail, "Name");
+        if (existingName != null) SetParent(existingName, header);
+
+        Image detailIcon = EnsureImage(header, "Icon", null, Vector2.zero, new Vector2(76f, 76f), Color.white);
+        detailIcon.preserveAspect = true;
+        TextMeshProUGUI detailName = EnsureText(textTemplate.transform, header, "Name", Vector2.zero, new Vector2(360f, 64f), 48f, HorizontalAlignmentOptions.Center);
+        detailName.fontStyle = FontStyles.Bold;
+        detailName.enableAutoSizing = true;
+        detailName.fontSizeMin = 28f;
+        detailName.fontSizeMax = 48f;
+        detailName.textWrappingMode = TextWrappingModes.NoWrap;
+        detailName.overflowMode = TextOverflowModes.Ellipsis;
+
+        float innerWidth = RightDetailWidth - DetailPadding * 2f;
+        TextMeshProUGUI detailDescription = EnsureText(textTemplate.transform, detail, "Description", Vector2.zero, new Vector2(innerWidth, 96f), 24f, HorizontalAlignmentOptions.Left);
+        detailDescription.verticalAlignment = VerticalAlignmentOptions.Top;
+        detailDescription.textWrappingMode = TextWrappingModes.Normal;
+        detailDescription.overflowMode = TextOverflowModes.Overflow;
+        SetSibling(header, 0);
+        SetSibling(detailDescription.transform, 1);
+
+        Transform figures = EnsureChild(detail, "Figures");
+        SetSibling(figures, 2);
+        LayoutElement figuresElement = GetOrAdd<LayoutElement>(figures.gameObject);
+        figuresElement.preferredHeight = FigureCellMax * 2f + FigureSpacing;
+        figuresElement.flexibleWidth = 1f;
+        // 레이아웃 그룹은 한 오브젝트에 둘을 붙이면 새 컴포넌트가 바로 빠진다.
+        HorizontalLayoutGroup oldRow = figures.GetComponent<HorizontalLayoutGroup>();
+        if (oldRow != null) Object.DestroyImmediate(oldRow);
+        GridLayoutGroup figureGrid = GetOrAdd<GridLayoutGroup>(figures.gameObject);
+        if (figureGrid == null) throw new InvalidOperationException("피규어 칸 GridLayoutGroup을 만들지 못했습니다.");
+        figureGrid.cellSize = new Vector2(FigureCellMax, FigureCellMax);
+        figureGrid.spacing = new Vector2(FigureSpacing, FigureSpacing);
+        figureGrid.startCorner = GridLayoutGroup.Corner.UpperLeft;
+        figureGrid.startAxis = GridLayoutGroup.Axis.Horizontal;
+        figureGrid.childAlignment = TextAnchor.UpperCenter;
+        figureGrid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        figureGrid.constraintCount = 5;
+        Sprite slotSprite = LoadSprite(IconFrameSpritePath, null);
+        if (slotSprite == null) throw new InvalidOperationException("slot_dark_small_1 스프라이트를 찾지 못했습니다.");
+        GameObject slotTemplate = EnsureFigureSlot(detail, slotSprite);
+
+        int maxFigures = 0;
+        foreach (string guid in AssetDatabase.FindAssets("t:SynergyData", new[] { SynergyDataFolder }))
+        {
+            SynergyData data = AssetDatabase.LoadAssetAtPath<SynergyData>(AssetDatabase.GUIDToAssetPath(guid));
+            if (data == null || data.RequiredFigures == null) continue;
+            maxFigures = Mathf.Max(maxFigures, data.RequiredFigures.Count);
+        }
+
+        float cellAtMax = Mathf.Min(FigureCellMax, (innerWidth - FigureSpacing * (maxFigures - 1)) / Mathf.Max(1, maxFigures));
         so.FindProperty("rowTemplate").objectReferenceValue = template.gameObject;
         so.FindProperty("rowNormalSprite").objectReferenceValue = normal;
         so.FindProperty("rowSelectedSprite").objectReferenceValue = selected;
         so.FindProperty("listScroll").objectReferenceValue = scrollRect;
+        so.FindProperty("listTitle").objectReferenceValue = listTitle;
         so.FindProperty("detailName").objectReferenceValue = detailName;
         so.FindProperty("detailDescription").objectReferenceValue = detailDescription;
         so.FindProperty("detailIcon").objectReferenceValue = detailIcon;
         so.FindProperty("detailFigureRoot").objectReferenceValue = figures;
-        Debug.Log("[CollectionBook] synergy row pixelsPerUnitMultiplier=1 arrow=64x64 close=96x64");
+        so.FindProperty("detailFigureTemplate").objectReferenceValue = slotTemplate;
+        so.FindProperty("figureAreaWidth").floatValue = innerWidth;
+        Debug.Log("[CollectionBook] synergy figures max=" + maxFigures + " cellAtMax=" + cellAtMax.ToString("0.##") + " inner=" + innerWidth);
+    }
+
+    static GameObject EnsureFigureSlot(Transform detail, Sprite slotSprite)
+    {
+        Transform slot = FindDirect(detail, "FigureSlotTemplate");
+        if (slot == null)
+        {
+            GameObject go = new GameObject("FigureSlotTemplate", typeof(RectTransform), typeof(LayoutElement));
+            go.layer = detail.gameObject.layer;
+            go.transform.SetParent(detail, false);
+            slot = go.transform;
+            NewImage(slot, "Plate");
+            NewImage(slot, "Icon");
+            NewImage(slot, "Silhouette");
+        }
+
+        SetActive(slot.gameObject, false);
+        RectTransform rect = (RectTransform)slot;
+        if (rect.sizeDelta != new Vector2(FigureCellMax, FigureCellMax)) rect.sizeDelta = new Vector2(FigureCellMax, FigureCellMax);
+        Image plate = slot.Find("Plate").GetComponent<Image>();
+        if (plate.sprite != slotSprite) plate.sprite = slotSprite;
+        if (plate.type != Image.Type.Sliced) plate.type = Image.Type.Sliced;
+        if (plate.color != Color.white) plate.color = Color.white;
+        plate.raycastTarget = false;
+        if (Mathf.Abs(plate.pixelsPerUnitMultiplier - 1f) > 0.001f) plate.pixelsPerUnitMultiplier = 1f;
+        Stretch(plate.rectTransform);
+
+        Image icon = slot.Find("Icon").GetComponent<Image>();
+        icon.preserveAspect = true;
+        icon.raycastTarget = false;
+        SetCenterRect(icon.rectTransform, Vector2.zero, new Vector2(72f, 72f));
+        Image silhouette = slot.Find("Silhouette").GetComponent<Image>();
+        silhouette.color = new Color(0f, 0f, 0f, 0.9019608f);
+        silhouette.preserveAspect = true;
+        silhouette.raycastTarget = false;
+        SetCenterRect(silhouette.rectTransform, Vector2.zero, new Vector2(72f, 72f));
+        SetActive(silhouette.gameObject, false);
+        return slot.gameObject;
     }
 
     static Transform EnsureSynergyRow(Transform parent, TextMeshProUGUI template, Sprite normal)
@@ -1168,7 +1320,7 @@ public static class CollectionBookSetup
 
         SetActive(row.gameObject, false);
         LayoutElement element = row.GetComponent<LayoutElement>();
-        element.preferredHeight = 88f;
+        element.preferredHeight = 96f;
         element.flexibleWidth = 1f;
         Image background = row.GetComponent<Image>();
         background.sprite = normal;
@@ -1183,16 +1335,28 @@ public static class CollectionBookSetup
         RectTransform iconRect = icon.rectTransform;
         iconRect.anchorMin = iconRect.anchorMax = new Vector2(0f, 0.5f);
         iconRect.pivot = new Vector2(0f, 0.5f);
-        if (iconRect.anchoredPosition != new Vector2(9f, 0f)) iconRect.anchoredPosition = new Vector2(9f, 0f);
-        if (iconRect.sizeDelta != new Vector2(64f, 64f)) iconRect.sizeDelta = new Vector2(64f, 64f);
+        if (iconRect.anchoredPosition != new Vector2(12f, 0f)) iconRect.anchoredPosition = new Vector2(12f, 0f);
+        if (iconRect.sizeDelta != new Vector2(72f, 72f)) iconRect.sizeDelta = new Vector2(72f, 72f);
         icon.preserveAspect = true;
         icon.raycastTarget = false;
 
         TextMeshProUGUI label = row.Find("Name").GetComponent<TextMeshProUGUI>();
-        SetAnchors(label.rectTransform, Vector2.zero, Vector2.one, new Vector2(96f, 8f), new Vector2(-16f, -8f));
-        StyleText(label, 26f, HorizontalAlignmentOptions.Left, VerticalAlignmentOptions.Middle);
+        SetAnchors(label.rectTransform, Vector2.zero, Vector2.one, new Vector2(96f, 8f), new Vector2(-128f, -8f));
+        StyleText(label, 32f, HorizontalAlignmentOptions.Left, VerticalAlignmentOptions.Middle);
         label.textWrappingMode = TextWrappingModes.NoWrap;
         label.overflowMode = TextOverflowModes.Ellipsis;
+
+        Transform progressTransform = FindDirect(row, "Progress");
+        TextMeshProUGUI progress = progressTransform != null
+            ? progressTransform.GetComponent<TextMeshProUGUI>()
+            : Object.Instantiate(template, row);
+        progress.name = "Progress";
+        SetRect(progress.rectTransform, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f),
+            new Vector2(-16f, 0f), new Vector2(104f, 48f), Vector3.one);
+        StyleText(progress, 28f, HorizontalAlignmentOptions.Right, VerticalAlignmentOptions.Middle);
+        progress.textWrappingMode = TextWrappingModes.NoWrap;
+        progress.overflowMode = TextOverflowModes.Ellipsis;
+        if (progress.text != "0 / 0") progress.text = "0 / 0";
         return row;
     }
 

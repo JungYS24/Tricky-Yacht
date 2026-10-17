@@ -38,6 +38,13 @@ public class SynergyWikiDisplayer : MonoBehaviour
 
     [SerializeField] private Transform detailFigureRoot;
 
+    [SerializeField] private GameObject detailFigureTemplate;
+
+    [SerializeField] private TextMeshProUGUI listTitle;
+
+    // 오른쪽 페이지 안쪽 폭. 칸 크기는 이 폭으로 계산한다.
+    [SerializeField] private float figureAreaWidth = 604f;
+
     // 드롭다운 옵션 순서는 OrderType 순서와 같다.
     private static readonly (string key, string fallback)[] OrderLabelKeys =
     {
@@ -137,6 +144,11 @@ public class SynergyWikiDisplayer : MonoBehaviour
         if (reverseLabel != null)
         {
             reverseLabel.text = LocalizationManager.GetUi("UI_SYNERGY_SORT_REVERSE", "역순");
+        }
+
+        if (listTitle != null)
+        {
+            listTitle.text = LocalizationManager.GetUi("UI_TAB_SYNERGY", "시너지");
         }
     }
 
@@ -288,6 +300,11 @@ public class SynergyWikiDisplayer : MonoBehaviour
             icon.sprite = synergy.icon;
             icon.enabled = synergy.icon != null;
             row.Find("Name").GetComponent<TextMeshProUGUI>().text = synergy.SynergyName;
+            Transform progress = row.Find("Progress");
+            if (progress != null)
+            {
+                progress.GetComponent<TextMeshProUGUI>().text = OwnedCountLabel(synergy);
+            }
 
             SynergyData captured = synergy;
             row.GetComponent<Button>().onClick.AddListener(() => Select(captured, true));
@@ -331,20 +348,29 @@ public class SynergyWikiDisplayer : MonoBehaviour
         if (synergy == null) return;
         if (detailName != null) detailName.text = synergy.SynergyName;
         if (detailDescription != null) detailDescription.text = synergy.SynergyDescription;
-        if (detailIcon != null)
-        {
-            detailIcon.sprite = synergy.icon;
-            detailIcon.enabled = synergy.icon != null;
-        }
-        if (detailFigureRoot == null || figureFrameObj == null) return;
+        if (detailIcon != null) detailIcon.sprite = synergy.icon;
+        LayoutHeader();
+        if (detailFigureRoot == null) return;
 
-        for (int i = detailFigureRoot.childCount - 1; i >= 0; i--)
+        ClearChildren(detailFigureRoot);
+        if (detailFigureTemplate != null)
         {
-            GameObject child = detailFigureRoot.GetChild(i).gameObject;
-            child.SetActive(false);
-            Destroy(child);
+            var figures = new List<FigureItemSO>();
+            foreach (FigureItemSO figure in synergy.RequiredFigures)
+            {
+                if (figure != null) figures.Add(figure);
+            }
+
+            float cell = LayoutFigureGrid(figures.Count);
+            foreach (FigureItemSO figure in figures)
+            {
+                CreateBookSlot(figure, cell);
+            }
+
+            return;
         }
 
+        if (figureFrameObj == null) return;
         foreach (FigureItemSO figure in synergy.RequiredFigures)
         {
             if (figure == null) continue;
@@ -354,6 +380,138 @@ public class SynergyWikiDisplayer : MonoBehaviour
             Transform silhouette = frame.Find("Silhouette");
             if (silhouette != null) silhouette.gameObject.SetActive(!ownedFigures.Contains(figure));
         }
+    }
+
+    // 아이콘과 이름을 한 덩어리로 가운데 둔다. 아이콘이 없으면 이름만 가운데.
+    private void LayoutHeader()
+    {
+        bool showIcon = detailIcon != null && detailIcon.sprite != null;
+        if (detailIcon != null)
+        {
+            detailIcon.gameObject.SetActive(showIcon);
+            if (showIcon) FitInteger(detailIcon, 80f);
+        }
+
+        if (detailName == null) return;
+        detailName.fontStyle = FontStyles.Bold;
+        detailName.textWrappingMode = TextWrappingModes.NoWrap;
+        float iconWidth = showIcon ? detailIcon.rectTransform.sizeDelta.x : 0f;
+        float spacing = showIcon ? 16f : 0f;
+        float maxWidth = Mathf.Max(80f, figureAreaWidth - iconWidth - spacing);
+        detailName.enableAutoSizing = false;
+        detailName.fontSize = 48f;
+        detailName.ForceMeshUpdate();
+        float preferred = detailName.preferredWidth;
+        if (preferred > 1f && preferred <= maxWidth)
+        {
+            detailName.rectTransform.sizeDelta = new Vector2(preferred, 64f);
+            detailName.overflowMode = TextOverflowModes.Overflow;
+            return;
+        }
+
+        detailName.rectTransform.sizeDelta = new Vector2(maxWidth, 64f);
+        detailName.enableAutoSizing = true;
+        detailName.fontSizeMin = 28f;
+        detailName.fontSizeMax = 48f;
+        detailName.overflowMode = TextOverflowModes.Ellipsis;
+    }
+
+    // 기본 96. 한 줄에 안 들어가면 줄이고, 72보다 작아지면 두 줄로 나눈다.
+    private float LayoutFigureGrid(int count)
+    {
+        const float spacing = 12f;
+        const float cellMax = 96f;
+        const float cellMin = 72f;
+        float width = figureAreaWidth > 1f ? figureAreaWidth : 604f;
+        int columns = Mathf.Max(1, count);
+        float cell = FitCell(width, columns, spacing, cellMax);
+        if (count > 1 && cell < cellMin)
+        {
+            columns = Mathf.CeilToInt(count / 2f);
+            cell = FitCell(width, columns, spacing, cellMax);
+        }
+
+        GridLayoutGroup grid = detailFigureRoot.GetComponent<GridLayoutGroup>();
+        if (grid != null)
+        {
+            grid.cellSize = new Vector2(cell, cell);
+            grid.spacing = new Vector2(spacing, spacing);
+            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            grid.constraintCount = columns;
+        }
+
+        return cell;
+    }
+
+    private static float FitCell(float width, int columns, float spacing, float cellMax)
+    {
+        float fit = (width - spacing * (columns - 1)) / columns;
+        return Mathf.Min(cellMax, fit);
+    }
+
+    private void CreateBookSlot(FigureItemSO figure, float cell)
+    {
+        Transform slot = Instantiate(detailFigureTemplate, detailFigureRoot).transform;
+        slot.gameObject.SetActive(true);
+        Image icon = slot.Find("Icon").GetComponent<Image>();
+        Image silhouette = slot.Find("Silhouette").GetComponent<Image>();
+        Image plate = slot.Find("Plate").GetComponent<Image>();
+        icon.sprite = figure.icon;
+        icon.color = Color.white;
+        icon.preserveAspect = true;
+        FitInteger(icon, cell * 0.75f);
+        silhouette.sprite = figure.icon;
+        silhouette.color = new Color(0f, 0f, 0f, 0.9019608f);
+        silhouette.preserveAspect = true;
+        silhouette.rectTransform.sizeDelta = icon.rectTransform.sizeDelta;
+        // 보유는 저장 목록 + 이번 판 인벤토리. 없으면 스프라이트 형태의 어두운 실루엣.
+        silhouette.gameObject.SetActive(!ownedFigures.Contains(figure));
+        FitSlotFrame(plate, cell);
+    }
+
+    // 테두리 픽셀이 칸 크기에 비례하게 남도록 9-slice 배율을 맞춘다.
+    private static void FitSlotFrame(Image plate, float cell)
+    {
+        if (plate == null || plate.sprite == null || plate.sprite.border.x <= 0f || cell <= 0f) return;
+        float ppu = plate.pixelsPerUnit;
+        float borderUnits = cell * (plate.sprite.border.x / plate.sprite.rect.width);
+        if (ppu <= 0.001f || borderUnits <= 0.001f) return;
+        plate.pixelsPerUnitMultiplier = plate.sprite.border.x / (ppu * borderUnits);
+    }
+
+    // 80px을 넘지 않는 가장 큰 정수 배.
+    private static void FitInteger(Image image, float maxSize)
+    {
+        if (image == null || image.sprite == null) return;
+        float longest = Mathf.Max(image.sprite.rect.width, image.sprite.rect.height);
+        if (longest <= 0f) return;
+        int scale = 1;
+        while (longest * (scale + 1) <= maxSize) scale++;
+        image.rectTransform.sizeDelta = image.sprite.rect.size * scale;
+    }
+
+    private static void ClearChildren(Transform root)
+    {
+        for (int i = root.childCount - 1; i >= 0; i--)
+        {
+            GameObject child = root.GetChild(i).gameObject;
+            child.SetActive(false);
+            Destroy(child);
+        }
+    }
+
+    private string OwnedCountLabel(SynergyData synergy)
+    {
+        int total = 0;
+        int owned = 0;
+        foreach (FigureItemSO figure in synergy.RequiredFigures)
+        {
+            if (figure == null) continue;
+            total++;
+            if (ownedFigures.Contains(figure)) owned++;
+        }
+
+        return owned + " / " + total;
     }
 
     private void ScrollTo(RectTransform row)
