@@ -12,6 +12,13 @@ public class CollectionSlot : MonoBehaviour
     public Sprite unknownQuestionSprite;
     public Color lockedColor = new Color(0f, 0f, 0f, 0.7f); // 실루엣 효과용 까만색
 
+    [Header("이름 색 (양피지 위에서 읽히는 색 하나로 통일)")]
+    public Color nameColor = new Color(0.29f, 0.18f, 0.1f, 1f);
+    public Color unknownNameColor = new Color(0.5f, 0.44f, 0.37f, 1f);
+
+    [Header("마주쳤지만 아직 해금 안 된 피규어 표식 (예전 초록 이름 대신)")]
+    public GameObject encounteredMark;
+
     private FigureItemSO currentFigure;
     private CollectionBookManager manager;
     private bool isUnlocked;
@@ -32,22 +39,25 @@ public class CollectionSlot : MonoBehaviour
             figureIcon.sprite = figureData.icon;
             figureIcon.color = Color.white;
             nameText.text = LocalizationManager.GetItemDisplayName(figureData);
-            nameText.color = Color.white;
+            nameText.color = nameColor;
         }
         else if (isEncountered)
         {
             figureIcon.sprite = figureData.icon;
             figureIcon.color = Color.gray;
             nameText.text = LocalizationManager.GetItemDisplayName(figureData);
-            nameText.color = Color.green;
+            nameText.color = nameColor;
         }
         else
         {
             figureIcon.sprite = unknownQuestionSprite != null ? unknownQuestionSprite : figureData.icon;
             figureIcon.color = unknownQuestionSprite != null ? Color.white : lockedColor;
             nameText.text = LocalizationManager.GetUi("UI_UNKNOWN", "???");
-            nameText.color = new Color(0.4f, 0.4f, 0.4f, 1f);
+            nameText.color = unknownNameColor;
         }
+
+        if (encounteredMark != null)
+            encounteredMark.SetActive(isEncountered && !isUnlocked);
     }
 
     private void OnSlotClicked()

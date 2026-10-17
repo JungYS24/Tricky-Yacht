@@ -19,10 +19,89 @@ public class SynergyWikiDisplayer : MonoBehaviour
     private HashSet<FigureItemSO> ownedFigures = new();
 
     private OrderType orderType;
+
+    private bool isReversed;
+
+    private bool hasLoaded;
     
     public void OrderReverse(bool reverse)
     {
+        isReversed = reverse;
         Order((int)orderType);
+        ApplySiblingOrder(reverse);
+    }
+
+    public void Order(int orderTypeInt)
+    {
+        if (orderType == (OrderType)orderTypeInt)
+        {
+            return;
+        }
+
+        var pre = orderType;
+        orderType = (OrderType)orderTypeInt;
+        if (!SortComponents())
+        {
+            Debug.LogWarning($"'{nameof(orderType)}'에 잘못된 값이 입력되었습니다: {orderType}");
+            orderType = pre;
+            return;
+        }
+
+        ApplySiblingOrder(false);
+    }
+
+    /// <summary>
+    /// 생성한 항목을 지우고 최신 보유 피규어 기준으로 다시 만든 뒤 현재 정렬 상태를 다시 적용한다.
+    /// </summary>
+    public void Refresh()
+    {
+        hasLoaded = true;
+        ClearWiki();
+        LoadWiki();
+        SortComponents();
+        ApplySiblingOrder(isReversed);
+
+        if (noSynergyMessageObj != null)
+        {
+            noSynergyMessageObj.SetActive(components.Count == 0);
+        }
+    }
+
+    private bool SortComponents()
+    {
+        switch (orderType)
+        {
+            case OrderType.Name:
+                components.Sort((x, y) => x.Item2.SynergyName.CompareTo(y.Item2.SynergyName));
+                return true;
+
+            case OrderType.OwnedFigurePercentile:
+                components.Sort(
+                    (x, y) => (y.Item2.RequiredFigures
+                            .Count(
+                                f => ownedFigures.Contains(f)
+                            ) / (float)y.Item2.RequiredFigures.Count)
+                        .CompareTo(
+                            x.Item2.RequiredFigures
+                                .Count(
+                                    f => ownedFigures.Contains(f)
+                                ) / (float)x.Item2.RequiredFigures.Count
+                        ));
+                return true;
+
+            case OrderType.FigureCount:
+                components.Sort(
+                    (x, y) => x.Item2.RequiredFigures.Count
+                    .CompareTo(y.Item2.RequiredFigures.Count));
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    private void ApplySiblingOrder(bool reverse)
+    {
         int cnt = components.Count;
         if (reverse)
         {
@@ -40,56 +119,30 @@ public class SynergyWikiDisplayer : MonoBehaviour
         }
     }
 
-    public void Order(int orderTypeInt)
+    private void Start()
     {
-        if (orderType == (OrderType)orderTypeInt)
+        // 페이지를 열면서 Refresh()가 먼저 불렸으면 다시 만들지 않는다.
+        if (!hasLoaded)
         {
-            return;
-        }
-
-        var pre = orderType;
-        switch (orderType = (OrderType)orderTypeInt)
-        {
-            case OrderType.Name:
-                components.Sort((x, y) => x.Item2.SynergyName.CompareTo(y.Item2.SynergyName));
-                break;
-
-            case OrderType.OwnedFigurePercentile:
-                components.Sort(
-                    (x, y) => (y.Item2.RequiredFigures
-                            .Count(
-                                f => ownedFigures.Contains(f)
-                            ) / (float)y.Item2.RequiredFigures.Count)
-                        .CompareTo(
-                            x.Item2.RequiredFigures
-                                .Count(
-                                    f => ownedFigures.Contains(f)
-                                ) / (float)x.Item2.RequiredFigures.Count
-                        ));
-                break;
-
-            case OrderType.FigureCount:
-                components.Sort(
-                    (x, y) => x.Item2.RequiredFigures.Count
-                    .CompareTo(y.Item2.RequiredFigures.Count));
-                break;
-
-            default:
-                Debug.LogWarning($"'{nameof(orderType)}'에 잘못된 값이 입력되었습니다: {orderType}");
-                orderType = pre;
-                return;
-        }
-
-        int cnt = components.Count;
-        for (int i = 0; i < cnt; i++)
-        {
-            components[i].Item1.SetSiblingIndex(i);
+            Refresh();
         }
     }
 
-    private void Start()
+    private void ClearWiki()
     {
-        LoadWiki();
+        foreach (var (component, _) in components)
+        {
+            if (component == null)
+            {
+                continue;
+            }
+
+            // Destroy는 프레임 끝에 처리되므로 레이아웃에서 바로 빠지도록 먼저 끈다.
+            component.gameObject.SetActive(false);
+            Destroy(component.gameObject);
+        }
+
+        components.Clear();
     }
 
     private void LoadWiki()
@@ -101,21 +154,19 @@ public class SynergyWikiDisplayer : MonoBehaviour
             return;
         }
 
-        var data = GameSaveManager.Instance.LoadSaveData();
-
-        ownedFigures = data.ownedFigureIDs
-            .Select(id => GameSaveManager.Instance.FindFigureByID(id))
-            .ToHashSet();
+        ownedFigures = CollectOwnedFigures();
         var synergies = SynergyManager.Instance.GetAllSynergies()
             .OrderBy(s => s.SynergyName);
 
         foreach (var synergy in synergies)
         {
             var component = Instantiate(componentObj, viewport).transform;
-            component
+            var synergyIcon = component
                .Find("Description/DescriptionBackground/SynergyIcon")
-               .GetComponent<Image>()
-               .sprite = synergy.icon;
+               .GetComponent<Image>();
+            synergyIcon.sprite = synergy.icon;
+            // 아이콘이 아직 없는 시너지는 흰 사각형 대신 비워 둔다.
+            synergyIcon.enabled = synergy.icon != null;
             component
                 .Find("Description/DescriptionBackground/Name")
                 .GetComponent<TextMeshProUGUI>()
@@ -131,10 +182,43 @@ public class SynergyWikiDisplayer : MonoBehaviour
             {
                 var figureFrame = Instantiate(figureFrameObj, figureArea).transform;
                 figureFrame.GetComponentInChildren<Image>().sprite = figure.icon;
-                figureFrame.GetComponentInChildren<TextMeshProUGUI>().text = figure.itemName;
+                figureFrame.GetComponentInChildren<TextMeshProUGUI>().text = LocalizationManager.GetItemDisplayName(figure);
                 figureFrame.Find("Silhouette").gameObject.SetActive(!ownedFigures.Contains(figure));
             }
         }
+    }
+
+    // 저장 데이터의 보유 목록에 현재 런의 인벤토리를 더한다. 저장 전에 얻은 피규어도 바로 반영된다.
+    private static HashSet<FigureItemSO> CollectOwnedFigures()
+    {
+        var result = new HashSet<FigureItemSO>();
+
+        var saveManager = GameSaveManager.Instance;
+        var data = saveManager != null ? saveManager.LoadSaveData() : null;
+        if (data != null && data.ownedFigureIDs != null)
+        {
+            foreach (var id in data.ownedFigureIDs)
+            {
+                var figure = saveManager.FindFigureByID(id);
+                if (figure != null)
+                {
+                    result.Add(figure);
+                }
+            }
+        }
+
+        if (InventoryManager.Instance != null && InventoryManager.Instance.ownedFigures != null)
+        {
+            foreach (var figure in InventoryManager.Instance.ownedFigures)
+            {
+                if (figure != null)
+                {
+                    result.Add(figure);
+                }
+            }
+        }
+
+        return result;
     }
 
     private enum OrderType

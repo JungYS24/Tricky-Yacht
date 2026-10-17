@@ -1,4 +1,7 @@
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.InputSystem;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -14,6 +17,9 @@ public enum CollectionStatusFilter { All, Unlocked, Locked }
 
 public class CollectionBookManager : MonoBehaviour
 {
+    // 필터 버튼과 바이옴 좌우 넘김이 같이 쓰는 순서 (전체 → 바이옴 순)
+    private static readonly int[] BiomeFilterOrder = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+
     [Header("도감 데이터")]
     public List<FigureItemSO> masterFigureDatabase;
 
@@ -37,18 +43,93 @@ public class CollectionBookManager : MonoBehaviour
     public CollectionBiomeFilter currentBiomeFilter = CollectionBiomeFilter.All;
     public CollectionStatusFilter currentStatusFilter = CollectionStatusFilter.All;
 
-    private List<GameObject> activeSlots = new List<GameObject>();
+    [Header("모달 (딤 클릭 시 닫기)")]
+    public Button dimButton;
+
+    [Header("책갈피 탭")]
+    public Button figureTabButton;
+    public Button synergyTabButton;
+    public Button achievementTabButton; // 업적은 아직 기능 없음
+    public TextMeshProUGUI figureTabLabel;
+    public TextMeshProUGUI synergyTabLabel;
+    public TextMeshProUGUI achievementTabLabel;
+    public Color tabSelectedColor = Color.white;
+    public Color tabUnselectedColor = new Color(0.72f, 0.72f, 0.72f, 1f);
+    public float tabSelectedOffsetX = -16f; // 선택된 탭이 책 밖으로 더 나오는 거리
+
+    [Header("페이지")]
+    public GameObject figurePageRoot;
+    public GameObject synergyPageRoot;
+    public SynergyWikiDisplayer synergyWiki;
+
+    [Header("피규어 페이지 헤더")]
+    public TextMeshProUGUI titleText;
+    public TextMeshProUGUI biomeNameText;
+    public Button prevBiomeButton;
+    public Button nextBiomeButton;
+
+    [Header("피규어 페이지 넘김")]
+    public int slotsPerPage = 15;
+    public Button prevPageButton;
+    public Button nextPageButton;
+    public TextMeshProUGUI pageText;
+
+    private readonly List<CollectionSlot> slotPool = new List<CollectionSlot>();
     private List<FigureItemSO> currentFilteredList = new List<FigureItemSO>();
+    private readonly Dictionary<Button, Vector2> tabBasePositions = new Dictionary<Button, Vector2>();
+    private int currentPage;
+    private bool isInitialized;
+    private bool isSynergyPageOpen;
 
     public TextMeshProUGUI currentFilterText;
+
+    private bool UsePaging => prevPageButton != null && nextPageButton != null && slotsPerPage > 0;
+    private bool UseBiomeStepper => prevBiomeButton != null && nextBiomeButton != null;
+
     private void Start()
     {
+        EnsureInitialized();
+
+        if (biomeFilterPanelRoot != null) biomeFilterPanelRoot.SetActive(false);
+        RefreshCollectionBoard();
+    }
+
+    // 패널이 꺼진 채로 시작하므로 Start보다 OpenCollectionBook이 먼저 불릴 수 있다.
+    private void EnsureInitialized()
+    {
+        if (isInitialized) return;
+        isInitialized = true;
+
         masterFigureDatabase = masterFigureDatabase.OrderBy(f => (int)f.sourceBiomes.FirstOrDefault()).ToList();
 
         GenerateFilterButtons(); // 시작할 때 필터 버튼 자동 생성
 
-        if (biomeFilterPanelRoot != null) biomeFilterPanelRoot.SetActive(false);
-        RefreshCollectionBoard();
+        if (dimButton != null) dimButton.onClick.AddListener(CloseCollectionBook);
+        if (figureTabButton != null) figureTabButton.onClick.AddListener(ShowFigurePage);
+        if (synergyTabButton != null) synergyTabButton.onClick.AddListener(ShowSynergyPage);
+        if (prevBiomeButton != null) prevBiomeButton.onClick.AddListener(() => StepBiomeFilter(-1));
+        if (nextBiomeButton != null) nextBiomeButton.onClick.AddListener(() => StepBiomeFilter(1));
+        if (prevPageButton != null) prevPageButton.onClick.AddListener(() => ChangePage(-1));
+        if (nextPageButton != null) nextPageButton.onClick.AddListener(() => ChangePage(1));
+
+        foreach (var tab in new[] { figureTabButton, synergyTabButton, achievementTabButton })
+        {
+            if (tab != null) tabBasePositions[tab] = ((RectTransform)tab.transform).anchoredPosition;
+        }
+    }
+
+    private void Update()
+    {
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame) return;
+
+        // 상세 → 필터창 → 도감 순서로 하나씩 닫는다.
+        if (detailPanel != null && detailPanel.panelRoot != null && detailPanel.panelRoot.activeSelf)
+            detailPanel.ClosePanel();
+        else if (biomeFilterPanelRoot != null && biomeFilterPanelRoot.activeSelf)
+            CloseBiomeFilterPanel();
+        else
+            CloseCollectionBook();
     }
 
     // 필터 버튼들을 생성해주는 함수
@@ -56,38 +137,14 @@ public class CollectionBookManager : MonoBehaviour
     {
         if (filterGridParent == null || filterButtonPrefab == null) return;
 
-        string[] filterNames =
-        {
-            LocalizationManager.GetUi("UI_FILTER_ALL", "전체"),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Special),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Forest),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Meadow),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Temple),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Jungle),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Desert),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Ruins),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Cave),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Volcano),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Swamp),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Beach),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Ocean),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Abyss),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Snow),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Grave),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Circus),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Void),
-            LocalizationManager.GetBiomeDisplayName(BiomeType.Skyisland)
-        };
-        int[] filterValues = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
-
-        for (int i = 0; i < filterNames.Length; i++)
+        foreach (int filterValue in BiomeFilterOrder)
         {
             GameObject btnGo = Instantiate(filterButtonPrefab, filterGridParent);
             BiomeFilterSlot slot = btnGo.GetComponent<BiomeFilterSlot>();
 
             if (slot != null)
             {
-                slot.Setup(filterNames[i], filterValues[i], this);
+                slot.Setup(GetFilterDisplayName(filterValue), filterValue, this);
             }
         }
     }
@@ -99,10 +156,18 @@ public class CollectionBookManager : MonoBehaviour
             CloseCollectionBook();
             return;
         }
+
+        EnsureInitialized();
+
+        if (UseBiomeStepper)
+        {
+            currentBiomeFilter = GetDefaultBiomeFilter();
+            currentPage = 0;
+        }
+
         collectionPanelRoot.SetActive(true);
-        RefreshCollectionBoard();
-        GameObject bookButton = GameObject.Find("Book_Button");
-        if (bookButton != null) bookButton.transform.SetAsLastSibling();
+        RefreshTabLabels();
+        ShowFigurePage();
     }
 
     public void CloseCollectionBook()
@@ -110,6 +175,30 @@ public class CollectionBookManager : MonoBehaviour
         if (detailPanel != null) detailPanel.ClosePanel();
         if (biomeFilterPanelRoot != null) biomeFilterPanelRoot.SetActive(false);
         collectionPanelRoot.SetActive(false);
+    }
+
+    public void ShowFigurePage()
+    {
+        isSynergyPageOpen = false;
+        if (figurePageRoot != null) figurePageRoot.SetActive(true);
+        if (synergyPageRoot != null) synergyPageRoot.SetActive(false);
+        UpdateTabVisuals();
+        RefreshCollectionBoard();
+    }
+
+    public void ShowSynergyPage()
+    {
+        if (synergyPageRoot == null) return;
+
+        isSynergyPageOpen = true;
+        // 상세창과 바이옴 필터는 피규어 페이지 전용
+        if (detailPanel != null) detailPanel.ClosePanel();
+        CloseBiomeFilterPanel();
+
+        if (figurePageRoot != null) figurePageRoot.SetActive(false);
+        synergyPageRoot.SetActive(true);
+        if (synergyWiki != null) synergyWiki.Refresh();
+        UpdateTabVisuals();
     }
 
     public void OpenBiomeFilterPanel()
@@ -125,6 +214,9 @@ public class CollectionBookManager : MonoBehaviour
     public void ChangeBiomeFilter(int biomeFilterIndex)
     {
         currentBiomeFilter = (CollectionBiomeFilter)biomeFilterIndex;
+        currentPage = 0;
+        // 필터가 바뀌면 상세창이 보던 목록이 달라지므로 닫는다.
+        if (detailPanel != null) detailPanel.ClosePanel();
         RefreshCollectionBoard();
         CloseBiomeFilterPanel(); // 누르면 자동으로 닫힘
     }
@@ -132,13 +224,30 @@ public class CollectionBookManager : MonoBehaviour
     public void ChangeStatusFilter(int statusFilterIndex)
     {
         currentStatusFilter = (CollectionStatusFilter)statusFilterIndex;
+        currentPage = 0;
+        RefreshCollectionBoard();
+    }
+
+    public void StepBiomeFilter(int direction)
+    {
+        int count = BiomeFilterOrder.Length;
+        int index = Array.IndexOf(BiomeFilterOrder, (int)currentBiomeFilter);
+        if (index < 0) index = 0;
+        index = ((index + direction) % count + count) % count;
+        ChangeBiomeFilter(BiomeFilterOrder[index]);
+    }
+
+    public void ChangePage(int direction)
+    {
+        int nextPage = Mathf.Clamp(currentPage + direction, 0, GetPageCount() - 1);
+        if (nextPage == currentPage) return;
+
+        currentPage = nextPage;
         RefreshCollectionBoard();
     }
 
     public void RefreshCollectionBoard()
     {
-        foreach (var slot in activeSlots) Destroy(slot);
-        activeSlots.Clear();
         currentFilteredList.Clear();
 
         int totalCount = 0;
@@ -150,35 +259,54 @@ public class CollectionBookManager : MonoBehaviour
                 continue;
 
             //하드디스크 대신 매니저의 딕셔너리에서 상태(0, 1, 2)를 한 번에 가져옴
-            int figureState = CollectionDataManager.Instance.GetFigureState(figure);
+            int figureState = GetFigureState(figure);
             bool isUnlocked = (figureState == 2);         // 2번이면 완전 해금
-            bool isEncountered = (figureState >= 1);      // 1번 이상(1, 2)이면 마주친 적 있음
 
             if (currentStatusFilter == CollectionStatusFilter.Unlocked && !isUnlocked) continue;
             if (currentStatusFilter == CollectionStatusFilter.Locked && isUnlocked) continue;
 
-            GameObject slotGo = Instantiate(collectionSlotPrefab, gridContentParent);
-            CollectionSlot slot = slotGo.GetComponent<CollectionSlot>();
-
-            slot.Setup(figure, isUnlocked, isEncountered, this);
-
-            activeSlots.Add(slotGo);
             currentFilteredList.Add(figure);
 
             totalCount++;
             if (isUnlocked) unlockedCount++;
         }
 
-        if (progressText != null)
+        int pageCount = GetPageCount();
+        currentPage = Mathf.Clamp(currentPage, 0, pageCount - 1);
+        int startIndex = UsePaging ? currentPage * slotsPerPage : 0;
+        int visibleCount = UsePaging
+            ? Mathf.Min(slotsPerPage, currentFilteredList.Count - startIndex)
+            : currentFilteredList.Count;
+
+        EnsureSlotPool(visibleCount);
+        for (int i = 0; i < slotPool.Count; i++)
         {
-            progressText.text = LocalizationManager.GetUi(
-                "UI_COLLECTION_PROGRESS",
-                "{0} : {1} / {2}",
-                GetCurrentFilterDisplayName(),
-                unlockedCount,
-                totalCount);
+            CollectionSlot slot = slotPool[i];
+            bool visible = i < visibleCount;
+            slot.gameObject.SetActive(visible);
+            if (!visible) continue;
+
+            FigureItemSO figure = currentFilteredList[startIndex + i];
+            int figureState = GetFigureState(figure);
+            slot.Setup(figure, figureState == 2, figureState >= 1, this);
         }
 
+        if (progressText != null)
+        {
+            progressText.text = UseBiomeStepper
+                ? LocalizationManager.GetUi("UI_COLLECTION_COUNT", "{0} / {1}", unlockedCount, totalCount)
+                : LocalizationManager.GetUi(
+                    "UI_COLLECTION_PROGRESS",
+                    "{0} : {1} / {2}",
+                    GetCurrentFilterDisplayName(),
+                    unlockedCount,
+                    totalCount);
+        }
+
+        if (titleText != null)
+            titleText.text = LocalizationManager.GetUi("UI_COLLECTION_TITLE", "피규어 도감");
+
+        UpdatePager(pageCount);
         UpdateFilterText();
     }
 
@@ -187,17 +315,91 @@ public class CollectionBookManager : MonoBehaviour
         if (detailPanel != null) detailPanel.OpenPanel(currentFilteredList, figure);
     }
 
+    private void EnsureSlotPool(int count)
+    {
+        while (slotPool.Count < count)
+        {
+            GameObject slotGo = Instantiate(collectionSlotPrefab, gridContentParent);
+            slotPool.Add(slotGo.GetComponent<CollectionSlot>());
+        }
+    }
+
+    private int GetPageCount()
+    {
+        if (!UsePaging) return 1;
+        return Mathf.Max(1, Mathf.CeilToInt(currentFilteredList.Count / (float)slotsPerPage));
+    }
+
+    private void UpdatePager(int pageCount)
+    {
+        if (pageText != null)
+            pageText.text = LocalizationManager.GetUi("UI_PAGE_INDICATOR", "{0} / {1}", currentPage + 1, pageCount);
+        if (prevPageButton != null) prevPageButton.interactable = currentPage > 0;
+        if (nextPageButton != null) nextPageButton.interactable = currentPage < pageCount - 1;
+    }
+
+    private void UpdateTabVisuals()
+    {
+        SetTabSelected(figureTabButton, !isSynergyPageOpen);
+        SetTabSelected(synergyTabButton, isSynergyPageOpen);
+        SetTabSelected(achievementTabButton, false);
+    }
+
+    private void SetTabSelected(Button tab, bool selected)
+    {
+        if (tab == null) return;
+
+        if (tab.targetGraphic != null)
+            tab.targetGraphic.color = selected ? tabSelectedColor : tabUnselectedColor;
+
+        if (tabBasePositions.TryGetValue(tab, out Vector2 basePosition))
+        {
+            ((RectTransform)tab.transform).anchoredPosition =
+                selected ? basePosition + new Vector2(tabSelectedOffsetX, 0f) : basePosition;
+        }
+    }
+
+    private void RefreshTabLabels()
+    {
+        if (figureTabLabel != null) figureTabLabel.text = LocalizationManager.GetUi("UI_TAB_FIGURE", "피규어");
+        if (synergyTabLabel != null) synergyTabLabel.text = LocalizationManager.GetUi("UI_TAB_SYNERGY", "시너지");
+        if (achievementTabLabel != null) achievementTabLabel.text = LocalizationManager.GetUi("UI_TAB_ACHIEVEMENT", "업적");
+    }
+
+    // 런 중이면 현재 바이옴, 아니면 전체
+    private static CollectionBiomeFilter GetDefaultBiomeFilter()
+    {
+        DiceManager diceManager = DiceManager.Instance;
+        if (diceManager != null && diceManager.currentBiome != null)
+            return (CollectionBiomeFilter)(int)diceManager.currentBiome.biomeType;
+
+        return CollectionBiomeFilter.All;
+    }
+
+    private static int GetFigureState(FigureItemSO figure)
+    {
+        return CollectionDataManager.Instance != null ? CollectionDataManager.Instance.GetFigureState(figure) : 0;
+    }
+
     private void UpdateFilterText()
     {
+        if (biomeNameText != null)
+            biomeNameText.text = GetCurrentFilterDisplayName();
+
         if (currentFilterText == null) return;
         currentFilterText.text = LocalizationManager.GetUi("UI_BIOME_FILTER", "바이옴 : {0}", GetCurrentFilterDisplayName());
     }
 
     private string GetCurrentFilterDisplayName()
     {
-        if (currentBiomeFilter == CollectionBiomeFilter.All)
+        return GetFilterDisplayName((int)currentBiomeFilter);
+    }
+
+    private static string GetFilterDisplayName(int filterValue)
+    {
+        if (filterValue == (int)CollectionBiomeFilter.All)
             return LocalizationManager.GetUi("UI_FILTER_ALL", "전체");
 
-        return LocalizationManager.GetBiomeDisplayName((BiomeType)(int)currentBiomeFilter);
+        return LocalizationManager.GetBiomeDisplayName((BiomeType)filterValue);
     }
 }

@@ -21,6 +21,12 @@ public class FigureDetailPanel : MonoBehaviour
     public Button rightButton;
     public Button closeButton;
 
+    [Header("글자 색 덮어쓰기 (양피지 배경용, 끄면 기존 색)")]
+    public bool useCustomTextColors = false;
+    public Color customTextColor = new Color(0.29f, 0.18f, 0.1f, 1f);
+    public Color customSubTextColor = new Color(0.45f, 0.32f, 0.2f, 1f);
+    public Color customLockedTextColor = new Color(0.5f, 0.44f, 0.37f, 1f);
+
     // 보유 중인 피규어 리스트와 현재 보고 있는 피규어 인덱스
     private List<FigureItemSO> currentOwnedFigures;
     private int currentIndex;
@@ -137,12 +143,25 @@ public class FigureDetailPanel : MonoBehaviour
             }
         }
 
+        if (useCustomTextColors)
+            ApplyCustomTextColors(isEncountered);
+
         // 첫 번째거나 마지막 피규어면 화살표 비활성화 (버튼이 있을 때만 실행)
         if (leftButton != null)
             leftButton.interactable = (currentIndex > 0);
 
         if (rightButton != null)
             rightButton.interactable = (currentIndex < currentOwnedFigures.Count - 1);
+    }
+
+    private void ApplyCustomTextColors(bool isEncountered)
+    {
+        Color mainColor = isEncountered ? customTextColor : customLockedTextColor;
+        Color subColor = isEncountered ? customSubTextColor : customLockedTextColor;
+
+        if (nameText != null) nameText.color = mainColor;
+        if (descText != null) descText.color = mainColor;
+        if (locationText != null) locationText.color = subColor;
     }
 
     // 이전 피규어 보기
