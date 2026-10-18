@@ -5,9 +5,10 @@ using System.Collections.Generic;
 public static class CombatFlowController
 {
     // 메인 턴 결산 흐름 
-    // coinDice: 면 효과가 Coin이라 골드를 준 주사위들(코인 날아가기 연출용). 없으면 골드 숫자를 바로 갱신한다.
+    // coinDice: 코인 면이나 다이아 스탬프로 골드를 준 주사위들(코인 날아가기 연출용). 없으면 골드 숫자를 바로 갱신한다.
+    // shieldGain: 하트 스탬프로 얻는 보호막. 몬스터 공격 전에 더해져 이번 턴 공격부터 막는다.
     // 가시 디버프 피해는 여기가 아니라 결산 시작 때 ProcessDebuffThorn에서 먼저 적용한다.
-    public static IEnumerator ProcessTurnResolution(DiceManager dm, int finalDamage, int darkDamage, int finalHeal, int expectedGold, int flameDamage, string handName, int selfDamage = 0, List<Dice> coinDice = null)
+    public static IEnumerator ProcessTurnResolution(DiceManager dm, int finalDamage, int darkDamage, int finalHeal, int expectedGold, int flameDamage, string handName, int selfDamage = 0, List<Dice> coinDice = null, int shieldGain = 0)
     {
         //플레이어 회복
         if (finalHeal > 0)
@@ -16,6 +17,13 @@ public static class CombatFlowController
             dm.playerStatus.Heal(finalHeal);
             if (dm.currentPlayerHP > hpBefore && FigureEffectManager.Instance != null && FigureEffectManager.Instance.GetHealMultiplier() > 1f) FigureEffectManager.Instance.NotifyPassiveApplied(FigureEffectType.IncreaseHealMultiplier);
             dm.ui?.UpdateShieldUI(dm.playerStatus.currentShield);
+        }
+
+        // 하트 스탬프 보호막 (이번 전투 동안 유지)
+        if (shieldGain > 0)
+        {
+            dm.currentShield += shieldGain;
+            dm.ui?.UpdateShieldUI(dm.currentShield);
         }
 
         //골드 획득 처리
@@ -90,7 +98,7 @@ public static class CombatFlowController
         {
             for (int i = 0; i < coinDice.Count; i++)
             {
-                if (coinDice[i] != null) coinBase += Mathf.Max(0, coinDice[i].currentValue) * TurnCalculator.GoldPerPip;
+                coinBase += TurnCalculator.GetCoinFlyGold(coinDice[i]);
             }
         }
 
@@ -118,7 +126,7 @@ public static class CombatFlowController
             Dice die = coinDice[i];
             if (die == null || die.currentValue <= 0) continue;
 
-            int dieBase = die.currentValue * TurnCalculator.GoldPerPip;
+            int dieBase = TurnCalculator.GetCoinFlyGold(die);
             int share = i == lastIndex
                 ? remainingShare
                 : Mathf.Min(remainingShare, Mathf.RoundToInt(granted * coinRatio * dieBase / coinBase));

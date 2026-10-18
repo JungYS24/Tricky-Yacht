@@ -24,6 +24,25 @@ public static class HandRankUtil
         return matches;
     }
 
+    // index번 주사위가 이번 족보를 이루는 데 쓰였는지. 결산 강조(HandResolutionFeedback.GetEmphasisGroups)와 같은 기준이며
+    // 주사위 수가 5개가 아니어도 동작합니다. 하이카드는 족보에 쓰인 주사위가 없습니다.
+    public static bool IsUsedInHand(HandRank rank, System.Collections.Generic.IReadOnlyList<int> values, int index)
+    {
+        if (values == null || index < 0 || index >= values.Count) return false;
+        int same = CountValues(values, values[index], values.Count);
+        switch (rank)
+        {
+            case HandRank.OnePair:
+            case HandRank.TwoPair: return same == 2;
+            case HandRank.Triple: return same == 3;
+            case HandRank.FullHouse: return same == 2 || same == 3;
+            case HandRank.FourOfAKind: return same == 4;
+            case HandRank.Straight:
+            case HandRank.Yacht: return true;
+            default: return false;
+        }
+    }
+
     public static string GetLocKey(HandRank rank)
     {
         switch (rank)

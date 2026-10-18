@@ -42,12 +42,13 @@ public class DeckManager
             return true;
         }
 
-        // 바꾸는 주사위에 붙어 있던 코팅·위성은 그대로 옮긴다.
+        // 바꾸는 주사위에 붙어 있던 코팅·위성·스탬프는 그대로 옮긴다.
         DiceData1 old = masterDeck[target];
         journey.isCoated = old.isCoated;
         journey.type = old.type;
         journey.multiplier = old.multiplier;
         journey.diceColor = old.diceColor;
+        journey.stampType = old.stampType;
         if (old.activeSatellites != null) journey.activeSatellites = new List<SatelliteType>(old.activeSatellites);
 
         masterDeck[target] = journey;

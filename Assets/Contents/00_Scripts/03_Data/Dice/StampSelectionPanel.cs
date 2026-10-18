@@ -15,6 +15,7 @@ public class StampSelectionPanel : MonoBehaviour
 
     private List<GameObject> activeSlots = new List<GameObject>();
     private DiceManager diceManager;
+    private bool isBusy;
 
     public void OpenSelection(DiceManager dm, StampType type, Sprite image)
     {
@@ -46,7 +47,7 @@ public class StampSelectionPanel : MonoBehaviour
             Button btn = slotGo.GetComponent<Button>();
             if (btn != null)
             {
-                btn.onClick.AddListener(() => OnDiceSelected(dice));
+                btn.onClick.AddListener(() => OnDiceSelected(dice, slotGo.GetComponent<DeckSlot>()));
             }
 
             DeckSlot deckSlot = slotGo.GetComponent<DeckSlot>();
@@ -57,15 +58,32 @@ public class StampSelectionPanel : MonoBehaviour
         }
     }
 
-    private void OnDiceSelected(DiceData1 selectedDice)
+    private void OnDiceSelected(DiceData1 selectedDice, DeckSlot selectedSlot)
     {
-       
+        if (isBusy) return;
+        if (diceManager == null || selectedDice == null || !diceManager.masterDeck.Contains(selectedDice)) return;
+        isBusy = true;
 
-        ClosePanel();
+        // 코팅처럼 주사위마다 하나만 찍힌다. 이미 찍힌 스탬프는 새 스탬프로 바뀐다.
+        selectedDice.stampType = pendingStampType;
+
+        Debug.Log($"{selectedDice.diceName}에 {pendingStampType} 스탬프 적용 완료!");
+
+        // 도장을 쾅 찍는 연출. 찍히는 순간 슬롯을 다시 그려 가운데에 연한 스탬프 자국이 남게 한다.
+        DiceSelectionFeedback.Get(this).PlayStamp(selectedSlot, activeSlots, pendingStampType, () =>
+        {
+            if (selectedSlot != null) selectedSlot.SetDice(selectedDice, false);
+        }, () =>
+        {
+            isBusy = false;
+            ClosePanel();
+            if (diceManager != null && diceManager.enemy != null) diceManager.ForceUpdateUI();
+        });
     }
 
     public void ClosePanel()
     {
+        if (isBusy) return;
         IsPanelOpen = false;
         panelRoot.SetActive(false);
         ClearSlots();

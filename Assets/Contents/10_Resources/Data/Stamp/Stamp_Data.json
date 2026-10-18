@@ -5,14 +5,13 @@
     "NameKey": "CNT_Stamp_Heart_NAME",
     "Item_Name_KR": "하트",
     "DescKey": "CNT_Stamp_Heart_DESC",
-    "Effect_Summary_KR": "킵하면 이번 피격 -4",
-    "Trigger": "OnKeep",
+    "Effect_Summary_KR": "킵 결산 시 보호막 +4",
+    "Trigger": "OnKeepSettle",
     "Effects": [
       {
         "Condition": "Always",
-        "EffectType": "IncomingDamageReduction",
-        "Value": 4,
-        "Duration": "NextHitOnly"
+        "EffectType": "ShieldGain",
+        "Value": 4
       }
     ]
   },
