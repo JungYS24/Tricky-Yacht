@@ -23,7 +23,11 @@ public class AudioControl : MonoBehaviour
     private const string MasterVolKey = "MasterVol";
     private const string BgmVolKey = "BGMVol";
     private const string SfxVolKey = "SFXVol";
+    private static readonly string[] MasterSliderNames = { "MasterSlider", "VOLSlider", "VolSlider" };
+    private static readonly string[] BgmSliderNames = { "BGMSlider" };
+    private static readonly string[] SfxSliderNames = { "SFXSlider" };
 
+    private static bool appliedLaunchVolume;
     private bool isReady;
 
     private void Awake()
@@ -37,6 +41,7 @@ public class AudioControl : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         EnsureSfxSource();
+        ApplyLaunchVolumes();
         ApplySavedVolumes();
     }
 
@@ -94,29 +99,22 @@ public class AudioControl : MonoBehaviour
 
     private void ApplySavedVolumes()
     {
-        EnsureDefaultVolumes();
         SetMixerVolume("Master", GetSavedVolume(MasterVolKey));
         SetMixerVolume("BGM", GetSavedVolume(BgmVolKey));
         SetMixerVolume("SFX", GetSavedVolume(SfxVolKey));
     }
 
-    private static void EnsureDefaultVolumes()
+    // 앱 실행당 한 번만 70%로 덮어쓴다. 씬 전환에서는 호출하지 않는다.
+    private static void ApplyLaunchVolumes()
     {
-        bool wrote = false;
-        wrote |= EnsureDefaultVolume(MasterVolKey);
-        wrote |= EnsureDefaultVolume(BgmVolKey);
-        wrote |= EnsureDefaultVolume(SfxVolKey);
-        if (wrote)
-            PlayerPrefs.Save();
-    }
+        if (appliedLaunchVolume)
+            return;
 
-    private static bool EnsureDefaultVolume(string key)
-    {
-        if (PlayerPrefs.HasKey(key))
-            return false;
-
-        PlayerPrefs.SetFloat(key, DefaultVolume);
-        return true;
+        appliedLaunchVolume = true;
+        PlayerPrefs.SetFloat(MasterVolKey, DefaultVolume);
+        PlayerPrefs.SetFloat(BgmVolKey, DefaultVolume);
+        PlayerPrefs.SetFloat(SfxVolKey, DefaultVolume);
+        PlayerPrefs.Save();
     }
 
     private static float GetSavedVolume(string key)
@@ -131,17 +129,17 @@ public class AudioControl : MonoBehaviour
     {
         isReady = false;
 
-        BindSlider(ref masterSlider, "MasterSlider", SetMasterVolume, MasterVolKey);
-        BindSlider(ref bgmSlider, "BGMSlider", SetBGMVolume, BgmVolKey);
-        BindSlider(ref sfxSlider, "SFXSlider", SetSFXVolume, SfxVolKey);
+        BindSlider(ref masterSlider, MasterSliderNames, SetMasterVolume, MasterVolKey);
+        BindSlider(ref bgmSlider, BgmSliderNames, SetBGMVolume, BgmVolKey);
+        BindSlider(ref sfxSlider, SfxSliderNames, SetSFXVolume, SfxVolKey);
 
         isReady = true;
     }
 
-    private void BindSlider(ref Slider slider, string fallbackName, UnityEngine.Events.UnityAction<float> listener, string prefsKey)
+    private void BindSlider(ref Slider slider, string[] fallbackNames, UnityEngine.Events.UnityAction<float> listener, string prefsKey)
     {
         if (slider == null)
-            slider = FindSliderByName(fallbackName);
+            slider = FindSliderByNames(fallbackNames);
         if (slider == null)
             return;
 
@@ -163,16 +161,19 @@ public class AudioControl : MonoBehaviour
         slider = null;
     }
 
-    private Slider FindSliderByName(string targetName)
+    private Slider FindSliderByNames(string[] targetNames)
     {
         Slider[] allSliders = Resources.FindObjectsOfTypeAll<Slider>();
-        foreach (Slider slider in allSliders)
+        foreach (string targetName in targetNames)
         {
-            if (slider.gameObject.name == targetName &&
-                slider.gameObject.scene.IsValid() &&
-                slider.gameObject.scene.isLoaded)
+            foreach (Slider slider in allSliders)
             {
-                return slider;
+                if (slider.gameObject.name == targetName &&
+                    slider.gameObject.scene.IsValid() &&
+                    slider.gameObject.scene.isLoaded)
+                {
+                    return slider;
+                }
             }
         }
 
@@ -181,18 +182,27 @@ public class AudioControl : MonoBehaviour
 
     public void SetMasterVolume(float volume)
     {
+        if (!isReady)
+            return;
+
         SetMixerVolume("Master", volume);
         SaveVolume(MasterVolKey, volume, masterSlider);
     }
 
     public void SetBGMVolume(float volume)
     {
+        if (!isReady)
+            return;
+
         SetMixerVolume("BGM", volume);
         SaveVolume(BgmVolKey, volume, bgmSlider);
     }
 
     public void SetSFXVolume(float volume)
     {
+        if (!isReady)
+            return;
+
         SetMixerVolume("SFX", volume);
         SaveVolume(SfxVolKey, volume, sfxSlider);
     }

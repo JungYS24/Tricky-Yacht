@@ -68,19 +68,17 @@ public class BGMManager : MonoBehaviour
         }
     }
 
+    // 씬 슬라이더 onValueChanged가 여기로 연결되어 있어도 믹서는 AudioControl만 적용한다.
     public void SetMasterVolume(float volume)
     {
-        AudioControl.ApplyMixerVolume(bgmMixerGroup != null ? bgmMixerGroup.audioMixer : null, "Master", volume);
     }
 
     public void SetBGMVolume(float volume)
     {
-        AudioControl.ApplyMixerVolume(bgmMixerGroup != null ? bgmMixerGroup.audioMixer : null, "BGM", volume);
     }
 
     public void SetSFXVolume(float volume)
     {
-        AudioControl.ApplyMixerVolume(bgmMixerGroup != null ? bgmMixerGroup.audioMixer : null, "SFX", volume);
     }
 
 
