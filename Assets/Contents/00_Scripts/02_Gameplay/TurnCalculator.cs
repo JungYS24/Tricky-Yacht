@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 // 결산 결과를 한 번에 담아 전달할 구조체
 public struct TurnCalcResult
@@ -17,6 +18,10 @@ public struct TurnCalcResult
     public int satelliteBonusChips;
     public float satelliteBonusMult;
     public float iceBonusMult;
+
+    public int stampBonusChips;
+    public int stampDamage;
+    public int stampGold;
 }
 
 public enum DiceScoreBonusKind
@@ -218,6 +223,43 @@ public static class TurnCalculator
                             break;
                     }
                 }
+            }
+
+            // 스탬프 효과
+            switch (d.myData.stampType)
+            {
+                case StampType.Spade:
+                    var rank = CalculateHand(
+                        targetDice.Select(d => d.currentValue).ToList(),
+                        DiceManager.Instance,
+                        out _);
+                    int[] group = new int[5];
+                    HandResolutionFeedback.GetEmphasisGroups(
+                        rank,
+                        targetDice.Select(d => d.currentValue).ToArray(),
+                        group,
+                        new int[5]);
+                    int index = targetDice.IndexOf(d);
+                    if (group[index] >= 0)
+                    {
+                        res.stampBonusChips += 20;
+                    }
+                    else
+                    {
+                        res.stampDamage += d.currentValue;
+                    }
+                    break;
+
+                case StampType.Heart:
+                    res.stampDamage -= 4;
+                    break;
+                
+                case StampType.Diamond:
+                    res.stampGold += d.currentValue * 5;
+                    break;
+
+                default:
+                    break;
             }
         }
         return res;
