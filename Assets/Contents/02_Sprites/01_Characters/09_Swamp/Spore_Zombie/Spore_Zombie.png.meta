@@ -16,16 +16,16 @@ TextureImporter:
     second: Spore_Zombie_3
   - first:
       213: -6810960006606507015
+    second: Spore_Zombie_4
+  - first:
+      213: 8068919625469453289
+    second: Spore_Zombie_5
+  - first:
+      213: 2931015405332968067
     second: Spore_Zombie_6
   - first:
       213: 7407067829139725125
-    second: Spore_Zombie_8
-  - first:
-      213: 8068919625469453289
-    second: Spore_Zombie_9
-  - first:
-      213: 2931015405332968067
-    second: Spore_Zombie_11
+    second: Spore_Zombie_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -124,10 +124,10 @@ TextureImporter:
       name: Spore_Zombie_0
       rect:
         serializedVersion: 2
-        x: 24
-        y: 136
-        width: 82
-        height: 105
+        x: 0
+        y: 128
+        width: 128
+        height: 128
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -146,10 +146,10 @@ TextureImporter:
       name: Spore_Zombie_1
       rect:
         serializedVersion: 2
-        x: 152
-        y: 136
-        width: 80
-        height: 107
+        x: 128
+        y: 128
+        width: 128
+        height: 128
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -168,10 +168,10 @@ TextureImporter:
       name: Spore_Zombie_2
       rect:
         serializedVersion: 2
-        x: 283
-        y: 137
-        width: 73
-        height: 108
+        x: 256
+        y: 128
+        width: 128
+        height: 128
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -190,10 +190,10 @@ TextureImporter:
       name: Spore_Zombie_3
       rect:
         serializedVersion: 2
-        x: 409
-        y: 137
-        width: 73
-        height: 108
+        x: 384
+        y: 128
+        width: 128
+        height: 128
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -209,13 +209,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spore_Zombie_6
+      name: Spore_Zombie_4
       rect:
         serializedVersion: 2
-        x: 26
-        y: 9
-        width: 71
-        height: 108
+        x: 0
+        y: 0
+        width: 128
+        height: 128
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -231,35 +231,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spore_Zombie_8
+      name: Spore_Zombie_5
       rect:
         serializedVersion: 2
-        x: 411
-        y: 6
-        width: 72
-        height: 111
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 54bd81f32f03bc660800000000000000
-      internalID: 7407067829139725125
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Spore_Zombie_9
-      rect:
-        serializedVersion: 2
-        x: 153
-        y: 6
-        width: 74
-        height: 105
+        x: 128
+        y: 0
+        width: 128
+        height: 128
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -275,13 +253,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spore_Zombie_11
+      name: Spore_Zombie_6
       rect:
         serializedVersion: 2
-        x: 282
-        y: 6
-        width: 74
-        height: 109
+        x: 256
+        y: 0
+        width: 128
+        height: 128
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -292,6 +270,28 @@ TextureImporter:
       bones: []
       spriteID: 382b1126bfe0da820800000000000000
       internalID: 2931015405332968067
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Spore_Zombie_7
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54bd81f32f03bc660800000000000000
+      internalID: 7407067829139725125
       vertices: []
       indices: 
       edges: []
@@ -314,10 +314,10 @@ TextureImporter:
       Spore_Zombie_1: 8802690981307586656
       Spore_Zombie_2: -4253109517862031222
       Spore_Zombie_3: 3873271396708654157
-      Spore_Zombie_6: -6810960006606507015
-      Spore_Zombie_8: 7407067829139725125
-      Spore_Zombie_9: 8068919625469453289
-      Spore_Zombie_11: 2931015405332968067
+      Spore_Zombie_4: -6810960006606507015
+      Spore_Zombie_5: 8068919625469453289
+      Spore_Zombie_6: 2931015405332968067
+      Spore_Zombie_7: 7407067829139725125
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
