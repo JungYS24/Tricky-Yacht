@@ -58,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -96,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -109,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -122,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -137,10 +137,10 @@ TextureImporter:
       name: MoonPerformer_SS_0
       rect:
         serializedVersion: 2
-        x: 44
-        y: 391
-        width: 266
-        height: 350
+        x: 10
+        y: 129
+        width: 87
+        height: 121
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -159,10 +159,10 @@ TextureImporter:
       name: MoonPerformer_SS_1
       rect:
         serializedVersion: 2
-        x: 403
-        y: 391
-        width: 279
-        height: 333
+        x: 137
+        y: 129
+        width: 87
+        height: 123
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -181,10 +181,10 @@ TextureImporter:
       name: MoonPerformer_SS_2
       rect:
         serializedVersion: 2
-        x: 813
-        y: 390
-        width: 199
-        height: 326
+        x: 265
+        y: 129
+        width: 87
+        height: 126
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -203,10 +203,10 @@ TextureImporter:
       name: MoonPerformer_SS_3
       rect:
         serializedVersion: 2
-        x: 1121
-        y: 391
-        width: 199
-        height: 342
+        x: 392
+        y: 129
+        width: 88
+        height: 126
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -225,10 +225,10 @@ TextureImporter:
       name: MoonPerformer_SS_4
       rect:
         serializedVersion: 2
-        x: 27
-        y: 24
-        width: 299
-        height: 323
+        x: 8
+        y: 1
+        width: 89
+        height: 124
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -247,10 +247,10 @@ TextureImporter:
       name: MoonPerformer_SS_5
       rect:
         serializedVersion: 2
-        x: 386
-        y: 27
-        width: 281
-        height: 323
+        x: 136
+        y: 1
+        width: 89
+        height: 121
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -269,10 +269,10 @@ TextureImporter:
       name: MoonPerformer_SS_6
       rect:
         serializedVersion: 2
-        x: 775
-        y: 33
-        width: 208
-        height: 339
+        x: 265
+        y: 1
+        width: 88
+        height: 122
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -291,10 +291,10 @@ TextureImporter:
       name: MoonPerformer_SS_7
       rect:
         serializedVersion: 2
-        x: 1159
-        y: 24
-        width: 152
-        height: 344
+        x: 393
+        y: 1
+        width: 87
+        height: 124
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

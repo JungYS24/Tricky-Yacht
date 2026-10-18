@@ -20,6 +20,12 @@ TextureImporter:
   - first:
       213: 1238147086942268144
     second: Permafrost_Slime_5
+  - first:
+      213: 2730810880246948086
+    second: Permafrost_Slime_6
+  - first:
+      213: -9028965678823548168
+    second: Permafrost_Slime_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -52,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -90,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -103,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -118,10 +124,10 @@ TextureImporter:
       name: Permafrost_Slime_0
       rect:
         serializedVersion: 2
-        x: 67
-        y: 274
-        width: 156
-        height: 119
+        x: 10
+        y: 152
+        width: 101
+        height: 83
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -140,10 +146,10 @@ TextureImporter:
       name: Permafrost_Slime_1
       rect:
         serializedVersion: 2
-        x: 255
-        y: 274
-        width: 155
-        height: 119
+        x: 137
+        y: 152
+        width: 102
+        height: 83
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -162,10 +168,10 @@ TextureImporter:
       name: Permafrost_Slime_2
       rect:
         serializedVersion: 2
-        x: 626
-        y: 274
-        width: 156
-        height: 119
+        x: 266
+        y: 152
+        width: 101
+        height: 83
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -184,10 +190,10 @@ TextureImporter:
       name: Permafrost_Slime_3
       rect:
         serializedVersion: 2
-        x: 67
-        y: 70
-        width: 156
-        height: 120
+        x: 400
+        y: 152
+        width: 95
+        height: 83
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -206,10 +212,10 @@ TextureImporter:
       name: Permafrost_Slime_4
       rect:
         serializedVersion: 2
-        x: 255
-        y: 70
-        width: 155
-        height: 120
+        x: 17
+        y: 24
+        width: 94
+        height: 84
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -228,10 +234,10 @@ TextureImporter:
       name: Permafrost_Slime_5
       rect:
         serializedVersion: 2
-        x: 626
-        y: 70
-        width: 156
-        height: 120
+        x: 145
+        y: 24
+        width: 94
+        height: 84
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -242,6 +248,50 @@ TextureImporter:
       bones: []
       spriteID: 0fae0e03738ce2110800000000000000
       internalID: 1238147086942268144
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Permafrost_Slime_6
+      rect:
+        serializedVersion: 2
+        x: 273
+        y: 24
+        width: 94
+        height: 84
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6f024e1f60ac5e520800000000000000
+      internalID: 2730810880246948086
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Permafrost_Slime_7
+      rect:
+        serializedVersion: 2
+        x: 401
+        y: 24
+        width: 94
+        height: 84
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8fa57887d8ba2b280800000000000000
+      internalID: -9028965678823548168
       vertices: []
       indices: 
       edges: []
@@ -266,6 +316,8 @@ TextureImporter:
       Permafrost_Slime_3: -8578468444346954444
       Permafrost_Slime_4: 2720643122774398606
       Permafrost_Slime_5: 1238147086942268144
+      Permafrost_Slime_6: 2730810880246948086
+      Permafrost_Slime_7: -9028965678823548168
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
