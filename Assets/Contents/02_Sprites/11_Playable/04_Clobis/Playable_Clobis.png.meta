@@ -26,9 +26,6 @@ TextureImporter:
   - first:
       213: 7965550155193078261
     second: Playable_Clobis_7
-  - first:
-      213: 8940638437182329794
-    second: Playable_Clobis_8
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -61,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -99,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -112,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -125,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -138,7 +135,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -153,12 +150,12 @@ TextureImporter:
       name: Playable_Clobis_0
       rect:
         serializedVersion: 2
-        x: 12
-        y: 129
-        width: 100
-        height: 120
+        x: 0
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -175,12 +172,12 @@ TextureImporter:
       name: Playable_Clobis_1
       rect:
         serializedVersion: 2
-        x: 140
-        y: 170
-        width: 8
-        height: 18
+        x: 128
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -197,12 +194,12 @@ TextureImporter:
       name: Playable_Clobis_2
       rect:
         serializedVersion: 2
-        x: 148
-        y: 129
-        width: 91
-        height: 121
+        x: 256
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -219,12 +216,12 @@ TextureImporter:
       name: Playable_Clobis_3
       rect:
         serializedVersion: 2
-        x: 269
-        y: 129
-        width: 97
-        height: 122
+        x: 384
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -241,12 +238,12 @@ TextureImporter:
       name: Playable_Clobis_4
       rect:
         serializedVersion: 2
-        x: 398
-        y: 129
-        width: 95
-        height: 122
+        x: 0
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -263,12 +260,12 @@ TextureImporter:
       name: Playable_Clobis_5
       rect:
         serializedVersion: 2
-        x: 18
-        y: 1
-        width: 90
-        height: 122
+        x: 128
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -285,12 +282,12 @@ TextureImporter:
       name: Playable_Clobis_6
       rect:
         serializedVersion: 2
-        x: 146
-        y: 1
-        width: 89
-        height: 122
+        x: 256
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -307,12 +304,12 @@ TextureImporter:
       name: Playable_Clobis_7
       rect:
         serializedVersion: 2
-        x: 274
-        y: 1
-        width: 89
-        height: 122
+        x: 384
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -321,28 +318,6 @@ TextureImporter:
       bones: []
       spriteID: 5f157d0b9a15b8e60800000000000000
       internalID: 7965550155193078261
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Playable_Clobis_8
-      rect:
-        serializedVersion: 2
-        x: 403
-        y: 1
-        width: 89
-        height: 122
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2c3d4710a47831c70800000000000000
-      internalID: 8940638437182329794
       vertices: []
       indices: 
       edges: []
@@ -369,7 +344,6 @@ TextureImporter:
       Playable_Clobis_5: 466046391784834080
       Playable_Clobis_6: 3358917364348349883
       Playable_Clobis_7: 7965550155193078261
-      Playable_Clobis_8: 8940638437182329794
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
