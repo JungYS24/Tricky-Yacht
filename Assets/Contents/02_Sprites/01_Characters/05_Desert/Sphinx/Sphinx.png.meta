@@ -3,28 +3,28 @@ guid: 5b445c85fed54ea4cb6efc7e7bfdce38
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2758215239840145994
+      213: -5012982022781409529
     second: Sphinx_0
   - first:
-      213: 3414300960512991675
+      213: -1697295132107351847
     second: Sphinx_1
   - first:
-      213: -179567042332565920
+      213: -352036178186598081
     second: Sphinx_2
   - first:
-      213: 8464536420939138476
+      213: -7220283114026781963
     second: Sphinx_3
   - first:
-      213: 388837544819469069
+      213: -8197972253174761674
     second: Sphinx_4
   - first:
-      213: -8963621442954391506
+      213: 5822126986462336035
     second: Sphinx_5
   - first:
-      213: 1673613980035871338
+      213: -3047766135646398933
     second: Sphinx_6
   - first:
-      213: 4247205599950668426
+      213: 2585394237732539861
     second: Sphinx_7
   externalObjects: {}
   serializedVersion: 13
@@ -58,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 130
+  spritePixelsToUnits: 35
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -96,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -109,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -122,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -137,20 +137,20 @@ TextureImporter:
       name: Sphinx_0
       rect:
         serializedVersion: 2
-        x: 60
-        y: 587
-        width: 421
-        height: 481
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6bd524f5ad9d8b9d0800000000000000
-      internalID: -2758215239840145994
+      spriteID: 07e7b102694f6eba82c207fd96e5ba91
+      internalID: -5012982022781409529
       vertices: []
       indices: 
       edges: []
@@ -159,20 +159,20 @@ TextureImporter:
       name: Sphinx_1
       rect:
         serializedVersion: 2
-        x: 571
-        y: 587
-        width: 472
-        height: 481
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bb1e6a342a8026f20800000000000000
-      internalID: 3414300960512991675
+      spriteID: d9d8bdeb11ff71e8e9bc6f9052a0d8d6
+      internalID: -1697295132107351847
       vertices: []
       indices: 
       edges: []
@@ -181,20 +181,20 @@ TextureImporter:
       name: Sphinx_2
       rect:
         serializedVersion: 2
-        x: 1113
-        y: 587
-        width: 479
-        height: 473
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 06e5664f9bc028df0800000000000000
-      internalID: -179567042332565920
+      spriteID: 3f091a0bf6501dfbe975ef824d5c4d2e
+      internalID: -352036178186598081
       vertices: []
       indices: 
       edges: []
@@ -203,20 +203,20 @@ TextureImporter:
       name: Sphinx_3
       rect:
         serializedVersion: 2
-        x: 1643
-        y: 596
-        width: 481
-        height: 481
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ca50f6e1703187570800000000000000
-      internalID: 8464536420939138476
+      spriteID: f5b2ae32c366cc9bed60cbbad547947b
+      internalID: -7220283114026781963
       vertices: []
       indices: 
       edges: []
@@ -225,20 +225,20 @@ TextureImporter:
       name: Sphinx_4
       rect:
         serializedVersion: 2
-        x: 55
-        y: 39
-        width: 433
-        height: 503
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d0bac46dfad656500800000000000000
-      internalID: 388837544819469069
+      spriteID: 367702a3abf33a8e55f7ddcf69d8422f
+      internalID: -8197972253174761674
       vertices: []
       indices: 
       edges: []
@@ -247,20 +247,20 @@ TextureImporter:
       name: Sphinx_5
       rect:
         serializedVersion: 2
-        x: 567
-        y: 39
-        width: 453
-        height: 491
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e2011a7f9c1da9380800000000000000
-      internalID: -8963621442954391506
+      spriteID: 23944db1a559cc50172febe1a986768a
+      internalID: 5822126986462336035
       vertices: []
       indices: 
       edges: []
@@ -269,20 +269,20 @@ TextureImporter:
       name: Sphinx_6
       rect:
         serializedVersion: 2
-        x: 1105
-        y: 52
-        width: 480
-        height: 491
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a627a233c0fd93710800000000000000
-      internalID: 1673613980035871338
+      spriteID: 2bd654eed828b4d564f0f4ca42932097
+      internalID: -3047766135646398933
       vertices: []
       indices: 
       edges: []
@@ -291,20 +291,20 @@ TextureImporter:
       name: Sphinx_7
       rect:
         serializedVersion: 2
-        x: 1615
-        y: 40
-        width: 514
-        height: 395
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a820c119dfa11fa30800000000000000
-      internalID: 4247205599950668426
+      spriteID: d5cd63785c2ae123dae5326d87c7a11a
+      internalID: 2585394237732539861
       vertices: []
       indices: 
       edges: []
@@ -323,14 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Sphinx_0: -2758215239840145994
-      Sphinx_1: 3414300960512991675
-      Sphinx_2: -179567042332565920
-      Sphinx_3: 8464536420939138476
-      Sphinx_4: 388837544819469069
-      Sphinx_5: -8963621442954391506
-      Sphinx_6: 1673613980035871338
-      Sphinx_7: 4247205599950668426
+      Sphinx_0: -5012982022781409529
+      Sphinx_1: -1697295132107351847
+      Sphinx_2: -352036178186598081
+      Sphinx_3: -7220283114026781963
+      Sphinx_4: -8197972253174761674
+      Sphinx_5: 5822126986462336035
+      Sphinx_6: -3047766135646398933
+      Sphinx_7: 2585394237732539861
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -14,6 +14,18 @@ TextureImporter:
   - first:
       213: 582755692157340647
     second: banana king kong_3
+  - first:
+      213: 3259230301624266531
+    second: banana king kong_4
+  - first:
+      213: -8121083215368321241
+    second: banana king kong_5
+  - first:
+      213: -1236137997135386579
+    second: banana king kong_6
+  - first:
+      213: 3067728634381233947
+    second: banana king kong_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -84,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -97,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -110,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -125,12 +137,12 @@ TextureImporter:
       name: banana king kong_0
       rect:
         serializedVersion: 2
-        x: 140
-        y: 239
-        width: 253
-        height: 173
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -147,12 +159,12 @@ TextureImporter:
       name: banana king kong_1
       rect:
         serializedVersion: 2
-        x: 406
-        y: 239
-        width: 252
-        height: 173
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -169,12 +181,12 @@ TextureImporter:
       name: banana king kong_2
       rect:
         serializedVersion: 2
-        x: 140
-        y: 51
-        width: 246
-        height: 174
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -191,12 +203,12 @@ TextureImporter:
       name: banana king kong_3
       rect:
         serializedVersion: 2
-        x: 406
-        y: 52
-        width: 250
-        height: 173
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -205,6 +217,94 @@ TextureImporter:
       bones: []
       spriteID: 7eb00e5e63d561800800000000000000
       internalID: 582755692157340647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: banana king kong_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23ef80f1b01c3b2d8be4de99f680c9f0
+      internalID: 3259230301624266531
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: banana king kong_5
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 278795ccd71d4c8f326ba2fca2147223
+      internalID: -8121083215368321241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: banana king kong_6
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2de8617b0a5bd8ee9d32e0a1963e14da
+      internalID: -1236137997135386579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: banana king kong_7
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b6f967ff0c2922a5c0f8e975c0a2c17
+      internalID: 3067728634381233947
       vertices: []
       indices: 
       edges: []
@@ -227,6 +327,10 @@ TextureImporter:
       banana king kong_1: -2936973717164919094
       banana king kong_2: -3026730265145452310
       banana king kong_3: 582755692157340647
+      banana king kong_4: 3259230301624266531
+      banana king kong_5: -8121083215368321241
+      banana king kong_6: -1236137997135386579
+      banana king kong_7: 3067728634381233947
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

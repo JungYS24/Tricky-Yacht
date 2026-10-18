@@ -26,6 +26,18 @@ TextureImporter:
   - first:
       213: -1060337416981908403
     second: Bog_Witch_7
+  - first:
+      213: -1038969653406528171
+    second: Bog_Witch_8
+  - first:
+      213: 2535403228802570972
+    second: Bog_Witch_9
+  - first:
+      213: 2691275773245098085
+    second: Bog_Witch_10
+  - first:
+      213: 5398803949124542404
+    second: Bog_Witch_11
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -58,7 +70,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -96,7 +108,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -109,7 +121,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -124,10 +136,10 @@ TextureImporter:
       name: Bog_Witch_0
       rect:
         serializedVersion: 2
-        x: 16
-        y: 285
-        width: 145
-        height: 151
+        x: 21
+        y: 133
+        width: 100
+        height: 111
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -146,10 +158,10 @@ TextureImporter:
       name: Bog_Witch_1
       rect:
         serializedVersion: 2
-        x: 169
-        y: 285
-        width: 143
-        height: 148
+        x: 147
+        y: 133
+        width: 102
+        height: 111
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -168,10 +180,10 @@ TextureImporter:
       name: Bog_Witch_2
       rect:
         serializedVersion: 2
-        x: 326
-        y: 285
-        width: 141
-        height: 148
+        x: 272
+        y: 133
+        width: 105
+        height: 111
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -190,10 +202,10 @@ TextureImporter:
       name: Bog_Witch_3
       rect:
         serializedVersion: 2
-        x: 484
-        y: 285
-        width: 144
-        height: 149
+        x: 402
+        y: 133
+        width: 103
+        height: 111
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -212,10 +224,10 @@ TextureImporter:
       name: Bog_Witch_4
       rect:
         serializedVersion: 2
-        x: 16
-        y: 75
-        width: 144
-        height: 150
+        x: 23
+        y: 5
+        width: 97
+        height: 112
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -234,10 +246,10 @@ TextureImporter:
       name: Bog_Witch_5
       rect:
         serializedVersion: 2
-        x: 170
-        y: 76
-        width: 141
-        height: 147
+        x: 147
+        y: 5
+        width: 102
+        height: 112
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -256,10 +268,10 @@ TextureImporter:
       name: Bog_Witch_6
       rect:
         serializedVersion: 2
-        x: 326
-        y: 75
-        width: 141
-        height: 148
+        x: 272
+        y: 5
+        width: 104
+        height: 111
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -278,10 +290,10 @@ TextureImporter:
       name: Bog_Witch_7
       rect:
         serializedVersion: 2
-        x: 484
-        y: 75
-        width: 142
-        height: 150
+        x: 306
+        y: 114
+        width: 9
+        height: 8
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -292,6 +304,94 @@ TextureImporter:
       bones: []
       spriteID: d44fcb6bcbce841f0800000000000000
       internalID: -1060337416981908403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bog_Witch_8
+      rect:
+        serializedVersion: 2
+        x: 408
+        y: 5
+        width: 96
+        height: 111
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55d0b4cda96d491f0800000000000000
+      internalID: -1038969653406528171
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bog_Witch_9
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 90
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cdad72fadcf8f2320800000000000000
+      internalID: 2535403228802570972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bog_Witch_10
+      rect:
+        serializedVersion: 2
+        x: 399
+        y: 76
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56883e88e05595520800000000000000
+      internalID: 2691275773245098085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bog_Witch_11
+      rect:
+        serializedVersion: 2
+        x: 143
+        y: 59
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4cf5b8f66976cea40800000000000000
+      internalID: 5398803949124542404
       vertices: []
       indices: 
       edges: []
@@ -318,6 +418,10 @@ TextureImporter:
       Bog_Witch_5: -7286352400004655160
       Bog_Witch_6: -7497325036156065953
       Bog_Witch_7: -1060337416981908403
+      Bog_Witch_8: -1038969653406528171
+      Bog_Witch_9: 2535403228802570972
+      Bog_Witch_10: 2691275773245098085
+      Bog_Witch_11: 5398803949124542404
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
