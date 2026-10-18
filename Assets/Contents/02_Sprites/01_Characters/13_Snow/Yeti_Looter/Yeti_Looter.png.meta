@@ -58,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -96,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -109,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -124,10 +124,10 @@ TextureImporter:
       name: Yeti_Looter_0
       rect:
         serializedVersion: 2
-        x: 48
-        y: 261
-        width: 182
-        height: 152
+        x: 4
+        y: 142
+        width: 116
+        height: 103
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -146,10 +146,10 @@ TextureImporter:
       name: Yeti_Looter_1
       rect:
         serializedVersion: 2
-        x: 239
-        y: 261
-        width: 182
-        height: 150
+        x: 132
+        y: 142
+        width: 115
+        height: 104
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -168,10 +168,10 @@ TextureImporter:
       name: Yeti_Looter_2
       rect:
         serializedVersion: 2
-        x: 425
-        y: 261
-        width: 185
-        height: 150
+        x: 260
+        y: 142
+        width: 116
+        height: 105
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -190,10 +190,10 @@ TextureImporter:
       name: Yeti_Looter_3
       rect:
         serializedVersion: 2
-        x: 619
-        y: 261
-        width: 182
-        height: 150
+        x: 388
+        y: 142
+        width: 116
+        height: 106
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -212,10 +212,10 @@ TextureImporter:
       name: Yeti_Looter_4
       rect:
         serializedVersion: 2
-        x: 48
-        y: 51
-        width: 180
-        height: 153
+        x: 4
+        y: 14
+        width: 115
+        height: 105
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -234,10 +234,10 @@ TextureImporter:
       name: Yeti_Looter_5
       rect:
         serializedVersion: 2
-        x: 239
-        y: 51
-        width: 178
-        height: 152
+        x: 132
+        y: 14
+        width: 115
+        height: 103
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -256,10 +256,10 @@ TextureImporter:
       name: Yeti_Looter_6
       rect:
         serializedVersion: 2
-        x: 428
-        y: 51
-        width: 179
-        height: 152
+        x: 259
+        y: 14
+        width: 115
+        height: 102
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -278,10 +278,10 @@ TextureImporter:
       name: Yeti_Looter_7
       rect:
         serializedVersion: 2
-        x: 618
-        y: 51
-        width: 180
-        height: 152
+        x: 387
+        y: 14
+        width: 114
+        height: 101
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

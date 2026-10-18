@@ -58,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -96,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -109,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -122,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -137,10 +137,10 @@ TextureImporter:
       name: SkeletonHorse_SS_0
       rect:
         serializedVersion: 2
-        x: 29
-        y: 386
-        width: 309
-        height: 325
+        x: 7
+        y: 134
+        width: 114
+        height: 116
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -159,10 +159,10 @@ TextureImporter:
       name: SkeletonHorse_SS_1
       rect:
         serializedVersion: 2
-        x: 376
-        y: 386
-        width: 311
-        height: 325
+        x: 138
+        y: 134
+        width: 111
+        height: 115
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -181,10 +181,10 @@ TextureImporter:
       name: SkeletonHorse_SS_2
       rect:
         serializedVersion: 2
-        x: 723
-        y: 386
-        width: 316
-        height: 318
+        x: 266
+        y: 134
+        width: 111
+        height: 115
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -203,10 +203,10 @@ TextureImporter:
       name: SkeletonHorse_SS_3
       rect:
         serializedVersion: 2
-        x: 1063
-        y: 386
-        width: 323
-        height: 320
+        x: 389
+        y: 134
+        width: 116
+        height: 116
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -225,10 +225,10 @@ TextureImporter:
       name: SkeletonHorse_SS_4
       rect:
         serializedVersion: 2
-        x: 27
-        y: 19
-        width: 316
-        height: 312
+        x: 4
+        y: 6
+        width: 117
+        height: 115
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -247,10 +247,10 @@ TextureImporter:
       name: SkeletonHorse_SS_5
       rect:
         serializedVersion: 2
-        x: 369
-        y: 19
-        width: 321
-        height: 290
+        x: 135
+        y: 6
+        width: 114
+        height: 115
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -269,10 +269,10 @@ TextureImporter:
       name: SkeletonHorse_SS_6
       rect:
         serializedVersion: 2
-        x: 717
-        y: 14
-        width: 323
-        height: 328
+        x: 264
+        y: 6
+        width: 113
+        height: 115
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -291,10 +291,10 @@ TextureImporter:
       name: SkeletonHorse_SS_7
       rect:
         serializedVersion: 2
-        x: 1070
-        y: 14
-        width: 316
-        height: 322
+        x: 391
+        y: 6
+        width: 114
+        height: 116
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

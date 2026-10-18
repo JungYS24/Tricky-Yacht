@@ -58,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -96,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -109,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -124,10 +124,10 @@ TextureImporter:
       name: Heart_of_Tundra_0
       rect:
         serializedVersion: 2
-        x: 73
-        y: 263
-        width: 148
-        height: 138
+        x: 3
+        y: 130
+        width: 123
+        height: 119
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -146,10 +146,10 @@ TextureImporter:
       name: Heart_of_Tundra_1
       rect:
         serializedVersion: 2
-        x: 258
-        y: 263
-        width: 149
-        height: 138
+        x: 131
+        y: 130
+        width: 122
+        height: 120
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -168,10 +168,10 @@ TextureImporter:
       name: Heart_of_Tundra_2
       rect:
         serializedVersion: 2
-        x: 441
-        y: 263
-        width: 149
-        height: 139
+        x: 260
+        y: 130
+        width: 121
+        height: 121
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -190,10 +190,10 @@ TextureImporter:
       name: Heart_of_Tundra_3
       rect:
         serializedVersion: 2
-        x: 627
-        y: 263
-        width: 149
-        height: 140
+        x: 388
+        y: 130
+        width: 120
+        height: 122
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -212,10 +212,10 @@ TextureImporter:
       name: Heart_of_Tundra_4
       rect:
         serializedVersion: 2
-        x: 73
-        y: 61
-        width: 148
-        height: 140
+        x: 3
+        y: 2
+        width: 121
+        height: 124
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -234,10 +234,10 @@ TextureImporter:
       name: Heart_of_Tundra_5
       rect:
         serializedVersion: 2
-        x: 258
-        y: 60
-        width: 149
-        height: 141
+        x: 131
+        y: 2
+        width: 122
+        height: 123
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -256,10 +256,10 @@ TextureImporter:
       name: Heart_of_Tundra_6
       rect:
         serializedVersion: 2
-        x: 440
-        y: 61
-        width: 150
-        height: 140
+        x: 259
+        y: 2
+        width: 122
+        height: 123
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -278,10 +278,10 @@ TextureImporter:
       name: Heart_of_Tundra_7
       rect:
         serializedVersion: 2
-        x: 627
-        y: 60
-        width: 149
-        height: 141
+        x: 387
+        y: 2
+        width: 122
+        height: 121
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
