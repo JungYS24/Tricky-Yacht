@@ -26,9 +26,6 @@ TextureImporter:
   - first:
       213: -3101566340657124610
     second: Mimic_7
-  - first:
-      213: 2092654696836977030
-    second: Mimic_8
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -61,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -99,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -112,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -125,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -140,12 +137,12 @@ TextureImporter:
       name: Mimic_0
       rect:
         serializedVersion: 2
-        x: 71
-        y: 702
-        width: 521
-        height: 606
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -162,12 +159,12 @@ TextureImporter:
       name: Mimic_1
       rect:
         serializedVersion: 2
-        x: 710
-        y: 702
-        width: 522
-        height: 606
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -184,12 +181,12 @@ TextureImporter:
       name: Mimic_2
       rect:
         serializedVersion: 2
-        x: 1350
-        y: 702
-        width: 521
-        height: 616
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -206,12 +203,12 @@ TextureImporter:
       name: Mimic_3
       rect:
         serializedVersion: 2
-        x: 1969
-        y: 702
-        width: 553
-        height: 658
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -228,12 +225,12 @@ TextureImporter:
       name: Mimic_4
       rect:
         serializedVersion: 2
-        x: 71
+        x: 0
         y: 0
-        width: 606
-        height: 679
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -250,12 +247,12 @@ TextureImporter:
       name: Mimic_5
       rect:
         serializedVersion: 2
-        x: 689
-        y: 552
-        width: 19
-        height: 20
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -272,12 +269,12 @@ TextureImporter:
       name: Mimic_6
       rect:
         serializedVersion: 2
-        x: 710
+        x: 256
         y: 0
-        width: 617
-        height: 689
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -294,12 +291,12 @@ TextureImporter:
       name: Mimic_7
       rect:
         serializedVersion: 2
-        x: 1361
+        x: 384
         y: 0
-        width: 575
-        height: 636
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -308,28 +305,6 @@ TextureImporter:
       bones: []
       spriteID: efae2d198d505f4d0800000000000000
       internalID: -3101566340657124610
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Mimic_8
-      rect:
-        serializedVersion: 2
-        x: 1990
-        y: 0
-        width: 513
-        height: 604
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 68155820c5a9a0d10800000000000000
-      internalID: 2092654696836977030
       vertices: []
       indices: 
       edges: []
@@ -356,7 +331,6 @@ TextureImporter:
       Mimic_5: -1320156814832202976
       Mimic_6: -6686032228374034166
       Mimic_7: -3101566340657124610
-      Mimic_8: 2092654696836977030
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

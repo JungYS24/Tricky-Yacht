@@ -3,28 +3,28 @@ guid: 3ea1450aeefa4e0458de8f92f0747a27
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8057421169667133730
+      213: 2743498347809319339
     second: SS_Acolyte_0
   - first:
-      213: -6349203079521894429
+      213: -7946921352174257977
     second: SS_Acolyte_1
   - first:
-      213: 3912916721951023394
+      213: 1134529173952399628
     second: SS_Acolyte_2
   - first:
-      213: -2850072406001021476
+      213: -7094347172552475152
     second: SS_Acolyte_3
   - first:
-      213: 1684558507119663955
+      213: -8349331071637979818
     second: SS_Acolyte_4
   - first:
-      213: -1803629234607758420
+      213: 4355917492651876424
     second: SS_Acolyte_5
   - first:
-      213: -1262140507919880436
+      213: -3501661943977667394
     second: SS_Acolyte_6
   - first:
-      213: -1169945479318315967
+      213: -3718690018806674252
     second: SS_Acolyte_7
   externalObjects: {}
   serializedVersion: 13
@@ -58,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 34
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -96,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -109,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -122,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -137,20 +137,20 @@ TextureImporter:
       name: SS_Acolyte_0
       rect:
         serializedVersion: 2
-        x: 92
-        y: 393
-        width: 176
-        height: 330
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ede2740e22a4e2090800000000000000
-      internalID: -8057421169667133730
+      spriteID: aba90b2f36dd122662bbf23ba9db3b89
+      internalID: 2743498347809319339
       vertices: []
       indices: 
       edges: []
@@ -159,20 +159,20 @@ TextureImporter:
       name: SS_Acolyte_1
       rect:
         serializedVersion: 2
-        x: 442
-        y: 393
-        width: 175
-        height: 330
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3eff74e407913e7a0800000000000000
-      internalID: -6349203079521894429
+      spriteID: c7b8af8122ddb6915ad4f0d1a5a17231
+      internalID: -7946921352174257977
       vertices: []
       indices: 
       edges: []
@@ -181,20 +181,20 @@ TextureImporter:
       name: SS_Acolyte_2
       rect:
         serializedVersion: 2
-        x: 791
-        y: 393
-        width: 176
-        height: 330
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 221a39fe6097d4630800000000000000
-      internalID: 3912916721951023394
+      spriteID: 0c09c0d045a8be0f1a1ce54049d26801
+      internalID: 1134529173952399628
       vertices: []
       indices: 
       edges: []
@@ -203,20 +203,20 @@ TextureImporter:
       name: SS_Acolyte_3
       rect:
         serializedVersion: 2
-        x: 1138
-        y: 393
-        width: 193
-        height: 330
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cdd8a204f328278d0800000000000000
-      internalID: -2850072406001021476
+      spriteID: f07db682d5d08b9d43a24459408bd6df
+      internalID: -7094347172552475152
       vertices: []
       indices: 
       edges: []
@@ -225,20 +225,20 @@ TextureImporter:
       name: SS_Acolyte_4
       rect:
         serializedVersion: 2
-        x: 86
-        y: 27
-        width: 227
-        height: 342
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 35bda3c7901c06710800000000000000
-      internalID: 1684558507119663955
+      spriteID: 56fde282a037218c8e9be7790e4783de
+      internalID: -8349331071637979818
       vertices: []
       indices: 
       edges: []
@@ -247,20 +247,20 @@ TextureImporter:
       name: SS_Acolyte_5
       rect:
         serializedVersion: 2
-        x: 438
-        y: 27
-        width: 227
-        height: 342
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ca3e1b464c838f6e0800000000000000
-      internalID: -1803629234607758420
+      spriteID: 48e06c84e153733cf6a654abf7c6df92
+      internalID: 4355917492651876424
       vertices: []
       indices: 
       edges: []
@@ -269,20 +269,20 @@ TextureImporter:
       name: SS_Acolyte_6
       rect:
         serializedVersion: 2
-        x: 796
-        y: 27
-        width: 182
-        height: 341
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c0fedc825e9fb7ee0800000000000000
-      internalID: -1262140507919880436
+      spriteID: be14b5b9039967cfbaa54cf6ab26e029
+      internalID: -3501661943977667394
       vertices: []
       indices: 
       edges: []
@@ -291,20 +291,20 @@ TextureImporter:
       name: SS_Acolyte_7
       rect:
         serializedVersion: 2
-        x: 1141
-        y: 27
-        width: 182
-        height: 342
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 14c58a209c483cfe0800000000000000
-      internalID: -1169945479318315967
+      spriteID: b4cc3c5f218f64ccc091204a44be69fe
+      internalID: -3718690018806674252
       vertices: []
       indices: 
       edges: []
@@ -323,14 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      SS_Acolyte_0: -8057421169667133730
-      SS_Acolyte_1: -6349203079521894429
-      SS_Acolyte_2: 3912916721951023394
-      SS_Acolyte_3: -2850072406001021476
-      SS_Acolyte_4: 1684558507119663955
-      SS_Acolyte_5: -1803629234607758420
-      SS_Acolyte_6: -1262140507919880436
-      SS_Acolyte_7: -1169945479318315967
+      SS_Acolyte_0: 2743498347809319339
+      SS_Acolyte_1: -7946921352174257977
+      SS_Acolyte_2: 1134529173952399628
+      SS_Acolyte_3: -7094347172552475152
+      SS_Acolyte_4: -8349331071637979818
+      SS_Acolyte_5: 4355917492651876424
+      SS_Acolyte_6: -3501661943977667394
+      SS_Acolyte_7: -3718690018806674252
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
