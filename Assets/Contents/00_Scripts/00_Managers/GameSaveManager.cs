@@ -16,6 +16,7 @@ public class SavedDiceData
     public int type;
     public float multiplier;
     public Color diceColor;
+    public int stampType;           // StampType의 int 값. 예전 저장에는 없어서 0(None)
 
     public List<int> activeSatellites = new List<int>();
 }
@@ -322,6 +323,7 @@ public class GameSaveManager : MonoBehaviour
             sdd.type = (int)targetToSave.type;
             sdd.multiplier = targetToSave.multiplier;
             sdd.diceColor = targetToSave.diceColor;
+            sdd.stampType = (int)targetToSave.stampType;
 
             sdd.activeSatellites = new List<int>();
 

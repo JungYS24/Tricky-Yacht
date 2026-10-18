@@ -35,6 +35,7 @@ public class DeckSlot : MonoBehaviour
     public float vfxScale = 2.5f;
 
     private SatelliteUIVisual satelliteVisual;
+    private StampUIVisual stampVisual;
 
     private DiceData1 currentData;
 
@@ -71,6 +72,7 @@ public class DeckSlot : MonoBehaviour
 
         // 빈 슬롯은 별 오브젝트를 숨겨 두고 다음 표시 때 재사용합니다.
         if (satelliteVisual != null) satelliteVisual.Bind(null);
+        if (stampVisual != null) stampVisual.Bind(null);
     }
 
     public void SetDice(DiceData1 data, bool isUsed, int exactValue = -1)
@@ -179,6 +181,11 @@ public class DeckSlot : MonoBehaviour
             if (satelliteVisual == null) satelliteVisual = diceIcon.GetComponent<SatelliteUIVisual>();
             if (satelliteVisual == null) satelliteVisual = diceIcon.gameObject.AddComponent<SatelliteUIVisual>();
             satelliteVisual.Bind(data);
+
+            // 스탬프는 아이콘 가운데에 연한 자국으로 겹칩니다. 사용한 주사위는 아이콘처럼 더 흐리게.
+            if (stampVisual == null) stampVisual = diceIcon.GetComponent<StampUIVisual>();
+            if (stampVisual == null) stampVisual = diceIcon.gameObject.AddComponent<StampUIVisual>();
+            stampVisual.Bind(data, isUsed ? 0.4f : 1f);
         }
     }
 

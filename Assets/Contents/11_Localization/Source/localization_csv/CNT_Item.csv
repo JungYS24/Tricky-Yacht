@@ -206,7 +206,7 @@ CNT_Item,CNT_Fig_SpiderLily_DESC,최대 체력이 영구적으로 증가할 때�
 CNT_Item,CNT_Fig_DragonBomb_NAME,마룡의 폭탄,Dragon's Bomb,魔竜の爆弾,魔龙炸弹,
 CNT_Item,CNT_Fig_DragonBomb_DESC,적에게 가하는 폭발 피해 50% 증가,Increases explosive damage dealt to enemies by 50%,敵に与える爆発ダメージが50%増加,对敌人造成的爆炸伤害增加50%,
 CNT_Item,CNT_Stamp_Heart_NAME,하트,Heart,ハート,红心,
-CNT_Item,CNT_Stamp_Heart_DESC,킵하면 이번 피격 -4,"While kept, reduces the next hit taken by 4",キープ中、次に受けるダメージ-4,保留期间，下一次受到的伤害-4,
+CNT_Item,CNT_Stamp_Heart_DESC,킵 결산 시 보호막 +4,"On Keep settlement, +4 Shield",キープ決算時、シールド+4,结算保留时，护盾+4,
 CNT_Item,CNT_Stamp_Clover_NAME,클로버,Clover,クローバー,梅花,
 CNT_Item,CNT_Stamp_Clover_DESC,이 주사위 리롤 시 30%로 횟수 유지,30% chance to not consume a reroll charge when rerolling this die,このサイコロをリロールする時、30%の確率でリロール回数を消費しない,重投这颗骰子时，有30%概率不消耗重投次数,
 CNT_Item,CNT_Stamp_Diamond_NAME,다이아,Diamond,ダイヤ,方块,

@@ -111,6 +111,9 @@ public static class GameStateRestorer
                 newDice.diceColor = dData.diceColor;
             }
 
+            // 세이브 파일에 있던 스탬프를 덮어씌움
+            if (newDice != null) newDice.stampType = (StampType)dData.stampType;
+
             //세이브 파일에 있던 위성 상태를 덮어씌움
             if (newDice != null && dData.activeSatellites != null)
             {

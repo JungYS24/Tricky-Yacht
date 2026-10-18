@@ -686,9 +686,14 @@ public class DiceManager : MonoBehaviour
 
         board.RollUnkept();
 
-        // 클로버 스탬프가 찍힌 주사위가 있으면 리롤 횟수 유지
-        if (board.ActiveDice.All(d => d.myData.stampType != StampType.Clover) ||
-            UnityEngine.Random.Range(0, 10) >= 3)
+        // 클로버 스탬프: 이번에 굴러간(킵 안 된) 클로버 주사위마다 30%씩 따로 굴려, 하나라도 맞으면 리롤 횟수 유지(최대 1회)
+        bool keepRerollCharge = false;
+        foreach (var d in board.ActiveDice)
+        {
+            if (d == null || d.isKept || d.myData == null || d.myData.stampType != StampType.Clover) continue;
+            if (UnityEngine.Random.Range(0, 100) < TurnCalculator.CloverKeepChancePercent) keepRerollCharge = true;
+        }
+        if (!keepRerollCharge)
             currentRerolls++;
 
         //리롤 시 발동(OnDiceReroll)하는 6번 카테고리 피규어 발동
@@ -800,7 +805,7 @@ public class DiceManager : MonoBehaviour
         int simEnemyHP = enemy != null ? enemy.CurrentHP : 0;
 
         // 변경된 코팅·위성을 반영하여 주사위 효과 계산
-        TurnCalcResult calcResult = TurnCalculator.CalculateDiceEffects(keptDice, simEnemyHP, healMultUI, diceScoreBonuses);
+        TurnCalcResult calcResult = TurnCalculator.CalculateDiceEffects(keptDice, simEnemyHP, healMultUI, diceScoreBonuses, handRank);
         int extraIceChipsForDisplay = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetIceChipsBonus() : 0;
 
         // 주사위별 기본 눈금 표시. 코팅·위성 칩은 아래 순차 결산에서 표시합니다.
@@ -830,26 +835,27 @@ public class DiceManager : MonoBehaviour
 
         // 다크 데미지 별도 계산 (최신 HP 기준)
         int darkDamageTotal = TurnCalculator.CalculateDarkDamage(keptDice, simEnemyHP);
+        // 스페이드 스탬프 추가 피해는 배수 없이 최종 피해에 더한다
+        int finalDamage = total.damage + calcResult.stampDamage;
 
-        yield return resolutionPresenter.PlayFinalDamage(ui, total.damage + darkDamageTotal, resolutionTiming);
+        yield return resolutionPresenter.PlayFinalDamage(ui, finalDamage + darkDamageTotal, resolutionTiming);
 
         // 화염 및 기타 수치 종합
         int totalFlameDamage = calcResult.flameDamageThisTurn + figureBonusFlameDamage;
         figureBonusFlameDamage = 0;
         int finalHeal = calcResult.expectedHeal;
-        int expectedGold = calcResult.expectedGold; // 코인 주사위 등에서 얻은 골드
+        int expectedGold = calcResult.expectedGold + calcResult.stampGold; // 코인 주사위·다이아 스탬프 등에서 얻은 골드
 
-        // 면 효과가 Coin이라 골드를 준 주사위(코인 날아가기 연출 대상)
+        // 코인 면이나 다이아 스탬프로 골드를 준 주사위(코인 날아가기 연출 대상)
         var coinDice = new List<Dice>();
         foreach (var d in keptDice)
         {
-            if (d == null || d.myData == null || d.currentValue <= 0) continue;
-            if (d.myData.GetFaceEffect(d.ResolveFaceIndex()) == SpecialDieEffect.Coin) coinDice.Add(d);
+            if (TurnCalculator.GetCoinFlyGold(d) > 0) coinDice.Add(d);
         }
 
         // 완벽하게 쪼개진 수치들을 전투 지휘관(CombatFlowController)에게 전달
-        yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, total.damage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName, calcResult.selfDamage, coinDice
-        ));
+        yield return StartCoroutine(CombatFlowController.ProcessTurnResolution(this, finalDamage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName, calcResult.selfDamage, coinDice,
+            calcResult.stampShield));
         ui?.ClearMergedHandDamageText();
     }
 

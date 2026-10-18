@@ -7,6 +7,12 @@ using UnityEngine.UI;
 // InventorySlot에서 자동으로 연결합니다. 씬에 별도 매니저를 만들 필요가 없습니다.
 public sealed class FigureFeedback : MonoBehaviour
 {
+    // 족보 조건 미리보기: 밝기 범위, 한 번 밝아지며 커지는 시간(초), 숨 쉬듯 커지는 배율
+    private const float PreviewGlowMin = 0.12f;
+    private const float PreviewGlowMax = 0.4f;
+    private const float PreviewPeriod = 0.75f;
+    private const float PreviewScale = 1.08f;
+
     private static readonly Dictionary<FigureItemSO, FigureFeedback> Slots = new Dictionary<FigureItemSO, FigureFeedback>();
     private FigureItemSO figure;
     private UIEffect effect;
@@ -57,9 +63,16 @@ public sealed class FigureFeedback : MonoBehaviour
     {
         if (effect == null || retiring) return;
         previewTween?.Kill();
-        effect.colorIntensity = preview ? 0.12f : 0f;
+        previewTween = null;
+        if (icon != null) icon.localScale = baseScale;
+        effect.colorIntensity = preview ? PreviewGlowMin : 0f;
         if (!preview || !isActiveAndEnabled) return;
-        previewTween = DOTween.To(() => effect.colorIntensity, value => effect.colorIntensity = value, 0.4f, 0.65f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo).SetUpdate(true);
+        // 조건이 맞는 동안 은은하게 빛나며 숨 쉬듯 살짝 커졌다 작아진다
+        Sequence breathing = DOTween.Sequence().SetUpdate(true);
+        breathing.Join(DOTween.To(() => effect.colorIntensity, value => effect.colorIntensity = value, PreviewGlowMax, PreviewPeriod).SetEase(Ease.InOutSine));
+        breathing.Join(icon.DOScale(baseScale * PreviewScale, PreviewPeriod).SetEase(Ease.InOutSine));
+        breathing.SetLoops(-1, LoopType.Yoyo);
+        previewTween = breathing;
     }
 
     public static void Pulse(FigureItemSO data)

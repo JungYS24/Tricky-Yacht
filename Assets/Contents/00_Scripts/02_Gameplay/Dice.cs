@@ -44,6 +44,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
     private Tween scoreFeedbackTween;
     private UiHoverIdleJuice hoverJuice;
+    private StampBadge stampBadge;
 
 
     private void Awake()
@@ -91,6 +92,10 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         currentValue = initialValue;
         currentFaceIndex = faceIndex >= 0 ? faceIndex : myData.FindFaceIndex(initialValue);
         UpdateSprite(initialValue);
+
+        // 스탬프가 찍힌 주사위만 표시를 붙인다. 풀에서 다시 쓰는 주사위는 스탬프가 없으면 숨긴다.
+        if (stampBadge == null && myData.stampType != StampType.None) stampBadge = StampBadge.Get(this);
+        if (stampBadge != null) stampBadge.Bind(spriteRenderer, myData.stampType);
 
         spriteRenderer.DOKill(); // 지난 결산의 가짜 주사위 흐림 연출이 남지 않도록 정리
         ApplyDiceColor();
@@ -164,6 +169,13 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         }
 
         spriteRenderer.color = finalColor;
+
+        // 스탬프는 코팅 색을 받지 않고 킵했을 때 어두워지는 것만 따른다.
+        if (stampBadge != null)
+        {
+            float shade = isKept ? keptDarkness : 1f;
+            stampBadge.SetTint(new Color(shade, shade, shade, myData.diceColor.a));
+        }
     }
 
     private System.Collections.IEnumerator IdleAnimationRoutine(int[] faces)

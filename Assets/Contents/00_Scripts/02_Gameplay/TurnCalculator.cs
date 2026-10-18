@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 
 // 결산 결과를 한 번에 담아 전달할 구조체
 public struct TurnCalcResult
@@ -19,14 +18,15 @@ public struct TurnCalcResult
     public float satelliteBonusMult;
     public float iceBonusMult;
 
-    public int stampBonusChips;
-    public int stampDamage;
-    public int stampGold;
+    public int stampBonusChips; // 스페이드: 족보에 쓰인 주사위의 칩
+    public int stampDamage;     // 스페이드: 족보에 안 쓰인 주사위의 눈만큼, 배수 없이 최종 피해에 더함
+    public int stampGold;       // 다이아: expectedGold와 따로 모아 결산에서 더함
+    public int stampShield;     // 하트: 결산 때 얻는 보호막
 }
 
 public enum DiceScoreBonusKind
 {
-    IceChips, MercuryChips, PrismMult, IceMult, MarsMult
+    IceChips, MercuryChips, PrismMult, IceMult, MarsMult, SpadeChips
 }
 
 public struct DiceScoreBonus
@@ -34,7 +34,7 @@ public struct DiceScoreBonus
     public Dice source;
     public DiceScoreBonusKind kind;
     public float amount;
-    public bool IsChips => kind == DiceScoreBonusKind.IceChips || kind == DiceScoreBonusKind.MercuryChips;
+    public bool IsChips => kind == DiceScoreBonusKind.IceChips || kind == DiceScoreBonusKind.MercuryChips || kind == DiceScoreBonusKind.SpadeChips;
 
     public DiceScoreBonus(Dice source, DiceScoreBonusKind kind, float amount)
     {
@@ -64,16 +64,32 @@ public static class TurnCalculator
 {
     public const int GoldPerPip = 10;
 
+    // 스탬프 수치
+    public const int SpadeChips = 20;
+    public const int HeartShield = 4;
+    public const int DiamondGoldPerPip = 5;
+    public const int CloverKeepChancePercent = 30;
+
     // 하트 면 회복량. 전투 결산과 지도 굴림이 같은 계산을 쓴다.
     public static int CalculateHeartHeal(int pips, float healMultiplier)
     {
         return Mathf.FloorToInt(pips * healMultiplier);
     }
 
+    // 결산 때 코인이 날아가는 골드: 코인 면(눈×10) + 다이아 스탬프(눈×5). 코팅·위성 골드는 코인 없이 바로 오른다.
+    public static int GetCoinFlyGold(Dice d)
+    {
+        if (d == null || d.myData == null || d.currentValue <= 0) return 0;
+        int gold = 0;
+        if (d.myData.GetFaceEffect(d.ResolveFaceIndex()) == SpecialDieEffect.Coin) gold += d.currentValue * GoldPerPip;
+        if (d.myData.stampType == StampType.Diamond) gold += d.currentValue * DiamondGoldPerPip;
+        return gold;
+    }
+
     public static TurnScoreResult CalculateScore(TurnCalcResult dice, float handMult, TurnScoreBonuses bonuses)
     {
-        // 최종 칩 = 주사위 기본합 + 얼음/위성 + 피규어/스테이지 보너스 + 스낵 보너스
-        int chips = dice.baseSum + dice.iceBonusChips + dice.satelliteBonusChips + bonuses.stageChips + bonuses.snackChips;
+        // 최종 칩 = 주사위 기본합 + 얼음/위성/스페이드 + 피규어/스테이지 보너스 + 스낵 보너스
+        int chips = dice.baseSum + dice.iceBonusChips + dice.satelliteBonusChips + dice.stampBonusChips + bonuses.stageChips + bonuses.snackChips;
         // 최종 배수 = 족보 배수 + 피규어/스테이지 배수 + 스낵 배수 + 프리즘/위성 배수
         float multiplier = handMult + bonuses.stageMult + bonuses.snackMult + dice.prismMultTotal + dice.satelliteBonusMult + dice.iceBonusMult + bonuses.permanentMult;
         multiplier *= dice.curseMultiplier;
@@ -154,12 +170,15 @@ public static class TurnCalculator
     }
 
     // 결산 및 UI 갱신 시 주사위 개별 효과들을 한 번에 합산해주는 순수 연산 함수
-    public static TurnCalcResult CalculateDiceEffects(List<Dice> targetDice, int currentEnemyHP, float healMultiplier, List<DiceScoreBonus> bonusSteps = null)
+    // scoredHand: 결산에서 이미 판정한 족보. 없으면 스페이드 스탬프가 있을 때만 직접 판정한다.
+    public static TurnCalcResult CalculateDiceEffects(List<Dice> targetDice, int currentEnemyHP, float healMultiplier, List<DiceScoreBonus> bonusSteps = null, HandRank? scoredHand = null)
     {
         bonusSteps?.Clear();
         TurnCalcResult res = new TurnCalcResult { curseMultiplier = 1f };
         int extraIceChips = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetIceChipsBonus() : 0;
         float extraIceMult = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetIceMultiplierBonus() : 0f;
+        List<int> handValues = null;
+        HandRank hand = HandRank.HighCard;
 
         foreach (var d in targetDice)
         {
@@ -225,40 +244,34 @@ public static class TurnCalculator
                 }
             }
 
-            // 스탬프 효과
+            // 스탬프 효과 (주사위마다 하나). 클로버는 리롤할 때 DiceManager에서 처리한다.
             switch (d.myData.stampType)
             {
                 case StampType.Spade:
-                    var rank = CalculateHand(
-                        targetDice.Select(d => d.currentValue).ToList(),
-                        DiceManager.Instance,
-                        out _);
-                    int[] group = new int[5];
-                    HandResolutionFeedback.GetEmphasisGroups(
-                        rank,
-                        targetDice.Select(d => d.currentValue).ToArray(),
-                        group,
-                        new int[5]);
-                    int index = targetDice.IndexOf(d);
-                    if (group[index] >= 0)
+                    // 족보에 쓰였으면 칩 +20, 아니면(하이카드 포함) 눈만큼 추가 피해
+                    if (handValues == null)
                     {
-                        res.stampBonusChips += 20;
+                        handValues = new List<int>(targetDice.Count);
+                        foreach (var die in targetDice) handValues.Add(die.currentValue);
+                        hand = scoredHand ?? CalculateHand(handValues, DiceManager.Instance, out _);
+                    }
+                    if (HandRankUtil.IsUsedInHand(hand, handValues, targetDice.IndexOf(d)))
+                    {
+                        res.stampBonusChips += SpadeChips;
+                        bonusSteps?.Add(new DiceScoreBonus(d, DiceScoreBonusKind.SpadeChips, SpadeChips));
                     }
                     else
                     {
-                        res.stampDamage += d.currentValue;
+                        res.stampDamage += Mathf.Max(0, d.currentValue);
                     }
                     break;
 
                 case StampType.Heart:
-                    res.stampDamage -= 4;
-                    break;
-                
-                case StampType.Diamond:
-                    res.stampGold += d.currentValue * 5;
+                    res.stampShield += HeartShield;
                     break;
 
-                default:
+                case StampType.Diamond:
+                    res.stampGold += Mathf.Max(0, d.currentValue) * DiamondGoldPerPip;
                     break;
             }
         }
