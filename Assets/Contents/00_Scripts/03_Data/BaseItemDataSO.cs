@@ -13,6 +13,7 @@ public abstract class BaseItemDataSO : ScriptableObject
     public int price;
     public Sprite icon;
     [TextArea(3, 5)] public string description;
+    public ItemGrade grade;
 
     public abstract void ApplyItemEffect(DiceManager diceManager);
 }
