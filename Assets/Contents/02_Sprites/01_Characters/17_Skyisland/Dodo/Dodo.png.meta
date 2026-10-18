@@ -26,21 +26,6 @@ TextureImporter:
   - first:
       213: 2692966373135456723
     second: Dodo__7
-  - first:
-      213: 3063136407513086434
-    second: Dodo__8
-  - first:
-      213: 7255482824171371071
-    second: Dodo__9
-  - first:
-      213: 8056977017743483245
-    second: Dodo__10
-  - first:
-      213: -2725304180877157733
-    second: Dodo__11
-  - first:
-      213: -4203275363592306229
-    second: Dodo__12
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -73,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -111,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -124,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -137,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -152,10 +137,10 @@ TextureImporter:
       name: Dodo__0
       rect:
         serializedVersion: 2
-        x: 86
-        y: 693
-        width: 467
-        height: 590
+        x: 17
+        y: 130
+        width: 103
+        height: 112
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -174,10 +159,10 @@ TextureImporter:
       name: Dodo__1
       rect:
         serializedVersion: 2
-        x: 650
-        y: 940
-        width: 11
-        height: 29
+        x: 145
+        y: 130
+        width: 102
+        height: 115
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -196,10 +181,10 @@ TextureImporter:
       name: Dodo__2
       rect:
         serializedVersion: 2
-        x: 663
-        y: 902
-        width: 25
-        height: 84
+        x: 273
+        y: 130
+        width: 102
+        height: 119
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -218,10 +203,10 @@ TextureImporter:
       name: Dodo__3
       rect:
         serializedVersion: 2
-        x: 689
-        y: 692
-        width: 479
-        height: 592
+        x: 402
+        y: 130
+        width: 102
+        height: 121
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -240,10 +225,10 @@ TextureImporter:
       name: Dodo__4
       rect:
         serializedVersion: 2
-        x: 1328
-        y: 692
-        width: 519
-        height: 597
+        x: 19
+        y: 2
+        width: 99
+        height: 121
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -262,10 +247,10 @@ TextureImporter:
       name: Dodo__5
       rect:
         serializedVersion: 2
-        x: 2007
-        y: 692
-        width: 483
-        height: 592
+        x: 146
+        y: 2
+        width: 102
+        height: 120
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -284,10 +269,10 @@ TextureImporter:
       name: Dodo__6
       rect:
         serializedVersion: 2
-        x: 93
-        y: 81
-        width: 472
-        height: 585
+        x: 275
+        y: 2
+        width: 104
+        height: 119
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -306,10 +291,10 @@ TextureImporter:
       name: Dodo__7
       rect:
         serializedVersion: 2
-        x: 754
-        y: 83
-        width: 476
-        height: 583
+        x: 403
+        y: 2
+        width: 104
+        height: 117
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -320,116 +305,6 @@ TextureImporter:
       bones: []
       spriteID: 3d99fcef5a65f5520800000000000000
       internalID: 2692966373135456723
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Dodo__8
-      rect:
-        serializedVersion: 2
-        x: 1298
-        y: 497
-        width: 84
-        height: 72
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2e9326c5552728a20800000000000000
-      internalID: 3063136407513086434
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Dodo__9
-      rect:
-        serializedVersion: 2
-        x: 1324
-        y: 458
-        width: 52
-        height: 44
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f3abea8ff27a0b460800000000000000
-      internalID: 7255482824171371071
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Dodo__10
-      rect:
-        serializedVersion: 2
-        x: 1383
-        y: 81
-        width: 474
-        height: 584
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d612612f8e120df60800000000000000
-      internalID: 8056977017743483245
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Dodo__11
-      rect:
-        serializedVersion: 2
-        x: 2007
-        y: 80
-        width: 476
-        height: 585
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b9a1ee96946cd2ad0800000000000000
-      internalID: -2725304180877157733
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Dodo__12
-      rect:
-        serializedVersion: 2
-        x: 722
-        y: 106
-        width: 62
-        height: 59
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bc10ee3a357faa5c0800000000000000
-      internalID: -4203275363592306229
       vertices: []
       indices: 
       edges: []
@@ -450,17 +325,12 @@ TextureImporter:
     nameFileIdTable:
       Dodo__0: 1532897884692481026
       Dodo__1: 5329962410666399715
-      Dodo__10: 8056977017743483245
-      Dodo__11: -2725304180877157733
-      Dodo__12: -4203275363592306229
       Dodo__2: -8089153932666180047
       Dodo__3: 399267810031503181
       Dodo__4: -4788884264687071126
       Dodo__5: -6548165279508031385
       Dodo__6: 8643006962506059799
       Dodo__7: 2692966373135456723
-      Dodo__8: 3063136407513086434
-      Dodo__9: 7255482824171371071
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
