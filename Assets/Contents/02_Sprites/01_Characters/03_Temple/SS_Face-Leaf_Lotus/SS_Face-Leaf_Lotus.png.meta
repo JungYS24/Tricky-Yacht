@@ -3,41 +3,29 @@ guid: d021e12d911d25c46a093e8cdfdcb5c4
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8671824613451903791
+      213: 6082925814080347166
     second: SS_Face-Leaf_Lotus_0
   - first:
-      213: -4025527368448744308
+      213: -3040251430722695487
     second: SS_Face-Leaf_Lotus_1
   - first:
-      213: 4269032465725720400
+      213: 3704995443632539523
     second: SS_Face-Leaf_Lotus_2
   - first:
-      213: 1196753471621298622
+      213: 2155785161455292855
     second: SS_Face-Leaf_Lotus_3
   - first:
-      213: -5727171233232931555
+      213: -7926397059488323681
     second: SS_Face-Leaf_Lotus_4
   - first:
-      213: -9140341169686766605
+      213: -6850996370095090937
     second: SS_Face-Leaf_Lotus_5
   - first:
-      213: 8860690483997154196
+      213: -4548390920925417816
     second: SS_Face-Leaf_Lotus_6
   - first:
-      213: 1058557655679390190
+      213: 1567863656765865785
     second: SS_Face-Leaf_Lotus_7
-  - first:
-      213: 9065376795327509557
-    second: SS_Face-Leaf_Lotus_8
-  - first:
-      213: 5339051839800057110
-    second: SS_Face-Leaf_Lotus_9
-  - first:
-      213: -6523382983724295433
-    second: SS_Face-Leaf_Lotus_10
-  - first:
-      213: 801831463475062736
-    second: SS_Face-Leaf_Lotus_11
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -70,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -84,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 40
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -108,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -121,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -134,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -149,20 +137,20 @@ TextureImporter:
       name: SS_Face-Leaf_Lotus_0
       rect:
         serializedVersion: 2
-        x: 85
-        y: 405
-        width: 186
-        height: 257
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1dcc5b8957d77a780800000000000000
-      internalID: -8671824613451903791
+      spriteID: 1e1c5097cce46a5412b9d27f48392386
+      internalID: 6082925814080347166
       vertices: []
       indices: 
       edges: []
@@ -171,20 +159,20 @@ TextureImporter:
       name: SS_Face-Leaf_Lotus_1
       rect:
         serializedVersion: 2
-        x: 435
-        y: 405
-        width: 187
-        height: 268
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c84eff1cf247228c0800000000000000
-      internalID: -4025527368448744308
+      spriteID: c18ee6836edbced5804a00031cad6ef1
+      internalID: -3040251430722695487
       vertices: []
       indices: 
       edges: []
@@ -193,20 +181,20 @@ TextureImporter:
       name: SS_Face-Leaf_Lotus_2
       rect:
         serializedVersion: 2
-        x: 759
-        y: 405
-        width: 247
-        height: 295
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0570136c866ae3b30800000000000000
-      internalID: 4269032465725720400
+      spriteID: 838728e0b9c96a331bccdd341d54b0ab
+      internalID: 3704995443632539523
       vertices: []
       indices: 
       edges: []
@@ -215,20 +203,20 @@ TextureImporter:
       name: SS_Face-Leaf_Lotus_3
       rect:
         serializedVersion: 2
-        x: 1106
-        y: 405
-        width: 250
-        height: 307
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: eb9f3b711f8bb9010800000000000000
-      internalID: 1196753471621298622
+      spriteID: b7d199b82ee3ea1d93613faba960cc3e
+      internalID: 2155785161455292855
       vertices: []
       indices: 
       edges: []
@@ -237,20 +225,20 @@ TextureImporter:
       name: SS_Face-Leaf_Lotus_4
       rect:
         serializedVersion: 2
-        x: 63
-        y: 33
-        width: 248
-        height: 330
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d15b0537b100580b0800000000000000
-      internalID: -5727171233232931555
+      spriteID: 9f677fc8dec7ff91c9ba9b03962d2f32
+      internalID: -7926397059488323681
       vertices: []
       indices: 
       edges: []
@@ -259,20 +247,20 @@ TextureImporter:
       name: SS_Face-Leaf_Lotus_5
       rect:
         serializedVersion: 2
-        x: 412
-        y: 33
-        width: 248
-        height: 330
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3fb11fe322cf62180800000000000000
-      internalID: -9140341169686766605
+      spriteID: 07d3fd7a195feca0b671e09404c18910
+      internalID: -6850996370095090937
       vertices: []
       indices: 
       edges: []
@@ -281,20 +269,20 @@ TextureImporter:
       name: SS_Face-Leaf_Lotus_6
       rect:
         serializedVersion: 2
-        x: 763
-        y: 295
-        width: 6
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 49b955b9c0f77fa70800000000000000
-      internalID: 8860690483997154196
+      spriteID: a8eea04a8edee0c09cfd604243c9b706
+      internalID: -4548390920925417816
       vertices: []
       indices: 
       edges: []
@@ -303,108 +291,20 @@ TextureImporter:
       name: SS_Face-Leaf_Lotus_7
       rect:
         serializedVersion: 2
-        x: 768
-        y: 33
-        width: 229
-        height: 318
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ee15a015490c0be00800000000000000
-      internalID: 1058557655679390190
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: SS_Face-Leaf_Lotus_8
-      rect:
-        serializedVersion: 2
-        x: 992
-        y: 253
-        width: 19
-        height: 49
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 534b0983a20becd70800000000000000
-      internalID: 9065376795327509557
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: SS_Face-Leaf_Lotus_9
-      rect:
-        serializedVersion: 2
-        x: 1136
-        y: 33
-        width: 187
-        height: 295
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 61d9dac5c5f181a40800000000000000
-      internalID: 5339051839800057110
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: SS_Face-Leaf_Lotus_10
-      rect:
-        serializedVersion: 2
-        x: 757
-        y: 251
-        width: 16
-        height: 41
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7fa19491db94875a0800000000000000
-      internalID: -6523382983724295433
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: SS_Face-Leaf_Lotus_11
-      rect:
-        serializedVersion: 2
-        x: 991
-        y: 236
-        width: 10
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0d7a92eb77da02b00800000000000000
-      internalID: 801831463475062736
+      spriteID: 393fc65db02bc215485e53c2d2d8a238
+      internalID: 1567863656765865785
       vertices: []
       indices: 
       edges: []
@@ -423,18 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      SS_Face-Leaf_Lotus_0: -8671824613451903791
-      SS_Face-Leaf_Lotus_1: -4025527368448744308
-      SS_Face-Leaf_Lotus_10: -6523382983724295433
-      SS_Face-Leaf_Lotus_11: 801831463475062736
-      SS_Face-Leaf_Lotus_2: 4269032465725720400
-      SS_Face-Leaf_Lotus_3: 1196753471621298622
-      SS_Face-Leaf_Lotus_4: -5727171233232931555
-      SS_Face-Leaf_Lotus_5: -9140341169686766605
-      SS_Face-Leaf_Lotus_6: 8860690483997154196
-      SS_Face-Leaf_Lotus_7: 1058557655679390190
-      SS_Face-Leaf_Lotus_8: 9065376795327509557
-      SS_Face-Leaf_Lotus_9: 5339051839800057110
+      SS_Face-Leaf_Lotus_0: 6082925814080347166
+      SS_Face-Leaf_Lotus_1: -3040251430722695487
+      SS_Face-Leaf_Lotus_2: 3704995443632539523
+      SS_Face-Leaf_Lotus_3: 2155785161455292855
+      SS_Face-Leaf_Lotus_4: -7926397059488323681
+      SS_Face-Leaf_Lotus_5: -6850996370095090937
+      SS_Face-Leaf_Lotus_6: -4548390920925417816
+      SS_Face-Leaf_Lotus_7: 1567863656765865785
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

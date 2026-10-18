@@ -3,28 +3,28 @@ guid: 5634113399ee1da42853c247f7e46422
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6412657101094354363
+      213: 3394386545518077862
     second: SS_Weeping_Buddha_0
   - first:
-      213: 7193908254432469937
+      213: 4313330644643643428
     second: SS_Weeping_Buddha_1
   - first:
-      213: -6138732871777647334
+      213: 2532722201305171343
     second: SS_Weeping_Buddha_2
   - first:
-      213: 2834265023549447677
+      213: -3102599858654769139
     second: SS_Weeping_Buddha_3
   - first:
-      213: 2385900488935686858
+      213: 1357959806577786486
     second: SS_Weeping_Buddha_4
   - first:
-      213: 8112109850860144019
+      213: -1041774945541675513
     second: SS_Weeping_Buddha_5
   - first:
-      213: -5852186420782564462
+      213: 2484202913427163304
     second: SS_Weeping_Buddha_6
   - first:
-      213: 4322630737000122842
+      213: -8467016219330746992
     second: SS_Weeping_Buddha_7
   externalObjects: {}
   serializedVersion: 13
@@ -58,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 90
+  spritePixelsToUnits: 36
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -96,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -109,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -122,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -137,20 +137,20 @@ TextureImporter:
       name: SS_Weeping_Buddha_0
       rect:
         serializedVersion: 2
-        x: 81
-        y: 404
-        width: 208
-        height: 314
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bbd7d1168a55ef850800000000000000
-      internalID: 6412657101094354363
+      spriteID: a667f83394481b2ff7cd3e56f9ad7c3e
+      internalID: 3394386545518077862
       vertices: []
       indices: 
       edges: []
@@ -159,20 +159,20 @@ TextureImporter:
       name: SS_Weeping_Buddha_1
       rect:
         serializedVersion: 2
-        x: 429
-        y: 404
-        width: 209
-        height: 314
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1b3a2344175e5d360800000000000000
-      internalID: 7193908254432469937
+      spriteID: 2480ca485e07dc3ba625ed52a8701f76
+      internalID: 4313330644643643428
       vertices: []
       indices: 
       edges: []
@@ -181,20 +181,20 @@ TextureImporter:
       name: SS_Weeping_Buddha_2
       rect:
         serializedVersion: 2
-        x: 779
-        y: 404
-        width: 208
-        height: 314
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a150eae3af6decaa0800000000000000
-      internalID: -6138732871777647334
+      spriteID: 8f458a536c092623c7179502c717f57f
+      internalID: 2532722201305171343
       vertices: []
       indices: 
       edges: []
@@ -203,20 +203,20 @@ TextureImporter:
       name: SS_Weeping_Buddha_3
       rect:
         serializedVersion: 2
-        x: 1125
-        y: 404
-        width: 209
-        height: 314
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: dfd9af7b505555720800000000000000
-      internalID: 2834265023549447677
+      spriteID: 0d90b4e8dd59f1d4d21423268575ee1f
+      internalID: -3102599858654769139
       vertices: []
       indices: 
       edges: []
@@ -225,20 +225,20 @@ TextureImporter:
       name: SS_Weeping_Buddha_4
       rect:
         serializedVersion: 2
-        x: 83
-        y: 33
-        width: 207
-        height: 314
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ac241788adb6c1120800000000000000
-      internalID: 2385900488935686858
+      spriteID: 76be53d23f71d812c5018768aa3edd00
+      internalID: 1357959806577786486
       vertices: []
       indices: 
       edges: []
@@ -247,20 +247,20 @@ TextureImporter:
       name: SS_Weeping_Buddha_5
       rect:
         serializedVersion: 2
-        x: 433
-        y: 33
-        width: 204
-        height: 314
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3954777fde0049070800000000000000
-      internalID: 8112109850860144019
+      spriteID: 072616e334df8af1f977b8bafdeba334
+      internalID: -1041774945541675513
       vertices: []
       indices: 
       edges: []
@@ -269,20 +269,20 @@ TextureImporter:
       name: SS_Weeping_Buddha_6
       rect:
         serializedVersion: 2
-        x: 781
-        y: 33
-        width: 206
-        height: 314
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 29bf3edd47bd8cea0800000000000000
-      internalID: -5852186420782564462
+      spriteID: a808d14c63a97922a3c68402b119ad13
+      internalID: 2484202913427163304
       vertices: []
       indices: 
       edges: []
@@ -291,20 +291,20 @@ TextureImporter:
       name: SS_Weeping_Buddha_7
       rect:
         serializedVersion: 2
-        x: 1128
-        y: 33
-        width: 207
-        height: 314
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ad9c316c0c11dfb30800000000000000
-      internalID: 4322630737000122842
+      spriteID: 90e551d39b1d7f8adf5330ea8cf58c1a
+      internalID: -8467016219330746992
       vertices: []
       indices: 
       edges: []
@@ -323,14 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      SS_Weeping_Buddha_0: 6412657101094354363
-      SS_Weeping_Buddha_1: 7193908254432469937
-      SS_Weeping_Buddha_2: -6138732871777647334
-      SS_Weeping_Buddha_3: 2834265023549447677
-      SS_Weeping_Buddha_4: 2385900488935686858
-      SS_Weeping_Buddha_5: 8112109850860144019
-      SS_Weeping_Buddha_6: -5852186420782564462
-      SS_Weeping_Buddha_7: 4322630737000122842
+      SS_Weeping_Buddha_0: 3394386545518077862
+      SS_Weeping_Buddha_1: 4313330644643643428
+      SS_Weeping_Buddha_2: 2532722201305171343
+      SS_Weeping_Buddha_3: -3102599858654769139
+      SS_Weeping_Buddha_4: 1357959806577786486
+      SS_Weeping_Buddha_5: -1041774945541675513
+      SS_Weeping_Buddha_6: 2484202913427163304
+      SS_Weeping_Buddha_7: -8467016219330746992
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
