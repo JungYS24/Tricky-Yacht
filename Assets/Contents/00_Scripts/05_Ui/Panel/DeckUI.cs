@@ -20,26 +20,22 @@ public class DeckUI : MonoBehaviour
 
     private List<DeckSlot> slotList = new List<DeckSlot>();
     private bool isInitialized = false;
+    private int lastToggleFrame = -1;
 
     private void Awake()
     {
         if (closeButton != null) closeButton.onClick.AddListener(CloseDeckPanel);
         if (sortButton != null) sortButton.onClick.AddListener(SortDeck);
-        IsPanelOpen = false;
-    }
-    private void Start()
-    {
-        // 에디터에서 팝업창을 켜둔 채로 시작하더라도, 게임 시작 시 강제로 닫아서 코드와 상태를 일치시킵니다.
-        if (deckPanel != null && deckPanel.activeSelf)
-        {
-            deckPanel.SetActive(false);
-            IsPanelOpen = false;
-        }
+
+        // 버튼으로 연 직후 첫 활성화라면 닫지 않는다.
+        if (lastToggleFrame != Time.frameCount)
+            ForceClosed();
     }
 
     private void OnEnable()
     {
         DiceManager.OnDeckUpdateNeeded += RefreshDeckVisuals;
+        AlignPanelWithOpenState();
     }
 
     private void OnDisable()
@@ -61,7 +57,11 @@ public class DeckUI : MonoBehaviour
 
     public void OnClickDeckButton()
     {
-        if (deckPanel.activeSelf)
+        if (lastToggleFrame == Time.frameCount)
+            return;
+        lastToggleFrame = Time.frameCount;
+
+        if (IsPanelOpen)
         {
             CloseDeckPanel();
             return;
@@ -75,15 +75,17 @@ public class DeckUI : MonoBehaviour
 
         IsPanelOpen = true;
         UpdateDeckUI();
-        deckPanel.SetActive(true);
+        if (deckPanel != null)
+        {
+            deckPanel.SetActive(true);
+            deckPanel.transform.SetAsLastSibling();
+        }
     }
 
     private void RefreshDeckVisuals()
     {
-        if (deckPanel != null && deckPanel.activeSelf)
-        {
+        if (IsPanelOpen)
             UpdateDeckUI();
-        }
     }
 
     private void UpdateDeckUI()
@@ -126,7 +128,8 @@ public class DeckUI : MonoBehaviour
     public void CloseDeckPanel()
     {
         IsPanelOpen = false;
-        deckPanel.SetActive(false);
+        if (deckPanel != null)
+            deckPanel.SetActive(false);
     }
 
     public void SortDeck()
@@ -140,5 +143,29 @@ public class DeckUI : MonoBehaviour
             .ToList();
 
         UpdateDeckUI();
+    }
+
+    private void ForceClosed()
+    {
+        IsPanelOpen = false;
+        if (deckPanel != null && deckPanel.activeSelf)
+            deckPanel.SetActive(false);
+    }
+
+    // 꺼져 있다 켜져도 플래그와 패널 활성 상태를 맞춘다.
+    private void AlignPanelWithOpenState()
+    {
+        if (deckPanel == null)
+            return;
+
+        if (IsPanelOpen)
+        {
+            if (!deckPanel.activeSelf)
+                deckPanel.SetActive(true);
+            return;
+        }
+
+        if (lastToggleFrame != Time.frameCount && deckPanel.activeSelf)
+            deckPanel.SetActive(false);
     }
 }
