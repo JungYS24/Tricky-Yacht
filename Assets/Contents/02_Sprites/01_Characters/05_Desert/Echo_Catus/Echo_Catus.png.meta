@@ -3,26 +3,29 @@ guid: efa1efc858013cf42b01e1463a8ff276
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8222156059753457988
+      213: -8153536194513029382
     second: Echo_Catus_0
   - first:
-      213: 5400359945554756554
+      213: 4851369771002019313
     second: Echo_Catus_1
   - first:
-      213: 3152658754635751700
+      213: 2615547520897698042
     second: Echo_Catus_2
   - first:
-      213: 745381292177900119
+      213: 457150641141037564
     second: Echo_Catus_3
   - first:
-      213: 1923066700539671065
+      213: 403714219589177150
     second: Echo_Catus_4
   - first:
-      213: -6207168475796942283
+      213: 7753257946856476379
     second: Echo_Catus_5
   - first:
-      213: -6468709630498165833
+      213: -3682821998323265251
     second: Echo_Catus_6
+  - first:
+      213: 1151380079192391967
+    second: Echo_Catus_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -55,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -69,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 170
+  spritePixelsToUnits: 36
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -93,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -106,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -119,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -134,20 +137,20 @@ TextureImporter:
       name: Echo_Catus_0
       rect:
         serializedVersion: 2
-        x: 49
-        y: 598
-        width: 451
-        height: 514
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4492e6d9f57fa1270800000000000000
-      internalID: 8222156059753457988
+      spriteID: fab6c2c607d2d88e43c0dd48bf6254ea
+      internalID: -8153536194513029382
       vertices: []
       indices: 
       edges: []
@@ -156,20 +159,20 @@ TextureImporter:
       name: Echo_Catus_1
       rect:
         serializedVersion: 2
-        x: 597
-        y: 597
-        width: 448
-        height: 510
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ac30a0612cee1fa40800000000000000
-      internalID: 5400359945554756554
+      spriteID: f1bda4621a8753433f070833e5027b50
+      internalID: 4851369771002019313
       vertices: []
       indices: 
       edges: []
@@ -178,20 +181,20 @@ TextureImporter:
       name: Echo_Catus_2
       rect:
         serializedVersion: 2
-        x: 1127
-        y: 597
-        width: 471
-        height: 522
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 411e6101f6e70cb20800000000000000
-      internalID: 3152658754635751700
+      spriteID: fac842cc9c4a4c2438c95c8bebc8ca5b
+      internalID: 2615547520897698042
       vertices: []
       indices: 
       edges: []
@@ -200,20 +203,20 @@ TextureImporter:
       name: Echo_Catus_3
       rect:
         serializedVersion: 2
-        x: 1657
-        y: 598
-        width: 495
-        height: 532
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7524c760650285a00800000000000000
-      internalID: 745381292177900119
+      spriteID: fcb90d061620580695bcf52ae697a63f
+      internalID: 457150641141037564
       vertices: []
       indices: 
       edges: []
@@ -222,20 +225,20 @@ TextureImporter:
       name: Echo_Catus_4
       rect:
         serializedVersion: 2
-        x: 595
+        x: 0
         y: 0
-        width: 472
-        height: 532
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 912bc0da9fa10ba10800000000000000
-      internalID: 1923066700539671065
+      spriteID: 3e0f6399f1479a0535d150c72c129b9b
+      internalID: 403714219589177150
       vertices: []
       indices: 
       edges: []
@@ -244,20 +247,20 @@ TextureImporter:
       name: Echo_Catus_5
       rect:
         serializedVersion: 2
-        x: 1131
+        x: 128
         y: 0
-        width: 473
-        height: 532
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 532de138825bbd9a0800000000000000
-      internalID: -6207168475796942283
+      spriteID: dbce5a2e061b996ba02da2761993e6f1
+      internalID: 7753257946856476379
       vertices: []
       indices: 
       edges: []
@@ -266,20 +269,42 @@ TextureImporter:
       name: Echo_Catus_6
       rect:
         serializedVersion: 2
-        x: 1667
+        x: 256
         y: 0
-        width: 474
-        height: 532
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7bb220f1dd68a36a0800000000000000
-      internalID: -6468709630498165833
+      spriteID: 1d91f2aae7fce3cc734a293b58393eed
+      internalID: -3682821998323265251
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Echo_Catus_7
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f41b9ed1486fa0fb5e93ff8b14fa17d
+      internalID: 1151380079192391967
       vertices: []
       indices: 
       edges: []
@@ -298,13 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Echo_Catus_0: 8222156059753457988
-      Echo_Catus_1: 5400359945554756554
-      Echo_Catus_2: 3152658754635751700
-      Echo_Catus_3: 745381292177900119
-      Echo_Catus_4: 1923066700539671065
-      Echo_Catus_5: -6207168475796942283
-      Echo_Catus_6: -6468709630498165833
+      Echo_Catus_0: -8153536194513029382
+      Echo_Catus_1: 4851369771002019313
+      Echo_Catus_2: 2615547520897698042
+      Echo_Catus_3: 457150641141037564
+      Echo_Catus_4: 403714219589177150
+      Echo_Catus_5: 7753257946856476379
+      Echo_Catus_6: -3682821998323265251
+      Echo_Catus_7: 1151380079192391967
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
