@@ -26,9 +26,6 @@ TextureImporter:
   - first:
       213: 4678840210413399325
     second: Fujin_7
-  - first:
-      213: -6954975011785858723
-    second: Fujin_8
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -61,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -75,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 60
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -99,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -112,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -125,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -138,7 +135,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -153,12 +150,12 @@ TextureImporter:
       name: Fujin_0
       rect:
         serializedVersion: 2
-        x: 133
-        y: 412
-        width: 280
-        height: 254
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -175,12 +172,12 @@ TextureImporter:
       name: Fujin_1
       rect:
         serializedVersion: 2
-        x: 431
-        y: 405
-        width: 266
-        height: 274
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -197,12 +194,12 @@ TextureImporter:
       name: Fujin_2
       rect:
         serializedVersion: 2
-        x: 706
-        y: 407
-        width: 268
-        height: 255
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -219,12 +216,12 @@ TextureImporter:
       name: Fujin_3
       rect:
         serializedVersion: 2
-        x: 1000
-        y: 407
-        width: 273
-        height: 256
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -241,12 +238,12 @@ TextureImporter:
       name: Fujin_4
       rect:
         serializedVersion: 2
-        x: 1263
-        y: 544
-        width: 11
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -263,12 +260,12 @@ TextureImporter:
       name: Fujin_5
       rect:
         serializedVersion: 2
-        x: 155
-        y: 103
-        width: 248
-        height: 245
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -285,12 +282,12 @@ TextureImporter:
       name: Fujin_6
       rect:
         serializedVersion: 2
-        x: 435
-        y: 89
-        width: 251
-        height: 276
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -307,12 +304,12 @@ TextureImporter:
       name: Fujin_7
       rect:
         serializedVersion: 2
-        x: 742
-        y: 106
-        width: 232
-        height: 240
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -321,28 +318,6 @@ TextureImporter:
       bones: []
       spriteID: d1d218eb1649ee040800000000000000
       internalID: 4678840210413399325
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Fujin_8
-      rect:
-        serializedVersion: 2
-        x: 995
-        y: 97
-        width: 280
-        height: 257
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d5129c86317fa7f90800000000000000
-      internalID: -6954975011785858723
       vertices: []
       indices: 
       edges: []
@@ -369,7 +344,6 @@ TextureImporter:
       Fujin_5: -438145970766339261
       Fujin_6: 8583730359620446662
       Fujin_7: 4678840210413399325
-      Fujin_8: -6954975011785858723
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -3,28 +3,28 @@ guid: c775999351145e548b8b5d569e61674d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3444792869479348976
+      213: 6353438366863191045
     second: SS_Incense_Wraith_0
   - first:
-      213: -7154478287624559310
+      213: 804357809244134046
     second: SS_Incense_Wraith_1
   - first:
-      213: 4724257840626334519
+      213: 2524937857480131616
     second: SS_Incense_Wraith_2
   - first:
-      213: -5007536353467321574
+      213: -8253950110664316098
     second: SS_Incense_Wraith_3
   - first:
-      213: 4792953262381456629
+      213: 669377115727057834
     second: SS_Incense_Wraith_4
   - first:
-      213: -1030268809115778129
+      213: 6613945726457686162
     second: SS_Incense_Wraith_5
   - first:
-      213: 2652715729975514616
+      213: 5788570055565051548
     second: SS_Incense_Wraith_6
   - first:
-      213: -8052934504381967235
+      213: -5683166989864531389
     second: SS_Incense_Wraith_7
   externalObjects: {}
   serializedVersion: 13
@@ -58,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -96,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -109,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -122,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -137,20 +137,20 @@ TextureImporter:
       name: SS_Incense_Wraith_0
       rect:
         serializedVersion: 2
-        x: 118
-        y: 388
-        width: 153
-        height: 260
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 01582e1f223a130d0800000000000000
-      internalID: -3444792869479348976
+      spriteID: 05ec375f88f22b58fe239dfa519f3684
+      internalID: 6353438366863191045
       vertices: []
       indices: 
       edges: []
@@ -159,20 +159,20 @@ TextureImporter:
       name: SS_Incense_Wraith_1
       rect:
         serializedVersion: 2
-        x: 459
-        y: 388
-        width: 154
-        height: 306
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 235a4e847ef26bc90800000000000000
-      internalID: -7154478287624559310
+      spriteID: 9eda4e742aa7290b0b345a6d827cdb6f
+      internalID: 804357809244134046
       vertices: []
       indices: 
       edges: []
@@ -181,20 +181,20 @@ TextureImporter:
       name: SS_Incense_Wraith_2
       rect:
         serializedVersion: 2
-        x: 774
-        y: 388
-        width: 192
-        height: 342
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 73bf2e1d97fef8140800000000000000
-      internalID: 4724257840626334519
+      spriteID: 20040a8b9a610a231e973c536a40faad
+      internalID: 2524937857480131616
       vertices: []
       indices: 
       edges: []
@@ -203,20 +203,20 @@ TextureImporter:
       name: SS_Incense_Wraith_3
       rect:
         serializedVersion: 2
-        x: 1120
-        y: 388
-        width: 182
-        height: 356
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a13b9b3b738a18ab0800000000000000
-      internalID: -5007536353467321574
+      spriteID: 3eab0e0c1b14748d4b58b4527e143400
+      internalID: -8253950110664316098
       vertices: []
       indices: 
       edges: []
@@ -225,20 +225,20 @@ TextureImporter:
       name: SS_Incense_Wraith_4
       rect:
         serializedVersion: 2
-        x: 121
-        y: 30
-        width: 152
-        height: 341
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5fcdb45199df38240800000000000000
-      internalID: 4792953262381456629
+      spriteID: aad3afb3f01a4a09c2c279f094e7183a
+      internalID: 669377115727057834
       vertices: []
       indices: 
       edges: []
@@ -247,20 +247,20 @@ TextureImporter:
       name: SS_Incense_Wraith_5
       rect:
         serializedVersion: 2
-        x: 440
-        y: 30
-        width: 183
-        height: 351
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fa34d790affb3b1f0800000000000000
-      internalID: -1030268809115778129
+      spriteID: 922839959874c95b789c81f01a2b1570
+      internalID: 6613945726457686162
       vertices: []
       indices: 
       edges: []
@@ -269,20 +269,20 @@ TextureImporter:
       name: SS_Incense_Wraith_6
       rect:
         serializedVersion: 2
-        x: 791
-        y: 30
-        width: 176
-        height: 329
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8f51847d6e650d420800000000000000
-      internalID: 2652715729975514616
+      spriteID: 9c066bdfcb21555041e219f9f34a6a4e
+      internalID: 5788570055565051548
       vertices: []
       indices: 
       edges: []
@@ -291,20 +291,20 @@ TextureImporter:
       name: SS_Incense_Wraith_7
       rect:
         serializedVersion: 2
-        x: 1141
-        y: 30
-        width: 152
-        height: 281
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d7493da0cba3e3090800000000000000
-      internalID: -8052934504381967235
+      spriteID: 430ae6c1bb5521b14fcb4c1cb0b48eb5
+      internalID: -5683166989864531389
       vertices: []
       indices: 
       edges: []
@@ -323,14 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      SS_Incense_Wraith_0: -3444792869479348976
-      SS_Incense_Wraith_1: -7154478287624559310
-      SS_Incense_Wraith_2: 4724257840626334519
-      SS_Incense_Wraith_3: -5007536353467321574
-      SS_Incense_Wraith_4: 4792953262381456629
-      SS_Incense_Wraith_5: -1030268809115778129
-      SS_Incense_Wraith_6: 2652715729975514616
-      SS_Incense_Wraith_7: -8052934504381967235
+      SS_Incense_Wraith_0: 6353438366863191045
+      SS_Incense_Wraith_1: 804357809244134046
+      SS_Incense_Wraith_2: 2524937857480131616
+      SS_Incense_Wraith_3: -8253950110664316098
+      SS_Incense_Wraith_4: 669377115727057834
+      SS_Incense_Wraith_5: 6613945726457686162
+      SS_Incense_Wraith_6: 5788570055565051548
+      SS_Incense_Wraith_7: -5683166989864531389
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

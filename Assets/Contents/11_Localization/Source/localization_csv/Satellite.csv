@@ -1,0 +1,9 @@
+﻿table,key,ko,en,ja,zh-Hans,note
+Satellite,SAT_MERCURY_NAME,수성,Mercury,水星,水星,
+Satellite,SAT_MERCURY_DESC,"해당 주사위의 족보 연산 완료 시, 최종 칩수 +15",Adds +15 to the final Chip count when this die is settled.,このサイコロの役計算が完了すると、最終チップ数+15,该骰子完成牌型结算时，最终筹码数+15,
+Satellite,SAT_VENUS_NAME,금성,Venus,金星,金星,
+Satellite,SAT_VENUS_DESC,"해당 주사위의 족보 연산 완료 시, 30골드 획득",Grants 30 Gold when this die is settled.,このサイコロの役計算が完了すると、30ゴールドを獲得,该骰子完成牌型结算时，获得30金币,
+Satellite,SAT_MARS_NAME,화성,Mars,火星,火星,
+Satellite,SAT_MARS_DESC,"해당 주사위의 족보 연산 완료 시, 최종 배수(Multiplier) +1.1",Adds +1.1 to the final Multiplier when this die is settled.,このサイコロの役計算が完了すると、最終倍率(Multiplier)+1.1,该骰子完成牌型结算时，最终倍率+1.1,
+Satellite,SAT_JUPITER_NAME,목성,Jupiter,木星,木星,
+Satellite,SAT_JUPITER_DESC,"해당 주사위의 족보 연산 완료 시, 플레이어 체력(HP) +2 회복",Restores +2 Player HP when this die is settled.,このサイコロの役計算が完了すると、プレイヤーHP+2回復,该骰子完成牌型结算时，玩家体力(HP)恢复+2,

@@ -1,25 +1,29 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.EventSystems;
 using System;
 using System.Collections;
 using System.Linq;
+using DG.Tweening;
 
 public class Dice : MonoBehaviour, IPointerDownHandler
 {
-    [Header("»óÅÂ µ¥ÀÌÅÍ")]
+    [Header("ìƒíƒœ ë°ì´í„°")]
     public int currentValue;
+    // í˜„ì¬ ëˆˆì´ ë‚˜ì˜¨ ë©´ ë²ˆí˜¸(0~5). ë©´ë³„ íš¨ê³¼ë¥¼ ì°¾ì„ ë•Œ ì“°ê³ , ëª¨ë¥´ë©´ -1ì´ë‹¤.
+    public int currentFaceIndex = -1;
     public bool isKept = false;
     public int currentKeepIndex = -1;
     public Vector3 rollPos;
-    public DiceData1 myData; // ÁÖ»çÀ§ °íÀ¯ µ¥ÀÌÅÍ (ÄÚÆÃ, »ö»ó, ¸é ±¸¼º µî)
+    public bool IsMoving { get; private set; }
+    public DiceData1 myData; // ì£¼ì‚¬ìœ„ ê³ ìœ  ë°ì´í„° (ì½”íŒ…, ìƒ‰ìƒ, ë©´ êµ¬ì„± ë“±)
 
-    [Header("·»´õ¸µ ¹× ¿¬Ãâ")]
-    public Sprite[] diceFaceSprites;     // ÀÏ¹İ ÁÖ»çÀ§ ´«±İ ÀÌ¹ÌÁö (1~6)
-    public Sprite[] fixedNumberSprites;  // °íÁ¤ ÁÖ»çÀ§¿ë ¾Æ¶óºñ¾Æ ¼ıÀÚ ÀÌ¹ÌÁö (1~6)
+    [Header("ë Œë”ë§ ë° ì—°ì¶œ")]
+    public Sprite[] diceFaceSprites;     // ì¼ë°˜ ì£¼ì‚¬ìœ„ ëˆˆê¸ˆ ì´ë¯¸ì§€ (1~6)
+    public Sprite[] fixedNumberSprites;  // ê³ ì • ì£¼ì‚¬ìœ„ìš© ì•„ë¼ë¹„ì•„ ìˆ«ì ì´ë¯¸ì§€ (1~6)
     private SpriteRenderer spriteRenderer;
     public ParticleSystem rollParticle;
 
-    [Header("¾Ö´Ï¸ŞÀÌ¼Ç ¼³Á¤")]
+    [Header("ì• ë‹ˆë©”ì´ì…˜ ì„¤ì •")]
     public float rollDuration = 0.45f;
     public float shakePower = 0.12f;
     public float rotatePower = 25f;
@@ -27,60 +31,104 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
     private Vector3 originalScale;
     private Coroutine rollCoroutine;
-    private bool isFixedDice = false; // 6¸éÀÌ ¸ğµÎ °°Àº ¼ıÀÚÀÎÁö ¿©ºÎ
+    private bool isFixedDice = false; // 6ë©´ì´ ëª¨ë‘ ê°™ì€ ìˆ«ìì¸ì§€ ì—¬ë¶€
     private bool useNumberSprite = false;
 
-    [Header("ÄÚÆÃ »ö»ó º¸Á¤")]
+    [Header("ì½”íŒ… ìƒ‰ìƒ ë³´ì •")]
     [SerializeField] private float coatingBrightness = 1.35f;
     [SerializeField] private float keptDarkness = 0.6f;
 
     public static event Action OnDiceStateChanged;
     private Coroutine idleAnimCoroutine;
 
+
+    private Tween scoreFeedbackTween;
+    private UiHoverIdleJuice hoverJuice;
+    private StampBadge stampBadge;
+
+
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         originalScale = transform.localScale;
+        hoverJuice = GetComponent<UiHoverIdleJuice>();
+        if (hoverJuice == null)
+            hoverJuice = gameObject.AddComponent<UiHoverIdleJuice>();
+        RefreshHoverJuice();
     }
 
-    public void SetData(DiceData1 data, int initialValue)
+    // ë©´ íš¨ê³¼ ê³„ì‚°ìš© ë©´ ë²ˆí˜¸. ê¸°ë¡ëœ ë²ˆí˜¸ê°€ í˜„ì¬ ëˆˆê³¼ ì–´ê¸‹ë‚˜ë©´ ëˆˆ ê°’ì´ ê°™ì€ ì²« ë©´ìœ¼ë¡œ ëŒ€ì‹ í•œë‹¤.
+    // SetData/PlayRollEffectì˜ faceIndexëŠ” í™•ì‹¤í•  ë•Œë§Œ ë„˜ê¸°ê³ , ëª¨ë¥´ë©´(ë³µì›Â·íŠœí† ë¦¬ì–¼ ê°•ì œê°’ ë“±) -1ì„ ë„˜ê¸´ë‹¤.
+    public int ResolveFaceIndex()
+    {
+        if (myData == null || myData.faceValues == null) return -1;
+        if (currentFaceIndex >= 0 && currentFaceIndex < myData.faceValues.Length && myData.faceValues[currentFaceIndex] == currentValue)
+            return currentFaceIndex;
+        return myData.FindFaceIndex(currentValue);
+    }
+
+    public void SetData(DiceData1 data, int initialValue, int faceIndex = -1)
     {
         if (isKept) return;
         myData = data;
 
-        // ¸¸¾à µ¥ÀÌÅÍ¿¡ Ä¿½ºÅÒ ´«±İÀÌ ÀÖ´Ù¸é ±×°ÍÀ» »ç¿ëÇÏ°í, ¾ø´Ù¸é ±âº» ½ºÇÁ¶óÀÌÆ®¸¦ »ç¿ë
-        if (myData.customFaceSprites != null && myData.customFaceSprites.Length > 0)
-        {
-            // Dice ½ºÅ©¸³Æ®ÀÇ diceFaceSprites ¹è¿­À» Ä¿½ºÅÒ ÀÌ¹ÌÁö·Î ±³Ã¼
-            this.diceFaceSprites = myData.customFaceSprites;
-        }
+        //// ë§Œì•½ ë°ì´í„°ì— ì»¤ìŠ¤í…€ ëˆˆê¸ˆì´ ìˆë‹¤ë©´ ê·¸ê²ƒì„ ì‚¬ìš©í•˜ê³ , ì—†ë‹¤ë©´ ê¸°ë³¸ ìŠ¤í”„ë¼ì´íŠ¸ë¥¼ ì‚¬ìš©
+        //if (myData.customFaceSprites != null && myData.customFaceSprites.Length > 0)
+        //{
+        //    // Dice ìŠ¤í¬ë¦½íŠ¸ì˜ diceFaceSprites ë°°ì—´ì„ ì»¤ìŠ¤í…€ ì´ë¯¸ì§€ë¡œ êµì²´
+        //    this.diceFaceSprites = myData.customFaceSprites;
+        //}
         if (myData.customDiceShell != null)
         {
             spriteRenderer.sprite = myData.customDiceShell;
         }
 
-        // °íÁ¤ ÁÖ»çÀ§ÀÌ°Å³ª, ÀÌ¸§¿¡ 'È¦¼ö' ¶Ç´Â 'Â¦¼ö'°¡ µé¾î°¡¸é ¼ıÀÚ ÀÌ¹ÌÁö¸¦ »ç¿ëÇÏµµ·Ï ¼³Á¤
+        // ê³ ì • ì£¼ì‚¬ìœ„ì´ê±°ë‚˜, ì´ë¦„ì— 'í™€ìˆ˜' ë˜ëŠ” 'ì§ìˆ˜'ê°€ ë“¤ì–´ê°€ë©´ ìˆ«ì ì´ë¯¸ì§€ë¥¼ ì‚¬ìš©í•˜ë„ë¡ ì„¤ì •
         bool isFixed = myData.faceValues.All(f => f == myData.faceValues[0]);
         bool isOddEven = myData.specialEffect == SpecialDieEffect.Odd || myData.specialEffect == SpecialDieEffect.Even;
 
         useNumberSprite = isFixed || isOddEven;
 
         currentValue = initialValue;
-        UpdateSprite(initialValue);
+        currentFaceIndex = faceIndex >= 0 ? faceIndex : myData.FindFaceIndex(initialValue);
+        ShowFace(currentFaceIndex);
 
+        // ìŠ¤íƒ¬í”„ê°€ ì°íŒ ì£¼ì‚¬ìœ„ë§Œ í‘œì‹œë¥¼ ë¶™ì¸ë‹¤. í’€ì—ì„œ ë‹¤ì‹œ ì“°ëŠ” ì£¼ì‚¬ìœ„ëŠ” ìŠ¤íƒ¬í”„ê°€ ì—†ìœ¼ë©´ ìˆ¨ê¸´ë‹¤.
+        if (stampBadge == null && myData.stampType != StampType.None) stampBadge = StampBadge.Get(this);
+        if (stampBadge != null) stampBadge.Bind(spriteRenderer, myData.stampType);
+
+        // ë””ë²„í”„ ì£¼ì‚¬ìœ„ëŠ” ë’¤ì— ì€ì€í•œ ë³´ëë¹›ì„ ê¹”ì•„ êµ´ë¦´ ë•Œë„ ì•Œì•„ë³¼ ìˆ˜ ìˆê²Œ í•œë‹¤.
+        DebuffDiceGlow.Sync(this, spriteRenderer);
+
+        spriteRenderer.DOKill(); // ì§€ë‚œ ê²°ì‚°ì˜ ê°€ì§œ ì£¼ì‚¬ìœ„ íë¦¼ ì—°ì¶œì´ ë‚¨ì§€ ì•Šë„ë¡ ì •ë¦¬
         ApplyDiceColor();
 
-        // ÇÊµå ´ë±â »óÅÂ ¾Ö´Ï¸ŞÀÌ¼Ç Ãß°¡
+        // í•„ë“œ ëŒ€ê¸° ìƒíƒœ ì• ë‹ˆë©”ì´ì…˜ ì¶”ê°€
         int[] uniqueFaces = myData.faceValues.Distinct().ToArray();
         bool shouldAnimate = uniqueFaces.Length > 1 && uniqueFaces.Length < 6;
 
+    }
+
+    // ì»¤ìŠ¤í…€ 6ë©´ì€ ëˆˆ ê°’ì´ ê°™ì•„ë„ ë©´ ë²ˆí˜¸ë¡œ ìŠ¤í”„ë¼ì´íŠ¸ë¥¼ ê³ ë¥¸ë‹¤(ì—¬ì • í•´ê³¨/í•˜íŠ¸/ê³¨ë“œ).
+    void ShowFace(int faceIndex)
+    {
+        if (spriteRenderer == null) return;
+        if (myData != null && myData.customFaceSprites != null && myData.customFaceSprites.Length >= 6 && faceIndex >= 0)
+        {
+            spriteRenderer.sprite = myData.customFaceSprites[Mathf.Clamp(faceIndex, 0, myData.customFaceSprites.Length - 1)];
+            return;
+        }
+        int value = currentValue;
+        if (myData != null && myData.faceValues != null && faceIndex >= 0 && faceIndex < myData.faceValues.Length)
+            value = myData.faceValues[faceIndex];
+        UpdateSprite(value);
     }
 
     private void UpdateSprite(int value)
     {
         if (spriteRenderer == null) return;
 
-        // 1. °ªÀÌ 0 ÀÌÇÏÀÏ ¶§(°¡Â¥ ÁÖ»çÀ§)ÀÇ Ã³¸®
+        // 1. ê°’ì´ 0 ì´í•˜ì¼ ë•Œ(ê°€ì§œ ì£¼ì‚¬ìœ„)ì˜ ì²˜ë¦¬
         if (value <= 0)
         {
             if (myData != null && myData.customFaceSprites != null && myData.customFaceSprites.Length > 0)
@@ -90,17 +138,17 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             return;
         }
 
-        // Ä¿½ºÅÒ ÀÌ¹ÌÁö°¡ ÀÖ´Â °æ¿ì (88 ÁÖ»çÀ§ ¿Ïº® ´ëÀÀ)
+        // ì»¤ìŠ¤í…€ ì´ë¯¸ì§€ê°€ ìˆëŠ” ê²½ìš° (88 ì£¼ì‚¬ìœ„ ì™„ë²½ ëŒ€ì‘)
         if (myData != null && myData.customFaceSprites != null && myData.customFaceSprites.Length > 0)
         {
-            // Ä¿½ºÅÒ ÀÌ¹ÌÁö°¡ 1Àå»ÓÀÌ¶ó¸é ¹«Á¶°Ç 0¹øÀ», ¿©·¯ ÀåÀÌ¶ó¸é ´«±İ¿¡ ¸Â°Ô ¾ÈÀüÇÏ°Ô °¡Á®¿É´Ï´Ù.
+            // ì»¤ìŠ¤í…€ ì´ë¯¸ì§€ê°€ 1ì¥ë¿ì´ë¼ë©´ ë¬´ì¡°ê±´ 0ë²ˆì„, ì—¬ëŸ¬ ì¥ì´ë¼ë©´ ëˆˆê¸ˆì— ë§ê²Œ ì•ˆì „í•˜ê²Œ ê°€ì ¸ì˜µë‹ˆë‹¤.
             int safeIndex = (myData.customFaceSprites.Length == 1) ? 0 : Mathf.Clamp(value - 1, 0, myData.customFaceSprites.Length - 1);
             spriteRenderer.sprite = myData.customFaceSprites[safeIndex];
-            return; // ¿©±â¼­ ¹Ù·Î ÇÔ¼ö¸¦ ³¡³»¼­ ¿¡·¯¸¦ Â÷´ÜÇÕ´Ï´Ù!
+            return; // ì—¬ê¸°ì„œ ë°”ë¡œ í•¨ìˆ˜ë¥¼ ëë‚´ì„œ ì—ëŸ¬ë¥¼ ì°¨ë‹¨í•©ë‹ˆë‹¤!
         }
 
-        //±âÁ¸ 1~6 ÀÏ¹İ ¼ıÀÚ/´«±İ Ã³¸® (¾ÈÀüÀåÄ¡ Ãß°¡)
-        int safeDefaultIndex = Mathf.Clamp(value - 1, 0, 5); // 0~5 ¹üÀ§¸¦ ¹ş¾î³ªÁö ¸øÇÏµµ·Ï °­Á¦ °íÁ¤
+        //ê¸°ì¡´ 1~6 ì¼ë°˜ ìˆ«ì/ëˆˆê¸ˆ ì²˜ë¦¬ (ì•ˆì „ì¥ì¹˜ ì¶”ê°€)
+        int safeDefaultIndex = Mathf.Clamp(value - 1, 0, 5); // 0~5 ë²”ìœ„ë¥¼ ë²—ì–´ë‚˜ì§€ ëª»í•˜ë„ë¡ ê°•ì œ ê³ ì •
 
         if (useNumberSprite && fixedNumberSprites != null && fixedNumberSprites.Length >= 6)
         {
@@ -108,7 +156,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         }
         else if (diceFaceSprites != null && diceFaceSprites.Length > 0)
         {
-            // SetData¿¡¼­ Ä¿½ºÅÒ ÀÌ¹ÌÁö·Î µ¤¾î¾º¿öÁ³À» °æ¿ì¸¦ ´ëºñÇØ ¹è¿­ ±æÀÌ¿¡ ¸Â°Ô ¾ÈÀüÇÏ°Ô °¡Á®¿È
+            // SetDataì—ì„œ ì»¤ìŠ¤í…€ ì´ë¯¸ì§€ë¡œ ë®ì–´ì”Œì›Œì¡Œì„ ê²½ìš°ë¥¼ ëŒ€ë¹„í•´ ë°°ì—´ ê¸¸ì´ì— ë§ê²Œ ì•ˆì „í•˜ê²Œ ê°€ì ¸ì˜´
             int finalIndex = Mathf.Clamp(value - 1, 0, diceFaceSprites.Length - 1);
             spriteRenderer.sprite = diceFaceSprites[finalIndex];
         }
@@ -139,6 +187,13 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         }
 
         spriteRenderer.color = finalColor;
+
+        // ìŠ¤íƒ¬í”„ëŠ” ì½”íŒ… ìƒ‰ì„ ë°›ì§€ ì•Šê³  í‚µí–ˆì„ ë•Œ ì–´ë‘ì›Œì§€ëŠ” ê²ƒë§Œ ë”°ë¥¸ë‹¤.
+        if (stampBadge != null)
+        {
+            float shade = isKept ? keptDarkness : 1f;
+            stampBadge.SetTint(new Color(shade, shade, shade, myData.diceColor.a));
+        }
     }
 
     private System.Collections.IEnumerator IdleAnimationRoutine(int[] faces)
@@ -152,7 +207,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         }
     }
 
-    public void PlayRollEffect(int finalValue)
+    public void PlayRollEffect(int finalValue, int faceIndex = -1)
     {
         if (isKept) return;
 
@@ -163,10 +218,11 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         }
 
         if (rollCoroutine != null) StopCoroutine(rollCoroutine);
-        rollCoroutine = StartCoroutine(RollRoutine(finalValue));
+        rollCoroutine = StartCoroutine(RollRoutine(finalValue, faceIndex));
+        RefreshHoverJuice();
     }
 
-    private IEnumerator RollRoutine(int finalValue)
+    private IEnumerator RollRoutine(int finalValue, int faceIndex)
     {
         Vector3 startPos = transform.position;
         float elapsed = 0f;
@@ -176,12 +232,12 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             elapsed += Time.deltaTime;
             float t = elapsed / rollDuration;
 
-            // 1~6 ÀüÃ¼°¡ ¾Æ´Ñ, ÀÌ ÁÖ»çÀ§°¡ °¡Áø ¸é(faceValues) Áß¿¡¼­¸¸ ·£´ıÇÏ°Ô º¸¿©ÁÜ
-            // È¦¼ö ÁÖ»çÀ§¶ó¸é ±¼·¯°¡´Â µ¿¾È¿¡µµ 1, 3, 5¸¸ º¸ÀÓ
+            // 1~6 ì „ì²´ê°€ ì•„ë‹Œ, ì´ ì£¼ì‚¬ìœ„ê°€ ê°€ì§„ ë©´(faceValues) ì¤‘ì—ì„œë§Œ ëœë¤í•˜ê²Œ ë³´ì—¬ì¤Œ
+            // í™€ìˆ˜ ì£¼ì‚¬ìœ„ë¼ë©´ êµ´ëŸ¬ê°€ëŠ” ë™ì•ˆì—ë„ 1, 3, 5ë§Œ ë³´ì„
             int randomFaceIndex = UnityEngine.Random.Range(0, 6);
-            UpdateSprite(myData.faceValues[randomFaceIndex]);
+            ShowFace(randomFaceIndex);
 
-            // Èçµé¸² ¹× È¸Àü ¿¬Ãâ
+            // í”ë“¤ë¦¼ ë° íšŒì „ ì—°ì¶œ
             Vector3 randomOffset = new Vector3(
                 UnityEngine.Random.Range(-shakePower, shakePower),
                 UnityEngine.Random.Range(-shakePower, shakePower), 0f);
@@ -193,13 +249,14 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             yield return null;
         }
 
-        // ¿¬Ãâ Á¾·á ÈÄ »óÅÂ º¹±¸
+        // ì—°ì¶œ ì¢…ë£Œ í›„ ìƒíƒœ ë³µêµ¬
         transform.SetPositionAndRotation(startPos, Quaternion.identity);
         transform.localScale = originalScale;
         currentValue = finalValue;
-        UpdateSprite(finalValue);
+        currentFaceIndex = faceIndex >= 0 ? faceIndex : (myData != null ? myData.FindFaceIndex(finalValue) : -1);
+        ShowFace(currentFaceIndex);
 
-        // ÆË¾÷ ÀÌÆåÆ® ¹× ÆÄÆ¼Å¬
+        // íŒì—… ì´í™íŠ¸ ë° íŒŒí‹°í´
         transform.localScale = originalScale * 1.25f;
         if (rollParticle != null)
         {
@@ -210,30 +267,36 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         yield return new WaitForSeconds(0.06f);
         transform.localScale = originalScale;
 
-        // º¸°ü »óÅÂ¿¡ µû¸¥ »ö»ó ÃÖÁ¾ Á¶Á¤
+        // ë³´ê´€ ìƒíƒœì— ë”°ë¥¸ ìƒ‰ìƒ ìµœì¢… ì¡°ì •
         ApplyDiceColor();
         rollCoroutine = null;
+        RefreshHoverJuice();
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        // »óÁ¡ÀÌ ¿­·ÁÀÖ°Å³ª ÇÇ±Ô¾î »ó¼¼ ÆĞ³ÎÀÌ ¿­·ÁÀÖÀ¸¸é Å¬¸¯ Ãë¼Ò
-        if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || DeckUI.IsPanelOpen || TicketDetailPanel.IsPanelOpen || CoatingSelectionPanel.IsPanelOpen || UIManager.IsSettingsOpen)
+        if (DiceManager.Instance == null || DiceManager.Instance.IsDiceInputLocked)
+        {
+            return;
+        }
+
+        // ìƒì ì´ ì—´ë ¤ìˆê±°ë‚˜ í”¼ê·œì–´ ìƒì„¸ íŒ¨ë„ì´ ì—´ë ¤ìˆìœ¼ë©´ í´ë¦­ ì·¨ì†Œ
+        if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || DebuffDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || DeckUI.IsPanelOpen || TicketDetailPanel.IsPanelOpen || CoatingSelectionPanel.IsPanelOpen || UIManager.IsSettingsOpen)
             return;
 
-        //»óÁ¡ ¼±ÅÃ ÆĞ³Î(»óÁ¡/´ÙÀ½ ½ºÅ×ÀÌÁö) ¶Ç´Â ¹ÙÀÌ¿È ¼±ÅÃ ÆĞ³ÎÀÌ ¿­·ÁÀÖÀ» ¶§ Å¬¸¯ Â÷´Ü
+        //ìƒì  ì„ íƒ íŒ¨ë„(ìƒì /ë‹¤ìŒ ìŠ¤í…Œì´ì§€) ë˜ëŠ” ë°”ì´ì˜´ ì„ íƒ íŒ¨ë„ì´ ì—´ë ¤ìˆì„ ë•Œ í´ë¦­ ì°¨ë‹¨
         if (DiceManager.Instance != null)
         {
             if (DiceManager.Instance.ui != null && DiceManager.Instance.ui.shopChoicePanel.activeInHierarchy) return;
             if (DiceManager.Instance.biomeSelectionPanel != null && DiceManager.Instance.biomeSelectionPanel.panelRoot.activeInHierarchy) return;
         }
 
-        //Æ©Åä¸®¾ó Áß Å¬¸¯ Á¦ÇÑ ·ÎÁ÷
+        //íŠœí† ë¦¬ì–¼ ì¤‘ í´ë¦­ ì œí•œ ë¡œì§
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
             if (!TutorialManager.Instance.IsDiceClickable(this))
             {
-                return; // Çã¶ôµÇÁö ¾ÊÀº ÁÖ»çÀ§¸é ¿©±â¼­ Å¬¸¯ Ãë¼Ò
+                return; // í—ˆë½ë˜ì§€ ì•Šì€ ì£¼ì‚¬ìœ„ë©´ ì—¬ê¸°ì„œ í´ë¦­ ì·¨ì†Œ
             }
         }
 
@@ -241,16 +304,20 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         OnDiceStateChanged?.Invoke();
 
         ApplyDiceColor();
+        RefreshHoverJuice();
     }
 
     public void MoveToTarget(Vector3 targetPos)
     {
         StopAllCoroutines();
+        rollCoroutine = null;
         StartCoroutine(MoveRoutine(targetPos));
     }
 
     private IEnumerator MoveRoutine(Vector3 target)
     {
+        IsMoving = true;
+        RefreshHoverJuice();
         float duration = 0.2f, elapsed = 0f;
         Vector3 startPos = transform.position;
         while (elapsed < duration)
@@ -260,7 +327,31 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             yield return null;
         }
         transform.position = target;
+        IsMoving = false;
+        RefreshHoverJuice();
     }
+
+    // ì´ì–´í•˜ê¸°ëŠ” í´ë¦­ ì´ë²¤íŠ¸ë‚˜ ì´ë™/êµ´ë¦¼ ì—°ì¶œ ì—†ì´ í‚µ ìƒ‰ìƒê³¼ ì…ë ¥ ìƒíƒœë§Œ ë³µì›í•©ë‹ˆë‹¤.
+    public void RefreshRestoredState()
+    {
+        ApplyDiceColor();
+        RefreshHoverJuice();
+    }
+
+    public bool IsRollAnimating => rollCoroutine != null;
+
+    public void RefreshHoverJuice()
+    {
+        if (hoverJuice == null)
+            hoverJuice = GetComponent<UiHoverIdleJuice>();
+        if (hoverJuice == null)
+            return;
+
+        hoverJuice.enabled = !isKept && !IsMoving && rollCoroutine == null;
+    }
+
+    private void OnDisable() => IsMoving = false;
+
     private void Update()
     {
         if (myData != null && myData.type == DiceType.Prism)
@@ -268,4 +359,74 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             ApplyDiceColor();
         }
     }
+
+    public void PlayScoreFeedback(float duration)
+    {
+        if (!gameObject.activeInHierarchy) return;
+        CameraShake.Instance?.ShakeScore();
+
+        // ì´ì „ ë°˜ì‘ì„ ëë‚´ê³  ì›ë˜ ìƒíƒœì—ì„œ ë‹¤ì‹œ ì‹œì‘
+        scoreFeedbackTween?.Kill();
+
+        Vector3 startScale = transform.localScale;
+        Quaternion startRotation = transform.localRotation;
+
+        const float scaleBoost = 0.18f; // ìµœëŒ€ 1.18ë°° í™•ëŒ€
+        const float rotationStrength = 14f; // ì¢Œìš° íšŒì „ ê°•ë„
+        const float shakeCycles = 3f; // ì „ì²´ ì‹œê°„ ë™ì•ˆ í”ë“¤ë¦¬ëŠ” íšŸìˆ˜
+
+        scoreFeedbackTween = DOVirtual.Float(0f, 1f, Mathf.Max(0.05f, duration), t =>
+        {
+            // ì•ë¶€ë¶„ì—ì„œ ë¹ ë¥´ê²Œ í™•ëŒ€í•˜ê³ , ë‚¨ì€ ì‹œê°„ ë™ì•ˆ ë¶€ë“œëŸ½ê²Œ ë³µê·€
+            float scaleWeight;
+
+            if (t < 0.2f)
+            {
+                float progress = t / 0.2f;
+                scaleWeight = 1f - (1f - progress) * (1f - progress);
+            }
+            else
+            {
+                float remaining = (1f - t) / 0.8f;
+                scaleWeight = remaining * remaining;
+            }
+
+            // ì²˜ìŒì—ëŠ” ê°•í•˜ê²Œ í”ë“¤ë¦¬ê³  ì ì°¨ ì¦ì•„ë“¦
+            float damping = (1f - t) * (1f - t);
+            float angle = Mathf.Sin(t * Mathf.PI * 2f * shakeCycles) * rotationStrength * damping;
+
+            transform.localScale = startScale * (1f + scaleBoost * scaleWeight);
+            transform.localRotation = startRotation * Quaternion.Euler(0f, 0f, angle);
+        })
+        .SetEase(Ease.Linear)
+        .SetUpdate(true) // ì ìˆ˜ ì¹´ìš´í„°ì™€ ê°™ì€ ì‹œê°„ ê¸°ì¤€ìœ¼ë¡œ í”ë“¤ë¦¼ì„ ë™ê¸°í™”
+        .SetLink(gameObject, LinkBehaviour.KillOnDisable)
+        .OnKill(() =>
+        {
+            // ì •ìƒ ì¢…ë£Œí•˜ê±°ë‚˜ ì¤‘ê°„ì— ì·¨ì†Œë˜ì–´ë„ ì›ë˜ ìƒíƒœë¡œ ë³µêµ¬
+            if (this != null)
+            {
+                transform.localScale = startScale;
+                transform.localRotation = startRotation;
+            }
+
+            scoreFeedbackTween = null;
+        });
+    }
+
+
+    public void ShowFloatingText(int bonusValue)
+    {
+        // ìµœì´ˆ ëˆˆê¸ˆê³¼ ê°•í™” ëˆ„ì  ìˆ«ìì˜ ìƒì„±Â·ì •ë¦¬ëŠ” ê°™ì€ ë‹´ë‹¹ìê°€ ì²˜ë¦¬í•©ë‹ˆë‹¤.
+        DiceBonusLabel.Get(this).ShowBaseValue(bonusValue);
+    }
+
+    // ê°€ì§œ ì£¼ì‚¬ìœ„ê°€ ê²°ì‚°ì—ì„œ íë¦¿í•˜ê²Œ êº¼ì§€ëŠ” ì—°ì¶œ. ë‹¤ìŒ SetDataì—ì„œ ì›ë˜ ìƒ‰ìœ¼ë¡œ ëŒì•„ì˜µë‹ˆë‹¤.
+    public void FadeAsFake()
+    {
+        if (spriteRenderer == null) return;
+        spriteRenderer.DOKill();
+        spriteRenderer.DOColor(new Color(0.5f, 0.5f, 0.55f, 0.45f), 0.35f).SetUpdate(true).SetLink(gameObject);
+    }
+
 }

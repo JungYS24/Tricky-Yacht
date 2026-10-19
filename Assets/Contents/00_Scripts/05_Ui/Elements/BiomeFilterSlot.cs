@@ -24,7 +24,7 @@ public class BiomeFilterSlot : MonoBehaviour
 
     private void OnClickSlot()
     {
-        // ¹öÆ°ÀÌ ´­¸®¸é ¸Å´ÏÀú¿¡°Ô ³» ÀÎµ¦½º¸¦ Àü´ŞÇØ¼­ ÇÊÅÍ Àû¿ë
+        // ë²„íŠ¼ì´ ëˆŒë¦¬ë©´ ë§¤ë‹ˆì €ì—ê²Œ ë‚´ ì¸ë±ìŠ¤ë¥¼ ì „ë‹¬í•´ì„œ í•„í„° ì ìš©
         manager.ChangeBiomeFilter(myFilterIndex);
     }
 }

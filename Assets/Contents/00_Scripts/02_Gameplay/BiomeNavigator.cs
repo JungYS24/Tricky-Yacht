@@ -2,15 +2,29 @@ using System.Collections.Generic;
 
 public enum BiomeType
 {
-    Forest, Meadow, Temple, Jungle,
-    Desert, Ruins, Cave, Volcano,
-    Swamp, Beach, Ocean, Abyss,
-    Snow, Grave, Circus, Void,Shop
+    Special = 0,
+    Forest = 1,
+    Meadow = 2,
+    Temple = 3,
+    Jungle = 4,
+    Desert = 5,
+    Ruins = 6,
+    Cave = 7,
+    Volcano = 8,
+    Swamp = 9,
+    Beach = 10,
+    Ocean = 11,
+    Abyss = 12,
+    Snow = 13,
+    Grave = 14,
+    Circus = 15,
+    Void = 16,
+    Skyisland = 17
 }
 
 public class BiomeNavigator
 {
-    // °¢ ¹ÙÀÌ¿È¸¶´Ù Á¤È®È÷ 3°³ÀÇ ´ÙÀ½ ¸ñÀûÁö ³ëµå¸¦ °¡Áı´Ï´Ù
+    // ê° ë°”ì´ì˜´ë§ˆë‹¤ ì •í™•íˆ 3ê°œì˜ ë‹¤ìŒ ëª©ì ì§€ ë…¸ë“œë¥¼ ê°€ì§‘ë‹ˆë‹¤
     public readonly Dictionary<BiomeType, List<BiomeType>> BiomeRoutes = new Dictionary<BiomeType, List<BiomeType>>()
     {
         { BiomeType.Forest, new List<BiomeType> { BiomeType.Meadow, BiomeType.Jungle, BiomeType.Cave } },
@@ -25,19 +39,34 @@ public class BiomeNavigator
         { BiomeType.Beach,  new List<BiomeType> { BiomeType.Meadow, BiomeType.Ocean, BiomeType.Circus } },
         { BiomeType.Ocean,  new List<BiomeType> { BiomeType.Beach, BiomeType.Swamp, BiomeType.Abyss } },
         { BiomeType.Abyss,  new List<BiomeType> { BiomeType.Ocean, BiomeType.Grave, BiomeType.Temple } },
-        { BiomeType.Snow,   new List<BiomeType> { BiomeType.Volcano, BiomeType.Forest, BiomeType.Circus } },
+        { BiomeType.Snow,   new List<BiomeType> { BiomeType.Volcano, BiomeType.Forest, BiomeType.Skyisland } },
         { BiomeType.Grave,  new List<BiomeType> { BiomeType.Temple, BiomeType.Swamp, BiomeType.Abyss } },
-        { BiomeType.Circus, new List<BiomeType> { BiomeType.Temple, BiomeType.Beach, BiomeType.Snow } }
+        { BiomeType.Circus, new List<BiomeType> { BiomeType.Temple, BiomeType.Beach, BiomeType.Skyisland } },
+        { BiomeType.Skyisland, new List<BiomeType> { BiomeType.Circus, BiomeType.Snow, BiomeType.Beach } }
     };
 
     public List<BiomeType> GetNextBiomeOptions(BiomeType currentBiome, int currentStage)
     {
-        //100½ºÅ×ÀÌÁö(¹ÙÀÌ¿È 10°³) Å¬¸®¾î ½Ã ¹«Á¶°Ç °øÇã(Void) 3°³·Î °íÁ¤ÇÏ¿© ¼±ÅÃÁö¿¡ ¶ç¿ò
-        if (currentStage >= 10)
+        // ì§ì„  ì§„í–‰(ê¸°ì¡´ ë©”ì¸ì”¬)ì€ ìŠ¤í…Œì´ì§€ ë²ˆí˜¸ë¡œ Voidë¥¼ íŒì •í•©ë‹ˆë‹¤.
+        if (currentStage >= 100)
         {
-            return new List<BiomeType> { BiomeType.Void, BiomeType.Void, BiomeType.Void };
+            return VoidOptions();
         }
 
         return BiomeRoutes.ContainsKey(currentBiome) ? BiomeRoutes[currentBiome] : new List<BiomeType>();
+    }
+
+    // ì§€ë„ ì§„í–‰ì€ í´ë¦¬ì–´í•œ ë°”ì´ì˜´ ìˆ˜ë¡œ Voidë¥¼ íŒì •í•©ë‹ˆë‹¤. ê¸°ì¤€ê°’ì€ Map_Tableì˜ Biome_Count_To_Voidì…ë‹ˆë‹¤.
+    public List<BiomeType> GetNextBiomeOptions(BiomeType currentBiome, int biomeIndex, int biomeCountToVoid)
+    {
+        if (biomeIndex >= biomeCountToVoid)
+            return VoidOptions();
+
+        return BiomeRoutes.ContainsKey(currentBiome) ? BiomeRoutes[currentBiome] : new List<BiomeType>();
+    }
+
+    static List<BiomeType> VoidOptions()
+    {
+        return new List<BiomeType> { BiomeType.Void, BiomeType.Void, BiomeType.Void };
     }
 }

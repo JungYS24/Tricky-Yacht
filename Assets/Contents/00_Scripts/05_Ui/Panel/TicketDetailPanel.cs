@@ -54,12 +54,9 @@ public class TicketDetailPanel : MonoBehaviour
         ticketIcon.sprite = ticket.icon;
 
         if (ticketNameText != null)
-        {
-            ticketNameText.text = ticket.itemName;
-        }
-
-        ticketNameText.text = ticket.itemName;
-        ticketDescText.text = ticket.description;
+            ticketNameText.text = LocalizationManager.GetItemDisplayName(ticket);
+        if (ticketDescText != null)
+            ticketDescText.text = LocalizationManager.GetItemDescription(ticket);
 
         if (leftButton != null)
         {

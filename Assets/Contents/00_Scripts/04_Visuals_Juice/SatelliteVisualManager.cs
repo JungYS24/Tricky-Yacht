@@ -1,198 +1,213 @@
-using UnityEngine;
-using System.Collections.Generic;
+ï»¿using UnityEngine;
+using DG.Tweening;
+using static SatelliteVisualResources;
 
 public class SatelliteVisualManager : MonoBehaviour
 {
-    [Header("À§¼º ½ºÇÁ¶óÀÌÆ® (Çà¼º ÀÌ¹ÌÁö)")]
-    public Sprite mercurySprite; // ¼ö¼º
-    public Sprite venusSprite;   // ±İ¼º
-    public Sprite marsSprite;    // È­¼º
-    public Sprite jupiterSprite; // ¸ñ¼º
-
-    [Header("±Ëµµ ¼³Á¤")]
-    public float orbitSpeed = 3f;      // °øÀü ¼Óµµ
-    public float orbitWidth = 1.2f;    // ±Ëµµ °¡·ÎÆø
-    public float orbitHeight = 0.35f;  // ±Ëµµ ¼¼·ÎÆø
-
-    [Header("±Ëµµ Áß½É ¿µÁ¡ Á¶Àı")]
-    // ÁÖ»çÀ§ ÀÌ¹ÌÁöÀÇ ±âÁØÁ¡(Pivot) Â÷ÀÌ·Î ÀÎÇØ ±Ëµµ°¡ ½ò¸®´Â Çö»óÀ» º¸Á¤ÇÕ´Ï´Ù.
-    // ÀÎ½ºÆåÅÍ¿¡¼­ X, Y °ªÀ» Á¶±İ¾¿ Á¶ÀıÇÏ¸ç Á¤Áß¾ÓÀ» ¸ÂÃçº¸¼¼¿ä.
-    public Vector3 centerOffset = new Vector3(0f, 0.2f, 0f);
-
-    [Header("¿ø±Ù°¨(3D) ¼³Á¤")]
-    public float frontScale = 0.4f;    // ¾ÕÀ¸·Î ¿Ã ¶§ Å©±â
-    public float backScale = 0.2f;     // µÚ·Î °¥ ¶§ Å©±â
-    public float backDarkness = 0.4f;  // µÚ·Î °¥ ¶§ ¾îµÎ¿öÁö´Â Á¤µµ
-
-    [Header("²¿¸®(Æ®·¹ÀÏ) ÀÌÆåÆ® ¼³Á¤")]
-    public Material trailMaterial;     // ²¿¸®¿¡ ¾²ÀÏ ÀçÁú (ÀÎ½ºÆåÅÍ ÇÒ´ç ±ÇÀå)
-    public float trailTime = 0.4f;     // ²¿¸®°¡ À¯ÁöµÇ´Â ½Ã°£ (±æÀÌ)
-    public float trailStartWidth = 0.15f; // ²¿¸® ½ÃÀÛ µÎ²²
-    public float trailEndWidth = 0.0f;    // ²¿¸® ³¡ µÎ²²
+    [Header("ë³„ ìœ„ì„± ê³µìš© ì„¤ì • (ë¹„ì–´ ìˆìœ¼ë©´ Resources ê¸°ë³¸ê°’ ì‚¬ìš©)")]
+    [SerializeField] private SatelliteVisualProfile visualProfile;
 
     private Dice dice;
     private SpriteRenderer diceSpriteRenderer;
+    private Transform effectsRoot;
+    private readonly SatelliteInstance[] instances = new SatelliteInstance[4];
+    private float orbitAngle;
+    private float twinklePhase;
+    private Tween twinkleTween;
+    private float tweenPeriod;
+    private bool usesSharedAssets;
 
-    // À§¼º°ú ²¿¸® ÀÌÆåÆ®¸¦ ÇÔ²² ¹­¾î¼­ °ü¸®ÇÏ´Â Å¬·¡½º
-    private class SatelliteInstance
+    private struct TrailDot
     {
-        public SatelliteType type;
-        public GameObject go;
-        public SpriteRenderer sr;
-        public TrailRenderer tr; // Æ®·¹ÀÏ ·»´õ·¯ Ãß°¡
-        public float angle;
+        public Transform transform;
+        public SpriteRenderer renderer;
     }
 
-    private List<SatelliteInstance> activeInstances = new List<SatelliteInstance>();
+    // ìœ„ì„±ê³¼ ê¼¬ë¦¬ ì´í™íŠ¸ë¥¼ í•¨ê»˜ ë¬¶ì–´ì„œ ê´€ë¦¬í•˜ëŠ” í´ë˜ìŠ¤. ì¥ì°© ë³€ê²½ ì‹œì—ë„ ì¬ì‚¬ìš©í•©ë‹ˆë‹¤.
+    private sealed class SatelliteInstance
+    {
+        public SatelliteType type;
+        public Transform root;
+        public Transform starTransform;
+        public SpriteRenderer star;
+        public Transform glowTransform;
+        public SpriteRenderer glow;
+        public TrailDot[] dots = System.Array.Empty<TrailDot>();
+        public float appearedAt;
+        public bool assigned;
+    }
 
-    void Awake()
+    private void Awake()
     {
         dice = GetComponent<Dice>();
         diceSpriteRenderer = GetComponent<SpriteRenderer>();
+        if (visualProfile == null) visualProfile = Profile;
+        if (visualProfile == null)
+            Debug.LogWarning("[ìœ„ì„± ì—°ì¶œ] Resources/SatelliteVisualProfile ì„¤ì •ì´ í•„ìš”í•©ë‹ˆë‹¤.", this);
     }
 
-    void Update()
+    private void OnDisable()
     {
-        if (dice == null || dice.myData == null) return;
-
-        if (dice.myData.activeSatellites != null &&
-            dice.myData.activeSatellites.Count != activeInstances.Count)
-        {
-            RefreshSatellites();
-        }
-
-        UpdateOrbits();
+        twinkleTween?.Pause();
+        if (effectsRoot != null) effectsRoot.gameObject.SetActive(false);
     }
 
-    private void RefreshSatellites()
+    private void OnDestroy()
     {
-        foreach (var inst in activeInstances)
+        twinkleTween?.Kill();
+        if (effectsRoot != null) Destroy(effectsRoot.gameObject);
+        if (usesSharedAssets) Release();
+    }
+
+    private void LateUpdate()
+    {
+        var satellites = dice != null && dice.myData != null ? dice.myData.activeSatellites : null;
+        int count = satellites != null ? Mathf.Min(satellites.Count, instances.Length) : 0;
+        if (count == 0 || visualProfile == null || diceSpriteRenderer == null || diceSpriteRenderer.sprite == null)
         {
-            if (inst.go != null) Destroy(inst.go);
+            if (effectsRoot != null) effectsRoot.gameObject.SetActive(false);
+            for (int i = 0; i < instances.Length; i++) if (instances[i] != null) instances[i].assigned = false;
+            twinkleTween?.Pause();
+            return;
         }
-        activeInstances.Clear();
 
-        if (dice.myData.activeSatellites == null) return;
-
-        for (int i = 0; i < dice.myData.activeSatellites.Count; i++)
+        EnsureSharedAssets();
+        if (effectsRoot == null)
         {
-            SatelliteType type = dice.myData.activeSatellites[i];
+            effectsRoot = new GameObject("SatelliteStarEffects").transform;
+            effectsRoot.SetParent(transform, false);
+        }
+        effectsRoot.gameObject.SetActive(true);
+        EnsureTwinkle();
 
-            GameObject satGo = new GameObject("Satellite_" + type.ToString());
-            satGo.transform.SetParent(transform);
-            satGo.transform.localPosition = centerOffset; // ½ÃÀÛ À§Ä¡¸¦ ¿ÀÇÁ¼ÂÀ¸·Î ÁöÁ¤
+        // ì¢…ë¥˜ë³„ ë°©í–¥ ë¶„ê¸° ì—†ì´ ëª¨ë‘ ë™ì¼í•œ ì‹œê³„ ë°©í–¥ìœ¼ë¡œ ì§„í–‰í•©ë‹ˆë‹¤. ê²Œì„ ë‚œìˆ˜ëŠ” ì‚¬ìš©í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.
+        orbitAngle = Mathf.Repeat(orbitAngle - Mathf.Abs(visualProfile.clockwiseDegreesPerSecond) * Time.deltaTime, 360f);
+        Bounds bounds = diceSpriteRenderer.sprite.bounds;
+        Vector3 center = bounds.center;
+        if (diceSpriteRenderer.flipX) center.x = -center.x;
+        if (diceSpriteRenderer.flipY) center.y = -center.y;
+        center.x += bounds.size.x * visualProfile.centerOffsetRatio.x;
+        center.y += bounds.size.y * visualProfile.centerOffsetRatio.y;
+        float width = Mathf.Max(0.01f, bounds.size.x);
+        float height = Mathf.Max(0.01f, bounds.size.y);
+        Vector2 radius = new Vector2(width * Mathf.Max(0.1f, visualProfile.radiusRatio.x), height * Mathf.Max(0.1f, visualProfile.radiusRatio.y));
+        float dieSize = Mathf.Min(width, height);
+        float starSize = dieSize * Mathf.Max(0.01f, visualProfile.starSizeRatio);
+        int dotCount = Mathf.Clamp(visualProfile.trailDotCount, 0, 24);
 
-            // 1. ½ºÇÁ¶óÀÌÆ® ·»´õ·¯ ¼¼ÆÃ
-            SpriteRenderer sr = satGo.AddComponent<SpriteRenderer>();
-            Color satColor = Color.white; // ²¿¸® »ö»ó¿ë º¯¼ö
-
-            switch (type)
+        for (int i = 0; i < instances.Length; i++)
+        {
+            if (i >= count)
             {
-                case SatelliteType.Mercury:
-                    sr.sprite = mercurySprite;
-                    satColor = new Color(0.3f, 0.8f, 1f); // ÇÏ´Ã»ö
-                    break;
-                case SatelliteType.Venus:
-                    sr.sprite = venusSprite;
-                    satColor = new Color(1f, 0.9f, 0.2f); // ³ë¶õ»ö
-                    break;
-                case SatelliteType.Mars:
-                    sr.sprite = marsSprite;
-                    satColor = new Color(1f, 0.4f, 0.3f); // ºÓÀº»ö
-                    break;
-                case SatelliteType.Jupiter:
-                    sr.sprite = jupiterSprite;
-                    satColor = new Color(0.8f, 0.6f, 0.4f); // ÁÖÈ²/°¥»ö
-                    break;
+                if (instances[i] != null) { instances[i].root.gameObject.SetActive(false); instances[i].assigned = false; }
+                continue;
             }
 
-            // 2. Æ®·¹ÀÏ ·»´õ·¯(²¿¸®) ¼¼ÆÃ
-            TrailRenderer tr = satGo.AddComponent<TrailRenderer>();
-            tr.time = trailTime;
-            tr.startWidth = trailStartWidth;
-            tr.endWidth = trailEndWidth;
-
-            // ¸ÓÆ¼¸®¾óÀÌ ºñ¾îÀÖÀ¸¸é À¯´ÏÆ¼ ±âº» ½ºÇÁ¶óÀÌÆ® ÀçÁúÀ» »ç¿ë
-            if (trailMaterial != null) tr.material = trailMaterial;
-            else tr.material = new Material(Shader.Find("Sprites/Default"));
-
-            // ²¿¸®ÀÇ »ö»óÀÌ ¼­¼­È÷ Åõ¸íÇØÁöµµ·Ï ±×¶óµğ¾ğÆ® Àû¿ë
-            Gradient gradient = new Gradient();
-            gradient.SetKeys(
-                new GradientColorKey[] { new GradientColorKey(satColor, 0.0f), new GradientColorKey(satColor, 1.0f) },
-                new GradientAlphaKey[] { new GradientAlphaKey(0.8f, 0.0f), new GradientAlphaKey(0.0f, 1.0f) }
-            );
-            tr.colorGradient = gradient;
-
-            SatelliteInstance newInst = new SatelliteInstance
+            var inst = instances[i] ?? (instances[i] = CreateInstance());
+            SatelliteType type = satellites[i];
+            Sprite star = visualProfile.GetStar(type);
+            if (!inst.assigned || inst.type != type || inst.star.sprite != star)
             {
-                type = type,
-                go = satGo,
-                sr = sr,
-                tr = tr,
-                angle = Random.Range(0f, Mathf.PI * 2f)
-            };
+                inst.type = type;
+                inst.star.sprite = star;
+                inst.appearedAt = Time.time;
+                inst.assigned = true;
+            }
+            inst.root.gameObject.SetActive(star != null);
+            if (star == null) continue;
+            EnsureDots(inst, dotCount);
 
-            activeInstances.Add(newInst);
+            float angle = orbitAngle + StartAngle(type);
+            float pulse = 0.5f + 0.5f * Mathf.Sin(twinklePhase + (int)type * 1.7f);
+            Color light = visualProfile.GetLight(type);
+            inst.root.localPosition = OrbitPosition(center, radius, angle);
+            // ë³„ PNG ìì²´ì—ëŠ” ìƒ‰ìƒ/íˆ¬ëª…ë„ ë³€ì¡°ë¥¼ í•˜ì§€ ì•Šì•„ ë¾°ì¡±í•œ ëª¨ì–‘ì„ ì„ ëª…í•˜ê²Œ ìœ ì§€í•©ë‹ˆë‹¤.
+            float spriteSize = Mathf.Max(0.001f, Mathf.Max(star.bounds.size.x, star.bounds.size.y));
+            float starScale = starSize / spriteSize * (1f + pulse * visualProfile.starPulse);
+            inst.starTransform.localScale = Vector3.one * starScale;
+            inst.starTransform.localPosition = -star.bounds.center * starScale;
+            inst.star.color = Color.white;
+            inst.glowTransform.localScale = Vector3.one * (starSize * visualProfile.glowSize * (0.9f + 0.1f * pulse));
+            inst.glow.color = new Color(light.r, light.g, light.b, visualProfile.glowAlpha * (0.65f + 0.35f * pulse));
+
+            int layer = diceSpriteRenderer.sortingLayerID;
+            int order = diceSpriteRenderer.sortingOrder;
+            SetSorting(inst.star, layer, order + 3);
+            SetSorting(inst.glow, layer, order + 2);
+            // ì£¼ì‚¬ìœ„ì™€ í•¨ê»˜ ì›€ì§ì´ëŠ” ë¡œì»¬ ì”ìƒì´ë¼ í‚µ/êµì²´ ë•Œ í™”ë©´ì„ ê°€ë¡œì§€ë¥´ëŠ” ê¸´ ê¼¬ë¦¬ê°€ ìƒê¸°ì§€ ì•ŠìŠµë‹ˆë‹¤.
+            float warmup = Mathf.Clamp01((Time.time - inst.appearedAt) / 0.45f);
+            for (int j = 0; j < inst.dots.Length; j++)
+            {
+                var dot = inst.dots[j];
+                dot.renderer.enabled = j < dotCount;
+                if (j >= dotCount) continue;
+                float progress = (j + 1f) / (dotCount + 1f);
+                dot.transform.localPosition = OrbitPosition(center, radius, angle + progress * visualProfile.trailArcDegrees) - inst.root.localPosition;
+                float sparkle = 0.8f + 0.2f * Mathf.Sin(twinklePhase * 1.3f + j * 2.1f + i);
+                float size = dieSize * visualProfile.dotSizeRatio * (1f - 0.45f * progress);
+                dot.transform.localScale = Vector3.one * size;
+                float alpha = visualProfile.trailAlpha * (1f - progress * 0.85f) * sparkle * Mathf.Clamp01(warmup * 2f - progress);
+                dot.renderer.color = new Color(Mathf.Lerp(light.r, 1f, 0.45f), Mathf.Lerp(light.g, 1f, 0.45f), Mathf.Lerp(light.b, 1f, 0.45f), alpha);
+                SetSorting(dot.renderer, layer, order + 1);
+            }
         }
     }
 
-    private void UpdateOrbits()
+    private void EnsureTwinkle()
     {
-        int baseOrder = diceSpriteRenderer.sortingOrder;
-
-        foreach (var inst in activeInstances)
+        float period = Mathf.Max(0.2f, visualProfile.twinkleSeconds);
+        if (twinkleTween == null || !twinkleTween.IsActive() || !Mathf.Approximately(period, tweenPeriod))
         {
-            inst.angle += Time.deltaTime * orbitSpeed;
-
-            float x = Mathf.Cos(inst.angle) * orbitWidth;
-            float y = Mathf.Sin(inst.angle) * orbitHeight;
-            float depth = Mathf.Sin(inst.angle);
-
-            float finalX = x;
-            float finalY = y;
-
-            switch (inst.type)
-            {
-                case SatelliteType.Mercury: break;
-                case SatelliteType.Venus:
-                    // [¹æÇâ ¹İÀü] ±İ¼ºÀÌ À§¿¡¼­ ¾Æ·¡·Î ¶³¾îÁö°Ô ¸¸µì´Ï´Ù
-                    finalX = 0f;
-                    finalY = -x;
-                    break;
-                case SatelliteType.Mars:
-                    float cos45 = 0.7071f;
-                    finalX = x * cos45 - y * cos45;
-                    finalY = x * cos45 + y * cos45;
-                    break;
-                case SatelliteType.Jupiter:
-                    float cosM45 = 0.7071f; float sinM45 = -0.7071f;
-                    finalX = x * cosM45 - y * sinM45;
-                    finalY = x * sinM45 + y * cosM45;
-                    break;
-            }
-
-            // °è»êµÈ ÃÖÁ¾ À§Ä¡¿¡ ¿µÁ¡(centerOffset)À» ´õÇØÁİ´Ï´Ù.
-            inst.go.transform.localPosition = new Vector3(finalX, finalY, 0f) + centerOffset;
-
-            float depth01 = (depth + 1f) / 2f;
-            float currentScale = Mathf.Lerp(frontScale, backScale, depth01);
-            inst.go.transform.localScale = new Vector3(currentScale, currentScale, 1f);
-
-            float colorMult = Mathf.Lerp(1f, backDarkness, depth01);
-            inst.sr.color = new Color(colorMult, colorMult, colorMult, 1f);
-
-            // ÁÖ»çÀ§ ±âÁØ ¾Õ/µÚ ·¹ÀÌ¾î ·»´õ¸µ Á¤·Ä (À§¼º º»Ã¼¿Í ²¿¸® µ¿½Ã Àû¿ë)
-            if (depth > 0)
-            {
-                inst.sr.sortingOrder = baseOrder - 1;
-                if (inst.tr != null) inst.tr.sortingOrder = baseOrder - 2;
-            }
-            else
-            {
-                inst.sr.sortingOrder = baseOrder + 2;
-                if (inst.tr != null) inst.tr.sortingOrder = baseOrder + 1;
-            }
+            twinkleTween?.Kill();
+            tweenPeriod = period;
+            // ì£¼ì‚¬ìœ„ë‹¹ Tween í•˜ë‚˜ë§Œ ì‚¬ìš©í•˜ê³  ê° ìœ„ì„±ì˜ ë°ê¸°ëŠ” ìœ„ìƒ ì°¨ì´ë¡œ ë‹¬ë¦¬í•©ë‹ˆë‹¤.
+            twinkleTween = DOVirtual.Float(0f, Mathf.PI * 2f, period, value => twinklePhase = value).SetEase(Ease.Linear).SetLoops(-1, LoopType.Restart);
         }
+        else if (!twinkleTween.IsPlaying()) twinkleTween.Play();
+    }
+
+    private SatelliteInstance CreateInstance()
+    {
+        var root = new GameObject("StarOrbit").transform;
+        root.SetParent(effectsRoot, false);
+        var star = CreateRenderer("Star", root, null);
+        var glow = CreateRenderer("Glow", root, glowSprite);
+        return new SatelliteInstance { root = root, star = star, starTransform = star.transform, glow = glow, glowTransform = glow.transform };
+    }
+
+    private void EnsureDots(SatelliteInstance inst, int count)
+    {
+        if (inst.dots.Length >= count) return;
+        int oldCount = inst.dots.Length;
+        System.Array.Resize(ref inst.dots, count);
+        for (int i = oldCount; i < count; i++)
+        {
+            // ê° ìœ„ì„±ì˜ root ì•„ë˜ì— ë‘ë˜ ìœ„ì¹˜ëŠ” ì£¼ì‚¬ìœ„ ë¡œì»¬ ê¶¤ë„ë¥¼ ë”°ë¦…ë‹ˆë‹¤.
+            var renderer = CreateRenderer("OrbitDot", inst.root, dotSprite);
+            inst.dots[i] = new TrailDot { renderer = renderer, transform = renderer.transform };
+        }
+    }
+
+    private static SpriteRenderer CreateRenderer(string objectName, Transform parent, Sprite sprite)
+    {
+        var go = new GameObject(objectName);
+        go.transform.SetParent(parent, false);
+        var renderer = go.AddComponent<SpriteRenderer>();
+        renderer.sprite = sprite;
+        if (effectMaterial != null) renderer.sharedMaterial = effectMaterial;
+        return renderer;
+    }
+
+    private static void SetSorting(SpriteRenderer renderer, int layer, int order)
+    {
+        renderer.sortingLayerID = layer;
+        renderer.sortingOrder = order;
+    }
+
+    private void EnsureSharedAssets()
+    {
+        if (usesSharedAssets) return;
+        Acquire(true);
+        usesSharedAssets = true;
     }
 }

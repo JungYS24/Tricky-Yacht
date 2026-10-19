@@ -1,0 +1,22 @@
+public enum SynergyEffectType
+{
+    YachtMultiplierUp,
+    MaxHpUp,
+    ShopRerollCostDown,
+    FourKindMultiplierUp,
+    StartWithSnackPeppermint,
+    BurnDamageReductionUp,
+    VictoryGoldChanceUp,
+    BurnPowerUp,
+    StartGoldUp,
+    IncomingDamageDown,
+    OnePairMultiplierUp,
+    StraightMultiplierUp,
+    FullHouseMultiplierUp,
+    StartWithDarkCoating,
+    StartWithSnackGarnish,
+    BaseChipsUp,
+    ShopPriceDiscountUp,
+    StartWithSnackSteak,
+    StartWithSnackCherry
+}

@@ -6,11 +6,13 @@ using UnityEngine.UI;
 public class LobbyManager : MonoBehaviour
 {
     public GameObject glitchOverlay;
-    public AudioSource sfxSource;    
+    public AudioSource sfxSource;
+    // ì”¬ ì§ë ¬í™” ë³´ì¡´ìš©. ë¡œë¹„ ì‹œì‘ìŒì€ Game_Start_Doorë§Œ ì¬ìƒí•œë‹¤.
+    [System.Obsolete("ë¡œë¹„ ì‹œì‘ìŒì€ SfxId.Game_Start_Doorë¥¼ ì‚¬ìš©í•©ë‹ˆë‹¤.")]
     public AudioClip glitchSound;
 
-    [Header("ÀÌ¾îÇÏ±â ¹öÆ°")]
-    public Button continueButton; // ÀÌ¾îÇÏ±â ¹öÆ° ¿¬°á¿ë
+    [Header("ì´ì–´í•˜ê¸° ë²„íŠ¼")]
+    public Button continueButton; // ì´ì–´í•˜ê¸° ë²„íŠ¼ ì—°ê²°ìš©
 
     //public void OnStartButtonClick()
     //{
@@ -20,7 +22,7 @@ public class LobbyManager : MonoBehaviour
 
     private void Start()
     {
-        // ¼¼ÀÌºê ÆÄÀÏÀÌ ¾øÀ¸¸é ÀÌ¾îÇÏ±â ¹öÆ°À» Å¬¸¯ ºÒ°¡´ÉÇÏ°Ô ¸·À½
+        // ì„¸ì´ë¸Œ íŒŒì¼ì´ ì—†ìœ¼ë©´ ì´ì–´í•˜ê¸° ë²„íŠ¼ì„ í´ë¦­ ë¶ˆê°€ëŠ¥í•˜ê²Œ ë§‰ìŒ
         if (continueButton != null)
         {
             continueButton.interactable = PlayerPrefs.HasKey("TrickYacht_Save");
@@ -29,52 +31,52 @@ public class LobbyManager : MonoBehaviour
 
     public void OnStartButtonClick()
     {
-        // º» °ÔÀÓ ½ÃÀÛ ½Ã¿¡´Â Æ©Åä¸®¾óÀ» ²ôµµ·Ï ¼³Á¤ (PlayerPrefs È°¿ë)
+        // ë³¸ ê²Œì„ ì‹œì‘ ì‹œì—ëŠ” íŠœí† ë¦¬ì–¼ì„ ë„ë„ë¡ ì„¤ì • (PlayerPrefs í™œìš©)
         PlayerPrefs.SetInt("RunTutorial", 0);
 
-        //»õ °ÔÀÓÀÌ¹Ç·Î ±âÁ¸ ¼¼ÀÌºê ÆÄÀÏ »èÁ¦ ¹× Load ÇÃ·¡±× 0 ºÎ¿©
+        //ìƒˆ ê²Œì„ì´ë¯€ë¡œ ê¸°ì¡´ ì„¸ì´ë¸Œ íŒŒì¼ ì‚­ì œ ë° Load í”Œë˜ê·¸ 0 ë¶€ì—¬
         PlayerPrefs.DeleteKey("TrickYacht_Save");
         PlayerPrefs.SetInt("LoadGame", 0);
 
-        ////µµ°¨ ÃÊ±âÈ­
+        ////ë„ê° ì´ˆê¸°í™”
         //if (GameSaveManager.Instance != null)
         //{
         //    GameSaveManager.Instance.ResetCollectionData();
         //}
 
         StopAllCoroutines();
-        StartCoroutine(GlitchAndLoad("MainScene"));
+        StartCoroutine(GlitchAndLoad("Playable"));
     }
 
-    //ÀÌ¾îÇÏ±â Àü¿ë Å¬¸¯ ÀÌº¥Æ®
+    //ì´ì–´í•˜ê¸° ì „ìš© í´ë¦­ ì´ë²¤íŠ¸
     public void OnContinueButtonClick()
     {
         PlayerPrefs.SetInt("RunTutorial", 0);
 
-        //ÀúÀåµÈ °É ºÒ·¯¿À¶ó´Â Load ÇÃ·¡±× 1 ºÎ¿©
+        //ì €ì¥ëœ ê±¸ ë¶ˆëŸ¬ì˜¤ë¼ëŠ” Load í”Œë˜ê·¸ 1 ë¶€ì—¬
         PlayerPrefs.SetInt("LoadGame", 1);
 
         StopAllCoroutines();
-        StartCoroutine(GlitchAndLoad("MainScene"));
+        StartCoroutine(GlitchAndLoad("MainScene_Map"));
     }
 
     public void OnTutorialButtonClick()
     {
-        // Æ©Åä¸®¾ó ½ÃÀÛ ½Ã¿¡´Â ÇÃ·¡±×¸¦ 1·Î ¼³Á¤
+        // íŠœí† ë¦¬ì–¼ ì‹œì‘ ì‹œì—ëŠ” í”Œë˜ê·¸ë¥¼ 1ë¡œ ì„¤ì •
         PlayerPrefs.SetInt("RunTutorial", 1);
         StopAllCoroutines();
 
-        // ¸¸¾à Æ©Åä¸®¾ó ¾ÀÀÌ µû·Î ÀÖ´Ù¸é "TutorialScene"À¸·Î, 
-        // º» °ÔÀÓ ¾À°ú °°´Ù¸é "SampleScene"À¸·Î Àû¾îÁÖ¼¼¿ä.
+        // ë§Œì•½ íŠœí† ë¦¬ì–¼ ì”¬ì´ ë”°ë¡œ ìˆë‹¤ë©´ "TutorialScene"ìœ¼ë¡œ, 
+        // ë³¸ ê²Œì„ ì”¬ê³¼ ê°™ë‹¤ë©´ "SampleScene"ìœ¼ë¡œ ì ì–´ì£¼ì„¸ìš”.
         StartCoroutine(GlitchAndLoad("TutorialScene"));
     }
 
 
-    // ¸Å°³º¯¼ö·Î ¾À ÀÌ¸§À» ¹Şµµ·Ï ¼öÁ¤
+    // ë§¤ê°œë³€ìˆ˜ë¡œ ì”¬ ì´ë¦„ì„ ë°›ë„ë¡ ìˆ˜ì •
     IEnumerator GlitchAndLoad(string sceneName)
     {
         if (glitchOverlay != null) glitchOverlay.SetActive(true);
-        if (sfxSource != null && glitchSound != null) sfxSource.PlayOneShot(glitchSound);
+        Sfx.Play(SfxId.Game_Start_Door);
 
         yield return new WaitForSeconds(0.7f);
 
@@ -83,13 +85,13 @@ public class LobbyManager : MonoBehaviour
 
     //IEnumerator GlitchAndLoad()
     //{
-    //    // ±Û¸®Ä¡ È¿°ú È°¼ºÈ­ ¹× »ç¿îµå Àç»ı
+    //    // ê¸€ë¦¬ì¹˜ íš¨ê³¼ í™œì„±í™” ë° ì‚¬ìš´ë“œ ì¬ìƒ
     //    if (glitchOverlay != null) glitchOverlay.SetActive(true);
     //    if (sfxSource != null && glitchSound != null) sfxSource.PlayOneShot(glitchSound);
 
     //    yield return new WaitForSeconds(0.7f);
 
-    //    // ½ÇÁ¦ ¾À ÀÌµ¿
+    //    // ì‹¤ì œ ì”¬ ì´ë™
     //    SceneManager.LoadScene("SampleScene");
     //}
 
@@ -98,13 +100,13 @@ public class LobbyManager : MonoBehaviour
     public void ClickQuitButton()
     {
         #if UNITY_EDITOR
-            // À¯´ÏÆ¼ ¿¡µğÅÍ¿¡¼­ ½ÇÇà ÁßÀÏ ¶§´Â Àç»ı ¸ğµå¸¦ ²ü´Ï´Ù.
+            // ìœ ë‹ˆí‹° ì—ë””í„°ì—ì„œ ì‹¤í–‰ ì¤‘ì¼ ë•ŒëŠ” ì¬ìƒ ëª¨ë“œë¥¼ ë•ë‹ˆë‹¤.
             UnityEditor.EditorApplication.isPlaying = false;
         #else
-            // ½ÇÁ¦ ºôµåµÈ °ÔÀÓ(.exe µî)¿¡¼­´Â ÇÁ·Î±×·¥À» Á¾·áÇÕ´Ï´Ù.
+            // ì‹¤ì œ ë¹Œë“œëœ ê²Œì„(.exe ë“±)ì—ì„œëŠ” í”„ë¡œê·¸ë¨ì„ ì¢…ë£Œí•©ë‹ˆë‹¤.
             Application.Quit();
         #endif
         
-        Debug.Log("°ÔÀÓ Á¾·á ¹öÆ°ÀÌ Å¬¸¯µÇ¾ú½À´Ï´Ù.");
+        Debug.Log("ê²Œì„ ì¢…ë£Œ ë²„íŠ¼ì´ í´ë¦­ë˜ì—ˆìŠµë‹ˆë‹¤.");
     }
 }

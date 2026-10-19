@@ -2,21 +2,57 @@
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using DG.Tweening;
 
 public class UIManager : MonoBehaviour
 {
+    // 미리보기의 표시 형식과 팀원 작업의 카운트업 연출은 UIManager가 담당합니다.
+    public void ShowTurnPreview(string handName, int displayBaseSum, float displayMult, int iceBonusChips, int satelliteBonusChips, int darkDamageTotal)
+    {
+        string displayHand = string.IsNullOrEmpty(handName) ? "" : $"<color=#FFD700>{handName}</color>";
+        if (iceBonusChips > 0) displayHand += $" <color=#00FFFF>+{iceBonusChips}</color>";
+        if (darkDamageTotal > 0) displayHand += $" <color=#A9A9A9>+{darkDamageTotal}</color>";
+        if (satelliteBonusChips > 0) displayHand += $" <color=#B19CD9>+{satelliteBonusChips}{LocalizationManager.GetUi("UI_SATELLITE_TAG", "(위성)")}</color>";
+
+        // 분리된 텍스트에 각각 할당
+
+        SetHandNameText(displayHand);
+        UiCountUpText.On(chipsSumText, UiCountUpText.FormatKind.Chips)?.Play(displayBaseSum);
+        UiCountUpText.On(multSumText, UiCountUpText.FormatKind.Mult)?.Play(displayMult);
+
+        if (chipsLogText != null) chipsLogText.text = "";
+        if (multLogText != null) multLogText.text = "";
+        if (finalDamageText != null)
+            UiCountUpText.On(finalDamageText, UiCountUpText.FormatKind.Integer)?.Clear();
+    }
+
+
     [Header("메인 게임 UI")]
     public TextMeshProUGUI stageText;
     public TextMeshProUGUI targetScoreText;
     public TextMeshProUGUI cumulativeScoreText;
     public TextMeshProUGUI roundPlaysText;
+    public TextMeshProUGUI roundEndText;
 
-    [Header("데미지 계산 UI (통합)")]
-    public TextMeshProUGUI scoringFormulaText;
+    // 기존 통합 UI 대신, 용도별로 완전히 분리된 텍스트들을 선언
+    [Header("데미지 계산 UI (분리형)")]
+    //public TextMeshProUGUI scoringFormulaText; // 기존 통합 텍스트는 이제 사용 안 함
+    public TextMeshProUGUI handInfoText;     // 족보 이름 및 기본 코팅 보너스
+    public TextMeshProUGUI chipsSumText;     // 합연산(덧셈) 전용 텍스트
+    public TextMeshProUGUI multSumText;      // 곱연산(배수) 전용 텍스트
+    public TextMeshProUGUI chipsLogText;     // 덧셈(칩) 머리 위에서 뜰 로그
+    public TextMeshProUGUI multLogText;      // 곱셈(배수) 머리 위에서 뜰 로그
+    public TextMeshProUGUI finalDamageText;  // = 대미지 예정 텍스트
 
     [Header("플레이어 체력 UI")]
     //플레이어 체력
     public TextMeshProUGUI heartText;
+    [Tooltip("켜면 보호막이 있을 때 체력 글자에 보호막 수치를 붙입니다. 예: 100(4)/100")]
+    public bool shieldInHealthText;
+
+    //보호막 UI 연결용
+    public GameObject shieldRoot;        
+    public TextMeshProUGUI shieldText;   
 
     [Header("버튼 및 패널")]
     public Button rollButton;
@@ -33,6 +69,11 @@ public class UIManager : MonoBehaviour
     [Header("피규어 발동 아이콘 UI")]
     public Image[] activeFigureIcons; // 유니티 에디터에서 띄워줄 이미지 UI들을 연결할 배열
 
+    //준비된 화염 틱딜 UI를 연결할 변수
+    [Header("상태이상(화염) UI")]
+    public GameObject flameStackRoot;  // 이미지와 텍스트를 모두 포함하는 최상위 부모 오브젝트
+    public TextMeshProUGUI flameStackText; // 숫자가 표시될 텍스트
+
     [Header("결과창 설정")]
     public TMPro.TextMeshProUGUI resultText;
     public GameObject resultPanel;
@@ -47,6 +88,11 @@ public class UIManager : MonoBehaviour
     //다이스 클릭방지
     public static bool IsSettingsOpen = false;
 
+    private void Awake()
+    {
+        BindRoundEndText();
+    }
+
     private void Start()
     {
         if (settingsOpenButton != null)
@@ -55,8 +101,7 @@ public class UIManager : MonoBehaviour
         if (resumeButton != null)
             resumeButton.onClick.AddListener(CloseSettings);
 
-        if (settingsPanel != null)
-            settingsPanel.SetActive(false);
+        CloseSettings();
     }
 
     public void OpenSettings()
@@ -81,22 +126,20 @@ public class UIManager : MonoBehaviour
     }
 
     // 매개변수 맨 끝에 List<Sprite> activeSprites = null 을 추가해 줍니다.
-    public void UpdateGameUI(string stageName, int currentHP, int maxHP, int playerHP, int playerMaxHP, int rerollsLeft, string combinedDamageText, string activeFigureString = "", List<Sprite> activeSprites = null)
+    public void UpdateGameUI(string stageName, int currentHP, int maxHP, int playerHP, int playerMaxHP, int rerollsLeft, string combinedDamageText, string activeFigureString = "", List<Sprite> activeSprites = null, int finishesLeft = 1)
     {
         stageText.text = stageName;
-        targetScoreText.text = $"<color=#FF5555>{currentHP}/{maxHP}</color>";
+        targetScoreText.text = $"{currentHP}/{maxHP}";
         cumulativeScoreText.text = "";
-        roundPlaysText.text = $"남은 굴리기: {rerollsLeft}";
+        if (roundPlaysText != null)
+            roundPlaysText.text = rerollsLeft.ToString();
 
-        if (heartText != null)
-        {
-            heartText.text = $"{playerHP}/{playerMaxHP}";
-        }
+        BindRoundEndText();
+        if (roundEndText != null)
+            roundEndText.text = finishesLeft.ToString();
 
-        if (scoringFormulaText != null)
-        {
-            scoringFormulaText.text = combinedDamageText;
-        }
+        int shield = DiceManager.Instance != null ? DiceManager.Instance.currentShield : 0;
+        UpdatePlayerHealthText(playerHP, playerMaxHP, shield);
 
 
         //발동된 피규어 아이콘 표시 로직
@@ -105,7 +148,13 @@ public class UIManager : MonoBehaviour
             // 1. 매번 갱신할 때마다 일단 모든 아이콘을 숨깁니다.
             foreach (var icon in activeFigureIcons)
             {
-                if (icon != null) icon.gameObject.SetActive(false);
+                if (icon != null)
+                {
+                    // DOTween 연출 중복 실행으로 인해 크기나 투명도가 꼬이지 않도록 초기화
+                    icon.DOKill();
+                    icon.transform.DOKill();
+                    icon.gameObject.SetActive(false);
+                }
             }
 
             // 전달받은 발동 피규어 아이콘이 있다면 앞에서부터 순서대로 켬
@@ -117,6 +166,14 @@ public class UIManager : MonoBehaviour
                     {
                         activeFigureIcons[i].sprite = activeSprites[i];
                         activeFigureIcons[i].gameObject.SetActive(true);
+
+                        //발동되는 순간 쫀득하게 튀어 오르는 타격감
+                        activeFigureIcons[i].transform.localScale = Vector3.one;
+                        activeFigureIcons[i].transform.DOPunchScale(new Vector3(0.3f, 0.3f, 0f), 0.4f, 2, 0.5f);
+
+                        //상시 발동(연한 빛) 느낌을 위한 투명도 깜빡임(숨쉬기) 효과
+                        activeFigureIcons[i].color = new Color(1f, 1f, 1f, 1f);
+                        activeFigureIcons[i].DOFade(0.5f, 0.8f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
                     }
                 }
             }
@@ -126,6 +183,18 @@ public class UIManager : MonoBehaviour
     public void UpdateGoldUI(int currentGold) => goldText.text = currentGold.ToString("N0");
     public void SetRollButtonInteractable(bool state) => rollButton.interactable = state;
     public void SetFinishButtonInteractable(bool state) => finishButton.interactable = state;
+
+    void BindRoundEndText()
+    {
+        if (roundEndText != null) return;
+
+        var named = GameObject.Find("Round_END");
+        if (named == null) return;
+
+        roundEndText = named.GetComponent<TextMeshProUGUI>();
+        if (roundEndText == null)
+            roundEndText = named.GetComponentInChildren<TextMeshProUGUI>(true);
+    }
 
     public void ShowResult(string colorHex, string message)
     {
@@ -164,4 +233,124 @@ public class UIManager : MonoBehaviour
     }
 
     public void HideResult() => resultPanel.SetActive(false);
+    //화염 스택 갱신
+    public void UpdateFlameStackUI(int flameDamage)
+    {
+        if (flameStackRoot != null)
+        {
+            if (flameDamage > 0)
+            {
+                flameStackRoot.SetActive(true);
+                if (flameStackText != null) flameStackText.text = flameDamage.ToString();
+
+                // 데미지가 누적될 때마다 아이콘 전체가 쫀득하게 튕기는 타격감
+                flameStackRoot.transform.DOKill(true);
+                flameStackRoot.transform.DOPunchScale(new Vector3(0.25f, 0.25f, 0f), 0.35f, 3, 0.5f);
+            }
+            else
+            {
+                flameStackRoot.SetActive(false); // 0이면 아예 숨김 처리
+            }
+        }
+    }
+
+    // 체력은 한 줄로 유지하고 보호막은 별도의 방패/숫자 줄에 표시합니다.
+    private void UpdatePlayerHealthText(int hp, int maxHP, int shield)
+    {
+        if (heartText == null) return;
+        heartText.text = shieldInHealthText && shield > 0 ? $"{hp}<color=#FFFFFF>({shield})</color>/{maxHP}" : $"{hp}/{maxHP}";
+        heartText.enableWordWrapping = false;
+        heartText.enableAutoSizing = true;
+        if (DiceManager.Instance != null) HurtVignetteController.Get(DiceManager.Instance).UpdateShieldDisplay(this, Mathf.Max(0, shield));
+    }
+
+    public void UpdateShieldUI(int shieldAmount)
+    {
+        shieldAmount = Mathf.Max(0, shieldAmount);
+        if (DiceManager.Instance != null) UpdatePlayerHealthText(DiceManager.Instance.currentPlayerHP, DiceManager.Instance.playerMaxHP, shieldAmount);
+    }
+
+
+    public static string FormatChipsValue(int value)
+    {
+        return $"<color=#51F8D5>{value}</color>";
+    }
+
+    public static string FormatMultValue(float value)
+    {
+        return LocalizationManager.GetUi("UI_MULT_VALUE", "<color=#FDE470>{0}</color>", value.ToString("F1")).Replace("배", "");
+    }
+
+    static readonly Color FinalDamageColor = new Color(1f, 0.33333334f, 0.33333334f, 1f);
+    Vector3 handInfoBaseScale = Vector3.one;
+    Color handInfoBaseColor = Color.white;
+    bool handInfoBaseCached;
+    bool handInfoDamageStyleActive;
+
+    public void CacheHandInfoBaseStyle()
+    {
+        if (handInfoBaseCached || handInfoText == null)
+            return;
+
+        handInfoBaseScale = handInfoText.transform.localScale;
+        handInfoBaseColor = handInfoText.color;
+        handInfoBaseCached = true;
+    }
+
+    public void RestoreHandInfoAppearance()
+    {
+        if (handInfoText == null)
+            return;
+
+        CacheHandInfoBaseStyle();
+        if (!handInfoDamageStyleActive)
+            return;
+
+        handInfoText.GetComponent<FinalDamageFeedback>()?.Restore();
+        handInfoText.transform.DOKill(true);
+        handInfoText.transform.localScale = handInfoBaseScale;
+        handInfoText.color = handInfoBaseColor;
+        handInfoDamageStyleActive = false;
+    }
+
+    public void ApplyFinalDamageStyle()
+    {
+        if (handInfoText == null)
+            return;
+
+        CacheHandInfoBaseStyle();
+        handInfoText.transform.DOKill(true);
+        handInfoText.color = FinalDamageColor;
+        handInfoText.transform.localScale = handInfoBaseScale;
+        // 최종 숫자에 도달한 순간의 확대는 FinalDamageFeedback에서 처리합니다.
+        handInfoDamageStyleActive = true;
+    }
+
+    public void SetHandNameText(string displayHand)
+    {
+        if (handInfoText == null)
+            return;
+
+        var handCounter = handInfoText.GetComponent<UiCountUpText>();
+        if (handCounter != null)
+            handCounter.StopTween();
+
+        RestoreHandInfoAppearance();
+        handInfoText.text = displayHand;
+    }
+
+    public void ClearMergedHandDamageText()
+    {
+        RestoreHandInfoAppearance();
+        if (handInfoText != null)
+        {
+            var handCounter = handInfoText.GetComponent<UiCountUpText>();
+            if (handCounter != null)
+                handCounter.Clear();
+            else
+                handInfoText.text = "";
+        }
+        if (finalDamageText != null)
+            UiCountUpText.On(finalDamageText, UiCountUpText.FormatKind.Integer)?.Clear();
+    }
 }

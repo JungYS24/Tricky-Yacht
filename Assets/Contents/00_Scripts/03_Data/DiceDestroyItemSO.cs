@@ -7,7 +7,7 @@ public class DiceDestroyItemSO : BaseItemDataSO
     {
         if (diceManager != null && diceManager.shopManager != null)
         {
-            // »óÁ¡ ¸Å´ÏÀú¿¡°Ô ÁÖ»çÀ§ ÆÄ±« UI¸¦ ¿­¾î´Ş¶ó°í ¿äÃ»
+            // ìƒì  ë§¤ë‹ˆì €ì—ê²Œ ì£¼ì‚¬ìœ„ íŒŒê´´ UIë¥¼ ì—´ì–´ë‹¬ë¼ê³  ìš”ì²­
             diceManager.shopManager.ShowDiceDestructionSelection();
         }
     }

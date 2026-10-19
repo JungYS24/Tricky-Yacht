@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Collections.Generic;
 
 public class DeckSlot : MonoBehaviour
 {
@@ -35,36 +34,15 @@ public class DeckSlot : MonoBehaviour
     public Vector3 vfxLocalOffset = new Vector3(0f, 0f, 50f);
     public float vfxScale = 2.5f;
 
-    // 위성 UI 전용
-    [Header("위성 UI 설정")]
-    public Sprite mercurySprite;
-    public Sprite venusSprite;
-    public Sprite marsSprite;
-    public Sprite jupiterSprite;
-
-    public float satOrbitSpeed = 3f;
-    public float satOrbitWidth = 45f;   // UI 픽셀 단위 궤도 가로폭
-    public float satOrbitHeight = 15f;  // UI 픽셀 단위 궤도 세로폭
-    public float satFrontScale = 0.8f;  // UI에서 앞으로 올 때 크기
-    public float satBackScale = 0.4f;   // UI에서 뒤로 갈 때 크기
-    public float satBackDarkness = 0.4f;
-
-    public Vector3 satCenterOffset = Vector3.zero;
-
-    private class UISatellite
-    {
-        public SatelliteType type;
-        public GameObject go;
-        public Image image;
-        public float angle;
-    }
-    private List<UISatellite> activeSatellites = new List<UISatellite>();
+    private SatelliteUIVisual satelliteVisual;
+    private StampUIVisual stampVisual;
 
     private DiceData1 currentData;
 
     // LINQ 대체 및 배열 재할당 방지를 위한 고정 배열
     private int[] animFaces = new int[6];
     private int animUniqueCount = 0;
+    private bool animUseFaceIndex = false;
 
     private Sprite[] animSprites;
     private int currentAnimIndex;
@@ -77,6 +55,7 @@ public class DeckSlot : MonoBehaviour
     private bool isUsedState = false;
 
     private int exactFaceValue = -1;
+    private int exactFaceIndex = -1;
     private GameObject currentVFX;
     private DiceType lastVFXType = DiceType.Normal;
 
@@ -90,18 +69,21 @@ public class DeckSlot : MonoBehaviour
         isAnimating = false;
         isPrismUI = false;
         exactFaceValue = -1;
+        exactFaceIndex = -1;
 
         ClearVFX();
 
-        //파괴하는 대신 빈 리스트를 넘겨서 위성들을 모두 숨김 처리
-        UpdateSatellites(new List<SatelliteType>());
+        // 빈 슬롯은 별 오브젝트를 숨겨 두고 다음 표시 때 재사용합니다.
+        if (satelliteVisual != null) satelliteVisual.Bind(null);
+        if (stampVisual != null) stampVisual.Bind(null);
     }
 
-    public void SetDice(DiceData1 data, bool isUsed, int exactValue = -1)
+    public void SetDice(DiceData1 data, bool isUsed, int exactValue = -1, int faceIndex = -1)
     {
         currentData = data;
         isUsedState = isUsed;
         exactFaceValue = exactValue;
+        exactFaceIndex = faceIndex;
         emptyVisual.SetActive(false);
         filledVisual.SetActive(true);
 
@@ -110,8 +92,11 @@ public class DeckSlot : MonoBehaviour
 
         animTimer = 0f;
         currentAnimIndex = 0;
+        animUseFaceIndex = false;
 
-        //LINQ 제거 및 단일 반복문 최적화
+        bool hasPerFaceSprites = data.customFaceSprites != null && data.customFaceSprites.Length >= 6;
+        bool completePerFace = DiceData1.HasCompleteFaceSprites(data.customFaceSprites);
+
         int minVal = data.faceValues[0];
         int maxVal = data.faceValues[0];
         bool isFixed = true;
@@ -145,8 +130,20 @@ public class DeckSlot : MonoBehaviour
             }
         }
 
-        isAnimating = animUniqueCount > 1 && animUniqueCount < 6;
-        bool isSpecialDie = isAnimating || isFixed || data.customDiceShell != null;
+        // 여정처럼 6칸이 모두 채워진 경우에만 면 번호로 돌려 보여 준다.
+        // 하이/로우/짝/홀은 배열 길이는 6이지만 빈 칸이 있어 실제 눈 값만 순환한다.
+        if (completePerFace && exactFaceValue == -1 && exactFaceIndex < 0)
+        {
+            for (int i = 0; i < 6; i++) animFaces[i] = i;
+            animUniqueCount = 6;
+            animUseFaceIndex = true;
+            isAnimating = true;
+        }
+        else
+        {
+            isAnimating = animUniqueCount > 1 && animUniqueCount < 6;
+        }
+        bool isSpecialDie = isAnimating || isFixed || data.customDiceShell != null || hasPerFaceSprites;
 
         if (data.isCoated)
         {
@@ -191,75 +188,24 @@ public class DeckSlot : MonoBehaviour
         if (descText != null)
         {
             //가짜 주사위 일 떄 숫자 대신 Fake 출력
-            if (data.diceName == "가짜 주사위") descText.text = "Fake";
+            if (data.diceName == "가짜 주사위")
+                descText.text = LocalizationManager.GetUi("UI_FAKE_DICE", "Fake");
             else if (minVal == maxVal) descText.text = minVal.ToString();
             else descText.text = $"{minVal}~{maxVal}";
         }
 
-        //위성 UI 생성
-        if (data.activeSatellites == null)
-            data.activeSatellites = new List<SatelliteType>();
-
-        UpdateSatellites(data.activeSatellites);
-    }
-
-    private void UpdateSatellites(List<SatelliteType> satTypes)
-    {
-        // 필요한 개수보다 모자라면 껍데기를 추가 생성
-        while (activeSatellites.Count < satTypes.Count)
+        // 덱·강화 선택창이 같은 별 연출을 사용합니다. 프리팹 연결은 필요 없습니다.
+        if (diceIcon != null)
         {
-            CreateUISatellitePooled();
+            if (satelliteVisual == null) satelliteVisual = diceIcon.GetComponent<SatelliteUIVisual>();
+            if (satelliteVisual == null) satelliteVisual = diceIcon.gameObject.AddComponent<SatelliteUIVisual>();
+            satelliteVisual.Bind(data);
+
+            // 스탬프는 아이콘 가운데에 연한 자국으로 겹칩니다. 사용한 주사위는 아이콘처럼 더 흐리게.
+            if (stampVisual == null) stampVisual = diceIcon.GetComponent<StampUIVisual>();
+            if (stampVisual == null) stampVisual = diceIcon.gameObject.AddComponent<StampUIVisual>();
+            stampVisual.Bind(data, isUsed ? 0.4f : 1f);
         }
-
-        // 만들어둔 위성들을 꺼내서 현재 상태에 맞게 옷을 갈아입히거나 끕니다
-        for (int i = 0; i < activeSatellites.Count; i++)
-        {
-            UISatellite sat = activeSatellites[i];
-
-            if (i < satTypes.Count)
-            {
-                sat.go.SetActive(true); // 켜기
-                sat.type = satTypes[i];
-
-                switch (sat.type)
-                {
-                    case SatelliteType.Mercury: sat.image.sprite = mercurySprite; break;
-                    case SatelliteType.Venus: sat.image.sprite = venusSprite; break;
-                    case SatelliteType.Mars: sat.image.sprite = marsSprite; break;
-                    case SatelliteType.Jupiter: sat.image.sprite = jupiterSprite; break;
-                }
-
-                if (sat.image.sprite != null) sat.image.SetNativeSize();
-            }
-            else
-            {
-                sat.go.SetActive(false); // [핵심] 안 쓰는 위성은 파괴하지 않고 숨김 처리
-            }
-        }
-    }
-
-    private void CreateUISatellitePooled()
-    {
-        // 파괴되지 않고 재사용될 빈 껍데기만 생성
-        GameObject satGo = new GameObject("UISatellite_Pooled");
-
-        // [버그 원천 차단] 유니티 에디터 인스펙터 충돌 방지용 투명망토
-        satGo.hideFlags = HideFlags.HideAndDontSave;
-
-        satGo.transform.SetParent(filledVisual.transform, false);
-
-        Image img = satGo.AddComponent<Image>();
-        img.raycastTarget = false;
-
-        UISatellite newSat = new UISatellite
-        {
-            go = satGo,
-            image = img,
-            angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f)
-        };
-
-        satGo.transform.localScale = Vector3.one * satFrontScale; // 초기 크기 지정
-        activeSatellites.Add(newSat);
     }
 
     private void ApplyVFX(DiceType type)
@@ -357,72 +303,6 @@ public class DeckSlot : MonoBehaviour
                 UpdateDisplaySprite();
             }
         }
-        //UI 위성 회전 연산
-        if (activeSatellites.Count > 0 && diceIcon != null)
-        {
-            foreach (var sat in activeSatellites)
-            {
-                if (!sat.go.activeSelf) continue;
-
-                sat.angle += Time.unscaledDeltaTime * satOrbitSpeed;
-
-                float x = Mathf.Cos(sat.angle) * satOrbitWidth;
-                float y = Mathf.Sin(sat.angle) * satOrbitHeight;
-                float depth = Mathf.Sin(sat.angle);
-
-                float finalX = x;
-                float finalY = y;
-
-                switch (sat.type)
-                {
-                    case SatelliteType.Mercury: break;
-                    case SatelliteType.Venus:
-                        //UI에서도 좌우 흔들림(finalX)을 0으로 완벽 차단! 위에서 아래로만 떨어짐!
-                        finalX = 0f;
-                        finalY = -x;
-                        break;
-                    case SatelliteType.Mars:
-                        float cos45 = 0.7071f;
-                        finalX = x * cos45 - y * cos45;
-                        finalY = x * cos45 + y * cos45;
-                        break;
-                    case SatelliteType.Jupiter:
-                        float cosM45 = 0.7071f; float sinM45 = -0.7071f;
-                        finalX = x * cosM45 - y * sinM45;
-                        finalY = x * sinM45 + y * cosM45;
-                        break;
-                }
-
-                // [중심 맞추기] 위치 적용 시 중심점(baseCenter)과 오프셋(satCenterOffset)을 더해줌
-                Vector3 baseCenter = diceIcon.transform.localPosition;
-                sat.go.transform.localPosition = new Vector3(finalX, finalY, 0f) + baseCenter + satCenterOffset;
-
-                float depth01 = (depth + 1f) / 2f;
-                float currentScale = Mathf.Lerp(satFrontScale, satBackScale, depth01);
-                sat.go.transform.localScale = new Vector3(currentScale, currentScale, 1f);
-
-                float colorMult = Mathf.Lerp(1f, satBackDarkness, depth01);
-                sat.image.color = new Color(colorMult, colorMult, colorMult, 1f);
-
-                // Hierarchy 순서를 변경하여 주사위 이미지(diceIcon) 앞/뒤를 교차
-                if (depth > 0) // 뒤로 갈 때
-                {
-                    if (sat.go.transform.GetSiblingIndex() > diceIcon.transform.GetSiblingIndex())
-                    {
-                        sat.go.transform.SetSiblingIndex(diceIcon.transform.GetSiblingIndex());
-                    }
-                }
-                else // 앞으로 올 때
-                {
-                    if (sat.go.transform.GetSiblingIndex() < diceIcon.transform.GetSiblingIndex())
-                    {
-                        sat.go.transform.SetAsLastSibling();
-                    }
-                }
-            }
-        }
-
-
     }
 
     private void UpdateDisplayColor(Color c)
@@ -447,9 +327,12 @@ public class DeckSlot : MonoBehaviour
         if (diceIcon != null && animSprites != null && animSprites.Length > 0)
         {
             int faceValue = animFaces[currentAnimIndex];
-            // 배열 크기를 넘어서는 눈금(예: 88)이 들어와도 에러가 나지 않도록 안전하게 묶어줌
-            int safeIndex = Mathf.Clamp(faceValue - 1, 0, animSprites.Length - 1);
-            diceIcon.sprite = animSprites[safeIndex];
+            int safeIndex = animUseFaceIndex
+                ? Mathf.Clamp(faceValue, 0, animSprites.Length - 1)
+                : Mathf.Clamp(faceValue - 1, 0, animSprites.Length - 1);
+            Sprite next = animSprites[safeIndex];
+            if (next != null)
+                diceIcon.sprite = next;
         }
     }
 
@@ -459,12 +342,23 @@ public class DeckSlot : MonoBehaviour
 
         int faceToShow = exactFaceValue != -1 ? exactFaceValue : data.faceValues[UnityEngine.Random.Range(0, data.faceValues.Length)];
 
+        if (data.customFaceSprites != null && data.customFaceSprites.Length >= 6)
+        {
+            int idx = exactFaceIndex >= 0 ? exactFaceIndex : Mathf.Clamp(faceToShow - 1, 0, data.customFaceSprites.Length - 1);
+            Sprite next = data.customFaceSprites[Mathf.Clamp(idx, 0, data.customFaceSprites.Length - 1)];
+            if (next != null)
+                diceIcon.sprite = next;
+            return;
+        }
+
         //커스텀 이미지가 설정되어 있다면 무조건 최우선으로 띄워줌 (88 주사위 완벽 대응)
         if (data.customFaceSprites != null && data.customFaceSprites.Length > 0)
         {
             // 커스텀 이미지가 1개밖에 없다면 무조건 0번째 이미지를 띄움 (에러 방지)
             int safeIndex = (data.customFaceSprites.Length == 1) ? 0 : Mathf.Clamp(faceToShow - 1, 0, data.customFaceSprites.Length - 1);
-            diceIcon.sprite = data.customFaceSprites[safeIndex];
+            Sprite next = data.customFaceSprites[safeIndex];
+            if (next != null)
+                diceIcon.sprite = next;
             return; // 여기서 함수를 끝내서 숫자 6으로 바뀌는 현상을 막음
         }
 

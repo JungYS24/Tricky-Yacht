@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic; // List를 사용하기 위해 추가
 using TMPro;
+using DG.Tweening;
 
 public class Enemy : MonoBehaviour
 {
@@ -75,6 +76,10 @@ public class Enemy : MonoBehaviour
     public bool useExternalDeathSequence = false;
     private Coroutine hitEffectCoroutine;
     private Coroutine hpCoroutine;
+    private HpBarFx hpBarFx;
+    private bool deathPresentationStarted;
+    private bool deathAnimatorPaused;
+    private bool deathAnimatorWasEnabled;
 
     //최초 크기는 무조건 Awake에서 딱 한 번만 저장!
     void Awake()
@@ -91,6 +96,8 @@ public class Enemy : MonoBehaviour
                 enemyHPSlider = sliderObj.GetComponent<Slider>();
             }
         }
+
+        BindHpBarFx();
 
         //공격력 텍스트 자동 할당 코드
         if (attackPowerText == null)
@@ -128,21 +135,35 @@ public class Enemy : MonoBehaviour
 
     public void Initialize(int currentStage, BiomeDataSO currentBiome)
     {
+        StopAttackPresentation();
+        ResetDeathPresentation();
+        GetComponent<MonsterHitFeedback>()?.Stop();
         //만약의 사태를 대비한 기본 체력 (리스트가 비어있을 때 등)
         int finalMaxHP = 40;
         int finalAttack = 10;
         MonsterDataSO nextMonsterData = null;
+
+        DiceManager dice = DiceManager.Instance;
+        MonsterDataSO forcedMonster = dice != null ? dice.pendingForcedMonster : null;
+        if (dice != null) dice.pendingForcedMonster = null;
 
         // 튜토리얼 중이라면 매니저에서 튜토리얼용 데이터를 가져옵니다 ---
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
             nextMonsterData = TutorialManager.Instance.GetTutorialMonster(currentStage);
         }
-
+        else if (forcedMonster != null)
+        {
+            // 차원문 등, 바이옴 목록보다 먼저 강제 몬스터를 씁니다. 보스 몬스터면 bossAbility도 같이 적용됩니다.
+            nextMonsterData = forcedMonster;
+        }
         else if (currentBiome != null)
         {
-            //보스 여기서 바꾸면 됨
-            if (currentStage % 10 == 0 && currentBiome.bossMonster != null)
+            // 지도의 일반 전투는 층 번호가 10의 배수여도 보스전으로 보지 않습니다.
+            bool bossStage = currentStage % 10 == 0;
+            if (dice != null && dice.UsesMapFlow)
+                bossStage = dice.mapBossBattle;
+            if (bossStage && currentBiome.bossMonster != null)
             {
                 nextMonsterData = currentBiome.bossMonster;
             }
@@ -175,11 +196,8 @@ public class Enemy : MonoBehaviour
             dropFigureData = nextMonsterData.dropFigureData;
             baseDropRate = nextMonsterData.dropRate;
 
-            if (dropFigureData != null)
-            {
-                PlayerPrefs.SetInt("Collection_Encountered_" + dropFigureData.itemName, 1);
-                PlayerPrefs.Save();
-            }
+            if (dropFigureData != null && CollectionDataManager.Instance != null)
+                CollectionDataManager.Instance.EncounterFigure(dropFigureData);
 
             finalMaxHP = nextMonsterData.maxHp;
             finalAttack = nextMonsterData.baseAtk;
@@ -209,6 +227,7 @@ public class Enemy : MonoBehaviour
 
         MaxAttackTurn = 2;
         CurrentAttackTurn = MaxAttackTurn;
+        UpdateTurnUI();
 
         //몬스터가 등장할 때(초기화될 때) 공격력 텍스트를 업데이트
         if (attackPowerText != null)
@@ -242,23 +261,80 @@ public class Enemy : MonoBehaviour
     }
 
 
-    public void TakeDamage(int damage, System.Action onDeathCallback)
+    // 불꽃이 커지는 프레임까지 예고만 재생하고, 실제 피해는 기존 TakeDamage를 한 번 호출합니다.
+    public IEnumerator PlayFlameDamage(int damage, System.Action onDeathCallback)
     {
-        if (IsDead) return;
+        if (IsDead || damage <= 0 || !isActiveAndEnabled) yield break;
+        StopAttackPresentation();
+        int monsterIndex = currentMonsterIndex;
+        var feedback = MonsterHitFeedback.Get(this);
+        float hitStrength = 1f + 0.35f * Mathf.Clamp01((float)damage / Mathf.Max(1, MaxHP));
+        feedback.Play(monsterImage, false, monsterAnimator, hitStrength, EnemyHitKind.Flame, prepareFlame: true);
+        yield return new WaitForSecondsRealtime(feedback.FlameContactDelay);
+        if (IsDead || !isActiveAndEnabled || currentMonsterIndex != monsterIndex) yield break;
+        TakeDamage(damage, onDeathCallback, hitKind: EnemyHitKind.Flame, preserveFlameVisual: true);
+    }
 
-        CurrentHP = Mathf.Max(0, CurrentHP - damage);
+    public void TakeDamage(int damage,System.Action onDeathCallback,bool isFirstNormalAttack = false, EnemyHitKind hitKind = EnemyHitKind.Other, bool includesDark = false, bool preserveFlameVisual = false)
+    {
+        if (IsDead || damage <= 0) return;
+        StopAttackPresentation();
+        var currentFeedback = GetComponent<MonsterHitFeedback>();
+        bool continueFlame = preserveFlameVisual && hitKind == EnemyHitKind.Flame && currentFeedback != null && currentFeedback.IsFlamePlaying;
+        if (!continueFlame) currentFeedback?.Stop();
 
-        // 데미지를 입었으니 HP바 깎는 코루틴 실행!
-        if (hpCoroutine != null) StopCoroutine(hpCoroutine);
-        hpCoroutine = StartCoroutine(ShrinkHPBarRoutine());
+        // 적 체력보다 큰 공격도 실제 감소한 체력까지만 피해로 인정
+        int previousHP = CurrentHP;
+        int actualDamage = Mathf.Min(CurrentHP, damage);
+        CurrentHP -= actualDamage;
+
+        // 사망 콜백 전에 지급해야 마지막 공격의 효과도 적용됨
+        DiceManager dm = DiceManager.Instance;
+
+        if (dm != null && dm.enemy == this)
+        {
+            FigureEffectManager.Instance?.EvaluateEnemyDamageTriggers(dm,actualDamage,isFirstNormalAttack);
+        }
+
+        // 데미지를 입었으니 HP바를 갱신한다. 연출 컴포넌트가 있으면 그쪽으로 넘긴다.
+        BindHpBarFx();
+        if (hpBarFx != null)
+        {
+            if (hpCoroutine != null)
+            {
+                StopCoroutine(hpCoroutine);
+                hpCoroutine = null;
+            }
+            hpBarFx.OnHpChanged(previousHP, CurrentHP, MaxHP);
+        }
+        else
+        {
+            if (hpCoroutine != null) StopCoroutine(hpCoroutine);
+            hpCoroutine = StartCoroutine(ShrinkHPBarRoutine());
+        }
 
         if (damage > 0)
         {
             if (hitEffectCoroutine != null) StopCoroutine(hitEffectCoroutine);
-            hitEffectCoroutine = StartCoroutine(HitEffectRoutine());
+            if (hitKind != EnemyHitKind.Other)
+            {
+                // 피해 종류별 오버레이를 사용하고 바탕색은 현재 체력에 맞춥니다.
+                if (monsterImage != null) monsterImage.color = Color.Lerp(Color.red, Color.white, MaxHP > 0 ? (float)CurrentHP / MaxHP : 0f);
+                hitEffectCoroutine = null;
+            }
+            else hitEffectCoroutine = StartCoroutine(HitEffectRoutine());
+            // 종류에 맞는 연출을 재생합니다. 치명타는 사망 확대와 충돌하지 않게 밀림을 생략합니다.
+            if (hitKind != EnemyHitKind.Other)
+                {
+                float strength = 1f + 0.35f * Mathf.Clamp01((float)damage / Mathf.Max(1, MaxHP));
+                if (continueFlame) currentFeedback.ShowFlameContact();
+                else MonsterHitFeedback.Get(this).Play(monsterImage, CurrentHP > 0, monsterAnimator, strength, hitKind, includesDark);
+                if (hitKind == EnemyHitKind.Normal) CameraShake.Instance?.ShakeImpact(strength);
+                else if (hitKind == EnemyHitKind.Dark) CameraShake.Instance?.ShakeElemental();
+            }
 
             // ===== 데미지 텍스트 생성 호출 =====
-            ShowDamageText(damage);
+            ShowDamageText(damage, hitKind == EnemyHitKind.Flame);
 
         }
 
@@ -266,19 +342,22 @@ public class Enemy : MonoBehaviour
         {
             IsDead = true;
 
-            if (useExternalDeathSequence)
+            // 게임 진행 중에는 DiceManager가 포획 여부를 판정한 뒤 연출을 하나만 선택합니다.
+            // 정산 중 피규어 피해의 null 콜백은 CombatFlowController의 사망 확인까지 기다립니다.
+            if ((dm != null && dm.enemy == this) || useExternalDeathSequence)
             {
                 onDeathCallback?.Invoke();
             }
-            else
+            else if (BeginDeathPresentation())
             {
+                // DiceManager 없이 사용하는 테스트 몬스터는 기존 일반 사망 동작을 유지합니다.
                 StartCoroutine(MonsterDeathRoutine(onDeathCallback));
             }
         }
     }
 
     // 데미지 텍스트 생성 함수
-    private void ShowDamageText(int damage)
+    private void ShowDamageText(int damage, bool smallFlame = false)
     {
         if (damageTextPrefab == null || uiCanvas == null) return;
 
@@ -293,55 +372,106 @@ public class Enemy : MonoBehaviour
         {
             // 데미지 수치에 따라 크기 배율 결정
             // 예: 기준 데미지를 20으로 잡고, 데미지가 클수록 배율 증가
-            float sizeMultiplier = 1f + (damage / 20f) * 0.5f;
+            float sizeMultiplier = smallFlame ? 0.85f : 1f + (damage / 20f) * 0.5f;
             dmgTextScript.Setup(damage, sizeMultiplier);
         }
     }
 
+    [Header("플레이어를 향한 공격 연출")]
+    public float attackPrepareDuration = 0.12f;
+    public float attackLungeDuration = 0.10f;
+    public float attackReturnDuration = 0.18f;
+    public float attackScale = 1.12f;
+    public float attackTravelRatio = 0.12f;
+    public float AttackContactDelay => Mathf.Max(0.01f, attackPrepareDuration) + Mathf.Max(0.01f, attackLungeDuration);
+
+    private Sequence attackTween;
+    private SpriteRenderer attackVisual;
+    private bool attackWasHidden;
+    private bool attackVisualActive;
+
     public void PlayAttackAnim()
     {
-        if (monsterAnimator != null)
+        StopAttackPresentation();
+        GetComponent<MonsterHitFeedback>()?.Stop();
+        if (monsterImage == null || IsDead) return;
+
+        // 외형만 복제해 움직이므로 몬스터 HP바, 루트, 대기 Animator는 건드리지 않습니다.
+        if (attackVisual == null)
         {
-            monsterAnimator.SetTrigger("Attack");
+            GameObject visual = new GameObject("Attack Visual");
+            visual.transform.SetParent(monsterImage.transform, false);
+            attackVisual = visual.AddComponent<SpriteRenderer>();
         }
-        else
-        {
-            StartCoroutine(SimpleAttackPunchRoutine());
-        }
+        attackVisual.sprite = monsterImage.sprite;
+        attackVisual.sharedMaterial = monsterImage.sharedMaterial;
+        attackVisual.color = monsterImage.color;
+        attackVisual.flipX = monsterImage.flipX;
+        attackVisual.flipY = monsterImage.flipY;
+        attackVisual.sortingLayerID = monsterImage.sortingLayerID;
+        attackVisual.sortingOrder = monsterImage.sortingOrder;
+        attackVisual.gameObject.layer = monsterImage.gameObject.layer;
+        attackVisual.gameObject.SetActive(true);
+        attackWasHidden = monsterImage.forceRenderingOff;
+        attackVisualActive = true;
+        monsterImage.forceRenderingOff = true;
+        Transform visualTransform = attackVisual.transform;
+        visualTransform.localPosition = Vector3.zero;
+        visualTransform.localScale = Vector3.one;
+        float travel = monsterImage.sprite != null ? monsterImage.sprite.bounds.size.y * attackTravelRatio : 0.1f;
+        float prepare = Mathf.Max(0.01f, attackPrepareDuration);
+        float lunge = Mathf.Max(0.01f, attackLungeDuration);
+        attackTween = DOTween.Sequence();
+        attackTween.Append(visualTransform.DOScale(0.96f, prepare).SetEase(Ease.OutSine));
+        attackTween.Join(visualTransform.DOLocalMoveY(travel * 0.25f, prepare));
+        attackTween.Append(visualTransform.DOScale(attackScale, lunge).SetEase(Ease.InQuad));
+        attackTween.Join(visualTransform.DOLocalMoveY(-travel, lunge).SetEase(Ease.InQuad));
+        attackTween.Append(visualTransform.DOScale(1f, Mathf.Max(0.01f, attackReturnDuration)).SetEase(Ease.OutSine));
+        attackTween.Join(visualTransform.DOLocalMoveY(0f, Mathf.Max(0.01f, attackReturnDuration)).SetEase(Ease.OutSine));
+        attackTween.OnKill(RestoreAttackVisual);
     }
 
-    private IEnumerator SimpleAttackPunchRoutine()
+    private void RestoreAttackVisual()
     {
-        float duration = 0.1f;
-        float elapsed = 0f;
-        Vector3 targetPos = originalPosition + Vector3.down * 0.5f;
+        if (attackVisualActive && monsterImage != null) monsterImage.forceRenderingOff = attackWasHidden;
+        attackVisualActive = false;
+        if (attackVisual != null) attackVisual.gameObject.SetActive(false);
+        attackTween = null;
+    }
 
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            transform.position = Vector3.Lerp(originalPosition, targetPos, elapsed / duration);
-            yield return null;
-        }
+    private void StopAttackPresentation()
+    {
+        attackTween?.Kill();
+        RestoreAttackVisual();
+    }
 
-        elapsed = 0f;
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            transform.position = Vector3.Lerp(targetPos, originalPosition, elapsed / duration);
-            yield return null;
-        }
-        transform.position = originalPosition;
+    private void OnDisable()
+    {
+        StopAttackPresentation();
+    }
+
+    void BindHpBarFx()
+    {
+        if (hpBarFx == null && enemyHPSlider != null)
+            hpBarFx = enemyHPSlider.GetComponent<HpBarFx>();
     }
 
     private void UpdateHPBar(bool immediate)
     {
         if (enemyHPSlider == null) return;
+        BindHpBarFx();
         enemyHPSlider.maxValue = MaxHP;
-        if (immediate) enemyHPSlider.value = CurrentHP;
+        if (!immediate) return;
+        enemyHPSlider.value = CurrentHP;
+        if (hpBarFx == null) return;
+        // 사망 연출이 이미 재생 중이면 BeginDeathPresentation의 즉시 갱신이 페이드를 지우지 않게 둔다.
+        if (CurrentHP <= 0 && hpBarFx.IsDeathSequenceActive) return;
+        hpBarFx.SetImmediate(CurrentHP, MaxHP);
     }
 
     private IEnumerator HitEffectRoutine()
     {
+        if (monsterImage == null) yield break;
         monsterImage.color = hitColor;
         float hpPercent = MaxHP > 0 ? (float)CurrentHP / MaxHP : 0f;
         Color targetColor = Color.Lerp(Color.red, Color.white, hpPercent);
@@ -354,6 +484,45 @@ public class Enemy : MonoBehaviour
             yield return null;
         }
         monsterImage.color = targetColor;
+    }
+
+    // 포획/일반 사망이 Transform과 색상을 독점하도록 기존 피격·공격 연출을 종료합니다.
+    public IEnumerator WaitForHitPresentation()
+    {
+        var feedback = GetComponent<MonsterHitFeedback>();
+        while (isActiveAndEnabled && IsDead && feedback != null && feedback.IsPlaying) yield return null;
+    }
+
+    public bool BeginDeathPresentation()
+    {
+        if (!IsDead || deathPresentationStarted) return false;
+        deathPresentationStarted = true;
+        StopAttackPresentation();
+        GetComponent<MonsterHitFeedback>()?.Stop();
+        StopAllCoroutines();
+        hitEffectCoroutine = null;
+        hpCoroutine = null;
+        UpdateHPBar(true);
+        if (monsterAnimator != null)
+        {
+            deathAnimatorWasEnabled = monsterAnimator.enabled;
+            deathAnimatorPaused = true;
+            monsterAnimator.enabled = false;
+        }
+        return true;
+    }
+
+    public IEnumerator PlayNormalDeathPresentation()
+    {
+        // DiceManager의 코루틴에서 실행하므로 몬스터 비활성화 후에도 클리어 처리가 이어집니다.
+        yield return MonsterDeathRoutine(null);
+    }
+
+    private void ResetDeathPresentation()
+    {
+        if (deathAnimatorPaused && monsterAnimator != null) monsterAnimator.enabled = deathAnimatorWasEnabled;
+        deathAnimatorPaused = false;
+        deathPresentationStarted = false;
     }
 
     private IEnumerator MonsterDeathRoutine(System.Action onFinished)
@@ -406,6 +575,9 @@ public class Enemy : MonoBehaviour
 
     public void RestoreMonster(MonsterDataSO monsterData, int hp, int maxHp, int attack, int index, int currentTurn, int maxTurn)
     {
+        StopAttackPresentation();
+        ResetDeathPresentation();
+        GetComponent<MonsterHitFeedback>()?.Stop();
         CurrentMonsterName = monsterData.monsterName;
         currentMonsterIndex = index;
 
@@ -423,11 +595,8 @@ public class Enemy : MonoBehaviour
         dropFigureData = monsterData.dropFigureData;
         baseDropRate = monsterData.dropRate;
 
-        if (dropFigureData != null)
-        {
-            PlayerPrefs.SetInt("Collection_Encountered_" + dropFigureData.itemName, 1);
-            PlayerPrefs.Save();
-        }
+        if (dropFigureData != null && CollectionDataManager.Instance != null)
+            CollectionDataManager.Instance.EncounterFigure(dropFigureData);
 
         MaxHP = maxHp;
         CurrentHP = hp;
@@ -464,8 +633,27 @@ public class Enemy : MonoBehaviour
     {
         if (turnText != null)
         {
-            turnText.text = $"Turn : {CurrentAttackTurn}턴";
+            turnText.text = CurrentAttackTurn.ToString();
         }
+    }
+
+    // 스테이지 시작 시 최대 체력을 낮추는 효과용
+    public void ReduceMaxHP(int amount)
+    {
+        if (IsDead || amount <= 0) return;
+
+        // 최대 체력 감소만으로 적이 죽지는 않도록 최소 1 유지
+        MaxHP = Mathf.Max(1, MaxHP - amount);
+        CurrentHP = Mathf.Min(CurrentHP, MaxHP);
+
+        // 이전 체력바 애니메이션이 새 값을 덮어쓰지 않도록 중단
+        if (hpCoroutine != null)
+        {
+            StopCoroutine(hpCoroutine);
+            hpCoroutine = null;
+        }
+
+        UpdateHPBar(true);
     }
 
     public void DecreaseTurn()

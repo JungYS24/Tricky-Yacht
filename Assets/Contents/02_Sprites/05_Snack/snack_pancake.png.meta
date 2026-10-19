@@ -116,10 +116,10 @@ TextureImporter:
       name: snack_pancake_0
       rect:
         serializedVersion: 2
-        x: 10
-        y: 10
-        width: 211
-        height: 162
+        x: 23
+        y: 20
+        width: 83
+        height: 85
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

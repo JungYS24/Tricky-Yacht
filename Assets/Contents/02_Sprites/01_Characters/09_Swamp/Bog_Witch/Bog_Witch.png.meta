@@ -24,7 +24,7 @@ TextureImporter:
       213: -7497325036156065953
     second: Bog_Witch_6
   - first:
-      213: -1060337416981908403
+      213: -1038969653406528171
     second: Bog_Witch_7
   externalObjects: {}
   serializedVersion: 13
@@ -58,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 50
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -96,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -109,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -124,12 +124,12 @@ TextureImporter:
       name: Bog_Witch_0
       rect:
         serializedVersion: 2
-        x: 16
-        y: 285
-        width: 145
-        height: 151
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -146,12 +146,12 @@ TextureImporter:
       name: Bog_Witch_1
       rect:
         serializedVersion: 2
-        x: 169
-        y: 285
-        width: 143
-        height: 148
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -168,12 +168,12 @@ TextureImporter:
       name: Bog_Witch_2
       rect:
         serializedVersion: 2
-        x: 326
-        y: 285
-        width: 141
-        height: 148
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -190,12 +190,12 @@ TextureImporter:
       name: Bog_Witch_3
       rect:
         serializedVersion: 2
-        x: 484
-        y: 285
-        width: 144
-        height: 149
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -212,12 +212,12 @@ TextureImporter:
       name: Bog_Witch_4
       rect:
         serializedVersion: 2
-        x: 16
-        y: 75
-        width: 144
-        height: 150
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -234,12 +234,12 @@ TextureImporter:
       name: Bog_Witch_5
       rect:
         serializedVersion: 2
-        x: 170
-        y: 76
-        width: 141
-        height: 147
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -256,12 +256,12 @@ TextureImporter:
       name: Bog_Witch_6
       rect:
         serializedVersion: 2
-        x: 326
-        y: 75
-        width: 141
-        height: 148
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -278,20 +278,20 @@ TextureImporter:
       name: Bog_Witch_7
       rect:
         serializedVersion: 2
-        x: 484
-        y: 75
-        width: 142
-        height: 150
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d44fcb6bcbce841f0800000000000000
-      internalID: -1060337416981908403
+      spriteID: 55d0b4cda96d491f0800000000000000
+      internalID: -1038969653406528171
       vertices: []
       indices: 
       edges: []
@@ -317,7 +317,7 @@ TextureImporter:
       Bog_Witch_4: 9163303697614243146
       Bog_Witch_5: -7286352400004655160
       Bog_Witch_6: -7497325036156065953
-      Bog_Witch_7: -1060337416981908403
+      Bog_Witch_7: -1038969653406528171
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

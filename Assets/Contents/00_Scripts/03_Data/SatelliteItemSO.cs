@@ -3,14 +3,14 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewSatellite", menuName = "Shop/Items/Satellite")]
 public class SatelliteItemSO : BaseItemDataSO
 {
-    [Header("--- À§¼º Àü¿ë ½ºÆå ---")]
+    [Header("--- ìœ„ì„± ì „ìš© ìŠ¤í™ ---")]
     public SatelliteType satelliteType = SatelliteType.Mercury;
 
     public override void ApplyItemEffect(DiceManager diceManager)
     {
         if (diceManager != null && diceManager.shopManager != null)
         {
-            // ShopManager¿¡°Ô À§¼º ¼±ÅÃ UI¸¦ ¿­¾î´Ş¶ó°í ¿äÃ»
+            // ShopManagerì—ê²Œ ìœ„ì„± ì„ íƒ UIë¥¼ ì—´ì–´ë‹¬ë¼ê³  ìš”ì²­
             diceManager.shopManager.ShowSatelliteSelection(satelliteType);
         }
     }

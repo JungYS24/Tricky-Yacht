@@ -116,10 +116,10 @@ TextureImporter:
       name: snack_limejuice_0
       rect:
         serializedVersion: 2
-        x: 10
-        y: 7
-        width: 161
-        height: 198
+        x: 11
+        y: 0
+        width: 101
+        height: 122
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

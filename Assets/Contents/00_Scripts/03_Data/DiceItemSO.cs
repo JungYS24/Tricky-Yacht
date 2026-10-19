@@ -3,28 +3,48 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewDiceItem", menuName = "Shop/Items/DiceItem")]
 public class DiceItemSO : BaseItemDataSO
 {
-    [Header("ÁÖ»çÀ§ ±¸¼º (6°³ ¸é)")]
+    [Header("ì£¼ì‚¬ìœ„ êµ¬ì„± (6ê°œ ë©´)")]
     public int[] customFaces = new int[6] { 1, 2, 3, 4, 5, 6 };
 
-    [Header("Æ¯¼ö ÁÖ»çÀ§ ´É·Â ¼³Á¤")]
+    [Header("íŠ¹ìˆ˜ ì£¼ì‚¬ìœ„ ëŠ¥ë ¥ ì„¤ì •")]
     public SpecialDieEffect specialEffect = SpecialDieEffect.None;
 
-    [Header("Ä¿½ºÅÒ ¿ÜÇü ¼³Á¤ (»ï°¢Çü ÁÖ»çÀ§ µî)")]
-    public Sprite customDiceShell;      // »ï°¢Çü ÁÖ»çÀ§ ÀÌ¹ÌÁö
-    public Sprite[] customFaceSprites;  // ÇØ´ç ÁÖ»çÀ§ Àü¿ë ´«±İ ÀÌ¹ÌÁöµé (1~6¹ø)
+    [Header("ë””ë²„í”„ ì£¼ì‚¬ìœ„ ì¢…ë¥˜")]
+    [Tooltip("None: ì¼ë°˜ / FakeÂ·SpineÂ·Curse: ì˜êµ¬ / ThiefÂ·Shackle: ì „íˆ¬ í•œì •, ë½‘ëŠ” ì¦‰ì‹œ ë°œë™")]
+    public DebuffDiceType debuffType = DebuffDiceType.None;
+
+    [Header("ë©´ë³„ íš¨ê³¼ (ê¸¸ì´ 6, ë¹„ì›Œ ë‘ë©´ ìœ„ ëŠ¥ë ¥ì„ ëª¨ë“  ë©´ì— ì ìš©)")]
+    public SpecialDieEffect[] faceEffects;
+    [Tooltip("ë±ì— í•­ìƒ 1ê°œ ìœ ì§€ë˜ëŠ” ì—¬ì • ì£¼ì‚¬ìœ„. íŒŒê´´Â·êµì²´ ëŒ€ìƒì—ì„œ ë¹ ì§‘ë‹ˆë‹¤.")]
+    public bool isJourneyDice = false;
+
+    [Header("ì»¤ìŠ¤í…€ ì™¸í˜• ì„¤ì • (ì‚¼ê°í˜• ì£¼ì‚¬ìœ„ ë“±)")]
+    public Sprite customDiceShell;      // ì‚¼ê°í˜• ì£¼ì‚¬ìœ„ ì´ë¯¸ì§€
+    public Sprite[] customFaceSprites;  // í•´ë‹¹ ì£¼ì‚¬ìœ„ ì „ìš© ëˆˆê¸ˆ ì´ë¯¸ì§€ë“¤ (1~6ë²ˆ)
+
+    // ì—ì…‹ ì„¤ì •ì„ ë³µì‚¬í•œ ìƒˆ ì£¼ì‚¬ìœ„ ë°ì´í„°ë¥¼ ë§Œë“ ë‹¤. ìƒì  êµ¬ë§¤Â·ì‹œì‘ ë±Â·ì €ì¥ ë³µì›ì´ ê°™ì€ ê²½ë¡œë¥¼ ì“´ë‹¤.
+    public DiceData1 CreateDiceData()
+    {
+        DiceData1 newDice = new DiceData1(itemName, (int[])customFaces.Clone());
+        newDice.customDiceShell = customDiceShell;
+        newDice.customFaceSprites = customFaceSprites != null ? (Sprite[])customFaceSprites.Clone() : null;
+
+        // ì´ ë¼ì¸ì„ ì¶”ê°€í•˜ì—¬ ì¸ìŠ¤í™í„°ì—ì„œ ê³ ë¥¸ íŠ¹ìˆ˜ ëŠ¥ë ¥ì„ ìƒˆ ì£¼ì‚¬ìœ„ì— ì „ë‹¬í•©ë‹ˆë‹¤.
+        newDice.specialEffect = this.specialEffect;
+        newDice.debuffType = this.debuffType;
+
+        // ë©´ë³„ íš¨ê³¼ëŠ” ì—ì…‹ ë°°ì—´ì„ ê³µìœ í•˜ì§€ ì•Šë„ë¡ ë³µì‚¬í•´ì„œ ë„˜ê¹ë‹ˆë‹¤.
+        newDice.faceEffects = (faceEffects != null && faceEffects.Length > 0) ? (SpecialDieEffect[])faceEffects.Clone() : null;
+        newDice.isJourneyDice = isJourneyDice;
+        return newDice;
+    }
 
     public override void ApplyItemEffect(DiceManager diceManager)
     {
-
-        // »óÁ¡¿¡¼­ ±¸¸Å ½Ã masterDeck¿¡ »õ ÁÖ»çÀ§ Ãß°¡
-        DiceData1 newDice = new DiceData1(itemName, customFaces);
-        newDice.customDiceShell = customDiceShell;
-        newDice.customFaceSprites = customFaceSprites;
-
-        // ÀÌ ¶óÀÎÀ» Ãß°¡ÇÏ¿© ÀÎ½ºÆåÅÍ¿¡¼­ °í¸¥ Æ¯¼ö ´É·ÂÀ» »õ ÁÖ»çÀ§¿¡ Àü´ŞÇÕ´Ï´Ù.
-        newDice.specialEffect = this.specialEffect;
+        // ìƒì ì—ì„œ êµ¬ë§¤ ì‹œ masterDeckì— ìƒˆ ì£¼ì‚¬ìœ„ ì¶”ê°€
+        DiceData1 newDice = CreateDiceData();
 
         diceManager.masterDeck.Add(newDice);
-        Debug.Log($"{itemName}ÀÌ(°¡) µ¦¿¡ Ãß°¡µÇ¾ú½À´Ï´Ù! ÃÑ ÁÖ»çÀ§ ¼ö: {diceManager.masterDeck.Count}");
+        Debug.Log($"{itemName}ì´(ê°€) ë±ì— ì¶”ê°€ë˜ì—ˆìŠµë‹ˆë‹¤! ì´ ì£¼ì‚¬ìœ„ ìˆ˜: {diceManager.masterDeck.Count}");
     }
 }

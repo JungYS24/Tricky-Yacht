@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,22 +6,104 @@ using System.Linq;
 public class SavedDiceData
 {
     public string diceName;
+    public int[] faceValues; // 강화/고정 눈금도 저장 당시 그대로 복원
+    public int specialEffect;
+    public int debuffType;
+    public bool isCurrentCombatDebuff;
+    public int[] faceEffects;       // 면별 효과(SpecialDieEffect의 int 값). 없으면 null
+    public bool isJourneyDice;      // 덱에 항상 유지되는 여정 주사위 여부
     public bool isCoated;
     public int type;
     public float multiplier;
     public Color diceColor;
+    public int stampType;           // StampType의 int 값. 예전 저장에는 없어서 0(None)
 
     public List<int> activeSatellites = new List<int>();
 }
+
+[System.Serializable]
+public class SavedFigureKillCount
+{
+    public string figureName;
+    public int count;
+}
+
+[System.Serializable]
+public sealed class SavedBoardDie
+{
+    public int deckIndex;
+    public int value;
+    public int rollSlotIndex;
+    public int keepSlotIndex = -1;
+}
+
 public class SaveData
 {
+    // 1부터 디버프를 덱 인스턴스로 저장한다. 0은 교체형 가짜 주사위 저장과의 호환용.
+    public int debuffSaveVersion;
+    public bool isEnemySkillNullified;
+
+    public void MigrateLegacyDebuffs(bool resumeCombat)
+    {
+        if (debuffSaveVersion >= 1) return;
+        // 3~4단계에서 작성된 버전 없는 새 형식 저장은 이미 디버프를 포함하고 있다.
+        bool hasDebuffs = deckDiceList != null && deckDiceList.Exists(d => d != null && d.debuffType != 0);
+        if (resumeCombat && !hasDebuffs && deckDiceList != null
+            && savedFakeDiceIndex >= 0 && savedFakeDiceIndex < deckDiceList.Count)
+        {
+            SavedDiceData original = deckDiceList[savedFakeDiceIndex];
+            if (original != null && !original.isJourneyDice)
+            {
+                int originalIndex = deckDiceList.Count;
+                deckDiceList.Add(original);
+                // 기존 보드/더미 인덱스는 가짜 주사위를 계속 가리키고 원본만 덱 끝에 복구한다.
+                deckDiceList[savedFakeDiceIndex] = new SavedDiceData
+                {
+                    diceName = "가짜 주사위", faceValues = new int[6],
+                    debuffType = (int)DebuffDiceType.Fake, isCurrentCombatDebuff = true,
+                    multiplier = 1f, diceColor = Color.white
+                };
+                if (boardSaveVersion == 1 && drawPileIndices != null) drawPileIndices.Add(originalIndex);
+            }
+        }
+        savedFakeDiceIndex = -1;
+        debuffSaveVersion = 1;
+    }
+
+    // 0은 구버전 세이브. 1은 보드와 덱 순서를 그대로 복원합니다.
+    public int boardSaveVersion;
+    public List<SavedBoardDie> boardDice = new List<SavedBoardDie>();
+    public List<int> drawPileIndices = new List<int>();
+    public List<int> discardPileIndices = new List<int>();
+    public int savedCurrentRerolls;
+    public int savedMaxRerolls;
+    public int debuffRerollPenalty;
+    public int savedFakeDiceIndex = -1;
+
     public int currentStage;
     public int currentPlayerHP;
+
+    // 지도 진행. mapSaveVersion이 0이면 지도 도입 이전 세이브입니다.
+    public int mapSaveVersion;
+    public int runSeed;
+    public int biomeIndex;
+    public int currentNodeId = -1;
+    public bool currentNodeCleared;
+    public List<int> visitedNodeIds = new List<int>();
+    public List<int> passedNodeIds = new List<int>();
+    public int pendingJourneyMove;
     public int playerMaxHP;
     public int currentGold;
 
+    //전투 중 나갔을 때를 대비한 보호막 저장
+    public int currentShield;
 
-    //��ȸ�� ���� ���� ����
+    //전투(스테이지) 전용 누적 보너스 저장
+    public float stageBonusMult;
+    public int stageBonusChips;
+
+
+    //일회성 버프 상태 저장
     public float snackBonusMult;
     public int snackBonusChips;
     public int snackBonusRerolls;
@@ -29,9 +111,9 @@ public class SaveData
     public int figureBonusRerolls;
     public bool isPeppermintActive;
 
-    public int savedBiomeType; // ���̿� ����
+    public int savedBiomeType; // 바이옴 저장
 
-    //�ο�� ���� ���� ����
+    //싸우던 몬스터 상태 저장
     public string savedMonsterName;
     public int savedMonsterHP;
     public int savedMonsterMaxHP;
@@ -40,14 +122,29 @@ public class SaveData
 
     public int savedFlameDamage;
 
-    public int savedMonsterCurrentTurn;//���� �ϰ��� �߰�
+    public int savedMonsterCurrentTurn;//몬스터 턴개념 추가
     public int savedMonsterMaxTurn;
+    public bool firstNormalAttackDone;
+
+    public List<SavedFigureKillCount> figureKillCounts =new List<SavedFigureKillCount>();
+
+    public float permanentFigureMultiplier;
+
+    // 스테이지당 1회 피규어 사용 기록
+    public List<string> usedFigureNodes = new List<string>();
+
+    // 아직 결산에서 누적 화염으로 옮기지 않은 피규어 화염량
+    public int pendingFigureFlameDamage;
 
     public List<SavedDiceData> deckDiceList = new List<SavedDiceData>();
 
-    public List<string> ownedFigureNames = new List<string>();
-    public List<string> ownedSnackNames = new List<string>();
-    public List<string> ownedTicketNames = new List<string>();
+    public List<string> ownedFigureIDs = new List<string>(); //새로 추가된 ID 저장용 리스트
+
+    public List<string> ownedSnackIDs = new List<string>();
+    // 슬롯 위치와 사용 대기 상태를 함께 저장. 0은 이전 버전 저장 파일입니다.
+    public int snackSlotSaveVersion;
+    public List<SavedSnackSlot> snackSlots = new List<SavedSnackSlot>();
+    public List<string> ownedTicketIDs = new List<string>();
 
     public float multHighCard, multOnePair, multTwoPair, multTriple, multFullHouse, multFourOfAKind, multStraight, multYacht;
 }
@@ -56,40 +153,107 @@ public class GameSaveManager : MonoBehaviour
 {
     public static GameSaveManager Instance;
 
-    [Header("���� �� ��� ������ ������")]
+    [Header("게임 내 모든 아이템 총집합")]
     public List<BaseItemDataSO> masterItemDatabase = new List<BaseItemDataSO>();
+
+    // 피규어도 아래의 공용 ID 딕셔너리를 사용하여 중복 캐시와 초기화 누락을 방지합니다.
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+            InitializeDictionary(); // 시작할 때 딕셔너리 셋업
+        }
         else Destroy(gameObject);
     }
 
-    //����� ��׶���� ���ų� â�� ���� �� �ڵ����� �����
+    // 피규어뿐만 아니라 모든 아이템을 담는 만능 딕셔너리
+    private Dictionary<string, BaseItemDataSO> itemDictionary = new Dictionary<string, BaseItemDataSO>();
+    // List에 있는 피규어들을 초고속 탐색용 딕셔너리로 압축하는 함수
+    private void InitializeDictionary()
+    {
+        SnackItemSO.RegisterResourceSnacks(masterItemDatabase);
+        itemDictionary.Clear();
+        foreach (var item in masterItemDatabase)
+        {
+            if (item == null) continue;
+            // 모든 아이템(BaseItemDataSO)은 Item_ID를 가지므로 그대로 등록
+            if (!string.IsNullOrEmpty(item.Item_ID))
+            {
+                if (!itemDictionary.ContainsKey(item.Item_ID))
+                    itemDictionary.Add(item.Item_ID, item);
+            }
+        }
+    }
+
+    // 만능 탐지기 함수
+    public BaseItemDataSO FindItemByID(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return null;
+        if (itemDictionary.TryGetValue(id, out BaseItemDataSO item)) return item;
+        return null;
+    }
+
+    //모바일 백그라운드로 가거나 창을 닫을 때 자동으로 실행됨
     private void OnApplicationQuit() { AutoSave(); }
     private void OnApplicationPause(bool pauseStatus) { if (pauseStatus) AutoSave(); }
 
     private void AutoSave()
     {
-        // ���� �Ŵ������� �� ���������� ���� ���� ����(����/���� ���� ����) ����
+        // 씬에 매니저들이 다 정상적으로 켜져 있을 때만(전투/상점 중일 때만) 저장
         if (DiceManager.Instance != null && InventoryManager.Instance != null)
         {
             SaveGame(DiceManager.Instance, InventoryManager.Instance, DiceManager.Instance.shopManager);
         }
     }
 
+    private bool savePending;
+
+    private void LateUpdate()
+    {
+        var dice = DiceManager.Instance;
+        if (savePending && dice != null && dice.IsSaveStateStable && InventoryManager.Instance != null)
+            SaveGame(dice, InventoryManager.Instance, dice.shopManager);
+    }
+
     public void SaveGame(DiceManager dice, InventoryManager inv, ShopManager shop)
     {
+        if (dice == null || inv == null || dice.currentPlayerHP <= 0) return;
+        // 초기화/복원이 끝나기 전이나 복원이 실패한 상태로 정상 세이브를 덮어쓰지 않는다.
+        if (!dice.CanSaveProgress) return;
+        // 굴리기/정산 중에는 직전 정상 세이브를 보존하고 안정된 시점에 다시 저장합니다.
+        if (!dice.IsSaveStateStable) { savePending = true; return; }
+        savePending = false;
         SaveData data = new SaveData();
+        data.debuffSaveVersion = 1;
+        data.isEnemySkillNullified = dice.isEnemySkillNullified;
+
+        data.permanentFigureMultiplier =
+    dice.permanentFigureMultiplier;
+
+        foreach (var entry in dice.figureKillCounts)
+        {
+            data.figureKillCounts.Add(new SavedFigureKillCount
+            {
+                figureName = entry.Key,
+                count = entry.Value
+            });
+        }
+        data.firstNormalAttackDone =dice.stageContext.firstNormalAttackDone;
+        data.usedFigureNodes = new List<string>(dice.stageContext.usedFigureNodes);
+
+        data.pendingFigureFlameDamage = dice.figureBonusFlameDamage;
 
 
-        //��ȸ�� �����鵵 ���� ���� ���̺� ���Ͽ� ���� ���
+        //일회성 버프들도 잊지 말고 세이브 파일에 도장 찍기
         data.playerMaxHP = dice.playerMaxHP;
         data.snackBonusMult = dice.snackBonusMult;
         data.snackBonusChips = dice.snackBonusChips;
         data.snackBonusRerolls = dice.snackBonusRerolls;
         data.snackBonusFigureDropRate = dice.snackBonusFigureDropRate;
         data.figureBonusRerolls = dice.figureBonusRerolls;
+        data.debuffRerollPenalty = dice.turnContext.debuffRerollPenalty;
         data.isPeppermintActive = dice.isPeppermintActive;
 
         if (dice.currentBiome != null)
@@ -99,10 +263,29 @@ public class GameSaveManager : MonoBehaviour
 
 
         data.currentStage = dice.currentStage;
+        data.mapSaveVersion = dice.useMapFlow ? 1 : 0;
+        data.runSeed = dice.stageProgression.runSeed;
+        data.biomeIndex = dice.stageProgression.biomeIndex;
+        data.currentNodeId = dice.stageProgression.currentNodeId;
+        data.currentNodeCleared = dice.stageProgression.currentNodeCleared;
+        data.visitedNodeIds = dice.stageProgression.visitedNodeIds != null
+            ? new List<int>(dice.stageProgression.visitedNodeIds)
+            : new List<int>();
+        data.passedNodeIds = dice.stageProgression.passedNodeIds != null
+            ? new List<int>(dice.stageProgression.passedNodeIds)
+            : new List<int>();
+        data.pendingJourneyMove = dice.stageProgression.pendingJourneyMove;
         data.currentPlayerHP = dice.currentPlayerHP;
         data.currentGold = shop != null ? shop.currentGold : 0;
 
-        //���Ͱ� ����ִٸ� ���� ���� �״�� ����
+        //보호막 저장
+        data.currentShield = dice.currentShield;
+
+        //누적 보너스 저장
+        data.stageBonusMult = dice.stageBonusMult;
+        data.stageBonusChips = dice.stageBonusChips;
+
+        //몬스터가 살아있다면 현재 스탯 그대로 저장
         if (dice.enemy != null && !dice.enemy.IsDead)
         {
             data.savedMonsterName = dice.enemy.CurrentMonsterName;
@@ -110,47 +293,63 @@ public class GameSaveManager : MonoBehaviour
             data.savedMonsterMaxHP = dice.enemy.MaxHP;
             data.savedMonsterAttack = dice.enemy.AttackPower;
             data.savedMonsterIndex = dice.enemy.CurrentMonsterIndex;
-            //�ο�� ���Ͱ� ����ִٸ� ȭ�� ���õ� ���� ����
+            //싸우던 몬스터가 살아있다면 화염 스택도 같이 저장
             data.savedFlameDamage = dice.accumulatedFlameDamage;
 
-            // ���� ���� �� ���� �ִ� �� �� ����
+            // 현재 남은 턴 수와 최대 턴 수 저장
             data.savedMonsterCurrentTurn = dice.enemy.CurrentAttackTurn;
             data.savedMonsterMaxTurn = dice.enemy.MaxAttackTurn;
         }
 
-        // �ֻ��� ���� �������� ���� �����ؼ� ����
+        // 주사위 코팅 정보까지 전부 추출해서 저장
         foreach (var d in dice.masterDeck)
         {
             DiceData1 targetToSave = d;
 
-            //��¥ �ֻ������ ���� �ֻ����� ��� �����Ŵ!
-            if (d.diceName == "��¥ �ֻ���" && dice.originalBossDice != null)
-            {
-                targetToSave = dice.originalBossDice;
-            }
-
-
             SavedDiceData sdd = new SavedDiceData();
-            sdd.diceName = d.diceName;
-            sdd.isCoated = d.isCoated;
-            sdd.type = (int)d.type;
-            sdd.multiplier = d.multiplier;
-            sdd.diceColor = d.diceColor;
-            // ���� ������ ���� 
-            sdd.activeSatellites = new List<int>();
-            foreach (var sat in d.activeSatellites)
+            sdd.debuffType = (int)targetToSave.debuffType;
+            sdd.isCurrentCombatDebuff = dice.currentCombatDebuffs.Contains(d);
+            sdd.diceName = targetToSave.diceName;
+            sdd.faceValues = targetToSave.faceValues != null ? (int[])targetToSave.faceValues.Clone() : null;
+            sdd.specialEffect = (int)targetToSave.specialEffect;
+            sdd.isJourneyDice = targetToSave.isJourneyDice;
+            if (targetToSave.faceEffects != null && targetToSave.faceEffects.Length > 0)
             {
-                sdd.activeSatellites.Add((int)sat);
+                sdd.faceEffects = new int[targetToSave.faceEffects.Length];
+                for (int i = 0; i < sdd.faceEffects.Length; i++)
+                    sdd.faceEffects[i] = (int)targetToSave.faceEffects[i];
+            }
+            sdd.isCoated = targetToSave.isCoated;
+            sdd.type = (int)targetToSave.type;
+            sdd.multiplier = targetToSave.multiplier;
+            sdd.diceColor = targetToSave.diceColor;
+            sdd.stampType = (int)targetToSave.stampType;
+
+            sdd.activeSatellites = new List<int>();
+
+            if (targetToSave.activeSatellites != null)
+            {
+                foreach (var sat in targetToSave.activeSatellites)
+                {
+                    sdd.activeSatellites.Add((int)sat);
+                }
             }
 
             data.deckDiceList.Add(sdd);
         }
-        foreach (var f in inv.ownedFigures) data.ownedFigureNames.Add(f.itemName);
-        foreach (var t in inv.ownedTickets) data.ownedTicketNames.Add(t.itemName);
+
+        foreach (var f in inv.ownedFigures)
+        {
+            data.ownedFigureIDs.Add(f.Item_ID);    //고유 아이디를 세이브 파일에 기록
+        }
+
+        inv.CollectTicketNamesForSave(data.ownedTicketIDs);
+        data.snackSlotSaveVersion = 2;
+        inv.SnackUses.CollectForSave(data.snackSlots);
         foreach (var s in inv.snackSlots)
         {
-            if (!s.isEmpty && s.currentItem != null)
-                data.ownedSnackNames.Add(s.currentItem.itemName);
+            if (s.CountsAsOwnedSnack && s.currentItem != null)
+                data.ownedSnackIDs.Add(s.currentItem.itemName);
         }
 
         data.multHighCard = dice.multHighCard; data.multOnePair = dice.multOnePair;
@@ -158,6 +357,7 @@ public class GameSaveManager : MonoBehaviour
         data.multFullHouse = dice.multFullHouse; data.multFourOfAKind = dice.multFourOfAKind;
         data.multStraight = dice.multStraight; data.multYacht = dice.multYacht;
 
+        dice.CaptureBoardForSave(data);
         string json = JsonUtility.ToJson(data);
         PlayerPrefs.SetString("TrickYacht_Save", json);
         PlayerPrefs.Save();
@@ -175,22 +375,15 @@ public class GameSaveManager : MonoBehaviour
 
     public BaseItemDataSO FindItemByName(string name)
     {
-        return masterItemDatabase.FirstOrDefault(x => x.itemName == name);
+        if (string.IsNullOrEmpty(name) || masterItemDatabase == null) return null;
+        return masterItemDatabase.FirstOrDefault(x => x != null && x.itemName == name);
     }
 
-    public void DeleteSave() { PlayerPrefs.DeleteKey("TrickYacht_Save"); }
+    public void DeleteSave() { savePending = false; PlayerPrefs.DeleteKey("TrickYacht_Save"); }
 
-    //public void ResetCollectionData()
-    //{
-    //    foreach (var item in masterItemDatabase)
-    //    {
-    //        if (item is FigureItemSO)
-    //        {
-    //            PlayerPrefs.DeleteKey("Collection_Unlocked_" + item.itemName);
-    //            PlayerPrefs.DeleteKey("Collection_Encountered_" + item.itemName);
-    //        }
-    //    }
-    //    PlayerPrefs.Save();
-    //    Debug.Log("���� �����Ͱ� ������ �ʱ�ȭ�Ǿ����ϴ�.");
-    //}
+    // 초기화된 공용 딕셔너리를 이용해 ID로 피규어를 찾습니다.
+    public FigureItemSO FindFigureByID(string id)
+    {
+        return FindItemByID(id) as FigureItemSO;
+    }
 }

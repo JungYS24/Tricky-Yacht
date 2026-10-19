@@ -18,7 +18,8 @@ public class BiomeChoiceSlot : MonoBehaviour
         diceManager = manager;
 
         if (backgroundImage != null) backgroundImage.sprite = data.choiceBackgroundImaage;
-        if (biomeNameText != null) biomeNameText.text = data.biomeName;
+        if (biomeNameText != null)
+            biomeNameText.text = LocalizationManager.GetBiomeDisplayName(data.biomeType);
 
         selectButton.onClick.RemoveAllListeners();
         selectButton.onClick.AddListener(OnSelected);

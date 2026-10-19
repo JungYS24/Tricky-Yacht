@@ -6,12 +6,12 @@ public class ToastPopupController : MonoBehaviour
 {
     public static ToastPopupController Instance { get; private set; }
 
-    [Header("UI ÄÄÆ÷³ÍÆ® ¿¬°á")]
+    [Header("UI ì»´í¬ë„ŒíŠ¸ ì—°ê²°")]
     [SerializeField] private CanvasGroup canvasGroup;     
     [SerializeField] private TextMeshProUGUI messageText;   
     [SerializeField] private RectTransform rectTransform;  
 
-    [Header("¿¬Ãâ ¼¼ºÎ ¼³Á¤")]
+    [Header("ì—°ì¶œ ì„¸ë¶€ ì„¤ì •")]
     [SerializeField] private float fadeDuration = 0.25f;   
     [SerializeField] private float delayDuration = 1.2f;   
     [SerializeField] private float moveOffset = 35f;     
@@ -21,7 +21,7 @@ public class ToastPopupController : MonoBehaviour
 
     void Awake()
     {
-        // 1. ½Ì±ÛÅæ °¡µå ¹× ÀÎ½ºÅÏ½º ÇÒ´ç
+        // 1. ì‹±ê¸€í†¤ ê°€ë“œ ë° ì¸ìŠ¤í„´ìŠ¤ í• ë‹¹
         if (Instance == null)
         {
             Instance = this;
@@ -35,37 +35,37 @@ public class ToastPopupController : MonoBehaviour
 
         DOTween.Init(true, true, LogBehaviour.ErrorsOnly);
 
-        // 2. ÄÄÆ÷³ÍÆ® ÀÚµ¿ Ã£±â ¾ÈÀüÀåÄ¡
+        // 2. ì»´í¬ë„ŒíŠ¸ ìë™ ì°¾ê¸° ì•ˆì „ì¥ì¹˜
         if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
         if (rectTransform == null) rectTransform = GetComponent<RectTransform>();
 
-        // 3. ÃÊ±â À§Ä¡ ±â¾ï ¹× Åõ¸íµµ ¸®¼Â
+        // 3. ì´ˆê¸° ìœ„ì¹˜ ê¸°ì–µ ë° íˆ¬ëª…ë„ ë¦¬ì…‹
         if (rectTransform != null) originPosition = rectTransform.anchoredPosition;
         if (canvasGroup != null) canvasGroup.alpha = 0f;
     }
 
     public void ShowToast(string message)
     {
-        // 1. È¤½Ã ´©¶ôµÈ ·¹ÆÛ·±½º°¡ ÀÖ´Ù¸é ¿¬ÃâÀ» ½ÇÇàÇÏÁö ¾Ê°í ¸®ÅÏ (¿¡·¯ ¹æÁö)
+        // 1. í˜¹ì‹œ ëˆ„ë½ëœ ë ˆí¼ëŸ°ìŠ¤ê°€ ìˆë‹¤ë©´ ì—°ì¶œì„ ì‹¤í–‰í•˜ì§€ ì•Šê³  ë¦¬í„´ (ì—ëŸ¬ ë°©ì§€)
         if (canvasGroup == null || rectTransform == null || messageText == null)
         {
-            Debug.LogWarning("[ToastPopup] ÇÊ¼ö UI ÄÄÆ÷³ÍÆ®°¡ ½½·Ô¿¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogWarning("[ToastPopup] í•„ìˆ˜ UI ì»´í¬ë„ŒíŠ¸ê°€ ìŠ¬ë¡¯ì— ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
             return;
         }
 
-        // 2. ÆË¾÷ ¿ÀºêÁ§Æ® È°¼ºÈ­
+        // 2. íŒì—… ì˜¤ë¸Œì íŠ¸ í™œì„±í™”
         gameObject.SetActive(true);
 
-        // 3. ¸Å°³º¯¼ö·Î µé¾î¿Â ¹®±¸ ÅØ½ºÆ® ²È±â
+        // 3. ë§¤ê°œë³€ìˆ˜ë¡œ ë“¤ì–´ì˜¨ ë¬¸êµ¬ í…ìŠ¤íŠ¸ ê½‚ê¸°
         messageText.text = message;
 
-        // 4. ¿¬Å¸·Î ¹öÆ°À» ´­·¶À» ¶§ ±âÁ¸ ¿¬Ãâ °­Á¦ Á¾·á (Æ®À© ²¿ÀÓ ¹æÁö Ä¡Æ®Å°)
+        // 4. ì—°íƒ€ë¡œ ë²„íŠ¼ì„ ëˆŒë €ì„ ë•Œ ê¸°ì¡´ ì—°ì¶œ ê°•ì œ ì¢…ë£Œ (íŠ¸ìœˆ ê¼¬ì„ ë°©ì§€ ì¹˜íŠ¸í‚¤)
         if (toastSequence != null && toastSequence.IsActive())
         {
             toastSequence.Kill();
         }
 
-        // 5. ¿¬Ãâ ½ÃÀÛ ÁöÁ¡À¸·Î »óÅÂ°ª ¸®¼Â
+        // 5. ì—°ì¶œ ì‹œì‘ ì§€ì ìœ¼ë¡œ ìƒíƒœê°’ ë¦¬ì…‹
         canvasGroup.alpha = 0f;
         rectTransform.anchoredPosition = originPosition;
 
@@ -83,9 +83,9 @@ public class ToastPopupController : MonoBehaviour
             .OnComplete(() =>
             {
                 gameObject.SetActive(false);
-                rectTransform.anchoredPosition = originPosition; // À§Ä¡ ¿Ïº® ¸®¼Â
+                rectTransform.anchoredPosition = originPosition; // ìœ„ì¹˜ ì™„ë²½ ë¦¬ì…‹
             })
-            // Å¸ÀÓ½ºÄÉÀÏÀÌ 0(ÀÏ½ÃÁ¤Áö)ÀÌ µÇ¾îµµ ÆË¾÷ ¾Ë¸²Àº Á¤»ó Àç»ıµÇµµ·Ï ¼³Á¤
+            // íƒ€ì„ìŠ¤ì¼€ì¼ì´ 0(ì¼ì‹œì •ì§€)ì´ ë˜ì–´ë„ íŒì—… ì•Œë¦¼ì€ ì •ìƒ ì¬ìƒë˜ë„ë¡ ì„¤ì •
             .SetUpdate(true);
     }
 

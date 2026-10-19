@@ -1,0 +1,819 @@
+fileFormatVersion: 2
+guid: 9bb30f7a25482d0458bccc1a90bbb1a5
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1254143226938950183
+    second: dark_vortex_8f_384x192_0
+  - first:
+      213: -1147432463108598053
+    second: dark_vortex_8f_384x192_1
+  - first:
+      213: -3852137114052688709
+    second: dark_vortex_8f_384x192_2
+  - first:
+      213: -1682937490428494624
+    second: dark_vortex_8f_384x192_3
+  - first:
+      213: -5168425790081299214
+    second: dark_vortex_8f_384x192_4
+  - first:
+      213: 663718829503242083
+    second: dark_vortex_8f_384x192_5
+  - first:
+      213: -8044116916713988589
+    second: dark_vortex_8f_384x192_6
+  - first:
+      213: 2302441808456814855
+    second: dark_vortex_8f_384x192_7
+  - first:
+      213: -2563120808742942993
+    second: dark_vortex_8f_384x192_8
+  - first:
+      213: -1266619856947326949
+    second: dark_vortex_8f_384x192_9
+  - first:
+      213: -8410612440782861882
+    second: dark_vortex_8f_384x192_10
+  - first:
+      213: -5270416302917173018
+    second: dark_vortex_8f_384x192_11
+  - first:
+      213: -4759248367527369715
+    second: dark_vortex_8f_384x192_12
+  - first:
+      213: -1474586627497340500
+    second: dark_vortex_8f_384x192_13
+  - first:
+      213: -8079546013048556182
+    second: dark_vortex_8f_384x192_14
+  - first:
+      213: -5479588461854566051
+    second: dark_vortex_8f_384x192_15
+  - first:
+      213: 5183533574687929698
+    second: dark_vortex_8f_384x192_16
+  - first:
+      213: -6980435349786822537
+    second: dark_vortex_8f_384x192_17
+  - first:
+      213: 1105975848335173634
+    second: dark_vortex_8f_384x192_18
+  - first:
+      213: -7218717309627484809
+    second: dark_vortex_8f_384x192_19
+  - first:
+      213: -9098341907519204241
+    second: dark_vortex_8f_384x192_20
+  - first:
+      213: -588225854230438299
+    second: dark_vortex_8f_384x192_21
+  - first:
+      213: 2800224836253340864
+    second: dark_vortex_8f_384x192_22
+  - first:
+      213: -9152737869091428572
+    second: dark_vortex_8f_384x192_23
+  - first:
+      213: -9146090388465668977
+    second: dark_vortex_8f_384x192_24
+  - first:
+      213: 2304870132713495003
+    second: dark_vortex_8f_384x192_25
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_0
+      rect:
+        serializedVersion: 2
+        x: 19
+        y: 150
+        width: 58
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9dd77dc3163689ee0800000000000000
+      internalID: -1254143226938950183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_1
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 153
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd619a011408310f0800000000000000
+      internalID: -1147432463108598053
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_2
+      rect:
+        serializedVersion: 2
+        x: 105
+        y: 105
+        width: 37
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb48aca44b57a8ac0800000000000000
+      internalID: -3852137114052688709
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_3
+      rect:
+        serializedVersion: 2
+        x: 137
+        y: 141
+        width: 46
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ec72dfd44105a8e0800000000000000
+      internalID: -1682937490428494624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_4
+      rect:
+        serializedVersion: 2
+        x: 209
+        y: 110
+        width: 70
+        height: 66
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2fc8c3e90201648b0800000000000000
+      internalID: -5168425790081299214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_5
+      rect:
+        serializedVersion: 2
+        x: 297
+        y: 12
+        width: 75
+        height: 165
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 36f574742c0063900800000000000000
+      internalID: 663718829503242083
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_6
+      rect:
+        serializedVersion: 2
+        x: 19
+        y: 115
+        width: 25
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31e5d87a84e8d5090800000000000000
+      internalID: -8044116916713988589
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_7
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 115
+        width: 26
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 701931d30aae3ff10800000000000000
+      internalID: 2302441808456814855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_8
+      rect:
+        serializedVersion: 2
+        x: 140
+        y: 106
+        width: 43
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe607765437fd6cd0800000000000000
+      internalID: -2563120808742942993
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_9
+      rect:
+        serializedVersion: 2
+        x: 329
+        y: 120
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b10d23173ff0c6ee0800000000000000
+      internalID: -1266619856947326949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_10
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 15
+        width: 71
+        height: 69
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c908a3eb80874b80800000000000000
+      internalID: -8410612440782861882
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_11
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 50
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6e0c13edb48bbd6b0800000000000000
+      internalID: -5270416302917173018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_12
+      rect:
+        serializedVersion: 2
+        x: 105
+        y: 18
+        width: 68
+        height: 68
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d046ca743d0c3fdb0800000000000000
+      internalID: -4759248367527369715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_13
+      rect:
+        serializedVersion: 2
+        x: 213
+        y: 14
+        width: 29
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca1da756647398be0800000000000000
+      internalID: -1474586627497340500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_14
+      rect:
+        serializedVersion: 2
+        x: 214
+        y: 39
+        width: 14
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a6531d955bfafdf80800000000000000
+      internalID: -8079546013048556182
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_15
+      rect:
+        serializedVersion: 2
+        x: 217
+        y: 51
+        width: 25
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d5954d7735794f3b0800000000000000
+      internalID: -5479588461854566051
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_16
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 46
+        width: 26
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 265b598925c9fe740800000000000000
+      internalID: 5183533574687929698
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_17
+      rect:
+        serializedVersion: 2
+        x: 318
+        y: 48
+        width: 13
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 77870668803802f90800000000000000
+      internalID: -6980435349786822537
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_18
+      rect:
+        serializedVersion: 2
+        x: 331
+        y: 47
+        width: 20
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 208ed22ac27395f00800000000000000
+      internalID: 1105975848335173634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_19
+      rect:
+        serializedVersion: 2
+        x: 57
+        y: 31
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 775b0b17ad6f1db90800000000000000
+      internalID: -7218717309627484809
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_20
+      rect:
+        serializedVersion: 2
+        x: 60
+        y: 38
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f64944d7d323cb180800000000000000
+      internalID: -9098341907519204241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_21
+      rect:
+        serializedVersion: 2
+        x: 243
+        y: 37
+        width: 16
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56ed4eeb3b336d7f0800000000000000
+      internalID: -588225854230438299
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_22
+      rect:
+        serializedVersion: 2
+        x: 325
+        y: 32
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c45b1007a56cd620800000000000000
+      internalID: 2800224836253340864
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_23
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 30
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4272a8eb661faf080800000000000000
+      internalID: -9152737869091428572
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_24
+      rect:
+        serializedVersion: 2
+        x: 250
+        y: 12
+        width: 19
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8ca3efef3f821180800000000000000
+      internalID: -9146090388465668977
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: dark_vortex_8f_384x192_25
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 27
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd99bc98c2b8cff10800000000000000
+      internalID: 2304870132713495003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      dark_vortex_8f_384x192_0: -1254143226938950183
+      dark_vortex_8f_384x192_1: -1147432463108598053
+      dark_vortex_8f_384x192_10: -8410612440782861882
+      dark_vortex_8f_384x192_11: -5270416302917173018
+      dark_vortex_8f_384x192_12: -4759248367527369715
+      dark_vortex_8f_384x192_13: -1474586627497340500
+      dark_vortex_8f_384x192_14: -8079546013048556182
+      dark_vortex_8f_384x192_15: -5479588461854566051
+      dark_vortex_8f_384x192_16: 5183533574687929698
+      dark_vortex_8f_384x192_17: -6980435349786822537
+      dark_vortex_8f_384x192_18: 1105975848335173634
+      dark_vortex_8f_384x192_19: -7218717309627484809
+      dark_vortex_8f_384x192_2: -3852137114052688709
+      dark_vortex_8f_384x192_20: -9098341907519204241
+      dark_vortex_8f_384x192_21: -588225854230438299
+      dark_vortex_8f_384x192_22: 2800224836253340864
+      dark_vortex_8f_384x192_23: -9152737869091428572
+      dark_vortex_8f_384x192_24: -9146090388465668977
+      dark_vortex_8f_384x192_25: 2304870132713495003
+      dark_vortex_8f_384x192_3: -1682937490428494624
+      dark_vortex_8f_384x192_4: -5168425790081299214
+      dark_vortex_8f_384x192_5: 663718829503242083
+      dark_vortex_8f_384x192_6: -8044116916713988589
+      dark_vortex_8f_384x192_7: 2302441808456814855
+      dark_vortex_8f_384x192_8: -2563120808742942993
+      dark_vortex_8f_384x192_9: -1266619856947326949
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

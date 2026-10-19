@@ -26,24 +26,6 @@ TextureImporter:
   - first:
       213: 2344767432711473635
     second: griffin_7
-  - first:
-      213: 8423727123416861362
-    second: griffin_8
-  - first:
-      213: 2526971979678339770
-    second: griffin_9
-  - first:
-      213: -7652613950689346408
-    second: griffin_10
-  - first:
-      213: -7434006707041972723
-    second: griffin_11
-  - first:
-      213: -9128397567549211901
-    second: griffin_12
-  - first:
-      213: 220706558534443439
-    second: griffin_13
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -76,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -90,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 70
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -114,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -127,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -140,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -153,7 +135,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -168,12 +150,12 @@ TextureImporter:
       name: griffin_0
       rect:
         serializedVersion: 2
-        x: 136
-        y: 418
-        width: 219
-        height: 197
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -190,12 +172,12 @@ TextureImporter:
       name: griffin_1
       rect:
         serializedVersion: 2
-        x: 354
-        y: 525
-        width: 8
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -212,12 +194,12 @@ TextureImporter:
       name: griffin_2
       rect:
         serializedVersion: 2
-        x: 424
-        y: 418
-        width: 221
-        height: 203
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -234,12 +216,12 @@ TextureImporter:
       name: griffin_3
       rect:
         serializedVersion: 2
-        x: 708
-        y: 414
-        width: 221
-        height: 236
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -256,12 +238,12 @@ TextureImporter:
       name: griffin_4
       rect:
         serializedVersion: 2
-        x: 923
-        y: 521
-        width: 51
-        height: 39
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -278,12 +260,12 @@ TextureImporter:
       name: griffin_5
       rect:
         serializedVersion: 2
-        x: 936
-        y: 517
-        width: 19
-        height: 10
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -300,12 +282,12 @@ TextureImporter:
       name: griffin_6
       rect:
         serializedVersion: 2
-        x: 994
-        y: 414
-        width: 281
-        height: 253
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -322,12 +304,12 @@ TextureImporter:
       name: griffin_7
       rect:
         serializedVersion: 2
-        x: 133
-        y: 102
-        width: 221
-        height: 208
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -336,138 +318,6 @@ TextureImporter:
       bones: []
       spriteID: 3e90ca39e894a8020800000000000000
       internalID: 2344767432711473635
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: griffin_8
-      rect:
-        serializedVersion: 2
-        x: 422
-        y: 101
-        width: 224
-        height: 227
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2bac51c103717e470800000000000000
-      internalID: 8423727123416861362
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: griffin_9
-      rect:
-        serializedVersion: 2
-        x: 639
-        y: 248
-        width: 35
-        height: 28
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ab2d71680ab911320800000000000000
-      internalID: 2526971979678339770
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: griffin_10
-      rect:
-        serializedVersion: 2
-        x: 655
-        y: 240
-        width: 12
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 89c76f938247cc590800000000000000
-      internalID: -7652613950689346408
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: griffin_11
-      rect:
-        serializedVersion: 2
-        x: 698
-        y: 101
-        width: 289
-        height: 228
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d0e44e8794a15d890800000000000000
-      internalID: -7434006707041972723
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: griffin_12
-      rect:
-        serializedVersion: 2
-        x: 1007
-        y: 101
-        width: 222
-        height: 215
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 30b70b1d6ca615180800000000000000
-      internalID: -9128397567549211901
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: griffin_13
-      rect:
-        serializedVersion: 2
-        x: 987
-        y: 225
-        width: 8
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: fa16b05127b101300800000000000000
-      internalID: 220706558534443439
       vertices: []
       indices: 
       edges: []
@@ -488,18 +338,12 @@ TextureImporter:
     nameFileIdTable:
       griffin_0: 3192161695392630816
       griffin_1: 5010574328882276038
-      griffin_10: -7652613950689346408
-      griffin_11: -7434006707041972723
-      griffin_12: -9128397567549211901
-      griffin_13: 220706558534443439
       griffin_2: 8129419951498072413
       griffin_3: 8650907751680524139
       griffin_4: 8373981452119265087
       griffin_5: 6301862023853308023
       griffin_6: -2953512809351921978
       griffin_7: 2344767432711473635
-      griffin_8: 8423727123416861362
-      griffin_9: 2526971979678339770
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

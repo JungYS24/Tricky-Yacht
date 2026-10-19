@@ -3,29 +3,29 @@ guid: 7d9bb4406fb527c4ebd952af273a0896
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4038573961785984331
-    second: Time-sand Turtle_0
+      213: -9061978268112941040
+    second: Time-Sand_Turtle_0
   - first:
-      213: -7600021838328768018
-    second: Time-sand Turtle_1
+      213: 7431358501800733405
+    second: Time-Sand_Turtle_1
   - first:
-      213: 509374635010296767
-    second: Time-sand Turtle_2
+      213: -2630728555637034442
+    second: Time-Sand_Turtle_2
   - first:
-      213: -6311372210277572760
-    second: Time-sand Turtle_3
+      213: 8094034936519619432
+    second: Time-Sand_Turtle_3
   - first:
-      213: -6010838971841707016
-    second: Time-sand Turtle_4
+      213: 4416466275122205137
+    second: Time-Sand_Turtle_4
   - first:
-      213: 2023291991865467103
-    second: Time-sand Turtle_5
+      213: -4317177996847757791
+    second: Time-Sand_Turtle_5
   - first:
-      213: -4880005352611374354
-    second: Time-sand Turtle_6
+      213: -840812913779342887
+    second: Time-Sand_Turtle_6
   - first:
-      213: -2386438988890454970
-    second: Time-sand Turtle_7
+      213: 7752803073377588061
+    second: Time-Sand_Turtle_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -58,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 50
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -96,7 +96,7 @@ TextureImporter:
     maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -109,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -122,7 +122,7 @@ TextureImporter:
     maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -134,177 +134,177 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Time-sand Turtle_0
+      name: Time-Sand_Turtle_0
       rect:
         serializedVersion: 2
-        x: 103
-        y: 274
-        width: 123
-        height: 150
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5baba98016a14f7c0800000000000000
-      internalID: -4038573961785984331
+      spriteID: 1090d10ec7623d82302abfc5adb39cde
+      internalID: -9061978268112941040
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Time-sand Turtle_1
+      name: Time-Sand_Turtle_1
       rect:
         serializedVersion: 2
-        x: 241
-        y: 274
-        width: 124
-        height: 151
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ee9d339976c478690800000000000000
-      internalID: -7600021838328768018
+      spriteID: dd6a69322f7d216714ec66b927e3a162
+      internalID: 7431358501800733405
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Time-sand Turtle_2
+      name: Time-Sand_Turtle_2
       rect:
         serializedVersion: 2
-        x: 376
-        y: 269
-        width: 135
-        height: 155
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fbb02612889a11700800000000000000
-      internalID: 509374635010296767
+      spriteID: 3632c71c51c67ddb2483c8b748266380
+      internalID: -2630728555637034442
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Time-sand Turtle_3
+      name: Time-Sand_Turtle_3
       rect:
         serializedVersion: 2
-        x: 524
-        y: 274
-        width: 124
-        height: 151
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 86f1221f9608968a0800000000000000
-      internalID: -6311372210277572760
+      spriteID: 6873da06e4c953700e4c47f3444e71d1
+      internalID: 8094034936519619432
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Time-sand Turtle_4
+      name: Time-Sand_Turtle_4
       rect:
         serializedVersion: 2
-        x: 103
-        y: 87
-        width: 120
-        height: 136
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8f30d494dc5359ca0800000000000000
-      internalID: -6010838971841707016
+      spriteID: d1d12683ad704a3d2272d1a4b84a35f0
+      internalID: 4416466275122205137
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Time-sand Turtle_5
+      name: Time-Sand_Turtle_5
       rect:
         serializedVersion: 2
-        x: 242
-        y: 87
-        width: 119
-        height: 136
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fd0a804c85d241c10800000000000000
-      internalID: 2023291991865467103
+      spriteID: 21c6c1397c4d16c4b1d39bd34a0d3de3
+      internalID: -4317177996847757791
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Time-sand Turtle_6
+      name: Time-Sand_Turtle_6
       rect:
         serializedVersion: 2
-        x: 385
-        y: 87
-        width: 119
-        height: 136
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: eea1897bcfcb64cb0800000000000000
-      internalID: -4880005352611374354
+      spriteID: d9019f171cd554f43b12018772b1f1fc
+      internalID: -840812913779342887
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Time-sand Turtle_7
+      name: Time-Sand_Turtle_7
       rect:
         serializedVersion: 2
-        x: 526
-        y: 87
-        width: 119
-        height: 136
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 644ca0d226aa1eed0800000000000000
-      internalID: -2386438988890454970
+      spriteID: 5d533ab2517d976b11ac2e7f76a2d544
+      internalID: 7752803073377588061
       vertices: []
       indices: 
       edges: []
@@ -323,14 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Time-sand Turtle_0: -4038573961785984331
-      Time-sand Turtle_1: -7600021838328768018
-      Time-sand Turtle_2: 509374635010296767
-      Time-sand Turtle_3: -6311372210277572760
-      Time-sand Turtle_4: -6010838971841707016
-      Time-sand Turtle_5: 2023291991865467103
-      Time-sand Turtle_6: -4880005352611374354
-      Time-sand Turtle_7: -2386438988890454970
+      Time-Sand_Turtle_0: -9061978268112941040
+      Time-Sand_Turtle_1: 7431358501800733405
+      Time-Sand_Turtle_2: -2630728555637034442
+      Time-Sand_Turtle_3: 8094034936519619432
+      Time-Sand_Turtle_4: 4416466275122205137
+      Time-Sand_Turtle_5: -4317177996847757791
+      Time-Sand_Turtle_6: -840812913779342887
+      Time-Sand_Turtle_7: 7752803073377588061
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

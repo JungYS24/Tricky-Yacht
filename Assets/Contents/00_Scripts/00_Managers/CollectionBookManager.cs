@@ -1,79 +1,188 @@
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.InputSystem;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 
 public enum CollectionBiomeFilter
 {
-    All = -1, Forest = 0, Meadow = 1, Temple = 2, Jungle = 3, Desert = 4,
-    Ruins = 5, Cave = 6, Volcano = 7, Swamp = 8, Beach = 9, Ocean = 10,
-    Abyss = 11, Snow = 12, Grave = 13, Circus = 14, Void = 15, Shop = 16
+    All = -1,
+    Special = 0, Forest = 1, Meadow = 2, Temple = 3, Jungle = 4, Desert = 5,
+    Ruins = 6, Cave = 7, Volcano = 8, Swamp = 9, Beach = 10, Ocean = 11,
+    Abyss = 12, Snow = 13, Grave = 14, Circus = 15, Void = 16, Skyisland = 17
 }
 public enum CollectionStatusFilter { All, Unlocked, Locked }
 
 public class CollectionBookManager : MonoBehaviour
 {
-    [Header("µµ°¨ µ¥ÀÌÅÍ")]
+    // í•„í„° ë²„íŠ¼ê³¼ ë°”ì´ì˜´ ì¢Œìš° ë„˜ê¹€ì´ ê°™ì´ ì“°ëŠ” ìˆœì„œ (ì „ì²´ â†’ ë°”ì´ì˜´ ìˆœ)
+    private static readonly int[] BiomeFilterOrder = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
+
+    [Header("ë„ê° ë°ì´í„°")]
     public List<FigureItemSO> masterFigureDatabase;
 
-    [Header("UI ¿¬°á")]
+    [Header("UI ì—°ê²°")]
     public GameObject collectionPanelRoot;
     public Transform gridContentParent;
     public GameObject collectionSlotPrefab;
     public FigureDetailPanel detailPanel;
 
-    [Header("ÇÊÅÍÃ¢ UI")]
-    public GameObject biomeFilterPanelRoot; // ¾îµÎ¿î ¹è°æÀ» Æ÷ÇÔÇÑ ÀüÃ¼ ÇÊÅÍÃ¢
+    [Header("í•„í„°ì°½ UI")]
+    public GameObject biomeFilterPanelRoot; // ì–´ë‘ìš´ ë°°ê²½ì„ í¬í•¨í•œ ì „ì²´ í•„í„°ì°½
 
-    [Header("ÇÊÅÍ ¹öÆ° µ¿Àû »ı¼º")]
-    public Transform filterGridParent;      // Grid Layout GroupÀÌ ÀÖ´Â ºÎ¸ğ
-    public GameObject filterButtonPrefab;   // BiomeFilterSlot.cs°¡ ´Ş¸° ¹öÆ° ÇÁ¸®ÆÕ
+    [Header("í•„í„° ë²„íŠ¼ ë™ì  ìƒì„±")]
+    public Transform filterGridParent;      // Grid Layout Groupì´ ìˆëŠ” ë¶€ëª¨
+    public GameObject filterButtonPrefab;   // BiomeFilterSlot.csê°€ ë‹¬ë¦° ë²„íŠ¼ í”„ë¦¬íŒ¹
 
-    [Header("ÁøÇàµµ ÅØ½ºÆ®")]
+    [Header("ì§„í–‰ë„ í…ìŠ¤íŠ¸")]
     public TextMeshProUGUI progressText;
 
-    [Header("ÇöÀç ÇÊÅÍ »óÅÂ")]
+    [Header("í˜„ì¬ í•„í„° ìƒíƒœ")]
     public CollectionBiomeFilter currentBiomeFilter = CollectionBiomeFilter.All;
     public CollectionStatusFilter currentStatusFilter = CollectionStatusFilter.All;
 
-    private List<GameObject> activeSlots = new List<GameObject>();
+    [Header("ëª¨ë‹¬ (ë”¤ í´ë¦­ ì‹œ ë‹«ê¸°)")]
+    public Button dimButton;
+
+    [Header("ì±…ê°ˆí”¼ íƒ­")]
+    public Button figureTabButton;
+    public Button synergyTabButton;
+    public Button achievementTabButton; // ì—…ì ì€ ì•„ì§ ê¸°ëŠ¥ ì—†ìŒ
+    public TextMeshProUGUI figureTabLabel;
+    public TextMeshProUGUI synergyTabLabel;
+    public TextMeshProUGUI achievementTabLabel;
+    public Color tabSelectedColor = Color.white;
+    public Color tabUnselectedColor = new Color(0.72f, 0.72f, 0.72f, 1f);
+    public float tabSelectedOffsetX = -16f; // ì„ íƒëœ íƒ­ì´ ì±… ë°–ìœ¼ë¡œ ë” ë‚˜ì˜¤ëŠ” ê±°ë¦¬
+
+    [Header("í˜ì´ì§€")]
+    public GameObject figurePageRoot;
+    public GameObject synergyPageRoot;
+    public SynergyWikiDisplayer synergyWiki;
+
+    [Header("í”¼ê·œì–´ í˜ì´ì§€ í—¤ë”")]
+    public TextMeshProUGUI titleText;
+    public TextMeshProUGUI biomeNameText;
+    public Button prevBiomeButton;
+    public Button nextBiomeButton;
+
+    [Header("í”¼ê·œì–´ í˜ì´ì§€ ë„˜ê¹€")]
+    public int slotsPerPage = 15;
+    public Button prevPageButton;
+    public Button nextPageButton;
+    public TextMeshProUGUI pageText;
+
+    private readonly List<CollectionSlot> slotPool = new List<CollectionSlot>();
     private List<FigureItemSO> currentFilteredList = new List<FigureItemSO>();
+    private readonly Dictionary<Button, Vector2> tabBasePositions = new Dictionary<Button, Vector2>();
+    private int currentPage;
+    private bool isInitialized;
+    private bool isSynergyPageOpen;
 
     public TextMeshProUGUI currentFilterText;
+
+    private static bool HasPersistentMethod(Button button, string methodName)
+    {
+        for (int i = 0; i < button.onClick.GetPersistentEventCount(); i++)
+        {
+            if (button.onClick.GetPersistentMethodName(i) == methodName) return true;
+        }
+        return false;
+    }
+
+    private bool UsePaging => prevPageButton != null && nextPageButton != null && slotsPerPage > 0;
+    private bool UseBiomeStepper => prevBiomeButton != null && nextBiomeButton != null;
+
     private void Start()
     {
-        masterFigureDatabase = masterFigureDatabase.OrderBy(f => (int)f.sourceBiomes.FirstOrDefault()).ToList();
-
-        GenerateFilterButtons(); // ½ÃÀÛÇÒ ¶§ ÇÊÅÍ ¹öÆ° 18°³ ÀÚµ¿ »ı¼º
+        EnsureInitialized();
 
         if (biomeFilterPanelRoot != null) biomeFilterPanelRoot.SetActive(false);
         RefreshCollectionBoard();
     }
 
-    // ÇÊÅÍ ¹öÆ°µéÀ» »ı¼ºÇØÁÖ´Â ÇÔ¼ö
+    // íŒ¨ë„ì´ êº¼ì§„ ì±„ë¡œ ì‹œì‘í•˜ë¯€ë¡œ Startë³´ë‹¤ OpenCollectionBookì´ ë¨¼ì € ë¶ˆë¦´ ìˆ˜ ìˆë‹¤.
+    private void EnsureInitialized()
+    {
+        if (isInitialized) return;
+        isInitialized = true;
+
+        masterFigureDatabase = masterFigureDatabase.OrderBy(f => (int)f.sourceBiomes.FirstOrDefault()).ToList();
+
+        GenerateFilterButtons(); // ì‹œì‘í•  ë•Œ í•„í„° ë²„íŠ¼ ìë™ ìƒì„±
+
+        if (dimButton != null) dimButton.onClick.AddListener(CloseCollectionBook);
+        // ì”¬ì— ì €ì¥ëœ í˜¸ì¶œì´ ìˆìœ¼ë©´ ëŸ°íƒ€ì„ì— ë˜ ë¶™ì´ì§€ ì•ŠëŠ”ë‹¤. ì—†ìœ¼ë©´ ì˜ˆì „ ì”¬ë„ ë™ì‘í•˜ê²Œ ë¶™ì¸ë‹¤.
+        if (figureTabButton != null && !HasPersistentMethod(figureTabButton, nameof(ShowFigurePage)))
+            figureTabButton.onClick.AddListener(ShowFigurePage);
+        if (synergyTabButton != null && !HasPersistentMethod(synergyTabButton, nameof(ShowSynergyPage)))
+            synergyTabButton.onClick.AddListener(ShowSynergyPage);
+        if (prevBiomeButton != null) prevBiomeButton.onClick.AddListener(() => StepBiomeFilter(-1));
+        if (nextBiomeButton != null) nextBiomeButton.onClick.AddListener(() => StepBiomeFilter(1));
+        if (prevPageButton != null) prevPageButton.onClick.AddListener(() => ChangePage(-1));
+        if (nextPageButton != null) nextPageButton.onClick.AddListener(() => ChangePage(1));
+        if (detailPanel != null) detailPanel.synergyClicked = ShowSynergy;
+
+        foreach (var tab in new[] { figureTabButton, synergyTabButton, achievementTabButton })
+        {
+            if (tab != null) tabBasePositions[tab] = ((RectTransform)tab.transform).anchoredPosition;
+        }
+    }
+
+    private void Update()
+    {
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame) return;
+
+        // ì •ë ¬ ë“œë¡­ë‹¤ìš´ â†’ ìƒì„¸ â†’ í•„í„°ì°½ â†’ ë„ê° ìˆœì„œë¡œ í•˜ë‚˜ì”© ë‹«ëŠ”ë‹¤.
+        if (isSynergyPageOpen && synergyWiki != null && synergyWiki.IsOrderDropdownExpanded)
+            synergyWiki.CloseOrderDropdown();
+        else if (detailPanel != null && detailPanel.panelRoot != null && detailPanel.panelRoot.activeSelf)
+            detailPanel.ClosePanel();
+        else if (biomeFilterPanelRoot != null && biomeFilterPanelRoot.activeSelf)
+            CloseBiomeFilterPanel();
+        else
+            CloseCollectionBook();
+    }
+
+    // í•„í„° ë²„íŠ¼ë“¤ì„ ìƒì„±í•´ì£¼ëŠ” í•¨ìˆ˜
     private void GenerateFilterButtons()
     {
         if (filterGridParent == null || filterButtonPrefab == null) return;
 
-        string[] filterNames = { "ÀüÃ¼", "½£", "ÃÊ¿ø", "½ÅÀü", "Á¤±Û", "»ç¸·", "À¯Àû", "µ¿±¼", "È­»ê", "´Ë", "ÇØº¯", "¹Ù´Ù", "½É¿¬", "¼³¿ø", "¹«´ı", "¼­Ä¿½º", "°øÇã", "»óÁ¡" };
-        int[] filterValues = { -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-
-        for (int i = 0; i < filterNames.Length; i++)
+        foreach (int filterValue in BiomeFilterOrder)
         {
             GameObject btnGo = Instantiate(filterButtonPrefab, filterGridParent);
             BiomeFilterSlot slot = btnGo.GetComponent<BiomeFilterSlot>();
 
             if (slot != null)
             {
-                slot.Setup(filterNames[i], filterValues[i], this);
+                slot.Setup(GetFilterDisplayName(filterValue), filterValue, this);
             }
         }
     }
 
     public void OpenCollectionBook()
     {
+        if (collectionPanelRoot != null && collectionPanelRoot.activeSelf)
+        {
+            CloseCollectionBook();
+            return;
+        }
+
+        EnsureInitialized();
+
+        if (UseBiomeStepper)
+        {
+            currentBiomeFilter = GetDefaultBiomeFilter();
+            currentPage = 0;
+        }
+
         collectionPanelRoot.SetActive(true);
-        RefreshCollectionBoard();
+        RefreshTabLabels();
+        ShowFigurePage();
     }
 
     public void CloseCollectionBook()
@@ -81,6 +190,44 @@ public class CollectionBookManager : MonoBehaviour
         if (detailPanel != null) detailPanel.ClosePanel();
         if (biomeFilterPanelRoot != null) biomeFilterPanelRoot.SetActive(false);
         collectionPanelRoot.SetActive(false);
+    }
+
+    public void ShowFigurePage()
+    {
+#if UNITY_EDITOR
+        Debug.Log("[CollectionBook] tab -> figure");
+#endif
+        isSynergyPageOpen = false;
+        if (figurePageRoot != null) figurePageRoot.SetActive(true);
+        if (synergyPageRoot != null) synergyPageRoot.SetActive(false);
+        UpdateTabVisuals();
+        RefreshCollectionBoard();
+    }
+
+    public void ShowSynergyPage()
+    {
+#if UNITY_EDITOR
+        Debug.Log("[CollectionBook] tab -> synergy");
+#endif
+        if (synergyPageRoot == null) return;
+
+        isSynergyPageOpen = true;
+        // ìƒì„¸ì°½ê³¼ ë°”ì´ì˜´ í•„í„°ëŠ” í”¼ê·œì–´ í˜ì´ì§€ ì „ìš©
+        if (detailPanel != null) detailPanel.ClosePanel();
+        CloseBiomeFilterPanel();
+
+        if (figurePageRoot != null) figurePageRoot.SetActive(false);
+        SetPagerVisible(false);
+        synergyPageRoot.SetActive(true);
+        if (synergyWiki != null) synergyWiki.Refresh();
+        UpdateTabVisuals();
+    }
+
+    // ê´€ë ¨ ì‹œë„ˆì§€ ì¹´ë“œì—ì„œ ë“¤ì–´ì˜¨ë‹¤. í”¼ê·œì–´ í˜ì´ì§€ì˜ í•„í„°ì™€ í˜ì´ì§€ëŠ” ë°”ê¾¸ì§€ ì•ŠëŠ”ë‹¤.
+    public void ShowSynergy(SynergyData synergy)
+    {
+        if (synergyWiki != null) synergyWiki.ArmFocus(synergy);
+        ShowSynergyPage();
     }
 
     public void OpenBiomeFilterPanel()
@@ -96,20 +243,40 @@ public class CollectionBookManager : MonoBehaviour
     public void ChangeBiomeFilter(int biomeFilterIndex)
     {
         currentBiomeFilter = (CollectionBiomeFilter)biomeFilterIndex;
+        currentPage = 0;
+        // í•„í„°ê°€ ë°”ë€Œë©´ ìƒì„¸ì°½ì´ ë³´ë˜ ëª©ë¡ì´ ë‹¬ë¼ì§€ë¯€ë¡œ ë‹«ëŠ”ë‹¤.
+        if (detailPanel != null) detailPanel.ClosePanel();
         RefreshCollectionBoard();
-        CloseBiomeFilterPanel(); // ´©¸£¸é ÀÚµ¿À¸·Î ´İÈû
+        CloseBiomeFilterPanel(); // ëˆ„ë¥´ë©´ ìë™ìœ¼ë¡œ ë‹«í˜
     }
 
     public void ChangeStatusFilter(int statusFilterIndex)
     {
         currentStatusFilter = (CollectionStatusFilter)statusFilterIndex;
+        currentPage = 0;
+        RefreshCollectionBoard();
+    }
+
+    public void StepBiomeFilter(int direction)
+    {
+        int count = BiomeFilterOrder.Length;
+        int index = Array.IndexOf(BiomeFilterOrder, (int)currentBiomeFilter);
+        if (index < 0) index = 0;
+        index = ((index + direction) % count + count) % count;
+        ChangeBiomeFilter(BiomeFilterOrder[index]);
+    }
+
+    public void ChangePage(int direction)
+    {
+        int nextPage = Mathf.Clamp(currentPage + direction, 0, GetPageCount() - 1);
+        if (nextPage == currentPage) return;
+
+        currentPage = nextPage;
         RefreshCollectionBoard();
     }
 
     public void RefreshCollectionBoard()
     {
-        foreach (var slot in activeSlots) Destroy(slot);
-        activeSlots.Clear();
         currentFilteredList.Clear();
 
         int totalCount = 0;
@@ -120,30 +287,55 @@ public class CollectionBookManager : MonoBehaviour
             if (currentBiomeFilter != CollectionBiomeFilter.All && !figure.sourceBiomes.Contains((BiomeType)currentBiomeFilter))
                 continue;
 
-            bool isUnlocked = PlayerPrefs.GetInt("Collection_Unlocked_" + figure.itemName, 0) == 1;
-            bool isEncountered = PlayerPrefs.GetInt("Collection_Encountered_" + figure.itemName, 0) == 1;
+            //í•˜ë“œë””ìŠ¤í¬ ëŒ€ì‹  ë§¤ë‹ˆì €ì˜ ë”•ì…”ë„ˆë¦¬ì—ì„œ ìƒíƒœ(0, 1, 2)ë¥¼ í•œ ë²ˆì— ê°€ì ¸ì˜´
+            int figureState = GetFigureState(figure);
+            bool isUnlocked = (figureState == 2);         // 2ë²ˆì´ë©´ ì™„ì „ í•´ê¸ˆ
 
             if (currentStatusFilter == CollectionStatusFilter.Unlocked && !isUnlocked) continue;
             if (currentStatusFilter == CollectionStatusFilter.Locked && isUnlocked) continue;
 
-            GameObject slotGo = Instantiate(collectionSlotPrefab, gridContentParent);
-            CollectionSlot slot = slotGo.GetComponent<CollectionSlot>();
-
-            slot.Setup(figure, isUnlocked, isEncountered, this);
-
-            activeSlots.Add(slotGo);
             currentFilteredList.Add(figure);
 
             totalCount++;
             if (isUnlocked) unlockedCount++;
         }
 
-        if (progressText != null)
+        int pageCount = GetPageCount();
+        currentPage = Mathf.Clamp(currentPage, 0, pageCount - 1);
+        int startIndex = UsePaging ? currentPage * slotsPerPage : 0;
+        int visibleCount = UsePaging
+            ? Mathf.Min(slotsPerPage, currentFilteredList.Count - startIndex)
+            : currentFilteredList.Count;
+
+        EnsureSlotPool(visibleCount);
+        for (int i = 0; i < slotPool.Count; i++)
         {
-            string biomeName = currentBiomeFilter == CollectionBiomeFilter.All ? "All" : currentBiomeFilter.ToString();
-            progressText.text = $"{biomeName} Biome Figures Collected: {unlockedCount} / {totalCount}";
+            CollectionSlot slot = slotPool[i];
+            bool visible = i < visibleCount;
+            slot.gameObject.SetActive(visible);
+            if (!visible) continue;
+
+            FigureItemSO figure = currentFilteredList[startIndex + i];
+            int figureState = GetFigureState(figure);
+            slot.Setup(figure, figureState == 2, figureState >= 1, this);
         }
 
+        if (progressText != null)
+        {
+            progressText.text = UseBiomeStepper
+                ? LocalizationManager.GetUi("UI_COLLECTION_COUNT", "{0} / {1}", unlockedCount, totalCount)
+                : LocalizationManager.GetUi(
+                    "UI_COLLECTION_PROGRESS",
+                    "{0} : {1} / {2}",
+                    GetCurrentFilterDisplayName(),
+                    unlockedCount,
+                    totalCount);
+        }
+
+        if (titleText != null)
+            titleText.text = LocalizationManager.GetUi("UI_COLLECTION_TITLE", "í”¼ê·œì–´ ë„ê°");
+
+        UpdatePager(pageCount);
         UpdateFilterText();
     }
 
@@ -152,33 +344,101 @@ public class CollectionBookManager : MonoBehaviour
         if (detailPanel != null) detailPanel.OpenPanel(currentFilteredList, figure);
     }
 
+    private void EnsureSlotPool(int count)
+    {
+        while (slotPool.Count < count)
+        {
+            GameObject slotGo = Instantiate(collectionSlotPrefab, gridContentParent);
+            slotPool.Add(slotGo.GetComponent<CollectionSlot>());
+        }
+    }
+
+    private int GetPageCount()
+    {
+        if (!UsePaging) return 1;
+        return Mathf.Max(1, Mathf.CeilToInt(currentFilteredList.Count / (float)slotsPerPage));
+    }
+
+    private void UpdatePager(int pageCount)
+    {
+        bool show = pageCount > 1;
+        SetPagerVisible(show);
+        if (!show) return;
+        if (pageText != null)
+            pageText.text = LocalizationManager.GetUi("UI_PAGE_INDICATOR", "{0} / {1}", currentPage + 1, pageCount);
+        if (prevPageButton != null) prevPageButton.interactable = currentPage > 0;
+        if (nextPageButton != null) nextPageButton.interactable = currentPage < pageCount - 1;
+    }
+
+    private void SetPagerVisible(bool visible)
+    {
+        if (prevPageButton != null) prevPageButton.gameObject.SetActive(visible);
+        if (nextPageButton != null) nextPageButton.gameObject.SetActive(visible);
+        if (pageText != null) pageText.gameObject.SetActive(visible);
+    }
+
+    private void UpdateTabVisuals()
+    {
+        SetTabSelected(figureTabButton, !isSynergyPageOpen);
+        SetTabSelected(synergyTabButton, isSynergyPageOpen);
+        SetTabSelected(achievementTabButton, false);
+    }
+
+    private void SetTabSelected(Button tab, bool selected)
+    {
+        if (tab == null) return;
+
+        if (tab.targetGraphic != null)
+            tab.targetGraphic.color = selected ? tabSelectedColor : tabUnselectedColor;
+
+        if (tabBasePositions.TryGetValue(tab, out Vector2 basePosition))
+        {
+            ((RectTransform)tab.transform).anchoredPosition =
+                selected ? basePosition + new Vector2(tabSelectedOffsetX, 0f) : basePosition;
+        }
+    }
+
+    private void RefreshTabLabels()
+    {
+        if (figureTabLabel != null) figureTabLabel.text = LocalizationManager.GetUi("UI_TAB_FIGURE", "í”¼ê·œì–´");
+        if (synergyTabLabel != null) synergyTabLabel.text = LocalizationManager.GetUi("UI_TAB_SYNERGY", "ì‹œë„ˆì§€");
+        if (achievementTabLabel != null) achievementTabLabel.text = LocalizationManager.GetUi("UI_TAB_ACHIEVEMENT", "ì—…ì ");
+    }
+
+    // ëŸ° ì¤‘ì´ë©´ í˜„ì¬ ë°”ì´ì˜´, ì•„ë‹ˆë©´ ì „ì²´
+    private static CollectionBiomeFilter GetDefaultBiomeFilter()
+    {
+        DiceManager diceManager = DiceManager.Instance;
+        if (diceManager != null && diceManager.currentBiome != null)
+            return (CollectionBiomeFilter)(int)diceManager.currentBiome.biomeType;
+
+        return CollectionBiomeFilter.All;
+    }
+
+    private static int GetFigureState(FigureItemSO figure)
+    {
+        return CollectionDataManager.Instance != null ? CollectionDataManager.Instance.GetFigureState(figure) : 0;
+    }
+
     private void UpdateFilterText()
     {
+        if (biomeNameText != null)
+            biomeNameText.text = GetCurrentFilterDisplayName();
+
         if (currentFilterText == null) return;
+        currentFilterText.text = LocalizationManager.GetUi("UI_BIOME_FILTER", "ë°”ì´ì˜´ : {0}", GetCurrentFilterDisplayName());
+    }
 
-        string filterName = "";
-        switch (currentBiomeFilter)
-        {
-            case CollectionBiomeFilter.All: filterName = "ÀüÃ¼"; break;
-            case CollectionBiomeFilter.Forest: filterName = "½£"; break;
-            case CollectionBiomeFilter.Meadow: filterName = "ÃÊ¿ø"; break;
-            case CollectionBiomeFilter.Temple: filterName = "½ÅÀü"; break;
-            case CollectionBiomeFilter.Jungle: filterName = "Á¤±Û"; break;
-            case CollectionBiomeFilter.Desert: filterName = "»ç¸·"; break;
-            case CollectionBiomeFilter.Ruins: filterName = "À¯Àû"; break;
-            case CollectionBiomeFilter.Cave: filterName = "µ¿±¼"; break;
-            case CollectionBiomeFilter.Volcano: filterName = "È­»ê"; break;
-            case CollectionBiomeFilter.Swamp: filterName = "´Ë"; break;
-            case CollectionBiomeFilter.Beach: filterName = "ÇØº¯"; break;
-            case CollectionBiomeFilter.Ocean: filterName = "¹Ù´Ù"; break;
-            case CollectionBiomeFilter.Abyss: filterName = "½É¿¬"; break;
-            case CollectionBiomeFilter.Snow: filterName = "¼³¿ø"; break;
-            case CollectionBiomeFilter.Grave: filterName = "¹«´ı"; break;
-            case CollectionBiomeFilter.Circus: filterName = "¼­Ä¿½º"; break;
-            case CollectionBiomeFilter.Void: filterName = "°øÇã"; break;
-            case CollectionBiomeFilter.Shop: filterName = "»óÁ¡"; break;
-        }
+    private string GetCurrentFilterDisplayName()
+    {
+        return GetFilterDisplayName((int)currentBiomeFilter);
+    }
 
-        currentFilterText.text = $"¹ÙÀÌ¿È : {filterName}";
+    private static string GetFilterDisplayName(int filterValue)
+    {
+        if (filterValue == (int)CollectionBiomeFilter.All)
+            return LocalizationManager.GetUi("UI_FILTER_ALL", "ì „ì²´");
+
+        return LocalizationManager.GetBiomeDisplayName((BiomeType)filterValue);
     }
 }

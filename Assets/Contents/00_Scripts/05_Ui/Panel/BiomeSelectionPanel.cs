@@ -13,7 +13,7 @@ public class BiomeSelectionPanel : MonoBehaviour
         {
             if (i < nextBiomes.Count)
             {
-                // DiceManagerÀÇ ¸®½ºÆ®¿¡¼­ ÇØ´ç Å¸ÀÔÀÇ SO¸¦ Ã£¾Æ ½½·Ô¿¡ ¼¼ÆÃ
+                // DiceManagerì˜ ë¦¬ìŠ¤íŠ¸ì—ì„œ í•´ë‹¹ íƒ€ìž…ì˜ SOë¥¼ ì°¾ì•„ ìŠ¬ë¡¯ì— ì„¸íŒ…
                 BiomeDataSO biomeData = manager.biomeList.Find(b => b.biomeType == nextBiomes[i]);
                 if (biomeData != null)
                 {

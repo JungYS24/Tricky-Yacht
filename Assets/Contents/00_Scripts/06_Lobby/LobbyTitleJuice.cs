@@ -29,7 +29,7 @@ public class LobbyTitleJuice : MonoBehaviour
         if (titleImage != null)
         {
             titleImage.DOFade(minAlpha, blinkDuration)
-                .SetLoops(-1, LoopType.Yoyo) // ¿ä¿ä ¸ğµå·Î ¸®¹ö½º Àç»ıµÇ°Ô ¼³Á¤
+                .SetLoops(-1, LoopType.Yoyo) // ìš”ìš” ëª¨ë“œë¡œ ë¦¬ë²„ìŠ¤ ì¬ìƒë˜ê²Œ ì„¤ì •
                 .SetEase(Ease.InOutSine);
         }
     }

@@ -3,29 +3,17 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewCoinItem", menuName = "Shop/Items/CoinItem")]
 public class CoinItemSO : BaseItemDataSO
 {
-    [Header("Áö±ŞÇÒ °ñµå·®")]
+    [Header("ì§€ê¸‰í•  ê³¨ë“œëŸ‰")]
     public int goldAmount = 300;
 
     public override void ApplyItemEffect(DiceManager diceManager)
     {
         if (diceManager != null && diceManager.shopManager != null)
         {
-            // °ñµå Ãß°¡
-            diceManager.shopManager.currentGold += goldAmount;
+            // ê³¨ë“œ ì¶”ê°€: ì—ë©”ë„ë“œ ë³´ë„ˆìŠ¤, UI ë° ì¹´ìš´íŒ… ì—°ì¶œê¹Œì§€ í•¨ê»˜ ì²˜ë¦¬
+            int grantedGold = diceManager.shopManager.GrantGold(goldAmount);
 
-            // UI ¾÷µ¥ÀÌÆ®
-            if (diceManager.ui != null)
-            {
-                diceManager.ui.UpdateGoldUI(diceManager.shopManager.currentGold);
-            }
-
-            // Ä«¿îÆÃ ¿¬Ãâ (GoldCounter°¡ Á¸ÀçÇÑ´Ù¸é ½ÇÇà)
-            if (GoldCounter.Instance != null)
-            {
-                GoldCounter.Instance.SetGold(diceManager.shopManager.currentGold);
-            }
-
-            Debug.Log($"ÄÚÀÎ Àü¸®Ç° È¹µæ! {goldAmount} G Ãß°¡µÊ.");
+            Debug.Log($"ì½”ì¸ ì „ë¦¬í’ˆ íšë“! {grantedGold} G ì¶”ê°€ë¨.");
         }
     }
 }

@@ -10,17 +10,21 @@ public class DiceDestructionPanel : MonoBehaviour
 
     private List<GameObject> activeSlots = new List<GameObject>();
     private DiceManager diceManager;
+    private bool isBusy;
 
     public void OpenSelection(DiceManager dm)
     {
+        if (isBusy) return;
         diceManager = dm;
 
-        // µ¦¿¡¼­ ÁÖ»çÀ§¸¦ ·£´ıÀ¸·Î ÃÖ´ë 5°³ ÃßÃâ (GetRandomDiceForCoating Àç»ç¿ë)
-        List<DiceData1> options = dm.GetRandomDiceForCoating(5);
+        // ë±ì—ì„œ ì£¼ì‚¬ìœ„ë¥¼ ëœë¤ìœ¼ë¡œ ìµœëŒ€ 5ê°œ ì¶”ì¶œ (ì—¬ì • ì£¼ì‚¬ìœ„ëŠ” íŒŒê´´ í›„ë³´ì—ì„œ ì œì™¸)
+        List<DiceData1> options = dm.deckManager.GetRandomDiceForDestruction(5);
 
         if (options.Count == 0)
         {
-            Debug.Log("ÆÄ±«ÇÒ ¼ö ÀÖ´Â ÁÖ»çÀ§°¡ µ¦¿¡ ¾ø½À´Ï´Ù!");
+            Debug.Log("íŒŒê´´í•  ìˆ˜ ìˆëŠ” ì£¼ì‚¬ìœ„ê°€ ë±ì— ì—†ìŠµë‹ˆë‹¤!");
+            if (ToastPopupController.Instance != null)
+                ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_NO_EQUIPPABLE_DICE", "ì¥ì°© ê°€ëŠ¥í•œ ì£¼ì‚¬ìœ„ê°€ ì—†ìŠµë‹ˆë‹¤."));
             return;
         }
 
@@ -35,7 +39,7 @@ public class DiceDestructionPanel : MonoBehaviour
             Button btn = slotGo.GetComponent<Button>();
             if (btn != null)
             {
-                btn.onClick.AddListener(() => OnDiceSelected(dice));
+                btn.onClick.AddListener(() => OnDiceSelected(dice, slotGo.GetComponent<DeckSlot>()));
             }
 
             DeckSlot deckSlot = slotGo.GetComponent<DeckSlot>();
@@ -46,22 +50,58 @@ public class DiceDestructionPanel : MonoBehaviour
         }
     }
 
-    private void OnDiceSelected(DiceData1 selectedDice)
+    private void OnDiceSelected(DiceData1 selectedDice, DeckSlot selectedSlot)
     {
-        // ¼±ÅÃÇÑ ÁÖ»çÀ§¸¦ µ¦(masterDeck)¿¡¼­ ¿µ±¸ »èÁ¦
-        if (diceManager.masterDeck.Contains(selectedDice))
+        if (isBusy) return;
+        if (diceManager == null || selectedDice == null) return;
+
+        // ì—¬ì • ì£¼ì‚¬ìœ„ëŠ” ì–´ë–¤ ê²½ë¡œë¡œë„ íŒŒê´´í•  ìˆ˜ ì—†ë‹¤(ë°©ì–´ ì½”ë“œ).
+        if (DeckManager.IsProtected(selectedDice)) return;
+
+        // ì„ íƒí•œ ì£¼ì‚¬ìœ„ë¥¼ ë±(masterDeck)ì—ì„œ ì˜êµ¬ ì‚­ì œ
+        if (diceManager.masterDeck.Remove(selectedDice))
         {
-            diceManager.masterDeck.Remove(selectedDice);
-            Debug.Log($"{selectedDice.diceName} ÁÖ»çÀ§°¡ µ¦¿¡¼­ ¿µ±¸È÷ ÆÄ±«µÇ¾ú½À´Ï´Ù! ³²Àº ÁÖ»çÀ§: {diceManager.masterDeck.Count}");
+            isBusy = true;
+
+            // ë½‘ê¸° ë”ë¯¸ì™€ ë²„ë¦° ë”ë¯¸ì— ë‚¨ì•„ ìˆëŠ” ê°™ì€ ì£¼ì‚¬ìœ„ë„ ì œê±°
+            diceManager.deckManager.drawPile.RemoveAll(
+                dice => ReferenceEquals(dice, selectedDice));
+
+            diceManager.deckManager.discardPile.RemoveAll(
+                dice => ReferenceEquals(dice, selectedDice));
+
+            Debug.Log($"{selectedDice.diceName} ì£¼ì‚¬ìœ„ê°€ ë±ì—ì„œ ì˜êµ¬íˆ íŒŒê´´ë˜ì—ˆìŠµë‹ˆë‹¤! ë‚¨ì€ ì£¼ì‚¬ìœ„: {diceManager.masterDeck.Count}");
+
+            Sfx.Play(SfxId.Dice_Burn_Vanish);
+            DiceSelectionFeedback.Get(this).PlayDestruction(selectedSlot, activeSlots, () =>
+            {
+                isBusy = false;
+                // íŒŒê´´ ì„ íƒì°½ì„ ë‹«ì€ ë’¤ ì£¼ì‚¬ìœ„ íŒŒê´´ í”¼ê·œì–´ íš¨ê³¼ ë°œë™
+                ClosePanel();
+
+                if (diceManager == null) return;
+                FigureEffectManager.Instance?.EvaluateDiceDestroyedTriggers(
+                    diceManager,
+                    diceManager.shopManager);
+
+                if (diceManager.enemy != null) diceManager.ForceUpdateUI();
+            });
+            return;
         }
 
         ClosePanel();
     }
 
+    public System.Action onClosed;
+
     public void ClosePanel()
     {
-        panelRoot.SetActive(false);
+        if (isBusy) return;
+        if (panelRoot != null) panelRoot.SetActive(false);
         ClearSlots();
+        System.Action callback = onClosed;
+        onClosed = null;
+        callback?.Invoke();
     }
 
     private void ClearSlots()

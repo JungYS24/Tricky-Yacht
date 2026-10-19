@@ -15,6 +15,7 @@ public class TutorialManager : MonoBehaviour
     public GameObject tutorialRoot;
     public GameObject darkOverlay;
     public TextMeshProUGUI dialogText;
+    public TextMeshProUGUI speakerNameText;
     public Button nextButton;
 
     [Header("매니저 참조")]
@@ -115,6 +116,7 @@ public class TutorialManager : MonoBehaviour
         currentStepIndex = step;
         string key = "Tut_" + step.ToString("D2");
         dialogText.text = DialogueManager.Instance.GetText(key);
+        RefreshSpeakerName();
 
         tutorialRoot.SetActive(true);
         SetDialogPanelVisible(true);
@@ -174,7 +176,24 @@ public class TutorialManager : MonoBehaviour
         }
         }
 
-    
+    private void RefreshSpeakerName()
+    {
+        if (speakerNameText == null && tutorialRoot != null)
+        {
+            TextMeshProUGUI[] labels = tutorialRoot.GetComponentsInChildren<TextMeshProUGUI>(true);
+            for (int i = 0; i < labels.Length; i++)
+            {
+                if (labels[i] != null && labels[i].gameObject.name == "NameText")
+                {
+                    speakerNameText = labels[i];
+                    break;
+                }
+            }
+        }
+
+        if (speakerNameText != null)
+            speakerNameText.text = LocalizationManager.GetTut("TUT_SPEAKER_DEVIL", "악마 주사위");
+    }
 
     //피규어 팝업이 뜨고 닫기 버튼을 누를 때까지 이벤트를 감시하는 코루틴
     private IEnumerator WaitForFigurePopupClose()

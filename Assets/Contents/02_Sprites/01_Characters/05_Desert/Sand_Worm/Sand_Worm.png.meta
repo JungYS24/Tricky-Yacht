@@ -3,29 +3,29 @@ guid: c37814a10a883bb418d1bcd2f4036ced
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6621869828661327427
-    second: Sand Worm_0
+      213: 208321021053482991
+    second: Sand_Worm_0
   - first:
-      213: 8091016512817940938
-    second: Sand Worm_1
+      213: 4921658485692116259
+    second: Sand_Worm_1
   - first:
-      213: -6121280209777236096
-    second: Sand Worm_2
+      213: -2344871654979686488
+    second: Sand_Worm_2
   - first:
-      213: -4248550807218013807
-    second: Sand Worm_3
+      213: -2064523522995400909
+    second: Sand_Worm_3
   - first:
-      213: 866648133665668500
-    second: Sand Worm_4
+      213: 994565741840962275
+    second: Sand_Worm_4
   - first:
-      213: -7524775341475728528
-    second: Sand Worm_5
+      213: -8408171749895406752
+    second: Sand_Worm_5
   - first:
-      213: 4701523794248078542
-    second: Sand Worm_6
+      213: -1253702864455439159
+    second: Sand_Worm_6
   - first:
-      213: -4739018761172218043
-    second: Sand Worm_7
+      213: 3610947094242850065
+    second: Sand_Worm_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -58,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 47
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -96,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -109,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -122,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -134,177 +134,177 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Sand Worm_0
+      name: Sand_Worm_0
       rect:
         serializedVersion: 2
-        x: 127
-        y: 294
-        width: 92
-        height: 108
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: db9c3c999746a14a0800000000000000
-      internalID: -6621869828661327427
+      spriteID: efb7236bdd1ae40281d21d12aec1675b
+      internalID: 208321021053482991
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sand Worm_1
+      name: Sand_Worm_1
       rect:
         serializedVersion: 2
-        x: 259
-        y: 294
-        width: 93
-        height: 110
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ac9455e76a0194070800000000000000
-      internalID: 8091016512817940938
+      spriteID: 232d7711513e4d441e890dd9bf72e96c
+      internalID: 4921658485692116259
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sand Worm_2
+      name: Sand_Worm_2
       rect:
         serializedVersion: 2
-        x: 391
-        y: 293
-        width: 94
-        height: 111
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0876995c418dc0ba0800000000000000
-      internalID: -6121280209777236096
+      spriteID: a8af0d49a75775df1738ae05ace7c95a
+      internalID: -2344871654979686488
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sand Worm_3
+      name: Sand_Worm_3
       rect:
         serializedVersion: 2
-        x: 525
-        y: 294
-        width: 94
-        height: 108
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1993295fc8d1a05c0800000000000000
-      internalID: -4248550807218013807
+      spriteID: 33cf6b4dcb5659e3f2d9c1bb9505b4d6
+      internalID: -2064523522995400909
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sand Worm_4
+      name: Sand_Worm_4
       rect:
         serializedVersion: 2
-        x: 127
-        y: 109
-        width: 92
-        height: 108
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 49db568c2e3f60c00800000000000000
-      internalID: 866648133665668500
+      spriteID: e31234d44568cd0d83dae0243741ad19
+      internalID: 994565741840962275
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sand Worm_5
+      name: Sand_Worm_5
       rect:
         serializedVersion: 2
-        x: 259
-        y: 109
-        width: 93
-        height: 108
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 07378b4e1b0a29790800000000000000
-      internalID: -7524775341475728528
+      spriteID: 607b0285572c508b1fe8910a83c5014d
+      internalID: -8408171749895406752
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sand Worm_6
+      name: Sand_Worm_6
       rect:
         serializedVersion: 2
-        x: 392
-        y: 109
-        width: 92
-        height: 108
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ec4143b2bfa2f3140800000000000000
-      internalID: 4701523794248078542
+      spriteID: c96c3e1ee3f399eebee995bf060392f9
+      internalID: -1253702864455439159
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Sand Worm_7
+      name: Sand_Worm_7
       rect:
         serializedVersion: 2
-        x: 525
-        y: 109
-        width: 94
-        height: 108
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 54f0b6c8b8f9b3eb0800000000000000
-      internalID: -4739018761172218043
+      spriteID: 11f5122740a91c32f61ec47494fb8a5f
+      internalID: 3610947094242850065
       vertices: []
       indices: 
       edges: []
@@ -323,14 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Sand Worm_0: -6621869828661327427
-      Sand Worm_1: 8091016512817940938
-      Sand Worm_2: -6121280209777236096
-      Sand Worm_3: -4248550807218013807
-      Sand Worm_4: 866648133665668500
-      Sand Worm_5: -7524775341475728528
-      Sand Worm_6: 4701523794248078542
-      Sand Worm_7: -4739018761172218043
+      Sand_Worm_0: 208321021053482991
+      Sand_Worm_1: 4921658485692116259
+      Sand_Worm_2: -2344871654979686488
+      Sand_Worm_3: -2064523522995400909
+      Sand_Worm_4: 994565741840962275
+      Sand_Worm_5: -8408171749895406752
+      Sand_Worm_6: -1253702864455439159
+      Sand_Worm_7: 3610947094242850065
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

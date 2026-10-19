@@ -1,55 +1,134 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public enum SnackType { Cherry, Pancake, LimeJuice, Steak, Garnish, Peppermint }
+public enum SnackType { Cherry, Pancake, LimeJuice, Steak, Garnish, Peppermint, FortuneCookie }
 
 [CreateAssetMenu(fileName = "NewSnack", menuName = "Shop/Items/Snack")]
 public class SnackItemSO : BaseItemDataSO
 {
-    [Header("--- ½º³¼ Àü¿ë ½ºÆå ---")]
+    public const string ResourceFolder = "Snacks";
+
+    [Header("--- ìŠ¤ë‚µ ì „ìš© ìŠ¤í™ ---")]
     public SnackType snackType;
 
     public override void ApplyItemEffect(DiceManager diceManager)
     {
         if (diceManager == null) return;
 
+        float snackMultiplier = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetSnackEffectMultiplier() : 1f;
+
+        int hpBeforeSnack = diceManager.currentPlayerHP;
         switch (snackType)
         {
             case SnackType.Cherry:
-                // [Ã¼¸®] ÃÖÁ¾ µ¥¹ÌÁö ¹è¼ö +0.2 (ÇÕ¿¬»ê)
-                diceManager.snackBonusMult += 0.2f;
+                // [ì²´ë¦¬] ìµœì¢… ë°ë¯¸ì§€ ë°°ìˆ˜ +0.2 (í•©ì—°ì‚°)
+                diceManager.snackBonusMult += 0.2f * snackMultiplier;
                 break;
+
             case SnackType.Pancake:
-                // [ÆÒÄÉÀÌÅ©] ±âº» Ä¨ ¼ö +30
-                diceManager.snackBonusChips += 30;
+                // [íŒ¬ì¼€ì´í¬] ê¸°ë³¸ ì¹© ìˆ˜ +30
+                diceManager.snackBonusChips +=
+                    Mathf.FloorToInt(30f * snackMultiplier);
                 break;
+
             case SnackType.LimeJuice:
-                // [¶óÀÓ ÁÖ½º] ¸®·Ñ ±âÈ¸ +1
-                diceManager.snackBonusRerolls++;
+                // [ë¼ì„ ì£¼ìŠ¤] ë¦¬ë¡¤ ê¸°íšŒ +1
+                diceManager.snackBonusRerolls +=
+                    Mathf.FloorToInt(1f * snackMultiplier);
                 break;
 
             case SnackType.Steak:
-                // [½ºÅ×ÀÌÅ©] Ã¼·Â 10 È¸º¹
-                diceManager.currentPlayerHP += 10;
-                if (diceManager.currentPlayerHP > diceManager.playerMaxHP)
                 {
-                    diceManager.currentPlayerHP = diceManager.playerMaxHP;
+                    // [ìŠ¤í…Œì´í¬] ì²´ë ¥ 10 íšŒë³µ
+                    // ìŠ¤ë‚µ ë°°ìœ¨ê³¼ ë„ë„ìƒˆ ëª¨ìì˜ íšŒë³µ ë°°ìœ¨ì„ ê°ê° í•œ ë²ˆ ì ìš©
+                    float healMultiplier = FigureEffectManager.Instance != null
+                        ? FigureEffectManager.Instance.GetHealMultiplier()
+                        : 1f;
+
+                    int healAmount = Mathf.FloorToInt(
+                        10f * snackMultiplier * healMultiplier);
+
+                    diceManager.playerStatus.Heal(healAmount);
+                    if (diceManager.currentPlayerHP > hpBeforeSnack && healMultiplier > 1f) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.IncreaseHealMultiplier);
+                    break;
                 }
-                break;
 
             case SnackType.Garnish:
-                // [°¡´Ï½¬] ÀÌ¹ø ¶ó¿îµå ¸ó½ºÅÍ ¹ÚÁ¦(ÇÇ±Ô¾î) È®·ü 15% Áõ°¡ (¿øÇÏ½Ã´Â ¼öÄ¡·Î Á¶Àı °¡´É)
-                diceManager.snackBonusFigureDropRate += 0.15f;
+                // [ê°€ë‹ˆì‰¬] í”¼ê·œì–´ í¬íš í™•ë¥  ì¦ê°€
+                diceManager.snackBonusFigureDropRate +=
+                    0.15f * snackMultiplier;
                 break;
+
             case SnackType.Peppermint:
-                // [ÆäÆÛ¹ÎÆ®] Áï½Ã Æ÷È¹ ½Ãµµ ´ë½Å, ÀÌ¹ø ÅÏ Ã³Ä¡ ½Ã 30% È®·ü·Î Æ÷È¹µÇ´Â ¹öÇÁ¸¦ ÄÕ´Ï´Ù.
+                // [í˜í¼ë¯¼íŠ¸] í¬íš í™œì„±í™”ë§Œ ìˆ˜í–‰. ìŠ¤ë‚µ ë°°ìœ¨ ì ìš© ì œì™¸
                 diceManager.isPeppermintActive = true;
                 break;
 
+            case SnackType.FortuneCookie:
+                // [í¬ì¶˜ì¿ í‚¤] í‚µí•˜ì§€ ì•Šì€ ì£¼ì‚¬ìœ„ë¥¼ ë±ì˜ ì£¼ì‚¬ìœ„ë¡œ êµì²´. ìŠ¤ë‚µ ë°°ìœ¨ ì ìš© ì œì™¸
+                diceManager.TryReplaceUnkeptDiceFromDeck();
+                break;
         }
 
-        Debug.Log($"½º³¼ [{itemName}] »ç¿ë! È¿°ú°¡ Àû¿ëµÇ¾ú½À´Ï´Ù.");
+        bool snackApplied = snackType != SnackType.Peppermint
+            && snackType != SnackType.FortuneCookie
+            && (snackType != SnackType.Steak || diceManager.currentPlayerHP > hpBeforeSnack);
+        if (snackApplied && snackMultiplier > 1f) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.MultiplySnackEffects);
 
-        // ¾ÆÀÌÅÛ »ç¿ë ÈÄ È­¸é¿¡ ¹Ù²ï µ¥¹ÌÁö/È½¼ö/È®·ü µîÀ» Áï½Ã ¹İ¿µ
+        Debug.Log($"ìŠ¤ë‚µ [{itemName}] ì‚¬ìš©! íš¨ê³¼ê°€ ì ìš©ë˜ì—ˆìŠµë‹ˆë‹¤.");
+
+        // ì•„ì´í…œ ì‚¬ìš© í›„ í™”ë©´ì— ë°”ë€ ë°ë¯¸ì§€/íšŸìˆ˜/í™•ë¥  ë“±ì„ ì¦‰ì‹œ ë°˜ì˜
         diceManager.ForceUpdateUI();
+    }
+
+    public static void RegisterResourceSnacks(List<BaseItemDataSO> pool)
+    {
+        if (pool == null) return;
+        SnackItemSO[] loaded = Resources.LoadAll<SnackItemSO>(ResourceFolder);
+        for (int i = 0; i < loaded.Length; i++)
+        {
+            SnackItemSO snack = loaded[i];
+            if (snack == null || ContainsSnack(pool, snack)) continue;
+            pool.Add(snack);
+        }
+    }
+
+    public static void RegisterResourceSnacks(List<SnackItemSO> pool)
+    {
+        if (pool == null) return;
+        SnackItemSO[] loaded = Resources.LoadAll<SnackItemSO>(ResourceFolder);
+        for (int i = 0; i < loaded.Length; i++)
+        {
+            SnackItemSO snack = loaded[i];
+            if (snack == null || ContainsSnack(pool, snack)) continue;
+            pool.Add(snack);
+        }
+    }
+
+    private static bool ContainsSnack(List<BaseItemDataSO> pool, SnackItemSO snack)
+    {
+        for (int i = 0; i < pool.Count; i++)
+        {
+            if (pool[i] == snack) return true;
+            if (pool[i] is SnackItemSO other && IsSameSnack(other, snack)) return true;
+        }
+        return false;
+    }
+
+    private static bool ContainsSnack(List<SnackItemSO> pool, SnackItemSO snack)
+    {
+        for (int i = 0; i < pool.Count; i++)
+        {
+            if (pool[i] == snack || IsSameSnack(pool[i], snack)) return true;
+        }
+        return false;
+    }
+
+    private static bool IsSameSnack(SnackItemSO a, SnackItemSO b)
+    {
+        if (a == null || b == null) return false;
+        if (!string.IsNullOrEmpty(a.Item_ID) && a.Item_ID == b.Item_ID) return true;
+        if (!string.IsNullOrEmpty(a.itemName) && a.itemName == b.itemName) return true;
+        return false;
     }
 }

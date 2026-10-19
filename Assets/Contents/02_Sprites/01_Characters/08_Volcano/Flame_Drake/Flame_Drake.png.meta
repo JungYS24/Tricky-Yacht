@@ -26,12 +26,6 @@ TextureImporter:
   - first:
       213: -6405791602403606418
     second: Flame_Drake 1_7
-  - first:
-      213: 6830126744398796220
-    second: Flame_Drake 1_8
-  - first:
-      213: -7675315755378855138
-    second: Flame_Drake 1_9
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -64,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -78,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 90
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -102,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -115,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -128,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -143,12 +137,12 @@ TextureImporter:
       name: Flame_Drake 1_0
       rect:
         serializedVersion: 2
-        x: 87
-        y: 391
-        width: 227
-        height: 327
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -165,12 +159,12 @@ TextureImporter:
       name: Flame_Drake 1_1
       rect:
         serializedVersion: 2
-        x: 332
-        y: 391
-        width: 227
-        height: 327
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -187,12 +181,12 @@ TextureImporter:
       name: Flame_Drake 1_2
       rect:
         serializedVersion: 2
-        x: 577
-        y: 391
-        width: 227
-        height: 327
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -209,12 +203,12 @@ TextureImporter:
       name: Flame_Drake 1_3
       rect:
         serializedVersion: 2
-        x: 778
-        y: 608
-        width: 60
-        height: 44
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -231,12 +225,12 @@ TextureImporter:
       name: Flame_Drake 1_4
       rect:
         serializedVersion: 2
-        x: 814
-        y: 646
-        width: 15
-        height: 13
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -253,12 +247,12 @@ TextureImporter:
       name: Flame_Drake 1_5
       rect:
         serializedVersion: 2
-        x: 827
-        y: 391
-        width: 496
-        height: 327
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -275,12 +269,12 @@ TextureImporter:
       name: Flame_Drake 1_6
       rect:
         serializedVersion: 2
-        x: 85
-        y: 50
-        width: 230
-        height: 332
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -297,12 +291,12 @@ TextureImporter:
       name: Flame_Drake 1_7
       rect:
         serializedVersion: 2
-        x: 332
-        y: 50
-        width: 232
-        height: 332
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -311,50 +305,6 @@ TextureImporter:
       bones: []
       spriteID: e608d891a7e0a17a0800000000000000
       internalID: -6405791602403606418
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Flame_Drake 1_8
-      rect:
-        serializedVersion: 2
-        x: 580
-        y: 50
-        width: 232
-        height: 332
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: cb519c2261c79ce50800000000000000
-      internalID: 6830126744398796220
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Flame_Drake 1_9
-      rect:
-        serializedVersion: 2
-        x: 829
-        y: 50
-        width: 231
-        height: 332
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e133fad6cfccb7590800000000000000
-      internalID: -7675315755378855138
       vertices: []
       indices: 
       edges: []
@@ -381,8 +331,6 @@ TextureImporter:
       Flame_Drake 1_5: 2176435940949438231
       Flame_Drake 1_6: 6881377432218148260
       Flame_Drake 1_7: -6405791602403606418
-      Flame_Drake 1_8: 6830126744398796220
-      Flame_Drake 1_9: -7675315755378855138
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

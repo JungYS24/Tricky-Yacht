@@ -116,10 +116,10 @@ TextureImporter:
       name: snack_Garnish_0
       rect:
         serializedVersion: 2
-        x: 14
-        y: 3
+        x: 15
+        y: 17
         width: 93
-        height: 94
+        height: 103
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

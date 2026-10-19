@@ -32,11 +32,10 @@ public class LootChoiceSlot : MonoBehaviour
 
         // 아이템 정보 채우기
         lootIcon.sprite = data.icon;
-        lootNameText.text = data.itemName;
-        //툴팁 대신 슬롯 내부 텍스트에 설명을 채웁니다.
+        lootNameText.text = LocalizationManager.GetItemDisplayName(data);
         if (lootDescText != null)
         {
-            lootDescText.text = data.description;
+            lootDescText.text = LocalizationManager.GetItemDescription(data);
         }
     }
 

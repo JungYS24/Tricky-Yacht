@@ -10,36 +10,32 @@ public class DeckUI : MonoBehaviour
     public DiceManager diceManager;
     public GameObject deckPanel;
 
-    [Header("¿Œ∫•≈‰∏Æ UI º≥¡§")]
+    [Header("Ïù∏Î≤§ÌÜ†Î¶¨ UI ÏÑ§Ï†ï")]
     public Transform slotParent;
     public GameObject deckSlotPrefab;
 
-    [Header("πˆ∆∞ º≥¡§")]
+    [Header("Î≤ÑÌäº ÏÑ§Ï†ï")]
     public Button closeButton;
     public Button sortButton;
 
     private List<DeckSlot> slotList = new List<DeckSlot>();
     private bool isInitialized = false;
+    private int lastToggleFrame = -1;
 
     private void Awake()
     {
         if (closeButton != null) closeButton.onClick.AddListener(CloseDeckPanel);
         if (sortButton != null) sortButton.onClick.AddListener(SortDeck);
-        IsPanelOpen = false;
-    }
-    private void Start()
-    {
-        // ø°µ≈Õø°º≠ ∆Àæ˜√¢¿ª ƒ—µ– √§∑Œ Ω√¿€«œ¥ı∂Ûµµ, ∞‘¿” Ω√¿€ Ω√ ∞≠¡¶∑Œ ¥›æ∆º≠ ƒ⁄µÂøÕ ªÛ≈¬∏¶ ¿œƒ°Ω√≈µ¥œ¥Ÿ.
-        if (deckPanel != null && deckPanel.activeSelf)
-        {
-            deckPanel.SetActive(false);
-            IsPanelOpen = false;
-        }
+
+        // Î≤ÑÌäºÏúºÎ°ú Ïó∞ ÏßÅÌõÑ Ï≤´ ÌôúÏÑ±ÌôîÎùºÎ©¥ Îã´ÏßÄ ÏïäÎäîÎã§.
+        if (lastToggleFrame != Time.frameCount)
+            ForceClosed();
     }
 
     private void OnEnable()
     {
         DiceManager.OnDeckUpdateNeeded += RefreshDeckVisuals;
+        AlignPanelWithOpenState();
     }
 
     private void OnDisable()
@@ -61,7 +57,11 @@ public class DeckUI : MonoBehaviour
 
     public void OnClickDeckButton()
     {
-        if (deckPanel.activeSelf)
+        if (lastToggleFrame == Time.frameCount)
+            return;
+        lastToggleFrame = Time.frameCount;
+
+        if (IsPanelOpen)
         {
             CloseDeckPanel();
             return;
@@ -75,15 +75,17 @@ public class DeckUI : MonoBehaviour
 
         IsPanelOpen = true;
         UpdateDeckUI();
-        deckPanel.SetActive(true);
+        if (deckPanel != null)
+        {
+            deckPanel.SetActive(true);
+            deckPanel.transform.SetAsLastSibling();
+        }
     }
 
     private void RefreshDeckVisuals()
     {
-        if (deckPanel != null && deckPanel.activeSelf)
-        {
+        if (IsPanelOpen)
             UpdateDeckUI();
-        }
     }
 
     private void UpdateDeckUI()
@@ -105,16 +107,18 @@ public class DeckUI : MonoBehaviour
                 }
 
                 int exactValue = -1;
+                int exactFaceIndex = -1;
                 if (isUsed && activeDice != null)
                 {
                     Dice fieldDice = activeDice.FirstOrDefault(d => d != null && d.myData == diceData);
                     if (fieldDice != null)
                     {
                         exactValue = fieldDice.currentValue;
+                        exactFaceIndex = fieldDice.currentFaceIndex;
                     }
                 }
 
-                slotList[i].SetDice(diceData, isUsed, exactValue);
+                slotList[i].SetDice(diceData, isUsed, exactValue, exactFaceIndex);
             }
             else
             {
@@ -126,7 +130,8 @@ public class DeckUI : MonoBehaviour
     public void CloseDeckPanel()
     {
         IsPanelOpen = false;
-        deckPanel.SetActive(false);
+        if (deckPanel != null)
+            deckPanel.SetActive(false);
     }
 
     public void SortDeck()
@@ -140,5 +145,29 @@ public class DeckUI : MonoBehaviour
             .ToList();
 
         UpdateDeckUI();
+    }
+
+    private void ForceClosed()
+    {
+        IsPanelOpen = false;
+        if (deckPanel != null && deckPanel.activeSelf)
+            deckPanel.SetActive(false);
+    }
+
+    // Í∫ºÏ†∏ ÏûàÎã§ ÏºúÏ†∏ÎèÑ ÌîåÎûòÍ∑∏ÏôÄ Ìå®ÎÑê ÌôúÏÑ± ÏÉÅÌÉúÎ•º ÎßûÏ∂òÎã§.
+    private void AlignPanelWithOpenState()
+    {
+        if (deckPanel == null)
+            return;
+
+        if (IsPanelOpen)
+        {
+            if (!deckPanel.activeSelf)
+                deckPanel.SetActive(true);
+            return;
+        }
+
+        if (lastToggleFrame != Time.frameCount && deckPanel.activeSelf)
+            deckPanel.SetActive(false);
     }
 }

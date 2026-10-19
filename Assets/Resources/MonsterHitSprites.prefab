@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 400000}
+  - component: {fileID: 11400000}
+  m_Layer: 0
+  m_Name: MonsterHitSprites
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &400000
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a7591dc7dda49f7b05c5c23197af727, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  normalFlashSprites:
+  - {fileID: 21300000, guid: fa236287bb33c85429244163bdd0b5ce, type: 3}
+  - {fileID: 21300000, guid: c3983f677e2dfee469f23ea9e3f0fa5d, type: 3}
+  - {fileID: 21300000, guid: 0f706ed2d6c5ca240a8757d13bf911c9, type: 3}
+  normalShardSprites:
+  - {fileID: 21300000, guid: fa0e755c7bb70f04688405e6b79b4157, type: 3}
+  - {fileID: 21300000, guid: 5f5ec9642f0099349acd19630c37cea4, type: 3}
+  - {fileID: 21300000, guid: ab42d01884e6c634abfed5a6c00d43f4, type: 3}
+  normalGlowSprite: {fileID: 21300000, guid: 2702338767f81ec4eab493bcd9cbe84c, type: 3}
+  normalRingSprite: {fileID: 21300000, guid: e22a051a4dc4be348b8512f87efc3b8c, type: 3}
+  flameSheet: {fileID: 2800000, guid: ba1facb52f3d5004f87acae7a794dde1, type: 3}
+  darkSheet: {fileID: 2800000, guid: 9bb30f7a25482d0458bccc1a90bbb1a5, type: 3}
+  darkCrackTexture: {fileID: 2800000, guid: 1b631f1834219954f8d67d220a88bab6, type: 3}
+  emberSprite: {fileID: 21300000, guid: b115574469f757341be5b5d62d5e2893, type: 3}

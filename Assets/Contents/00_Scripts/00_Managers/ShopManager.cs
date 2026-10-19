@@ -1,7 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Components;
+using UnityEngine.Localization.Settings;
 using System.Collections.Generic;
+using System.Linq;
 
 public class ShopManager : MonoBehaviour
 {
@@ -10,6 +14,7 @@ public class ShopManager : MonoBehaviour
     [Header("참조 설정")]
     public DiceManager diceManager;
     public List<BaseItemDataSO> allItemsPool;
+    public TextAsset shopStockTable;
     public ShopSlot[] shopSlots;
     public GameObject shopUI;
 
@@ -22,6 +27,10 @@ public class ShopManager : MonoBehaviour
     public int currentGold = 3000;
     public Button shopRerollButton;
     public TextMeshProUGUI rerollCostText;
+    public TextMeshProUGUI rerollCostLabel;
+    public Image rerollCostIcon;
+    public Sprite coinIconSprite; // 리롤 비용 옆 코인 아이콘. 빌드에서도 보이도록 씬에서 연결한다. 코인 날아가기 연출도 이 스프라이트를 쓴다.
+    public AudioEvent coinArriveSound; // 코인 날아가기 연출에서 코인이 골드 패널에 닿을 때 나는 소리(비워 두면 소리 없음)
     public int rerollCost = 100;
 
     [Header("상점 제어 버튼")]
@@ -41,18 +50,39 @@ public class ShopManager : MonoBehaviour
     [Header("위성 선택 UI")]
     public SatelliteSelectionPanel satelliteSelectionPanel;
 
+    public enum MapMerchant
+    {
+        Nyaon = 0,
+        Ronan = 1,
+        Opel = 2
+    }
+
+    public MapMerchant currentMerchant = MapMerchant.Nyaon;
+    public RuntimeAnimatorController nyaonAnimator;
+    public RuntimeAnimatorController ronanAnimator;
+    public RuntimeAnimatorController opelAnimator;
+    bool mapMerchantActive;
+    ShopStockTable stockTable;
+    bool stockTableLogged;
+    readonly Dictionary<BaseItemDataSO, int> listedPrices = new Dictionary<BaseItemDataSO, int>();
+
+    [Header("스탬프 선택 UI")]
+    public StampSelectionPanel stampSelectionPanel;
+
     private void Awake()
     {
         if (tooltipRect == null && tooltipPanel != null)
             tooltipRect = tooltipPanel.GetComponent<RectTransform>();
 
         HideTooltip();
+        if (allItemsPool == null) allItemsPool = new List<BaseItemDataSO>();
+        SnackItemSO.RegisterResourceSnacks(allItemsPool);
+        BindShopStock();
 
         if (shopRerollButton != null)
             shopRerollButton.onClick.AddListener(RerollShop);
 
-        if (rerollCostText != null)
-            rerollCostText.text = "리롤 : " + rerollCost + " G";
+        UpdateRerollUI();
 
         if (nextStageButton != null)
             nextStageButton.onClick.AddListener(CloseShopAndGoNext);
@@ -66,21 +96,290 @@ public class ShopManager : MonoBehaviour
     private void Start()
     {
         if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
-        if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
+        if (GoldCounter.Instance != null) GoldCounter.Instance.SetInstant(currentGold);
     }
 
     public void OpenShop()
     {
+        OpenShopInternal(false);
+    }
+
+    public void OpenMapShop(MapMerchant merchant)
+    {
+        currentMerchant = merchant;
+        OpenShopInternal(true);
+    }
+
+    void OpenShopInternal(bool fromMap)
+    {
+        mapMerchantActive = fromMap;
         IsShopOpen = true;
-        if (shopUI != null) shopUI.SetActive(true);
+        RevealShop();
+        RemoveLegacyMerchantLabel();
 
-        // 정적 UI 업데이트를 먼저 처리하여 데이터 싱크를 맞추기
         if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
-
-        // 그 후 DoTween 연출을 실행해야 숫자가 꼬임 없이 부드럽게 표현
-        if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
+        if (GoldCounter.Instance != null) GoldCounter.Instance.SetInstant(currentGold);
 
         RefreshShop(false);
+        UpdateRerollUI();
+        if (FigureEffectManager.Instance != null)
+            FigureEffectManager.Instance.EvaluateShopEnteredTriggers(diceManager, this);
+
+        ApplyMerchantPresentation(fromMap);
+
+        Debug.Log($"[Map Shop] merchant={(fromMap ? currentMerchant.ToString() : "tutorial")} shopUI={(shopUI != null ? shopUI.name : "null")} active={shopUI != null && shopUI.activeInHierarchy}");
+    }
+
+    void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnShopLocaleChanged;
+    }
+
+    void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnShopLocaleChanged;
+    }
+
+    void OnShopLocaleChanged(Locale _)
+    {
+        if (!IsShopOpen) return;
+        ApplyShopTitle(mapMerchantActive);
+        UpdateRerollUI();
+    }
+
+    void RevealShop()
+    {
+        if (shopUI == null) return;
+        Transform cursor = shopUI.transform;
+        while (cursor != null)
+        {
+            if (!cursor.gameObject.activeSelf)
+                cursor.gameObject.SetActive(true);
+            if (cursor.GetComponent<Canvas>() != null) break;
+            cursor = cursor.parent;
+        }
+        shopUI.transform.SetAsLastSibling();
+    }
+
+    // 상점 제목에 상인 이름이 나오므로 예전에 만들어져 씬에 저장된 하단 MerchantName 라벨은 지운다.
+    void RemoveLegacyMerchantLabel()
+    {
+        if (shopUI == null) return;
+        Transform legacy = shopUI.transform.Find("MerchantName");
+        if (legacy != null) Destroy(legacy.gameObject);
+    }
+
+    TextMeshProUGUI shopTitleText;
+    LocalizeStringEvent shopTitleLocalize;
+    Image npcImage;
+    Animator npcAnimator;
+    bool npcRestSaved;
+    Vector2 npcAnchorMin, npcAnchorMax, npcPivot, npcAnchoredPosition, npcSizeDelta;
+    Vector3 npcLocalScale;
+    bool npcPreserveAspect;
+    Sprite npcSprite;
+    bool npcAnimatorEnabled;
+    RuntimeAnimatorController npcController;
+    float npcFootX, npcFootY, npcBodyHeight;
+
+    void ApplyMerchantPresentation(bool fromMap)
+    {
+        BindShopChrome();
+        if (fromMap)
+        {
+            ApplyNpc(currentMerchant);
+            ApplyShopTitle(true);
+        }
+        else
+        {
+            RestoreNpc();
+            ApplyShopTitle(false);
+        }
+    }
+
+    void BindShopChrome()
+    {
+        if (shopUI == null) return;
+        if (shopTitleText == null)
+        {
+            TextMeshProUGUI[] texts = shopUI.GetComponentsInChildren<TextMeshProUGUI>(true);
+            for (int i = 0; i < texts.Length; i++)
+            {
+                if (texts[i].gameObject.name != "Shop_TXT_Pannel") continue;
+                shopTitleText = texts[i];
+                shopTitleLocalize = texts[i].GetComponent<LocalizeStringEvent>();
+                break;
+            }
+        }
+        if (npcImage == null)
+        {
+            Image[] images = shopUI.GetComponentsInChildren<Image>(true);
+            for (int i = 0; i < images.Length; i++)
+            {
+                if (images[i].gameObject.name != "NPC_Image") continue;
+                npcImage = images[i];
+                npcAnimator = images[i].GetComponent<Animator>();
+                break;
+            }
+        }
+    }
+
+    void ApplyShopTitle(bool fromMap)
+    {
+        if (shopTitleText == null) return;
+        if (!fromMap)
+        {
+            if (shopTitleLocalize != null)
+            {
+                shopTitleLocalize.enabled = true;
+                shopTitleLocalize.RefreshString();
+            }
+            return;
+        }
+
+        if (shopTitleLocalize != null) shopTitleLocalize.enabled = false;
+        string key;
+        string fallback;
+        switch (currentMerchant)
+        {
+            case MapMerchant.Nyaon:
+                key = "UI_SHOP_TITLE_NYAON";
+                fallback = "냐온 딜레마, 기묘한 상점";
+                break;
+            case MapMerchant.Ronan:
+                key = "UI_SHOP_TITLE_RONAN";
+                fallback = "남작 로넌의 골동품 상점";
+                break;
+            default:
+                key = "UI_SHOP_TITLE_OPEL";
+                fallback = "오펠의 아르카나 상점";
+                break;
+        }
+        shopTitleText.text = LocalizationManager.GetUi(key, fallback);
+    }
+
+    RuntimeAnimatorController MerchantController(MapMerchant merchant)
+    {
+        switch (merchant)
+        {
+            case MapMerchant.Nyaon: return nyaonAnimator;
+            case MapMerchant.Ronan: return ronanAnimator;
+            default: return opelAnimator;
+        }
+    }
+
+    void SaveNpcRest()
+    {
+        if (npcRestSaved || npcImage == null) return;
+        RectTransform rect = npcImage.rectTransform;
+        npcAnchorMin = rect.anchorMin;
+        npcAnchorMax = rect.anchorMax;
+        npcPivot = rect.pivot;
+        npcAnchoredPosition = rect.anchoredPosition;
+        npcSizeDelta = rect.sizeDelta;
+        npcLocalScale = rect.localScale;
+        npcPreserveAspect = npcImage.preserveAspect;
+        npcSprite = npcImage.sprite;
+        npcAnimatorEnabled = npcAnimator != null && npcAnimator.enabled;
+        npcController = npcAnimator != null ? npcAnimator.runtimeAnimatorController : null;
+        float height = rect.rect.height * Mathf.Abs(rect.localScale.y);
+        float width = rect.rect.width * Mathf.Abs(rect.localScale.x);
+        npcBodyHeight = height;
+        npcFootY = rect.anchoredPosition.y - height * rect.pivot.y;
+        npcFootX = rect.anchoredPosition.x + width * (0.5f - rect.pivot.x);
+        npcRestSaved = true;
+    }
+
+    void ApplyNpc(MapMerchant merchant)
+    {
+        SaveNpcRest();
+        if (npcImage == null) return;
+        RuntimeAnimatorController controller = MerchantController(merchant);
+        if (npcAnimator != null && controller != null)
+        {
+            npcAnimator.enabled = true;
+            npcAnimator.runtimeAnimatorController = controller;
+            npcAnimator.Rebind();
+            npcAnimator.Update(0f);
+        }
+        FitNpcImage();
+    }
+
+    void FitNpcImage()
+    {
+        if (npcImage == null || npcImage.sprite == null || npcBodyHeight <= 1f) return;
+        Rect spriteRect = npcImage.sprite.rect;
+        float aspect = spriteRect.width / Mathf.Max(1f, spriteRect.height);
+        RectTransform rect = npcImage.rectTransform;
+        rect.localScale = Vector3.one;
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0f);
+        rect.sizeDelta = new Vector2(npcBodyHeight * aspect, npcBodyHeight);
+        rect.anchoredPosition = new Vector2(npcFootX, npcFootY);
+        npcImage.preserveAspect = true;
+    }
+
+    void RestoreNpc()
+    {
+        if (!npcRestSaved || npcImage == null) return;
+        if (npcAnimator != null)
+        {
+            npcAnimator.runtimeAnimatorController = npcController;
+            npcAnimator.enabled = npcAnimatorEnabled;
+        }
+        npcImage.sprite = npcSprite;
+        npcImage.preserveAspect = npcPreserveAspect;
+        RectTransform rect = npcImage.rectTransform;
+        rect.anchorMin = npcAnchorMin;
+        rect.anchorMax = npcAnchorMax;
+        rect.pivot = npcPivot;
+        rect.anchoredPosition = npcAnchoredPosition;
+        rect.sizeDelta = npcSizeDelta;
+        rect.localScale = npcLocalScale;
+    }
+
+    void BindShopStock()
+    {
+        stockTable = ShopStockTable.Parse(shopStockTable != null ? shopStockTable.text : null);
+        if (stockTableLogged) return;
+        stockTableLogged = true;
+        if (stockTable == null || !stockTable.Loaded)
+        {
+            Debug.LogWarning("[Map Shop] Shop_Stock_Table.json을 읽지 못했습니다.");
+            return;
+        }
+
+        Debug.Log($"[Map Shop] 미구현 품목 {stockTable.UnimplementedCount}개 제외");
+        List<string> missing = stockTable.MissingNames(allItemsPool);
+        for (int i = 0; i < missing.Count; i++)
+            Debug.LogWarning($"[Map Shop] 재고 표 품목을 풀에서 찾지 못했습니다: {missing[i]}");
+    }
+
+    List<BaseItemDataSO> FilterMerchantStock(List<BaseItemDataSO> source)
+    {
+        listedPrices.Clear();
+        var filtered = new List<BaseItemDataSO>();
+        var seen = new HashSet<BaseItemDataSO>();
+        if (stockTable == null || !stockTable.Loaded)
+        {
+            Debug.LogWarning("[Map Shop] 재고 표가 없어 지도 상인 진열을 비웁니다.");
+            return filtered;
+        }
+
+        for (int i = 0; i < source.Count; i++)
+        {
+            BaseItemDataSO item = source[i];
+            if (item == null || !seen.Add(item)) continue;
+            ShopStockOffer offer = stockTable.Find(item);
+            if (offer == null || !offer.SellsTo(currentMerchant)) continue;
+            filtered.Add(item);
+            listedPrices[item] = offer.Row.Price;
+        }
+
+        if (filtered.Count == 0)
+            Debug.LogWarning($"[Map Shop] {currentMerchant} 판매 품목이 없습니다.");
+        return filtered;
     }
 
     public void RefreshShop(bool isReroll)
@@ -97,7 +396,10 @@ public class ShopManager : MonoBehaviour
             validPool.Add(item);
         }
 
-        // 1. 일반 상점을 위해 미리 모든 아이템을 섞어둡니다. (validPool 기준)
+        if (mapMerchantActive)
+            validPool = FilterMerchantStock(validPool);
+
+        // 일반 상점을 위해 미리 모든 아이템을 섞어둡니다. (validPool 기준)
         List<BaseItemDataSO> shuffled = new List<BaseItemDataSO>(validPool);
         for (int i = 0; i < shuffled.Count; i++)
         {
@@ -107,7 +409,7 @@ public class ShopManager : MonoBehaviour
 
         int dataIndex = 0;
 
-        // 2. 튜토리얼 강제 진열 로직 분기
+        // 튜토리얼 강제 진열 로직 분기
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {
             int step = TutorialManager.Instance.currentStepIndex;
@@ -157,13 +459,18 @@ public class ShopManager : MonoBehaviour
             }
         }
 
-        // 3. 튜토리얼이 모두 끝났거나 일반 게임일 때 (완전 랜덤 상점)
+        // 튜토리얼이 모두 끝났거나 일반 게임일 때 (완전 랜덤 상점)
 
 
 
-        // 스테이지에 따른 슬롯 해금 개수 계산 (기본 2개 + 2스테이지마다 1개씩 추가)
-        int unlockedCount = 6 + (diceManager.currentStage - 1) / 2;
-        unlockedCount = Mathf.Clamp(unlockedCount, 2, shopSlots.Length); // 최소 2개, 최대 6개(Length)로 고정
+        int unlockedCount;
+        if (mapMerchantActive && stockTable != null && stockTable.Loaded)
+            unlockedCount = Mathf.Clamp(stockTable.SlotCount, 1, shopSlots.Length);
+        else
+        {
+            unlockedCount = 6 + (diceManager.currentStage - 1) / 2;
+            unlockedCount = Mathf.Clamp(unlockedCount, 2, shopSlots.Length);
+        }
 
         // 주의: 이 for문 아래에 기존 for문이 또 남아있으면 안 됩니다!
         for (int i = 0; i < shopSlots.Length; i++)
@@ -171,20 +478,24 @@ public class ShopManager : MonoBehaviour
             // 일단 슬롯 자체는 무조건 켭니다 (자물쇠 UI를 보여줘야 하므로)
             shopSlots[i].gameObject.SetActive(true);
 
-            // 1. 아직 해금되지 않은 칸은 '자물쇠 모드'로 만듦
+            // 아직 해금되지 않은 칸은 '자물쇠 모드'로 만듦
             if (i >= unlockedCount)
             {
                 shopSlots[i].SetLockedSlot();
                 continue; // 자물쇠로 잠갔으니 이번 칸은 여기서 끝내고 다음 칸으로 넘어감
             }
 
-            // 2. 리롤을 눌렀을 때, 이미 구매한 슬롯은 상품을 바꾸지 않고 건너뜁니다.
+            // 리롤을 눌렀을 때, 이미 구매한 슬롯은 상품을 바꾸지 않고 건너뜁니다.
             if (isReroll && shopSlots[i].isPurchased) continue;
 
-            // 3. 해금된 슬롯에 정상적으로 아이템 배치
+            // 해금된 슬롯에 정상적으로 아이템 배치
             if (dataIndex < shuffled.Count)
             {
-                shopSlots[i].SetupSlot(shuffled[dataIndex], this);
+                BaseItemDataSO item = shuffled[dataIndex];
+                int listed = -1;
+                if (mapMerchantActive && listedPrices.TryGetValue(item, out int tablePrice))
+                    listed = tablePrice;
+                shopSlots[i].SetupSlot(item, this, listed);
                 dataIndex++;
             }
             else if (!isReroll || !shopSlots[i].isPurchased)
@@ -206,41 +517,56 @@ public class ShopManager : MonoBehaviour
 
     public void RerollShop()
     {
-        // 코팅 선택 중이거나 파괴 선택 중이면 작동 불가
+        if ((ticketSelectionPanel != null && ticketSelectionPanel.activeSelf) || SatelliteSelectionPanel.IsPanelOpen)
+        {
+            return;
+        }
+
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return;
+        if (stampSelectionPanel != null && stampSelectionPanel.gameObject.activeSelf) return;
 
-        if (currentGold >= rerollCost)
+        //기본 rerollCost 대신 할인이 적용된 최종 비용 사용
+        int finalCost = GetFinalRerollCost();
+        if (currentGold >= finalCost)
         {
-            currentGold -= rerollCost;
+            currentGold -= finalCost;
+            if (finalCost < rerollCost) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.DiscountShopReroll);
             if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
             RefreshShop(true);
         }
         else
         {
-            // [추가] 리롤 비용이 부족할 때 토스트 팝업 강제 출력
             if (ToastPopupController.Instance != null)
-            {
-                ToastPopupController.Instance.ShowToast("골드가 부족합니다.");
-            }
+                ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_GOLD_NOT_ENOUGH", "골드가 부족합니다."));
         }
         if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
+        UpdateRerollUI();
     }
 
     public void CloseShopAndGoNext()
     {
+        if ((ticketSelectionPanel != null && ticketSelectionPanel.activeSelf) || SatelliteSelectionPanel.IsPanelOpen)
+        {
+            return;
+        }
         // 코팅 선택 중이거나 파괴 선택 중이면 다음 스테이지 넘어가기 불가
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return;
+        if (stampSelectionPanel != null && stampSelectionPanel.gameObject.activeSelf) return;
 
         IsShopOpen = false;
+        mapMerchantActive = false;
         if (shopUI != null) shopUI.SetActive(false);
 
         if (diceManager != null)
         {
             //무료 스위치 끄기
             diceManager.isNextShopFree = false;
-            diceManager.NextStage();
+            if (diceManager.UsesMapFlow)
+                diceManager.OnShopClosedDuringMap();
+            else
+                diceManager.NextStage();
         }
     }
 
@@ -257,14 +583,17 @@ public class ShopManager : MonoBehaviour
         }
     }
 
-    public bool PurchaseItem(BaseItemDataSO item)
+    public bool PurchaseItem(BaseItemDataSO item, int actualPrice)
     {
+        if ((ticketSelectionPanel != null && ticketSelectionPanel.activeSelf) || SatelliteSelectionPanel.IsPanelOpen)
+        {
+            return false;
+        }
+
         // 코팅 선택 중이거나 파괴 선택 중이면 구매 불가
         if (coatingSelectionPanel != null && coatingSelectionPanel.gameObject.activeSelf) return false;
         if (diceDestructionPanel != null && diceDestructionPanel.gameObject.activeSelf) return false;
-
-        //실제 계산될 가격 판별 로직 추가
-        int actualPrice = diceManager.isNextShopFree ? 0 : item.price;
+        if (stampSelectionPanel != null && stampSelectionPanel.gameObject.activeSelf) return false;
 
         if (currentGold >= actualPrice)
         {
@@ -277,6 +606,7 @@ public class ShopManager : MonoBehaviour
 
                     // 피규어/간식 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용
                     if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
+                    Sfx.Play(SfxId.Shop_Purchase);
                     if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
                     {
                         TutorialManager.Instance.OnItemBought(item.itemName);
@@ -288,7 +618,7 @@ public class ShopManager : MonoBehaviour
                     //인벤토리가 꽉 찼을 때도 토스트 팝업으로 피드백 제공
                     if (ToastPopupController.Instance != null)
                     {
-                        ToastPopupController.Instance.ShowToast("인벤토리가 가득 찼습니다.");
+                        ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_INVENTORY_FULL", "인벤토리가 가득 찼습니다."));
                     }
                     return false;
                 }
@@ -301,6 +631,7 @@ public class ShopManager : MonoBehaviour
 
                 // 그 외 소모품/티켓류 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용
                 if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
+                Sfx.Play(SfxId.Shop_Purchase);
 
                 if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
                 {
@@ -312,7 +643,7 @@ public class ShopManager : MonoBehaviour
         // 아이템 구매 비용이 부족할 때 토스트 팝업 띄우기
         if (ToastPopupController.Instance != null)
         {
-            ToastPopupController.Instance.ShowToast("골드가 부족합니다.");
+            ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_GOLD_NOT_ENOUGH", "골드가 부족합니다."));
         }
         return false;
     }
@@ -340,7 +671,13 @@ public class ShopManager : MonoBehaviour
         if (allTicketsPool.Count < 3) return;
 
         if (ticketSelectionPanel != null)
+        {
             ticketSelectionPanel.SetActive(true);
+            Transform dim = ticketSelectionPanel.transform.Find("DimPanel");
+            if (dim != null) dim.SetAsFirstSibling();
+            ticketSelectionPanel.transform.SetAsLastSibling();
+        }
+        SetTicketCombatButtonsHidden(true);
 
         // 전체 티켓 풀을 셔플
         List<TicketItemSO> shuffledTickets = new List<TicketItemSO>(allTicketsPool);
@@ -363,6 +700,52 @@ public class ShopManager : MonoBehaviour
     {
         if (ticketSelectionPanel != null)
             ticketSelectionPanel.SetActive(false);
+        SetTicketCombatButtonsHidden(false);
+    }
+
+    bool ticketHidRoll;
+    bool ticketHidFinish;
+    bool ticketRollWasActive;
+    bool ticketFinishWasActive;
+
+    void SetTicketCombatButtonsHidden(bool hidden)
+    {
+        if (diceManager == null || diceManager.ui == null) return;
+        if (hidden)
+        {
+            if (!ticketHidRoll && diceManager.ui.rollButton != null)
+            {
+                ticketRollWasActive = diceManager.ui.rollButton.gameObject.activeSelf;
+                diceManager.ui.rollButton.gameObject.SetActive(false);
+                ticketHidRoll = true;
+            }
+            if (!ticketHidFinish && diceManager.ui.finishButton != null)
+            {
+                ticketFinishWasActive = diceManager.ui.finishButton.gameObject.activeSelf;
+                diceManager.ui.finishButton.gameObject.SetActive(false);
+                ticketHidFinish = true;
+            }
+            return;
+        }
+        if (ticketHidRoll && diceManager.ui.rollButton != null && ticketRollWasActive)
+            diceManager.ui.rollButton.gameObject.SetActive(true);
+        if (ticketHidFinish && diceManager.ui.finishButton != null && ticketFinishWasActive)
+            diceManager.ui.finishButton.gameObject.SetActive(true);
+        ticketHidRoll = false;
+        ticketHidFinish = false;
+    }
+
+    // 스탬프 선택창 함수
+    public void ShowStampSelection(StampType type, Sprite sealImage)
+    {
+        if (stampSelectionPanel != null && diceManager != null)
+        {
+            stampSelectionPanel.OpenSelection(diceManager, type, sealImage);
+        }
+        else
+        {
+            Debug.LogWarning("StampSelectionPanel 또는 DiceManager가 연결되지 않았습니다.");
+        }
     }
 
     public void ShowCoatingSelection(DiceType type, float mult, Color color)
@@ -375,6 +758,168 @@ public class ShopManager : MonoBehaviour
         else
         {
             Debug.LogWarning("CoatingSelectionPanel 또는 DiceManager 연결이 누락되었습니다.");
+        }
+    }
+    // 리롤(고양이 눈) 할인율을 적용한 최종 리롤 비용 계산
+    public int GetFinalRerollCost()
+    {
+        int discount = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetShopDiscountRate(FigureEffectType.DiscountShopReroll) : 0;
+        int finalCost = Mathf.FloorToInt(rerollCost * (1f - discount / 100f));
+        return Mathf.Max(0, finalCost);
+    }
+
+    public void UpdateRerollUI()
+    {
+        ApplyRerollButtonWord();
+        EnsureRerollCostRow();
+        int finalCost = GetFinalRerollCost();
+        if (rerollCostLabel == null) return;
+
+        rerollCostLabel.text = finalCost.ToString();
+        Color color = Color.white;
+        if (currentGold < finalCost)
+            color = new Color(1f, 0.32f, 0.28f, 1f);
+        else if (finalCost < rerollCost)
+            color = new Color(0.4f, 0.92f, 0.38f, 1f);
+        rerollCostLabel.color = color;
+        if (rerollCostIcon != null)
+        {
+            if (rerollCostIcon.sprite == null) rerollCostIcon.sprite = FindCoinSprite();
+            rerollCostIcon.color = color;
+            rerollCostIcon.gameObject.SetActive(rerollCostIcon.sprite != null);
+        }
+        if (rerollCostLabel.transform.parent is RectTransform row)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(row);
+    }
+
+    void ApplyRerollButtonWord()
+    {
+        if (rerollCostText == null) return;
+        LocalizeStringEvent localize = rerollCostText.GetComponent<LocalizeStringEvent>();
+        if (localize != null) localize.enabled = false;
+        rerollCostText.text = LocalizationManager.GetUi("UI_REROLL", "리롤");
+    }
+
+    void EnsureRerollCostRow()
+    {
+        if (rerollCostLabel != null && rerollCostIcon != null) return;
+        if (shopRerollButton == null) return;
+
+        RectTransform buttonRect = shopRerollButton.transform as RectTransform;
+        if (buttonRect == null || buttonRect.parent == null) return;
+
+        var rowObject = new GameObject("RerollCost_Row", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(ContentSizeFitter));
+        rowObject.layer = buttonRect.gameObject.layer;
+        rowObject.transform.SetParent(buttonRect.parent, false);
+        RectTransform row = rowObject.GetComponent<RectTransform>();
+        row.anchorMin = buttonRect.anchorMin;
+        row.anchorMax = buttonRect.anchorMax;
+        row.pivot = new Vector2(0.5f, 1f);
+        float height = buttonRect.sizeDelta.y * buttonRect.localScale.y;
+        float bottom = buttonRect.anchoredPosition.y - buttonRect.pivot.y * height;
+        row.anchoredPosition = new Vector2(buttonRect.anchoredPosition.x, bottom - 8f);
+        row.localScale = Vector3.one;
+        row.SetSiblingIndex(buttonRect.GetSiblingIndex() + 1);
+
+        HorizontalLayoutGroup layout = rowObject.GetComponent<HorizontalLayoutGroup>();
+        layout.childAlignment = TextAnchor.MiddleCenter;
+        layout.spacing = 6f;
+        layout.childControlWidth = false;
+        layout.childControlHeight = false;
+        layout.childForceExpandWidth = false;
+        layout.childForceExpandHeight = false;
+        layout.childScaleWidth = false;
+        layout.childScaleHeight = false;
+
+        ContentSizeFitter rowFitter = rowObject.GetComponent<ContentSizeFitter>();
+        rowFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        rowFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        float fontSize = 28f;
+        if (rerollCostText != null)
+            fontSize = Mathf.Max(18f, rerollCostText.fontSize * buttonRect.localScale.y * 0.7f);
+
+        var labelObject = new GameObject("Label", typeof(RectTransform));
+        labelObject.layer = rowObject.layer;
+        labelObject.transform.SetParent(row, false);
+        rerollCostLabel = labelObject.AddComponent<TextMeshProUGUI>();
+        if (rerollCostText != null) rerollCostLabel.font = rerollCostText.font;
+        rerollCostLabel.fontSize = fontSize;
+        rerollCostLabel.alignment = TextAlignmentOptions.MidlineLeft;
+        rerollCostLabel.enableWordWrapping = false;
+        rerollCostLabel.raycastTarget = false;
+        ContentSizeFitter labelFitter = labelObject.AddComponent<ContentSizeFitter>();
+        labelFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        labelFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        var iconObject = new GameObject("CoinIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(LayoutElement));
+        iconObject.layer = rowObject.layer;
+        iconObject.transform.SetParent(row, false);
+        rerollCostIcon = iconObject.GetComponent<Image>();
+        rerollCostIcon.sprite = FindCoinSprite();
+        rerollCostIcon.preserveAspect = true;
+        rerollCostIcon.raycastTarget = false;
+        float iconSize = fontSize;
+        rerollCostIcon.rectTransform.sizeDelta = new Vector2(iconSize, iconSize);
+        LayoutElement iconLayout = iconObject.GetComponent<LayoutElement>();
+        iconLayout.preferredWidth = iconSize;
+        iconLayout.preferredHeight = iconSize;
+        iconLayout.minWidth = iconSize;
+        iconLayout.minHeight = iconSize;
+    }
+
+    Sprite FindCoinSprite()
+    {
+        if (coinIconSprite != null) return coinIconSprite;
+#if UNITY_EDITOR
+        // 필드가 비어 있을 때만 에디터에서 직접 찾는다(빌드에서는 필드 연결이 필요).
+        return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Contents/06_UI/Sprites/Icon/Coin_Icon.png");
+#else
+        return null;
+#endif
+    }
+
+    // 복고양이 효과: 진열된 아이템 중 하나를 무작위로 0원 처리
+    public void MakeRandomItemFree()
+    {
+        var validSlots = shopSlots.Where(s => s.gameObject.activeSelf && !s.isLocked && !s.isPurchased && s.currentData != null).ToList();
+        if (validSlots.Count > 0)
+        {
+            var randSlot = validSlots[Random.Range(0, validSlots.Count)];
+            randSlot.ApplyLuckyCatFree();
+        }
+    }
+
+    // 골드 획득 시 사용. 증가 효과 적용과 UI 갱신을 한 곳에서 처리
+    // 반환값은 보너스까지 반영해 실제로 지급한 골드
+    // deferUi가 true면 실제 골드(currentGold)만 바로 올리고 화면 숫자 갱신은 호출한 쪽(코인 날아가기 연출)이 맡는다.
+    public int GrantGold(int baseAmount, bool deferUi = false)
+    {
+        if (baseAmount <= 0) return 0;
+
+        float multiplier = FigureEffectManager.Instance != null
+            ? FigureEffectManager.Instance.GetGoldGainMultiplier()
+            : 1f;
+
+        // 획득 건별로 소수점 아래는 버림
+        int grantedAmount = Mathf.FloorToInt(baseAmount * multiplier);
+
+        currentGold += grantedAmount;
+        if (grantedAmount > baseAmount) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.IncreaseGoldGainPercent);
+
+        if (!deferUi) SyncGoldDisplay();
+
+        return grantedAmount;
+    }
+
+    // 화면의 골드 숫자를 현재 골드에 맞춘다(골드 카운터가 있으면 올라가는 연출 포함).
+    public void SyncGoldDisplay()
+    {
+        diceManager?.ui?.UpdateGoldUI(currentGold);
+
+        if (GoldCounter.Instance != null)
+        {
+            GoldCounter.Instance.SetGold(currentGold);
         }
     }
 

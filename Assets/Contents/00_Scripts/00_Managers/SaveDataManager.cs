@@ -7,6 +7,6 @@ public class SaveDataManager : MonoBehaviour
         PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
 
-        Debug.Log("¸ğµç ¼¼ÀÌºê µ¥ÀÌÅÍ(»óÁ¡ ÇÇ±Ô¾î ¹ÚÁ¦, ¼³Á¤ µî)°¡ ÃÊ±âÈ­µÇ¾ú½À´Ï´Ù.");
+        Debug.Log("ëª¨ë“  ì„¸ì´ë¸Œ ë°ì´í„°(ìƒì  í”¼ê·œì–´ ë°•ì œ, ì„¤ì • ë“±)ê°€ ì´ˆê¸°í™”ë˜ì—ˆìŠµë‹ˆë‹¤.");
     }
 }

@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 public class FigureDetailPanel : MonoBehaviour
 {
-    //´Ù¸¥ ½ºÅ©¸³Æ®(ÁÖ»çÀ§, ¸Å´ÏÀú µî)¿¡¼­ ÆĞ³Î ¿ÀÇÂ ¿©ºÎ¸¦ È®ÀÎÇÒ ¼ö ÀÖ´Â Á¤Àû º¯¼ö
+    //ë‹¤ë¥¸ ìŠ¤í¬ë¦½íŠ¸(ì£¼ì‚¬ìœ„, ë§¤ë‹ˆì € ë“±)ì—ì„œ íŒ¨ë„ ì˜¤í”ˆ ì—¬ë¶€ë¥¼ í™•ì¸í•  ìˆ˜ ìˆëŠ” ì •ì  ë³€ìˆ˜
     public static bool IsPanelOpen { get; private set; } = false;
 
     public GameObject panelRoot;
@@ -14,25 +15,58 @@ public class FigureDetailPanel : MonoBehaviour
     public TextMeshProUGUI nameText;
     public TextMeshProUGUI descText;
 
-    [Header("µµ°¨¿ë UI")]
+    [Header("ë„ê°ìš© UI")]
     public TextMeshProUGUI locationText;
+
+    [Header("ë„ê° ì˜¤ë¥¸ìª½ í˜ì´ì§€ (ë¹„ì–´ ìˆìœ¼ë©´ ì¸ë²¤í† ë¦¬ íŒì—…ì€ ê·¸ëŒ€ë¡œ)")]
+    public Image figureShadow;
+    public GameObject dropMonsterRoot;
+    public TextMeshProUGUI dropMonsterLabel;
+    public TextMeshProUGUI dropMonsterName;
+    public TextMeshProUGUI dropMonsterBiome;
+    public Image dropMonsterImage;
+    public Image dropMonsterShadow;
+    public Button dropMonsterPrev;
+    public Button dropMonsterNext;
+    public GameObject relatedSynergyRoot;
+    public TextMeshProUGUI relatedSynergyLabel;
+    public RectTransform relatedSynergyContent;
+    public GameObject synergyCardTemplate;
+    public Sprite countBadgeSprite;
+    [NonSerialized] public Action<SynergyData> synergyClicked;
+
+    // ë„ê° ì˜¤ë¥¸ìª½ ì•„ì´ì½˜ ë°•ìŠ¤. 100px ê·¸ë¦¼ì€ 3ë°°, ê·¸ë³´ë‹¤ í° ê·¸ë¦¼(ë°”ë‚˜ë‚˜)ì€ ì´ ë°•ìŠ¤ ì•ˆì— ë§ì¶˜ë‹¤.
+    public const float BookFigureIconBox = 300f;
+    // 128px ëª¬ìŠ¤í„°ë¥¼ 2ë°°(256)ë¡œ í‚¤ìš°ë©´ ì–‘í”¼ì§€ ì•„ë˜ë¡œ ë‚˜ê°„ë‹¤. í˜ì´ì§€ì— ë‚¨ëŠ” ì •ìˆ˜ ë°°ëŠ” 128ì´ë‹¤.
+    public const float BookMonsterIconBox = 128f;
 
     public Button leftButton;
     public Button rightButton;
     public Button closeButton;
 
-    // º¸À¯ ÁßÀÎ ÇÇ±Ô¾î ¸®½ºÆ®¿Í ÇöÀç º¸°í ÀÖ´Â ÇÇ±Ô¾î ÀÎµ¦½º
+    [Header("ê¸€ì ìƒ‰ ë®ì–´ì“°ê¸° (ì–‘í”¼ì§€ ë°°ê²½ìš©, ë„ë©´ ê¸°ì¡´ ìƒ‰)")]
+    public bool useCustomTextColors = false;
+    public Color customTextColor = new Color(0.29f, 0.18f, 0.1f, 1f);
+    public Color customSubTextColor = new Color(0.45f, 0.32f, 0.2f, 1f);
+    public Color customLockedTextColor = new Color(0.5f, 0.44f, 0.37f, 1f);
+
+    // ë³´ìœ  ì¤‘ì¸ í”¼ê·œì–´ ë¦¬ìŠ¤íŠ¸ì™€ í˜„ì¬ ë³´ê³  ìˆëŠ” í”¼ê·œì–´ ì¸ë±ìŠ¤
     private List<FigureItemSO> currentOwnedFigures;
     private int currentIndex;
+    private readonly List<MonsterDrop> currentDrops = new List<MonsterDrop>();
+    private int dropIndex;
+    private static Dictionary<FigureItemSO, List<MonsterDrop>> dropsByFigure;
 
     private void Awake()
     {
         if (closeButton != null) closeButton.onClick.AddListener(ClosePanel);
         if (leftButton != null) leftButton.onClick.AddListener(ShowPrevious);
         if (rightButton != null) rightButton.onClick.AddListener(ShowNext);
+        if (dropMonsterPrev != null) dropMonsterPrev.onClick.AddListener(() => StepDrop(-1));
+        if (dropMonsterNext != null) dropMonsterNext.onClick.AddListener(() => StepDrop(1));
 
-        panelRoot.SetActive(false); // ½ÃÀÛ ½Ã ÆĞ³Î ¼û±â±â
-        IsPanelOpen = false;        // »óÅÂ ÃÊ±âÈ­
+        panelRoot.SetActive(false); // ì‹œì‘ ì‹œ íŒ¨ë„ ìˆ¨ê¸°ê¸°
+        IsPanelOpen = false;        // ìƒíƒœ ì´ˆê¸°í™”
     }
 
     public void OpenPanel(List<FigureItemSO> ownedFigures, FigureItemSO selectedFigure)
@@ -42,34 +76,14 @@ public class FigureDetailPanel : MonoBehaviour
         currentOwnedFigures = ownedFigures;
         currentIndex = currentOwnedFigures.IndexOf(selectedFigure);
 
-        IsPanelOpen = true; // ÆĞ³ÎÀÌ ¿­·ÈÀ½À» ¾Ë¸² (ÁÖ»çÀ§/¹öÆ° Á¶ÀÛ Â÷´Ü ½ÃÀÛ)
+        IsPanelOpen = true; // íŒ¨ë„ì´ ì—´ë ¸ìŒì„ ì•Œë¦¼ (ì£¼ì‚¬ìœ„/ë²„íŠ¼ ì¡°ì‘ ì°¨ë‹¨ ì‹œì‘)
         UpdateUI();
         panelRoot.SetActive(true);
     }
 
-    private string GetBiomeKoreanName(BiomeType biome)
+    private string GetBiomeDisplayName(BiomeType biome)
     {
-        switch (biome)
-        {
-            case BiomeType.Forest: return "½£";
-            case BiomeType.Meadow: return "ÃÊ¿ø";
-            case BiomeType.Temple: return "½ÅÀü";
-            case BiomeType.Jungle: return "Á¤±Û";
-            case BiomeType.Desert: return "»ç¸·";
-            case BiomeType.Ruins: return "À¯Àû";
-            case BiomeType.Cave: return "µ¿±¼";
-            case BiomeType.Volcano: return "È­»ê";
-            case BiomeType.Swamp: return "´Ë";
-            case BiomeType.Beach: return "ÇØº¯";
-            case BiomeType.Ocean: return "¹Ù´Ù";
-            case BiomeType.Abyss: return "½É¿¬";
-            case BiomeType.Snow: return "¼³¿ø";
-            case BiomeType.Grave: return "¹«´ı";
-            case BiomeType.Circus: return "¼­Ä¿½º";
-            case BiomeType.Void: return "°øÇã";
-            case BiomeType.Shop: return "»óÁ¡";
-            default: return "¾Ë ¼ö ¾øÀ½";
-        }
+        return LocalizationManager.GetBiomeDisplayName(biome);
     }
 
 
@@ -78,11 +92,14 @@ public class FigureDetailPanel : MonoBehaviour
         if (currentIndex < 0 || currentIndex >= currentOwnedFigures.Count) return;
 
         FigureItemSO currentFigure = currentOwnedFigures[currentIndex];
-        bool isUnlocked = PlayerPrefs.GetInt("Collection_Unlocked_" + currentFigure.itemName, 0) == 1;
-        bool isEncountered = PlayerPrefs.GetInt("Collection_Encountered_" + currentFigure.itemName, 0) == 1;
+        int figureState = CollectionDataManager.Instance != null
+            ? CollectionDataManager.Instance.GetFigureState(currentFigure)
+            : 0;
+        bool isUnlocked = figureState == 2;
+        bool isEncountered = figureState >= 1;
 
-        string biomeNames = string.Join(", ", currentFigure.sourceBiomes.Select(b => GetBiomeKoreanName(b)));
-        string biomeText = $"È¹µæ ¹ÙÀÌ¿È : {biomeNames}";
+        string biomeNames = string.Join(", ", currentFigure.sourceBiomes.Select(b => GetBiomeDisplayName(b)));
+        string biomeText = LocalizationManager.GetUi("UI_BIOME_SOURCES", "íšë“ ë°”ì´ì˜´ : {0}", biomeNames);
 
         if (isUnlocked)
         {
@@ -93,12 +110,12 @@ public class FigureDetailPanel : MonoBehaviour
             }
             if (nameText != null)
             {
-                nameText.text = currentFigure.itemName;
+                nameText.text = LocalizationManager.GetItemDisplayName(currentFigure);
                 nameText.color = Color.white;
             }
             if (descText != null)
             {
-                descText.text = currentFigure.description;
+                descText.text = LocalizationManager.GetItemDescription(currentFigure);
                 descText.color = Color.white;
             }
             if (locationText != null)
@@ -116,12 +133,12 @@ public class FigureDetailPanel : MonoBehaviour
             }
             if (nameText != null)
             {
-                nameText.text = currentFigure.itemName;
+                nameText.text = LocalizationManager.GetItemDisplayName(currentFigure);
                 nameText.color = Color.green;
             }
             if (descText != null)
             {
-                descText.text = currentFigure.description;
+                descText.text = LocalizationManager.GetItemDescription(currentFigure);
                 descText.color = Color.white;
             }
             if (locationText != null)
@@ -139,12 +156,12 @@ public class FigureDetailPanel : MonoBehaviour
             }
             if (nameText != null)
             {
-                nameText.text = "???";
+                nameText.text = LocalizationManager.GetUi("UI_UNKNOWN", "???");
                 nameText.color = new Color(0.4f, 0.4f, 0.4f, 1f);
             }
             if (descText != null)
             {
-                descText.text = "???";
+                descText.text = LocalizationManager.GetUi("UI_UNKNOWN", "???");
                 descText.color = new Color(0.4f, 0.4f, 0.4f, 1f);
             }
             if (locationText != null)
@@ -154,7 +171,12 @@ public class FigureDetailPanel : MonoBehaviour
             }
         }
 
-        // Ã¹ ¹øÂ°°Å³ª ¸¶Áö¸· ÇÇ±Ô¾î¸é È­»ìÇ¥ ºñÈ°¼ºÈ­ (¹öÆ°ÀÌ ÀÖÀ» ¶§¸¸ ½ÇÇà)
+        if (useCustomTextColors)
+            ApplyCustomTextColors(isEncountered);
+
+        RefreshBookSections(currentFigure, isEncountered);
+
+        // ì²« ë²ˆì§¸ê±°ë‚˜ ë§ˆì§€ë§‰ í”¼ê·œì–´ë©´ í™”ì‚´í‘œ ë¹„í™œì„±í™” (ë²„íŠ¼ì´ ìˆì„ ë•Œë§Œ ì‹¤í–‰)
         if (leftButton != null)
             leftButton.interactable = (currentIndex > 0);
 
@@ -162,7 +184,17 @@ public class FigureDetailPanel : MonoBehaviour
             rightButton.interactable = (currentIndex < currentOwnedFigures.Count - 1);
     }
 
-    // ÀÌÀü ÇÇ±Ô¾î º¸±â
+    private void ApplyCustomTextColors(bool isEncountered)
+    {
+        Color mainColor = isEncountered ? customTextColor : customLockedTextColor;
+        Color subColor = isEncountered ? customSubTextColor : customLockedTextColor;
+
+        if (nameText != null) nameText.color = mainColor;
+        if (descText != null) descText.color = mainColor;
+        if (locationText != null) locationText.color = subColor;
+    }
+
+    // ì´ì „ í”¼ê·œì–´ ë³´ê¸°
     private void ShowPrevious()
     {
         if (currentIndex > 0)
@@ -172,7 +204,7 @@ public class FigureDetailPanel : MonoBehaviour
         }
     }
 
-    // ´ÙÀ½ ÇÇ±Ô¾î º¸±â
+    // ë‹¤ìŒ í”¼ê·œì–´ ë³´ê¸°
     private void ShowNext()
     {
         if (currentIndex < currentOwnedFigures.Count - 1)
@@ -184,7 +216,311 @@ public class FigureDetailPanel : MonoBehaviour
 
     public void ClosePanel()
     {
-        IsPanelOpen = false; // ÆĞ³ÎÀÌ ´İÇûÀ½À» ¾Ë¸² (Á¶ÀÛ Â÷´Ü ÇØÁ¦)
+        IsPanelOpen = false; // íŒ¨ë„ì´ ë‹«í˜”ìŒì„ ì•Œë¦¼ (ì¡°ì‘ ì°¨ë‹¨ í•´ì œ)
         panelRoot.SetActive(false);
+    }
+
+    // ë„ê° ì¸ìŠ¤í„´ìŠ¤ì—ë§Œ ë“œë¡­ ëª¬ìŠ¤í„°ì™€ ê´€ë ¨ ì‹œë„ˆì§€ë¥¼ ì±„ìš´ë‹¤.
+    private void RefreshBookSections(FigureItemSO figure, bool isEncountered)
+    {
+        if (dropMonsterRoot == null && relatedSynergyRoot == null) return;
+
+        FitSpriteBox(figureImage, BookFigureIconBox);
+        PlaceShadow(figureShadow, figureImage);
+
+        bool showExtra = isEncountered;
+        if (dropMonsterRoot != null) dropMonsterRoot.SetActive(showExtra);
+        if (relatedSynergyRoot != null) relatedSynergyRoot.SetActive(showExtra);
+        if (!showExtra)
+        {
+            LayoutBookDescription();
+            return;
+        }
+
+        if (dropMonsterLabel != null)
+            dropMonsterLabel.text = LocalizationManager.GetUi("UI_DROP_MONSTER", "ë“œë¡­ ëª¬ìŠ¤í„°");
+        if (relatedSynergyLabel != null)
+            relatedSynergyLabel.text = LocalizationManager.GetUi("UI_RELATED_SYNERGY", "ê´€ë ¨ ì‹œë„ˆì§€");
+
+        currentDrops.Clear();
+        currentDrops.AddRange(GetDrops(figure));
+        dropIndex = 0;
+        bool hasDrop = currentDrops.Count > 0;
+        if (dropMonsterRoot != null) dropMonsterRoot.SetActive(hasDrop);
+        if (relatedSynergyRoot != null)
+        {
+            var rect = (RectTransform)relatedSynergyRoot.transform;
+            var position = rect.anchoredPosition;
+            position.x = hasDrop ? 160f : 0f;
+            rect.anchoredPosition = position;
+        }
+        ShowDrop();
+        ShowRelatedSynergies(figure);
+        LayoutBookDescription();
+    }
+
+    private void StepDrop(int direction)
+    {
+        if (currentDrops.Count <= 1) return;
+        dropIndex = (dropIndex + direction + currentDrops.Count) % currentDrops.Count;
+        ShowDrop();
+    }
+
+    private void ShowDrop()
+    {
+        if (dropMonsterRoot == null || !dropMonsterRoot.activeSelf || currentDrops.Count == 0) return;
+
+        MonsterDrop drop = currentDrops[dropIndex];
+        if (dropMonsterName != null) dropMonsterName.text = LocalizationManager.GetMonsterDisplayName(drop.monster);
+        if (dropMonsterBiome != null)
+        {
+            string grade = LocalizationManager.GetUi(
+                drop.boss ? "UI_MONSTER_GRADE_BOSS" : "UI_MONSTER_GRADE_NORMAL",
+                drop.boss ? "ë³´ìŠ¤" : "ì¼ë°˜");
+            string biomes = drop.biomeNames.Count > 0 ? string.Join(", ", drop.biomeNames) : "-";
+            dropMonsterBiome.text = LocalizationManager.GetUi("UI_MONSTER_APPEARANCE", "ì¶œí˜„ ë°”ì´ì˜´ : {0} Â· {1}", biomes, grade);
+        }
+        if (dropMonsterImage != null)
+        {
+            dropMonsterImage.sprite = drop.monster.monsterSprite;
+            dropMonsterImage.enabled = drop.monster.monsterSprite != null;
+            FitSpriteBox(dropMonsterImage, BookMonsterIconBox);
+            PlaceShadow(dropMonsterShadow, dropMonsterImage);
+        }
+        bool many = currentDrops.Count > 1;
+        if (dropMonsterPrev != null) dropMonsterPrev.gameObject.SetActive(many);
+        if (dropMonsterNext != null) dropMonsterNext.gameObject.SetActive(many);
+    }
+
+    private void ShowRelatedSynergies(FigureItemSO figure)
+    {
+        if (relatedSynergyContent == null || synergyCardTemplate == null) return;
+
+        for (int i = relatedSynergyContent.childCount - 1; i >= 0; i--)
+        {
+            GameObject child = relatedSynergyContent.GetChild(i).gameObject;
+            child.SetActive(false);
+            Destroy(child);
+        }
+
+        if (SynergyManager.Instance == null) return;
+        var owned = CollectOwnedFigures();
+        foreach (SynergyData synergy in SynergyManager.Instance.GetAllSynergies())
+        {
+            if (synergy == null || synergy.RequiredFigures == null || !synergy.RequiredFigures.Contains(figure)) continue;
+
+            GameObject card = Instantiate(synergyCardTemplate, relatedSynergyContent);
+            card.SetActive(true);
+            Image icon = card.transform.Find("Icon").GetComponent<Image>();
+            icon.sprite = synergy.icon;
+            icon.enabled = synergy.icon != null;
+            icon.preserveAspect = true;
+            int required = synergy.RequiredFigures.Count;
+            int have = synergy.RequiredFigures.Count(owned.Contains);
+            card.transform.Find("Badge/Text").GetComponent<TextMeshProUGUI>().text = have + "/" + required;
+            Transform nameLabel = card.transform.Find("Name");
+            if (nameLabel != null) nameLabel.gameObject.SetActive(false);
+
+            SynergyData captured = synergy;
+            Button button = card.GetComponent<Button>();
+            button.onClick.AddListener(() => synergyClicked?.Invoke(captured));
+        }
+
+        LayoutSynergyCards();
+    }
+
+    // ì¹¸ì„ ì œëª© ì•„ë˜ ê°€ìš´ë°ë¡œ ë†“ê³ , ë„ˆë¹„ë¥¼ ë„˜ì¹˜ë©´ ë‹¤ìŒ ì¤„ë¡œ ë„˜ê¸´ë‹¤.
+    private void LayoutSynergyCards()
+    {
+        if (relatedSynergyContent == null) return;
+        float cell = synergyCardTemplate != null
+            ? ((RectTransform)synergyCardTemplate.transform).sizeDelta.x
+            : 96f;
+        if (cell < 1f) cell = 96f;
+        const float spacing = 12f;
+        float width = relatedSynergyContent.rect.width;
+        if (width < cell) width = relatedSynergyContent.sizeDelta.x;
+        if (width < cell) width = cell;
+        int columns = Mathf.Max(1, Mathf.FloorToInt((width + spacing) / (cell + spacing)));
+
+        var cards = new List<RectTransform>();
+        for (int i = 0; i < relatedSynergyContent.childCount; i++)
+        {
+            RectTransform child = relatedSynergyContent.GetChild(i) as RectTransform;
+            if (child != null && child.gameObject.activeSelf) cards.Add(child);
+        }
+
+        int rows = Mathf.CeilToInt(cards.Count / (float)columns);
+        for (int index = 0; index < cards.Count; index++)
+        {
+            int row = index / columns;
+            int column = index % columns;
+            int rowCount = row == rows - 1 ? cards.Count - row * columns : columns;
+            float rowWidth = rowCount * cell + (rowCount - 1) * spacing;
+            float x = -rowWidth * 0.5f + cell * 0.5f + column * (cell + spacing);
+            float y = -cell * 0.5f - row * (cell + spacing);
+            RectTransform card = cards[index];
+            card.anchorMin = card.anchorMax = new Vector2(0.5f, 1f);
+            card.pivot = new Vector2(0.5f, 0.5f);
+            card.sizeDelta = new Vector2(cell, cell);
+            card.anchoredPosition = new Vector2(x, y);
+        }
+    }
+
+    private static List<MonsterDrop> GetDrops(FigureItemSO figure)
+    {
+        EnsureDropIndex();
+        if (dropsByFigure != null && dropsByFigure.TryGetValue(figure, out List<MonsterDrop> found))
+            return found;
+        return new List<MonsterDrop>();
+    }
+
+    // í”¼ê·œì–´ë¥¼ ë–¨ì–´ëœ¨ë¦¬ëŠ” ëª¬ìŠ¤í„°ì™€ ì¶œí˜„ ë°”ì´ì˜´ì€ ë°”ì´ì˜´ ë°ì´í„°ì— ì—°ê²°ëœ ëª¬ìŠ¤í„° SOì—ì„œ ì—­ìœ¼ë¡œ ëª¨ì€ë‹¤.
+    private static void EnsureDropIndex()
+    {
+        if (dropsByFigure != null) return;
+        dropsByFigure = new Dictionary<FigureItemSO, List<MonsterDrop>>();
+
+        DiceManager diceManager = DiceManager.Instance;
+        if (diceManager == null || diceManager.biomeList == null) return;
+
+        foreach (BiomeDataSO biome in diceManager.biomeList)
+        {
+            if (biome == null) continue;
+            string biomeName = LocalizationManager.GetBiomeDisplayName(biome.biomeType);
+            if (biome.biomeMonsters != null)
+            {
+                foreach (MonsterDataSO monster in biome.biomeMonsters)
+                    AddDrop(monster, biomeName, false);
+            }
+            AddDrop(biome.bossMonster, biomeName, true);
+        }
+    }
+
+    private static void AddDrop(MonsterDataSO monster, string biomeName, bool boss)
+    {
+        if (monster == null || monster.dropFigureData == null) return;
+        if (!dropsByFigure.TryGetValue(monster.dropFigureData, out List<MonsterDrop> list))
+        {
+            list = new List<MonsterDrop>();
+            dropsByFigure[monster.dropFigureData] = list;
+        }
+
+        MonsterDrop drop = list.FirstOrDefault(item => item.monster == monster);
+        if (drop == null)
+        {
+            drop = new MonsterDrop { monster = monster };
+            list.Add(drop);
+        }
+        drop.boss |= boss;
+        if (!string.IsNullOrEmpty(biomeName) && !drop.biomeNames.Contains(biomeName))
+            drop.biomeNames.Add(biomeName);
+    }
+
+    private static HashSet<FigureItemSO> CollectOwnedFigures()
+    {
+        var result = new HashSet<FigureItemSO>();
+        GameSaveManager saveManager = GameSaveManager.Instance;
+        var data = saveManager != null ? saveManager.LoadSaveData() : null;
+        if (data != null && data.ownedFigureIDs != null)
+        {
+            foreach (string id in data.ownedFigureIDs)
+            {
+                FigureItemSO figure = saveManager.FindFigureByID(id);
+                if (figure != null) result.Add(figure);
+            }
+        }
+        if (InventoryManager.Instance != null && InventoryManager.Instance.ownedFigures != null)
+        {
+            foreach (FigureItemSO figure in InventoryManager.Instance.ownedFigures)
+            {
+                if (figure != null) result.Add(figure);
+            }
+        }
+        return result;
+    }
+
+    // ì„¤ëª…ì´ ê¸¸ë©´ ì¹¸ì„ ëŠ˜ë¦¬ê³ , íšë“ ë°”ì´ì˜´Â·êµ¬ë¶„ì„ Â·í•˜ë‹¨ ë¬¶ìŒì„ ê°™ì€ ë§Œí¼ ë‚´ë¦°ë‹¤.
+    // ê·¸ë˜ë„ í˜ì´ì§€ë¥¼ ë„˜ì¹˜ë©´ ê¸€ìë¥¼ 24ì—ì„œ 20ê¹Œì§€ 2ptì”© ì¤„ì¸ë‹¤.
+    private void LayoutBookDescription()
+    {
+        if (descText == null || dropMonsterRoot == null) return;
+
+        const float descTop = -52f;
+        const float descWidth = 580f;
+        const float baseHeight = 56f;
+        const float locationBase = -128f;
+        const float dividerBase = -152f;
+        const float columnBase = -279f;
+        const float monsterBottomOffset = -9.3f - 128f * 1.5f * 0.5f;
+        const float pageBottom = -414f;
+
+        descText.textWrappingMode = TextWrappingModes.Normal;
+        descText.overflowMode = TextOverflowModes.Overflow;
+        descText.enableAutoSizing = false;
+
+        float height = baseHeight;
+        foreach (float size in new float[] { 24f, 22f, 20f })
+        {
+            descText.fontSize = size;
+            descText.ForceMeshUpdate();
+            float preferred = Mathf.Max(baseHeight, descText.preferredHeight);
+            float bottom = columnBase - (preferred - baseHeight) + monsterBottomOffset;
+            height = preferred;
+            if (bottom >= pageBottom) break;
+        }
+
+        RectTransform descRect = descText.rectTransform;
+        if (descRect.pivot != new Vector2(0.5f, 1f)) descRect.pivot = new Vector2(0.5f, 1f);
+        descRect.anchoredPosition = new Vector2(0f, descTop);
+        descRect.sizeDelta = new Vector2(descWidth, height);
+        LayoutElement element = descText.GetComponent<LayoutElement>();
+        if (element != null) element.preferredHeight = height;
+
+        float delta = height - baseHeight;
+        if (locationText != null)
+            locationText.rectTransform.anchoredPosition = new Vector2(locationText.rectTransform.anchoredPosition.x, locationBase - delta);
+        Transform divider = transform.Find("Divider");
+        if (divider is RectTransform dividerRect)
+            dividerRect.anchoredPosition = new Vector2(dividerRect.anchoredPosition.x, dividerBase - delta);
+        var dropRect = (RectTransform)dropMonsterRoot.transform;
+        dropRect.anchoredPosition = new Vector2(dropRect.anchoredPosition.x, columnBase - delta);
+        if (relatedSynergyRoot != null)
+        {
+            var synergyRect = (RectTransform)relatedSynergyRoot.transform;
+            synergyRect.anchoredPosition = new Vector2(synergyRect.anchoredPosition.x, columnBase - delta);
+        }
+    }
+
+    // ë°•ìŠ¤ì— ë“¤ì–´ê°€ëŠ” ê°€ì¥ í° ì •ìˆ˜ ë°°ë¡œ í‚¤ìš´ë‹¤. ì›ë³¸ì´ ë°•ìŠ¤ë³´ë‹¤ í¬ë©´ ë°•ìŠ¤ì— ë§ì¶”ê³  ë¹„ìœ¨ì€ ìœ ì§€í•œë‹¤.
+    private static void FitSpriteBox(Image image, float box)
+    {
+        if (image == null || image.sprite == null) return;
+        image.preserveAspect = true;
+        float longest = Mathf.Max(image.sprite.rect.width, image.sprite.rect.height);
+        int scale = Mathf.FloorToInt(box / Mathf.Max(1f, longest));
+        Vector2 size = scale >= 1 ? image.sprite.rect.size * scale : new Vector2(box, box);
+        if (image.rectTransform.sizeDelta != size) image.rectTransform.sizeDelta = size;
+    }
+
+    private static void PlaceShadow(Image shadow, Image body)
+    {
+        if (shadow == null || body == null) return;
+        float scaleX = Mathf.Abs(body.rectTransform.localScale.x);
+        float scaleY = Mathf.Abs(body.rectTransform.localScale.y);
+        float width = Mathf.Max(48f, body.rectTransform.sizeDelta.x * scaleX * 0.72f);
+        float height = Mathf.Max(16f, width * 0.22f);
+        shadow.rectTransform.sizeDelta = new Vector2(width, height);
+        float bodyHeight = body.rectTransform.sizeDelta.y * scaleY;
+        shadow.rectTransform.anchoredPosition = new Vector2(
+            body.rectTransform.anchoredPosition.x,
+            body.rectTransform.anchoredPosition.y - bodyHeight * 0.42f);
+    }
+
+    private class MonsterDrop
+    {
+        public MonsterDataSO monster;
+        public readonly List<string> biomeNames = new List<string>();
+        public bool boss;
     }
 }

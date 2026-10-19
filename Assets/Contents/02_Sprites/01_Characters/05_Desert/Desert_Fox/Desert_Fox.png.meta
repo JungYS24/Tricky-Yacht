@@ -3,41 +3,29 @@ guid: 135386d9cb16fce45a4edad68cb2445a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -996022207264780015
-    second: desert fox_0
+      213: -1065549290002716123
+    second: Desert_Fox_0
   - first:
-      213: 2608704037162930480
-    second: desert fox_1
+      213: -6336676170156934978
+    second: Desert_Fox_1
   - first:
-      213: 8540878492785735150
-    second: desert fox_2
+      213: -6113717172054559069
+    second: Desert_Fox_2
   - first:
-      213: -9020616164188769368
-    second: desert fox_3
+      213: -1421208223811452384
+    second: Desert_Fox_3
   - first:
-      213: 6190892365596095329
-    second: desert fox_4
+      213: 208062383467976367
+    second: Desert_Fox_4
   - first:
-      213: -4732798807312910232
-    second: desert fox_5
+      213: -3931716253352240638
+    second: Desert_Fox_5
   - first:
-      213: 7551337353800387645
-    second: desert fox_6
+      213: 9055765500191563356
+    second: Desert_Fox_6
   - first:
-      213: 8827946399320654472
-    second: desert fox_7
-  - first:
-      213: -5396296676785244358
-    second: desert fox_8
-  - first:
-      213: -2754020474105068931
-    second: desert fox_9
-  - first:
-      213: -2820511383514706648
-    second: desert fox_10
-  - first:
-      213: 4215684925193993631
-    second: desert fox_11
+      213: -7810147507129437526
+    second: Desert_Fox_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -70,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -84,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 40
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -108,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -121,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -134,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -146,265 +134,177 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: desert fox_0
+      name: Desert_Fox_0
       rect:
         serializedVersion: 2
-        x: 24
-        y: 303
-        width: 78
-        height: 102
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1111593641b6d22f0800000000000000
-      internalID: -996022207264780015
+      spriteID: 25eab7f6906836f15bc1aeee3002611e
+      internalID: -1065549290002716123
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: desert fox_1
+      name: Desert_Fox_1
       rect:
         serializedVersion: 2
-        x: 102
-        y: 303
-        width: 78
-        height: 102
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0315933108af33420800000000000000
-      internalID: 2608704037162930480
+      spriteID: bef81cad989a0fa8832431e7319e6fe7
+      internalID: -6336676170156934978
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: desert fox_2
-      rect:
-        serializedVersion: 2
-        x: 179
-        y: 303
-        width: 78
-        height: 102
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ee57448dcbb478670800000000000000
-      internalID: 8540878492785735150
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: desert fox_3
+      name: Desert_Fox_2
       rect:
         serializedVersion: 2
         x: 256
-        y: 303
-        width: 77
-        height: 102
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8a3b166546550d280800000000000000
-      internalID: -9020616164188769368
+      spriteID: a3767bb69fb627ab5c006f264a387425
+      internalID: -6113717172054559069
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: desert fox_4
+      name: Desert_Fox_3
       rect:
         serializedVersion: 2
-        x: 332
-        y: 303
-        width: 79
-        height: 102
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 16378064ec77ae550800000000000000
-      internalID: 6190892365596095329
+      spriteID: 20c2da7ba6da46eca00362220d23b921
+      internalID: -1421208223811452384
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: desert fox_5
+      name: Desert_Fox_4
       rect:
         serializedVersion: 2
-        x: 410
-        y: 303
-        width: 78
-        height: 102
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 868b8b86f88b15eb0800000000000000
-      internalID: -4732798807312910232
+      spriteID: afd6baa9a22fe302ea1067d0c98814ad
+      internalID: 208062383467976367
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: desert fox_6
+      name: Desert_Fox_5
       rect:
         serializedVersion: 2
-        x: 24
-        y: 107
-        width: 79
-        height: 106
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d3c0968805dbbc860800000000000000
-      internalID: 7551337353800387645
+      spriteID: 025a4f11e6bc6fc97f4fb4226dbd7b0b
+      internalID: -3931716253352240638
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: desert fox_7
-      rect:
-        serializedVersion: 2
-        x: 101
-        y: 107
-        width: 79
-        height: 106
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 88242bb4a7a238a70800000000000000
-      internalID: 8827946399320654472
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: desert fox_8
-      rect:
-        serializedVersion: 2
-        x: 179
-        y: 107
-        width: 78
-        height: 106
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a37389563c08c15b0800000000000000
-      internalID: -5396296676785244358
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: desert fox_9
+      name: Desert_Fox_6
       rect:
         serializedVersion: 2
         x: 256
-        y: 107
-        width: 77
-        height: 106
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d7280d068f0c7c9d0800000000000000
-      internalID: -2754020474105068931
+      spriteID: 5cde2730be8aac7da5b2c473e2777588
+      internalID: 9055765500191563356
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: desert fox_10
+      name: Desert_Fox_7
       rect:
         serializedVersion: 2
-        x: 332
-        y: 107
-        width: 78
-        height: 106
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 82d09a427d78bd8d0800000000000000
-      internalID: -2820511383514706648
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: desert fox_11
-      rect:
-        serializedVersion: 2
-        x: 409
-        y: 107
-        width: 79
-        height: 106
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f9d38239a1f118a30800000000000000
-      internalID: 4215684925193993631
+      spriteID: aab225e238c89c93cb59ea416d1cffdd
+      internalID: -7810147507129437526
       vertices: []
       indices: 
       edges: []
@@ -423,18 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      desert fox_0: -996022207264780015
-      desert fox_1: 2608704037162930480
-      desert fox_10: -2820511383514706648
-      desert fox_11: 4215684925193993631
-      desert fox_2: 8540878492785735150
-      desert fox_3: -9020616164188769368
-      desert fox_4: 6190892365596095329
-      desert fox_5: -4732798807312910232
-      desert fox_6: 7551337353800387645
-      desert fox_7: 8827946399320654472
-      desert fox_8: -5396296676785244358
-      desert fox_9: -2754020474105068931
+      Desert_Fox_0: -1065549290002716123
+      Desert_Fox_1: -6336676170156934978
+      Desert_Fox_2: -6113717172054559069
+      Desert_Fox_3: -1421208223811452384
+      Desert_Fox_4: 208062383467976367
+      Desert_Fox_5: -3931716253352240638
+      Desert_Fox_6: 9055765500191563356
+      Desert_Fox_7: -7810147507129437526
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

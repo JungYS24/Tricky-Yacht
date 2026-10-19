@@ -3,28 +3,28 @@ guid: d65475bce71240e4cb92ea110d0724f1
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6552986091716506595
+      213: -7912128649035874809
     second: SS_Myriad_Hand_0
   - first:
-      213: 383874379852659641
+      213: 7724922321188959691
     second: SS_Myriad_Hand_1
   - first:
-      213: 4373800788557371419
+      213: -8055670658361592634
     second: SS_Myriad_Hand_2
   - first:
-      213: 7573041105640108567
+      213: 4469250215122864247
     second: SS_Myriad_Hand_3
   - first:
-      213: -8310298766832794053
+      213: 5302688244459653162
     second: SS_Myriad_Hand_4
   - first:
-      213: -4938569108457222525
+      213: 4364065241008109640
     second: SS_Myriad_Hand_5
   - first:
-      213: 4146808990920691899
+      213: -8642705342992531085
     second: SS_Myriad_Hand_6
   - first:
-      213: 5745672466106041274
+      213: -2638491799166290887
     second: SS_Myriad_Hand_7
   externalObjects: {}
   serializedVersion: 13
@@ -58,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 64
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -96,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -109,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -122,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -137,20 +137,20 @@ TextureImporter:
       name: SS_Myriad_Hand_0
       rect:
         serializedVersion: 2
-        x: 52
-        y: 385
-        width: 294
-        height: 328
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d1c89296edd1f05a0800000000000000
-      internalID: -6552986091716506595
+      spriteID: 077e06f9e9783292a1638ae5dcd06098
+      internalID: -7912128649035874809
       vertices: []
       indices: 
       edges: []
@@ -159,20 +159,20 @@ TextureImporter:
       name: SS_Myriad_Hand_1
       rect:
         serializedVersion: 2
-        x: 391
-        y: 385
-        width: 295
-        height: 328
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9bbbd71f6bbc35500800000000000000
-      internalID: 383874379852659641
+      spriteID: cb35f437ec6f346b952945beef6675cb
+      internalID: 7724922321188959691
       vertices: []
       indices: 
       edges: []
@@ -181,20 +181,20 @@ TextureImporter:
       name: SS_Myriad_Hand_2
       rect:
         serializedVersion: 2
-        x: 731
-        y: 385
-        width: 294
-        height: 328
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b181940d4acd2bc30800000000000000
-      internalID: 4373800788557371419
+      spriteID: c6f4d18c37823490c075f75eaf354614
+      internalID: -8055670658361592634
       vertices: []
       indices: 
       edges: []
@@ -203,20 +203,20 @@ TextureImporter:
       name: SS_Myriad_Hand_3
       rect:
         serializedVersion: 2
-        x: 1070
-        y: 385
-        width: 295
-        height: 328
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7123c1b03c8d81960800000000000000
-      internalID: 7573041105640108567
+      spriteID: 7788bc3c64f7053e93afae6a623bfaf7
+      internalID: 4469250215122864247
       vertices: []
       indices: 
       edges: []
@@ -225,20 +225,20 @@ TextureImporter:
       name: SS_Myriad_Hand_4
       rect:
         serializedVersion: 2
-        x: 52
-        y: 30
-        width: 296
-        height: 331
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b3680992d43ebac80800000000000000
-      internalID: -8310298766832794053
+      spriteID: 2a48a80dddee9649d231083d3582e50e
+      internalID: 5302688244459653162
       vertices: []
       indices: 
       edges: []
@@ -247,20 +247,20 @@ TextureImporter:
       name: SS_Myriad_Hand_5
       rect:
         serializedVersion: 2
-        x: 391
-        y: 30
-        width: 297
-        height: 331
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 38e80bfbf8da67bb0800000000000000
-      internalID: -4938569108457222525
+      spriteID: 48f8ea023746903c3ea97642635b06e2
+      internalID: 4364065241008109640
       vertices: []
       indices: 
       edges: []
@@ -269,20 +269,20 @@ TextureImporter:
       name: SS_Myriad_Hand_6
       rect:
         serializedVersion: 2
-        x: 731
-        y: 30
-        width: 305
-        height: 331
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bb059377ecc6c8930800000000000000
-      internalID: 4146808990920691899
+      spriteID: 73418f1448f10e881502958928a22f65
+      internalID: -8642705342992531085
       vertices: []
       indices: 
       edges: []
@@ -291,20 +291,20 @@ TextureImporter:
       name: SS_Myriad_Hand_7
       rect:
         serializedVersion: 2
-        x: 1070
-        y: 30
-        width: 296
-        height: 331
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ab34ef18aaabcbf40800000000000000
-      internalID: 5745672466106041274
+      spriteID: 3974e91fb03162dbe096f2bc5d0fec76
+      internalID: -2638491799166290887
       vertices: []
       indices: 
       edges: []
@@ -323,14 +323,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      SS_Myriad_Hand_0: -6552986091716506595
-      SS_Myriad_Hand_1: 383874379852659641
-      SS_Myriad_Hand_2: 4373800788557371419
-      SS_Myriad_Hand_3: 7573041105640108567
-      SS_Myriad_Hand_4: -8310298766832794053
-      SS_Myriad_Hand_5: -4938569108457222525
-      SS_Myriad_Hand_6: 4146808990920691899
-      SS_Myriad_Hand_7: 5745672466106041274
+      SS_Myriad_Hand_0: -7912128649035874809
+      SS_Myriad_Hand_1: 7724922321188959691
+      SS_Myriad_Hand_2: -8055670658361592634
+      SS_Myriad_Hand_3: 4469250215122864247
+      SS_Myriad_Hand_4: 5302688244459653162
+      SS_Myriad_Hand_5: 4364065241008109640
+      SS_Myriad_Hand_6: -8642705342992531085
+      SS_Myriad_Hand_7: -2638491799166290887
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

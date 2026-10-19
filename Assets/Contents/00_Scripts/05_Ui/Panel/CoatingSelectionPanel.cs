@@ -16,9 +16,11 @@ public class CoatingSelectionPanel : MonoBehaviour
 
     private List<GameObject> activeSlots = new List<GameObject>();
     private DiceManager diceManager;
+    private bool isBusy;
 
     public void OpenSelection(DiceManager dm, DiceType type, float mult, Color color)
     {
+        if (isBusy) return;
         IsPanelOpen = true;
 
         diceManager = dm;
@@ -27,12 +29,15 @@ public class CoatingSelectionPanel : MonoBehaviour
         pendingColor = color;
 
 
-        //(GetRandomDiceForCoating È£Ãâ)
-        List<DiceData1> options = dm.GetRandomDiceForCoating(5);
+        //(GetRandomDiceForCoating í˜¸ì¶œ)
+        List<DiceData1> options = dm.deckManager.GetRandomDiceForCoating(5);
 
         if (options.Count == 0)
         {
-            Debug.Log("ÄÚÆÃÇÒ ¼ö ÀÖ´Â ÁÖ»çÀ§°¡ µ¦¿¡ ¾ø½À´Ï´Ù!");
+            Debug.Log("ì½”íŒ…í•  ìˆ˜ ìˆëŠ” ì£¼ì‚¬ìœ„ê°€ ë±ì— ì—†ìŠµë‹ˆë‹¤!");
+            if (ToastPopupController.Instance != null)
+                ToastPopupController.Instance.ShowToast(LocalizationManager.GetSys("SYS_NO_EQUIPPABLE_DICE", "ì¥ì°© ê°€ëŠ¥í•œ ì£¼ì‚¬ìœ„ê°€ ì—†ìŠµë‹ˆë‹¤."));
+            IsPanelOpen = false;
             return;
         }
 
@@ -47,7 +52,7 @@ public class CoatingSelectionPanel : MonoBehaviour
             Button btn = slotGo.GetComponent<Button>();
             if (btn != null)
             {
-                btn.onClick.AddListener(() => OnDiceSelected(dice));
+                btn.onClick.AddListener(() => OnDiceSelected(dice, slotGo.GetComponent<DeckSlot>()));
             }
 
             DeckSlot deckSlot = slotGo.GetComponent<DeckSlot>();
@@ -58,26 +63,39 @@ public class CoatingSelectionPanel : MonoBehaviour
         }
     }
 
-    private void OnDiceSelected(DiceData1 selectedDice)
+    private void OnDiceSelected(DiceData1 selectedDice, DeckSlot selectedSlot)
     {
+        if (isBusy) return;
+        if (diceManager == null || selectedDice == null || !diceManager.masterDeck.Contains(selectedDice)) return;
+        isBusy = true;
+
         selectedDice.isCoated = true;
         selectedDice.type = pendingCoatingType;
         selectedDice.multiplier = pendingMultiplier;
         selectedDice.diceColor = pendingColor;
 
-        Debug.Log($"{selectedDice.diceName}¿¡ {pendingCoatingType} ÄÚÆÃ Àû¿ë ¿Ï·á!");
+        Debug.Log($"{selectedDice.diceName}ì— {pendingCoatingType} ì½”íŒ… ì ìš© ì™„ë£Œ!");
 
-        // Æ©Åä¸®¾ó ÁßÀÏ ¶§ ÄÚÆÃ Ã³¸®°¡ ³¡³µÀ½À» ¾Ë¸²
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+        DiceSelectionFeedback.Get(this).PlayCoating(selectedSlot, activeSlots, pendingCoatingType, pendingColor, () =>
         {
-            TutorialManager.Instance.OnCoatingAppliedComplete();
-        }
+            if (selectedSlot != null) selectedSlot.SetDice(selectedDice, false);
+        }, () =>
+        {
+            isBusy = false;
+            // íŠœí† ë¦¬ì–¼ ì¤‘ì¼ ë•Œ ì½”íŒ… ì²˜ë¦¬ê°€ ëë‚¬ìŒì„ ì•Œë¦¼
+            if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
+            {
+                TutorialManager.Instance.OnCoatingAppliedComplete();
+            }
 
-        ClosePanel();
+            ClosePanel();
+            if (diceManager != null && diceManager.enemy != null) diceManager.ForceUpdateUI();
+        });
     }
 
     public void ClosePanel()
     {
+        if (isBusy) return;
         IsPanelOpen = false;
 
         panelRoot.SetActive(false);
