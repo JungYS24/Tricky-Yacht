@@ -62,13 +62,15 @@ public class EncounterEventPanel : MonoBehaviour
 
     [Header("대화창 스킨")]
     public Sprite dialogPanelSprite;
-    public Sprite choiceButtonSprite;
     [Tooltip("값이 클수록 9슬라이스 테두리가 얇아집니다.")]
     public float dialogBorderScale = 1f;
+    [Tooltip("대사·선택지 글자 크기 배율. 씬에 저장된 원래 크기에 곱합니다.")]
+    public float encounterTextScale = 0.85f;
 
     private int dialogueIndex = 0;
     Color choiceATextColor = Color.white;
     Color choiceBTextColor = Color.white;
+    bool encounterTextScaleApplied;
 
     private void Awake()
     {
@@ -80,6 +82,7 @@ public class EncounterEventPanel : MonoBehaviour
         if (choiceBText != null) choiceBTextColor = choiceBText.color;
 
         ApplyDialogSkin();
+        ApplyEncounterTextScale();
 
         if (fullScreenBackground != null) fullScreenBackground.SetActive(false);
         if (dialogueRoot != null) dialogueRoot.SetActive(false);
@@ -187,7 +190,6 @@ public class EncounterEventPanel : MonoBehaviour
         if (choiceBButton != null) choiceBButton.gameObject.SetActive(true);
 
         if (choiceRoot != null) choiceRoot.SetActive(true);
-        RefreshChoiceLayout();
     }
 
     void EnsureSkinSprites()
@@ -196,9 +198,6 @@ public class EncounterEventPanel : MonoBehaviour
         if (dialogPanelSprite == null)
             dialogPanelSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
                 "Assets/Contents/06_UI/Sprites/Encounter/Encounter_Dialog_Panel.png");
-        if (choiceButtonSprite == null)
-            choiceButtonSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
-                "Assets/Contents/06_UI/Sprites/Encounter/Encounter_Choice_Button.png");
 #endif
     }
 
@@ -213,10 +212,30 @@ public class EncounterEventPanel : MonoBehaviour
         if (dialogueText != null)
             dialogueText.margin = new Vector4(140f, 60f, 140f, 60f);
 
-        SkinChoiceButton(choiceAButton, choiceAText, choiceATextColor);
-        SkinChoiceButton(choiceBButton, choiceBText, choiceBTextColor);
-        SetupChoiceLayout();
-        RefreshChoiceLayout();
+        ApplyChoiceButtonColors(choiceAButton);
+        ApplyChoiceButtonColors(choiceBButton);
+    }
+
+    void ApplyEncounterTextScale()
+    {
+        if (encounterTextScaleApplied) return;
+        encounterTextScaleApplied = true;
+
+        ScaleEncounterText(dialogueText);
+        ScaleEncounterText(choiceAText);
+        ScaleEncounterText(choiceBText);
+    }
+
+    void ScaleEncounterText(TextMeshProUGUI label)
+    {
+        if (label == null) return;
+
+        float originalSize = label.fontSize;
+        label.fontSize = originalSize * encounterTextScale;
+
+        if (!label.enableAutoSizing) return;
+        label.fontSizeMax *= encounterTextScale;
+        label.fontSizeMin *= encounterTextScale;
     }
 
     static void ApplyPanelImage(GameObject root, Sprite sprite, float borderMul)
@@ -231,20 +250,9 @@ public class EncounterEventPanel : MonoBehaviour
         image.pixelsPerUnitMultiplier = borderMul;
     }
 
-    void SkinChoiceButton(Button button, TextMeshProUGUI label, Color textColor)
+    static void ApplyChoiceButtonColors(Button button)
     {
         if (button == null) return;
-
-        Image graphic = button.targetGraphic as Image;
-        if (graphic == null) graphic = button.GetComponent<Image>();
-        if (graphic != null && choiceButtonSprite != null)
-        {
-            graphic.sprite = choiceButtonSprite;
-            graphic.type = Image.Type.Sliced;
-            graphic.color = Color.white;
-            graphic.fillCenter = true;
-            graphic.pixelsPerUnitMultiplier = Mathf.Max(0.01f, dialogBorderScale);
-        }
 
         ColorBlock colors = button.colors;
         colors.normalColor = Color.white;
@@ -253,76 +261,6 @@ public class EncounterEventPanel : MonoBehaviour
         colors.selectedColor = new Color(1f, 0.95f, 0.8f, 1f);
         colors.disabledColor = new Color(0.45f, 0.45f, 0.45f, 1f);
         button.colors = colors;
-
-        if (label == null) return;
-        label.color = textColor;
-        label.alignment = TextAlignmentOptions.MidlineLeft;
-        label.margin = new Vector4(110f, 0f, 24f, 0f);
-        label.outlineWidth = 0.15f;
-        label.outlineColor = new Color(0.08f, 0.05f, 0.04f, 0.9f);
-    }
-
-    void SetupChoiceLayout()
-    {
-        if (choiceRoot == null) return;
-
-        VerticalLayoutGroup group = choiceRoot.GetComponent<VerticalLayoutGroup>();
-        if (group == null) group = choiceRoot.AddComponent<VerticalLayoutGroup>();
-        group.childAlignment = TextAnchor.MiddleCenter;
-        group.spacing = 16f;
-        group.childControlWidth = true;
-        group.childControlHeight = true;
-        group.childForceExpandWidth = false;
-        group.childForceExpandHeight = false;
-
-        EnsureButtonLayout(choiceAButton);
-        EnsureButtonLayout(choiceBButton);
-    }
-
-    static void EnsureButtonLayout(Button button)
-    {
-        if (button == null) return;
-        LayoutElement element = button.GetComponent<LayoutElement>();
-        if (element == null) element = button.gameObject.AddComponent<LayoutElement>();
-        element.preferredHeight = 90f;
-        element.minHeight = 90f;
-        element.flexibleWidth = 0f;
-        element.flexibleHeight = 0f;
-    }
-
-    void RefreshChoiceLayout()
-    {
-        if (choiceRoot == null) return;
-
-        VerticalLayoutGroup group = choiceRoot.GetComponent<VerticalLayoutGroup>();
-        RectTransform rootRect = choiceRoot.transform as RectTransform;
-        if (group == null || rootRect == null) return;
-
-        float scale = Mathf.Max(0.01f, dialogBorderScale);
-        int padX = Mathf.Max(24, Mathf.RoundToInt(140f / scale));
-        int padY = Mathf.Max(20, Mathf.RoundToInt(60f / scale));
-        group.padding = new RectOffset(padX, padX, padY, padY);
-
-        float innerWidth = Mathf.Max(0f, rootRect.rect.width - padX * 2f);
-        float preferredWidth = innerWidth * 0.85f;
-        float innerHeight = Mathf.Max(0f, rootRect.rect.height - padY * 2f);
-        float buttonHeight = 90f;
-        if (buttonHeight * 2f + 16f > innerHeight)
-            buttonHeight = Mathf.Max(64f, (innerHeight - 16f) * 0.5f);
-
-        ApplyButtonPreferredSize(choiceAButton, preferredWidth, buttonHeight);
-        ApplyButtonPreferredSize(choiceBButton, preferredWidth, buttonHeight);
-    }
-
-    static void ApplyButtonPreferredSize(Button button, float width, float height)
-    {
-        if (button == null) return;
-        LayoutElement element = button.GetComponent<LayoutElement>();
-        if (element == null) return;
-        element.preferredWidth = width;
-        element.minWidth = width;
-        element.preferredHeight = height;
-        element.minHeight = height;
     }
 
     void RefreshChoiceATextAlpha()
