@@ -27,6 +27,11 @@ public class AudioEvent : ScriptableObject
 
     public void PlayOneShot(AudioSource source)
     {
+        PlayOneShot(source, 1f);
+    }
+
+    public void PlayOneShot(AudioSource source, float pitchMul)
+    {
         AudioClip clip = PickClip();
         if (source == null || clip == null)
             return;
@@ -34,7 +39,7 @@ public class AudioEvent : ScriptableObject
         AudioMixerGroup previousGroup = source.outputAudioMixerGroup;
         ApplyMixer(source);
         float previousPitch = source.pitch;
-        source.pitch = Random.Range(pitchRange.x, pitchRange.y);
+        source.pitch = Random.Range(pitchRange.x, pitchRange.y) * pitchMul;
         source.PlayOneShot(clip, Random.Range(volumeRange.x, volumeRange.y));
         source.pitch = previousPitch;
         source.outputAudioMixerGroup = previousGroup;

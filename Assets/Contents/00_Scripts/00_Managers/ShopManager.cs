@@ -96,7 +96,7 @@ public class ShopManager : MonoBehaviour
     private void Start()
     {
         if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
-        if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
+        if (GoldCounter.Instance != null) GoldCounter.Instance.SetInstant(currentGold);
     }
 
     public void OpenShop()
@@ -118,7 +118,7 @@ public class ShopManager : MonoBehaviour
         RemoveLegacyMerchantLabel();
 
         if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
-        if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
+        if (GoldCounter.Instance != null) GoldCounter.Instance.SetInstant(currentGold);
 
         RefreshShop(false);
         UpdateRerollUI();
@@ -606,6 +606,7 @@ public class ShopManager : MonoBehaviour
 
                     // 피규어/간식 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용
                     if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
+                    Sfx.Play(SfxId.Shop_Purchase);
                     if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
                     {
                         TutorialManager.Instance.OnItemBought(item.itemName);
@@ -630,6 +631,7 @@ public class ShopManager : MonoBehaviour
 
                 // 그 외 소모품/티켓류 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용
                 if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
+                Sfx.Play(SfxId.Shop_Purchase);
 
                 if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
                 {

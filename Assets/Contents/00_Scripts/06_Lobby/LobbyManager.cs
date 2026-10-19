@@ -82,6 +82,8 @@ public class LobbyManager : MonoBehaviour
                 sfxSource.PlayOneShot(glitchSound);
         }
 
+        Sfx.Play(SfxId.Game_Start_Door);
+
         yield return new WaitForSeconds(0.7f);
 
         SceneManager.LoadScene(sceneName);

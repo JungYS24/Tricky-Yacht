@@ -930,6 +930,7 @@ public class DiceManager : MonoBehaviour
     {
         if (isStageClearing) return; //이미 클리어 처리 중이면 중복 실행 방지
         isStageClearing = true;
+        StartCoroutine(PlayStageClearSfxDelayed());
 
         // 이번 전투 한정 디버프(도둑·족쇄)를 제거하고, 왼쪽 위 디버프 표시에서 연기처럼 사라지는 모습을 보여 준다.
         var vanishing = new List<DiceData1>();
@@ -1084,17 +1085,26 @@ public class DiceManager : MonoBehaviour
     }
     public void PlayPlayerHurtSound()
     {
-        if (playerHurtAudioEvent == null)
-            return;
-
-        if (AudioControl.Instance != null)
+        if (playerHurtAudioEvent != null)
         {
-            AudioControl.Instance.PlaySFX(playerHurtAudioEvent);
+            if (AudioControl.Instance != null)
+            {
+                AudioControl.Instance.PlaySFX(playerHurtAudioEvent);
+                return;
+            }
+
+            if (sfxSource != null)
+                playerHurtAudioEvent.PlayOneShot(sfxSource);
             return;
         }
 
-        if (sfxSource != null)
-            playerHurtAudioEvent.PlayOneShot(sfxSource);
+        Sfx.Play(SfxId.Player_Hurt);
+    }
+
+    IEnumerator PlayStageClearSfxDelayed()
+    {
+        yield return new WaitForSeconds(0.4f);
+        Sfx.Play(SfxId.Stage_Clear);
     }
 
     // 현재 족보 이름에 맞는 진짜 배수를 찾아오는 함수
@@ -1230,7 +1240,7 @@ public class DiceManager : MonoBehaviour
             shopManager.currentGold = 50000; // 초기 소지금
             ui?.UpdateGoldUI(shopManager.currentGold);
             // 재시작 및 메인 이동 시 초기 소지금 카운팅 연출 실행 (또는 초기화용)
-            if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(shopManager.currentGold);
+            if (GoldCounter.Instance != null) GoldCounter.Instance.SetInstant(shopManager.currentGold);
         }
 
         //인벤토리 초기화 (방금 만든 함수 호출)
@@ -1266,6 +1276,7 @@ public class DiceManager : MonoBehaviour
         RemoveCombatDebuffs(temporaryOnly: true);
         currentCombatDebuffs.Clear();
         yield return new WaitForSeconds(1.2f); // "게임 오버"
+        Sfx.Play(SfxId.Game_Over);
 
         if (gameOverPanel != null)
         {
@@ -1328,6 +1339,8 @@ public class DiceManager : MonoBehaviour
         if (!UsesMapFlow) return;
         MapNode node = stageProgression.FindNode(nodeId);
         if (node == null || !IsMapNodeSelectable(nodeId)) return;
+
+        Sfx.Play(SfxId.Journey_Step);
 
         MapTableData table = GetMapTable();
         bool forceStop = table == null || table.Config.ShopRowForceStop;

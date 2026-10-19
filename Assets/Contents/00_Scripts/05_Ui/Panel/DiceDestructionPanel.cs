@@ -72,6 +72,7 @@ public class DiceDestructionPanel : MonoBehaviour
 
             Debug.Log($"{selectedDice.diceName} 주사위가 덱에서 영구히 파괴되었습니다! 남은 주사위: {diceManager.masterDeck.Count}");
 
+            Sfx.Play(SfxId.Dice_Burn_Vanish);
             DiceSelectionFeedback.Get(this).PlayDestruction(selectedSlot, activeSlots, () =>
             {
                 isBusy = false;

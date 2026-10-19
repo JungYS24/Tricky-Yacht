@@ -85,9 +85,14 @@ public class AudioControl : MonoBehaviour
 
     public void PlaySFX(AudioEvent audioEvent)
     {
+        PlaySFX(audioEvent, 1f);
+    }
+
+    public void PlaySFX(AudioEvent audioEvent, float pitchMul)
+    {
         EnsureSfxSource();
         if (audioEvent != null)
-            audioEvent.PlayOneShot(sfxSource);
+            audioEvent.PlayOneShot(sfxSource, pitchMul);
     }
 
     public void PlaySFX(AudioClip clip, float volume = 1f)

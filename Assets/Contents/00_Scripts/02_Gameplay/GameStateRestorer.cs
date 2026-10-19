@@ -42,7 +42,7 @@ public static class GameStateRestorer
         {
             dm.shopManager.currentGold = data.currentGold;
             dm.ui?.UpdateGoldUI(dm.shopManager.currentGold);
-            if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(dm.shopManager.currentGold);
+            if (GoldCounter.Instance != null) GoldCounter.Instance.SetInstant(dm.shopManager.currentGold);
         }
 
         dm.multHighCard = data.multHighCard; dm.multOnePair = data.multOnePair;

@@ -89,6 +89,27 @@ public sealed class TurnResolutionPresenter
 
     public IEnumerator PlayHand(DiceManager manager, List<Dice> keptDice, HandRank rank, float handMult, TurnResolutionTiming timing)
     {
+        switch (rank)
+        {
+            case HandRank.OnePair:
+            case HandRank.TwoPair:
+            case HandRank.Triple:
+                Sfx.Play(SfxId.Hand_Confirm);
+                break;
+            case HandRank.Straight:
+                Sfx.Play(SfxId.Hand_Jackpot_Straight);
+                break;
+            case HandRank.FullHouse:
+                Sfx.Play(SfxId.Hand_Jackpot_Fullhouse);
+                break;
+            case HandRank.FourOfAKind:
+                Sfx.Play(SfxId.Hand_Jackpot_FourofKind);
+                break;
+            case HandRank.Yacht:
+                Sfx.Play(SfxId.Hand_Jackpot_Yacht);
+                break;
+        }
+
         // 달성한 족보의 이펙트 재생
         yield return HandResolutionFeedback.Get(manager).Play(keptDice, rank, manager.ui);
 
@@ -177,6 +198,12 @@ public sealed class TurnResolutionPresenter
 
                 logText.text = string.IsNullOrEmpty(label) ? "" : $"{label} ({amountText})";
             }
+
+            // 숫자 카운트업 시작 직전 효과음 (amount 0 early return 경로는 여기까지 오지 않음)
+            if (isChips)
+                Sfx.Play(SfxId.Score_Tick, Mathf.Min(1f + 0.03f * playedCount, 1.4f));
+            else
+                Sfx.Play(SfxId.Mult_Pop);
 
             // 계산된 최종 칩과 배수를 UI에 띄우고 통통 튀는 펀치 스케일 적용
             // 각 보너스가 반영될 때마다 숫자와 연출을 갱신
