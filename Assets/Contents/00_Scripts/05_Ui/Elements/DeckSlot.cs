@@ -95,6 +95,7 @@ public class DeckSlot : MonoBehaviour
         animUseFaceIndex = false;
 
         bool hasPerFaceSprites = data.customFaceSprites != null && data.customFaceSprites.Length >= 6;
+        bool completePerFace = DiceData1.HasCompleteFaceSprites(data.customFaceSprites);
 
         int minVal = data.faceValues[0];
         int maxVal = data.faceValues[0];
@@ -129,8 +130,9 @@ public class DeckSlot : MonoBehaviour
             }
         }
 
-        // 여정처럼 눈 값이 겹쳐도 면 스프라이트가 6장이면 면 번호로 돌려 보여 준다.
-        if (hasPerFaceSprites && exactFaceValue == -1 && exactFaceIndex < 0)
+        // 여정처럼 6칸이 모두 채워진 경우에만 면 번호로 돌려 보여 준다.
+        // 하이/로우/짝/홀은 배열 길이는 6이지만 빈 칸이 있어 실제 눈 값만 순환한다.
+        if (completePerFace && exactFaceValue == -1 && exactFaceIndex < 0)
         {
             for (int i = 0; i < 6; i++) animFaces[i] = i;
             animUniqueCount = 6;
@@ -328,7 +330,9 @@ public class DeckSlot : MonoBehaviour
             int safeIndex = animUseFaceIndex
                 ? Mathf.Clamp(faceValue, 0, animSprites.Length - 1)
                 : Mathf.Clamp(faceValue - 1, 0, animSprites.Length - 1);
-            diceIcon.sprite = animSprites[safeIndex];
+            Sprite next = animSprites[safeIndex];
+            if (next != null)
+                diceIcon.sprite = next;
         }
     }
 
@@ -341,7 +345,9 @@ public class DeckSlot : MonoBehaviour
         if (data.customFaceSprites != null && data.customFaceSprites.Length >= 6)
         {
             int idx = exactFaceIndex >= 0 ? exactFaceIndex : Mathf.Clamp(faceToShow - 1, 0, data.customFaceSprites.Length - 1);
-            diceIcon.sprite = data.customFaceSprites[Mathf.Clamp(idx, 0, data.customFaceSprites.Length - 1)];
+            Sprite next = data.customFaceSprites[Mathf.Clamp(idx, 0, data.customFaceSprites.Length - 1)];
+            if (next != null)
+                diceIcon.sprite = next;
             return;
         }
 
@@ -350,7 +356,9 @@ public class DeckSlot : MonoBehaviour
         {
             // 커스텀 이미지가 1개밖에 없다면 무조건 0번째 이미지를 띄움 (에러 방지)
             int safeIndex = (data.customFaceSprites.Length == 1) ? 0 : Mathf.Clamp(faceToShow - 1, 0, data.customFaceSprites.Length - 1);
-            diceIcon.sprite = data.customFaceSprites[safeIndex];
+            Sprite next = data.customFaceSprites[safeIndex];
+            if (next != null)
+                diceIcon.sprite = next;
             return; // 여기서 함수를 끝내서 숫자 6으로 바뀌는 현상을 막음
         }
 

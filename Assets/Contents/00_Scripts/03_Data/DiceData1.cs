@@ -115,6 +115,17 @@ public class DiceData1
         }
         return -1;
     }
+
+    // 6칸이 모두 채워져 있어야 면 번호 0~5 순환이 흰 칸 없이 안전하다(여정 주사위).
+    public static bool HasCompleteFaceSprites(Sprite[] sprites)
+    {
+        if (sprites == null || sprites.Length < 6) return false;
+        for (int i = 0; i < 6; i++)
+        {
+            if (sprites[i] == null) return false;
+        }
+        return true;
+    }
 }
 
 // 지도에서 여정 주사위를 굴린 결과가 어떤 종류인지

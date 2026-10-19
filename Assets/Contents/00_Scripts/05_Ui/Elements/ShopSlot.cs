@@ -103,17 +103,30 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         {
             int[] uniqueFaces = diceData.customFaces.Distinct().ToArray();
             bool shouldAnimate = uniqueFaces.Length > 1 && uniqueFaces.Length < 6;
-            bool perFace = diceData.customFaceSprites != null && diceData.customFaceSprites.Length >= 6;
+            Sprite[] faceSprites = diceData.customFaceSprites;
+            bool completePerFace = DiceData1.HasCompleteFaceSprites(faceSprites);
+            bool hasFaceSprites = faceSprites != null && faceSprites.Length > 0;
 
-            if (perFace && (shouldAnimate || diceData.isJourneyDice))
+            if ((completePerFace && (shouldAnimate || diceData.isJourneyDice)) ||
+                (shouldAnimate && hasFaceSprites))
             {
                 isAnimating = true;
-                animUseFaceIndex = true;
-                animFaces = new int[] { 0, 1, 2, 3, 4, 5 };
-                animSprites = diceData.customFaceSprites;
+                animSprites = faceSprites;
                 currentAnimIndex = 0;
                 animTimer = 0f;
-                if (itemIcon != null) itemIcon.sprite = animSprites[0];
+                if (completePerFace)
+                {
+                    // 여정처럼 6칸이 모두 있으면 면 번호로 순환
+                    animUseFaceIndex = true;
+                    animFaces = new int[] { 0, 1, 2, 3, 4, 5 };
+                }
+                else
+                {
+                    // 하이/로우/짝/홀은 실제 눈 값만 순환 (빈 칸 제외)
+                    animUseFaceIndex = false;
+                    animFaces = uniqueFaces;
+                }
+                ApplyAnimSprite();
             }
             else
             {
@@ -148,13 +161,23 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             {
                 animTimer = 0f;
                 currentAnimIndex = (currentAnimIndex + 1) % animFaces.Length;
-                int spriteIndex = animUseFaceIndex
-                    ? animFaces[currentAnimIndex]
-                    : animFaces[currentAnimIndex] - 1;
-                itemIcon.sprite = animSprites[Mathf.Clamp(spriteIndex, 0, animSprites.Length - 1)];
+                ApplyAnimSprite();
                 FitItemIcon();
             }
         }
+    }
+
+    // null 스프라이트면 이번 프레임을 건너뛰고 이전 아이콘을 유지한다.
+    void ApplyAnimSprite()
+    {
+        if (itemIcon == null || animSprites == null || animFaces == null || animFaces.Length == 0) return;
+        int spriteIndex = animUseFaceIndex
+            ? animFaces[currentAnimIndex]
+            : animFaces[currentAnimIndex] - 1;
+        if (spriteIndex < 0 || spriteIndex >= animSprites.Length) return;
+        Sprite next = animSprites[spriteIndex];
+        if (next == null) return;
+        itemIcon.sprite = next;
     }
 
     // 버튼 클릭 시 작동하는 구매 로직
