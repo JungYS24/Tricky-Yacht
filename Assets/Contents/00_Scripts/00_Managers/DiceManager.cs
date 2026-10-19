@@ -1356,17 +1356,21 @@ public class DiceManager : MonoBehaviour
     // 지도 굴림에 쓰는 덱의 여정 주사위. 못 찾으면 null이며, 굴림은 기본 면 구성으로 대신한다.
     public DiceData1 GetJourneyDiceData() => JourneyDice.Find(deckManager.masterDeck);
 
-    // 여정 주사위 면 스프라이트. 에셋 스프라이트가 없으면 기본 주사위 눈금 이미지로 대신한다.
-    public Sprite GetJourneyFaceSprite(DiceData1 die, int pips)
+    // 여정 주사위 면 스프라이트. 해골/하트/골드처럼 눈 값이 같아도 면 번호로 고른다.
+    public Sprite GetJourneyFaceSprite(DiceData1 die, int faceIndex)
     {
         if (die != null && die.customFaceSprites != null && die.customFaceSprites.Length > 0)
         {
-            int index = die.customFaceSprites.Length == 1 ? 0 : Mathf.Clamp(pips - 1, 0, die.customFaceSprites.Length - 1);
+            int index = die.customFaceSprites.Length == 1 ? 0 : Mathf.Clamp(faceIndex, 0, die.customFaceSprites.Length - 1);
             if (die.customFaceSprites[index] != null) return die.customFaceSprites[index];
         }
         Dice prefabDice = dicePrefab != null ? dicePrefab.GetComponent<Dice>() : null;
         if (prefabDice != null && prefabDice.diceFaceSprites != null && prefabDice.diceFaceSprites.Length > 0)
-            return prefabDice.diceFaceSprites[Mathf.Clamp(pips - 1, 0, prefabDice.diceFaceSprites.Length - 1)];
+        {
+            int pip = die != null && die.faceValues != null && faceIndex >= 0 && faceIndex < die.faceValues.Length
+                ? die.faceValues[faceIndex] : JourneyDice.MapPipsFromFaceIndex(faceIndex);
+            return prefabDice.diceFaceSprites[Mathf.Clamp(pip - 1, 0, prefabDice.diceFaceSprites.Length - 1)];
+        }
         return null;
     }
 
@@ -1374,12 +1378,11 @@ public class DiceManager : MonoBehaviour
     public Sprite RandomJourneyFaceSprite()
     {
         DiceData1 die = GetJourneyDiceData() ?? JourneyDice.CreateDefault();
-        int pips = die.faceValues[JourneyDice.RollFaceIndex(die)];
-        return GetJourneyFaceSprite(die, pips);
+        return GetJourneyFaceSprite(die, JourneyDice.RollFaceIndex(die));
     }
 
     // 여정 주사위의 면 하나를 굴려 결과를 계산한다. 상태는 바꾸지 않는다.
-    // 덱에서 여정 주사위를 못 찾아도 기본 면 구성({1~6}, {없음×3, 가시, 하트, 코인})으로 굴려 멈추지 않는다.
+    // 덱에서 여정 주사위를 못 찾아도 기본 면 구성으로 굴려 멈추지 않는다.
     public JourneyRollResult RollJourneyFace()
     {
         DiceData1 die = GetJourneyDiceData();
@@ -1387,16 +1390,17 @@ public class DiceManager : MonoBehaviour
             die = JourneyDice.CreateDefault();
 
         int faceIndex = JourneyDice.RollFaceIndex(die);
-        int pips = die.faceValues[faceIndex];
+        // 지도 효과량은 면 번호(1~6). 전투 눈금(faceValues)과 섞지 않는다.
+        int mapPips = JourneyDice.MapPipsFromFaceIndex(faceIndex);
         SpecialDieEffect effect = die.GetFaceEffect(faceIndex);
         MapTableData table = GetMapTable();
 
         var result = new JourneyRollResult
         {
             faceIndex = faceIndex,
-            pips = pips,
+            pips = mapPips,
             effect = effect,
-            faceSprite = GetJourneyFaceSprite(die, pips)
+            faceSprite = GetJourneyFaceSprite(die, faceIndex)
         };
 
         // 지도에서는 면 효과만 쓴다. 코팅·위성 효과는 전투 결산에서만 적용한다.
@@ -1404,21 +1408,21 @@ public class DiceManager : MonoBehaviour
         {
             case SpecialDieEffect.Thorn:
                 result.outcome = JourneyOutcome.Damage;
-                result.amount = Mathf.Max(0, pips);
+                result.amount = Mathf.Max(0, mapPips);
                 break;
             case SpecialDieEffect.Heart:
                 result.outcome = JourneyOutcome.Heal;
                 float healMult = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetHealMultiplier() : 1f;
-                result.amount = Mathf.Max(0, TurnCalculator.CalculateHeartHeal(pips, healMult));
+                result.amount = Mathf.Max(0, TurnCalculator.CalculateHeartHeal(mapPips, healMult));
                 break;
             case SpecialDieEffect.Coin:
                 result.outcome = JourneyOutcome.Gold;
                 int goldPerPip = table != null ? table.Config.JourneyMapGoldPerPip : 10;
-                result.amount = Mathf.Max(0, pips * goldPerPip);
+                result.amount = Mathf.Max(0, mapPips * goldPerPip);
                 break;
             default:
                 result.outcome = JourneyOutcome.Move;
-                result.amount = Mathf.Max(1, pips);
+                result.amount = Mathf.Max(1, mapPips);
                 break;
         }
         return result;

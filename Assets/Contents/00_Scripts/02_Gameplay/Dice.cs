@@ -91,7 +91,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
         currentValue = initialValue;
         currentFaceIndex = faceIndex >= 0 ? faceIndex : myData.FindFaceIndex(initialValue);
-        UpdateSprite(initialValue);
+        ShowFace(currentFaceIndex);
 
         // 스탬프가 찍힌 주사위만 표시를 붙인다. 풀에서 다시 쓰는 주사위는 스탬프가 없으면 숨긴다.
         if (stampBadge == null && myData.stampType != StampType.None) stampBadge = StampBadge.Get(this);
@@ -104,6 +104,21 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         int[] uniqueFaces = myData.faceValues.Distinct().ToArray();
         bool shouldAnimate = uniqueFaces.Length > 1 && uniqueFaces.Length < 6;
 
+    }
+
+    // 커스텀 6면은 눈 값이 같아도 면 번호로 스프라이트를 고른다(여정 해골/하트/골드).
+    void ShowFace(int faceIndex)
+    {
+        if (spriteRenderer == null) return;
+        if (myData != null && myData.customFaceSprites != null && myData.customFaceSprites.Length >= 6 && faceIndex >= 0)
+        {
+            spriteRenderer.sprite = myData.customFaceSprites[Mathf.Clamp(faceIndex, 0, myData.customFaceSprites.Length - 1)];
+            return;
+        }
+        int value = currentValue;
+        if (myData != null && myData.faceValues != null && faceIndex >= 0 && faceIndex < myData.faceValues.Length)
+            value = myData.faceValues[faceIndex];
+        UpdateSprite(value);
     }
 
     private void UpdateSprite(int value)
@@ -217,7 +232,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             // 1~6 전체가 아닌, 이 주사위가 가진 면(faceValues) 중에서만 랜덤하게 보여줌
             // 홀수 주사위라면 굴러가는 동안에도 1, 3, 5만 보임
             int randomFaceIndex = UnityEngine.Random.Range(0, 6);
-            UpdateSprite(myData.faceValues[randomFaceIndex]);
+            ShowFace(randomFaceIndex);
 
             // 흔들림 및 회전 연출
             Vector3 randomOffset = new Vector3(
@@ -236,7 +251,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         transform.localScale = originalScale;
         currentValue = finalValue;
         currentFaceIndex = faceIndex >= 0 ? faceIndex : (myData != null ? myData.FindFaceIndex(finalValue) : -1);
-        UpdateSprite(finalValue);
+        ShowFace(currentFaceIndex);
 
         // 팝업 이펙트 및 파티클
         transform.localScale = originalScale * 1.25f;

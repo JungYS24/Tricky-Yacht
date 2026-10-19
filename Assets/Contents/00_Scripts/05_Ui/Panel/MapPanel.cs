@@ -297,8 +297,8 @@ public class MapPanel : MonoBehaviour
         int pending = diceManager.stageProgression.pendingJourneyMove;
         if (pending > 0)
         {
-            // 대기 중인 이동 칸 수는 눈 값과 같으므로 그 면 스프라이트를 다시 보여 준다(불러오기 직후에도 동일).
-            Sprite pendingFace = diceManager.GetJourneyFaceSprite(diceManager.GetJourneyDiceData(), pending);
+            // 대기 중인 이동 칸 수는 면 번호(1~3)와 같으므로 그 면 스프라이트를 다시 보여 준다.
+            Sprite pendingFace = diceManager.GetJourneyFaceSprite(diceManager.GetJourneyDiceData(), pending - 1);
             SetJourneyResult(pendingFace);
         }
         else

@@ -143,7 +143,8 @@ public static class JourneyDice
     // Dice_Journey 에셋의 itemName과 같아야 저장 복원이 이름으로 찾는다.
     public const string DefaultName = "Journey";
 
-    public static readonly int[] DefaultFaceValues = { 1, 2, 3, 4, 5, 6 };
+    // 전투 눈금. 이동 면은 1·2·3, 해골·하트·골드는 전부 1. 지도 효과량은 MapPipsFromFaceIndex를 쓴다.
+    public static readonly int[] DefaultFaceValues = { 1, 2, 3, 1, 1, 1 };
     public static readonly SpecialDieEffect[] DefaultFaceEffects =
     {
         SpecialDieEffect.None, SpecialDieEffect.None, SpecialDieEffect.None,
@@ -194,4 +195,7 @@ public static class JourneyDice
         int count = die != null && die.faceValues != null && die.faceValues.Length > 0 ? die.faceValues.Length : DefaultFaceValues.Length;
         return Random.Range(0, count);
     }
+
+    // 지도 이동·피해·회복·골드량은 면 번호(1~6) 기준. 전투 눈금(faceValues)과 분리한다.
+    public static int MapPipsFromFaceIndex(int faceIndex) => faceIndex + 1;
 }

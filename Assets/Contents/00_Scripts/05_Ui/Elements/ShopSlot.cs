@@ -63,6 +63,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private int currentAnimIndex;
     private float animTimer;
     private float animInterval = 0.7f;
+    private bool animUseFaceIndex = false;
 
     void Awake()
     {
@@ -87,6 +88,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         manager = shopMgr;
         isPurchased = false;
         isAnimating = false; // 새로운 아이템이 들어올 때 애니메이션 초기화
+        animUseFaceIndex = false;
 
         //정상적으로 아이템이 들어올 때는 자물쇠를 끄고 잠금 해제
         isLocked = false;
@@ -101,18 +103,17 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         {
             int[] uniqueFaces = diceData.customFaces.Distinct().ToArray();
             bool shouldAnimate = uniqueFaces.Length > 1 && uniqueFaces.Length < 6;
+            bool perFace = diceData.customFaceSprites != null && diceData.customFaceSprites.Length >= 6;
 
-            if (shouldAnimate && diceData.customFaceSprites != null && diceData.customFaceSprites.Length >= 6)
+            if (perFace && (shouldAnimate || diceData.isJourneyDice))
             {
-                // 애니메이션 세팅
                 isAnimating = true;
-                animFaces = uniqueFaces;
+                animUseFaceIndex = true;
+                animFaces = new int[] { 0, 1, 2, 3, 4, 5 };
                 animSprites = diceData.customFaceSprites;
                 currentAnimIndex = 0;
                 animTimer = 0f;
-
-                // 첫 프레임부터 하얀 네모나 잘못된 이미지가 뜨지 않도록 즉시 적용
-                if (itemIcon != null) itemIcon.sprite = animSprites[animFaces[0] - 1];
+                if (itemIcon != null) itemIcon.sprite = animSprites[0];
             }
             else
             {
@@ -147,7 +148,10 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             {
                 animTimer = 0f;
                 currentAnimIndex = (currentAnimIndex + 1) % animFaces.Length;
-                itemIcon.sprite = animSprites[animFaces[currentAnimIndex] - 1];
+                int spriteIndex = animUseFaceIndex
+                    ? animFaces[currentAnimIndex]
+                    : animFaces[currentAnimIndex] - 1;
+                itemIcon.sprite = animSprites[Mathf.Clamp(spriteIndex, 0, animSprites.Length - 1)];
                 FitItemIcon();
             }
         }

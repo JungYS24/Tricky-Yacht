@@ -92,7 +92,14 @@ public static class GameStateRestorer
                     ? (DebuffDiceType)dData.debuffType : DebuffDiceType.None;
                 if (newDice.IsDebuff) dm.ApplyDebuffAppearance(newDice);
                 if (newDice.IsDebuff && dData.isCurrentCombatDebuff) dm.currentCombatDebuffs.Add(newDice);
-                if (dData.isJourneyDice) newDice.isJourneyDice = true;
+                if (dData.isJourneyDice)
+                {
+                    newDice.isJourneyDice = true;
+                    // 구세이브의 4·5·6 눈금을 현재 전투 눈금(1,2,3,1,1,1)으로 맞춘다.
+                    DiceItemSO journeySource = JourneyDice.FindSource();
+                    if (journeySource != null && journeySource.customFaces != null && journeySource.customFaces.Length == 6)
+                        newDice.faceValues = (int[])journeySource.customFaces.Clone();
+                }
                 if (dData.faceEffects != null && dData.faceEffects.Length == 6)
                 {
                     var restoredEffects = new SpecialDieEffect[6];

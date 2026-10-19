@@ -42,6 +42,7 @@ public class DeckSlot : MonoBehaviour
     // LINQ 대체 및 배열 재할당 방지를 위한 고정 배열
     private int[] animFaces = new int[6];
     private int animUniqueCount = 0;
+    private bool animUseFaceIndex = false;
 
     private Sprite[] animSprites;
     private int currentAnimIndex;
@@ -54,6 +55,7 @@ public class DeckSlot : MonoBehaviour
     private bool isUsedState = false;
 
     private int exactFaceValue = -1;
+    private int exactFaceIndex = -1;
     private GameObject currentVFX;
     private DiceType lastVFXType = DiceType.Normal;
 
@@ -67,6 +69,7 @@ public class DeckSlot : MonoBehaviour
         isAnimating = false;
         isPrismUI = false;
         exactFaceValue = -1;
+        exactFaceIndex = -1;
 
         ClearVFX();
 
@@ -75,11 +78,12 @@ public class DeckSlot : MonoBehaviour
         if (stampVisual != null) stampVisual.Bind(null);
     }
 
-    public void SetDice(DiceData1 data, bool isUsed, int exactValue = -1)
+    public void SetDice(DiceData1 data, bool isUsed, int exactValue = -1, int faceIndex = -1)
     {
         currentData = data;
         isUsedState = isUsed;
         exactFaceValue = exactValue;
+        exactFaceIndex = faceIndex;
         emptyVisual.SetActive(false);
         filledVisual.SetActive(true);
 
@@ -88,8 +92,10 @@ public class DeckSlot : MonoBehaviour
 
         animTimer = 0f;
         currentAnimIndex = 0;
+        animUseFaceIndex = false;
 
-        //LINQ 제거 및 단일 반복문 최적화
+        bool hasPerFaceSprites = data.customFaceSprites != null && data.customFaceSprites.Length >= 6;
+
         int minVal = data.faceValues[0];
         int maxVal = data.faceValues[0];
         bool isFixed = true;
@@ -123,8 +129,19 @@ public class DeckSlot : MonoBehaviour
             }
         }
 
-        isAnimating = animUniqueCount > 1 && animUniqueCount < 6;
-        bool isSpecialDie = isAnimating || isFixed || data.customDiceShell != null;
+        // 여정처럼 눈 값이 겹쳐도 면 스프라이트가 6장이면 면 번호로 돌려 보여 준다.
+        if (hasPerFaceSprites && exactFaceValue == -1 && exactFaceIndex < 0)
+        {
+            for (int i = 0; i < 6; i++) animFaces[i] = i;
+            animUniqueCount = 6;
+            animUseFaceIndex = true;
+            isAnimating = true;
+        }
+        else
+        {
+            isAnimating = animUniqueCount > 1 && animUniqueCount < 6;
+        }
+        bool isSpecialDie = isAnimating || isFixed || data.customDiceShell != null || hasPerFaceSprites;
 
         if (data.isCoated)
         {
@@ -308,8 +325,9 @@ public class DeckSlot : MonoBehaviour
         if (diceIcon != null && animSprites != null && animSprites.Length > 0)
         {
             int faceValue = animFaces[currentAnimIndex];
-            // 배열 크기를 넘어서는 눈금(예: 88)이 들어와도 에러가 나지 않도록 안전하게 묶어줌
-            int safeIndex = Mathf.Clamp(faceValue - 1, 0, animSprites.Length - 1);
+            int safeIndex = animUseFaceIndex
+                ? Mathf.Clamp(faceValue, 0, animSprites.Length - 1)
+                : Mathf.Clamp(faceValue - 1, 0, animSprites.Length - 1);
             diceIcon.sprite = animSprites[safeIndex];
         }
     }
@@ -319,6 +337,13 @@ public class DeckSlot : MonoBehaviour
         if (diceIcon == null) return;
 
         int faceToShow = exactFaceValue != -1 ? exactFaceValue : data.faceValues[UnityEngine.Random.Range(0, data.faceValues.Length)];
+
+        if (data.customFaceSprites != null && data.customFaceSprites.Length >= 6)
+        {
+            int idx = exactFaceIndex >= 0 ? exactFaceIndex : Mathf.Clamp(faceToShow - 1, 0, data.customFaceSprites.Length - 1);
+            diceIcon.sprite = data.customFaceSprites[Mathf.Clamp(idx, 0, data.customFaceSprites.Length - 1)];
+            return;
+        }
 
         //커스텀 이미지가 설정되어 있다면 무조건 최우선으로 띄워줌 (88 주사위 완벽 대응)
         if (data.customFaceSprites != null && data.customFaceSprites.Length > 0)

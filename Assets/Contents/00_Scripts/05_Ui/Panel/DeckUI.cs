@@ -107,16 +107,18 @@ public class DeckUI : MonoBehaviour
                 }
 
                 int exactValue = -1;
+                int exactFaceIndex = -1;
                 if (isUsed && activeDice != null)
                 {
                     Dice fieldDice = activeDice.FirstOrDefault(d => d != null && d.myData == diceData);
                     if (fieldDice != null)
                     {
                         exactValue = fieldDice.currentValue;
+                        exactFaceIndex = fieldDice.currentFaceIndex;
                     }
                 }
 
-                slotList[i].SetDice(diceData, isUsed, exactValue);
+                slotList[i].SetDice(diceData, isUsed, exactValue, exactFaceIndex);
             }
             else
             {
