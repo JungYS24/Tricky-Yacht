@@ -86,3 +86,6 @@ UI,UI_RELATED_SYNERGY,관련 시너지,Related Synergy,関連シナジー,相关
 UI,UI_MONSTER_APPEARANCE,출현 바이옴 : {0} · {1},Appears in: {0} · {1},出現バイオーム: {0} · {1},出现区域: {0} · {1},
 UI,UI_MONSTER_GRADE_NORMAL,일반,Normal,通常,普通,
 UI,UI_MONSTER_GRADE_BOSS,보스,Boss,ボス,首领,
+UI,UI_PANEL_SCORE,점수,Score,スコア,得分,왼쪽 계산 패널 점수 칸 제목
+UI,UI_PANEL_ROLLS,굴리기,Rolls,ロール,投骰,왼쪽 계산 패널 남은 굴리기 칸 제목
+UI,UI_PANEL_FINISHES,끝내기,Finish,終了,结束,왼쪽 계산 패널 남은 끝내기 칸 제목

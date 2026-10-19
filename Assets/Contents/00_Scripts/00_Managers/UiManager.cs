@@ -47,6 +47,8 @@ public class UIManager : MonoBehaviour
     [Header("플레이어 체력 UI")]
     //플레이어 체력
     public TextMeshProUGUI heartText;
+    [Tooltip("켜면 보호막이 있을 때 체력 글자에 보호막 수치를 붙입니다. 예: 100(4)/100")]
+    public bool shieldInHealthText;
 
     //보호막 UI 연결용
     public GameObject shieldRoot;        
@@ -256,7 +258,7 @@ public class UIManager : MonoBehaviour
     private void UpdatePlayerHealthText(int hp, int maxHP, int shield)
     {
         if (heartText == null) return;
-        heartText.text = $"{hp}/{maxHP}";
+        heartText.text = shieldInHealthText && shield > 0 ? $"{hp}<color=#FFFFFF>({shield})</color>/{maxHP}" : $"{hp}/{maxHP}";
         heartText.enableWordWrapping = false;
         heartText.enableAutoSizing = true;
         if (DiceManager.Instance != null) HurtVignetteController.Get(DiceManager.Instance).UpdateShieldDisplay(this, Mathf.Max(0, shield));
