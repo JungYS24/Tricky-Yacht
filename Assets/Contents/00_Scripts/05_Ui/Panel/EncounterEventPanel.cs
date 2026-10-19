@@ -60,13 +60,26 @@ public class EncounterEventPanel : MonoBehaviour
     public Button choiceBButton;
     public TextMeshProUGUI choiceBText;
 
+    [Header("대화창 스킨")]
+    public Sprite dialogPanelSprite;
+    public Sprite choiceButtonSprite;
+    [Tooltip("값이 클수록 9슬라이스 테두리가 얇아집니다.")]
+    public float dialogBorderScale = 1f;
+
     private int dialogueIndex = 0;
+    Color choiceATextColor = Color.white;
+    Color choiceBTextColor = Color.white;
 
     private void Awake()
     {
         if (nextDialogueButton != null) nextDialogueButton.onClick.AddListener(OnNextDialogue);
         if (choiceAButton != null) choiceAButton.onClick.AddListener(OnChoiceASelected);
         if (choiceBButton != null) choiceBButton.onClick.AddListener(OnChoiceBSelected);
+
+        if (choiceAText != null) choiceATextColor = choiceAText.color;
+        if (choiceBText != null) choiceBTextColor = choiceBText.color;
+
+        ApplyDialogSkin();
 
         if (fullScreenBackground != null) fullScreenBackground.SetActive(false);
         if (dialogueRoot != null) dialogueRoot.SetActive(false);
@@ -168,11 +181,156 @@ public class EncounterEventPanel : MonoBehaviour
 
         choiceAButton.interactable = CheckChoiceACondition(currentEncounter.type);
         choiceBButton.interactable = true;
+        RefreshChoiceATextAlpha();
 
         if (choiceAButton != null) choiceAButton.gameObject.SetActive(true);
         if (choiceBButton != null) choiceBButton.gameObject.SetActive(true);
 
         if (choiceRoot != null) choiceRoot.SetActive(true);
+        RefreshChoiceLayout();
+    }
+
+    void EnsureSkinSprites()
+    {
+#if UNITY_EDITOR
+        if (dialogPanelSprite == null)
+            dialogPanelSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/Contents/06_UI/Sprites/Encounter/Encounter_Dialog_Panel.png");
+        if (choiceButtonSprite == null)
+            choiceButtonSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
+                "Assets/Contents/06_UI/Sprites/Encounter/Encounter_Choice_Button.png");
+#endif
+    }
+
+    void ApplyDialogSkin()
+    {
+        EnsureSkinSprites();
+
+        float borderMul = Mathf.Max(0.01f, dialogBorderScale);
+        ApplyPanelImage(dialogueRoot, dialogPanelSprite, borderMul);
+        ApplyPanelImage(choiceRoot, dialogPanelSprite, borderMul);
+
+        if (dialogueText != null)
+            dialogueText.margin = new Vector4(140f, 60f, 140f, 60f);
+
+        SkinChoiceButton(choiceAButton, choiceAText, choiceATextColor);
+        SkinChoiceButton(choiceBButton, choiceBText, choiceBTextColor);
+        SetupChoiceLayout();
+        RefreshChoiceLayout();
+    }
+
+    static void ApplyPanelImage(GameObject root, Sprite sprite, float borderMul)
+    {
+        if (root == null || sprite == null) return;
+        Image image = root.GetComponent<Image>();
+        if (image == null) return;
+        image.sprite = sprite;
+        image.type = Image.Type.Sliced;
+        image.color = Color.white;
+        image.fillCenter = true;
+        image.pixelsPerUnitMultiplier = borderMul;
+    }
+
+    void SkinChoiceButton(Button button, TextMeshProUGUI label, Color textColor)
+    {
+        if (button == null) return;
+
+        Image graphic = button.targetGraphic as Image;
+        if (graphic == null) graphic = button.GetComponent<Image>();
+        if (graphic != null && choiceButtonSprite != null)
+        {
+            graphic.sprite = choiceButtonSprite;
+            graphic.type = Image.Type.Sliced;
+            graphic.color = Color.white;
+            graphic.fillCenter = true;
+            graphic.pixelsPerUnitMultiplier = Mathf.Max(0.01f, dialogBorderScale);
+        }
+
+        ColorBlock colors = button.colors;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(1f, 0.95f, 0.8f, 1f);
+        colors.pressedColor = new Color(0.8f, 0.75f, 0.65f, 1f);
+        colors.selectedColor = new Color(1f, 0.95f, 0.8f, 1f);
+        colors.disabledColor = new Color(0.45f, 0.45f, 0.45f, 1f);
+        button.colors = colors;
+
+        if (label == null) return;
+        label.color = textColor;
+        label.alignment = TextAlignmentOptions.MidlineLeft;
+        label.margin = new Vector4(110f, 0f, 24f, 0f);
+        label.outlineWidth = 0.15f;
+        label.outlineColor = new Color(0.08f, 0.05f, 0.04f, 0.9f);
+    }
+
+    void SetupChoiceLayout()
+    {
+        if (choiceRoot == null) return;
+
+        VerticalLayoutGroup group = choiceRoot.GetComponent<VerticalLayoutGroup>();
+        if (group == null) group = choiceRoot.AddComponent<VerticalLayoutGroup>();
+        group.childAlignment = TextAnchor.MiddleCenter;
+        group.spacing = 16f;
+        group.childControlWidth = true;
+        group.childControlHeight = true;
+        group.childForceExpandWidth = false;
+        group.childForceExpandHeight = false;
+
+        EnsureButtonLayout(choiceAButton);
+        EnsureButtonLayout(choiceBButton);
+    }
+
+    static void EnsureButtonLayout(Button button)
+    {
+        if (button == null) return;
+        LayoutElement element = button.GetComponent<LayoutElement>();
+        if (element == null) element = button.gameObject.AddComponent<LayoutElement>();
+        element.preferredHeight = 90f;
+        element.minHeight = 90f;
+        element.flexibleWidth = 0f;
+        element.flexibleHeight = 0f;
+    }
+
+    void RefreshChoiceLayout()
+    {
+        if (choiceRoot == null) return;
+
+        VerticalLayoutGroup group = choiceRoot.GetComponent<VerticalLayoutGroup>();
+        RectTransform rootRect = choiceRoot.transform as RectTransform;
+        if (group == null || rootRect == null) return;
+
+        float scale = Mathf.Max(0.01f, dialogBorderScale);
+        int padX = Mathf.Max(24, Mathf.RoundToInt(140f / scale));
+        int padY = Mathf.Max(20, Mathf.RoundToInt(60f / scale));
+        group.padding = new RectOffset(padX, padX, padY, padY);
+
+        float innerWidth = Mathf.Max(0f, rootRect.rect.width - padX * 2f);
+        float preferredWidth = innerWidth * 0.85f;
+        float innerHeight = Mathf.Max(0f, rootRect.rect.height - padY * 2f);
+        float buttonHeight = 90f;
+        if (buttonHeight * 2f + 16f > innerHeight)
+            buttonHeight = Mathf.Max(64f, (innerHeight - 16f) * 0.5f);
+
+        ApplyButtonPreferredSize(choiceAButton, preferredWidth, buttonHeight);
+        ApplyButtonPreferredSize(choiceBButton, preferredWidth, buttonHeight);
+    }
+
+    static void ApplyButtonPreferredSize(Button button, float width, float height)
+    {
+        if (button == null) return;
+        LayoutElement element = button.GetComponent<LayoutElement>();
+        if (element == null) return;
+        element.preferredWidth = width;
+        element.minWidth = width;
+        element.preferredHeight = height;
+        element.minHeight = height;
+    }
+
+    void RefreshChoiceATextAlpha()
+    {
+        if (choiceAText == null || choiceAButton == null) return;
+        Color color = choiceATextColor;
+        color.a = choiceAButton.interactable ? choiceATextColor.a : choiceATextColor.a * 0.5f;
+        choiceAText.color = color;
     }
 
     private static string GetEncounterKeyPrefix(EncounterType type)
