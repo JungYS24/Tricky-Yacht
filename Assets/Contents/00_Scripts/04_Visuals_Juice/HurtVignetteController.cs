@@ -112,6 +112,8 @@ public class HurtVignetteController : MonoBehaviour
     public float shieldToHealthDelay = 0.1f;
     public float shieldShakeStrength = 0.035f;
     [Range(0.25f, 0.55f)] public float shieldRowHeightRatio = 0.45f;
+    [Tooltip("끄면 체력 숫자 아래 방패+숫자 줄을 띄우지 않습니다(체력 칸이 방패 그림·회색으로 대신 표시할 때).")]
+    public bool showShieldRow = true;
 
     private RectTransform shieldRow;
     private Image shieldIcon;
@@ -225,6 +227,7 @@ public class HurtVignetteController : MonoBehaviour
     private void ApplyShieldLayout(bool visible)
     {
         if (shieldRow == null || shieldHealthText == null) return;
+        if (!showShieldRow) visible = false;
         shieldRow.gameObject.SetActive(visible);
         shieldRow.anchorMax = new Vector2(1f, shieldRowHeightRatio);
         Vector4 margin = originalHealthMargin;
