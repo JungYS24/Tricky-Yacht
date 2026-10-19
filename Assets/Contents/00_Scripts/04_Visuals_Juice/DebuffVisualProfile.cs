@@ -82,6 +82,21 @@ public sealed class DebuffVisualProfile : ScriptableObject
     public Vector2 trackerMapOffset = new Vector2(6f, -16f);
     public Color trackerGlowColor = new Color(0.7f, 0.4f, 1f);
 
+    [Header("테이블 위 디버프 주사위 보랏빛 후광 (주사위 뒤에서 은은하게 번짐)")]
+    [Tooltip("굴리는 디버프 주사위 뒤에 보랏빛을 깔지")]
+    public bool boardGlow = true;
+    [Tooltip("가장자리가 부드럽게 사라지는 흰 둥근 네모 빛. 색은 아래 색으로 입힘")]
+    public Sprite haloSprite;
+    [Tooltip("후광 전용 머티리얼(M_DebuffHalo). 바닥을 보라로 덮는 정도(Tint)와 더하는 밝기(Glow)는 머티리얼에서 조절")]
+    public Material haloMaterial;
+    [Tooltip("주사위 크기 대비 후광 크기")]
+    [Range(1.2f, 2.5f)] public float boardGlowSize = 1.8f;
+    [Tooltip("숨 쉬듯 바뀌는 세기 범위(최소, 최대). 1이면 머티리얼 값 그대로")]
+    public Vector2 boardGlowStrength = new Vector2(0.7f, 1f);
+    [Tooltip("한 번 밝아졌다 어두워지는 데 걸리는 시간(초)")]
+    [Min(0.5f)] public float boardGlowPeriod = 2.4f;
+    public Color boardGlowColor = new Color(0.62f, 0.22f, 1f);
+
     [Header("발동 연출 이미지")]
     public Sprite chainLink;
     public Sprite smokePuff;

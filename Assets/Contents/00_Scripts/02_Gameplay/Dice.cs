@@ -97,6 +97,9 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         if (stampBadge == null && myData.stampType != StampType.None) stampBadge = StampBadge.Get(this);
         if (stampBadge != null) stampBadge.Bind(spriteRenderer, myData.stampType);
 
+        // 디버프 주사위는 뒤에 은은한 보랏빛을 깔아 굴릴 때도 알아볼 수 있게 한다.
+        DebuffDiceGlow.Sync(this, spriteRenderer);
+
         spriteRenderer.DOKill(); // 지난 결산의 가짜 주사위 흐림 연출이 남지 않도록 정리
         ApplyDiceColor();
 
