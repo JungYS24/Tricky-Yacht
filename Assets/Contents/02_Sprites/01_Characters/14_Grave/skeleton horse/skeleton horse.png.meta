@@ -137,12 +137,12 @@ TextureImporter:
       name: SkeletonHorse_SS_0
       rect:
         serializedVersion: 2
-        x: 7
-        y: 134
-        width: 114
-        height: 116
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -159,12 +159,12 @@ TextureImporter:
       name: SkeletonHorse_SS_1
       rect:
         serializedVersion: 2
-        x: 138
-        y: 134
-        width: 111
-        height: 115
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -181,12 +181,12 @@ TextureImporter:
       name: SkeletonHorse_SS_2
       rect:
         serializedVersion: 2
-        x: 266
-        y: 134
-        width: 111
-        height: 115
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -203,12 +203,12 @@ TextureImporter:
       name: SkeletonHorse_SS_3
       rect:
         serializedVersion: 2
-        x: 389
-        y: 134
-        width: 116
-        height: 116
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -225,12 +225,12 @@ TextureImporter:
       name: SkeletonHorse_SS_4
       rect:
         serializedVersion: 2
-        x: 4
-        y: 6
-        width: 117
-        height: 115
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -247,12 +247,12 @@ TextureImporter:
       name: SkeletonHorse_SS_5
       rect:
         serializedVersion: 2
-        x: 135
-        y: 6
-        width: 114
-        height: 115
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -269,12 +269,12 @@ TextureImporter:
       name: SkeletonHorse_SS_6
       rect:
         serializedVersion: 2
-        x: 264
-        y: 6
-        width: 113
-        height: 115
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -291,12 +291,12 @@ TextureImporter:
       name: SkeletonHorse_SS_7
       rect:
         serializedVersion: 2
-        x: 391
-        y: 6
-        width: 114
-        height: 116
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []

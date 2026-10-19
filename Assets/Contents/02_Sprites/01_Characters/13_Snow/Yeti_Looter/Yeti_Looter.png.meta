@@ -124,12 +124,12 @@ TextureImporter:
       name: Yeti_Looter_0
       rect:
         serializedVersion: 2
-        x: 4
-        y: 142
-        width: 116
-        height: 103
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -146,12 +146,12 @@ TextureImporter:
       name: Yeti_Looter_1
       rect:
         serializedVersion: 2
-        x: 132
-        y: 142
-        width: 115
-        height: 104
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -168,12 +168,12 @@ TextureImporter:
       name: Yeti_Looter_2
       rect:
         serializedVersion: 2
-        x: 260
-        y: 142
-        width: 116
-        height: 105
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -190,12 +190,12 @@ TextureImporter:
       name: Yeti_Looter_3
       rect:
         serializedVersion: 2
-        x: 388
-        y: 142
-        width: 116
-        height: 106
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -212,12 +212,12 @@ TextureImporter:
       name: Yeti_Looter_4
       rect:
         serializedVersion: 2
-        x: 4
-        y: 14
-        width: 115
-        height: 105
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -234,12 +234,12 @@ TextureImporter:
       name: Yeti_Looter_5
       rect:
         serializedVersion: 2
-        x: 132
-        y: 14
-        width: 115
-        height: 103
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -256,12 +256,12 @@ TextureImporter:
       name: Yeti_Looter_6
       rect:
         serializedVersion: 2
-        x: 259
-        y: 14
-        width: 115
-        height: 102
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -278,12 +278,12 @@ TextureImporter:
       name: Yeti_Looter_7
       rect:
         serializedVersion: 2
-        x: 387
-        y: 14
-        width: 114
-        height: 101
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []

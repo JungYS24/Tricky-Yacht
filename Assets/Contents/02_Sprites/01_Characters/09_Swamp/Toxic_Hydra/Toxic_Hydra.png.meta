@@ -124,12 +124,12 @@ TextureImporter:
       name: Toxic_Hydra_0
       rect:
         serializedVersion: 2
-        x: 8
-        y: 138
-        width: 112
-        height: 106
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -146,12 +146,12 @@ TextureImporter:
       name: Toxic_Hydra_1
       rect:
         serializedVersion: 2
-        x: 136
-        y: 138
-        width: 112
-        height: 107
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -168,12 +168,12 @@ TextureImporter:
       name: Toxic_Hydra_2
       rect:
         serializedVersion: 2
-        x: 264
-        y: 138
-        width: 112
-        height: 108
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -190,12 +190,12 @@ TextureImporter:
       name: Toxic_Hydra_3
       rect:
         serializedVersion: 2
-        x: 392
-        y: 138
-        width: 112
-        height: 108
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -212,12 +212,12 @@ TextureImporter:
       name: Toxic_Hydra_4
       rect:
         serializedVersion: 2
-        x: 9
-        y: 9
-        width: 111
-        height: 109
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -234,12 +234,12 @@ TextureImporter:
       name: Toxic_Hydra_5
       rect:
         serializedVersion: 2
-        x: 136
-        y: 10
-        width: 112
-        height: 108
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -256,12 +256,12 @@ TextureImporter:
       name: Toxic_Hydra_6
       rect:
         serializedVersion: 2
-        x: 264
-        y: 10
-        width: 112
-        height: 107
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -278,12 +278,12 @@ TextureImporter:
       name: Toxic_Hydra_7
       rect:
         serializedVersion: 2
-        x: 392
-        y: 10
-        width: 113
-        height: 104
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []

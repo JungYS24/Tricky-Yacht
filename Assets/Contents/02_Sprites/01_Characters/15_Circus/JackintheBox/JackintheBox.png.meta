@@ -137,12 +137,12 @@ TextureImporter:
       name: JackintheBox_SS_0
       rect:
         serializedVersion: 2
-        x: 12
-        y: 131
-        width: 103
-        height: 120
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -159,12 +159,12 @@ TextureImporter:
       name: JackintheBox_SS_1
       rect:
         serializedVersion: 2
-        x: 140
-        y: 131
-        width: 104
-        height: 119
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -181,12 +181,12 @@ TextureImporter:
       name: JackintheBox_SS_2
       rect:
         serializedVersion: 2
-        x: 268
-        y: 131
-        width: 104
-        height: 116
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -203,12 +203,12 @@ TextureImporter:
       name: JackintheBox_SS_3
       rect:
         serializedVersion: 2
-        x: 396
-        y: 131
-        width: 103
-        height: 115
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -225,12 +225,12 @@ TextureImporter:
       name: JackintheBox_SS_4
       rect:
         serializedVersion: 2
-        x: 12
-        y: 3
-        width: 102
-        height: 115
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -247,12 +247,12 @@ TextureImporter:
       name: JackintheBox_SS_5
       rect:
         serializedVersion: 2
-        x: 140
-        y: 3
-        width: 102
-        height: 116
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -269,12 +269,12 @@ TextureImporter:
       name: JackintheBox_SS_6
       rect:
         serializedVersion: 2
-        x: 268
-        y: 3
-        width: 102
-        height: 118
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -291,12 +291,12 @@ TextureImporter:
       name: JackintheBox_SS_7
       rect:
         serializedVersion: 2
-        x: 396
-        y: 3
-        width: 102
-        height: 119
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []

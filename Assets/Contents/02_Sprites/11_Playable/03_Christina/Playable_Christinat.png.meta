@@ -58,7 +58,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -96,7 +96,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -109,7 +109,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -122,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -135,7 +135,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -150,12 +150,12 @@ TextureImporter:
       name: Playable_Christinat_0
       rect:
         serializedVersion: 2
-        x: 10
-        y: 131
-        width: 102
-        height: 123
+        x: 0
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -172,12 +172,12 @@ TextureImporter:
       name: Playable_Christinat_1
       rect:
         serializedVersion: 2
-        x: 139
-        y: 131
-        width: 102
-        height: 123
+        x: 128
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -194,12 +194,12 @@ TextureImporter:
       name: Playable_Christinat_2
       rect:
         serializedVersion: 2
-        x: 268
-        y: 131
-        width: 102
-        height: 123
+        x: 256
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -216,12 +216,12 @@ TextureImporter:
       name: Playable_Christinat_3
       rect:
         serializedVersion: 2
-        x: 396
-        y: 131
-        width: 104
-        height: 123
+        x: 384
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -238,12 +238,12 @@ TextureImporter:
       name: Playable_Christinat_4
       rect:
         serializedVersion: 2
-        x: 8
-        y: 1
-        width: 104
-        height: 122
+        x: 0
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -260,12 +260,12 @@ TextureImporter:
       name: Playable_Christinat_5
       rect:
         serializedVersion: 2
-        x: 138
-        y: 1
-        width: 103
-        height: 123
+        x: 128
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -282,12 +282,12 @@ TextureImporter:
       name: Playable_Christinat_6
       rect:
         serializedVersion: 2
-        x: 268
-        y: 1
-        width: 102
-        height: 124
+        x: 256
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -304,12 +304,12 @@ TextureImporter:
       name: Playable_Christinat_7
       rect:
         serializedVersion: 2
-        x: 398
+        x: 384
         y: 0
-        width: 102
-        height: 125
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []

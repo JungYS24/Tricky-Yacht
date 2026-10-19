@@ -124,12 +124,12 @@ TextureImporter:
       name: Frostbite_Wolf_0
       rect:
         serializedVersion: 2
-        x: 4
-        y: 139
-        width: 121
-        height: 97
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -146,12 +146,12 @@ TextureImporter:
       name: Frostbite_Wolf_1
       rect:
         serializedVersion: 2
-        x: 132
-        y: 139
-        width: 122
-        height: 97
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -168,12 +168,12 @@ TextureImporter:
       name: Frostbite_Wolf_2
       rect:
         serializedVersion: 2
-        x: 260
-        y: 139
-        width: 122
-        height: 98
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -190,12 +190,12 @@ TextureImporter:
       name: Frostbite_Wolf_3
       rect:
         serializedVersion: 2
-        x: 388
-        y: 139
-        width: 122
-        height: 100
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -212,12 +212,12 @@ TextureImporter:
       name: Frostbite_Wolf_4
       rect:
         serializedVersion: 2
-        x: 4
-        y: 11
-        width: 122
-        height: 102
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -234,12 +234,12 @@ TextureImporter:
       name: Frostbite_Wolf_5
       rect:
         serializedVersion: 2
-        x: 132
-        y: 11
-        width: 119
-        height: 105
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -256,12 +256,12 @@ TextureImporter:
       name: Frostbite_Wolf_6
       rect:
         serializedVersion: 2
-        x: 260
-        y: 11
-        width: 121
-        height: 106
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -278,12 +278,12 @@ TextureImporter:
       name: Frostbite_Wolf_7
       rect:
         serializedVersion: 2
-        x: 388
-        y: 11
-        width: 123
-        height: 106
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
