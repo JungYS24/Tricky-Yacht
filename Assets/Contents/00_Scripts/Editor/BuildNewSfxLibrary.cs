@@ -56,11 +56,79 @@ public static class BuildNewSfxLibrary
         BindSingle(library, mixer, SfxId.Journey_Step, "Cue_Journey_Step", 0.5f, "Journey_Step");
         BindSingle(library, mixer, SfxId.Dice_Burn_Vanish, "Cue_Dice_Burn_Vanish", 0.35f, "Dice_Burn_Vanish");
         BindSingle(library, mixer, SfxId.Game_Start_Door, "Cue_Game_Start_Door", 0.6f, "Game_Start_Door");
+        BindStampApply(library, mixer);
+        BindExistingCue(library, SfxId.Journey_Roll,
+            "Assets/Contents/08_Audio/SFX/Dice/Cue_Rolling_Dice.asset");
 
         EditorUtility.SetDirty(library);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log("[Build New SFX Library] Cue와 SfxLibrary를 갱신했습니다.");
+    }
+
+    [MenuItem("Tools/Audio/Validate New SFX Library")]
+    public static void Validate()
+    {
+        SfxLibrary library = AssetDatabase.LoadAssetAtPath<SfxLibrary>(LibraryPath);
+        if (library == null)
+        {
+            Debug.LogWarning("[Validate New SFX Library] Resources/SfxLibrary.asset이 없습니다.");
+            return;
+        }
+
+        Debug.Log("[Validate New SFX Library] SfxLibrary.asset 있음");
+        foreach (SfxId id in System.Enum.GetValues(typeof(SfxId)))
+        {
+            AudioEvent audioEvent = library.Get(id);
+            if (audioEvent == null)
+            {
+                Debug.LogWarning("[Validate New SFX Library] 미연결: " + id);
+                continue;
+            }
+
+            if (!HasClip(audioEvent))
+            {
+                Debug.LogWarning("[Validate New SFX Library] clips 비어 있음: " + id);
+                continue;
+            }
+
+            Debug.Log("[Validate New SFX Library] OK: " + id + " → " + audioEvent.name);
+        }
+    }
+
+    static void BindStampApply(SfxLibrary library, AudioMixerGroup mixer)
+    {
+        const string stampClip = "Stamp_Apply";
+        string stampPath = NewSfxFolder + "/" + stampClip + ".mp3";
+        string clipName = stampClip;
+        if (AssetDatabase.LoadAssetAtPath<AudioClip>(stampPath) == null)
+        {
+            clipName = "Coating_Apply";
+            Debug.LogWarning("[Build New SFX Library] Stamp_Apply.mp3가 없어 Coating_Apply 클립으로 임시 대체합니다.");
+        }
+        BindSingle(library, mixer, SfxId.Stamp_Apply, "Cue_Stamp_Apply", 0.6f, clipName);
+    }
+
+    static void BindExistingCue(SfxLibrary library, SfxId id, string assetPath)
+    {
+        AudioEvent cue = AssetDatabase.LoadAssetAtPath<AudioEvent>(assetPath);
+        if (cue == null)
+        {
+            Debug.LogWarning("[Build New SFX Library] 기존 Cue를 찾지 못했습니다: " + assetPath);
+            return;
+        }
+        library.Set(id, cue);
+    }
+
+    static bool HasClip(AudioEvent audioEvent)
+    {
+        if (audioEvent == null || audioEvent.clips == null || audioEvent.clips.Length == 0)
+            return false;
+        for (int i = 0; i < audioEvent.clips.Length; i++)
+        {
+            if (audioEvent.clips[i] != null) return true;
+        }
+        return false;
     }
 
     static void BindSingle(SfxLibrary library, AudioMixerGroup mixer, SfxId id, string cueName, float volume, string clipName)

@@ -433,6 +433,8 @@ public class EncounterEventPanel : MonoBehaviour
 
             case EncounterType.Alchemist:
                 // 내 덱의 모든 주사위를 코팅 및 눈금 무작위 변환시키고 3000골드 획득
+                if (diceManager.masterDeck.Count > 0)
+                    Sfx.Play(SfxId.Coating_Apply);
                 foreach (var d in diceManager.masterDeck)
                 {
                     // 1. 코팅 랜덤

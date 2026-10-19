@@ -16,5 +16,7 @@ public enum SfxId
     Coating_Apply,
     Journey_Step,
     Dice_Burn_Vanish,
-    Game_Start_Door
+    Game_Start_Door,
+    Stamp_Apply,
+    Journey_Roll
 }

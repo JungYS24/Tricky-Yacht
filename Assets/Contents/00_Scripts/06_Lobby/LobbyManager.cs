@@ -6,7 +6,9 @@ using UnityEngine.UI;
 public class LobbyManager : MonoBehaviour
 {
     public GameObject glitchOverlay;
-    public AudioSource sfxSource;    
+    public AudioSource sfxSource;
+    // 씬 직렬화 보존용. 로비 시작음은 Game_Start_Door만 재생한다.
+    [System.Obsolete("로비 시작음은 SfxId.Game_Start_Door를 사용합니다.")]
     public AudioClip glitchSound;
 
     [Header("이어하기 버튼")]
@@ -74,14 +76,6 @@ public class LobbyManager : MonoBehaviour
     IEnumerator GlitchAndLoad(string sceneName)
     {
         if (glitchOverlay != null) glitchOverlay.SetActive(true);
-        if (glitchSound != null)
-        {
-            if (AudioControl.Instance != null)
-                AudioControl.Instance.PlaySFX(glitchSound);
-            else if (sfxSource != null)
-                sfxSource.PlayOneShot(glitchSound);
-        }
-
         Sfx.Play(SfxId.Game_Start_Door);
 
         yield return new WaitForSeconds(0.7f);

@@ -92,6 +92,7 @@ public class SynergyData : BaseItemDataSO
                 dice.isCoated = true;
                 dice.type = DiceType.Dark;
                 dice.diceColor = new Color(0x2B, 0x2A, 0x1A);
+                Sfx.Play(SfxId.Coating_Apply);
                 break;
 
             case SynergyEffectType.StartWithSnackGarnish:

@@ -69,7 +69,7 @@ public class StampSelectionPanel : MonoBehaviour
 
         Debug.Log($"{selectedDice.diceName}에 {pendingStampType} 스탬프 적용 완료!");
 
-        // 도장을 쾅 찍는 연출. 찍히는 순간 슬롯을 다시 그려 가운데에 연한 스탬프 자국이 남게 한다.
+        // 스탬프 적용 확정. 효과음은 PlayStamp의 충돌 순간에 한 번만 재생한다.
         DiceSelectionFeedback.Get(this).PlayStamp(selectedSlot, activeSlots, pendingStampType, () =>
         {
             if (selectedSlot != null) selectedSlot.SetDice(selectedDice, false);

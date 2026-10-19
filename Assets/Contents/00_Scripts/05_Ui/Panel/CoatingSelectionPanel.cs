@@ -73,7 +73,6 @@ public class CoatingSelectionPanel : MonoBehaviour
         selectedDice.type = pendingCoatingType;
         selectedDice.multiplier = pendingMultiplier;
         selectedDice.diceColor = pendingColor;
-        Sfx.Play(SfxId.Coating_Apply);
 
         Debug.Log($"{selectedDice.diceName}에 {pendingCoatingType} 코팅 적용 완료!");
 

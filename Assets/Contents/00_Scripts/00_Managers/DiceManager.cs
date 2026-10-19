@@ -1899,7 +1899,7 @@ public class DiceManager : MonoBehaviour
         if (book != null)
             PlaceBottomLeftCenter(book, canvas, new Vector2(130f, 300f));
         FitTravelStatusPanels(coin, heart);
-        Vector2 coinPos = new Vector2(342f, -32f);
+        Vector2 coinPos = new Vector2(312f, -32f);
         // 남색 패널에서는 골드·체력 칸이 같은 폭이라 지도 화면에서도 오른쪽 끝을 맞춥니다.
         Vector2 heartPos = new Vector2(coinPos.x, coinPos.y - 66f);
         if (coin != null)

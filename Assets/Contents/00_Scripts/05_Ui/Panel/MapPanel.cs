@@ -317,6 +317,7 @@ public class MapPanel : MonoBehaviour
     {
         journeyRolling = true;
         if (journeyRollButton != null) journeyRollButton.interactable = false;
+        Sfx.Play(SfxId.Journey_Roll);
         MapTableData table = boundDice != null ? boundDice.GetMapTable() : null;
         float seconds = table != null ? Mathf.Max(0.05f, table.Config.JourneyRollSeconds) : 0.5f;
         float elapsed = 0f;

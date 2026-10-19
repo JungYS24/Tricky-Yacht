@@ -73,6 +73,7 @@ public class SatelliteSelectionPanel : MonoBehaviour
     private void OnDiceSelected(DiceData1 selectedDice)
     {
         selectedDice.activeSatellites.Add(pendingSatelliteType);
+        Sfx.Play(SfxId.Coating_Apply);
         Debug.Log($"{selectedDice.diceName}에 {pendingSatelliteType} 위성 장착! (현재 위성 갯수: {selectedDice.activeSatellites.Count})");
 
         ClosePanel();

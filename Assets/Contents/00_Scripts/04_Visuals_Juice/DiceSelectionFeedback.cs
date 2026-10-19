@@ -64,6 +64,8 @@ public sealed class DiceSelectionFeedback : MonoBehaviour
     public void PlayCoating(DeckSlot slot, List<GameObject> slots, DiceType type, Color color, Action reveal, Action onComplete)
     {
         UIEffect effect = Begin(slot, slots, onComplete);
+        // 연출이 눈에 보이기 시작하는 순간(early return 포함)에 한 번 재생한다.
+        Sfx.Play(SfxId.Coating_Apply);
         if (effect == null) { reveal?.Invoke(); Finish(); return; }
         float duration = Mathf.Max(0.1f, coatingDuration);
         RectTransform icon = slot.diceIcon.rectTransform;
@@ -120,11 +122,18 @@ public sealed class DiceSelectionFeedback : MonoBehaviour
     public void PlayStamp(DeckSlot slot, List<GameObject> slots, StampType type, Action reveal, Action onComplete)
     {
         UIEffect effect = Begin(slot, slots, onComplete);
-        if (effect == null) { reveal?.Invoke(); Finish(); return; }
+        if (effect == null)
+        {
+            Sfx.Play(SfxId.Stamp_Apply);
+            reveal?.Invoke();
+            Finish();
+            return;
+        }
         StampVisualProfile profile = StampVisualProfile.Profile;
         Sprite mark = StampVisualProfile.GetSprite(type);
         if (profile == null || mark == null)
         {
+            Sfx.Play(SfxId.Stamp_Apply);
             sequence.AppendCallback(() => reveal?.Invoke());
             return;
         }
@@ -229,7 +238,7 @@ public sealed class DiceSelectionFeedback : MonoBehaviour
         {
             fresh.color = Color.white;
             reveal?.Invoke();
-            // 효과음을 넣게 되면 이 자리에서 재생
+            Sfx.Play(SfxId.Stamp_Apply);
         });
         Vector3 sealPressed = new Vector3(1f + (1f - profile.sealSquash) * 0.5f, profile.sealSquash, 1f);
         sequence.Insert(impact, sealRect.DOScale(sealPressed, 0.06f * speed).SetEase(Ease.OutQuad));
