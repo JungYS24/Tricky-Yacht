@@ -83,6 +83,13 @@ public static class GameStateRestorer
             {
                 newDice.faceValues = (int[])dData.faceValues.Clone();
                 newDice.specialEffect = (SpecialDieEffect)dData.specialEffect;
+                // 예전 상점 홀수·짝수는 specialEffect가 비어 있어, 면 구성으로 보강한다.
+                if (newDice.specialEffect == SpecialDieEffect.None)
+                {
+                    SpecialDieEffect inferred = SpecialDiceSprites.ResolveOddEven(newDice.specialEffect, newDice.faceValues);
+                    if (inferred != SpecialDieEffect.None)
+                        newDice.specialEffect = inferred;
+                }
             }
 
             // 면별 효과와 여정 주사위 표시를 복원합니다. 구버전 저장에는 없으므로 에셋 값을 그대로 둡니다.

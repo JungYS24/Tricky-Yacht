@@ -163,6 +163,8 @@ public class DeckSlot : MonoBehaviour
         {
             animSprites = (data.customFaceSprites != null && data.customFaceSprites.Length >= 6)
                           ? data.customFaceSprites : fixedNumberSprites;
+            if (SpecialDiceSprites.IsOddEven(data))
+                animSprites = null;
 
             UpdateDisplaySprite();
         }
@@ -293,7 +295,7 @@ public class DeckSlot : MonoBehaviour
             UpdateDisplayColor(prismColor);
         }
 
-        if (isAnimating && animSprites != null && animSprites.Length >= 6)
+        if (isAnimating && (SpecialDiceSprites.IsOddEven(currentData) || (animSprites != null && animSprites.Length >= 6)))
         {
             animTimer += Time.deltaTime;
             if (animTimer >= animInterval)
@@ -324,9 +326,18 @@ public class DeckSlot : MonoBehaviour
 
     private void UpdateDisplaySprite()
     {
-        if (diceIcon != null && animSprites != null && animSprites.Length > 0)
+        if (diceIcon == null) return;
+
+        int faceValue = animFaces[currentAnimIndex];
+        int key = animUseFaceIndex ? faceValue : faceValue - 1;
+        if (SpecialDiceSprites.TryGetSpecialFaceSprite(currentData, key, out Sprite special) && special != null)
         {
-            int faceValue = animFaces[currentAnimIndex];
+            diceIcon.sprite = special;
+            return;
+        }
+
+        if (animSprites != null && animSprites.Length > 0)
+        {
             int safeIndex = animUseFaceIndex
                 ? Mathf.Clamp(faceValue, 0, animSprites.Length - 1)
                 : Mathf.Clamp(faceValue - 1, 0, animSprites.Length - 1);
@@ -342,24 +353,11 @@ public class DeckSlot : MonoBehaviour
 
         int faceToShow = exactFaceValue != -1 ? exactFaceValue : data.faceValues[UnityEngine.Random.Range(0, data.faceValues.Length)];
 
-        if (data.customFaceSprites != null && data.customFaceSprites.Length >= 6)
+        int specialKey = exactFaceIndex >= 0 ? exactFaceIndex : Mathf.Clamp(faceToShow - 1, 0, 5);
+        if (SpecialDiceSprites.TryGetSpecialFaceSprite(data, specialKey, out Sprite special) && special != null)
         {
-            int idx = exactFaceIndex >= 0 ? exactFaceIndex : Mathf.Clamp(faceToShow - 1, 0, data.customFaceSprites.Length - 1);
-            Sprite next = data.customFaceSprites[Mathf.Clamp(idx, 0, data.customFaceSprites.Length - 1)];
-            if (next != null)
-                diceIcon.sprite = next;
+            diceIcon.sprite = special;
             return;
-        }
-
-        //커스텀 이미지가 설정되어 있다면 무조건 최우선으로 띄워줌 (88 주사위 완벽 대응)
-        if (data.customFaceSprites != null && data.customFaceSprites.Length > 0)
-        {
-            // 커스텀 이미지가 1개밖에 없다면 무조건 0번째 이미지를 띄움 (에러 방지)
-            int safeIndex = (data.customFaceSprites.Length == 1) ? 0 : Mathf.Clamp(faceToShow - 1, 0, data.customFaceSprites.Length - 1);
-            Sprite next = data.customFaceSprites[safeIndex];
-            if (next != null)
-                diceIcon.sprite = next;
-            return; // 여기서 함수를 끝내서 숫자 6으로 바뀌는 현상을 막음
         }
 
         //기존 1~6 일반/고정 주사위 로직
