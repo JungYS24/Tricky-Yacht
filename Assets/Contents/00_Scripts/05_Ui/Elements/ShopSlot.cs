@@ -106,15 +106,17 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             Sprite[] faceSprites = diceData.customFaceSprites;
             bool completePerFace = DiceData1.HasCompleteFaceSprites(faceSprites);
             bool hasFaceSprites = faceSprites != null && faceSprites.Length > 0;
+            bool isOddEven = SpecialDiceSprites.IsOddEven(diceData);
 
             if ((completePerFace && (shouldAnimate || diceData.isJourneyDice)) ||
-                (shouldAnimate && hasFaceSprites))
+                (shouldAnimate && hasFaceSprites) ||
+                (shouldAnimate && isOddEven))
             {
                 isAnimating = true;
-                animSprites = faceSprites;
+                animSprites = isOddEven ? null : faceSprites;
                 currentAnimIndex = 0;
                 animTimer = 0f;
-                if (completePerFace)
+                if (completePerFace && !isOddEven)
                 {
                     // 여정처럼 6칸이 모두 있으면 면 번호로 순환
                     animUseFaceIndex = true;
@@ -154,7 +156,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private void Update()
     {
         //상점 슬롯이 켜져있고, 애니메이션 대상이며, '구매 전'일 때만 작동!
-        if (isAnimating && !isPurchased && itemIcon != null && animSprites != null)
+        if (isAnimating && !isPurchased && itemIcon != null && (animSprites != null || currentData is DiceItemSO oddEven && SpecialDiceSprites.IsOddEven(oddEven)))
         {
             animTimer += Time.deltaTime;
             if (animTimer >= animInterval)
@@ -170,11 +172,18 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     // null 스프라이트면 이번 프레임을 건너뛰고 이전 아이콘을 유지한다.
     void ApplyAnimSprite()
     {
-        if (itemIcon == null || animSprites == null || animFaces == null || animFaces.Length == 0) return;
+        if (itemIcon == null || animFaces == null || animFaces.Length == 0) return;
         int spriteIndex = animUseFaceIndex
             ? animFaces[currentAnimIndex]
             : animFaces[currentAnimIndex] - 1;
-        if (spriteIndex < 0 || spriteIndex >= animSprites.Length) return;
+        if (currentData is DiceItemSO diceData &&
+            SpecialDiceSprites.TryGetSpecialFaceSprite(diceData, spriteIndex, out Sprite special) &&
+            special != null)
+        {
+            itemIcon.sprite = special;
+            return;
+        }
+        if (animSprites == null || spriteIndex < 0 || spriteIndex >= animSprites.Length) return;
         Sprite next = animSprites[spriteIndex];
         if (next == null) return;
         itemIcon.sprite = next;

@@ -52,11 +52,15 @@ public sealed class MainUIPresenter
     private void RefreshScorePreview(DiceManager dm)
     {
         if (dm.ui == null) return;
-        // 미리보기는 킵된 주사위의 순수 눈금 합만 표시합니다. 강화는 실제 정산에서 반영합니다.
+        // 미리보기는 킵된 주사위의 눈금 합에 홀수·짝수 결산 보너스를 더해 실제 결산과 맞춘다.
         int chips = 0;
         for (int i = 0; i < uiValuesBuffer.Count; i++) chips += uiValuesBuffer[i];
-        float mult = 1f + dm.stageBonusMult + dm.permanentFigureMultiplier;
-        dm.ui.ShowTurnPreview(dm.currentHandName, chips, mult, 0, 0, 0);
+        TurnCalcResult calc = uiDiceBuffer.Count > 0
+            ? TurnCalculator.CalculateDiceEffects(uiDiceBuffer, 0, 1f)
+            : default;
+        chips += calc.oddBonusChips;
+        float mult = 1f + dm.stageBonusMult + dm.permanentFigureMultiplier + calc.evenBonusMult;
+        dm.ui.ShowTurnPreview(dm.currentHandName, chips, mult, 0, 0, 0, calc.oddBonusChips, calc.evenBonusMult);
     }
 
     private void RefreshFigures(DiceManager dm, HandRank rank)

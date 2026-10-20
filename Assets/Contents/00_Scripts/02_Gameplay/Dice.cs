@@ -83,11 +83,9 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             spriteRenderer.sprite = myData.customDiceShell;
         }
 
-        // 고정 주사위이거나, 이름에 '홀수' 또는 '짝수'가 들어가면 숫자 이미지를 사용하도록 설정
+        // 6면이 같은 고정 주사위만 JustDice 숫자 스프라이트를 쓴다. 홀수·짝수는 전용 테이블을 쓴다.
         bool isFixed = myData.faceValues.All(f => f == myData.faceValues[0]);
-        bool isOddEven = myData.specialEffect == SpecialDieEffect.Odd || myData.specialEffect == SpecialDieEffect.Even;
-
-        useNumberSprite = isFixed || isOddEven;
+        useNumberSprite = isFixed;
 
         currentValue = initialValue;
         currentFaceIndex = faceIndex >= 0 ? faceIndex : myData.FindFaceIndex(initialValue);
@@ -113,9 +111,9 @@ public class Dice : MonoBehaviour, IPointerDownHandler
     void ShowFace(int faceIndex)
     {
         if (spriteRenderer == null) return;
-        if (myData != null && myData.customFaceSprites != null && myData.customFaceSprites.Length >= 6 && faceIndex >= 0)
+        if (faceIndex >= 0 && SpecialDiceSprites.TryGetSpecialFaceSprite(myData, faceIndex, out Sprite special) && special != null)
         {
-            spriteRenderer.sprite = myData.customFaceSprites[Mathf.Clamp(faceIndex, 0, myData.customFaceSprites.Length - 1)];
+            spriteRenderer.sprite = special;
             return;
         }
         int value = currentValue;
@@ -138,13 +136,11 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             return;
         }
 
-        // 커스텀 이미지가 있는 경우 (88 주사위 완벽 대응)
-        if (myData != null && myData.customFaceSprites != null && myData.customFaceSprites.Length > 0)
+        // 커스텀 면 또는 홀수·짝수 전용 테이블. null이면 이번 프레임은 건너뛴다.
+        if (SpecialDiceSprites.TryGetSpecialFaceSprite(myData, value - 1, out Sprite special) && special != null)
         {
-            // 커스텀 이미지가 1장뿐이라면 무조건 0번을, 여러 장이라면 눈금에 맞게 안전하게 가져옵니다.
-            int safeIndex = (myData.customFaceSprites.Length == 1) ? 0 : Mathf.Clamp(value - 1, 0, myData.customFaceSprites.Length - 1);
-            spriteRenderer.sprite = myData.customFaceSprites[safeIndex];
-            return; // 여기서 바로 함수를 끝내서 에러를 차단합니다!
+            spriteRenderer.sprite = special;
+            return;
         }
 
         //기존 1~6 일반 숫자/눈금 처리 (안전장치 추가)

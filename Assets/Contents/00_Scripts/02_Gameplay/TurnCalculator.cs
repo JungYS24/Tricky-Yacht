@@ -22,11 +22,14 @@ public struct TurnCalcResult
     public int stampDamage;     // 스페이드: 족보에 안 쓰인 주사위의 눈만큼, 배수 없이 최종 피해에 더함
     public int stampGold;       // 다이아: expectedGold와 따로 모아 결산에서 더함
     public int stampShield;     // 하트: 결산 때 얻는 보호막
+
+    public int oddBonusChips;     // 홀수 주사위: 결산 포함 1개당 칩
+    public float evenBonusMult;   // 짝수 주사위: 결산 포함 1개당 배수
 }
 
 public enum DiceScoreBonusKind
 {
-    IceChips, MercuryChips, PrismMult, IceMult, MarsMult, SpadeChips
+    IceChips, MercuryChips, PrismMult, IceMult, MarsMult, SpadeChips, OddChips, EvenMult
 }
 
 public struct DiceScoreBonus
@@ -34,7 +37,7 @@ public struct DiceScoreBonus
     public Dice source;
     public DiceScoreBonusKind kind;
     public float amount;
-    public bool IsChips => kind == DiceScoreBonusKind.IceChips || kind == DiceScoreBonusKind.MercuryChips || kind == DiceScoreBonusKind.SpadeChips;
+    public bool IsChips => kind == DiceScoreBonusKind.IceChips || kind == DiceScoreBonusKind.MercuryChips || kind == DiceScoreBonusKind.SpadeChips || kind == DiceScoreBonusKind.OddChips;
 
     public DiceScoreBonus(Dice source, DiceScoreBonusKind kind, float amount)
     {
@@ -70,6 +73,9 @@ public static class TurnCalculator
     public const int DiamondGoldPerPip = 5;
     public const int CloverKeepChancePercent = 30;
 
+    public const int OddChipsPerDie = 5;
+    public const float EvenMultPerDie = 0.2f;
+
     // 하트 면 회복량. 전투 결산과 지도 굴림이 같은 계산을 쓴다.
     public static int CalculateHeartHeal(int pips, float healMultiplier)
     {
@@ -88,10 +94,10 @@ public static class TurnCalculator
 
     public static TurnScoreResult CalculateScore(TurnCalcResult dice, float handMult, TurnScoreBonuses bonuses)
     {
-        // 최종 칩 = 주사위 기본합 + 얼음/위성/스페이드 + 피규어/스테이지 보너스 + 스낵 보너스
-        int chips = dice.baseSum + dice.iceBonusChips + dice.satelliteBonusChips + dice.stampBonusChips + bonuses.stageChips + bonuses.snackChips;
-        // 최종 배수 = 족보 배수 + 피규어/스테이지 배수 + 스낵 배수 + 프리즘/위성 배수
-        float multiplier = handMult + bonuses.stageMult + bonuses.snackMult + dice.prismMultTotal + dice.satelliteBonusMult + dice.iceBonusMult + bonuses.permanentMult;
+        // 최종 칩 = 주사위 기본합 + 얼음/위성/스페이드/홀수 + 피규어/스테이지 보너스 + 스낵 보너스
+        int chips = dice.baseSum + dice.iceBonusChips + dice.satelliteBonusChips + dice.stampBonusChips + dice.oddBonusChips + bonuses.stageChips + bonuses.snackChips;
+        // 최종 배수 = 족보 배수 + 피규어/스테이지 배수 + 스낵 배수 + 프리즘/위성/짝수 배수
+        float multiplier = handMult + bonuses.stageMult + bonuses.snackMult + dice.prismMultTotal + dice.satelliteBonusMult + dice.iceBonusMult + dice.evenBonusMult + bonuses.permanentMult;
         multiplier *= dice.curseMultiplier;
         return new TurnScoreResult { chips = chips, multiplier = multiplier, damage = Mathf.FloorToInt(chips * multiplier) };
     }
@@ -200,6 +206,16 @@ public static class TurnCalculator
                     break;
                 case SpecialDieEffect.Thorn:
                     res.selfDamage += d.currentValue;
+                    break;
+                case SpecialDieEffect.Odd:
+                    if (d.currentValue <= 0) break;
+                    res.oddBonusChips += OddChipsPerDie;
+                    bonusSteps?.Add(new DiceScoreBonus(d, DiceScoreBonusKind.OddChips, OddChipsPerDie));
+                    break;
+                case SpecialDieEffect.Even:
+                    if (d.currentValue <= 0) break;
+                    res.evenBonusMult += EvenMultPerDie;
+                    bonusSteps?.Add(new DiceScoreBonus(d, DiceScoreBonusKind.EvenMult, EvenMultPerDie));
                     break;
             }
 
