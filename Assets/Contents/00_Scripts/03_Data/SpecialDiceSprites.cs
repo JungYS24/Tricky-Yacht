@@ -52,13 +52,24 @@ public static class SpecialDiceSprites
 
         // 2. 홀수·짝수 전용 테이블
         SpecialDieEffect kind = ResolveOddEven(specialEffect, faceValues);
-        Sprite[] table = GetTable(kind);
-        if (table == null || table.Length < 6)
-            return false;
+        if (TryGetTableSprite(GetOddEvenTable(kind), faceIndexOrValue, out sprite))
+            return true;
 
-        int index = Mathf.Clamp(faceIndexOrValue, 0, 5);
-        sprite = table[index];
-        return sprite != null;
+        // 3. 로우·하이 롤러. 세이브에는 스프라이트가 없으므로 1·2·3 / 4·5·6 면 구성으로 찾는다.
+        if (TryGetTableSprite(GetRollerTable(faceValues), faceIndexOrValue, out sprite))
+            return true;
+
+        return false;
+    }
+
+    public static bool IsLowHigh(DiceData1 data)
+    {
+        return data != null && GetRollerTable(data.faceValues) != null;
+    }
+
+    public static bool IsLowHigh(DiceItemSO so)
+    {
+        return so != null && GetRollerTable(so.customFaces) != null;
     }
 
     public static bool IsOddEven(DiceData1 data)
@@ -83,13 +94,31 @@ public static class SpecialDiceSprites
         return SpecialDieEffect.None;
     }
 
-    static Sprite[] GetTable(SpecialDieEffect kind)
+    static Sprite[] GetOddEvenTable(SpecialDieEffect kind)
     {
         SpecialDiceSpriteTable table = Table;
         if (table == null) return null;
         if (kind == SpecialDieEffect.Odd) return table.oddFaces;
         if (kind == SpecialDieEffect.Even) return table.evenFaces;
         return null;
+    }
+
+    // 1·2·3만 있으면 로우, 4·5·6만 있으면 하이. 그 외 눈금이 섞이면 null.
+    static Sprite[] GetRollerTable(int[] faceValues)
+    {
+        SpecialDiceSpriteTable table = Table;
+        if (table == null) return null;
+        if (MatchesUniqueFaces(faceValues, 1, 2, 3)) return table.lowFaces;
+        if (MatchesUniqueFaces(faceValues, 4, 5, 6)) return table.highFaces;
+        return null;
+    }
+
+    static bool TryGetTableSprite(Sprite[] table, int faceIndexOrValue, out Sprite sprite)
+    {
+        sprite = null;
+        if (table == null || table.Length < 6) return false;
+        sprite = table[Mathf.Clamp(faceIndexOrValue, 0, 5)];
+        return sprite != null;
     }
 
     static bool TryGetCustomSprite(Sprite[] customFaceSprites, int faceIndexOrValue, out Sprite sprite)
