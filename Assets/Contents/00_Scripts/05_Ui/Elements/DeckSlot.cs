@@ -130,9 +130,10 @@ public class DeckSlot : MonoBehaviour
             }
         }
 
-        // 여정처럼 6칸이 모두 채워진 경우에만 면 번호로 돌려 보여 준다.
-        // 하이/로우/짝/홀은 배열 길이는 6이지만 빈 칸이 있어 실제 눈 값만 순환한다.
-        if (completePerFace && exactFaceValue == -1 && exactFaceIndex < 0)
+        // 6칸이 채워졌거나 로우·하이 면 구성이면 면 번호로 돌려 보여 준다.
+        // 스프라이트가 비어 있는 구세이브·조우자 변환도 1·2·3 / 4·5·6 순서로 나온다.
+        bool rollerFaces = SpecialDiceSprites.IsLowHigh(data);
+        if ((completePerFace || rollerFaces) && exactFaceValue == -1 && exactFaceIndex < 0)
         {
             for (int i = 0; i < 6; i++) animFaces[i] = i;
             animUniqueCount = 6;
