@@ -33,6 +33,10 @@ public class ShopManager : MonoBehaviour
     public AudioEvent coinArriveSound; // 코인 날아가기 연출에서 코인이 골드 패널에 닿을 때 나는 소리(비워 두면 소리 없음)
     public int rerollCost = 100;
 
+    [Header("주사위 선택창 리롤 (코팅·스탬프·위성·주사위 삭제)")]
+    public int diceChoiceRerollCost = 200;
+    public int diceChoiceRerollLimit = 1;                // 선택창을 한 번 열 때마다 쓸 수 있는 횟수
+
     [Header("상점 제어 버튼")]
     public Button nextStageButton;
 
@@ -61,6 +65,8 @@ public class ShopManager : MonoBehaviour
     public RuntimeAnimatorController nyaonAnimator;
     public RuntimeAnimatorController ronanAnimator;
     public RuntimeAnimatorController opelAnimator;
+    public MerchantShopSkin merchantSkin; // 상인별 판·카드·버튼 그림과 배치 (비워 두면 원래 상점 모습 그대로)
+    MerchantShopSkinApplier skinApplier;
     bool mapMerchantActive;
     ShopStockTable stockTable;
     bool stockTableLogged;
@@ -185,15 +191,18 @@ public class ShopManager : MonoBehaviour
     void ApplyMerchantPresentation(bool fromMap)
     {
         BindShopChrome();
+        if (skinApplier == null && merchantSkin != null) skinApplier = new MerchantShopSkinApplier(this);
         if (fromMap)
         {
             ApplyNpc(currentMerchant);
             ApplyShopTitle(true);
+            skinApplier?.Apply(merchantSkin, currentMerchant, shopTitleText);
         }
         else
         {
             RestoreNpc();
             ApplyShopTitle(false);
+            skinApplier?.Restore();
         }
     }
 
@@ -626,6 +635,8 @@ public class ShopManager : MonoBehaviour
             else
             {
                 item.ApplyItemEffect(diceManager);
+                // 티켓을 상점에서 바로 사면 보유 티켓에도 기록 (도감 티켓 탭 숫자)
+                if (item is TicketItemSO) InventoryManager.Instance?.AddItem(item);
                 currentGold -= actualPrice;
                 if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
 

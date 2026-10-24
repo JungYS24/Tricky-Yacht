@@ -16,6 +16,7 @@ public class StampSelectionPanel : MonoBehaviour
     private List<GameObject> activeSlots = new List<GameObject>();
     private DiceManager diceManager;
     private bool isBusy;
+    private DiceChoiceWindow window;
 
     public void OpenSelection(DiceManager dm, StampType type, Sprite image)
     {
@@ -36,8 +37,23 @@ public class StampSelectionPanel : MonoBehaviour
             return;
         }
 
-        ClearSlots();
         panelRoot.SetActive(true);
+        window = DiceChoiceWindow.Attach(panelRoot.transform as RectTransform);
+        if (window != null)
+        {
+            // 덱 주사위 카드 5장 + 리롤(지금 보이는 주사위를 빼고 덱의 다른 주사위로 다시 보여 준다)
+            window.Open(DiceChoiceWindow.StampHeader(dm.shopManager, image), options, diceSlotPrefab, OnDiceSelected,
+                dm.shopManager, () => new List<DiceData1>(dm.masterDeck), () => isBusy);
+        }
+        else ShowOptions(options);
+    }
+
+    // 선택 연출이 흐리게 만들 카드(창이 없으면 예전 주사위 칸)
+    private List<GameObject> FeedbackSlots => window != null ? window.Cards : activeSlots;
+
+    private void ShowOptions(List<DiceData1> options)
+    {
+        ClearSlots();
 
         foreach (var dice in options)
         {
@@ -70,7 +86,7 @@ public class StampSelectionPanel : MonoBehaviour
         Debug.Log($"{selectedDice.diceName}에 {pendingStampType} 스탬프 적용 완료!");
 
         // 스탬프 적용 확정. 효과음은 PlayStamp의 충돌 순간에 한 번만 재생한다.
-        DiceSelectionFeedback.Get(this).PlayStamp(selectedSlot, activeSlots, pendingStampType, () =>
+        DiceSelectionFeedback.Get(this).PlayStamp(selectedSlot, FeedbackSlots, pendingStampType, () =>
         {
             if (selectedSlot != null) selectedSlot.SetDice(selectedDice, false);
         }, () =>
@@ -96,5 +112,6 @@ public class StampSelectionPanel : MonoBehaviour
             Destroy(slot);
         }
         activeSlots.Clear();
+        if (window != null) window.Clear();
     }
 }

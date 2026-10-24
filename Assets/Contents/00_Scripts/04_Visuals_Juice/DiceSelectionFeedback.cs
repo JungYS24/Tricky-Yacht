@@ -44,7 +44,9 @@ public sealed class DiceSelectionFeedback : MonoBehaviour
             var group = go.GetComponent<CanvasGroup>();
             if (group == null) group = go.AddComponent<CanvasGroup>();
             group.interactable = false;
-            group.alpha = slot != null && go == slot.gameObject ? 1f : 0.25f;
+            // 선택창 카드처럼 주사위 칸을 감싼 오브젝트가 넘어와도 고른 쪽은 밝게 둔다.
+            bool chosen = slot != null && (go == slot.gameObject || slot.transform.IsChildOf(go.transform));
+            group.alpha = chosen ? 1f : 0.25f;
         }
         if (slot == null || slot.diceIcon == null) return null;
         wasEnabled = slot.enabled;

@@ -10,7 +10,8 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public TextMeshProUGUI priceText;
     public Button buyButton;
 
-    const float ItemIconSize = 192f;
+    public const float ItemIconSize = 192f;
+    float iconSize = ItemIconSize; // 상인 상점은 카드 그림에 맞춰 바꾼다 (SetIconSize)
     static readonly Color PriceColor = Color.white;
     static readonly Color FreePriceColor = Color.yellow;
 
@@ -54,6 +55,37 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if (priceText == null) return;
         priceText.text = text;
         priceText.color = free ? FreePriceColor : PriceColor;
+        LayoutPriceRow();
+    }
+
+    // 상인 상점: 가격 숫자와 코인을 한 묶음으로 가운데 맞춘다 (gap은 월드 단위)
+    RectTransform priceCoin;
+    float priceCoinGap;
+    Vector3 priceRowCenter;
+
+    public void SetPriceRow(RectTransform coin, float gap)
+    {
+        priceCoin = coin;
+        priceCoinGap = gap;
+        if (priceText != null) priceRowCenter = priceText.rectTransform.position;
+        LayoutPriceRow();
+    }
+
+    public void ClearPriceRow()
+    {
+        priceCoin = null;
+    }
+
+    void LayoutPriceRow()
+    {
+        if (priceCoin == null || priceText == null) return;
+        priceText.ForceMeshUpdate();
+        float textWidth = priceText.textBounds.size.x * priceText.rectTransform.lossyScale.x;
+        if (float.IsNaN(textWidth) || float.IsInfinity(textWidth) || textWidth < 0f) textWidth = 0f;
+        float coinWidth = priceCoin.rect.width * priceCoin.lossyScale.x;
+        RectTransform textRect = priceText.rectTransform;
+        textRect.position = new Vector3(priceRowCenter.x - (priceCoinGap + coinWidth) * 0.5f, priceRowCenter.y, textRect.position.z);
+        priceCoin.position = new Vector3(priceRowCenter.x + (textWidth + priceCoinGap) * 0.5f, priceRowCenter.y, priceCoin.position.z);
     }
 
     // --- 애니메이션 제어용 변수 (코루틴 대체) ---
@@ -70,6 +102,12 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         FitItemIcon();
     }
 
+    public void SetIconSize(float size)
+    {
+        iconSize = size > 0f ? size : ItemIconSize;
+        FitItemIcon();
+    }
+
     void FitItemIcon()
     {
         if (itemIcon == null) return;
@@ -77,7 +115,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         RectTransform rect = itemIcon.rectTransform;
         rect.anchorMin = new Vector2(0.5f, 0.5f);
         rect.anchorMax = new Vector2(0.5f, 0.5f);
-        rect.sizeDelta = new Vector2(ItemIconSize, ItemIconSize);
+        rect.sizeDelta = new Vector2(iconSize, iconSize);
         rect.localScale = Vector3.one;
     }
 
@@ -201,6 +239,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         {
             if (usedDiscount && currentData is CoatingItemSO) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.DiscountCoating);
             if (usedDiscount && currentData is SatelliteItemSO) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.DiscountSatellite);
+            if (currentData is TicketItemSO boughtTicket && itemIcon != null) TicketFlyFeedback.Play(boughtTicket, itemIcon.rectTransform);
             // 사운드 구매 성공 소리 재생 (코인 지불하는 소리 등)
             isPurchased = true;
             isAnimating = false; //아이템을 구매하면 즉시 애니메이션 연산을 정지    

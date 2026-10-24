@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,10 +50,10 @@ public class CollectionBookManager : MonoBehaviour
     [Header("책갈피 탭")]
     public Button figureTabButton;
     public Button synergyTabButton;
-    public Button achievementTabButton; // 업적은 아직 기능 없음
+    [FormerlySerializedAs("achievementTabButton")] public Button ticketTabButton; // 예전 업적 탭 자리
     public TextMeshProUGUI figureTabLabel;
     public TextMeshProUGUI synergyTabLabel;
-    public TextMeshProUGUI achievementTabLabel;
+    [FormerlySerializedAs("achievementTabLabel")] public TextMeshProUGUI ticketTabLabel;
     public Color tabSelectedColor = Color.white;
     public Color tabUnselectedColor = new Color(0.72f, 0.72f, 0.72f, 1f);
     public float tabSelectedOffsetX = -16f; // 선택된 탭이 책 밖으로 더 나오는 거리
@@ -61,6 +62,8 @@ public class CollectionBookManager : MonoBehaviour
     public GameObject figurePageRoot;
     public GameObject synergyPageRoot;
     public SynergyWikiDisplayer synergyWiki;
+    public GameObject ticketPageRoot;
+    public TicketBookPage ticketPage;
 
     [Header("피규어 페이지 헤더")]
     public TextMeshProUGUI titleText;
@@ -79,7 +82,8 @@ public class CollectionBookManager : MonoBehaviour
     private readonly Dictionary<Button, Vector2> tabBasePositions = new Dictionary<Button, Vector2>();
     private int currentPage;
     private bool isInitialized;
-    private bool isSynergyPageOpen;
+    private enum BookTab { Figure, Synergy, Ticket }
+    private BookTab openTab;
 
     public TextMeshProUGUI currentFilterText;
 
@@ -119,13 +123,15 @@ public class CollectionBookManager : MonoBehaviour
             figureTabButton.onClick.AddListener(ShowFigurePage);
         if (synergyTabButton != null && !HasPersistentMethod(synergyTabButton, nameof(ShowSynergyPage)))
             synergyTabButton.onClick.AddListener(ShowSynergyPage);
+        if (ticketTabButton != null && !HasPersistentMethod(ticketTabButton, nameof(ShowTicketPage)))
+            ticketTabButton.onClick.AddListener(ShowTicketPage);
         if (prevBiomeButton != null) prevBiomeButton.onClick.AddListener(() => StepBiomeFilter(-1));
         if (nextBiomeButton != null) nextBiomeButton.onClick.AddListener(() => StepBiomeFilter(1));
         if (prevPageButton != null) prevPageButton.onClick.AddListener(() => ChangePage(-1));
         if (nextPageButton != null) nextPageButton.onClick.AddListener(() => ChangePage(1));
         if (detailPanel != null) detailPanel.synergyClicked = ShowSynergy;
 
-        foreach (var tab in new[] { figureTabButton, synergyTabButton, achievementTabButton })
+        foreach (var tab in new[] { figureTabButton, synergyTabButton, ticketTabButton })
         {
             if (tab != null) tabBasePositions[tab] = ((RectTransform)tab.transform).anchoredPosition;
         }
@@ -137,7 +143,7 @@ public class CollectionBookManager : MonoBehaviour
         if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame) return;
 
         // 정렬 드롭다운 → 상세 → 필터창 → 도감 순서로 하나씩 닫는다.
-        if (isSynergyPageOpen && synergyWiki != null && synergyWiki.IsOrderDropdownExpanded)
+        if (openTab == BookTab.Synergy && synergyWiki != null && synergyWiki.IsOrderDropdownExpanded)
             synergyWiki.CloseOrderDropdown();
         else if (detailPanel != null && detailPanel.panelRoot != null && detailPanel.panelRoot.activeSelf)
             detailPanel.ClosePanel();
@@ -197,9 +203,10 @@ public class CollectionBookManager : MonoBehaviour
 #if UNITY_EDITOR
         Debug.Log("[CollectionBook] tab -> figure");
 #endif
-        isSynergyPageOpen = false;
+        openTab = BookTab.Figure;
         if (figurePageRoot != null) figurePageRoot.SetActive(true);
         if (synergyPageRoot != null) synergyPageRoot.SetActive(false);
+        if (ticketPageRoot != null) ticketPageRoot.SetActive(false);
         UpdateTabVisuals();
         RefreshCollectionBoard();
     }
@@ -211,15 +218,35 @@ public class CollectionBookManager : MonoBehaviour
 #endif
         if (synergyPageRoot == null) return;
 
-        isSynergyPageOpen = true;
+        openTab = BookTab.Synergy;
         // 상세창과 바이옴 필터는 피규어 페이지 전용
         if (detailPanel != null) detailPanel.ClosePanel();
         CloseBiomeFilterPanel();
 
         if (figurePageRoot != null) figurePageRoot.SetActive(false);
+        if (ticketPageRoot != null) ticketPageRoot.SetActive(false);
         SetPagerVisible(false);
         synergyPageRoot.SetActive(true);
         if (synergyWiki != null) synergyWiki.Refresh();
+        UpdateTabVisuals();
+    }
+
+    public void ShowTicketPage()
+    {
+#if UNITY_EDITOR
+        Debug.Log("[CollectionBook] tab -> ticket");
+#endif
+        if (ticketPageRoot == null) return;
+
+        openTab = BookTab.Ticket;
+        if (detailPanel != null) detailPanel.ClosePanel();
+        CloseBiomeFilterPanel();
+
+        if (figurePageRoot != null) figurePageRoot.SetActive(false);
+        if (synergyPageRoot != null) synergyPageRoot.SetActive(false);
+        SetPagerVisible(false);
+        ticketPageRoot.SetActive(true);
+        if (ticketPage != null) ticketPage.Refresh();
         UpdateTabVisuals();
     }
 
@@ -379,9 +406,9 @@ public class CollectionBookManager : MonoBehaviour
 
     private void UpdateTabVisuals()
     {
-        SetTabSelected(figureTabButton, !isSynergyPageOpen);
-        SetTabSelected(synergyTabButton, isSynergyPageOpen);
-        SetTabSelected(achievementTabButton, false);
+        SetTabSelected(figureTabButton, openTab == BookTab.Figure);
+        SetTabSelected(synergyTabButton, openTab == BookTab.Synergy);
+        SetTabSelected(ticketTabButton, openTab == BookTab.Ticket);
     }
 
     private void SetTabSelected(Button tab, bool selected)
@@ -402,7 +429,7 @@ public class CollectionBookManager : MonoBehaviour
     {
         if (figureTabLabel != null) figureTabLabel.text = LocalizationManager.GetUi("UI_TAB_FIGURE", "피규어");
         if (synergyTabLabel != null) synergyTabLabel.text = LocalizationManager.GetUi("UI_TAB_SYNERGY", "시너지");
-        if (achievementTabLabel != null) achievementTabLabel.text = LocalizationManager.GetUi("UI_TAB_ACHIEVEMENT", "업적");
+        if (ticketTabLabel != null) ticketTabLabel.text = LocalizationManager.GetUi("UI_TAB_TICKET", "티켓");
     }
 
     // 런 중이면 현재 바이옴, 아니면 전체

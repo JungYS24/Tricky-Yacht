@@ -13,6 +13,7 @@ public class SatelliteSelectionPanel : MonoBehaviour
     private SatelliteType pendingSatelliteType;
     private List<GameObject> activeSlots = new List<GameObject>();
     private DiceManager diceManager;
+    private DiceChoiceWindow window;
 
     public void OpenSelection(DiceManager dm, SatelliteType type)
     {
@@ -20,18 +21,7 @@ public class SatelliteSelectionPanel : MonoBehaviour
         diceManager = dm;
         pendingSatelliteType = type;
 
-        // 전체 덱을 가져온 뒤 조건에 맞는 주사위만 필터링합니다.
-        List<DiceData1> validOptions = new List<DiceData1>();
-
-        foreach (var dice in dm.masterDeck)
-        {
-            //위성이 4개 미만이어야 함
-            //이미 같은 종류의 위성이 없어야 함 (중복 방지)
-            if (dice.activeSatellites.Count < 4 && !dice.activeSatellites.Contains(type))
-            {
-                validOptions.Add(dice);
-            }
-        }
+        List<DiceData1> validOptions = GetValidOptions();
 
         if (validOptions.Count == 0)
         {
@@ -48,10 +38,39 @@ public class SatelliteSelectionPanel : MonoBehaviour
         int maxShowCount = Mathf.Min(5, validOptions.Count);
         List<DiceData1> finalOptions = validOptions.GetRange(0, maxShowCount);
 
-        ClearSlots();
         panelRoot.SetActive(true);
+        window = DiceChoiceWindow.Attach(panelRoot.transform as RectTransform);
+        if (window != null)
+        {
+            // 덱 주사위 카드 + 리롤(지금 보이는 주사위를 빼고 위성을 달 수 있는 다른 주사위로 다시 보여 준다)
+            window.Open(DiceChoiceWindow.SatelliteHeader(dm.shopManager, type), finalOptions, diceSlotPrefab, (dice, slot) => OnDiceSelected(dice),
+                dm.shopManager, GetValidOptions);
+        }
+        else ShowOptions(finalOptions);
+    }
 
-        foreach (var dice in finalOptions)
+    // 전체 덱에서 조건에 맞는 주사위만 고릅니다.
+    private List<DiceData1> GetValidOptions()
+    {
+        List<DiceData1> validOptions = new List<DiceData1>();
+
+        foreach (var dice in diceManager.masterDeck)
+        {
+            //위성이 4개 미만이어야 함
+            //이미 같은 종류의 위성이 없어야 함 (중복 방지)
+            if (dice.activeSatellites.Count < 4 && !dice.activeSatellites.Contains(pendingSatelliteType))
+            {
+                validOptions.Add(dice);
+            }
+        }
+        return validOptions;
+    }
+
+    private void ShowOptions(List<DiceData1> options)
+    {
+        ClearSlots();
+
+        foreach (var dice in options)
         {
             GameObject slotGo = Instantiate(diceSlotPrefab, slotParent);
             activeSlots.Add(slotGo);
@@ -98,6 +117,7 @@ public class SatelliteSelectionPanel : MonoBehaviour
     {
         foreach (var slot in activeSlots) Destroy(slot);
         activeSlots.Clear();
+        if (window != null) window.Clear();
     }
 
     private void ShuffleList<T>(List<T> list)
