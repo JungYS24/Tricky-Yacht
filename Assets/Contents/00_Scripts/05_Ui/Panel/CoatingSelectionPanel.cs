@@ -17,6 +17,7 @@ public class CoatingSelectionPanel : MonoBehaviour
     private List<GameObject> activeSlots = new List<GameObject>();
     private DiceManager diceManager;
     private bool isBusy;
+    private DiceChoiceWindow window;
 
     public void OpenSelection(DiceManager dm, DiceType type, float mult, Color color)
     {
@@ -41,8 +42,23 @@ public class CoatingSelectionPanel : MonoBehaviour
             return;
         }
 
-        ClearSlots();
         panelRoot.SetActive(true);
+        window = DiceChoiceWindow.Attach(panelRoot.transform as RectTransform);
+        if (window != null)
+        {
+            // 덱 주사위 카드 5장 + 리롤(지금 보이는 주사위를 빼고 덱의 다른 주사위로 다시 보여 준다)
+            window.Open(DiceChoiceWindow.CoatingHeader(dm.shopManager, type, color), options, diceSlotPrefab, OnDiceSelected,
+                dm.shopManager, () => new List<DiceData1>(dm.masterDeck), () => isBusy);
+        }
+        else ShowOptions(options);
+    }
+
+    // 선택 연출이 흐리게 만들 카드(창이 없으면 예전 주사위 칸)
+    private List<GameObject> FeedbackSlots => window != null ? window.Cards : activeSlots;
+
+    private void ShowOptions(List<DiceData1> options)
+    {
+        ClearSlots();
 
         foreach (var dice in options)
         {
@@ -76,7 +92,7 @@ public class CoatingSelectionPanel : MonoBehaviour
 
         Debug.Log($"{selectedDice.diceName}에 {pendingCoatingType} 코팅 적용 완료!");
 
-        DiceSelectionFeedback.Get(this).PlayCoating(selectedSlot, activeSlots, pendingCoatingType, pendingColor, () =>
+        DiceSelectionFeedback.Get(this).PlayCoating(selectedSlot, FeedbackSlots, pendingCoatingType, pendingColor, () =>
         {
             if (selectedSlot != null) selectedSlot.SetDice(selectedDice, false);
         }, () =>
@@ -109,5 +125,6 @@ public class CoatingSelectionPanel : MonoBehaviour
             Destroy(slot);
         }
         activeSlots.Clear();
+        if (window != null) window.Clear();
     }
 }

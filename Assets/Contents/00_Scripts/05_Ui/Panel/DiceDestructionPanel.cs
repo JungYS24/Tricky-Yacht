@@ -11,6 +11,7 @@ public class DiceDestructionPanel : MonoBehaviour
     private List<GameObject> activeSlots = new List<GameObject>();
     private DiceManager diceManager;
     private bool isBusy;
+    private DiceChoiceWindow window;
 
     public void OpenSelection(DiceManager dm)
     {
@@ -28,8 +29,23 @@ public class DiceDestructionPanel : MonoBehaviour
             return;
         }
 
-        ClearSlots();
         panelRoot.SetActive(true);
+        window = DiceChoiceWindow.Attach(panelRoot.transform as RectTransform);
+        if (window != null)
+        {
+            // 덱 주사위 카드 5장 + 리롤(지금 보이는 주사위를 빼고 다른 주사위로, 여정 주사위는 계속 제외)
+            window.Open(DiceChoiceWindow.DestructionHeader(dm.shopManager), options, diceSlotPrefab, OnDiceSelected,
+                dm.shopManager, dm.deckManager.GetDestructionCandidates, () => isBusy);
+        }
+        else ShowOptions(options);
+    }
+
+    // 선택 연출이 흐리게 만들 카드(창이 없으면 예전 주사위 칸)
+    private List<GameObject> FeedbackSlots => window != null ? window.Cards : activeSlots;
+
+    private void ShowOptions(List<DiceData1> options)
+    {
+        ClearSlots();
 
         foreach (var dice in options)
         {
@@ -73,7 +89,7 @@ public class DiceDestructionPanel : MonoBehaviour
             Debug.Log($"{selectedDice.diceName} 주사위가 덱에서 영구히 파괴되었습니다! 남은 주사위: {diceManager.masterDeck.Count}");
 
             Sfx.Play(SfxId.Dice_Burn_Vanish);
-            DiceSelectionFeedback.Get(this).PlayDestruction(selectedSlot, activeSlots, () =>
+            DiceSelectionFeedback.Get(this).PlayDestruction(selectedSlot, FeedbackSlots, () =>
             {
                 isBusy = false;
                 // 파괴 선택창을 닫은 뒤 주사위 파괴 피규어 효과 발동
@@ -111,5 +127,6 @@ public class DiceDestructionPanel : MonoBehaviour
             Destroy(slot);
         }
         activeSlots.Clear();
+        if (window != null) window.Clear();
     }
 }

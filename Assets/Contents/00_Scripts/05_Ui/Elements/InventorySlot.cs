@@ -12,7 +12,6 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
     public BaseItemDataSO currentItem;
 
     public TextMeshProUGUI countText;
-    public int currentStack = 0;
 
     private InventoryManager manager;
     public SnackUseEntry PendingSnack { get; private set; }
@@ -68,22 +67,11 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
         itemIcon.sprite = null;
         itemIcon.gameObject.SetActive(false);
 
-        currentStack = 0;
         if (countText != null) countText.gameObject.SetActive(false);
 
         // 슬롯이 비워질 때 크기 연출 중이었다면 초기화
         if (scaleCoroutine != null) StopCoroutine(scaleCoroutine);
         transform.localScale = originalScale;
-    }
-
-    public void AddStack()
-    {
-        currentStack++;
-        if (countText != null)
-        {
-            countText.text = currentStack.ToString();
-            countText.gameObject.SetActive(true);
-        }
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -131,12 +119,6 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
                     manager.figureDetailPanel.OpenPanel(manager.ownedFigures, figure);
                 }
             }
-            //티켓 클릭 시 전용 팝업 열기
-            else if (currentItem is TicketItemSO ticket)
-            {
-                if (manager.ticketDetailPanel != null)
-                    manager.ticketDetailPanel.OpenPanel(manager.ownedTickets, ticket);
-            }
         }
         // 우클릭: 피규어 판매 팝업 띄우기
         else if (eventData.button == PointerEventData.InputButton.Right)
@@ -152,11 +134,11 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
     {
         if (!isEmpty && currentItem != null)
         {
-            //피규어 또는 티켓일 때 호버(눌림) 연출 실행
-            if (currentItem is FigureItemSO || currentItem is TicketItemSO)
+            //피규어일 때 호버(눌림) 연출 실행
+            if (currentItem is FigureItemSO)
             {
-                // 둘 중 하나의 패널이라도 열려있으면 꿀렁이는 연출 방지
-                if (!FigureDetailPanel.IsPanelOpen && !TicketDetailPanel.IsPanelOpen)
+                // 상세 패널이 열려있으면 꿀렁이는 연출 방지
+                if (!FigureDetailPanel.IsPanelOpen)
                 {
                     StartScaleTransition(originalScale * hoverScaleFactor);
                 }
@@ -170,8 +152,8 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        //마우스가 나갈 때 원래 크기로 복구 (피규어 & 티켓)
-        if (!isEmpty && (currentItem is FigureItemSO || currentItem is TicketItemSO))
+        //마우스가 나갈 때 원래 크기로 복구 (피규어)
+        if (!isEmpty && currentItem is FigureItemSO)
         {
             StartScaleTransition(originalScale);
         }

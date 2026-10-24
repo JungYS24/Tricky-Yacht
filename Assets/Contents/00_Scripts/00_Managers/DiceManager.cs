@@ -226,6 +226,7 @@ public class DiceManager : MonoBehaviour
     public float multFourOfAKind = 1.8f;
     public float multStraight = 2.0f;
     public float multYacht = 2.5f;
+    private float[] defaultHandMultipliers; // Awake에서 위 값을 기억해 두고 ResetHandMultipliers에서 되돌림
 
 
     private readonly List<Dice> keptDice = new List<Dice>(5);
@@ -266,6 +267,7 @@ public class DiceManager : MonoBehaviour
         Dice.OnDiceStateChanged += HandleDiceChanged;
 
         defaultMaxRerolls = maxRerolls;
+        defaultHandMultipliers = new[] { multHighCard, multOnePair, multTwoPair, multTriple, multFullHouse, multFourOfAKind, multStraight, multYacht };
 
         if (mainFromClearButton != null)
             mainFromClearButton.onClick.AddListener(OnGameClearMainButtonClick);
@@ -876,6 +878,37 @@ public class DiceManager : MonoBehaviour
         }
     }
 
+    // 티켓으로 올린 족보 배수를 인스펙터 기본값으로 되돌린다 (재시작, 심연의 딜러)
+    public void ResetHandMultipliers()
+    {
+        if (defaultHandMultipliers == null) return;
+        multHighCard = defaultHandMultipliers[0];
+        multOnePair = defaultHandMultipliers[1];
+        multTwoPair = defaultHandMultipliers[2];
+        multTriple = defaultHandMultipliers[3];
+        multFullHouse = defaultHandMultipliers[4];
+        multFourOfAKind = defaultHandMultipliers[5];
+        multStraight = defaultHandMultipliers[6];
+        multYacht = defaultHandMultipliers[7];
+    }
+
+    // 티켓 도감에 보여줄 현재 배수
+    public float GetHandMultiplier(HandType handType)
+    {
+        switch (handType)
+        {
+            case HandType.HighCard: return multHighCard;
+            case HandType.OnePair: return multOnePair;
+            case HandType.TwoPair: return multTwoPair;
+            case HandType.Triple: return multTriple;
+            case HandType.FullHouse: return multFullHouse;
+            case HandType.FourOfAKind: return multFourOfAKind;
+            case HandType.Straight: return multStraight;
+            case HandType.Yacht: return multYacht;
+            default: return 1.0f;
+        }
+    }
+
     public void OnEnemyKilled()
     {
         if (enemy == null || !enemy.IsDead || isStageClearing || enemyDeathHandled)
@@ -1252,14 +1285,7 @@ public class DiceManager : MonoBehaviour
         turnContext.figureBonusRerolls = 0;
         Debug.Log("게임이 완전히 초기화되었습니다. 다시 시작합니다.");
         //티켓으로 올렸던 배수를 다시 기본값으로 돌려줌
-        multHighCard = 1.0f;
-        multOnePair = 1.2f;
-        multTwoPair = 1.4f;
-        multTriple = 1.5f;
-        multFullHouse = 1.7f;
-        multFourOfAKind = 1.8f;
-        multStraight = 2.0f;
-        multYacht = 2.5f;
+        ResetHandMultipliers();
 
         //몬스터 초기화
         enemy.ResetMonsterIndex();

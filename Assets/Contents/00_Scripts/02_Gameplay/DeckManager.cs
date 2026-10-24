@@ -122,6 +122,12 @@ public class DeckManager
         return masterDeck.OrderBy(x => Random.value).Take(count).ToList();
     }
 
+    // 파괴·희생으로 지울 수 있는 주사위 전체(여정 주사위 제외). 파괴 선택창 리롤 후보.
+    public List<DiceData1> GetDestructionCandidates()
+    {
+        return masterDeck.Where(x => !IsProtected(x)).ToList();
+    }
+
     // 파괴·희생으로 지울 주사위 선택용. 여정 주사위는 후보에서 뺀다.
     public List<DiceData1> GetRandomDiceForDestruction(int count)
     {

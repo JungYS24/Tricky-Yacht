@@ -201,6 +201,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         {
             if (usedDiscount && currentData is CoatingItemSO) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.DiscountCoating);
             if (usedDiscount && currentData is SatelliteItemSO) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.DiscountSatellite);
+            if (currentData is TicketItemSO boughtTicket && itemIcon != null) TicketFlyFeedback.Play(boughtTicket, itemIcon.rectTransform);
             // 사운드 구매 성공 소리 재생 (코인 지불하는 소리 등)
             isPurchased = true;
             isAnimating = false; //아이템을 구매하면 즉시 애니메이션 연산을 정지    

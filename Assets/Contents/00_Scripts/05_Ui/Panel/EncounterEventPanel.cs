@@ -342,12 +342,10 @@ public class EncounterEventPanel : MonoBehaviour
 
             case EncounterType.AbyssDealer:
                 // 족보 초기화 (기본 배수로) 및 골드 획득
-                diceManager.multHighCard = 1.0f; diceManager.multOnePair = 1.2f; diceManager.multTwoPair = 1.4f;
-                diceManager.multTriple = 1.5f; diceManager.multFullHouse = 1.7f; diceManager.multFourOfAKind = 1.8f;
-                diceManager.multStraight = 2.0f; diceManager.multYacht = 2.5f;
+                diceManager.ResetHandMultipliers();
                 diceManager.shopManager.currentGold += (1000 * diceManager.currentStage);
 
-                // InventoryManager에 추가한 티켓 및 UI 완전 삭제 함수 호출
+                // 보유 티켓 수도 초기화 (티켓 도감 숫자가 전부 1로 돌아감)
                 if (InventoryManager.Instance != null) InventoryManager.Instance.ClearAllTickets();
                 break;
 

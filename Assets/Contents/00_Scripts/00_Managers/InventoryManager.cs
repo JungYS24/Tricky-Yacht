@@ -11,7 +11,6 @@ public class InventoryManager : MonoBehaviour
     [Header("참조")]
     public DiceManager diceManager;
     public FigureDetailPanel figureDetailPanel; // 피규어 상세 정보 패널
-    public TicketDetailPanel ticketDetailPanel; //티켓 상세 정보 패널
 
     [Header("슬롯 배열")]
     public Transform figureSlotParent; // 피규어가 생성될 부모 위치 (FigureSlotArea)
@@ -25,13 +24,8 @@ public class InventoryManager : MonoBehaviour
     private SnackUseController snackUses;
     public SnackUseController SnackUses => snackUses ?? (snackUses = new SnackUseController(this));
 
-    [Header("티켓 슬롯 설정")]
-    public Transform ticketSlotParent;
-    public GameObject ticketSlotPrefab;
-
-    //보유 중인 티켓 리스트
+    //보유 중인 티켓 리스트 (먹은 장수만큼 같은 티켓이 여러 번 들어감, 화면에는 도감 티켓 탭에서 보여줌)
     public List<TicketItemSO> ownedTickets = new List<TicketItemSO>();
-    private List<GameObject> activeTicketSlots = new List<GameObject>();
 
     [Header("인벤토리 용량 제한")]
     public int maxSnackSlots = 5;   // 스낵칸 최대 5개로 제한
@@ -99,9 +93,7 @@ public class InventoryManager : MonoBehaviour
 
         FigureEffectManager.Instance?.RebuildCache(); // 초기화 시 캐시 갱신
 
-        //티켓 슬롯도 같이 비워줌
-        foreach (var slotGo in activeTicketSlots) Destroy(slotGo);
-        activeTicketSlots.Clear();
+        //티켓도 같이 비워줌
         ownedTickets.Clear();
 
         foreach (var slot in snackSlots) slot.ClearSlot();
@@ -166,23 +158,7 @@ public class InventoryManager : MonoBehaviour
         //티켓 아이템이 들어올 경우 처리
         else if (item is TicketItemSO ticket)
         {
-            foreach (var slotGo in activeTicketSlots)
-            {
-                InventorySlot slot = slotGo.GetComponent<InventorySlot>();
-                if (slot.currentItem == ticket)
-                {
-                    slot.AddStack();
-                    return true;
-                }
-            }
-
             ownedTickets.Add(ticket);
-            GameObject newSlotGo = Instantiate(ticketSlotPrefab, ticketSlotParent);
-            InventorySlot newSlot = newSlotGo.GetComponent<InventorySlot>();
-            newSlot.Initialize(this);
-            newSlot.SetItem(ticket);
-            newSlot.AddStack();
-            activeTicketSlots.Add(newSlotGo);
             return true;
         }
         else if (item is SnackItemSO)
@@ -196,21 +172,21 @@ public class InventoryManager : MonoBehaviour
     {
         destination.Clear();
 
-        foreach (var slotGo in activeTicketSlots)
+        foreach (var ticket in ownedTickets)
         {
-            if (slotGo == null) continue;
-
-            var slot = slotGo.GetComponent<InventorySlot>();
-
-            if (slot == null || slot.isEmpty ||
-                !(slot.currentItem is TicketItemSO ticket))
-                continue;
-
-            for (int i = 0; i < slot.currentStack; i++)
-            {
-                destination.Add(ticket.itemName);
-            }
+            if (ticket != null) destination.Add(ticket.itemName);
         }
+    }
+
+    // 해당 족보 티켓을 몇 장 먹었는지 (도감 숫자 = 이 값 + 1)
+    public int GetTicketCount(HandType handType)
+    {
+        int count = 0;
+        foreach (var ticket in ownedTickets)
+        {
+            if (ticket != null && ticket.targetHand == handType) count++;
+        }
+        return count;
     }
 
     private bool PlaceIntoEmptySlot(BaseItemDataSO item, InventorySlot[] slots, int maxLimit)
@@ -364,11 +340,6 @@ public class InventoryManager : MonoBehaviour
     // 심연의 딜러 조우자 이벤트를 위한 티켓 완전 초기화 함수
     public void ClearAllTickets()
     {
-        foreach (var slotGo in activeTicketSlots)
-        {
-            if (slotGo != null) Destroy(slotGo);
-        }
-        activeTicketSlots.Clear();
         ownedTickets.Clear();
     }
 }

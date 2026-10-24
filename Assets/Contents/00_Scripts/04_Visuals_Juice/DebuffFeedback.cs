@@ -463,8 +463,8 @@ public static class DebuffFeedback
 
     static Texture2D dissolveNoise;
 
-    // 가장자리부터 안쪽으로 녹도록 바깥이 낮고 가운데가 높은 잡음 마스크(난수 대신 해시).
-    static Texture2D DissolveNoise()
+    // 가장자리부터 안쪽으로 녹도록 바깥이 낮고 가운데가 높은 잡음 마스크(난수 대신 해시). 티켓 획득 연출도 같이 쓴다.
+    internal static Texture2D DissolveNoise()
     {
         if (dissolveNoise != null) return dissolveNoise;
         const int size = 32;

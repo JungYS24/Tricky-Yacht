@@ -33,8 +33,11 @@ public class TicketChoiceSlot : MonoBehaviour, IPointerEnterHandler, IPointerExi
         // 선택한 티켓의 효과 적용 (배수 상승)
         currentTicketData.ApplyItemEffect(shopManager.diceManager);
 
-        //인벤토리에도 등록해서 화면에 보이게 함
+        //보유 티켓에 기록 (도감 티켓 탭 숫자가 올라감)
         InventoryManager.Instance.AddItem(currentTicketData);
+
+        // 고른 티켓이 도감 버튼으로 날아가는 연출
+        TicketFlyFeedback.Play(currentTicketData, ticketIcon.rectTransform);
 
         // 선택창 닫기
         shopManager.CloseTicketSelection();

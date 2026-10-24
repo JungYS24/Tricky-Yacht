@@ -277,7 +277,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         }
 
         // 상점이 열려있거나 피규어 상세 패널이 열려있으면 클릭 취소
-        if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || DebuffDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || DeckUI.IsPanelOpen || TicketDetailPanel.IsPanelOpen || CoatingSelectionPanel.IsPanelOpen || UIManager.IsSettingsOpen)
+        if (ShopManager.IsShopOpen || FigureDetailPanel.IsPanelOpen || DebuffDetailPanel.IsPanelOpen || LootSelectionPanel.IsPanelOpen || DeckUI.IsPanelOpen || CoatingSelectionPanel.IsPanelOpen || UIManager.IsSettingsOpen)
             return;
 
         //상점 선택 패널(상점/다음 스테이지) 또는 바이옴 선택 패널이 열려있을 때 클릭 차단

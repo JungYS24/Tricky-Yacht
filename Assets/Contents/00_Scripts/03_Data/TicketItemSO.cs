@@ -15,6 +15,9 @@ public class TicketItemSO : BaseItemDataSO
     [Header("배수 증가량 (기본 1.1배)")]
     public float upgradeMultiplier = 1.1f; // 기존 배수에 곱해집니다.
 
+    [Header("도감 족보 예시 주사위 (눈 5개, 고정)")]
+    public int[] exampleDice = new int[5];
+
     public override void ApplyItemEffect(DiceManager diceManager)
     {
         if (diceManager != null)
