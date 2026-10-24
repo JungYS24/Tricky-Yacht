@@ -65,6 +65,8 @@ public class ShopManager : MonoBehaviour
     public RuntimeAnimatorController nyaonAnimator;
     public RuntimeAnimatorController ronanAnimator;
     public RuntimeAnimatorController opelAnimator;
+    public MerchantShopSkin merchantSkin; // 상인별 판·카드·버튼 그림과 배치 (비워 두면 원래 상점 모습 그대로)
+    MerchantShopSkinApplier skinApplier;
     bool mapMerchantActive;
     ShopStockTable stockTable;
     bool stockTableLogged;
@@ -189,15 +191,18 @@ public class ShopManager : MonoBehaviour
     void ApplyMerchantPresentation(bool fromMap)
     {
         BindShopChrome();
+        if (skinApplier == null && merchantSkin != null) skinApplier = new MerchantShopSkinApplier(this);
         if (fromMap)
         {
             ApplyNpc(currentMerchant);
             ApplyShopTitle(true);
+            skinApplier?.Apply(merchantSkin, currentMerchant, shopTitleText);
         }
         else
         {
             RestoreNpc();
             ApplyShopTitle(false);
+            skinApplier?.Restore();
         }
     }
 
