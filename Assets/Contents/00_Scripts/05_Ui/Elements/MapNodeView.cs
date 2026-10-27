@@ -50,6 +50,17 @@ public class MapNodeView : MonoBehaviour
         }
     }
 
+    // 현재 칸 표시를 노란 네모 대신 플레이어 아이콘으로 노드 위에 그립니다.
+    public void SetCurrentMarker(Sprite marker)
+    {
+        if (ring == null || marker == null) return;
+        ring.sprite = marker;
+        ring.type = Image.Type.Simple;
+        ring.preserveAspect = true;
+        ring.color = Color.white;
+        ring.transform.SetAsLastSibling();
+    }
+
     void OnClick()
     {
         owner?.EnterMapNode(nodeId);

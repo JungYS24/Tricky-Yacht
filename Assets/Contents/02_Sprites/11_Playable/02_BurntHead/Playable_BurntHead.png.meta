@@ -150,10 +150,10 @@ TextureImporter:
       name: Playable_BurntHead_0
       rect:
         serializedVersion: 2
-        x: 20
+        x: 0
         y: 128
-        width: 78
-        height: 127
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -172,9 +172,9 @@ TextureImporter:
       name: Playable_BurntHead_1
       rect:
         serializedVersion: 2
-        x: 149
+        x: 128
         y: 128
-        width: 76
+        width: 128
         height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -194,10 +194,10 @@ TextureImporter:
       name: Playable_BurntHead_2
       rect:
         serializedVersion: 2
-        x: 278
+        x: 256
         y: 128
-        width: 74
-        height: 127
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -216,10 +216,10 @@ TextureImporter:
       name: Playable_BurntHead_3
       rect:
         serializedVersion: 2
-        x: 406
+        x: 384
         y: 128
-        width: 74
-        height: 124
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -238,10 +238,10 @@ TextureImporter:
       name: Playable_BurntHead_4
       rect:
         serializedVersion: 2
-        x: 22
+        x: 0
         y: 0
-        width: 74
-        height: 125
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -260,10 +260,10 @@ TextureImporter:
       name: Playable_BurntHead_5
       rect:
         serializedVersion: 2
-        x: 150
+        x: 128
         y: 0
-        width: 74
-        height: 123
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -282,10 +282,10 @@ TextureImporter:
       name: Playable_BurntHead_6
       rect:
         serializedVersion: 2
-        x: 278
+        x: 256
         y: 0
-        width: 74
-        height: 126
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -304,10 +304,10 @@ TextureImporter:
       name: Playable_BurntHead_7
       rect:
         serializedVersion: 2
-        x: 406
+        x: 384
         y: 0
-        width: 74
-        height: 127
+        width: 128
+        height: 128
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

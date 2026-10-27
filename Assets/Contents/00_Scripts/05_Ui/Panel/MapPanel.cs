@@ -23,6 +23,8 @@ public class MapPanel : MonoBehaviour
     // 여정 주사위 보드 이미지(Journey_Result_Slot 배경). 빌드에서는 여기 연결한 값만 쓴다.
     public Sprite journeyBoardSprite;
 
+    const string PlayerMarkerKey = "Icon_Map_Player";
+
     Sprite dotSprite;
     DiceManager boundDice;
     Coroutine journeyRollRoutine;
@@ -139,6 +141,8 @@ public class MapPanel : MonoBehaviour
         bool visited = ListHas(diceManager.stageProgression.visitedNodeIds, node.id)
             || ListHas(diceManager.stageProgression.passedNodeIds, node.id);
         view.Bind(diceManager, node.id, sprite, tint, selectable, current, visited);
+        if (current && iconSet != null)
+            view.SetCurrentMarker(iconSet.GetSprite(PlayerMarkerKey, out _));
         if (node.type == MapNodeType.Boss)
             view.transform.localScale = new Vector3(2.8f, 2.8f, 1f);
     }
