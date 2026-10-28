@@ -243,7 +243,7 @@ public class HurtVignetteController : MonoBehaviour
         ApplyShieldLayout(true);
         shieldPopup.rectTransform.position = shieldRow.TransformPoint(new Vector3(shieldRow.rect.width * 0.7f, 0f, 0f));
         shieldPopup.color = shieldColor;
-        shieldPopup.SetText(gained ? "+{0}" : "막음 {0}", amount);
+        shieldPopup.SetText(gained ? "+{0}" : LocalizationManager.GetUi("UI_SHIELD_BLOCKED", "막음 {0}"), amount);
         float duration = Mathf.Max(0.12f, broken ? shieldBreakDuration : shieldFeedbackDuration);
         shieldTween = DOTween.Sequence();
         shieldTween.Append(shieldRow.DOScale(shieldPulseScale, 0.07f).SetEase(Ease.OutQuad));

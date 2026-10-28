@@ -45,7 +45,7 @@ public class OpelPanel : MonoBehaviour
     void RefreshTexts()
     {
         if (titleText != null)
-            titleText.text = "오펠";
+            titleText.text = LocalizationManager.GetUi("UI_OPEL_TITLE", "오펠");
         SetButtonLabel(jupiterButton, SatelliteType.Jupiter, "목성");
         SetButtonLabel(marsButton, SatelliteType.Mars, "화성");
         SetButtonLabel(mercuryButton, SatelliteType.Mercury, "수성");

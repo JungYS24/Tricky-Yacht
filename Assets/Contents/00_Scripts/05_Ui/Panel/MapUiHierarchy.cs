@@ -279,7 +279,7 @@ public static class MapUiHierarchy
             buttonImage.color = new Color(0.22f, 0.28f, 0.36f, 1f);
             Button plainRoll = GetOrAdd<Button>(button.gameObject);
             plainRoll.targetGraphic = buttonImage;
-            Text label = EnsureLabel(button, "Text", "굴리기", 26, Vector2.zero, new Vector2(200f, 64f), true);
+            Text label = EnsureLabel(button, "Text", LocalizationManager.GetUi("UI_MAP_JOURNEY_ROLL", "굴리기"), 26, Vector2.zero, new Vector2(200f, 64f), true);
             RectTransform labelRect = label.rectTransform;
             labelRect.anchorMin = Vector2.zero;
             labelRect.anchorMax = Vector2.one;

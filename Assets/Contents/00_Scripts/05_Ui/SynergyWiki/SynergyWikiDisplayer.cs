@@ -165,8 +165,8 @@ public class SynergyWikiDisplayer : MonoBehaviour
             case OrderType.Name:
                 // 코드 포인트 순이라 RE:VIVE 같은 라틴 이름이 한글보다 앞에 온다.
                 components.Sort((x, y) => string.Compare(
-                    x.Item2.SynergyName,
-                    y.Item2.SynergyName,
+                    LocalizationManager.GetItemDisplayName(x.Item2),
+                    LocalizationManager.GetItemDisplayName(y.Item2),
                     StringComparison.Ordinal));
                 return true;
 
@@ -251,7 +251,7 @@ public class SynergyWikiDisplayer : MonoBehaviour
 
         ownedFigures = CollectOwnedFigures();
         var synergies = SynergyManager.Instance.GetAllSynergies()
-            .OrderBy(s => s.SynergyName, StringComparer.Ordinal);
+            .OrderBy(s => LocalizationManager.GetItemDisplayName(s), StringComparer.Ordinal);
 
         if (rowTemplate != null)
         {
@@ -271,11 +271,11 @@ public class SynergyWikiDisplayer : MonoBehaviour
             component
                 .Find("Description/DescriptionBackground/Name")
                 .GetComponent<TextMeshProUGUI>()
-                .text = synergy.SynergyName;
+                .text = LocalizationManager.GetItemDisplayName(synergy);
             component
                 .Find("Description/DescriptionBackground/Description")
                 .GetComponent<TextMeshProUGUI>()
-                .text = synergy.SynergyDescription;
+                .text = LocalizationManager.GetItemDescription(synergy);
 
             var figureArea = component.GetChild(0);
             components.Add((component, synergy));
@@ -305,7 +305,7 @@ public class SynergyWikiDisplayer : MonoBehaviour
             Image icon = row.Find("Icon").GetComponent<Image>();
             icon.sprite = synergy.icon;
             icon.enabled = synergy.icon != null;
-            row.Find("Name").GetComponent<TextMeshProUGUI>().text = synergy.SynergyName;
+            row.Find("Name").GetComponent<TextMeshProUGUI>().text = LocalizationManager.GetItemDisplayName(synergy);
             Transform progress = row.Find("Progress");
             if (progress != null)
             {
@@ -352,8 +352,8 @@ public class SynergyWikiDisplayer : MonoBehaviour
     private void ShowDetail(SynergyData synergy)
     {
         if (synergy == null) return;
-        if (detailName != null) detailName.text = synergy.SynergyName;
-        if (detailDescription != null) detailDescription.text = synergy.SynergyDescription;
+        if (detailName != null) detailName.text = LocalizationManager.GetItemDisplayName(synergy);
+        if (detailDescription != null) detailDescription.text = LocalizationManager.GetItemDescription(synergy);
         if (detailIcon != null) detailIcon.sprite = synergy.icon;
         LayoutHeader();
         if (detailFigureRoot == null) return;
