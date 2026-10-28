@@ -84,7 +84,10 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerEnterH
         }
 
         //몬스터가 죽어있는 상태(전투 종료 및 연출 대기 중)라면 인벤토리 상호작용 차단!
-        if (manager.diceManager != null && manager.diceManager.enemy != null && manager.diceManager.enemy.IsDead)
+        // 지도 화면에서는 직전 전투의 몬스터가 다음 전투 전까지 죽은 상태로 남아 있으므로 막지 않는다.
+        DiceManager dm = manager.diceManager;
+        bool onMap = dm != null && dm.mapPanel != null && dm.mapPanel.gameObject.activeInHierarchy;
+        if (!onMap && dm != null && dm.enemy != null && dm.enemy.IsDead)
         {
             return;
         }
