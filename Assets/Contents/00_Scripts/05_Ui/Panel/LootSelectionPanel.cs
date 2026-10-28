@@ -17,7 +17,6 @@ public class LootSelectionPanel : MonoBehaviour
 
     [Header("전리품 풀 세팅")]
     public List<SnackItemSO> snackPool; 
-    public List<DiceItemSO> dicePool;
 
     private DiceManager diceManager;
 
@@ -33,10 +32,21 @@ public class LootSelectionPanel : MonoBehaviour
         if (snackPool == null) snackPool = new List<SnackItemSO>();
         SnackItemSO.RegisterResourceSnacks(snackPool);
 
-        // 에러 방지: 스낵 1개, 주사위 1개, 그리고 고정 체력 아이템이 세팅되었는지 확인
-        if (snackPool.Count < 1 || dicePool.Count < 1 || firstSlotPool.Count < 1)
+        // 3번 칸 고정 보상은 랜덤 스낵 목록에서 빼도 공용 아이템 DB에서 가져온다.
+        var itemDatabase = GameSaveManager.Instance != null ? GameSaveManager.Instance.masterItemDatabase : null;
+        SnackItemSO peppermint = itemDatabase != null
+            ? itemDatabase.Find(item => item is SnackItemSO snack && snack.snackType == SnackType.Peppermint) as SnackItemSO
+            : null;
+        if (peppermint == null)
+            peppermint = snackPool.Find(snack => snack != null && snack.snackType == SnackType.Peppermint);
+
+        // 2번 칸은 페퍼민트와 누락된 에셋을 제외한 스낵만 추첨한다.
+        List<SnackItemSO> shuffledSnacks = snackPool.FindAll(snack => snack != null && snack.snackType != SnackType.Peppermint);
+
+        // 고정 보상과 각 랜덤 칸의 후보가 준비되었는지 확인
+        if (peppermint == null || shuffledSnacks.Count < 1 || firstSlotPool == null || firstSlotPool.Count < 1)
         {
-            Debug.LogWarning("전리품 풀에 아이템이 부족하거나 1번 칸 아이템이 누락되었습니다!");
+            Debug.LogWarning("전리품에 페퍼민트, 랜덤 스낵 또는 1번 칸 아이템이 누락되었습니다!");
             ClosePanelAndProceed();
             return;
         }
@@ -45,17 +55,12 @@ public class LootSelectionPanel : MonoBehaviour
         BaseItemDataSO selectedFirstSlotItem = firstSlotPool[Random.Range(0, firstSlotPool.Count)];
 
         // 스낵 1개 뽑기
-        List<SnackItemSO> shuffledSnacks = new List<SnackItemSO>(snackPool);
         ShuffleList(shuffledSnacks);
 
-        // 주사위 1개 뽑기
-        List<DiceItemSO> shuffledDice = new List<DiceItemSO>(dicePool);
-        ShuffleList(shuffledDice);
-
-        // 슬롯 세팅 (1번: 체력 아이템, 2번: 스낵, 3번: 주사위)
+        // 슬롯 세팅 (1번: 성장 아이템, 2번: 랜덤 스낵, 3번: 페퍼민트 고정)
         choiceSlots[0].Setup(selectedFirstSlotItem, this);
         choiceSlots[1].Setup(shuffledSnacks[0], this);
-        choiceSlots[2].Setup(shuffledDice[0], this);
+        choiceSlots[2].Setup(peppermint, this);
 
         panelRoot.SetActive(true);
         panelRoot.transform.SetAsLastSibling();
