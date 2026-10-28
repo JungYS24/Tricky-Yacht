@@ -27,6 +27,9 @@ public sealed class DebuffDetailPanel : MonoBehaviour
     Button leftButton;
     Button rightButton;
     Image hourglass;
+    RectTransform stage;
+    RectTransform stageShadow;
+    TextMeshProUGUI kindLabel;
     List<Entry> entries = new List<Entry>();
     int index;
 
@@ -108,6 +111,13 @@ public sealed class DebuffDetailPanel : MonoBehaviour
 
         var p = DebuffFeedback.Profile;
         if (dieImage == null) return;
+        stage = Mirror<RectTransform>(template.figureStage, sourceRoot, cloneRoot);
+        stageShadow = Mirror<RectTransform>(template.figureStageShadow, sourceRoot, cloneRoot);
+        if (stage != null)
+        {
+            BindStage(p);
+            return;
+        }
         RectTransform dieRect = dieImage.rectTransform;
         Rect area = dieRect.rect; // 피규어 그림이 들어가던 그림 칸
 
@@ -139,6 +149,42 @@ public sealed class DebuffDetailPanel : MonoBehaviour
         dieRect.anchoredPosition = center;
     }
 
+    // 피규어 패널이 나무 무대 구성이면, 구분 표시는 무대 위쪽 안에 크림색 글자로, 모래시계는 무대 오른쪽 아래 모서리에 붙입니다.
+    // 복제 시점의 피규어 그림 크기(마지막에 본 피규어)에 기대지 않도록 무대 크기를 기준으로 잡습니다.
+    void BindStage(DebuffVisualProfile p)
+    {
+        if (nameText != null)
+        {
+            kindLabel = Instantiate(nameText, stage);
+            kindLabel.name = "KindLabel";
+            RectTransform label = kindLabel.rectTransform;
+            label.anchorMin = label.anchorMax = new Vector2(0.5f, 1f);
+            label.pivot = new Vector2(0.5f, 1f);
+            label.sizeDelta = new Vector2(stage.rect.width - 48f, 36f);
+            label.anchoredPosition = new Vector2(0f, -16f);
+            kindLabel.enableAutoSizing = true;
+            kindLabel.fontSizeMax = 24f;
+            kindLabel.fontSizeMin = 18f;
+            kindLabel.raycastTarget = false;
+        }
+
+        if (p != null && p.hourglass != null)
+        {
+            hourglass = new GameObject("Hourglass", typeof(RectTransform), typeof(Image)).GetComponent<Image>();
+            RectTransform glass = hourglass.rectTransform;
+            glass.SetParent(stage, false);
+            glass.anchorMin = glass.anchorMax = new Vector2(1f, 0f);
+            glass.pivot = new Vector2(1f, 0f);
+            Vector2 size = p.hourglass.rect.size;
+            int scale = Mathf.Max(1, Mathf.RoundToInt(stage.rect.height * 0.12f / Mathf.Max(1f, size.y)));
+            glass.sizeDelta = size * scale;
+            glass.anchoredPosition = new Vector2(-16f, 16f);
+            hourglass.sprite = p.hourglass;
+            hourglass.preserveAspect = true;
+            hourglass.raycastTarget = false;
+        }
+    }
+
     void Show()
     {
         if (entries.Count == 0) return;
@@ -148,15 +194,21 @@ public sealed class DebuffDetailPanel : MonoBehaviour
             dieImage.sprite = entry.sprite;
             dieImage.color = Color.white;
             dieImage.preserveAspect = true;
+            // 무대 구성이면 주사위를 그림 박스보다 조금 작은 최대 정수 배로 키워 그림자 위에 세웁니다.
+            if (stage != null)
+            {
+                var p = DebuffFeedback.Profile;
+                float box = FigureDetailPanel.PopupFigureIconBox * (p != null ? p.panelDieScale : 0.65f);
+                FigureDetailPanel.FitPopupStage(dieImage, stage, stageShadow, box);
+            }
         }
         if (nameText != null) nameText.text = entry.count > 1 ? $"{entry.name} ×{entry.count}" : entry.name;
+        string kind = entry.temporary
+            ? DebuffTrackerHud.Localized(LocalizationManager.GetUi("UI_DEBUFF_TEMPORARY", "이번 전투 한정 디버프"), "이번 전투 한정 디버프")
+            : DebuffTrackerHud.Localized(LocalizationManager.GetUi("UI_DEBUFF_PERMANENT", "영구 디버프"), "영구 디버프");
+        if (kindLabel != null) kindLabel.text = kind;
         if (descText != null)
-        {
-            string kind = entry.temporary
-                ? DebuffTrackerHud.Localized(LocalizationManager.GetUi("UI_DEBUFF_TEMPORARY", "이번 전투 한정 디버프"), "이번 전투 한정 디버프")
-                : DebuffTrackerHud.Localized(LocalizationManager.GetUi("UI_DEBUFF_PERMANENT", "영구 디버프"), "영구 디버프");
-            descText.text = $"<color=#D9B8FF>{kind}</color>\n{entry.description}";
-        }
+            descText.text = kindLabel != null ? entry.description : $"<color=#D9B8FF>{kind}</color>\n{entry.description}";
         if (hourglass != null) hourglass.gameObject.SetActive(entry.temporary);
         if (leftButton != null) leftButton.interactable = index > 0;
         if (rightButton != null) rightButton.interactable = index < entries.Count - 1;
