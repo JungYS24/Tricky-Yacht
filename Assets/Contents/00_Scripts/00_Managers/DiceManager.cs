@@ -1545,8 +1545,6 @@ public class DiceManager : MonoBehaviour
                         pool.Add(biome.biomeMonsters[m]);
                 }
             }
-            if (biome.bossMonster != null)
-                pool.Add(biome.bossMonster);
         }
         if (pool.Count == 0) return null;
 
