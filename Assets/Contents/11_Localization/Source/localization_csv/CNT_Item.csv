@@ -648,3 +648,21 @@ CNT_Item,ID_DICE_NAME_1043,여정 주사위,Journey Dice,旅のサイコロ,旅�
 CNT_Item,ID_DICE_DESC_1043,"지도에서는 굴려서 이동하고, 전투에서는 일반 주사위처럼 쓰입니다. 해골은 가시(피해), 하트는 회복, 골드는 코인입니다. 이 세 면의 전투 눈금은 1입니다. 파괴할 수 없습니다.","Rolled on the map to travel and used like a normal die in battle. The skull is a thorn (damage), the heart heals, and the gold is a coin. Those faces score 1 in battle. It cannot be destroyed.",マップでは振って移動し、戦闘では通常のサイコロとして使います。ドクロは棘(ダメージ)、ハートは回復、ゴールドはコインです。この3面の戦闘出目は1です。破壊できません。,地图上掷骰移动，战斗中当作普通骰子使用。骷髅为荆棘(伤害)，爱心为恢复，金币为硬币。这三面战斗点数为1。无法被破坏。,
 CNT_Item,CNT_Journey_NAME,여정 주사위,Journey Dice,旅のサイコロ,旅途骰子,
 CNT_Item,CNT_Journey_DESC,"지도에서는 굴려서 이동하고, 전투에서는 일반 주사위처럼 쓰입니다. 해골은 가시(피해), 하트는 회복, 골드는 코인입니다. 이 세 면의 전투 눈금은 1입니다. 파괴할 수 없습니다.","Rolled on the map to travel and used like a normal die in battle. The skull is a thorn (damage), the heart heals, and the gold is a coin. Those faces score 1 in battle. It cannot be destroyed.",マップでは振って移動し、戦闘では通常のサイコロとして使います。ドクロは棘(ダメージ)、ハートは回復、ゴールドはコインです。この3面の戦闘出目は1です。破壊できません。,地图上掷骰移动，战斗中当作普通骰子使用。骷髅为荆棘(伤害)，爱心为恢复，金币为硬币。这三面战斗点数为1。无法被破坏。,
+CNT_Item,CNT_LOOT_COIN_NAME,코인,Coins,コイン,硬币,전리품 1번 칸 코인
+CNT_Item,CNT_LOOT_COIN_DESC,300코인을 획득합니다,Gain 300 coins.,300コインを獲得します。,获得300硬币。,
+CNT_Item,CNT_LOOT_MAX_HP_NAME,체력 증진,Vitality Boost,体力増強,体力增强,전리품 1번 칸 최대 체력
+CNT_Item,CNT_LOOT_MAX_HP_DESC,영구 체력 5를 얻습니다,Permanently gain 5 max HP.,最大HPを永久に5獲得します。,永久获得5点最大体力。,
+CNT_Item,CNT_DICE_DESTROY_NAME,주사위 파괴,Destroy Die,サイコロ破壊,摧毁骰子,주사위 파괴 아이템(SO 이름 Destroy)
+CNT_Item,CNT_DICE_DESTROY_DESC,주사위를 파괴합니다.,Destroy a die.,サイコロを破壊します。,摧毁一个骰子。,
+CNT_Item,CNT_DDice_CurseDice_NAME,저주 주사위,Cursed Dice,呪いのサイコロ,诅咒骰子,디버프 주사위 원본 SO
+CNT_Item,CNT_DDice_CurseDice_DESC,킵한 채 결산하면 최종 배수에 (1 - 눈 x 0.05)를 곱합니다. 영구 디버프.,"If scored while kept, multiplies the final multiplier by (1 - pips x 0.05). Permanent debuff.",キープしたまま決算すると、最終倍率に(1 - 目 x 0.05)を掛けます。永久デバフ。,保留状态下结算时，最终倍率乘以(1 - 点数 x 0.05)。永久减益。,
+CNT_Item,CNT_DDice_FakeDice_NAME,가짜 주사위,Fake Dice,偽物のサイコロ,假骰子,디버프 주사위 원본 SO
+CNT_Item,CNT_DDice_FakeDice_DESC,눈 0 고정. 덱에 영구 추가됩니다.,Pips fixed at 0. Permanently added to your deck.,目は0に固定。デッキに永久に追加されます。,点数固定为0。永久加入牌组。,
+CNT_Item,CNT_DDice_SpineDice_NAME,가시 주사위,Spine Dice,トゲのサイコロ,荆棘骰子,디버프 주사위 원본 SO
+CNT_Item,CNT_DDice_SpineDice_DESC,킵한 채 결산하면 눈 x 2만큼 체력 감소. 영구 디버프.,"If scored while kept, lose HP equal to pips x 2. Permanent debuff.",キープしたまま決算すると、目 x 2だけHPが減少。永久デバフ。,保留状态下结算时，失去点数 x 2的体力。永久减益。,
+CNT_Item,CNT_Fig_Mad_Hat_NAME,이상한 모자,Strange Hat,奇妙な帽子,奇怪的帽子,숲 피규어
+CNT_Item,CNT_Fig_Mad_Hat_DESC,주사위 족보가 스트레이트 달성 시 최종 칩수를 50 획득합니다,+50 final Chips on completing [Straight],[ストレート]完成時、最終チップ+50,完成【顺子】时，最终筹码+50,
+CNT_Item,CNT_Node_Enemy_NAME,적,Enemy,敵,敌人,지도 노드 이름
+CNT_Item,CNT_Node_Boss_NAME,보스,Boss,ボス,首领,지도 노드 이름
+CNT_Item,CNT_Node_Encounter_NAME,조우자,Encounter,遭遇,遭遇,지도 노드 이름
+CNT_Item,CNT_Node_Rest_NAME,휴식,Rest,休息,休息,지도 노드 이름

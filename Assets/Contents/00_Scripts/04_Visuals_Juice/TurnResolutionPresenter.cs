@@ -302,7 +302,7 @@ public sealed class TurnResolutionPresenter
                 if (die == null || die.myData == null || die.myData.debuffType != DebuffDiceType.Curse) continue;
                 float factor = Mathf.Clamp01(1f - die.currentValue * 0.05f);
                 DebuffFeedback.PlayCurse(die, ui.multSumText != null ? ui.multSumText.transform : null);
-                yield return AnimateBonus(false, shownMult * (factor - 1f), die.myData.diceName, die, factorText: $"×{factor:0.##}");
+                yield return AnimateBonus(false, shownMult * (factor - 1f), DiceChoiceWindow.DiceName(die.myData), die, factorText: $"×{factor:0.##}");
             }
 
             // 표시의 최종값을 실제 계산 결과에 맞춤

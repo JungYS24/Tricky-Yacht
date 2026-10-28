@@ -112,19 +112,76 @@ UI,UI_CHARSELECT_DEDICATED_FIGURE,전용 피규어,Signature Figure,専用フィ
 UI,UI_CHARSELECT_CANCEL,취소,Cancel,キャンセル,取消,캐릭터 선택창 취소 버튼
 UI,UI_CHARSELECT_START,시작,Start,スタート,开始,캐릭터 선택창 시작 버튼
 UI,UI_CHARSELECT_CONFIRM,{0}(으)로 시작할까요?,Start as {0}?,{0}で始めますか？,以{0}开始？,캐릭터 선택창 시작 확인 패널
-UI,UI_TUTORIAL_STEP_01,트리키 요트에 온 걸 환영합니다. 기본 조작만 빠르게 알려 드릴게요.,,,,튜토리얼 1 시작 안내
-UI,UI_TUTORIAL_STEP_02,지도에서는 여정 주사위를 굴려 앞으로 나아갑니다. 굴리기 버튼을 눌러 보세요.,,,,튜토리얼 2 여정 주사위
-UI,UI_TUTORIAL_STEP_02_MOVE,{0}칸까지 이동할 수 있어요. 빛나는 노드를 눌러 이동합니다.,,,,튜토리얼 2 결과: 이동 면(1~3)
-UI,UI_TUTORIAL_STEP_02_DAMAGE,"해골 면: 체력이 줄어들고, 한 번 더 굴려야 합니다.",,,,튜토리얼 2 결과: 해골 면
-UI,UI_TUTORIAL_STEP_02_HEAL,"하트 면: 체력을 회복하고, 한 번 더 굴려야 합니다.",,,,튜토리얼 2 결과: 하트 면
-UI,UI_TUTORIAL_STEP_02_GOLD,"코인 면: 골드를 얻고, 한 번 더 굴려야 합니다.",,,,튜토리얼 2 결과: 코인 면
-UI,UI_TUTORIAL_STEP_03,지도 이동은 자동이 아니에요. 빛나는 노드 중 전투 노드를 눌러 이동하면 전투가 시작됩니다.,,,,튜토리얼 3 전투 진입
-UI,UI_TUTORIAL_STEP_04,굴리기를 눌러 주사위 5개를 굴리세요.,,,,튜토리얼 4 굴리기
-UI,UI_TUTORIAL_STEP_05,남기고 싶은 주사위를 클릭해 위 칸에 올리세요.,,,,튜토리얼 5 킵
-UI,UI_TUTORIAL_STEP_06,킵하지 않은 주사위만 다시 굴립니다. 횟수는 제한이 있어요.,,,,튜토리얼 6 다시 굴리기
-UI,UI_TUTORIAL_STEP_07,"족보로 칩과 배수가 정해지고, 칩 × 배수가 피해량이 됩니다.",,,,튜토리얼 7 점수판
-UI,UI_TUTORIAL_STEP_08,끝내기를 누르면 킵한 주사위로 공격합니다.,,,,튜토리얼 8 끝내기
-UI,UI_TUTORIAL_STEP_09,승리! 보상 하나를 고르세요.,,,,튜토리얼 9 전리품
-UI,UI_TUTORIAL_STEP_10,기본 조작은 여기까지입니다. 이제 실전에서 만나요!,,,,튜토리얼 10 마무리
-UI,UI_TUTORIAL_NEXT,다음,,,,튜토리얼 다음 버튼
-UI,UI_TUTORIAL_SKIP,건너뛰기,,,,튜토리얼 건너뛰기 버튼
+UI,UI_TUTORIAL_STEP_01,트리키 요트에 온 걸 환영합니다. 기본 조작만 빠르게 알려 드릴게요.,Welcome to Tricky Yacht! Let's quickly go over the basic controls.,Tricky Yachtへようこそ。基本操作だけ手早くご案内します。,欢迎来到Tricky Yacht！我们来快速了解一下基本操作。,튜토리얼 1 시작 안내
+UI,UI_TUTORIAL_STEP_02,지도에서는 여정 주사위를 굴려 앞으로 나아갑니다. 굴리기 버튼을 눌러 보세요.,"On the map, roll the Journey Dice to move forward. Press the Roll button.",マップでは旅のサイコロを振って先へ進みます。「振る」ボタンを押してみましょう。,在地图上，投掷旅途骰子来前进。请按下「投骰」按钮。,튜토리얼 2 여정 주사위
+UI,UI_TUTORIAL_STEP_02_MOVE,{0}칸까지 이동할 수 있어요. 빛나는 노드를 눌러 이동합니다.,You can move up to {0} spaces. Click a glowing node to move there.,{0}マスまで移動できます。光っているノードを押して移動しましょう。,最多可以移动{0}格。点击发光的节点即可移动。,튜토리얼 2 결과: 이동 면(1~3)
+UI,UI_TUTORIAL_STEP_02_DAMAGE,"해골 면: 체력이 줄어들고, 한 번 더 굴려야 합니다.",Skull face: you lose some HP and must roll again.,ドクロの面:HPが減り、もう一度振る必要があります。,骷髅面：体力减少，需要再投一次。,튜토리얼 2 결과: 해골 면
+UI,UI_TUTORIAL_STEP_02_HEAL,"하트 면: 체력을 회복하고, 한 번 더 굴려야 합니다.",Heart face: you recover HP and must roll again.,ハートの面:HPを回復し、もう一度振る必要があります。,爱心面：恢复体力，需要再投一次。,튜토리얼 2 결과: 하트 면
+UI,UI_TUTORIAL_STEP_02_GOLD,"코인 면: 골드를 얻고, 한 번 더 굴려야 합니다.",Coin face: you gain gold and must roll again.,コインの面:ゴールドを獲得し、もう一度振る必要があります。,硬币面：获得金币，需要再投一次。,튜토리얼 2 결과: 코인 면
+UI,UI_TUTORIAL_STEP_03,지도 이동은 자동이 아니에요. 빛나는 노드 중 전투 노드를 눌러 이동하면 전투가 시작됩니다.,Movement isn't automatic. Click a glowing battle node to move there and start a fight.,マップの移動は自動ではありません。光っているノードのうち戦闘ノードを押して移動すると、戦闘が始まります。,地图移动不是自动的。点击发光节点中的战斗节点并移动过去，即可开始战斗。,튜토리얼 3 전투 진입
+UI,UI_TUTORIAL_STEP_04,굴리기를 눌러 주사위 5개를 굴리세요.,Press Roll to roll 5 dice.,「振る」を押してサイコロを5個振りましょう。,按下「投骰」投掷5个骰子。,튜토리얼 4 굴리기
+UI,UI_TUTORIAL_STEP_05,남기고 싶은 주사위를 클릭해 위 칸에 올리세요.,Click the dice you want to keep to move them to the top row.,残したいサイコロをクリックして上の枠に置きましょう。,点击想要保留的骰子，将其放到上方栏位。,튜토리얼 5 킵
+UI,UI_TUTORIAL_STEP_06,킵하지 않은 주사위만 다시 굴립니다. 횟수는 제한이 있어요.,Only unkept dice are rerolled. Rolls are limited.,キープしていないサイコロだけを振り直します。回数には制限があります。,只会重投未保留的骰子。次数有限。,튜토리얼 6 다시 굴리기
+UI,UI_TUTORIAL_STEP_07,"족보로 칩과 배수가 정해지고, 칩 × 배수가 피해량이 됩니다.",Your hand sets your Chips and multiplier. Chips × multiplier is your damage.,役によってチップと倍率が決まり、チップ×倍率がダメージになります。,牌型决定筹码与倍率，筹码×倍率即为伤害。,튜토리얼 7 점수판
+UI,UI_TUTORIAL_STEP_08,끝내기를 누르면 킵한 주사위로 공격합니다.,Press Finish to attack with your kept dice.,「終了」を押すと、キープしたサイコロで攻撃します。,按下「结束」即可用保留的骰子发动攻击。,튜토리얼 8 끝내기
+UI,UI_TUTORIAL_STEP_09,승리! 보상 하나를 고르세요.,Victory! Choose one reward.,勝利!報酬を1つ選んでください。,胜利！请选择一项奖励。,튜토리얼 9 전리품
+UI,UI_TUTORIAL_STEP_10,기본 조작은 여기까지입니다. 이제 실전에서 만나요!,That's all for the basics. See you in the real game!,基本操作は以上です。本番でお会いしましょう!,基础操作就介绍到这里。实战中见！,튜토리얼 10 마무리
+UI,UI_TUTORIAL_NEXT,다음,Next,次へ,下一步,튜토리얼 다음 버튼
+UI,UI_TUTORIAL_SKIP,건너뛰기,Skip,スキップ,跳过,튜토리얼 건너뛰기 버튼
+UI,UI_BONUS_PERMANENT,영구 보너스,Permanent Bonus,永久ボーナス,永久加成,결산 배수 로그: 영구 배수
+UI,UI_DEBUFF_PERMANENT,영구 디버프,Permanent Debuff,永久デバフ,永久减益,디버프 설명 패널 구분 표시
+UI,UI_DEBUFF_TEMPORARY,이번 전투 한정 디버프,Debuff (This Battle Only),この戦闘限定デバフ,本场战斗限定减益,디버프 설명 패널 구분 표시
+UI,UI_SHIELD_BLOCKED,막음 {0},Blocked {0},防御 {0},格挡 {0},보호막이 피해를 막았을 때 팝업
+UI,UI_OPEL_TITLE,오펠,Opel,オペル,奥佩尔,오펠 위성 선택 패널 제목
+UI,UI_STAGECLEAR_NEXT,다음 스테이지,Next Stage,次のステージ,下一关,스테이지 클리어 패널 버튼
+UI,UI_STAGECLEAR_SHOP,상점,Shop,店,商店,스테이지 클리어 패널 버튼
+UI,UI_GO_MAIN,메인으로,Main Menu,メインメニューへ,返回主菜单,게임 오버·클리어 패널 버튼
+UI,UI_CREDITS_BODY,"<size=40>TRICKY YACHT</size>
+Studio 10&6
+
+<color=#F6E4C2>개발</color>
+정윤성
+이창윤
+이건명
+김병훈
+
+<color=#F6E4C2>Special Thanks</color>
+플레이해 주신 모든 분들
+
+Made with Unity","<size=40>TRICKY YACHT</size>
+Studio 10&6
+
+<color=#F6E4C2>Development</color>
+Jung Yoonsung
+Lee Changyoon
+Lee Geonmyeong
+Kim Byeonghoon
+
+<color=#F6E4C2>Special Thanks</color>
+Everyone who played
+
+Made with Unity","<size=40>TRICKY YACHT</size>
+Studio 10&6
+
+<color=#F6E4C2>開発</color>
+Jung Yoonsung
+Lee Changyoon
+Lee Geonmyeong
+Kim Byeonghoon
+
+<color=#F6E4C2>Special Thanks</color>
+プレイしてくださった皆さま
+
+Made with Unity","<size=40>TRICKY YACHT</size>
+Studio 10&6
+
+<color=#F6E4C2>开发</color>
+Jung Yoonsung
+Lee Changyoon
+Lee Geonmyeong
+Kim Byeonghoon
+
+<color=#F6E4C2>Special Thanks</color>
+所有玩过本作的玩家
+
+Made with Unity",크레딧 본문. 이름은 다른 언어에서 로마자 표기

@@ -184,6 +184,23 @@ public class LocalizationManager : MonoBehaviour
         return GetOrFallback(tableName, key, item.description);
     }
 
+    // 캐릭터 이름·설명. 키는 에셋 이름 기준(CHAR_PAWN → CNT_CHAR_PAWN_NAME / _DESC).
+    public static string GetCharacterName(CharacterData character)
+    {
+        if (character == null)
+            return string.Empty;
+
+        return GetOrFallback(ItemTable, "CNT_" + character.name + "_NAME", character.CharacterName);
+    }
+
+    public static string GetCharacterDescription(CharacterData character)
+    {
+        if (character == null)
+            return string.Empty;
+
+        return GetOrFallback(ItemTable, "CNT_" + character.name + "_DESC", character.Description);
+    }
+
     public static string GetTut(string entryKey, string fallback)
     {
         return GetOrFallback(TutTable, entryKey, fallback);
@@ -290,6 +307,25 @@ public class LocalizationManager : MonoBehaviour
         if (item is TicketPackSO)
         {
             key = "CNT_TICKET_PACK" + suffix;
+            return;
+        }
+
+        // Item_ID가 없는 전리품·상점 아이템은 종류로 키를 정한다.
+        if (item is CoinItemSO)
+        {
+            key = "CNT_LOOT_COIN" + suffix;
+            return;
+        }
+
+        if (item is MaxHPItemSO)
+        {
+            key = "CNT_LOOT_MAX_HP" + suffix;
+            return;
+        }
+
+        if (item is DiceDestroyItemSO)
+        {
+            key = "CNT_DICE_DESTROY" + suffix;
             return;
         }
 

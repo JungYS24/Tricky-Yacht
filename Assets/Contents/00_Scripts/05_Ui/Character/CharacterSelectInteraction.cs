@@ -49,7 +49,7 @@ public class CharacterSelectInteraction : MonoBehaviour, IPointerClickHandler
 
         if (unlocked)
         {
-            nameText.text = characterData.CharacterName;
+            nameText.text = LocalizationManager.GetCharacterName(characterData);
         }
         else
         {

@@ -47,7 +47,7 @@ public class CharacterApply : MonoBehaviour
     public void SetCharacter(CharacterData character)
     {
         data = character;
-        nameText.text = data.CharacterName;
+        nameText.text = LocalizationManager.GetCharacterName(data);
         SetApplyInteractable(true);
         RefreshInfo();
     }
@@ -58,7 +58,7 @@ public class CharacterApply : MonoBehaviour
             return;
 
         if (confirmText != null)
-            confirmText.text = LocalizationManager.GetUi("UI_CHARSELECT_CONFIRM", "{0}(으)로 시작할까요?", data.CharacterName);
+            confirmText.text = LocalizationManager.GetUi("UI_CHARSELECT_CONFIRM", "{0}(으)로 시작할까요?", LocalizationManager.GetCharacterName(data));
 
         finalCheckPanel.SetActive(true);
     }
@@ -94,7 +94,7 @@ public class CharacterApply : MonoBehaviour
             portraitImage.enabled = data.Portrait != null;
         }
 
-        if (descriptionText != null) descriptionText.text = data.Description;
+        if (descriptionText != null) descriptionText.text = LocalizationManager.GetCharacterDescription(data);
         if (hpValueText != null) hpValueText.text = data.InitialHP.ToString();
 
         SetItemIcon(diceIcon, diceEmptyText, data.DedicateDiceData);
