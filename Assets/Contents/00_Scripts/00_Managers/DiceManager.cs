@@ -238,6 +238,7 @@ public class DiceManager : MonoBehaviour
     public static DiceManager Instance { get; private set; }
 
     public static event System.Action OnDeckUpdateNeeded;//덱 주사위 실시간 변경 변수
+    public static event System.Action MapCombatStarted; // 지도 노드에서 전투가 시작된 직후(튜토리얼 안내용)
 
 
     void Awake()
@@ -312,6 +313,8 @@ public class DiceManager : MonoBehaviour
         {
             BGMManager.Instance.ChangeBGM(currentBiome.biomeBGM);
         }
+
+        if (TutorialMode.Active) TutorialOverlay.Spawn(this);
     }
 
     void OnDestroy()
@@ -1717,6 +1720,7 @@ public class DiceManager : MonoBehaviour
         pendingForcedMonster = forcedMonster;
         ShowCombatScreen();
         StartNewStage();
+        MapCombatStarted?.Invoke();
     }
 
     static ShopManager.MapMerchant MerchantFor(MapNodeType type)

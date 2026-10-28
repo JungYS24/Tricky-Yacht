@@ -25,6 +25,9 @@ public class MapPanel : MonoBehaviour
 
     const string PlayerMarkerKey = "Icon_Map_Player";
 
+    // 여정 주사위 굴림 결과가 적용된 직후(튜토리얼 안내용)
+    public static event System.Action<JourneyRollResult> JourneyRolled;
+
     Sprite dotSprite;
     DiceManager boundDice;
     Coroutine journeyRollRoutine;
@@ -357,6 +360,7 @@ public class MapPanel : MonoBehaviour
 
         SetJourneyResult(result.faceSprite);
         PlayJourneyOutcomeFeedback(result, applied, flyGold);
+        JourneyRolled?.Invoke(result);
         if (move)
             Rebuild(boundDice);
         else if (journeyRollButton != null)

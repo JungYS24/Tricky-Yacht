@@ -219,6 +219,8 @@ public class GameSaveManager : MonoBehaviour
 
     public void SaveGame(DiceManager dice, InventoryManager inv, ShopManager shop)
     {
+        // 튜토리얼 중에는 기존 이어하기 세이브를 덮어쓰지 않는다.
+        if (TutorialMode.Active) return;
         if (dice == null || inv == null || dice.currentPlayerHP <= 0) return;
         // 초기화/복원이 끝나기 전이나 복원이 실패한 상태로 정상 세이브를 덮어쓰지 않는다.
         if (!dice.CanSaveProgress) return;
@@ -379,7 +381,13 @@ public class GameSaveManager : MonoBehaviour
         return masterItemDatabase.FirstOrDefault(x => x != null && x.itemName == name);
     }
 
-    public void DeleteSave() { savePending = false; PlayerPrefs.DeleteKey("TrickYacht_Save"); }
+    public void DeleteSave()
+    {
+        savePending = false;
+        // 튜토리얼 중 패배해도 기존 이어하기 세이브는 지우지 않는다.
+        if (TutorialMode.Active) return;
+        PlayerPrefs.DeleteKey("TrickYacht_Save");
+    }
 
     // 초기화된 공용 딕셔너리를 이용해 ID로 피규어를 찾습니다.
     public FigureItemSO FindFigureByID(string id)

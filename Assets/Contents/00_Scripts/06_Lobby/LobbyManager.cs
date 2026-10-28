@@ -22,6 +22,9 @@ public class LobbyManager : MonoBehaviour
 
     private void Start()
     {
+        // 튜토리얼을 끝내거나 중간에 나와도 다음 판에 남지 않게 로비 진입 때 끈다.
+        TutorialMode.End();
+
         // 세이브 파일이 없으면 이어하기 버튼을 클릭 불가능하게 막음
         if (continueButton != null)
         {
@@ -62,13 +65,12 @@ public class LobbyManager : MonoBehaviour
 
     public void OnTutorialButtonClick()
     {
-        // 튜토리얼 시작 시에는 플래그를 1로 설정
-        PlayerPrefs.SetInt("RunTutorial", 1);
+        // 본게임 화면(MainScene_Map) 위에 오버레이로 조작만 안내한다. 옛 TutorialScene은 더 이상 쓰지 않는다.
+        // 캐릭터 선택은 건너뛰고 새 런으로 시작한다. 이어하기 세이브는 지우지 않고, 튜토리얼 중에는 저장도 막는다.
+        TutorialMode.Start();
+        PlayerPrefs.SetInt("LoadGame", 0);
         StopAllCoroutines();
-
-        // 만약 튜토리얼 씬이 따로 있다면 "TutorialScene"으로, 
-        // 본 게임 씬과 같다면 "SampleScene"으로 적어주세요.
-        StartCoroutine(GlitchAndLoad("TutorialScene"));
+        StartCoroutine(GlitchAndLoad("MainScene_Map"));
     }
 
 
