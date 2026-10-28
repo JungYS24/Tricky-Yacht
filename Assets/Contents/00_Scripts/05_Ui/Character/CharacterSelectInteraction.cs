@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class CharacterSelectInteraction : MonoBehaviour, IPointerClickHandler
 {
@@ -15,6 +16,18 @@ public class CharacterSelectInteraction : MonoBehaviour, IPointerClickHandler
     [Header("선택 연출")]
     [SerializeField] private float selectedScale = 1.15f;
     [SerializeField] private float scaleDuration = 0.15f;
+
+    [Header("이름표")]
+    [SerializeField] private Image nameTag;
+    [SerializeField] private GameObject lockIcon;
+    [SerializeField] private Sprite nameTagSprite;
+    [SerializeField] private Sprite nameTagSelectedSprite;
+    [SerializeField] private Color lockedNameColor = new Color32(0x96, 0xAA, 0xAA, 0xFF);
+
+    // 씬에서는 비활성 상태로 두고, 첫 선택 때 켠다.
+    [Header("선택 표시 (모든 캐릭터가 같은 오브젝트를 공유)")]
+    [SerializeField] private RectTransform selectGlow;
+    [SerializeField] private RectTransform selectArrow;
 
     private static CharacterSelectInteraction currentSelected;
     private Vector3 defaultScale;
@@ -30,15 +43,22 @@ public class CharacterSelectInteraction : MonoBehaviour, IPointerClickHandler
     {
         defaultScale = transform.localScale;
 
-        if (characterData.IsUnlocked)
+        bool unlocked = characterData.IsUnlocked;
+        if (lockIcon != null)
+            lockIcon.SetActive(!unlocked);
+
+        if (unlocked)
         {
             nameText.text = characterData.CharacterName;
         }
         else
         {
             nameText.text = "???";
+            nameText.color = lockedNameColor;
             enabled = false;
         }
+
+        SetNameTag(false);
     }
 
     private void Select()
@@ -48,6 +68,8 @@ public class CharacterSelectInteraction : MonoBehaviour, IPointerClickHandler
 
         currentSelected = this;
         SetSelected(true);
+        MoveMarker(selectGlow);
+        MoveMarker(selectArrow);
     }
 
     private void SetSelected(bool selected)
@@ -58,6 +80,29 @@ public class CharacterSelectInteraction : MonoBehaviour, IPointerClickHandler
             StopCoroutine(scaleRoutine);
 
         scaleRoutine = StartCoroutine(ScaleTo(target));
+        SetNameTag(selected);
+    }
+
+    private void SetNameTag(bool selected)
+    {
+        if (nameTag == null)
+            return;
+
+        Sprite sprite = selected ? nameTagSelectedSprite : nameTagSprite;
+        if (sprite != null)
+            nameTag.sprite = sprite;
+    }
+
+    // 발광·화살표는 y를 고정하고 x만 선택 캐릭터 위치로 옮긴다.
+    private void MoveMarker(RectTransform marker)
+    {
+        if (marker == null)
+            return;
+
+        Vector3 position = marker.position;
+        position.x = transform.position.x;
+        marker.position = position;
+        marker.gameObject.SetActive(true);
     }
 
     private IEnumerator ScaleTo(Vector3 target)
