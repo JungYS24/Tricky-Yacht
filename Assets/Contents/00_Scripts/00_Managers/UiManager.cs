@@ -12,9 +12,10 @@ public class UIManager : MonoBehaviour
         string displayHand = string.IsNullOrEmpty(handName) ? "" : $"<color=#FFD700>{handName}</color>";
         if (iceBonusChips > 0) displayHand += $" <color=#00FFFF>+{iceBonusChips}</color>";
         if (darkDamageTotal > 0) displayHand += $" <color=#A9A9A9>+{darkDamageTotal}</color>";
-        if (satelliteBonusChips > 0) displayHand += $" <color=#B19CD9>+{satelliteBonusChips}{LocalizationManager.GetUi("UI_SATELLITE_TAG", "(위성)")}</color>";
-        if (oddBonusChips > 0) displayHand += $" <color=#5B9BD5>+{oddBonusChips}{LocalizationManager.GetUi("UI_ODD_TAG", "(홀수)")}</color>";
-        if (evenBonusMult > 0f) displayHand += $" <color=#E74C3C>+{evenBonusMult:0.#}{LocalizationManager.GetUi("UI_EVEN_TAG", "(짝수)")}</color>";
+        // panel_score에는 글자 태그 없이 숫자와 + 기호만 둔다. 종류는 색으로 구분한다.
+        if (satelliteBonusChips > 0) displayHand += $" <color=#B19CD9>+{satelliteBonusChips}</color>";
+        if (oddBonusChips > 0) displayHand += $" <color=#5B9BD5>+{oddBonusChips}</color>";
+        if (evenBonusMult > 0f) displayHand += $" <color=#E74C3C>+{evenBonusMult:0.#}</color>";
 
         // 분리된 텍스트에 각각 할당
 

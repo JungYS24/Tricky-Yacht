@@ -6,6 +6,8 @@ public class LootSelectionPanel : MonoBehaviour
 {
     //다른 스크립트에서 전리품 창이 열려있는지 확인할 수 있는 변수
     public static bool IsPanelOpen { get; private set; } = false;
+    // 전리품을 실제로 받은 직후(튜토리얼 안내용). 인벤토리가 가득 차 못 받으면 부르지 않는다.
+    public static event System.Action LootChosen;
 
     public GameObject panelRoot;
     public LootChoiceSlot[] choiceSlots;
@@ -79,6 +81,7 @@ public class LootSelectionPanel : MonoBehaviour
             selectedLoot.ApplyItemEffect(diceManager);
         }
         Sfx.Play(SfxId.Shop_Purchase);
+        LootChosen?.Invoke();
         //튜토리얼 상태일 때 전리품 선택 완료를 매니저에게 알림
         if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
         {

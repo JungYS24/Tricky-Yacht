@@ -17,6 +17,11 @@ public class CharacterData : ScriptableObject
 
     [SerializeField] private FigureItemSO dedicateFigure;
 
+    [Header("선택창 표시")]
+    [SerializeField] private Sprite portrait;
+
+    [SerializeField, TextArea] private string description;
+
     public string CharacterName => characterName;
 
     public int InitialHP => initialHP;
@@ -28,4 +33,8 @@ public class CharacterData : ScriptableObject
     public DiceItemSO DedicateDiceData => dedicateDice;
 
     public FigureItemSO DedicateFigureData => dedicateFigure;
+
+    public Sprite Portrait => portrait;
+
+    public string Description => description;
 }

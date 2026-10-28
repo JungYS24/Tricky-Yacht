@@ -152,6 +152,11 @@ public class Enemy : MonoBehaviour
         {
             nextMonsterData = TutorialManager.Instance.GetTutorialMonster(currentStage);
         }
+        else if (TutorialMode.Active && TutorialMode.WeakestMonster(currentBiome) != null)
+        {
+            // 튜토리얼 모드 첫 전투는 가장 약한 몬스터로 고정합니다.
+            nextMonsterData = TutorialMode.WeakestMonster(currentBiome);
+        }
         else if (forcedMonster != null)
         {
             // 차원문 등, 바이옴 목록보다 먼저 강제 몬스터를 씁니다. 보스 몬스터면 bossAbility도 같이 적용됩니다.
@@ -217,6 +222,9 @@ public class Enemy : MonoBehaviour
 
         //2스테이지당 몬스터 공격력 1 증가 (2스테이지=+1, 4스테이지=+2 ...)
         finalAttack += (currentStage / 2);
+
+        // 튜토리얼 모드에서는 한 턴에 잡힐 정도로 체력을 낮춥니다.
+        if (TutorialMode.Active) finalMaxHP = Mathf.Min(finalMaxHP, TutorialMode.MonsterHp);
 
         // 여기서 최종적으로 체력을 확정(덮어씌워지는 문제 해결)
         MaxHP = finalMaxHP;

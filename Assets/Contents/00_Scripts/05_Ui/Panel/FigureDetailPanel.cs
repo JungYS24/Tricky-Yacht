@@ -40,6 +40,13 @@ public class FigureDetailPanel : MonoBehaviour
     // 128px 몬스터를 2배(256)로 키우면 양피지 아래로 나간다. 페이지에 남는 정수 배는 128이다.
     public const float BookMonsterIconBox = 128f;
 
+    [Header("인벤토리 팝업 그림 무대 (비어 있으면 기존 배치)")]
+    public RectTransform figureStage;
+    public RectTransform figureStageShadow;
+
+    // 인벤토리 팝업 무대의 그림 박스. 100px 그림은 3배, 64px 그림은 5배, 그보다 큰 그림(바나나)은 이 박스 안에 맞춘다.
+    public const float PopupFigureIconBox = 360f;
+
     public Button leftButton;
     public Button rightButton;
     public Button closeButton;
@@ -175,6 +182,7 @@ public class FigureDetailPanel : MonoBehaviour
             ApplyCustomTextColors(isEncountered);
 
         RefreshBookSections(currentFigure, isEncountered);
+        FitPopupStage(figureImage, figureStage, figureStageShadow, PopupFigureIconBox);
 
         // 첫 번째거나 마지막 피규어면 화살표 비활성화 (버튼이 있을 때만 실행)
         if (leftButton != null)
@@ -501,6 +509,18 @@ public class FigureDetailPanel : MonoBehaviour
         int scale = Mathf.FloorToInt(box / Mathf.Max(1f, longest));
         Vector2 size = scale >= 1 ? image.sprite.rect.size * scale : new Vector2(box, box);
         if (image.rectTransform.sizeDelta != size) image.rectTransform.sizeDelta = size;
+    }
+
+    // 인벤토리 팝업 무대에 그림을 박스 안 최대 정수 배로 키우고, 발이 그림자에 닿게 아래를 맞춘다.
+    public static void FitPopupStage(Image image, RectTransform stage, RectTransform stageShadow, float box)
+    {
+        if (image == null || stage == null) return;
+        FitSpriteBox(image, box);
+        RectTransform rect = image.rectTransform;
+        rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0f);
+        float baseline = stageShadow != null ? stageShadow.anchoredPosition.y : -stage.rect.height * 0.5f;
+        rect.anchoredPosition = new Vector2(0f, baseline);
     }
 
     private static void PlaceShadow(Image shadow, Image body)

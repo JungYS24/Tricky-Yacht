@@ -105,3 +105,26 @@ UI,UI_MONSTER_GRADE_BOSS,보스,Boss,ボス,首领,
 UI,UI_PANEL_SCORE,점수,Score,スコア,得分,왼쪽 계산 패널 점수 칸 제목
 UI,UI_PANEL_ROLLS,굴리기,Rolls,ロール,投骰,왼쪽 계산 패널 남은 굴리기 칸 제목
 UI,UI_PANEL_FINISHES,끝내기,Finish,終了,结束,왼쪽 계산 패널 남은 끝내기 칸 제목
+UI,UI_CHARSELECT_TITLE,캐릭터 선택,Character Select,キャラクター選択,选择角色,캐릭터 선택창 제목
+UI,UI_CHARSELECT_GUIDE,캐릭터를 선택하세요,Select a character,キャラクターを選択してください,请选择角色,캐릭터 선택창 정보 패널 안내
+UI,UI_CHARSELECT_DEDICATED_DICE,전용 주사위,Signature Dice,専用ダイス,专属骰子,캐릭터 선택창 스탯 칩 라벨
+UI,UI_CHARSELECT_DEDICATED_FIGURE,전용 피규어,Signature Figure,専用フィギュア,专属手办,캐릭터 선택창 스탯 칩 라벨
+UI,UI_CHARSELECT_CANCEL,취소,Cancel,キャンセル,取消,캐릭터 선택창 취소 버튼
+UI,UI_CHARSELECT_START,시작,Start,スタート,开始,캐릭터 선택창 시작 버튼
+UI,UI_CHARSELECT_CONFIRM,{0}(으)로 시작할까요?,Start as {0}?,{0}で始めますか？,以{0}开始？,캐릭터 선택창 시작 확인 패널
+UI,UI_TUTORIAL_STEP_01,트리키 요트에 온 걸 환영합니다. 기본 조작만 빠르게 알려 드릴게요.,,,,튜토리얼 1 시작 안내
+UI,UI_TUTORIAL_STEP_02,지도에서는 여정 주사위를 굴려 앞으로 나아갑니다. 굴리기 버튼을 눌러 보세요.,,,,튜토리얼 2 여정 주사위
+UI,UI_TUTORIAL_STEP_02_MOVE,{0}칸까지 이동할 수 있어요. 빛나는 노드를 눌러 이동합니다.,,,,튜토리얼 2 결과: 이동 면(1~3)
+UI,UI_TUTORIAL_STEP_02_DAMAGE,"해골 면: 체력이 줄어들고, 한 번 더 굴려야 합니다.",,,,튜토리얼 2 결과: 해골 면
+UI,UI_TUTORIAL_STEP_02_HEAL,"하트 면: 체력을 회복하고, 한 번 더 굴려야 합니다.",,,,튜토리얼 2 결과: 하트 면
+UI,UI_TUTORIAL_STEP_02_GOLD,"코인 면: 골드를 얻고, 한 번 더 굴려야 합니다.",,,,튜토리얼 2 결과: 코인 면
+UI,UI_TUTORIAL_STEP_03,지도 이동은 자동이 아니에요. 빛나는 노드 중 전투 노드를 눌러 이동하면 전투가 시작됩니다.,,,,튜토리얼 3 전투 진입
+UI,UI_TUTORIAL_STEP_04,굴리기를 눌러 주사위 5개를 굴리세요.,,,,튜토리얼 4 굴리기
+UI,UI_TUTORIAL_STEP_05,남기고 싶은 주사위를 클릭해 위 칸에 올리세요.,,,,튜토리얼 5 킵
+UI,UI_TUTORIAL_STEP_06,킵하지 않은 주사위만 다시 굴립니다. 횟수는 제한이 있어요.,,,,튜토리얼 6 다시 굴리기
+UI,UI_TUTORIAL_STEP_07,"족보로 칩과 배수가 정해지고, 칩 × 배수가 피해량이 됩니다.",,,,튜토리얼 7 점수판
+UI,UI_TUTORIAL_STEP_08,끝내기를 누르면 킵한 주사위로 공격합니다.,,,,튜토리얼 8 끝내기
+UI,UI_TUTORIAL_STEP_09,승리! 보상 하나를 고르세요.,,,,튜토리얼 9 전리품
+UI,UI_TUTORIAL_STEP_10,기본 조작은 여기까지입니다. 이제 실전에서 만나요!,,,,튜토리얼 10 마무리
+UI,UI_TUTORIAL_NEXT,다음,,,,튜토리얼 다음 버튼
+UI,UI_TUTORIAL_SKIP,건너뛰기,,,,튜토리얼 건너뛰기 버튼
