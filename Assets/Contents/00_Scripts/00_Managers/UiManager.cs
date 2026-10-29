@@ -94,6 +94,17 @@ public class UIManager : MonoBehaviour
     private void Awake()
     {
         BindRoundEndText();
+        // 임시 계산 로그는 표시하지 않는다. 실제 칩·배수 숫자는 그대로 사용한다.
+        if (chipsLogText != null)
+        {
+            chipsLogText.text = "";
+            chipsLogText.gameObject.SetActive(false);
+        }
+        if (multLogText != null)
+        {
+            multLogText.text = "";
+            multLogText.gameObject.SetActive(false);
+        }
     }
 
     private void Start()
