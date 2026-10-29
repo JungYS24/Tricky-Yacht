@@ -354,6 +354,7 @@ public class InventoryManager : MonoBehaviour
 internal sealed class ItemTooltipLayout
 {
     private const float ScreenPadding = 12f;
+    private const float SlicedTextGap = 10f; // 9-slice 테두리 안쪽에서 글자까지 띄울 거리
     private readonly RectTransform panel;
     private readonly TextMeshProUGUI text;
     private readonly float baseWidth;
@@ -370,28 +371,48 @@ internal sealed class ItemTooltipLayout
         minHeight = Mathf.Max(1f, panel.rect.height);
         fontSize = text.fontSize;
 
-        // 말풍선의 위쪽 꼬리와 테두리는 글을 넣는 공간이 아니다.
-        // Image가 Simple이면 이 여백도 높이에 비례해 늘어나므로 비율로 계산한다.
         Image background = panel.GetComponent<Image>();
-        bool speechBubble = background != null && background.sprite != null && background.sprite.name.StartsWith("Dialog_TextUi");
-        imageInsets = speechBubble
-            ? new Vector4(0.10f, 0.30f, 0.10f, 0.12f)
-            : new Vector4(0.08f, 0.18f, 0.08f, 0.14f);
 
-        Bounds content = RectTransformUtility.CalculateRelativeRectTransformBounds(panel, text.rectTransform);
-        left = Mathf.Max(12f, content.min.x - panel.rect.xMin);
-        right = Mathf.Max(12f, panel.rect.xMax - content.max.x);
-        top = Mathf.Max(12f, panel.rect.yMax - content.max.y);
-        bottom = Mathf.Max(12f, content.min.y - panel.rect.yMin);
+        // 9-slice 전용 패널: 테두리 두께만큼만 여백을 두고 배경은 늘어나는 만큼 그대로 맞춘다.
+        bool sliced = background != null && background.sprite != null
+            && background.type == Image.Type.Sliced && background.hasBorder;
+        if (sliced)
+        {
+            imageInsets = Vector4.zero;
+            float ppu = Mathf.Max(0.0001f, background.pixelsPerUnit * background.pixelsPerUnitMultiplier);
+            Vector4 border = background.sprite.border / ppu; // x=왼쪽, y=아래, z=오른쪽, w=위
+            left = border.x + SlicedTextGap;
+            bottom = border.y + SlicedTextGap;
+            right = border.z + SlicedTextGap;
+            top = border.w + SlicedTextGap;
+        }
+        else
+        {
+            // 말풍선의 위쪽 꼬리와 테두리는 글을 넣는 공간이 아니다.
+            // Image가 Simple이면 이 여백도 높이에 비례해 늘어나므로 비율로 계산한다.
+            bool speechBubble = background != null && background.sprite != null && background.sprite.name.StartsWith("Dialog_TextUi");
+            imageInsets = speechBubble
+                ? new Vector4(0.10f, 0.30f, 0.10f, 0.12f)
+                : new Vector4(0.08f, 0.18f, 0.08f, 0.14f);
+
+            Bounds content = RectTransformUtility.CalculateRelativeRectTransformBounds(panel, text.rectTransform);
+            left = Mathf.Max(12f, content.min.x - panel.rect.xMin);
+            right = Mathf.Max(12f, panel.rect.xMax - content.max.x);
+            top = Mathf.Max(12f, panel.rect.yMax - content.max.y);
+            bottom = Mathf.Max(12f, content.min.y - panel.rect.yMin);
+        }
 
         // 상점의 기존 가로 자동 확장과 직접 크기 계산이 서로 덮어쓰지 않게 한다.
         LayoutGroup layout = panel.GetComponent<LayoutGroup>();
         if (layout != null)
         {
-            left = Mathf.Max(12f, layout.padding.left);
-            right = Mathf.Max(12f, layout.padding.right);
-            top = Mathf.Max(12f, layout.padding.top);
-            bottom = Mathf.Max(12f, layout.padding.bottom);
+            if (!sliced)
+            {
+                left = Mathf.Max(12f, layout.padding.left);
+                right = Mathf.Max(12f, layout.padding.right);
+                top = Mathf.Max(12f, layout.padding.top);
+                bottom = Mathf.Max(12f, layout.padding.bottom);
+            }
             layout.enabled = false;
         }
         ContentSizeFitter panelFitter = panel.GetComponent<ContentSizeFitter>();
