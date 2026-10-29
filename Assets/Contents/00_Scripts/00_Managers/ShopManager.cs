@@ -22,6 +22,7 @@ public class ShopManager : MonoBehaviour
     public GameObject tooltipPanel;
     public RectTransform tooltipRect;
     public TextMeshProUGUI descText;
+    private ItemTooltipLayout tooltipLayout;
 
     [Header("리롤 및 재화 설정")]
     public int currentGold = 3000;
@@ -661,7 +662,12 @@ public class ShopManager : MonoBehaviour
 
     public void ShowTooltip(string desc, RectTransform slotRect)
     {
-        descText.text = desc;
+        if (descText == null || tooltipPanel == null || slotRect == null) return;
+        if (tooltipRect == null) tooltipRect = tooltipPanel.GetComponent<RectTransform>();
+        if (tooltipRect == null) return;
+        if (tooltipLayout == null) tooltipLayout = new ItemTooltipLayout(tooltipRect, descText);
+
+        descText.text = desc ?? string.Empty;
         tooltipPanel.SetActive(true);
 
         // [추가] 상점 툴팁도 최상단으로 강제 고정
@@ -672,9 +678,11 @@ public class ShopManager : MonoBehaviour
 
         tooltipRect.SetAsLastSibling();
         tooltipRect.pivot = new Vector2(0f, 0.5f);
+        tooltipLayout.Fit();
 
         tooltipRect.position = slotRect.position;
         tooltipRect.localPosition += new Vector3(20f, -50f, 0f);
+        tooltipLayout.ClampToCanvas();
     }
     // 티켓 선택창 열기 (티켓 아이템을 구매했을 때 호출됨)
     public void ShowTicketSelection()

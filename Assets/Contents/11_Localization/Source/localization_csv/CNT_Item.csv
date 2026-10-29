@@ -373,7 +373,7 @@ CNT_Item,CNT_TICKET_HIGH_CARD_DESC,하이카드 배수를 1.1배로 곱합니다
 CNT_Item,CNT_TICKET_YACHT_NAME,야추 티켓,Yacht Ticket,ヤッツィーチケット,快艇门票,
 CNT_Item,CNT_TICKET_YACHT_DESC,야추 배수를 1.1배로 곱합니다. (기본 2.5 → 2.75),Multiplies the Yacht multiplier by 1.1x. (Base 2.5 → 2.75),ヤッツィーの倍率を1.1倍にします。(基本2.5 → 2.75),将快艇的倍率乘以1.1倍。（基础2.5 → 2.75）,
 CNT_Item,CNT_TICKET_PACK_NAME,티켓팩,Ticket Pack,チケットパック,门票包,
-CNT_Item,CNT_TICKET_PACK_DESC,구매하면 족보 티켓 1장을 선택합니다. 배수는 바로 오르지 않습니다. (가격 300G),Purchasing lets you choose 1 hand ticket. The multiplier doesn't increase immediately. (Price: 300G),購入すると役チケットを1枚選択できます。倍率はすぐには上がりません。(価格300G),购买后可选择1张牌型门票。倍率不会立即提升。（价格300金币）,
+CNT_Item,CNT_TICKET_PACK_DESC,구매하면 족보 티켓 1장을 선택합니다. 배수는 바로 오르지 않습니다.,Purchasing lets you choose 1 hand ticket. The multiplier doesn't increase immediately.,購入すると役チケットを1枚選択できます。倍率はすぐには上がりません。,购买后可选择1张牌型门票。倍率不会立即提升。,
 CNT_Item,CNT_Coin_NAME,코인 주사위,Coin Dice,コインのサイコロ,硬币骰子,
 CNT_Item,CNT_Coin_DESC,결산 시 눈금의 10배만큼 골드를 획득합니다.,Gain gold equal to this die's face value x10 when scored.,決算時、出目の10倍のゴールドを獲得します。,结算时获得点数x10的金币。,
 CNT_Item,CNT_Vanilla_NAME,바닐라,Vanilla,バニラ,香草,

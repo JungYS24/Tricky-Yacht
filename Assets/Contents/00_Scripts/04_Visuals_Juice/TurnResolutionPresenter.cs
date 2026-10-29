@@ -187,17 +187,9 @@ public sealed class TurnResolutionPresenter
 
 
             var valueText = isChips ? ui.chipsSumText : ui.multSumText;
-            var logText = isChips ? ui.chipsLogText : ui.multLogText;
 
             float start = isChips ? shownChips : shownMult;
             float target = start + amount;
-
-            if (logText != null)
-            {
-                string amountText = factorText ?? (isChips ? amount.ToString("+0;-0;0") : amount.ToString("+0.0;-0.0;0.0"));
-
-                logText.text = string.IsNullOrEmpty(label) ? "" : $"{label} ({amountText})";
-            }
 
             // 숫자 카운트업 시작 직전 효과음 (amount 0 early return 경로는 여기까지 오지 않음)
             if (isChips)
@@ -231,8 +223,6 @@ public sealed class TurnResolutionPresenter
 
             if (snack != null) yield return snacks.CompleteVisual(snack);
 
-            if (logText != null)
-                logText.text = "";
         }
 
         IEnumerator AnimateDiceBonuses(bool isChips)
