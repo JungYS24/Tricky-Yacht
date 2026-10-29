@@ -119,7 +119,7 @@ public sealed class DiceSelectionFeedback : MonoBehaviour
     }
 
     // 도장 찍기: 나무 도장이 비스듬히 떠올라 조준하듯 흔들리다 똑바로 서서 쾅 내려찍고,
-    // 진하게 찍힌 잉크가 마르며 연한 자국만 남는다. 이미지·시간은 StampVisualProfile에서 조절한다.
+    // 찍힌 순간 주사위 아이콘에 문양이 새겨진다. 갓 찍힌 젖은 잉크 모습이 마른 새김으로 바뀐다. 이미지·시간은 StampVisualProfile에서 조절한다.
     // 흔들림·잉크 방울은 무작위 없이 사인 함수와 고정 각도로 만든다.
     public void PlayStamp(DeckSlot slot, List<GameObject> slots, StampType type, Action reveal, Action onComplete)
     {
@@ -132,8 +132,7 @@ public sealed class DiceSelectionFeedback : MonoBehaviour
             return;
         }
         StampVisualProfile profile = StampVisualProfile.Profile;
-        Sprite mark = StampVisualProfile.GetSprite(type);
-        if (profile == null || mark == null)
+        if (profile == null || profile.GetEngrave(type) == null)
         {
             Sfx.Play(SfxId.Stamp_Apply);
             sequence.AppendCallback(() => reveal?.Invoke());
@@ -151,10 +150,16 @@ public sealed class DiceSelectionFeedback : MonoBehaviour
 
         RectTransform layer = CreateStampLayer(icon);
 
-        // 갓 찍힌 진한 잉크. 실제 연한 자국과 같은 자리에 겹쳐 두었다가 마르면서 사라진다.
-        Image fresh = CreateImage("FreshInk", layer, mark);
-        StampUIVisual.PlaceMark(fresh.rectTransform, profile);
-        fresh.color = new Color(1f, 1f, 1f, 0f);
+        // 갓 찍힌 젖은 잉크. 아이콘과 같은 자리·크기에 겹쳐 두었다가 마르면서 사라져 아래의 마른 새김만 남는다.
+        // 찍는 순간의 하얀 번쩍임이 가려지지 않게 같은 효과를 붙여 아이콘과 함께 번쩍인다.
+        Image diceImage = slot.diceIcon;
+        Image wet = CreateImage("WetInk", layer, null);
+        wet.preserveAspect = diceImage.preserveAspect;
+        wet.enabled = false;
+        UIEffect wetEffect = wet.gameObject.AddComponent<UIEffect>();
+        wetEffect.colorFilter = ColorFilter.Additive;
+        wetEffect.color = Color.white;
+        wetEffect.colorIntensity = 0f;
 
         // 도장 그림자: 도장이 내려올수록 커지고 진해져 높이감을 준다.
         Image shadow = CreateImage("SealShadow", layer, GetShadowSprite());
@@ -233,13 +238,21 @@ public sealed class DiceSelectionFeedback : MonoBehaviour
         sequence.Insert(slamStart, shadowRect.DOScale(1f, slam).SetEase(Ease.InQuad));
         sequence.Insert(slamStart, shadow.DOFade(0.45f, slam));
 
-        // 4) 찍힌 순간: 진한 잉크를 띄우고 그 아래에서 슬롯을 다시 그려 실제 자국으로 바꾼다.
+        // 4) 찍힌 순간: 슬롯을 다시 그려 아이콘에 문양을 새기고, 그 위에 젖은 잉크 모습을 띄운다.
         //    도장과 주사위가 눌렸다 튀어나오고, 하얗게 번쩍이며, 선택창이 흔들리고, 잉크 방울이 튄다.
         float impact = slamStart + slam;
         sequence.InsertCallback(impact, () =>
         {
-            fresh.color = Color.white;
             reveal?.Invoke();
+            StampUIVisual visual = diceImage.GetComponent<StampUIVisual>();
+            Sprite source = visual != null ? visual.SourceSprite : diceImage.sprite;
+            Sprite wetSprite = StampEngraveCache.GetWet(source, type);
+            if (wetSprite != source)
+            {
+                wet.sprite = wetSprite;
+                wet.color = diceImage.color;
+                wet.enabled = true;
+            }
             Sfx.Play(SfxId.Stamp_Apply);
         });
         Vector3 sealPressed = new Vector3(1f + (1f - profile.sealSquash) * 0.5f, profile.sealSquash, 1f);
@@ -249,8 +262,8 @@ public sealed class DiceSelectionFeedback : MonoBehaviour
         sequence.Insert(impact, icon.DOScale(pressed, 0.06f * speed).SetEase(Ease.OutQuad));
         sequence.Insert(impact + 0.06f * speed, icon.DOScale(baseScale, 0.3f * speed).SetEase(Ease.OutBack));
         effect.color = Color.white;
-        sequence.Insert(impact, DOTween.To(() => effect.colorIntensity, v => effect.colorIntensity = v, 0.45f, 0.05f * speed));
-        sequence.Insert(impact + 0.05f * speed, DOTween.To(() => effect.colorIntensity, v => effect.colorIntensity = v, 0f, 0.25f * speed));
+        sequence.Insert(impact, DOTween.To(() => effect.colorIntensity, v => effect.colorIntensity = wetEffect.colorIntensity = v, 0.45f, 0.05f * speed));
+        sequence.Insert(impact + 0.05f * speed, DOTween.To(() => effect.colorIntensity, v => effect.colorIntensity = wetEffect.colorIntensity = v, 0f, 0.25f * speed));
         if (panel != null && profile.shake > 0f)
         {
             float shake = profile.shake;
@@ -268,8 +281,13 @@ public sealed class DiceSelectionFeedback : MonoBehaviour
         sequence.Insert(releaseAt, shadow.DOFade(0f, release * 0.6f));
         sequence.Insert(releaseAt, shadowRect.DOScale(0.6f, release * 0.6f));
 
-        // 6) 진한 잉크가 마르며 아래의 연한 자국만 남는다
-        sequence.Insert(releaseAt, fresh.DOFade(0f, dry).SetEase(Ease.InQuad));
+        // 6) 찍은 순간부터 젖은 잉크가 마르며 아래의 마른 새김으로 바뀐다
+        sequence.Insert(impact, DOTween.To(() => 1f, v =>
+        {
+            Color c = wet.color;
+            c.a = v * diceImage.color.a;
+            wet.color = c;
+        }, 0f, dry).SetEase(Ease.InQuad));
     }
 
     // 도장 그림자용 픽셀 타원 (흰색, 코드에서 검게 칠함)

@@ -204,7 +204,7 @@ public class DeckSlot : MonoBehaviour
             if (satelliteVisual == null) satelliteVisual = diceIcon.gameObject.AddComponent<SatelliteUIVisual>();
             satelliteVisual.Bind(data);
 
-            // 스탬프는 아이콘 가운데에 연한 자국으로 겹칩니다. 사용한 주사위는 아이콘처럼 더 흐리게.
+            // 스탬프는 아이콘 그림에 문양을 새긴 그림으로 바꿔 끼웁니다. 사용한 주사위는 아이콘과 함께 흐려집니다.
             if (stampVisual == null) stampVisual = diceIcon.GetComponent<StampUIVisual>();
             if (stampVisual == null) stampVisual = diceIcon.gameObject.AddComponent<StampUIVisual>();
             stampVisual.Bind(data, isUsed ? 0.4f : 1f);
