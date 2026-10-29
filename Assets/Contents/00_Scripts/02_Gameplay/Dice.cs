@@ -44,7 +44,6 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
     private Tween scoreFeedbackTween;
     private UiHoverIdleJuice hoverJuice;
-    private StampBadge stampBadge;
 
 
     private void Awake()
@@ -80,7 +79,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         //}
         if (myData.customDiceShell != null)
         {
-            spriteRenderer.sprite = myData.customDiceShell;
+            SetFaceSprite(myData.customDiceShell);
         }
 
         // 6면이 같은 고정 주사위만 JustDice 숫자 스프라이트를 쓴다. 홀수·짝수는 전용 테이블을 쓴다.
@@ -90,10 +89,6 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         currentValue = initialValue;
         currentFaceIndex = faceIndex >= 0 ? faceIndex : myData.FindFaceIndex(initialValue);
         ShowFace(currentFaceIndex);
-
-        // 스탬프가 찍힌 주사위만 표시를 붙인다. 풀에서 다시 쓰는 주사위는 스탬프가 없으면 숨긴다.
-        if (stampBadge == null && myData.stampType != StampType.None) stampBadge = StampBadge.Get(this);
-        if (stampBadge != null) stampBadge.Bind(spriteRenderer, myData.stampType);
 
         // 디버프 주사위는 뒤에 은은한 보랏빛을 깔아 굴릴 때도 알아볼 수 있게 한다.
         DebuffDiceGlow.Sync(this, spriteRenderer);
@@ -113,7 +108,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         if (spriteRenderer == null) return;
         if (faceIndex >= 0 && SpecialDiceSprites.TryGetSpecialFaceSprite(myData, faceIndex, out Sprite special) && special != null)
         {
-            spriteRenderer.sprite = special;
+            SetFaceSprite(special);
             return;
         }
         int value = currentValue;
@@ -131,7 +126,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         {
             if (myData != null && myData.customFaceSprites != null && myData.customFaceSprites.Length > 0)
             {
-                spriteRenderer.sprite = myData.customFaceSprites[0];
+                SetFaceSprite(myData.customFaceSprites[0]);
             }
             return;
         }
@@ -139,7 +134,7 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         // 커스텀 면 또는 홀수·짝수 전용 테이블. null이면 이번 프레임은 건너뛴다.
         if (SpecialDiceSprites.TryGetSpecialFaceSprite(myData, value - 1, out Sprite special) && special != null)
         {
-            spriteRenderer.sprite = special;
+            SetFaceSprite(special);
             return;
         }
 
@@ -148,14 +143,23 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
         if (useNumberSprite && fixedNumberSprites != null && fixedNumberSprites.Length >= 6)
         {
-            spriteRenderer.sprite = fixedNumberSprites[safeDefaultIndex];
+            SetFaceSprite(fixedNumberSprites[safeDefaultIndex]);
         }
         else if (diceFaceSprites != null && diceFaceSprites.Length > 0)
         {
             // SetData에서 커스텀 이미지로 덮어씌워졌을 경우를 대비해 배열 길이에 맞게 안전하게 가져옴
             int finalIndex = Mathf.Clamp(value - 1, 0, diceFaceSprites.Length - 1);
-            spriteRenderer.sprite = diceFaceSprites[finalIndex];
+            SetFaceSprite(diceFaceSprites[finalIndex]);
         }
+    }
+
+    // 주사위 그림은 모두 여기서 정한다. 스탬프가 찍혀 있으면 문양을 새긴 그림으로 바꿔 끼운다(캐시라 굴릴 때도 가볍다).
+    // 코팅·킵 색은 renderer.color로 곱하므로 새긴 문양도 코팅 위에 새겨진 것처럼 같이 물든다.
+    private void SetFaceSprite(Sprite sprite)
+    {
+        if (spriteRenderer == null) return;
+        StampType stamp = myData != null ? myData.stampType : StampType.None;
+        spriteRenderer.sprite = StampEngraveCache.Get(sprite, stamp);
     }
 
     private void ApplyDiceColor()
@@ -183,13 +187,6 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         }
 
         spriteRenderer.color = finalColor;
-
-        // 스탬프는 코팅 색을 받지 않고 킵했을 때 어두워지는 것만 따른다.
-        if (stampBadge != null)
-        {
-            float shade = isKept ? keptDarkness : 1f;
-            stampBadge.SetTint(new Color(shade, shade, shade, myData.diceColor.a));
-        }
     }
 
     private System.Collections.IEnumerator IdleAnimationRoutine(int[] faces)
