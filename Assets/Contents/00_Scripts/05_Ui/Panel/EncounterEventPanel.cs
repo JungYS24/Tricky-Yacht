@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,6 +52,8 @@ public class EncounterEventPanel : MonoBehaviour
     public GameObject dialogueRoot;
     public TextMeshProUGUI dialogueText;
     public Button nextDialogueButton;
+    [Tooltip("대사 창 오른쪽 아래 '다음' 표시. 마지막 대사에서는 숨깁니다.")]
+    public Graphic nextIndicator;
     public SpriteRenderer encounterSpriteRenderer;
 
     [Header("선택지 UI")]
@@ -62,15 +65,22 @@ public class EncounterEventPanel : MonoBehaviour
 
     [Header("대화창 스킨")]
     public Sprite dialogPanelSprite;
-    [Tooltip("값이 클수록 9슬라이스 테두리가 얇아집니다.")]
-    public float dialogBorderScale = 1f;
+    [Tooltip("값이 클수록 9슬라이스 테두리가 얇아집니다. 2 = 테두리 24px 스프라이트가 화면에서 12px.")]
+    public float dialogBorderScale = 2f;
     [Tooltip("대사·선택지 글자 크기 배율. 씬에 저장된 원래 크기에 곱합니다.")]
     public float encounterTextScale = 0.85f;
+
+    static readonly Vector4 DialogueTextMargin = new Vector4(32f, 24f, 32f, 24f);
+    const float NextIndicatorBob = 6f;
+    const float NextIndicatorPeriod = 0.7f;
+    const float NextIndicatorMinAlpha = 0.35f;
 
     private int dialogueIndex = 0;
     Color choiceATextColor = Color.white;
     Color choiceBTextColor = Color.white;
     bool encounterTextScaleApplied;
+    Vector2 nextIndicatorBasePos;
+    bool nextIndicatorBaseSaved;
 
     private void Awake()
     {
@@ -148,22 +158,54 @@ public class EncounterEventPanel : MonoBehaviour
             return;
         }
 
-        string locLine = GetEncounterDialogue(currentEncounter.type, dialogueIndex);
-        if (!string.IsNullOrEmpty(locLine))
+        string line = GetDialogueLine(dialogueIndex);
+        if (!string.IsNullOrEmpty(line))
         {
-            dialogueText.text = locLine;
+            dialogueText.text = line;
+            SetNextIndicator(!string.IsNullOrEmpty(GetDialogueLine(dialogueIndex + 1)));
             return;
         }
 
-        if (currentEncounter.dialogues != null && dialogueIndex < currentEncounter.dialogues.Length
-            && !string.IsNullOrEmpty(currentEncounter.dialogues[dialogueIndex]))
-        {
-            dialogueText.text = currentEncounter.dialogues[dialogueIndex];
-            return;
-        }
-
+        SetNextIndicator(false);
         if (dialogueRoot != null) dialogueRoot.SetActive(false);
         ShowChoices();
+    }
+
+    string GetDialogueLine(int index)
+    {
+        string locLine = GetEncounterDialogue(currentEncounter.type, index);
+        if (!string.IsNullOrEmpty(locLine))
+            return locLine;
+
+        if (currentEncounter.dialogues != null && index < currentEncounter.dialogues.Length)
+            return currentEncounter.dialogues[index];
+        return null;
+    }
+
+    // 다음 대사가 있을 때만 ▼ 를 보이고 위아래로 천천히 깜빡인다.
+    void SetNextIndicator(bool visible)
+    {
+        if (nextIndicator == null) return;
+        RectTransform rect = nextIndicator.rectTransform;
+        if (!nextIndicatorBaseSaved)
+        {
+            nextIndicatorBasePos = rect.anchoredPosition;
+            nextIndicatorBaseSaved = true;
+        }
+
+        rect.DOKill();
+        nextIndicator.DOKill();
+        rect.anchoredPosition = nextIndicatorBasePos;
+        Color color = nextIndicator.color;
+        color.a = 1f;
+        nextIndicator.color = color;
+        nextIndicator.gameObject.SetActive(visible);
+        if (!visible) return;
+
+        rect.DOAnchorPosY(nextIndicatorBasePos.y - NextIndicatorBob, NextIndicatorPeriod)
+            .SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo).SetUpdate(true);
+        nextIndicator.DOFade(NextIndicatorMinAlpha, NextIndicatorPeriod)
+            .SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo).SetUpdate(true);
     }
 
     private void OnNextDialogue()
@@ -197,7 +239,7 @@ public class EncounterEventPanel : MonoBehaviour
 #if UNITY_EDITOR
         if (dialogPanelSprite == null)
             dialogPanelSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(
-                "Assets/Contents/06_UI/Sprites/Encounter/Encounter_Dialog_Panel.png");
+                "Assets/Contents/06_UI/Sprites/Encounter/Encounter_Dialog_Navy.png");
 #endif
     }
 
@@ -210,10 +252,10 @@ public class EncounterEventPanel : MonoBehaviour
         ApplyPanelImage(choiceRoot, dialogPanelSprite, borderMul);
 
         if (dialogueText != null)
-            dialogueText.margin = new Vector4(140f, 60f, 140f, 60f);
+            dialogueText.margin = DialogueTextMargin;
 
-        ApplyChoiceButtonColors(choiceAButton);
-        ApplyChoiceButtonColors(choiceBButton);
+        ApplyChoiceButtonColors(choiceAButton, borderMul);
+        ApplyChoiceButtonColors(choiceBButton, borderMul);
     }
 
     void ApplyEncounterTextScale()
@@ -250,15 +292,20 @@ public class EncounterEventPanel : MonoBehaviour
         image.pixelsPerUnitMultiplier = borderMul;
     }
 
-    static void ApplyChoiceButtonColors(Button button)
+    static void ApplyChoiceButtonColors(Button button, float borderMul)
     {
         if (button == null) return;
 
+        // 선택지 배경(Risk/Safe)도 대화창과 같은 테두리 두께로 보이게 한다.
+        Image background = button.targetGraphic as Image;
+        if (background != null && background.type == Image.Type.Sliced)
+            background.pixelsPerUnitMultiplier = borderMul;
+
         ColorBlock colors = button.colors;
         colors.normalColor = Color.white;
-        colors.highlightedColor = new Color(1f, 0.95f, 0.8f, 1f);
-        colors.pressedColor = new Color(0.8f, 0.75f, 0.65f, 1f);
-        colors.selectedColor = new Color(1f, 0.95f, 0.8f, 1f);
+        colors.highlightedColor = new Color(1.1f, 1.1f, 1.1f, 1f);
+        colors.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+        colors.selectedColor = new Color(1.1f, 1.1f, 1.1f, 1f);
         colors.disabledColor = new Color(0.45f, 0.45f, 0.45f, 1f);
         button.colors = colors;
     }

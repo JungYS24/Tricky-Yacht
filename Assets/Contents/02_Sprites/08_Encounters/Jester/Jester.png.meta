@@ -109,7 +109,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -144,10 +144,10 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 512
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -181,555 +181,194 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Clown_SS_0
+      name: Jester_0
       rect:
         serializedVersion: 2
-        x: 12
-        y: 390
-        width: 337
-        height: 288
+        x: 0
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: a36b01639b47882b0800000000000000
-      internalID: -5582083399300893126
+      spriteID: eaeaf617a6753b544b71aa96ba713ff6
+      internalID: -163090061
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Clown_SS_1
+      name: Jester_1
       rect:
         serializedVersion: 2
-        x: 297
-        y: 531
-        width: 59
-        height: 51
+        x: 128
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 0c6f75ba6b66aff80800000000000000
-      internalID: -8072026447363443008
+      spriteID: eb06e35b2ee377248930382b1e2c22f8
+      internalID: -815135459
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Clown_SS_2
+      name: Jester_2
       rect:
         serializedVersion: 2
-        x: 377
-        y: 545
-        width: 41
-        height: 47
+        x: 256
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 0f60d8caaa7fe0180800000000000000
-      internalID: -9147101480731474192
+      spriteID: 7f10b2663eec9b042a0231d642c32b05
+      internalID: -1168167610
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Clown_SS_3
+      name: Jester_3
       rect:
         serializedVersion: 2
-        x: 387
-        y: 378
-        width: 310
-        height: 301
+        x: 384
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 4cd83d2af78dce870800000000000000
-      internalID: 8713577421759286724
+      spriteID: 74ddf814f157e1b4cb782e52b0b9d41d
+      internalID: 1140066019
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Clown_SS_4
+      name: Jester_4
       rect:
         serializedVersion: 2
-        x: 657
-        y: 542
-        width: 58
-        height: 51
+        x: 0
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: f359e06d41bb243f0800000000000000
-      internalID: -917965675865139905
+      spriteID: 6e1d089cfde431e4c84509b96e19ff90
+      internalID: -1294511717
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Clown_SS_5
+      name: Jester_5
       rect:
         serializedVersion: 2
-        x: 737
-        y: 554
-        width: 42
-        height: 48
+        x: 128
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: e2183ebf6c6de92d0800000000000000
-      internalID: -3269940129306541778
+      spriteID: a3c213d6c9ec12943b2a5732135bb71b
+      internalID: 1856347472
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Clown_SS_6
+      name: Jester_6
       rect:
         serializedVersion: 2
-        x: 758
-        y: 372
-        width: 284
-        height: 308
+        x: 256
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: c42bf3d3b17ad7f80800000000000000
-      internalID: -8107140018763484596
+      spriteID: 44b9e959280708947a65a32d8182a15f
+      internalID: 1705009053
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Clown_SS_7
+      name: Jester_7
       rect:
         serializedVersion: 2
-        x: 1017
-        y: 550
-        width: 59
-        height: 52
+        x: 384
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 6ce3150a4c74eeac0800000000000000
-      internalID: -3824040123762131258
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_8
-      rect:
-        serializedVersion: 2
-        x: 1097
-        y: 558
-        width: 42
-        height: 47
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4d7128aabf444ed70800000000000000
-      internalID: 9071451397119154132
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_9
-      rect:
-        serializedVersion: 2
-        x: 1119
-        y: 370
-        width: 281
-        height: 310
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 9a944481c9887e5e0800000000000000
-      internalID: -1880384115400488535
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_10
-      rect:
-        serializedVersion: 2
-        x: 1377
-        y: 554
-        width: 59
-        height: 52
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: af1681bd88c4c13f0800000000000000
-      internalID: -928783272470093318
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_11
-      rect:
-        serializedVersion: 2
-        x: 1454
-        y: 374
-        width: 341
-        height: 302
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f67dec11752e2c1e0800000000000000
-      internalID: -2178930406105098385
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_12
-      rect:
-        serializedVersion: 2
-        x: 1807
-        y: 377
-        width: 349
-        height: 299
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a83f7dfb3bd742340800000000000000
-      internalID: 4838130110673974154
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_13
-      rect:
-        serializedVersion: 2
-        x: 4
-        y: 17
-        width: 349
-        height: 298
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b073c2b5ade4e9c70800000000000000
-      internalID: 8979701406762809099
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_14
-      rect:
-        serializedVersion: 2
-        x: 297
-        y: 170
-        width: 59
-        height: 52
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 604cdee4fffc8a8d0800000000000000
-      internalID: -2834787269981912058
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_15
-      rect:
-        serializedVersion: 2
-        x: 364
-        y: 17
-        width: 350
-        height: 298
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2d9a299987e810690800000000000000
-      internalID: -7637666844419905070
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_16
-      rect:
-        serializedVersion: 2
-        x: 657
-        y: 169
-        width: 58
-        height: 52
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ac7a4c8e7ea37cfa0800000000000000
-      internalID: -5780586828989683766
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_17
-      rect:
-        serializedVersion: 2
-        x: 724
-        y: 21
-        width: 350
-        height: 294
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4d69d7e0f79535560800000000000000
-      internalID: 7301277823136536276
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_18
-      rect:
-        serializedVersion: 2
-        x: 1016
-        y: 168
-        width: 59
-        height: 51
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 505f009e4ca8bf790800000000000000
-      internalID: -7495244576500681467
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_19
-      rect:
-        serializedVersion: 2
-        x: 1084
-        y: 21
-        width: 349
-        height: 295
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: da296472ac219ee10800000000000000
-      internalID: 2227332150163051181
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_20
-      rect:
-        serializedVersion: 2
-        x: 1377
-        y: 167
-        width: 58
-        height: 52
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5103049401547f1e0800000000000000
-      internalID: -2164185159677497323
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_21
-      rect:
-        serializedVersion: 2
-        x: 1452
-        y: 19
-        width: 334
-        height: 296
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 93b3c330b23632380800000000000000
-      internalID: -8997238594167096519
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_22
-      rect:
-        serializedVersion: 2
-        x: 1737
-        y: 170
-        width: 58
-        height: 51
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1b652433b2df384c0800000000000000
-      internalID: -4286304058341173583
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_23
-      rect:
-        serializedVersion: 2
-        x: 1815
-        y: 18
-        width: 324
-        height: 297
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ec0a4a68a9365e310800000000000000
-      internalID: 1433661571722420430
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Clown_SS_24
-      rect:
-        serializedVersion: 2
-        x: 2097
-        y: 172
-        width: 59
-        height: 51
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7daa657a08a115480800000000000000
-      internalID: -8912313047723889961
+      spriteID: 854e5ee048254e54a87f306385fba292
+      internalID: -54573866
       vertices: []
       indices: 
       edges: []
@@ -738,7 +377,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: bf34c5086f2171643821cdcd63c512a1
     internalID: 0
     vertices: []
     indices: 
@@ -748,31 +387,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Clown_SS_0: -5582083399300893126
-      Clown_SS_1: -8072026447363443008
-      Clown_SS_10: -928783272470093318
-      Clown_SS_11: -2178930406105098385
-      Clown_SS_12: 4838130110673974154
-      Clown_SS_13: 8979701406762809099
-      Clown_SS_14: -2834787269981912058
-      Clown_SS_15: -7637666844419905070
-      Clown_SS_16: -5780586828989683766
-      Clown_SS_17: 7301277823136536276
-      Clown_SS_18: -7495244576500681467
-      Clown_SS_19: 2227332150163051181
-      Clown_SS_2: -9147101480731474192
-      Clown_SS_20: -2164185159677497323
-      Clown_SS_21: -8997238594167096519
-      Clown_SS_22: -4286304058341173583
-      Clown_SS_23: 1433661571722420430
-      Clown_SS_24: -8912313047723889961
-      Clown_SS_3: 8713577421759286724
-      Clown_SS_4: -917965675865139905
-      Clown_SS_5: -3269940129306541778
-      Clown_SS_6: -8107140018763484596
-      Clown_SS_7: -3824040123762131258
-      Clown_SS_8: 9071451397119154132
-      Clown_SS_9: -1880384115400488535
+      Jester_0: -163090061
+      Jester_1: -815135459
+      Jester_2: -1168167610
+      Jester_3: 1140066019
+      Jester_4: -1294511717
+      Jester_5: 1856347472
+      Jester_6: 1705009053
+      Jester_7: -54573866
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

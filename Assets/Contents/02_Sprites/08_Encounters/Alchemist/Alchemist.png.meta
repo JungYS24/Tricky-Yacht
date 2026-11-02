@@ -67,7 +67,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -102,10 +102,10 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 512
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -139,6 +139,19 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -146,12 +159,12 @@ TextureImporter:
       name: Alchemist_0
       rect:
         serializedVersion: 2
-        x: 75
-        y: 690
-        width: 9
-        height: 9
+        x: 0
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -168,12 +181,12 @@ TextureImporter:
       name: Alchemist_1
       rect:
         serializedVersion: 2
-        x: 77
-        y: 402
-        width: 242
-        height: 342
+        x: 128
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -190,12 +203,12 @@ TextureImporter:
       name: Alchemist_2
       rect:
         serializedVersion: 2
-        x: 421
-        y: 690
-        width: 10
-        height: 10
+        x: 256
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -212,12 +225,12 @@ TextureImporter:
       name: Alchemist_3
       rect:
         serializedVersion: 2
-        x: 423
-        y: 402
-        width: 243
-        height: 339
+        x: 384
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -234,12 +247,12 @@ TextureImporter:
       name: Alchemist_4
       rect:
         serializedVersion: 2
-        x: 769
-        y: 402
-        width: 242
-        height: 343
+        x: 0
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -256,12 +269,12 @@ TextureImporter:
       name: Alchemist_5
       rect:
         serializedVersion: 2
-        x: 1115
-        y: 402
-        width: 231
-        height: 322
+        x: 128
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -278,12 +291,12 @@ TextureImporter:
       name: Alchemist_6
       rect:
         serializedVersion: 2
-        x: 1315
-        y: 579
-        width: 37
-        height: 56
+        x: 256
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -300,12 +313,12 @@ TextureImporter:
       name: Alchemist_7
       rect:
         serializedVersion: 2
-        x: 74
-        y: 30
-        width: 208
-        height: 336
+        x: 384
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -318,77 +331,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: Alchemist_8
-      rect:
-        serializedVersion: 2
-        x: 420
-        y: 33
-        width: 246
-        height: 333
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 42d825490ec51dd90800000000000000
-      internalID: -7074771419991470812
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Alchemist_9
-      rect:
-        serializedVersion: 2
-        x: 766
-        y: 30
-        width: 213
-        height: 336
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5b4093dba2f228950800000000000000
-      internalID: 6449769476957734069
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Alchemist_10
-      rect:
-        serializedVersion: 2
-        x: 1109
-        y: 30
-        width: 243
-        height: 336
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ea58da68e95224200800000000000000
-      internalID: 162733899333338542
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 33b8935fe672f5b498899119b18cfd6b
     internalID: 0
     vertices: []
     indices: 
@@ -400,15 +347,12 @@ TextureImporter:
     nameFileIdTable:
       Alchemist_0: -3809233051643409127
       Alchemist_1: -8384645931170192464
-      Alchemist_10: 162733899333338542
       Alchemist_2: 3289359093171440981
       Alchemist_3: -8607878836576165482
       Alchemist_4: 1194658939448735346
       Alchemist_5: 1706857883762191516
       Alchemist_6: -1310944910754839866
       Alchemist_7: 4818152687250962583
-      Alchemist_8: -7074771419991470812
-      Alchemist_9: 6449769476957734069
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

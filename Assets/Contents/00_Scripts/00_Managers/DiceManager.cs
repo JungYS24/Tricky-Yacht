@@ -314,7 +314,7 @@ public class DiceManager : MonoBehaviour
             BGMManager.Instance.ChangeBGM(currentBiome.biomeBGM);
         }
 
-        if (TutorialMode.Active) TutorialOverlay.Spawn(this);
+        if (TutorialMode.ShowsOverlay) TutorialOverlay.Spawn(this);
     }
 
     void OnDestroy()

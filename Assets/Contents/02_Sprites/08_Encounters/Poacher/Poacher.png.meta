@@ -73,7 +73,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -108,10 +108,10 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 512
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -145,6 +145,19 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -152,12 +165,12 @@ TextureImporter:
       name: Poacher_0
       rect:
         serializedVersion: 2
-        x: 125
-        y: 723
-        width: 439
-        height: 602
+        x: 0
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -174,12 +187,12 @@ TextureImporter:
       name: Poacher_1
       rect:
         serializedVersion: 2
-        x: 749
-        y: 722
-        width: 444
-        height: 603
+        x: 128
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -196,12 +209,12 @@ TextureImporter:
       name: Poacher_2
       rect:
         serializedVersion: 2
-        x: 1378
-        y: 723
-        width: 444
-        height: 602
+        x: 256
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -218,12 +231,12 @@ TextureImporter:
       name: Poacher_3
       rect:
         serializedVersion: 2
-        x: 2008
-        y: 723
-        width: 449
-        height: 602
+        x: 384
+        y: 128
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -240,12 +253,12 @@ TextureImporter:
       name: Poacher_4
       rect:
         serializedVersion: 2
-        x: 119
-        y: 46
-        width: 439
-        height: 597
+        x: 0
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -262,12 +275,12 @@ TextureImporter:
       name: Poacher_5
       rect:
         serializedVersion: 2
-        x: 211
-        y: 558
-        width: 33
-        height: 96
+        x: 128
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -284,12 +297,12 @@ TextureImporter:
       name: Poacher_6
       rect:
         serializedVersion: 2
-        x: 744
-        y: 52
-        width: 502
-        height: 591
+        x: 256
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -306,12 +319,12 @@ TextureImporter:
       name: Poacher_7
       rect:
         serializedVersion: 2
-        x: 829
-        y: 555
-        width: 33
-        height: 94
+        x: 384
+        y: 0
+        width: 128
+        height: 128
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -324,121 +337,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: Poacher_8
-      rect:
-        serializedVersion: 2
-        x: 1376
-        y: 541
-        width: 28
-        height: 23
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 335a11c691eb5a300800000000000000
-      internalID: 262825169667597619
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Poacher_9
-      rect:
-        serializedVersion: 2
-        x: 1378
-        y: 46
-        width: 433
-        height: 597
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 96cbd21700d7de8f0800000000000000
-      internalID: -509613741970703255
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Poacher_10
-      rect:
-        serializedVersion: 2
-        x: 1465
-        y: 562
-        width: 32
-        height: 92
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 34bd07b49d5119260800000000000000
-      internalID: 7102482110357756739
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Poacher_11
-      rect:
-        serializedVersion: 2
-        x: 1997
-        y: 46
-        width: 445
-        height: 597
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 43d79b49db11e0af0800000000000000
-      internalID: -428385408611943116
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Poacher_12
-      rect:
-        serializedVersion: 2
-        x: 2077
-        y: 556
-        width: 32
-        height: 88
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: fef2dd8ddab359750800000000000000
-      internalID: 6311016070683373551
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 9d0e6f2af20e23a4cb5cd27310f3a50c
     internalID: 0
     vertices: []
     indices: 
@@ -450,17 +353,12 @@ TextureImporter:
     nameFileIdTable:
       Poacher_0: -8059230906558695232
       Poacher_1: -3738972704111680741
-      Poacher_10: 7102482110357756739
-      Poacher_11: -428385408611943116
-      Poacher_12: 6311016070683373551
       Poacher_2: -3022240265729516843
       Poacher_3: -8096535488001305904
       Poacher_4: 2858640901490228867
       Poacher_5: 4443710576121014081
       Poacher_6: -5759395780825514896
       Poacher_7: 1306091398037374372
-      Poacher_8: 262825169667597619
-      Poacher_9: -509613741970703255
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

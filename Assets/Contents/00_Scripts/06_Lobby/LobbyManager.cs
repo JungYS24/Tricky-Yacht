@@ -37,6 +37,9 @@ public class LobbyManager : MonoBehaviour
         // 본 게임 시작 시에는 튜토리얼을 끄도록 설정 (PlayerPrefs 활용)
         PlayerPrefs.SetInt("RunTutorial", 0);
 
+        // 처음 새 게임이면 캐릭터 선택 후 지도에서 바로 안내가 이어진다(세이브를 지우기 전에 판단).
+        TutorialMode.StartGuidedIfFirstRun();
+
         //새 게임이므로 기존 세이브 파일 삭제 및 Load 플래그 0 부여
         PlayerPrefs.DeleteKey("TrickYacht_Save");
         PlayerPrefs.SetInt("LoadGame", 0);

@@ -40,6 +40,8 @@ public class TutorialOverlay : MonoBehaviour
             return;
         }
         Instantiate(prefab).Bind(diceManager);
+        // 첫 판 안내는 중간에 나가도 다시 뜨지 않게 띄우는 순간 본 것으로 기록한다.
+        TutorialMode.MarkSeen();
     }
 
     void Bind(DiceManager diceManager)
@@ -238,6 +240,13 @@ public class TutorialOverlay : MonoBehaviour
 
     void EndTutorial()
     {
+        // 첫 판 안내는 안내만 닫고 판을 그대로 이어 간다. 로비 튜토리얼만 로비로 돌아간다.
+        if (TutorialMode.Guided)
+        {
+            TutorialMode.End();
+            Destroy(gameObject);
+            return;
+        }
         TutorialMode.End();
         SceneManager.LoadScene("Lobby");
     }
