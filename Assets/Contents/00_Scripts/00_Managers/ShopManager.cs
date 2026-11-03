@@ -36,6 +36,8 @@ public class ShopManager : MonoBehaviour
     [HideInInspector] public int rerollCost = 100;
     // 이번 상점 방문에서 리롤한 횟수. 리롤할 때마다 비용이 BalanceConfig.rerollCostStep 만큼 오른다.
     int rerollsThisVisit;
+    // 이번 상점 방문에서 세일 중인 진열 칸. 리롤해도 같은 칸이 세일을 유지한다.
+    int saleSlotIndex = -1;
     public int CurrentRerollCost => Mathf.Max(0, rerollCost + BalanceConfig.Current.rerollCostStep * rerollsThisVisit);
 
     [Header("주사위 선택창 리롤 (코팅·스탬프·위성·주사위 삭제)")]
@@ -134,6 +136,7 @@ public class ShopManager : MonoBehaviour
         if (GoldCounter.Instance != null) GoldCounter.Instance.SetInstant(currentGold);
 
         RefreshShop(false);
+        PickSaleSlot();
         UpdateRerollUI();
         if (FigureEffectManager.Instance != null)
             FigureEffectManager.Instance.EvaluateShopEnteredTriggers(diceManager, this);
@@ -551,6 +554,7 @@ public class ShopManager : MonoBehaviour
             rerollsThisVisit++;
             if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
             RefreshShop(true);
+            ApplySale();
         }
         else
         {
@@ -786,6 +790,37 @@ public class ShopManager : MonoBehaviour
             Debug.LogWarning("CoatingSelectionPanel 또는 DiceManager 연결이 누락되었습니다.");
         }
     }
+    // 진열된 칸 중 하나를 골라 세일한다. 잠긴 칸·빈 칸은 고르지 않는다.
+    void PickSaleSlot()
+    {
+        saleSlotIndex = -1;
+        float sale = BalanceConfig.Current.shopSaleMultiplier;
+        if (sale < 1f && shopSlots != null)
+        {
+            var candidates = new List<int>();
+            for (int i = 0; i < shopSlots.Length; i++)
+            {
+                ShopSlot slot = shopSlots[i];
+                if (slot != null && slot.gameObject.activeSelf && !slot.isLocked && slot.currentData != null && !slot.isPurchased)
+                    candidates.Add(i);
+            }
+            if (candidates.Count > 0) saleSlotIndex = candidates[UnityEngine.Random.Range(0, candidates.Count)];
+        }
+        ApplySale();
+    }
+
+    void ApplySale()
+    {
+        if (shopSlots == null) return;
+        float sale = BalanceConfig.Current.shopSaleMultiplier;
+        for (int i = 0; i < shopSlots.Length; i++)
+        {
+            ShopSlot slot = shopSlots[i];
+            if (slot == null || slot.isLocked) continue;
+            slot.SetSale(i == saleSlotIndex ? sale : 1f);
+        }
+    }
+
     // 리롤(고양이 눈) 할인율을 적용한 최종 리롤 비용 계산
     public int GetFinalRerollCost()
     {

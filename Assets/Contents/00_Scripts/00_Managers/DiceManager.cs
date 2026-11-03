@@ -1003,6 +1003,14 @@ public class DiceManager : MonoBehaviour
             shopManager.GrantGold(baseClearReward);
         }
 
+        // 바이옴 보스 처치 회복. 튜토리얼 모드는 예전처럼 회복하지 않는다.
+        int clearHealPercent = BalanceConfig.Current.biomeClearHealPercent;
+        if (!TutorialMode.Active && enemy.Grade == MonsterGrade.Boss && clearHealPercent > 0)
+        {
+            playerStatus.Heal(Mathf.FloorToInt(playerMaxHP * (clearHealPercent / 100f)));
+            UpdateMainUI("");
+        }
+
         //스테이지 클리어 시 패시브(Passive) 피규어 효과 일괄 발동
         if (FigureEffectManager.Instance != null)
         {
@@ -1019,20 +1027,21 @@ public class DiceManager : MonoBehaviour
         else if (RollNaturalFigureDrop())
         {
             InventoryManager.Instance.AddItem(enemy.dropFigureData);
-            ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_FIGURE_DROPPED", "피규어 획득: {0}", enemy.dropFigureData.itemName));
+            ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_FIGURE_DROPPED", "피규어 획득: {0}", LocalizationManager.GetItemDisplayName(enemy.dropFigureData)));
         }
 
         Invoke(nameof(ShowClownEvent), 1.0f);
     }
 
-    // 처치 골드: 몬스터 dropGold x 배율. 보스는 바이옴 클리어 보상을 더한다. 튜토리얼 모드는 예전 고정값을 유지한다.
+    // 처치 골드: 몬스터 dropGold x 배율. 보스는 바이옴 클리어 보상을 더하고, 엘리트·보스는 등급 배율을 한 번 더 곱한다.
+    // 튜토리얼 모드는 예전 고정값을 유지한다.
     int GetClearRewardGold()
     {
         if (TutorialMode.Active) return 500;
         BalanceConfig cfg = BalanceConfig.Current;
         int gold = Mathf.FloorToInt(enemy.DropGold * cfg.monsterGoldMultiplier);
         if (enemy.Grade == MonsterGrade.Boss) gold += cfg.biomeClearBonusGold;
-        return gold;
+        return Mathf.FloorToInt(gold * cfg.GoldMultiplierFor(enemy.Grade));
     }
 
     // 페퍼민트 없이 처치했을 때 등급별 확률로 드롭 피규어를 준다. 이미 가진 피규어는 주지 않는다.
@@ -1108,7 +1117,7 @@ public class DiceManager : MonoBehaviour
         }
     }
 
-    private void ShowGameClear()
+    private void ShowGameClear(bool demo = false)
     {
         if (gameClearPanel != null)
         {
@@ -1117,9 +1126,13 @@ public class DiceManager : MonoBehaviour
 
         if (gameClearText != null)
         {
-            gameClearText.text = LocalizationManager.GetUi(
-                "UI_GAME_CLEAR",
-                "<color=#00FF00>GAME CLEAR!</color>\n\n축하합니다!\n모든 시련을 이겨내고 공허를 정복했습니다!");
+            gameClearText.text = demo
+                ? LocalizationManager.GetUi(
+                    "UI_DEMO_CLEAR",
+                    "<color=#00FF00>DEMO CLEAR!</color>\n\n축하합니다!\n체험판의 세 바이옴을 모두 정복했습니다!\n이어지는 모험은 정식 출시에서 만나요!")
+                : LocalizationManager.GetUi(
+                    "UI_GAME_CLEAR",
+                    "<color=#00FF00>GAME CLEAR!</color>\n\n축하합니다!\n모든 시련을 이겨내고 공허를 정복했습니다!");
         }
 
         // 게임을 완전히 클리어했으므로 기존 세이브 데이터는 초기화(삭제)
@@ -1713,6 +1726,14 @@ public class DiceManager : MonoBehaviour
         isCalculating = false;
         HideMapOverlays();
         SetBoardVisible(false);
+
+        // 데모는 정해진 수의 바이옴 보스를 잡으면 다음 바이옴 선택 대신 클리어 화면으로 끝낸다.
+        int demoLimit = BalanceConfig.Current.demoBiomeLimit;
+        if (demoLimit > 0 && !TutorialMode.Active && stageProgression.biomeIndex >= demoLimit)
+        {
+            ShowGameClear(demo: true);
+            return;
+        }
 
         MapTableData table = GetMapTable();
         int threshold = table != null ? table.Config.BiomeCountToVoid : 10;

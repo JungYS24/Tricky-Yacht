@@ -14,6 +14,12 @@ public class BalanceConfig : ScriptableObject
     public int startGold = 100;
     public int maxRerolls = 2;
     [Range(0, 100)] public int restHealPercent = 25;
+    [Tooltip("바이옴 보스를 잡았을 때 최대 체력의 몇 %를 회복할지")]
+    [Range(0, 100)] public int biomeClearHealPercent = 30;
+
+    [Header("데모")]
+    [Tooltip("이 수만큼 바이옴 보스를 잡으면 데모 클리어로 끝난다. 0 이면 제한 없음(정식판)")]
+    public int demoBiomeLimit = 3;
 
     [Header("몬스터 공격 턴")]
     public int normalAttackTurn = 3;
@@ -26,8 +32,8 @@ public class BalanceConfig : ScriptableObject
     [Header("몬스터 성장 (바이옴 단계 + 바이옴 안 전투 수)")]
     [Tooltip("켜면 예전 공식(체력 x1.05^(stage-1), 공격력 +stage/2)을 쓴다")]
     public bool useLegacyGrowth = false;
-    public float[] tierHp = { 1.0f, 1.0f, 2.4f, 3.4f };
-    public float[] tierAtk = { 1.0f, 1.0f, 1.9f, 2.5f };
+    public float[] tierHp = { 1.0f, 1.2f, 1.3f, 3.4f };
+    public float[] tierAtk = { 1.0f, 1.1f, 1.15f, 2.5f };
     [Tooltip("바이옴 안에서 이미 치른 전투 1회당 체력 증가율")]
     public float hpPerNodeInBiome = 0.032f;
     [Tooltip("바이옴 안 전투 이 횟수마다 공격력 +1")]
@@ -39,9 +45,15 @@ public class BalanceConfig : ScriptableObject
     public float monsterGoldMultiplier = 1.2f;
     [Tooltip("보스 처치 시 몬스터 골드와 별도로 주는 바이옴 클리어 보상")]
     public int biomeClearBonusGold = 180;
+    [Tooltip("엘리트 처치 골드 전체에 곱하는 배율")]
+    public float eliteGoldMultiplier = 2f;
+    [Tooltip("보스 처치 골드 전체(바이옴 클리어 보상 포함)에 곱하는 배율")]
+    public float bossGoldMultiplier = 2f;
     public int journeyGoldPerPip = 6;
 
     [Header("상점")]
+    [Tooltip("상점에 들어갈 때 진열 칸 하나를 골라 이 배율로 할인한다. 1 이면 세일 없음")]
+    [Range(0f, 1f)] public float shopSaleMultiplier = 0.5f;
     public int rerollBaseCost = 50;
     [Tooltip("한 상점에서 리롤할 때마다 오르는 비용")]
     public int rerollCostStep = 25;
@@ -82,6 +94,16 @@ public class BalanceConfig : ScriptableObject
             case MonsterGrade.Boss: return Mathf.Max(1, bossAttackTurn);
             case MonsterGrade.Elite: return Mathf.Max(1, eliteAttackTurn);
             default: return Mathf.Max(1, normalAttackTurn);
+        }
+    }
+
+    public float GoldMultiplierFor(MonsterGrade grade)
+    {
+        switch (grade)
+        {
+            case MonsterGrade.Boss: return bossGoldMultiplier;
+            case MonsterGrade.Elite: return eliteGoldMultiplier;
+            default: return 1f;
         }
     }
 

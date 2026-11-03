@@ -185,3 +185,20 @@ Kim Byeonghoon
 所有玩过本作的玩家
 
 Made with Unity",크레딧 본문. 이름은 다른 언어에서 로마자 표기
+UI,UI_DEMO_CLEAR,"<color=#00FF00>DEMO CLEAR!</color>
+
+축하합니다!
+체험판의 세 바이옴을 모두 정복했습니다!
+이어지는 모험은 정식 출시에서 만나요!","<color=#00FF00>DEMO CLEAR!</color>
+
+Congratulations!
+You conquered all three biomes in the demo!
+The adventure continues in the full release.","<color=#00FF00>DEMO CLEAR!</color>
+
+おめでとうございます！
+体験版の3つのバイオームをすべて制覇しました！
+続きの冒険は製品版でお楽しみください。","<color=#00FF00>DEMO CLEAR!</color>
+
+恭喜！
+你已征服体验版的全部三个生物群系！
+更多冒险敬请期待正式版。",데모 종료(BalanceConfig.demoBiomeLimit 바이옴 클리어) 화면

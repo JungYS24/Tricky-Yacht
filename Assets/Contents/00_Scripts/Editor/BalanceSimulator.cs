@@ -12,6 +12,7 @@ using UnityEngine;
 // 배치모드: Unity -batchmode -quit -projectPath <path> -executeMethod BalanceSimulator.RunBatch [-simRuns 1000] [-simOut Docs/Balancing/SimResult_v1.md] [-simSeed 1]
 //   -simSet "필드=값,..."  : BalanceConfig 값을 이번 실행에서만 바꾼다(에셋은 그대로). 배열은 ; 로 구분. 예) tierHp=1;1.4
 //   -simScale "등급.항목=배율,..." : 몬스터 기본 수치를 등급별로 곱한다(JSON 은 그대로). 예) Boss.hp=0.8,Elite.atk=0.9
+//   -simBiomes N : 기본(BalanceConfig.demoBiomeLimit, 2) 대신 바이옴 N개까지 진행한다. 3 이상이면 바이옴 단계별 생존표를 붙인다.
 public static class BalanceSimulator
 {
     const string BiomeFolder = "Assets/Contents/10_Resources/Data/DiceData/Map";
@@ -21,6 +22,8 @@ public static class BalanceSimulator
 
     // 피규어 효과는 종류가 많아 재현하지 않고, 1개당 족보 배수 +0.1 로 근사한다.
     const float FigureMultBonus = 0.1f;
+    // 프리즘 코팅 배수 (Prism.asset scoreMultiplier 1.2 → 족보 배수 +0.2)
+    const float PrismMultBonus = 0.2f;
     const int MaxTurnsPerCombat = 60;
     const int DemoBiomeCount = 2;
 
@@ -44,10 +47,12 @@ public static class BalanceSimulator
         string output = ArgString(args, "-simOut", DefaultOut);
         string set = ArgString(args, "-simSet", null);
         string scale = ArgString(args, "-simScale", null);
+        int demoLimit = BalanceConfig.Current.demoBiomeLimit;
+        int biomes = ArgInt(args, "-simBiomes", demoLimit > 0 ? demoLimit : DemoBiomeCount);
         try
         {
             if (!string.IsNullOrEmpty(set)) BalanceConfig.OverrideForTesting(ApplyOverrides(BalanceConfig.Current, set));
-            Run(runs, seed, output, set, scale);
+            Run(runs, seed, output, set, scale, biomes);
         }
         finally { BalanceConfig.OverrideForTesting(null); }
     }
@@ -114,6 +119,7 @@ public static class BalanceSimulator
         public List<ShopOffer> stock = new List<ShopOffer>();
         public int slotCount = 6;
         public float[,] scale = ParseScale(null);
+        public int biomeCount = DemoBiomeCount;
         public int BaseHp(MonsterDataSO m) => Mathf.RoundToInt(m.maxHp * scale[(int)m.monsterGrade, 0]);
         public int BaseAtk(MonsterDataSO m) => Mathf.RoundToInt(m.baseAtk * scale[(int)m.monsterGrade, 1]);
         public int BaseGold(MonsterDataSO m) => Mathf.RoundToInt(m.dropGold * scale[(int)m.monsterGrade, 2]);
@@ -153,6 +159,8 @@ public static class BalanceSimulator
         public DieKind kind;
         public int[] faces;
         public bool temporary;
+        public string coating; // Prism / Ice / Gold / Dark
+        public string stamp;   // Spade / Heart / Diamond / Clover
         public Die(DieKind k, int[] f, bool temp = false) { kind = k; faces = f; temporary = temp; }
     }
 
@@ -172,6 +180,8 @@ public static class BalanceSimulator
     class Stats
     {
         public int runs;
+        public int[] tierReached, tierCleared;
+        public List<List<float>> tierArrivalHp = new List<List<float>>(), tierBossArrivalHp = new List<List<float>>();
         public int forestDeaths, forestBossReached, forestBossKilled;
         public int secondBossReached, secondBossKilled, secondDeaths;
         public List<int> forestNormalTurns = new List<int>(), forestEliteTurns = new List<int>(), forestBossTurns = new List<int>();
@@ -187,11 +197,13 @@ public static class BalanceSimulator
 
     // ---------------- 실행 ----------------
 
-    public static string Run(int runs, int seed, string outputPath, string set = null, string scale = null)
+    public static string Run(int runs, int seed, string outputPath, string set = null, string scale = null, int biomeCount = DemoBiomeCount)
     {
         World world = LoadWorld();
         world.scale = ParseScale(scale);
-        var stats = new Stats { runs = runs };
+        world.biomeCount = Mathf.Max(1, biomeCount);
+        var stats = new Stats { runs = runs, tierReached = new int[world.biomeCount], tierCleared = new int[world.biomeCount] };
+        for (int i = 0; i < world.biomeCount; i++) { stats.tierArrivalHp.Add(new List<float>()); stats.tierBossArrivalHp.Add(new List<float>()); }
         var sw = System.Diagnostics.Stopwatch.StartNew();
         for (int i = 0; i < runs; i++)
             SimulateRun(world, stats, new System.Random(seed * 100003 + i), seed * 7919 + i);
@@ -213,17 +225,27 @@ public static class BalanceSimulator
         for (int i = 0; i < 11; i++) run.deck.Add(new Die(DieKind.Basic, BasicFaces));
 
         BiomeType biome = BiomeType.Forest;
-        for (int tier = 0; tier < DemoBiomeCount; tier++)
+        var navigator = new BiomeNavigator();
+        for (int tier = 0; tier < w.biomeCount; tier++)
         {
-            if (tier == 1)
+            if (tier >= 1)
             {
-                var options = new BiomeNavigator().BiomeRoutes[BiomeType.Forest];
+                // 몬스터·보스 데이터가 있는 바이옴만 고른다(하늘섬처럼 비어 있는 곳 제외).
+                var options = navigator.BiomeRoutes[biome].Where(b => w.biomes.TryGetValue(b, out var d)
+                    && d.bossMonster != null && d.biomeMonsters != null && d.biomeMonsters.Count > 0).ToList();
+                if (options.Count == 0) return;
                 biome = options[rng.Next(options.Count)];
-                if (!s.secondBiome.ContainsKey(biome)) s.secondBiome[biome] = new int[2];
-                s.secondBiome[biome][0]++;
+                if (tier == 1)
+                {
+                    if (!s.secondBiome.ContainsKey(biome)) s.secondBiome[biome] = new int[2];
+                    s.secondBiome[biome][0]++;
+                }
             }
+            s.tierReached[tier]++;
+            s.tierArrivalHp[tier].Add(100f * run.hp / run.maxHp);
             bool alive = SimulateBiome(w, s, run, biome, tier, runSeed);
             if (!alive) return;
+            s.tierCleared[tier]++;
         }
     }
 
@@ -275,25 +297,26 @@ public static class BalanceSimulator
                             s.figuresAtForestBoss.Add(run.FigureCount);
                             s.forestCombats.Add(combatsInBiome);
                         }
-                        else s.secondBossReached++;
+                        else if (tier == 1) s.secondBossReached++;
+                        s.tierBossArrivalHp[tier].Add(100f * run.hp / run.maxHp);
                     }
                     AddNodeDebuffs(run, node.type);
                     CombatResult r = Fight(w, run, monster, grade, tier, combatsInBiome);
                     run.deck.RemoveAll(d => d.temporary);
                     combatsInBiome++;
-                    RecordCombat(s, forest, grade, node.type, r);
+                    if (tier <= 1) RecordCombat(s, forest, grade, node.type, r);
                     if (!r.won)
                     {
-                        string key = (forest ? "숲 " : "2번째 바이옴 ") + GradeName(grade);
+                        string key = (forest ? "숲 " : $"{tier + 1}번째 바이옴 ") + GradeName(grade);
                         s.deathCause[key] = s.deathCause.TryGetValue(key, out int c) ? c + 1 : 1;
-                        if (forest) s.forestDeaths++; else s.secondDeaths++;
+                        if (forest) s.forestDeaths++; else if (tier == 1) s.secondDeaths++;
                         return false;
                     }
                     GrantRewards(w, run, monster, grade);
                     if (node.type == MapNodeType.Boss)
                     {
                         if (forest) s.forestBossKilled++;
-                        else
+                        else if (tier == 1)
                         {
                             s.secondBossKilled++;
                             s.secondBiome[biomeType][1]++;
@@ -376,25 +399,46 @@ public static class BalanceSimulator
         }
     }
 
+    // DiceManager.GetClearRewardGold 와 같은 계산
     static void GrantRewards(World w, RunState run, MonsterDataSO m, MonsterGrade grade)
     {
-        run.gold += Mathf.FloorToInt(w.BaseGold(m) * w.cfg.monsterGoldMultiplier);
-        if (grade == MonsterGrade.Boss) run.gold += w.cfg.biomeClearBonusGold;
+        int gold = Mathf.FloorToInt(w.BaseGold(m) * w.cfg.monsterGoldMultiplier);
+        if (grade == MonsterGrade.Boss)
+        {
+            gold += w.cfg.biomeClearBonusGold;
+            run.hp = Math.Min(run.maxHp, run.hp + Mathf.FloorToInt(run.maxHp * (w.cfg.biomeClearHealPercent / 100f)));
+        }
+        run.gold += Mathf.FloorToInt(gold * w.cfg.GoldMultiplierFor(grade));
         if (m.dropFigureData != null && !run.figures.Contains(m.dropFigureData.name) && run.rng.NextDouble() < w.cfg.DropRateFor(grade))
             run.figures.Add(m.dropFigureData.name);
     }
 
-    // 봇 상점: 진열된 피규어 중 살 수 있는 가장 비싼 것부터 산다(리롤 안 함).
+    // 봇 상점: 진열된 칸 중 하나는 세일한다. 피규어를 살 수 있는 가장 비싼 것부터 사고,
+    // 남은 골드로 코팅·스탬프를 비싼 것부터 사서 아직 강화 안 된 기본 주사위에 붙인다(리롤 안 함).
     static void VisitShop(World w, RunState run, MapNodeType type)
     {
         Func<ShopOffer, bool> sells = type == MapNodeType.ShopRonan ? (Func<ShopOffer, bool>)(o => o.ronan)
             : type == MapNodeType.ShopOpel ? (o => o.opel) : (o => o.nyaon);
         var shown = w.stock.Where(sells).OrderBy(_ => run.rng.Next()).Take(w.slotCount).ToList();
-        foreach (var offer in shown.Where(o => o.cls == "FigureItemSO" && !run.figures.Contains(o.name)).OrderByDescending(o => o.price))
+        if (shown.Count == 0) return;
+        ShopOffer sale = shown[run.rng.Next(shown.Count)];
+        Func<ShopOffer, int> price = o => o == sale ? Mathf.FloorToInt(o.price * w.cfg.shopSaleMultiplier) : o.price;
+
+        foreach (var offer in shown.Where(o => o.cls == "FigureItemSO" && !run.figures.Contains(o.name)).OrderByDescending(price))
         {
-            if (offer.price > run.gold) continue;
-            run.gold -= offer.price;
+            if (price(offer) > run.gold) continue;
+            run.gold -= price(offer);
             run.figures.Add(offer.name);
+        }
+        foreach (var offer in shown.Where(o => o.cls == "CoatingItemSO" || o.cls == "StampItemSO").OrderByDescending(price))
+        {
+            if (price(offer) > run.gold) continue;
+            bool coating = offer.cls == "CoatingItemSO";
+            var target = run.deck.Where(d => d.kind == DieKind.Basic && (coating ? d.coating == null : d.stamp == null)).ToList();
+            if (target.Count == 0) continue;
+            run.gold -= price(offer);
+            Die die = target[run.rng.Next(target.Count)];
+            if (coating) die.coating = offer.name; else die.stamp = offer.name;
         }
     }
 
@@ -414,6 +458,7 @@ public static class BalanceSimulator
         Shuffle(draw, run.rng);
         var discard = new List<Die>();
         var result = new CombatResult();
+        int shield = 0; // 하트 스탬프 보호막. 전투마다 초기화된다.
 
         while (result.turns < MaxTurnsPerCombat)
         {
@@ -433,7 +478,7 @@ public static class BalanceSimulator
             int[] values = hand.Select(d => d.faces[run.rng.Next(6)]).ToArray();
             for (int r = 0; r < rerolls; r++)
             {
-                int mask = BestRerollMask(hand, values, run.FigureCount, run.rng);
+                int mask = BestRerollMask(hand, values, run.FigureCount, enemyHp, run.rng);
                 if (mask == 0) break;
                 for (int i = 0; i < hand.Count; i++)
                     if ((mask & (1 << i)) != 0) values[i] = hand[i].faces[run.rng.Next(6)];
@@ -444,8 +489,14 @@ public static class BalanceSimulator
             for (int i = 0; i < hand.Count; i++) if (hand[i].kind == DieKind.Spine) spine += values[i] * 2;
             if (spine > 0) { run.hp -= spine; if (run.hp <= 0) { result.won = false; return result; } }
 
-            int dmg = Damage(hand, values, run.FigureCount);
+            int dmg = Damage(hand, values, run.FigureCount, enemyHp);
             enemyHp -= dmg;
+            for (int i = 0; i < hand.Count; i++)
+            {
+                if (hand[i].coating == "Gold") run.gold += values[i] * TurnCalculator.GoldPerPip;
+                if (hand[i].stamp == "Diamond") run.gold += values[i] * TurnCalculator.DiamondGoldPerPip;
+                if (hand[i].stamp == "Heart") shield += TurnCalculator.HeartShield;
+            }
             discard.AddRange(hand);
             if (enemyHp <= 0) { result.won = true; return result; }
 
@@ -459,7 +510,9 @@ public static class BalanceSimulator
             turnLeft--;
             if (turnLeft <= 0)
             {
-                run.hp -= atk;
+                int blocked = Math.Min(shield, atk);
+                shield -= blocked;
+                run.hp -= atk - blocked;
                 result.hits++;
                 turnLeft = maxTurn;
                 if (run.hp <= 0) { result.won = false; return result; }
@@ -469,17 +522,41 @@ public static class BalanceSimulator
         return result;
     }
 
-    static int Damage(List<Die> hand, int[] values, int figures)
+    // TurnCalculator 와 같은 순서: (눈 합 + 얼음·스페이드 칩) x (족보 + 피규어 + 프리즘 배수) x 저주, 이어서 스페이드 미사용 눈·어둠 피해를 더한다.
+    static int Damage(List<Die> hand, int[] values, int figures, int enemyHp)
     {
-        int sum = 0;
-        float curse = 1f;
+        int chips = 0, flat = 0, darkCount = 0;
+        float curse = 1f, prism = 0f;
+        float handMult = HandMultiplier(values);
+        bool straight = handMult == HandMult[6];
         for (int i = 0; i < values.Length; i++)
         {
-            sum += values[i];
+            chips += values[i];
             if (hand[i].kind == DieKind.Curse) curse *= Mathf.Clamp01(1f - values[i] * 0.05f);
+            switch (hand[i].coating)
+            {
+                case "Prism": prism += PrismMultBonus; break;
+                case "Ice": chips += 10; break;
+                case "Dark": darkCount++; break;
+            }
+            if (hand[i].stamp == "Spade")
+            {
+                bool used = straight || CountOf(values, values[i]) >= 2;
+                if (used) chips += TurnCalculator.SpadeChips; else flat += Mathf.Max(0, values[i]);
+            }
         }
-        float mult = (HandMultiplier(values) + figures * FigureMultBonus) * curse;
-        return Mathf.FloorToInt(sum * mult);
+        float mult = (handMult + figures * FigureMultBonus + prism) * curse;
+        int damage = Mathf.FloorToInt(chips * mult) + flat;
+        int hp = enemyHp;
+        for (int i = 0; i < darkCount; i++) { int drop = Mathf.FloorToInt(hp * 0.1f); damage += drop; hp -= drop; }
+        return damage;
+    }
+
+    static int CountOf(int[] values, int v)
+    {
+        int c = 0;
+        foreach (int x in values) if (x == v) c++;
+        return c;
     }
 
     // TurnCalculator.CalculateHand 와 같은 판정. 눈은 0~6 이라 배열로 센다.
@@ -516,11 +593,11 @@ public static class BalanceSimulator
 
     // 봇: 남길 주사위 조합마다 다시 굴린 결과의 기대 피해를 몬테카를로로 재고, 기대 피해가 가장 큰 조합을 고른다.
     const int Samples = 24;
-    static int BestRerollMask(List<Die> hand, int[] values, int figures, System.Random rng)
+    static int BestRerollMask(List<Die> hand, int[] values, int figures, int enemyHp, System.Random rng)
     {
         int n = hand.Count;
         int bestMask = 0;
-        float bestValue = Damage(hand, values, figures);
+        float bestValue = Damage(hand, values, figures, enemyHp);
         int[] trial = new int[n];
         for (int mask = 1; mask < (1 << n); mask++)
         {
@@ -529,7 +606,7 @@ public static class BalanceSimulator
             {
                 for (int i = 0; i < n; i++)
                     trial[i] = (mask & (1 << i)) != 0 ? hand[i].faces[rng.Next(6)] : values[i];
-                total += Damage(hand, trial, figures);
+                total += Damage(hand, trial, figures, enemyHp);
             }
             float avg = total / Samples;
             if (avg > bestValue + 0.01f) { bestValue = avg; bestMask = mask; }
@@ -595,7 +672,15 @@ public static class BalanceSimulator
         sb.AppendLine($"| 숲 엘리트 평균 턴 | 4~5 | {fe:F2} (n={s.forestEliteTurns.Count}) | {Check(fe, 4f, 5f)} |");
         sb.AppendLine($"| 숲 보스 도착 시 남은 체력 | 40~55% | {arrival:F1}% (n={s.forestBossArrivalHpPct.Count}) | {Check(arrival, 40f, 55f)} |");
         sb.AppendLine($"| 숲 탈락률 | 35~45% | {forestDeath:F1}% | {Check(forestDeath, 35f, 45f)} |");
-        sb.AppendLine($"| 두 번째 바이옴 보스 처치율 | 20~30% | {secondKill:F1}% | {Check(secondKill, 20f, 30f)} |");
+        if (w.biomeCount > 2)
+        {
+            // 데모가 3바이옴 이상이면 마지막 보스를 데모 클리어 목표로 보고, 두 번째 보스는 중간 목표로 둔다.
+            float demoClear = 100f * s.tierCleared[w.biomeCount - 1] / runs;
+            sb.AppendLine($"| 두 번째 바이옴 보스 처치율 | 35~45% | {secondKill:F1}% | {Check(secondKill, 35f, 45f)} |");
+            sb.AppendLine($"| 데모 클리어({w.biomeCount}번째 보스) 처치율 | 20~30% | {demoClear:F1}% | {Check(demoClear, 20f, 30f)} |");
+        }
+        else
+            sb.AppendLine($"| 두 번째 바이옴 보스 처치율 | 20~30% | {secondKill:F1}% | {Check(secondKill, 20f, 30f)} |");
         sb.AppendLine($"| 첫 상점 도착 골드 | 350~450 | {shop:F0} (n={s.firstShopGold.Count}) | {Check(shop, 350f, 450f)} |");
         sb.AppendLine();
         sb.AppendLine("## 참고 지표");
@@ -621,9 +706,19 @@ public static class BalanceSimulator
         foreach (var kv in s.deathCause.OrderByDescending(k => k.Value))
             sb.AppendLine($"| {kv.Key} | {kv.Value} |");
         sb.AppendLine();
+        if (w.biomeCount > 2)
+        {
+            sb.AppendLine($"## 바이옴 단계별 생존 ({w.biomeCount}개까지)");
+            sb.AppendLine();
+            sb.AppendLine("| 단계 | 도착 | 보스 처치 | 처치율(전체 대비) | 도착 시 체력 | 보스 도착 시 체력 |");
+            sb.AppendLine("|---|---|---|---|---|---|");
+            for (int i = 0; i < w.biomeCount; i++)
+                sb.AppendLine($"| {i + 1} | {s.tierReached[i]} | {s.tierCleared[i]} | {100f * s.tierCleared[i] / runs:F1}% | {Avg(s.tierArrivalHp[i]):F0}% | {Avg(s.tierBossArrivalHp[i]):F0}% |");
+            sb.AppendLine();
+        }
         sb.AppendLine("## 사용한 설정");
         sb.AppendLine();
-        sb.AppendLine($"- 플레이어 체력 {c.playerMaxHP}, 시작 골드 {c.startGold}, 굴리기 {c.maxRerolls}, 휴식 {c.restHealPercent}%");
+        sb.AppendLine($"- 플레이어 체력 {c.playerMaxHP}, 시작 골드 {c.startGold}, 굴리기 {c.maxRerolls}, 휴식 {c.restHealPercent}%, 바이옴 클리어 회복 {c.biomeClearHealPercent}%");
         sb.AppendLine($"- 공격 턴 일반 {c.normalAttackTurn} / 엘리트 {c.eliteAttackTurn} / 보스 {c.bossAttackTurn} (체력 {c.bossPhase2HpRatio:P0} 이하 {c.bossPhase2AttackTurn})");
         sb.AppendLine($"- tierHp [{string.Join(", ", c.tierHp)}], tierAtk [{string.Join(", ", c.tierAtk)}], 전투당 체력 +{c.hpPerNodeInBiome:P0}, 공격력 +1 / {c.nodesPerAtkStep}전투");
         sb.AppendLine($"- 몬스터 골드 x{c.monsterGoldMultiplier}, 바이옴 클리어 {c.biomeClearBonusGold}, 여정 골드 눈당 {c.journeyGoldPerPip}");
@@ -632,8 +727,8 @@ public static class BalanceSimulator
         sb.AppendLine("## 봇 규칙과 단순화");
         sb.AppendLine();
         sb.AppendLine("- 주사위: 매 턴 덱(기본 11 + 여정 1 + 디버프)에서 5개를 뽑고, 굴리기마다 남길 조합 32가지의 기대 피해를 24회 몬테카를로로 재서 가장 큰 쪽을 고른다.");
-        sb.AppendLine("- 상점: 진열된 피규어 중 살 수 있는 가장 비싼 것부터 산다. 주사위·스낵·코팅 등은 사지 않고, 리롤도 하지 않는다.");
-        sb.AppendLine($"- 피규어 효과는 1개당 족보 배수 +{FigureMultBonus} 로 근사한다. 스낵·코팅·스탬프·위성·조우 이벤트 효과는 없다.");
+        sb.AppendLine($"- 상점: 진열 칸 하나는 x{w.cfg.shopSaleMultiplier} 세일. 피규어를 살 수 있는 가장 비싼 것부터 사고, 남은 골드로 코팅·스탬프를 비싼 것부터 사서 강화 안 된 기본 주사위에 붙인다. 주사위·스낵·위성은 사지 않고 리롤도 안 한다.");
+        sb.AppendLine($"- 피규어 효과는 1개당 족보 배수 +{FigureMultBonus} 로 근사한다. 코팅(프리즘 +{PrismMultBonus} 배수, 얼음 +10 칩, 황금 골드, 어둠 10% 피해)과 스탬프(스페이드 칩/피해, 하트 보호막, 다이아 골드)는 실제 수치로 넣었고, 클로버·시너지·스낵·위성·조우 이벤트 효과는 없다.");
         sb.AppendLine("- 지도: 실제 MapGenerator 로 만든 지도에서 여정 주사위를 굴려 갈 수 있는 가장 먼 칸 중 하나로 이동한다. 휴식 칸에서는 항상 회복한다.");
         sb.AppendLine("- 디버프: 엘리트 도둑·족쇄 3개(임시), 차원문 가시·저주 1개, 보스 가짜 1개(영구)를 실제 규칙대로 덱에 넣는다.");
         sb.AppendLine("- 차원문 전투는 다른 바이옴 몬스터라 턴·피격 지표에서 뺐다(탈락에는 포함).");

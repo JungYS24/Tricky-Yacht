@@ -14,6 +14,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     float iconSize = ItemIconSize; // 상인 상점은 카드 그림에 맞춰 바꾼다 (SetIconSize)
     static readonly Color PriceColor = Color.white;
     static readonly Color FreePriceColor = Color.yellow;
+    static readonly Color SalePriceColor = new Color(0.45f, 1f, 0.45f, 1f);
 
     // [자물쇠 아이콘
     [Header("잠금 UI")]
@@ -29,6 +30,16 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     [Header("상점 가격 배율")]
     [SerializeField] private float shopPriceMultiplier = 1f;
+
+    // 상점 방문마다 한 칸에만 붙는 세일 배율. 시너지 할인(shopPriceMultiplier)과 따로 곱한다.
+    float saleMultiplier = 1f;
+    public bool IsOnSale => saleMultiplier < 1f;
+
+    public void SetSale(float multiplier)
+    {
+        saleMultiplier = float.IsNaN(multiplier) || multiplier <= 0f ? 1f : Mathf.Min(1f, multiplier);
+        RefreshPriceDisplay();
+    }
 
     public float priceMultiplier
     {
@@ -47,14 +58,21 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if (priceText == null || currentData == null || isLocked || isPurchased) return;
         int price = GetFinalPrice();
         bool free = price <= 0;
+        if (!free && IsOnSale)
+        {
+            // 세일 칸: 원래 가격을 작게 긋고 할인 가격을 옆에 둔다.
+            int original = Mathf.Max(0, Mathf.FloorToInt(ListedUnitPrice() * shopPriceMultiplier));
+            SetPriceVisual($"<s><size=70%>{original}</size></s> {price}", false, SalePriceColor);
+            return;
+        }
         SetPriceVisual(free ? "0" : price.ToString(), free);
     }
 
-    void SetPriceVisual(string text, bool free)
+    void SetPriceVisual(string text, bool free, Color? color = null)
     {
         if (priceText == null) return;
         priceText.text = text;
-        priceText.color = free ? FreePriceColor : PriceColor;
+        priceText.color = color ?? (free ? FreePriceColor : PriceColor);
         LayoutPriceRow();
     }
 
@@ -234,7 +252,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
         //할인된 최종 가격을 계산해서 ShopManager에게 결제를 요청
         int actualPrice = GetFinalPrice();
-        bool usedDiscount = !manager.diceManager.isNextShopFree && !isLuckyCatFree && actualPrice < Mathf.FloorToInt(ListedUnitPrice() * shopPriceMultiplier);
+        bool usedDiscount = !manager.diceManager.isNextShopFree && !isLuckyCatFree && actualPrice < Mathf.FloorToInt(ListedUnitPrice() * shopPriceMultiplier * saleMultiplier);
         if (manager.PurchaseItem(currentData, actualPrice))
         {
             if (usedDiscount && currentData is CoatingItemSO) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.DiscountCoating);
@@ -261,6 +279,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         isPurchased = false;
         isAnimating = false;
         listedPrice = -1;
+        saleMultiplier = 1f;
 
         if (lockUI != null) lockUI.SetActive(true); // 자물쇠 아이콘 켜기
         if (itemIcon != null) itemIcon.color = Color.clear; // 아이템 아이콘 투명하게 숨김
@@ -296,7 +315,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if ((manager != null && manager.diceManager != null && manager.diceManager.isNextShopFree) || isLuckyCatFree) return 0;
 
         // 원본 SO 가격은 유지, 배율 적용 후 소수점 버림, 이어서 기존 피규어 할인을 적용
-        int price = Mathf.Max(0, Mathf.FloorToInt(ListedUnitPrice() * shopPriceMultiplier));
+        int price = Mathf.Max(0, Mathf.FloorToInt(ListedUnitPrice() * shopPriceMultiplier * saleMultiplier));
         // 코팅 및 위성 20% 할인 적용 (클래스 타입으로 안전하게 구분)
         if (currentData is CoatingItemSO)
         {   

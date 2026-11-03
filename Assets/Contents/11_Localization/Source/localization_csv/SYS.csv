@@ -3,3 +3,4 @@ SYS,SYS_GOLD_NOT_ENOUGH,골드가 부족합니다.,Not enough gold.,ゴールド
 SYS,SYS_INVENTORY_FULL,인벤토리가 가득 찼습니다.,Inventory is full.,インベントリが満杯です。,背包已满。,
 SYS,SYS_NO_EQUIPPABLE_DICE,장착 가능한 주사위가 없습니다.,No equippable dice available.,装着できるサイコロがありません。,没有可装备的骰子。,
 SYS,SYS_SELL_PRICE,판매: {0} G,Sell: {0} G,売却: {0} G,出售: {0} G,
+SYS,SYS_FIGURE_DROPPED,피규어 획득: {0},Figure obtained: {0},フィギュア獲得: {0},获得手办: {0},페퍼민트 없이 처치했을 때 피규어 드롭 토스트
