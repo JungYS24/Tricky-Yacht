@@ -267,6 +267,7 @@ public class DiceManager : MonoBehaviour
         // 주사위 상태 변경 이벤트 구독 연동
         Dice.OnDiceStateChanged += HandleDiceChanged;
 
+        maxRerolls = BalanceConfig.Current.maxRerolls;
         defaultMaxRerolls = maxRerolls;
         defaultHandMultipliers = new[] { multHighCard, multOnePair, multTwoPair, multTriple, multFullHouse, multFourOfAKind, multStraight, multYacht };
 
@@ -293,7 +294,10 @@ public class DiceManager : MonoBehaviour
         }
         else
         {
-            currentPlayerHP = playerMaxHP;
+            playerStatus.ResetStatus(StartingMaxHP);
+            if (shopManager != null) shopManager.currentGold = BalanceConfig.Current.startGold;
+            ui?.UpdateGoldUI(shopManager != null ? shopManager.currentGold : 0);
+            if (GoldCounter.Instance != null && shopManager != null) GoldCounter.Instance.SetInstant(shopManager.currentGold);
             deckManager.InitializeMasterDeck(JourneyDice.FindSource());
 
             // 첫 시작은 무조건 숲(Forest)으로 고정
@@ -989,7 +993,7 @@ public class DiceManager : MonoBehaviour
             return;
         }
 
-        int baseClearReward = 500;
+        int baseClearReward = GetClearRewardGold();
         baseClearReward = Mathf.FloorToInt(baseClearReward * combatWinGoldMultiplier); // 투탕카멘 2배 적용
         combatWinGoldMultiplier = 1.0f; // 초기화
 
@@ -1012,9 +1016,67 @@ public class DiceManager : MonoBehaviour
                 InventoryManager.Instance.AddItem(enemy.dropFigureData);
             }
         }
+        else if (RollNaturalFigureDrop())
+        {
+            InventoryManager.Instance.AddItem(enemy.dropFigureData);
+            ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_FIGURE_DROPPED", "피규어 획득: {0}", enemy.dropFigureData.itemName));
+        }
 
         Invoke(nameof(ShowClownEvent), 1.0f);
     }
+
+    // 처치 골드: 몬스터 dropGold x 배율. 보스는 바이옴 클리어 보상을 더한다. 튜토리얼 모드는 예전 고정값을 유지한다.
+    int GetClearRewardGold()
+    {
+        if (TutorialMode.Active) return 500;
+        BalanceConfig cfg = BalanceConfig.Current;
+        int gold = Mathf.FloorToInt(enemy.DropGold * cfg.monsterGoldMultiplier);
+        if (enemy.Grade == MonsterGrade.Boss) gold += cfg.biomeClearBonusGold;
+        return gold;
+    }
+
+    // 페퍼민트 없이 처치했을 때 등급별 확률로 드롭 피규어를 준다. 이미 가진 피규어는 주지 않는다.
+    bool RollNaturalFigureDrop()
+    {
+        if (TutorialMode.Active || enemy == null || enemy.dropFigureData == null) return false;
+        InventoryManager inventory = InventoryManager.Instance;
+        if (inventory == null || inventory.ownedFigures.Contains(enemy.dropFigureData)) return false;
+        float chance = BalanceConfig.Current.DropRateFor(enemy.Grade) + snackBonusFigureDropRate;
+        return UnityEngine.Random.value < chance;
+    }
+
+    // 몇 번째 바이옴인지(0부터). 지도 흐름이 아니면 스테이지 10개를 한 바이옴으로 본다.
+    public int CurrentBiomeTier => UsesMapFlow ? stageProgression.biomeIndex : Mathf.Max(0, (currentStage - 1) / 10);
+
+    // 이 바이옴에서 이미 치른 전투 수(지금 전투 제외). 지나친 노드는 싸우지 않았으므로 방문 기록만 센다.
+    public int CombatsClearedInBiome
+    {
+        get
+        {
+            if (!UsesMapFlow) return Mathf.Max(0, (currentStage - 1) % 10);
+            int count = 0;
+            List<int> visited = stageProgression.visitedNodeIds;
+            if (visited == null) return 0;
+            for (int i = 0; i < visited.Count; i++)
+            {
+                int id = visited[i];
+                if (id == stageProgression.currentNodeId) continue;
+                MapNode node = stageProgression.FindNode(id);
+                if (node != null && IsCombatNode(node.type)) count++;
+            }
+            return count;
+        }
+    }
+
+    static bool IsCombatNode(MapNodeType type)
+    {
+        return type == MapNodeType.Enemy || type == MapNodeType.Elite || type == MapNodeType.Portal || type == MapNodeType.Boss;
+    }
+
+    // 캐릭터 선택에서 고른 시작 체력. 고르지 않고 들어왔으면 기본 최대 체력.
+    public static int StartingMaxHP => CharacterStatus.Selected != null && CharacterStatus.Selected.HP > 0
+        ? CharacterStatus.Selected.HP
+        : BalanceConfig.Current.playerMaxHP;
 
     public void ShowClownEvent()
     {
@@ -1265,7 +1327,7 @@ public class DiceManager : MonoBehaviour
         pendingDrawTriggers.Clear(); // 골드는 아래에서 초기값으로 다시 맞춘다
 
         // 낡은 변수 대신 우리가 만든 상태 초기화 함수를 씀
-        playerStatus.ResetStatus(100);
+        playerStatus.ResetStatus(StartingMaxHP);
 
         //덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 11개 + 여정 주사위 1개로)
         deckManager.InitializeMasterDeck(JourneyDice.FindSource());
@@ -1273,7 +1335,7 @@ public class DiceManager : MonoBehaviour
         //골드 초기화 (ShopManager 참조)
         if (shopManager != null)
         {
-            shopManager.currentGold = 50000; // 초기 소지금
+            shopManager.currentGold = BalanceConfig.Current.startGold; // 초기 소지금
             ui?.UpdateGoldUI(shopManager.currentGold);
             // 재시작 및 메인 이동 시 초기 소지금 카운팅 연출 실행 (또는 초기화용)
             if (GoldCounter.Instance != null) GoldCounter.Instance.SetInstant(shopManager.currentGold);
@@ -1459,7 +1521,7 @@ public class DiceManager : MonoBehaviour
                 break;
             case SpecialDieEffect.Coin:
                 result.outcome = JourneyOutcome.Gold;
-                int goldPerPip = table != null ? table.Config.JourneyMapGoldPerPip : 10;
+                int goldPerPip = BalanceConfig.Current.journeyGoldPerPip;
                 result.amount = Mathf.Max(0, mapPips * goldPerPip);
                 break;
             default:

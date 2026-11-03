@@ -22,6 +22,7 @@ public class MonsterDataSO : ScriptableObject
     public RuntimeAnimatorController animatorController;
 
     [Header("Monster Stats")]
+    public MonsterGrade monsterGrade = MonsterGrade.Normal;
     public int maxHp;
     public int baseAtk;
     public float evasionRate;

@@ -40,15 +40,6 @@ public class MonsterDataSyncWindow : EditorWindow
         {
             if (!block.Contains("\"monsterName\"")) continue;
 
-            int idStartIndex = block.IndexOf("\"");
-            if (idStartIndex == -1) continue;
-            if (block.Trim().StartsWith("{"))
-            {
-                idStartIndex = block.IndexOf("\"", block.IndexOf("{") + 1);
-            }
-            int idEndIndex = block.IndexOf("\"", idStartIndex + 1);
-            string currentID = block.Substring(idStartIndex + 1, idEndIndex - idStartIndex - 1).Trim();
-
             int contentStartIndex = block.IndexOf("{");
             if (contentStartIndex == -1) continue;
             string pureJson = block.Substring(contentStartIndex).Trim();
@@ -66,7 +57,9 @@ public class MonsterDataSyncWindow : EditorWindow
                 continue;
             }
 
-            if (data == null) continue;
+            if (data == null || string.IsNullOrEmpty(data.monsterId)) continue;
+            // 예전에는 첫 번째 따옴표 문자열(키 이름 "monsterId")을 ID로 읽어 monsterId.asset 하나만 덮어썼다.
+            string currentID = data.monsterId.Trim();
 
             string mainBiome = data.biomeType.Contains(",")
                 ? data.biomeType.Split(',')[0].Trim()
@@ -98,6 +91,7 @@ public class MonsterDataSyncWindow : EditorWindow
             // --- 데이터 직렬화 바인딩 ---
             asset.monsterID = currentID;
             asset.monsterName = data.monsterName;
+            asset.monsterGrade = ParseGrade(data.monsterType);
             asset.maxHp = data.maxHp;
             asset.baseAtk = data.baseAtk;
             asset.evasionRate = data.evasionRate;
@@ -106,7 +100,8 @@ public class MonsterDataSyncWindow : EditorWindow
             asset.description = data.description;
 
             // 제이슨의 드롭 피규어 ID 텍스트 문자열을 기반으로 프로젝트 내 실제 FigureItemSO 파일을 자동 검색
-            asset.dropFigureData = FindFigureAsset(data.dropFigureId);
+            FigureItemSO dropFigure = FindFigureAsset(data.dropFigureId);
+            if (dropFigure != null || string.IsNullOrEmpty(data.dropFigureId)) asset.dropFigureData = dropFigure;
 
             // 비주얼 리소스 폴더 구조화 경로 추적
             string monsterFolderPath = $"Assets/Contents/02_Sprites/01_Characters/{biomeFolder}/{currentID}";
@@ -118,8 +113,11 @@ public class MonsterDataSyncWindow : EditorWindow
 
             string animAssetPath = $"{monsterFolderPath}/{data.monsterAnimator}.controller";
 
-            asset.monsterSprite = AssetDatabase.LoadAssetAtPath<Sprite>(spriteAssetPath);
-            asset.animatorController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(animAssetPath);
+            // 손으로 연결한 리소스는 그대로 두고, 비어 있을 때만 경로 규칙으로 채운다.
+            if (asset.monsterSprite == null)
+                asset.monsterSprite = AssetDatabase.LoadAssetAtPath<Sprite>(spriteAssetPath);
+            if (asset.animatorController == null)
+                asset.animatorController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(animAssetPath);
 
             // 에셋 로드 디버깅 로그 시스템
             if (asset.monsterSprite == null)
@@ -145,6 +143,17 @@ public class MonsterDataSyncWindow : EditorWindow
         AssetDatabase.Refresh();
 
         Debug.Log($"[Studio 10&6] 동기화 성공! {syncCount}개의 몬스터 SO가 폴더별로 자동 분류 생성되었습니다.");
+    }
+
+    private static MonsterGrade ParseGrade(string monsterType)
+    {
+        if (string.IsNullOrEmpty(monsterType)) return MonsterGrade.Normal;
+        switch (monsterType.Trim())
+        {
+            case "Boss": return MonsterGrade.Boss;
+            case "Elite": return MonsterGrade.Elite;
+            default: return MonsterGrade.Normal;
+        }
     }
 
     private static FigureItemSO FindFigureAsset(string dropFigureId)
@@ -181,6 +190,7 @@ public class MonsterDataSyncWindow : EditorWindow
 [System.Serializable]
 public class JsonMonsterItem
 {
+    public string monsterId;
     public string monsterName;
     public string biomeType;
     public string monsterType;

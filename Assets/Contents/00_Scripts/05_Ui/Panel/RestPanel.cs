@@ -74,8 +74,7 @@ public class RestPanel : MonoBehaviour
             destroyDescText.text = LocalizationManager.GetUi("UI_REST_DESTROY_DESC", "Remove a Die");
         if (healDescText != null)
         {
-            MapTableData table = diceManager != null ? diceManager.GetMapTable() : null;
-            int percent = table != null ? table.Config.RestHealPercent : 30;
+            int percent = BalanceConfig.Current.restHealPercent;
             string template = LocalizationManager.GetUi("UI_REST_HEAL_DESC", "Recover HP (+{0}%)");
             try
             {
@@ -91,8 +90,7 @@ public class RestPanel : MonoBehaviour
     void OnHeal()
     {
         if (diceManager == null) return;
-        MapTableData table = diceManager.GetMapTable();
-        int percent = table != null ? table.Config.RestHealPercent : 30;
+        int percent = BalanceConfig.Current.restHealPercent;
         int amount = Mathf.FloorToInt(diceManager.playerMaxHP * (percent / 100f));
         diceManager.playerStatus.Heal(amount);
         diceManager.ui?.UpdateShieldUI(diceManager.currentShield);

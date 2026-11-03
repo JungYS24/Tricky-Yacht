@@ -73,13 +73,11 @@ public class MapConfig
     public int ShortcutMaxSkip = 3;
     public float DetourEnemyRatio = 0.2f;
     public int MaxGenAttempts = 100;
-    public int RestHealPercent = 30;
     public bool PostBattleShop;
     public int BiomeCountToVoid = 10;
     public bool ShopRowForceStop = true;
     public int JourneyDamageMinHp = 1;
     public float JourneyRollSeconds = 0.5f;
-    public int JourneyMapGoldPerPip = 10; // 지도에서 코인 면이 나왔을 때 눈 1개당 골드
     public int StagesPerBiome = 10;       // 바이옴 하나가 차지하는 스테이지 번호 폭(마지막 번호는 보스)
 }
 
@@ -128,8 +126,8 @@ public class MapTableData
         {
             "Min_Enemy_Count", "Max_Path_Length", "Grid_Width", "Lane_Count", "Start_Columns", "Shop_Row",
             "Skip_Chance", "Shortcut_Max_Skip", "Detour_Enemy_Ratio", "Max_Gen_Attempts",
-            "Rest_Heal_Percent", "Post_Battle_Shop", "Biome_Count_To_Void",
-            "Shop_Row_Force_Stop", "Journey_Damage_Min_Hp", "Journey_Roll_Seconds", "Journey_Map_Gold_Per_Pip",
+            "Post_Battle_Shop", "Biome_Count_To_Void",
+            "Shop_Row_Force_Stop", "Journey_Damage_Min_Hp", "Journey_Roll_Seconds",
             "Stages_Per_Biome"
         };
         foreach (string key in required)
@@ -153,13 +151,11 @@ public class MapTableData
             case "Shortcut_Max_Skip": Config.ShortcutMaxSkip = ParseInt(entry.Value, Config.ShortcutMaxSkip); break;
             case "Detour_Enemy_Ratio": Config.DetourEnemyRatio = ParseFloat(entry.Value, Config.DetourEnemyRatio); break;
             case "Max_Gen_Attempts": Config.MaxGenAttempts = ParseInt(entry.Value, Config.MaxGenAttempts); break;
-            case "Rest_Heal_Percent": Config.RestHealPercent = ParseInt(entry.Value, Config.RestHealPercent); break;
             case "Post_Battle_Shop": Config.PostBattleShop = ParseBool(entry.Value); break;
             case "Biome_Count_To_Void": Config.BiomeCountToVoid = ParseInt(entry.Value, Config.BiomeCountToVoid); break;
             case "Shop_Row_Force_Stop": Config.ShopRowForceStop = ParseBool(entry.Value); break;
             case "Journey_Damage_Min_Hp": Config.JourneyDamageMinHp = ParseInt(entry.Value, Config.JourneyDamageMinHp); break;
             case "Journey_Roll_Seconds": Config.JourneyRollSeconds = ParseFloat(entry.Value, Config.JourneyRollSeconds); break;
-            case "Journey_Map_Gold_Per_Pip": Config.JourneyMapGoldPerPip = ParseInt(entry.Value, Config.JourneyMapGoldPerPip); break;
             case "Stages_Per_Biome": Config.StagesPerBiome = Mathf.Max(3, ParseInt(entry.Value, Config.StagesPerBiome)); break;
         }
     }

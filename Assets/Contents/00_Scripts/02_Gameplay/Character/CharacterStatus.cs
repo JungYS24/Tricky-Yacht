@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class CharacterStatus
 {
+    // 캐릭터 선택에서 고른 캐릭터. 메인 씬에서 시작 체력을 정할 때 읽는다.
+    public static CharacterStatus Selected { get; set; }
+
     public string CharacterName { get; private set; }
 
     public int HP { get; private set; }

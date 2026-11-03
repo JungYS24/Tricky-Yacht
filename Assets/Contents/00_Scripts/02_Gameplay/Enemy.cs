@@ -70,6 +70,14 @@ public class Enemy : MonoBehaviour
     public int MaxAttackTurn { get; private set; }
     public int CurrentAttackTurn { get; private set; }
 
+    // 예전 세이브·튜토리얼에서 쓰던 고정 공격 턴
+    const int LegacyAttackTurn = 2;
+
+    public MonsterGrade Grade { get; private set; } = MonsterGrade.Normal;
+    public int DropGold { get; private set; }
+    // 보스 체력이 일정 비율 이하로 내려가 공격 턴이 줄어든 상태
+    public bool IsBossPhase2 { get; private set; }
+
     private Material monsterRuntimeMat;
     private Vector3 originalScale;
     private Vector3 originalPosition;
@@ -172,11 +180,11 @@ public class Enemy : MonoBehaviour
             {
                 nextMonsterData = currentBiome.bossMonster;
             }
-            //그 외의 일반 스테이지는 기존처럼 리스트에서 랜덤 출현
+            //그 외의 일반 스테이지는 리스트에서 등급에 맞는 몬스터를 랜덤 출현
             else if (currentBiome.biomeMonsters != null && currentBiome.biomeMonsters.Count > 0)
             {
-                int randomIndex = UnityEngine.Random.Range(0, currentBiome.biomeMonsters.Count);
-                nextMonsterData = currentBiome.biomeMonsters[randomIndex];
+                bool elite = dice != null && dice.UsesMapFlow && dice.isEliteBattle;
+                nextMonsterData = PickBiomeMonster(currentBiome.biomeMonsters, elite);
             }
         }
 
@@ -200,6 +208,7 @@ public class Enemy : MonoBehaviour
 
             dropFigureData = nextMonsterData.dropFigureData;
             baseDropRate = nextMonsterData.dropRate;
+            DropGold = nextMonsterData.dropGold;
 
             if (dropFigureData != null && CollectionDataManager.Instance != null)
                 CollectionDataManager.Instance.EncounterFigure(dropFigureData);
@@ -209,9 +218,25 @@ public class Enemy : MonoBehaviour
 
             currentMonsterIndex++;
         }
-        //스테이지당 몬스터 배수 설정
-        float hpMultiplier = Mathf.Pow(1.05f, currentStage - 1);
-        finalMaxHP = Mathf.RoundToInt(finalMaxHP * hpMultiplier);
+        else DropGold = 0;
+        Grade = ResolveGrade(nextMonsterData);
+
+        // 바이옴 단계 + 바이옴 안 전투 수로 성장 (BalanceConfig.useLegacyGrowth 면 예전 스테이지 공식)
+        // 튜토리얼 모드는 예전 공식을 그대로 쓴다.
+        BalanceConfig cfg = BalanceConfig.Current;
+        bool legacy = cfg.useLegacyGrowth || TutorialMode.Active || dice == null;
+        int biomeTier = dice != null ? dice.CurrentBiomeTier : 0;
+        int nodeInBiome = dice != null ? dice.CombatsClearedInBiome : 0;
+        if (legacy)
+        {
+            finalMaxHP = Mathf.RoundToInt(finalMaxHP * Mathf.Pow(cfg.legacyHpGrowth, currentStage - 1));
+            finalAttack += currentStage / 2;
+        }
+        else
+        {
+            finalMaxHP = cfg.ScaleHp(finalMaxHP, biomeTier, nodeInBiome, currentStage);
+            finalAttack = cfg.ScaleAtk(finalAttack, biomeTier, nodeInBiome, currentStage);
+        }
 
         //(눈먼 점술가 패널티 적용)
         if (DiceManager.Instance != null && DiceManager.Instance.isNextEnemyHPBoosted)
@@ -219,9 +244,6 @@ public class Enemy : MonoBehaviour
             finalMaxHP *= 2; // 적 체력을 2배(100% 증가)로 만듬
             DiceManager.Instance.isNextEnemyHPBoosted = false; // 적용했으니 스위치를 다시 끔
         }
-
-        //2스테이지당 몬스터 공격력 1 증가 (2스테이지=+1, 4스테이지=+2 ...)
-        finalAttack += (currentStage / 2);
 
         // 튜토리얼 모드에서는 한 턴에 잡힐 정도로 체력을 낮춥니다.
         if (TutorialMode.Active) finalMaxHP = Mathf.Min(finalMaxHP, TutorialMode.MonsterHp);
@@ -233,7 +255,8 @@ public class Enemy : MonoBehaviour
         IsDead = false;
         useExternalDeathSequence = false;
 
-        MaxAttackTurn = 2;
+        MaxAttackTurn = TutorialMode.Active ? LegacyAttackTurn : cfg.AttackTurnFor(Grade);
+        IsBossPhase2 = false;
         CurrentAttackTurn = MaxAttackTurn;
         UpdateTurnUI();
 
@@ -295,6 +318,7 @@ public class Enemy : MonoBehaviour
         int previousHP = CurrentHP;
         int actualDamage = Mathf.Min(CurrentHP, damage);
         CurrentHP -= actualDamage;
+        CheckBossPhase2();
 
         // 사망 콜백 전에 지급해야 마지막 공격의 효과도 적용됨
         DiceManager dm = DiceManager.Instance;
@@ -602,6 +626,8 @@ public class Enemy : MonoBehaviour
 
         dropFigureData = monsterData.dropFigureData;
         baseDropRate = monsterData.dropRate;
+        DropGold = monsterData.dropGold;
+        Grade = ResolveGrade(monsterData);
 
         if (dropFigureData != null && CollectionDataManager.Instance != null)
             CollectionDataManager.Instance.EncounterFigure(dropFigureData);
@@ -612,9 +638,14 @@ public class Enemy : MonoBehaviour
         IsDead = false;
         useExternalDeathSequence = false;
 
-        //세이브 파일에 턴이 없으면(옛날 세이브면) 기본 2로 복구
-        MaxAttackTurn = maxTurn > 0 ? maxTurn : 2;
-        CurrentAttackTurn = currentTurn > 0 ? currentTurn : 2;
+        //세이브 파일에 턴이 없으면(옛날 세이브면) 등급 기본값으로 복구
+        int defaultTurn = TutorialMode.Active ? LegacyAttackTurn : BalanceConfig.Current.AttackTurnFor(Grade);
+        MaxAttackTurn = maxTurn > 0 ? maxTurn : defaultTurn;
+        CurrentAttackTurn = currentTurn > 0 ? Mathf.Min(currentTurn, MaxAttackTurn) : MaxAttackTurn;
+        // 2페이즈 중에 저장했으면 줄어든 턴이 그대로 저장되어 있다. 1페이즈 세이브라도 체력 조건을 다시 확인한다.
+        IsBossPhase2 = false;
+        CheckBossPhase2();
+        UpdateTurnUI();
 
         transform.position = originalPosition;
         transform.localScale = originalScale;
@@ -653,6 +684,7 @@ public class Enemy : MonoBehaviour
         // 최대 체력 감소만으로 적이 죽지는 않도록 최소 1 유지
         MaxHP = Mathf.Max(1, MaxHP - amount);
         CurrentHP = Mathf.Min(CurrentHP, MaxHP);
+        CheckBossPhase2();
 
         // 이전 체력바 애니메이션이 새 값을 덮어쓰지 않도록 중단
         if (hpCoroutine != null)
@@ -662,6 +694,57 @@ public class Enemy : MonoBehaviour
         }
 
         UpdateHPBar(true);
+    }
+
+    // 지도의 엘리트 노드는 엘리트 등급만, 일반 전투는 일반 등급만 뽑는다.
+    // 바이옴 목록에 해당 등급이 없으면 엘리트는 체력이 가장 높은 몬스터, 일반은 목록 전체에서 뽑는다.
+    static MonsterDataSO PickBiomeMonster(List<MonsterDataSO> monsters, bool elite)
+    {
+        MonsterGrade wanted = elite ? MonsterGrade.Elite : MonsterGrade.Normal;
+        var pool = new List<MonsterDataSO>();
+        foreach (MonsterDataSO m in monsters)
+            if (m != null && m.monsterGrade == wanted) pool.Add(m);
+        if (pool.Count > 0) return pool[UnityEngine.Random.Range(0, pool.Count)];
+
+        if (elite)
+        {
+            MonsterDataSO strongest = null;
+            foreach (MonsterDataSO m in monsters)
+                if (m != null && (strongest == null || m.maxHp > strongest.maxHp)) strongest = m;
+            if (strongest != null) return strongest;
+        }
+        return monsters[UnityEngine.Random.Range(0, monsters.Count)];
+    }
+
+    // 지도 노드가 보스·엘리트면 그 등급을, 아니면(일반·차원문·조우) 몬스터 데이터의 등급을 쓴다.
+    static MonsterGrade ResolveGrade(MonsterDataSO data)
+    {
+        DiceManager dice = DiceManager.Instance;
+        if (dice != null && dice.UsesMapFlow)
+        {
+            MapNode node = dice.stageProgression.FindNode(dice.stageProgression.currentNodeId);
+            if (node != null && node.type == MapNodeType.Boss) return MonsterGrade.Boss;
+            if (node != null && node.type == MapNodeType.Elite) return MonsterGrade.Elite;
+        }
+        return data != null ? data.monsterGrade : MonsterGrade.Normal;
+    }
+
+    // 보스 체력이 기준 비율 이하가 되면 공격 턴을 줄인다. 남은 턴이 새 최대치보다 많으면 함께 줄인다.
+    void CheckBossPhase2()
+    {
+        if (IsBossPhase2 || Grade != MonsterGrade.Boss || IsDead || CurrentHP <= 0 || TutorialMode.Active) return;
+        BalanceConfig cfg = BalanceConfig.Current;
+        if (CurrentHP > MaxHP * cfg.bossPhase2HpRatio) return;
+
+        IsBossPhase2 = true;
+        MaxAttackTurn = Mathf.Max(1, Mathf.Min(MaxAttackTurn, cfg.bossPhase2AttackTurn));
+        CurrentAttackTurn = Mathf.Min(CurrentAttackTurn, MaxAttackTurn);
+        UpdateTurnUI();
+        if (turnText != null)
+        {
+            turnText.transform.DOKill(true);
+            turnText.transform.DOPunchScale(Vector3.one * 0.4f, 0.4f, 6, 0.6f);
+        }
     }
 
     public void DecreaseTurn()

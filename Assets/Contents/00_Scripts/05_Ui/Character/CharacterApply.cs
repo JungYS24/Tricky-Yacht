@@ -67,7 +67,7 @@ public class CharacterApply : MonoBehaviour
     {
         if (apply)
         {
-            CharacterStatus status = new(data.CharacterName, data.InitialHP, data.DedicateDiceData, data.DedicateFigureData);
+            CharacterStatus.Selected = new(data.CharacterName, data.InitialHP, data.DedicateDiceData, data.DedicateFigureData);
             SceneManager.LoadScene("MainScene_Map");
         }
         else

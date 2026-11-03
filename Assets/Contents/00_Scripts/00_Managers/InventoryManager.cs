@@ -210,7 +210,7 @@ public class InventoryManager : MonoBehaviour
     {
         targetSellSlot = slot;
 
-        int sellPrice = Mathf.FloorToInt(slot.currentItem.price * 0.5f);
+        int sellPrice = Mathf.FloorToInt(slot.currentItem.price * BalanceConfig.Current.sellRatio);
         if (sellPriceText != null) sellPriceText.text = LocalizationManager.GetSys("SYS_SELL_PRICE", "판매: {0} G", sellPrice);
 
         if (sellPopupRoot != null)
@@ -272,7 +272,7 @@ public class InventoryManager : MonoBehaviour
     {
         if (targetSellSlot == null || targetSellSlot.isEmpty) return;
 
-        int sellPrice = Mathf.FloorToInt(targetSellSlot.currentItem.price * 0.5f);
+        int sellPrice = Mathf.FloorToInt(targetSellSlot.currentItem.price * BalanceConfig.Current.sellRatio);
 
         if (diceManager != null && diceManager.shopManager != null)
         {

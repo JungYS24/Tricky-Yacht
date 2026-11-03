@@ -32,7 +32,11 @@ public class ShopManager : MonoBehaviour
     public Image rerollCostIcon;
     public Sprite coinIconSprite; // 리롤 비용 옆 코인 아이콘. 빌드에서도 보이도록 씬에서 연결한다. 코인 날아가기 연출도 이 스프라이트를 쓴다.
     public AudioEvent coinArriveSound; // 코인 날아가기 연출에서 코인이 골드 패널에 닿을 때 나는 소리(비워 두면 소리 없음)
-    public int rerollCost = 100;
+    // 상점 리롤 기본 비용. BalanceConfig 에서 받아 오고, 시너지 효과가 여기에 더한다.
+    [HideInInspector] public int rerollCost = 100;
+    // 이번 상점 방문에서 리롤한 횟수. 리롤할 때마다 비용이 BalanceConfig.rerollCostStep 만큼 오른다.
+    int rerollsThisVisit;
+    public int CurrentRerollCost => Mathf.Max(0, rerollCost + BalanceConfig.Current.rerollCostStep * rerollsThisVisit);
 
     [Header("주사위 선택창 리롤 (코팅·스탬프·위성·주사위 삭제)")]
     public int diceChoiceRerollCost = 200;
@@ -85,6 +89,7 @@ public class ShopManager : MonoBehaviour
         if (allItemsPool == null) allItemsPool = new List<BaseItemDataSO>();
         SnackItemSO.RegisterResourceSnacks(allItemsPool);
         BindShopStock();
+        rerollCost = BalanceConfig.Current.rerollBaseCost;
 
         if (shopRerollButton != null)
             shopRerollButton.onClick.AddListener(RerollShop);
@@ -121,6 +126,7 @@ public class ShopManager : MonoBehaviour
     {
         mapMerchantActive = fromMap;
         IsShopOpen = true;
+        rerollsThisVisit = 0;
         RevealShop();
         RemoveLegacyMerchantLabel();
 
@@ -541,7 +547,8 @@ public class ShopManager : MonoBehaviour
         if (currentGold >= finalCost)
         {
             currentGold -= finalCost;
-            if (finalCost < rerollCost) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.DiscountShopReroll);
+            if (finalCost < CurrentRerollCost) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.DiscountShopReroll);
+            rerollsThisVisit++;
             if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
             RefreshShop(true);
         }
@@ -783,7 +790,7 @@ public class ShopManager : MonoBehaviour
     public int GetFinalRerollCost()
     {
         int discount = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetShopDiscountRate(FigureEffectType.DiscountShopReroll) : 0;
-        int finalCost = Mathf.FloorToInt(rerollCost * (1f - discount / 100f));
+        int finalCost = Mathf.FloorToInt(CurrentRerollCost * (1f - discount / 100f));
         return Mathf.Max(0, finalCost);
     }
 
@@ -798,7 +805,7 @@ public class ShopManager : MonoBehaviour
         Color color = Color.white;
         if (currentGold < finalCost)
             color = new Color(1f, 0.32f, 0.28f, 1f);
-        else if (finalCost < rerollCost)
+        else if (finalCost < CurrentRerollCost)
             color = new Color(0.4f, 0.92f, 0.38f, 1f);
         rerollCostLabel.color = color;
         if (rerollCostIcon != null)

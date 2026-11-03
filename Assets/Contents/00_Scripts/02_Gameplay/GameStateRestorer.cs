@@ -32,7 +32,7 @@ public static class GameStateRestorer
         dm.stageBonusChips = data.stageBonusChips;
 
         //세이브에 값이 없으면 기본 100으로, 있으면 세이브된 값으로 덮어씌움
-        dm.playerMaxHP = data.playerMaxHP > 0 ? data.playerMaxHP : 100;
+        dm.playerMaxHP = data.playerMaxHP > 0 ? data.playerMaxHP : BalanceConfig.Current.playerMaxHP;
 
         //세이브 파일에서 보호막 불러오기 및 UI 갱신
         dm.currentShield = data.currentShield;
