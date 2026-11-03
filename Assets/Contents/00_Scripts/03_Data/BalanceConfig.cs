@@ -26,20 +26,20 @@ public class BalanceConfig : ScriptableObject
     [Header("몬스터 성장 (바이옴 단계 + 바이옴 안 전투 수)")]
     [Tooltip("켜면 예전 공식(체력 x1.05^(stage-1), 공격력 +stage/2)을 쓴다")]
     public bool useLegacyGrowth = false;
-    public float[] tierHp = { 1.0f, 1.6f, 2.4f, 3.4f };
-    public float[] tierAtk = { 1.0f, 1.4f, 1.9f, 2.5f };
+    public float[] tierHp = { 1.0f, 1.0f, 2.4f, 3.4f };
+    public float[] tierAtk = { 1.0f, 1.0f, 1.9f, 2.5f };
     [Tooltip("바이옴 안에서 이미 치른 전투 1회당 체력 증가율")]
-    public float hpPerNodeInBiome = 0.04f;
+    public float hpPerNodeInBiome = 0.032f;
     [Tooltip("바이옴 안 전투 이 횟수마다 공격력 +1")]
     public int nodesPerAtkStep = 6;
     public float legacyHpGrowth = 1.05f;
 
     [Header("골드")]
     [Tooltip("몬스터 dropGold 에 곱하는 배율")]
-    public float monsterGoldMultiplier = 1f;
+    public float monsterGoldMultiplier = 1.2f;
     [Tooltip("보스 처치 시 몬스터 골드와 별도로 주는 바이옴 클리어 보상")]
-    public int biomeClearBonusGold = 150;
-    public int journeyGoldPerPip = 5;
+    public int biomeClearBonusGold = 180;
+    public int journeyGoldPerPip = 6;
 
     [Header("상점")]
     public int rerollBaseCost = 50;
