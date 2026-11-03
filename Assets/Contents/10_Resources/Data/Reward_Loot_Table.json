@@ -727,11 +727,11 @@
       {
         "Stage_Min": 1,
         "Stage_Max": 25,
-        "Normal": 0.68,
-        "Rare": 0.24,
-        "Epic": 0.06,
-        "Legendary": 0.02,
-        "Note": "초반: 일반 위주, 레전드 2%"
+        "Normal": 0.74,
+        "Rare": 0.2,
+        "Epic": 0.05,
+        "Legendary": 0.01,
+        "Note": "초반: 일반 위주, 레전드 1%"
       },
       {
         "Stage_Min": 26,
@@ -767,8 +767,8 @@
         "Stage_Max": 25,
         "Normal": 0,
         "Rare": 0,
-        "Epic": 0.75,
-        "Legendary": 0.25
+        "Epic": 0.85,
+        "Legendary": 0.15
       },
       {
         "Stage_Min": 26,
