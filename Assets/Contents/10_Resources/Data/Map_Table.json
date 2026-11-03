@@ -61,12 +61,6 @@
       "Desc_KR": "검증 실패 시 재생성 최대 횟수"
     },
     {
-      "Key": "Rest_Heal_Percent",
-      "Value": "30",
-      "Value_Type": "int",
-      "Desc_KR": "휴식 노드 체력 회복량(최대 체력의 %)"
-    },
-    {
       "Key": "Post_Battle_Shop",
       "Value": "false",
       "Value_Type": "bool",
@@ -95,12 +89,6 @@
       "Value": "0.5",
       "Value_Type": "float",
       "Desc_KR": "여정 주사위가 멈추기 전에 면이 바뀌는 시간(초)"
-    },
-    {
-      "Key": "Journey_Map_Gold_Per_Pip",
-      "Value": "10",
-      "Value_Type": "int",
-      "Desc_KR": "지도에서 코인 면이 나왔을 때 눈 1개당 얻는 골드(기본 10이면 전투 코인과 같은 눈×10)"
     },
     {
       "Key": "Stages_Per_Biome",
@@ -225,8 +213,8 @@
       "Enemy_W": 50,
       "Encounter_W": 15,
       "Shop_W": 12,
-      "Elite_W": 10,
-      "Rest_W": 13
+      "Elite_W": 12,
+      "Rest_W": 11
     },
     {
       "Biome": "Meadow",
