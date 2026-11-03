@@ -21,7 +21,7 @@ public class BalanceConfig : ScriptableObject
     public int bossAttackTurn = 2;
     [Tooltip("보스 체력이 이 비율 이하가 되면 2페이즈")]
     [Range(0f, 1f)] public float bossPhase2HpRatio = 0.5f;
-    public int bossPhase2AttackTurn = 1;
+    public int bossPhase2AttackTurn = 2;
 
     [Header("몬스터 성장 (바이옴 단계 + 바이옴 안 전투 수)")]
     [Tooltip("켜면 예전 공식(체력 x1.05^(stage-1), 공격력 +stage/2)을 쓴다")]

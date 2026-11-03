@@ -737,10 +737,12 @@ public class Enemy : MonoBehaviour
         if (CurrentHP > MaxHP * cfg.bossPhase2HpRatio) return;
 
         IsBossPhase2 = true;
+        int previousMax = MaxAttackTurn;
         MaxAttackTurn = Mathf.Max(1, Mathf.Min(MaxAttackTurn, cfg.bossPhase2AttackTurn));
         CurrentAttackTurn = Mathf.Min(CurrentAttackTurn, MaxAttackTurn);
         UpdateTurnUI();
-        if (turnText != null)
+        // 2페이즈 턴이 1페이즈와 같으면(설정으로 끈 경우) 연출하지 않는다.
+        if (turnText != null && MaxAttackTurn < previousMax)
         {
             turnText.transform.DOKill(true);
             turnText.transform.DOPunchScale(Vector3.one * 0.4f, 0.4f, 6, 0.6f);
