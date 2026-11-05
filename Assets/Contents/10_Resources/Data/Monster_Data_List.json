@@ -1234,15 +1234,15 @@
     "monsterName": "데블 다이스",
     "biomeType": "Void",
     "monsterType": "Boss",
-    "maxHp": 666,
-    "baseAtk": 66,
+    "maxHp": 138,
+    "baseAtk": 10,
     "evasionRate": 0.5,
-    "dropGold": 9999,
+    "dropGold": 150,
     "monsterSprite": "DevilDice",
     "monsterAnimator": "AC_DevilDice",
-    "figureDropRate": 1,
+    "figureDropRate": 1.0,
     "dropFigureId": "Fig_Sarcophagus",
-    "description": "90스테이지의 끝, 비차원의 세계선에서 운명의 주사위를 조종하는 최종 신격입니다."
+    "description": "비차원의 세계선에서 운명의 주사위를 조종하는 최종 신격입니다."
   },
   {
     "monsterId": "Seahorse",

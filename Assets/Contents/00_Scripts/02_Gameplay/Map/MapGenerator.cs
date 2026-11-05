@@ -68,6 +68,7 @@ public static class MapGenerator
             var rng = new System.Random(seed + attempt);
             if (TryBuild(rng, biome, table, seed + attempt, out MapData map))
             {
+                ApplyBiomeRules(map, biomeIndex, biome);
                 result.map = map;
                 result.attemptsUsed = attempt + 1;
                 result.usedFallback = false;
@@ -77,9 +78,28 @@ public static class MapGenerator
 
         Debug.LogWarning($"[Map] 맵 생성을 {attempts}번 시도했지만 실패했습니다. 지름길만 있는 안전 맵을 사용합니다. runSeed={runSeed}, biome={biome}");
         result.map = BuildSafetyMap(seed, table);
+        ApplyBiomeRules(result.map, biomeIndex, biome);
         result.attemptsUsed = attempts;
         result.usedFallback = true;
         return result;
+    }
+
+    // 바이옴 단계별 노드 규칙. 첫 바이옴에는 엘리트가 없고, 비차원(Void)은 적·엘리트가 전부 차원문이다.
+    static void ApplyBiomeRules(MapData map, int biomeIndex, BiomeType biome)
+    {
+        if (map == null) return;
+        foreach (MapNode node in map.nodes)
+        {
+            if (biome == BiomeType.Void)
+            {
+                if (node.type == MapNodeType.Enemy || node.type == MapNodeType.Elite)
+                    node.type = MapNodeType.Portal;
+            }
+            else if (biomeIndex == 0 && node.type == MapNodeType.Elite)
+            {
+                node.type = MapNodeType.Enemy;
+            }
+        }
     }
 
     public static bool SameLayout(MapData a, MapData b)

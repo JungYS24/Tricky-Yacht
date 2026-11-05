@@ -180,6 +180,13 @@ public class Dice : MonoBehaviour, IPointerDownHandler
 
         finalColor.a = myData.diceColor.a;
 
+        // 악마주사위가 저주를 건 주사위는 보랏빛으로 물든다.
+        if (myData.devilCursed)
+        {
+            finalColor *= new Color(0.75f, 0.4f, 1f, 1f);
+            finalColor.a = myData.diceColor.a;
+        }
+
         if (isKept)
         {
             finalColor *= keptDarkness;

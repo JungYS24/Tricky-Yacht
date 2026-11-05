@@ -18,8 +18,15 @@ public class DiceDestructionPanel : MonoBehaviour
         if (isBusy) return;
         diceManager = dm;
 
-        // 덱에서 주사위를 랜덤으로 최대 5개 추출 (여정 주사위는 파괴 후보에서 제외)
-        List<DiceData1> options = dm.deckManager.GetRandomDiceForDestruction(5);
+        // 덱에서 주사위를 최대 5개 추출 (여정 주사위는 파괴 후보에서 제외).
+        // 디버프 주사위가 쌓여 덱이 무너지지 않도록 디버프 주사위를 먼저 보여 준다.
+        List<DiceData1> options = dm.masterDeck.FindAll(d => d != null && d.IsDebuff && !DeckManager.IsProtected(d));
+        if (options.Count > 5) options = options.GetRange(0, 5);
+        foreach (DiceData1 die in dm.deckManager.GetRandomDiceForDestruction(5))
+        {
+            if (options.Count >= 5) break;
+            if (!options.Contains(die)) options.Add(die);
+        }
 
         if (options.Count == 0)
         {

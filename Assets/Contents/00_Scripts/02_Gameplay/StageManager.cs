@@ -79,7 +79,7 @@ public class StageManager
         currentNodeId = -1;
         currentNodeCleared = false;
         ClearMapTrail();
-        currentMap = biome == BiomeType.Void || table == null
+        currentMap = table == null
             ? null
             : MapGenerator.Generate(runSeed, biomeIndex, biome, table);
     }

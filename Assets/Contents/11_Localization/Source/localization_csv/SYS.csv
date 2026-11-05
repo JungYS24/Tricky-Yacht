@@ -4,3 +4,7 @@ SYS,SYS_INVENTORY_FULL,인벤토리가 가득 찼습니다.,Inventory is full.,�
 SYS,SYS_NO_EQUIPPABLE_DICE,장착 가능한 주사위가 없습니다.,No equippable dice available.,装着できるサイコロがありません。,没有可装备的骰子。,
 SYS,SYS_SELL_PRICE,판매: {0} G,Sell: {0} G,売却: {0} G,出售: {0} G,
 SYS,SYS_FIGURE_DROPPED,피규어 획득: {0},Figure obtained: {0},フィギュア獲得: {0},获得手办: {0},페퍼민트 없이 처치했을 때 피규어 드롭 토스트
+SYS,SYS_DEVIL_CURSE,악마주사위가 주사위 하나에 저주를 걸었습니다!,The Devil Dice cursed one of your dice!,悪魔のサイコロがダイスひとつに呪いをかけた！,恶魔骰子诅咒了你的一颗骰子！,최종보스 1페이즈: 매 턴 주사위 1개 저주
+SYS,SYS_DEVIL_PHASE2,악마주사위: 이제 원페어·투페어는 피해를 주지 못합니다!,Devil Dice: One Pair and Two Pair no longer deal damage!,悪魔のサイコロ：ワンペア・ツーペアではダメージを与えられない！,恶魔骰子：一对和两对将无法造成伤害！,최종보스 2페이즈 진입
+SYS,SYS_DEVIL_IMMUNE,원페어·투페어는 악마주사위에게 통하지 않습니다!,One Pair and Two Pair have no effect on the Devil Dice!,ワンペア・ツーペアは悪魔のサイコロに効かない！,一对和两对对恶魔骰子无效！,최종보스 2페이즈 피해 무효
+SYS,SYS_DEVIL_PATTERN,"악마의 눈 {0}: 공격력 {1}, {2}턴 뒤 공격",Devil eye {0}: {1} damage in {2} turn(s),悪魔の目 {0}：攻撃力 {1}、{2}ターン後に攻撃,恶魔之眼 {0}：攻击力 {1}，{2}回合后攻击,최종보스 3페이즈 공격 패턴

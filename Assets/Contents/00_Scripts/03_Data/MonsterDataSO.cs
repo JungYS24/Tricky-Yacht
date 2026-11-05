@@ -4,7 +4,8 @@
 public enum BossAbilityType
 {
     None,       // 일반 몬스터 또는 능력 없음
-    FakeDice    // 가짜 주사위 변이 능력
+    FakeDice,   // 가짜 주사위 변이 능력
+    DevilDice   // 최종보스 악마주사위 (DevilDiceBoss)
 }
 
 [CreateAssetMenu(fileName = "NewMonsterData", menuName = "ScriptableObjects/MonsterData")]
