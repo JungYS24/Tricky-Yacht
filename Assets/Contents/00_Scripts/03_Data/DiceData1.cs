@@ -65,6 +65,8 @@ public class DiceData1
     public SpecialDieEffect[] faceEffects;
     // 덱에 항상 1개 유지되는 여정 주사위 여부. 파괴·교체 대상에서 빠진다.
     public bool isJourneyDice = false;
+    // 악마주사위 1페이즈가 이번 전투 동안 건 저주. 저주 주사위로 계산하고, 전투가 끝나면 푼다(저장하지 않음).
+    [System.NonSerialized] public bool devilCursed;
 
     public Sprite customDiceShell;
     public Sprite[] customFaceSprites;

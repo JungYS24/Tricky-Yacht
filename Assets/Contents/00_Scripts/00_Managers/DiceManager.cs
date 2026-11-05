@@ -402,25 +402,50 @@ public class DiceManager : MonoBehaviour
         if (node == null) return;
         switch (node.type)
         {
+            // 엘리트(도둑·족쇄, 이번 전투만)와 차원문(가시·저주, 영구)은 바이옴 단계별 개수만큼 디버프 주사위를 넣는다.
             case MapNodeType.Elite:
-                for (int i = 0; i < 3; i++)
+            {
+                int count = BalanceConfig.Current.RollDebuffCount(CurrentBiomeTier);
+                for (int i = 0; i < count; i++)
                     AddCombatDebuff(UnityEngine.Random.Range(0, 2) == 0 ? DebuffDiceType.Thief : DebuffDiceType.Shackle);
                 break;
+            }
             case MapNodeType.Portal:
-                AddCombatDebuff(UnityEngine.Random.Range(0, 2) == 0 ? DebuffDiceType.Spine : DebuffDiceType.Curse);
+            {
+                BalanceConfig cfg = BalanceConfig.Current;
+                int count = cfg.RollDebuffCount(CurrentBiomeTier);
+                for (int i = 0; i < count; i++)
+                    AddCombatDebuff(UnityEngine.Random.Range(0, 2) == 0 ? DebuffDiceType.Spine : DebuffDiceType.Curse, !cfg.portalDebuffPermanent);
                 break;
+            }
             case MapNodeType.Boss:
                 AddCombatDebuff(DebuffDiceType.Fake);
                 break;
         }
     }
 
-    private void AddCombatDebuff(DebuffDiceType type)
+    private void AddCombatDebuff(DebuffDiceType type, bool fightOnly = false)
     {
         DiceItemSO source = FindDebuffSource(type);
         DiceData1 die = deckManager.AddDebuffDice(type, source);
         if (source == null) ApplyDebuffAppearance(die);
         currentCombatDebuffs.Add(die);
+        if (fightOnly) fightOnlyDebuffs.Add(die);
+    }
+
+    // 이번 전투에만 넣은 영구형 디버프(차원문의 가시·저주). 전투가 끝나면 덱에서 뺀다. 세이브에는 남지 않는다.
+    readonly List<DiceData1> fightOnlyDebuffs = new List<DiceData1>();
+
+    void RemoveFightOnlyDebuffs()
+    {
+        if (fightOnlyDebuffs.Count == 0) return;
+        System.Predicate<DiceData1> match = die => die != null && fightOnlyDebuffs.Contains(die);
+        board?.RemoveDiceMatching(match);
+        deckManager.masterDeck.RemoveAll(match);
+        deckManager.drawPile.RemoveAll(match);
+        deckManager.discardPile.RemoveAll(match);
+        currentCombatDebuffs.RemoveAll(match);
+        fightOnlyDebuffs.Clear();
     }
 
     internal DiceItemSO FindDebuffSource(DebuffDiceType type)
@@ -505,7 +530,9 @@ public class DiceManager : MonoBehaviour
         ui?.UpdateFlameStackUI(stageContext.accumulatedFlameDamage);
 
         RemoveCombatDebuffs(temporaryOnly: true);
+        RemoveFightOnlyDebuffs();
         currentCombatDebuffs.Clear();
+        DevilDiceBoss.ClearCurses(deckManager.masterDeck);
 
         //(숙원의 방랑자 패널티 적용)
         if (isNextCombatHPTiedToOne)
@@ -606,6 +633,12 @@ public class DiceManager : MonoBehaviour
         }
 
         board.SpawnDice(returnPreviousDiceToDiscard, currentStage, applyDrawEffects: !isFromLoad);
+        // 악마주사위 1페이즈부터: 매 턴 보드의 주사위 1개에 저주를 건다. 지난 턴의 저주는 풀린다.
+        if (!isFromLoad && DevilDiceBoss.IsActive(enemy))
+        {
+            DevilDiceBoss.ClearCurses(deckManager.masterDeck);
+            DevilDiceBoss.CurseOneDie(board.ActiveDice);
+        }
         HandleDiceChanged();
         // 전투 시작 연출 중이면 첫 드로우 연출이 끝난 뒤 PlayCombatIntro가 보여 준다.
         if (!isStartingCombat) StartCoroutine(FlushDrawTriggersAfter(0.15f));
@@ -846,6 +879,13 @@ public class DiceManager : MonoBehaviour
         int darkDamageTotal = TurnCalculator.CalculateDarkDamage(keptDice, simEnemyHP);
         // 스페이드 스탬프 추가 피해는 배수 없이 최종 피해에 더한다
         int finalDamage = total.damage + calcResult.stampDamage;
+        // 악마주사위 2페이즈부터: 원페어·투페어는 피해가 들어가지 않는다.
+        if (DevilDiceBoss.BlocksHand(enemy, handRank))
+        {
+            finalDamage = 0;
+            darkDamageTotal = 0;
+            ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_IMMUNE", "원페어·투페어는 악마주사위에게 통하지 않습니다!"));
+        }
 
         yield return resolutionPresenter.PlayFinalDamage(ui, finalDamage + darkDamageTotal, resolutionTiming);
 
@@ -975,9 +1015,11 @@ public class DiceManager : MonoBehaviour
         // 이번 전투 한정 디버프(도둑·족쇄)를 제거하고, 왼쪽 위 디버프 표시에서 연기처럼 사라지는 모습을 보여 준다.
         var vanishing = new List<DiceData1>();
         foreach (var die in deckManager.masterDeck)
-            if (die != null && die.IsTemporaryDebuff) vanishing.Add(die);
+            if (die != null && (die.IsTemporaryDebuff || fightOnlyDebuffs.Contains(die))) vanishing.Add(die);
         RemoveCombatDebuffs(temporaryOnly: true);
+        RemoveFightOnlyDebuffs();
         currentCombatDebuffs.Clear();
+        DevilDiceBoss.ClearCurses(deckManager.masterDeck);
         if (vanishing.Count > 0)
         {
             CacheHud();
@@ -1041,7 +1083,7 @@ public class DiceManager : MonoBehaviour
         BalanceConfig cfg = BalanceConfig.Current;
         int gold = Mathf.FloorToInt(enemy.DropGold * cfg.monsterGoldMultiplier);
         if (enemy.Grade == MonsterGrade.Boss) gold += cfg.biomeClearBonusGold;
-        return Mathf.FloorToInt(gold * cfg.GoldMultiplierFor(enemy.Grade));
+        return Mathf.FloorToInt(gold * cfg.GoldMultiplierFor(enemy.Grade) * cfg.TierGold(CurrentBiomeTier));
     }
 
     // 페퍼민트 없이 처치했을 때 등급별 확률로 드롭 피규어를 준다. 이미 가진 피규어는 주지 않는다.
@@ -1290,19 +1332,10 @@ public class DiceManager : MonoBehaviour
         stageProgression.SetNewBiome(biomeList, selectedType); // 이관된 로직
         if (UsesMapFlow)
         {
+            // 비차원(Void)도 지도로 진행한다. 적·엘리트 노드는 MapGenerator 가 차원문으로 바꾼다.
             MapTableData table = GetMapTable();
-            if (selectedType == BiomeType.Void)
-            {
-                int voidStage = table != null ? table.Config.BiomeCountToVoid * 10 + 1 : 101;
-                currentStage = voidStage;
-                ShowCombatScreen();
-                StartNewStage();
-            }
-            else
-            {
-                stageProgression.BeginBiome(table, selectedType);
-                ShowMapScreen();
-            }
+            stageProgression.BeginBiome(table, selectedType);
+            ShowMapScreen();
 
             if (GameSaveManager.Instance != null)
                 GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
@@ -1705,7 +1738,7 @@ public class DiceManager : MonoBehaviour
         }
 
         BiomeType biome = currentBiome != null ? currentBiome.biomeType : BiomeType.Forest;
-        stageProgression.currentMap = biome == BiomeType.Void || table == null
+        stageProgression.currentMap = table == null
             ? null
             : MapGenerator.Generate(stageProgression.runSeed, stageProgression.biomeIndex, biome, table);
         if (!MapProgressMatches(stageProgression))
@@ -1757,7 +1790,17 @@ public class DiceManager : MonoBehaviour
                 BeginMapCombat(true, false, null);
                 break;
             case MapNodeType.Boss:
-                BeginMapCombat(false, true, null);
+                // 비차원 보스(악마주사위)는 조우자 대화창으로 등장 대사를 먼저 보여 주고 전투를 연다.
+                if (currentBiome != null && currentBiome.biomeType == BiomeType.Void && encounterEventPanel != null && !TutorialMode.Active)
+                {
+                    HideMapOverlays();
+                    SetBoardVisible(false);
+                    encounterEventPanel.StartBossIntro(currentBiome.bossMonster, DevilDiceBoss.IntroKeyPrefix, DevilDiceBoss.IntroFallback,
+                        () => BeginMapCombat(false, true, null));
+                    PlaceTravelChrome();
+                }
+                else
+                    BeginMapCombat(false, true, null);
                 break;
             case MapNodeType.Portal:
                 BeginMapCombat(false, false, RollPortalMonster(node));

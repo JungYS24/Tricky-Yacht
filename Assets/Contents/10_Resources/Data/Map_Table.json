@@ -2,15 +2,15 @@
   "mapConfig": [
     {
       "Key": "Min_Enemy_Count",
-      "Value": "16",
+      "Value": "8",
       "Value_Type": "int",
-      "Desc_KR": "최단 루트의 전투 수(적·엘리트·차원문). 지름길 = 전투 16 + 상인 고정층 1"
+      "Desc_KR": "최단 루트의 전투 수(적·엘리트·차원문). 지름길 = 전투 8 + 상인 고정층 1"
     },
     {
       "Key": "Max_Path_Length",
-      "Value": "32",
+      "Value": "16",
       "Value_Type": "int",
-      "Desc_KR": "일반 노드 층 수(0~31층). 보스는 32층"
+      "Desc_KR": "일반 노드 층 수(0~15층). 보스는 16층"
     },
     {
       "Key": "Grid_Width",
@@ -32,7 +32,7 @@
     },
     {
       "Key": "Shop_Row",
-      "Value": "16",
+      "Value": "8",
       "Value_Type": "int",
       "Desc_KR": "상인 고정층. 이 층의 노드는 상점 3종이고 어떤 선도 이 층을 건너뛰지 못함"
     },
@@ -68,9 +68,9 @@
     },
     {
       "Key": "Biome_Count_To_Void",
-      "Value": "10",
+      "Value": "5",
       "Value_Type": "int",
-      "Desc_KR": "이 수만큼 바이옴을 클리어하면 Void 진입"
+      "Desc_KR": "이 수만큼 바이옴을 클리어하면 Void 진입 (Void 가 마지막 바이옴)"
     },
     {
       "Key": "Shop_Row_Force_Stop",
@@ -118,7 +118,7 @@
       "Desc_KR": "바이옴 보스와 전투합니다.",
       "Icon_Key": "Icon_Map_Boss",
       "Is_Facility": false,
-      "Min_Row": 32,
+      "Min_Row": 16,
       "Min_Per_Map": 1,
       "Max_Per_Map": 1
     },
@@ -131,8 +131,8 @@
       "Icon_Key": "Icon_Map_Encounter",
       "Is_Facility": true,
       "Min_Row": 1,
-      "Min_Per_Map": 4,
-      "Max_Per_Map": 16
+      "Min_Per_Map": 2,
+      "Max_Per_Map": 8
     },
     {
       "Node_ID": "Node_Elite",
@@ -142,9 +142,9 @@
       "Desc_KR": "강한 적과 전투합니다.",
       "Icon_Key": "Icon_Map_Elite",
       "Is_Facility": false,
-      "Min_Row": 6,
-      "Min_Per_Map": 2,
-      "Max_Per_Map": 4
+      "Min_Row": 3,
+      "Min_Per_Map": 1,
+      "Max_Per_Map": 2
     },
     {
       "Node_ID": "Node_Shop_Nyaon",
@@ -156,7 +156,7 @@
       "Is_Facility": true,
       "Min_Row": 2,
       "Min_Per_Map": 0,
-      "Max_Per_Map": 8
+      "Max_Per_Map": 4
     },
     {
       "Node_ID": "Node_Shop_Ronan",
@@ -168,7 +168,7 @@
       "Is_Facility": true,
       "Min_Row": 2,
       "Min_Per_Map": 0,
-      "Max_Per_Map": 8
+      "Max_Per_Map": 4
     },
     {
       "Node_ID": "Node_Shop_Opel",
@@ -180,7 +180,7 @@
       "Is_Facility": true,
       "Min_Row": 2,
       "Min_Per_Map": 0,
-      "Max_Per_Map": 8
+      "Max_Per_Map": 4
     },
     {
       "Node_ID": "Node_Portal",
@@ -190,8 +190,8 @@
       "Desc_KR": "다른 차원의 몬스터와 전투합니다.",
       "Icon_Key": "Icon_Map_Portal",
       "Is_Facility": false,
-      "Min_Row": 4,
-      "Min_Per_Map": 2,
+      "Min_Row": 3,
+      "Min_Per_Map": 1,
       "Max_Per_Map": 2
     },
     {
@@ -202,9 +202,9 @@
       "Desc_KR": "체력을 회복하거나 주사위를 파괴합니다.",
       "Icon_Key": "Icon_Map_Rest",
       "Is_Facility": true,
-      "Min_Row": 4,
-      "Min_Per_Map": 4,
-      "Max_Per_Map": 12
+      "Min_Row": 3,
+      "Min_Per_Map": 2,
+      "Max_Per_Map": 6
     }
   ],
   "biomeWeights": [
@@ -335,6 +335,14 @@
       "Shop_W": 10,
       "Elite_W": 10,
       "Rest_W": 8
+    },
+    {
+      "Biome": "Void",
+      "Enemy_W": 50,
+      "Encounter_W": 15,
+      "Shop_W": 12,
+      "Elite_W": 10,
+      "Rest_W": 13
     }
   ]
 }

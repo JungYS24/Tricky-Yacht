@@ -15,11 +15,11 @@ public class BalanceConfig : ScriptableObject
     public int maxRerolls = 2;
     [Range(0, 100)] public int restHealPercent = 25;
     [Tooltip("바이옴 보스를 잡았을 때 최대 체력의 몇 %를 회복할지")]
-    [Range(0, 100)] public int biomeClearHealPercent = 30;
+    [Range(0, 100)] public int biomeClearHealPercent = 100;
 
     [Header("데모")]
     [Tooltip("이 수만큼 바이옴 보스를 잡으면 데모 클리어로 끝난다. 0 이면 제한 없음(정식판)")]
-    public int demoBiomeLimit = 3;
+    public int demoBiomeLimit = 0;
 
     [Header("몬스터 공격 턴")]
     public int normalAttackTurn = 3;
@@ -32,8 +32,9 @@ public class BalanceConfig : ScriptableObject
     [Header("몬스터 성장 (바이옴 단계 + 바이옴 안 전투 수)")]
     [Tooltip("켜면 예전 공식(체력 x1.05^(stage-1), 공격력 +stage/2)을 쓴다")]
     public bool useLegacyGrowth = false;
-    public float[] tierHp = { 1.0f, 1.2f, 1.3f, 3.4f };
-    public float[] tierAtk = { 1.0f, 1.1f, 1.15f, 2.5f };
+    // 바이옴 단계(0~5)별 배율. 6번째(5)는 비차원.
+    public float[] tierHp = { 1.28f, 1.35f, 1.55f, 1.75f, 1.95f, 1.95f };
+    public float[] tierAtk = { 1.2f, 1.2f, 1.25f, 1.35f, 1.45f, 1.4f };
     [Tooltip("바이옴 안에서 이미 치른 전투 1회당 체력 증가율")]
     public float hpPerNodeInBiome = 0.032f;
     [Tooltip("바이옴 안 전투 이 횟수마다 공격력 +1")]
@@ -50,6 +51,8 @@ public class BalanceConfig : ScriptableObject
     [Tooltip("보스 처치 골드 전체(바이옴 클리어 보상 포함)에 곱하는 배율")]
     public float bossGoldMultiplier = 2f;
     public int journeyGoldPerPip = 6;
+    [Tooltip("바이옴 단계별 처치 골드 배율")]
+    public float[] tierGold = { 1.0f, 1.2f, 1.4f, 1.6f, 1.8f, 2.0f };
 
     [Header("상점")]
     [Tooltip("상점에 들어갈 때 진열 칸 하나를 골라 이 배율로 할인한다. 1 이면 세일 없음")]
@@ -58,6 +61,22 @@ public class BalanceConfig : ScriptableObject
     [Tooltip("한 상점에서 리롤할 때마다 오르는 비용")]
     public int rerollCostStep = 25;
     [Range(0f, 1f)] public float sellRatio = 0.4f;
+    [Tooltip("바이옴 단계별 상점 진열 가격 배율")]
+    public float[] tierShopPrice = { 1.0f, 1.1f, 1.2f, 1.3f, 1.4f, 1.5f };
+
+    [Header("디버프 주사위 (엘리트·차원문 전투마다 들어오는 개수)")]
+    [Tooltip("바이옴 단계별 최소 개수")]
+    public int[] tierDebuffMin = { 0, 1, 1, 2, 2, 2 };
+    [Tooltip("바이옴 단계별 최대 개수")]
+    public int[] tierDebuffMax = { 0, 1, 2, 2, 3, 3 };
+    [Tooltip("켜면 차원문 디버프(가시·저주)가 덱에 영구히 남는다. 끄면 그 전투가 끝날 때 사라진다")]
+    public bool portalDebuffPermanent = false;
+
+    [Header("최종보스 악마주사위")]
+    [Tooltip("2페이즈(원페어·투페어 피해 무효) 시작 체력 비율")]
+    [Range(0f, 1f)] public float devilPhase2HpRatio = 0.6f;
+    [Tooltip("3페이즈(공격 패턴 굴림) 시작 체력 비율")]
+    [Range(0f, 1f)] public float devilPhase3HpRatio = 0.25f;
 
     [Header("피규어 드롭률 (페퍼민트 없이 처치했을 때)")]
     [Range(0f, 1f)] public float normalDropRate = 0.12f;
@@ -95,6 +114,22 @@ public class BalanceConfig : ScriptableObject
             case MonsterGrade.Elite: return Mathf.Max(1, eliteAttackTurn);
             default: return Mathf.Max(1, normalAttackTurn);
         }
+    }
+
+    public float TierGold(int tier) => Tier(tierGold, tier);
+    public float TierShopPrice(int tier) => Tier(tierShopPrice, tier);
+
+    // 바이옴 단계별 디버프 주사위 개수를 [최소, 최대] 안에서 뽑는다.
+    public int RollDebuffCount(int tier)
+    {
+        int min = TierInt(tierDebuffMin, tier), max = Mathf.Max(min, TierInt(tierDebuffMax, tier));
+        return Random.Range(min, max + 1);
+    }
+
+    static int TierInt(int[] table, int tier)
+    {
+        if (table == null || table.Length == 0) return 0;
+        return Mathf.Max(0, table[Mathf.Clamp(tier, 0, table.Length - 1)]);
     }
 
     public float GoldMultiplierFor(MonsterGrade grade)

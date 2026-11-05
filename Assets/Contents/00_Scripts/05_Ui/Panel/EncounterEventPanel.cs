@@ -76,6 +76,11 @@ public class EncounterEventPanel : MonoBehaviour
     const float NextIndicatorMinAlpha = 0.35f;
 
     private int dialogueIndex = 0;
+
+    // 보스 등장 대사 모드(조우자 대신 보스가 말한다). 선택지 없이 대사만 보여 주고 끝나면 콜백을 부른다.
+    string introKeyPrefix;
+    string[] introFallback;
+    System.Action introFinished;
     Color choiceATextColor = Color.white;
     Color choiceBTextColor = Color.white;
     bool encounterTextScaleApplied;
@@ -99,10 +104,53 @@ public class EncounterEventPanel : MonoBehaviour
         if (choiceRoot != null) choiceRoot.SetActive(false);
     }
 
+    // 보스 노드에 들어섰을 때 보스의 대사를 조우자 대화창으로 보여 준다. 대사는 ENC 표의 {keyPrefix}_DLG_01.. 를 쓴다.
+    public void StartBossIntro(MonsterDataSO speaker, string keyPrefix, string[] fallbackLines, System.Action onFinished)
+    {
+        gameObject.SetActive(true);
+        dialogueIndex = 0;
+        currentEncounter = null;
+        introKeyPrefix = keyPrefix;
+        introFallback = fallbackLines;
+        introFinished = onFinished;
+
+        if (encounterSpriteRenderer != null && speaker != null && speaker.monsterSprite != null)
+            encounterSpriteRenderer.sprite = speaker.monsterSprite;
+        if (encounterAnimator != null)
+        {
+            bool animated = speaker != null && speaker.animatorController != null;
+            if (animated) encounterAnimator.runtimeAnimatorController = speaker.animatorController;
+            encounterAnimator.enabled = animated;
+            encounterAnimator.speed = 1f;
+        }
+
+        if (fullScreenBackground != null) fullScreenBackground.SetActive(true);
+        if (dialogueRoot != null) dialogueRoot.SetActive(true);
+        if (choiceRoot != null) choiceRoot.SetActive(false);
+
+        UpdateDialogue();
+    }
+
+    void FinishBossIntro()
+    {
+        System.Action finished = introFinished;
+        introKeyPrefix = null;
+        introFallback = null;
+        introFinished = null;
+
+        if (fullScreenBackground != null) fullScreenBackground.SetActive(false);
+        if (dialogueRoot != null) dialogueRoot.SetActive(false);
+        if (choiceRoot != null) choiceRoot.SetActive(false);
+        gameObject.SetActive(false);
+        finished?.Invoke();
+    }
+
     public void StartEvent(BiomeType currentBiome)
     {
         gameObject.SetActive(true);
         dialogueIndex = 0;
+        introKeyPrefix = null;
+        introFinished = null;
 
         // 현재 바이옴에 등장 가능한 조우자들만 필터링
         List<EncounterData> possibleEncounters = encounterDatabase
@@ -152,7 +200,8 @@ public class EncounterEventPanel : MonoBehaviour
 
     private void UpdateDialogue()
     {
-        if (currentEncounter == null)
+        bool intro = introKeyPrefix != null;
+        if (currentEncounter == null && !intro)
         {
             ShowChoices();
             return;
@@ -167,12 +216,24 @@ public class EncounterEventPanel : MonoBehaviour
         }
 
         SetNextIndicator(false);
+        if (intro)
+        {
+            FinishBossIntro();
+            return;
+        }
         if (dialogueRoot != null) dialogueRoot.SetActive(false);
         ShowChoices();
     }
 
     string GetDialogueLine(int index)
     {
+        if (introKeyPrefix != null)
+        {
+            LocalizationManager.TryGetLocalized(LocalizationManager.EncounterTable, introKeyPrefix + "_DLG_" + (index + 1).ToString("D2"), out string introLine);
+            if (!string.IsNullOrEmpty(introLine)) return introLine;
+            return introFallback != null && index < introFallback.Length ? introFallback[index] : null;
+        }
+
         string locLine = GetEncounterDialogue(currentEncounter.type, index);
         if (!string.IsNullOrEmpty(locLine))
             return locLine;

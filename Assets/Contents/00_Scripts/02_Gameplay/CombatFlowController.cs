@@ -290,6 +290,9 @@ public static class CombatFlowController
                 if (dm.enemy.IsDead) yield break;
 
                 dm.enemy.ResetTurn();
+                // 악마주사위 3페이즈: 공격할 때마다 다음 공격 패턴을 다시 굴린다.
+                if (DevilDiceBoss.IsActive(dm.enemy) && DevilDiceBoss.Phase(dm.enemy) >= 3)
+                    DevilDiceBoss.RollPattern(dm.enemy);
 
                 if (dm.currentPlayerHP <= 0)
                 {

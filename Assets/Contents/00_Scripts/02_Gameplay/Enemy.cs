@@ -77,6 +77,10 @@ public class Enemy : MonoBehaviour
     public int DropGold { get; private set; }
     // 보스 체력이 일정 비율 이하로 내려가 공격 턴이 줄어든 상태
     public bool IsBossPhase2 { get; private set; }
+    // 공격 패턴이 바뀌기 전 공격력(악마주사위 3페이즈 기준값)
+    public int BaseAttackPower { get; private set; }
+    // 악마주사위가 지금까지 들어간 페이즈(토스트·패턴 굴림을 한 번만 하기 위해 기억)
+    int devilPhaseShown = 1;
 
     private Material monsterRuntimeMat;
     private Vector3 originalScale;
@@ -252,6 +256,8 @@ public class Enemy : MonoBehaviour
         MaxHP = finalMaxHP;
         CurrentHP = finalMaxHP;
         AttackPower = finalAttack;
+        BaseAttackPower = finalAttack;
+        devilPhaseShown = 1;
         IsDead = false;
         useExternalDeathSequence = false;
 
@@ -319,6 +325,7 @@ public class Enemy : MonoBehaviour
         int actualDamage = Mathf.Min(CurrentHP, damage);
         CurrentHP -= actualDamage;
         CheckBossPhase2();
+        CheckDevilPhase();
 
         // 사망 콜백 전에 지급해야 마지막 공격의 효과도 적용됨
         DiceManager dm = DiceManager.Instance;
@@ -635,6 +642,8 @@ public class Enemy : MonoBehaviour
         MaxHP = maxHp;
         CurrentHP = hp;
         AttackPower = attack;
+        BaseAttackPower = attack;
+        devilPhaseShown = DevilDiceBoss.IsActive(this) ? DevilDiceBoss.Phase(this) : 1;
         IsDead = false;
         useExternalDeathSequence = false;
 
@@ -743,6 +752,32 @@ public class Enemy : MonoBehaviour
         UpdateTurnUI();
         // 2페이즈 턴이 1페이즈와 같으면(설정으로 끈 경우) 연출하지 않는다.
         if (turnText != null && MaxAttackTurn < previousMax)
+        {
+            turnText.transform.DOKill(true);
+            turnText.transform.DOPunchScale(Vector3.one * 0.4f, 0.4f, 6, 0.6f);
+        }
+    }
+
+    // 악마주사위 페이즈가 올라가면 한 번 알리고, 3페이즈에 들어서면 바로 공격 패턴을 굴린다.
+    void CheckDevilPhase()
+    {
+        if (!DevilDiceBoss.IsActive(this) || CurrentHP <= 0) return;
+        int phase = DevilDiceBoss.Phase(this);
+        if (phase <= devilPhaseShown) return;
+        devilPhaseShown = phase;
+        if (phase == 3) DevilDiceBoss.RollPattern(this);
+        else ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_PHASE2", "악마주사위: 이제 원페어·투페어는 피해를 주지 못합니다!"));
+    }
+
+    // 공격 턴 수와 공격력 배율을 바꾼다(악마주사위 3페이즈). 화면의 턴·공격력 표시도 갱신한다.
+    public void SetAttackPattern(int turns, float attackMultiplier)
+    {
+        MaxAttackTurn = Mathf.Max(1, turns);
+        CurrentAttackTurn = MaxAttackTurn;
+        AttackPower = Mathf.Max(1, Mathf.RoundToInt(BaseAttackPower * attackMultiplier));
+        UpdateTurnUI();
+        if (attackPowerText != null) attackPowerText.text = $"{AttackPower}";
+        if (turnText != null)
         {
             turnText.transform.DOKill(true);
             turnText.transform.DOPunchScale(Vector3.one * 0.4f, 0.4f, 6, 0.6f);

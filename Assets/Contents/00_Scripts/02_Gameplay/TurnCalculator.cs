@@ -189,7 +189,7 @@ public static class TurnCalculator
         foreach (var d in targetDice)
         {
             res.baseSum += d.currentValue;
-            if (d.myData.debuffType == DebuffDiceType.Curse)
+            if (d.myData.debuffType == DebuffDiceType.Curse || d.myData.devilCursed)
                 res.curseMultiplier *= Mathf.Clamp01(1f - d.currentValue * 0.05f);
 
             // 주사위 전체 효과 대신 이번에 나온 면의 효과로 분기한다(면별 효과가 없으면 기존 효과와 같다).

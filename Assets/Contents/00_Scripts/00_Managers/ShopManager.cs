@@ -513,7 +513,7 @@ public class ShopManager : MonoBehaviour
                 BaseItemDataSO item = shuffled[dataIndex];
                 int listed = -1;
                 if (mapMerchantActive && listedPrices.TryGetValue(item, out int tablePrice))
-                    listed = tablePrice;
+                    listed = Mathf.RoundToInt(tablePrice * BalanceConfig.Current.TierShopPrice(diceManager != null ? diceManager.CurrentBiomeTier : 0));
                 shopSlots[i].SetupSlot(item, this, listed);
                 dataIndex++;
             }
