@@ -70,6 +70,11 @@ public class EncounterEventPanel : MonoBehaviour
     [Tooltip("대사·선택지 글자 크기 배율. 씬에 저장된 원래 크기에 곱합니다.")]
     public float encounterTextScale = 0.85f;
 
+    // 스팀 데모 조우 보상 (EncounterChoice_Demo 명세)
+    const int DealerGoldPerTicket = 700;        // 심연의 딜러 A: 초기화한 티켓 1장당
+    const int ExplorerGoldPerSnack = 700;       // 탐험가 A: 파괴한 스낵 1개당
+    const int SacrificedGirlGoldPerStage = 10;  // 제물이 된 소녀 B: 스테이지당
+
     static readonly Vector4 DialogueTextMargin = new Vector4(32f, 24f, 32f, 24f);
     const float NextIndicatorBob = 6f;
     const float NextIndicatorPeriod = 0.7f;
@@ -449,13 +454,18 @@ public class EncounterEventPanel : MonoBehaviour
                 break;
 
             case EncounterType.AbyssDealer:
+            {
+                // 골드는 초기화하기 전에 센 티켓 장수 × 700
+                int ticketCount = InventoryManager.Instance != null ? InventoryManager.Instance.ownedTickets.Count(t => t != null) : 0;
+
                 // 족보 초기화 (기본 배수로) 및 골드 획득
                 diceManager.ResetHandMultipliers();
-                diceManager.shopManager.currentGold += (1000 * diceManager.currentStage);
+                diceManager.shopManager.currentGold += ticketCount * DealerGoldPerTicket;
 
                 // 보유 티켓 수도 초기화 (티켓 도감 숫자가 전부 1로 돌아감)
                 if (InventoryManager.Instance != null) InventoryManager.Instance.ClearAllTickets();
                 break;
+            }
 
             case EncounterType.BlindFortuneTeller:
                 // 다음 적 체력 100% 증가 플래그
@@ -524,21 +534,38 @@ public class EncounterEventPanel : MonoBehaviour
                 break;
 
             case EncounterType.SacrificedGirl:
+            {
                 // 덱에서 무작위 주사위 2개 소모 (코팅 여부 무관)
                 // 여정 주사위는 희생 대상에서 제외
                 List<DiceData1> sacrificed = diceManager.deckManager.GetRandomDiceForDestruction(2);
+                var offeredSprites = new List<Sprite>();
+                var offeredTints = new List<Color>();
                 if (sacrificed.Count >= 2)
                 {
-                    diceManager.masterDeck.Remove(sacrificed[0]);
-                    diceManager.masterDeck.Remove(sacrificed[1]);
+                    foreach (DiceData1 die in sacrificed)
+                    {
+                        // 빼기 전에 판 위 모습 그대로 그릴 그림을 받아 둔다.
+                        offeredSprites.Add(diceManager.DeckDiePreview(die, out Color tint));
+                        offeredTints.Add(tint);
+                        diceManager.masterDeck.Remove(die);
+                    }
+                    DebuffTrackerHud.Instance?.Refresh(); // 디버프 주사위를 바쳤을 수도 있다
                 }
                 // 제물소녀 전용 피규어 지급
                 if (sacrificedGirlFigureSO != null)
                     InventoryManager.Instance.AddItem(sacrificedGirlFigureSO);
+
+                // 바친 주사위가 소녀에게 빨려 들어가는 연출을 보여 준 뒤 지도로 돌아간다.
+                if (offeredSprites.Count > 0)
+                {
+                    waitCoroutine = true;
+                    StartCoroutine(SacrificeRoutine(offeredSprites, offeredTints));
+                }
                 break;
+            }
 
             case EncounterType.Alchemist:
-                // 내 덱의 모든 주사위를 코팅 및 눈금 무작위 변환시키고 3000골드 획득
+                // 내 덱의 모든 주사위를 코팅 및 눈금 무작위 변환 (골드는 주지 않는다)
                 if (diceManager.masterDeck.Count > 0)
                     Sfx.Play(SfxId.Coating_Apply);
                 foreach (var d in diceManager.masterDeck)
@@ -593,7 +620,6 @@ public class EncounterEventPanel : MonoBehaviour
                     d.customDiceShell = null;
                     d.customFaceSprites = null;
                 }
-                diceManager.shopManager.currentGold += 3000;
 
                 // 필드 파티클 강제 새로고침
                 foreach (var activeDice in diceManager.activeDiceList)
@@ -624,10 +650,18 @@ public class EncounterEventPanel : MonoBehaviour
                 break;
 
             case EncounterType.ForgottenExplorer:
-                // 스낵 모두 파괴 및 5000골드 즉시 획득
-                foreach (var slot in InventoryManager.Instance.snackSlots) slot.ClearSlot();
-                diceManager.shopManager.currentGold += 5000;
+            {
+                // 스낵 모두 파괴. 파괴한 스낵 1개당 700골드 (스낵이 없으면 0골드)
+                int destroyed = 0;
+                foreach (var slot in InventoryManager.Instance.snackSlots)
+                {
+                    if (slot == null) continue;
+                    if (slot.currentItem != null) destroyed++;
+                    slot.ClearSlot();
+                }
+                diceManager.shopManager.currentGold += destroyed * ExplorerGoldPerSnack;
                 break;
+            }
 
             case EncounterType.MadHatter:
                 // 스낵 슬롯을 완벽히 지우고 스테이크/팬케이크로 덮어씌움
@@ -666,7 +700,7 @@ public class EncounterEventPanel : MonoBehaviour
                 diceManager.currentPlayerHP += Mathf.FloorToInt(diceManager.playerMaxHP * 0.05f);
                 break;
             case EncounterType.SacrificedGirl:
-                diceManager.shopManager.currentGold += (100 * diceManager.currentStage);
+                diceManager.shopManager.currentGold += (SacrificedGirlGoldPerStage * diceManager.currentStage);
                 break;
             case EncounterType.RustyCaptain:
                 //전투 없이 그냥 이동
@@ -675,8 +709,15 @@ public class EncounterEventPanel : MonoBehaviour
                 diceManager.currentPlayerHP += Mathf.FloorToInt((diceManager.playerMaxHP - diceManager.currentPlayerHP) * 0.1f);
                 break;
             case EncounterType.ForgottenExplorer:
-                // [TODO: 골드 일부 소모 후 주사위 부품 획득 구현]
+            {
+                // 페퍼민트 1개. 스낵 칸이 가득 차면 안내만 띄우고 지급 없이 넘어간다.
+                SnackItemSO peppermint = FindSnack(SnackType.Peppermint);
+                if (peppermint == null)
+                    Debug.LogWarning("[Encounter] 페퍼민트 스낵을 찾지 못해 지급하지 못했습니다.");
+                else if (!InventoryManager.Instance.AddItem(peppermint))
+                    ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_INVENTORY_FULL", "인벤토리가 가득 찼습니다."));
                 break;
+            }
             case EncounterType.MadHatter:
                 // 스낵 슬롯을 완벽히 지우고 페퍼민트/체리로 덮어씌움
                 if (diceManager.shopManager != null && diceManager.shopManager.allItemsPool != null)
@@ -697,6 +738,33 @@ public class EncounterEventPanel : MonoBehaviour
 
         UpdateUIAfterChoice();
         EndEvent();
+    }
+
+    // 제물이 된 소녀 A: 선택지 창을 내리고, 바친 주사위가 녹아 소녀에게 빨려 들어가는 연출을 본 뒤 지도로 돌아간다.
+    private IEnumerator SacrificeRoutine(List<Sprite> sprites, List<Color> tints)
+    {
+        if (choiceRoot != null) choiceRoot.SetActive(false);
+        // 선택지에서 멈췄던 소녀 애니메이션을 다시 움직여 연출 동안 살아 있게 한다.
+        if (encounterAnimator != null && encounterAnimator.enabled) encounterAnimator.speed = 1f;
+
+        Graphic girl = encounterAnimator != null ? encounterAnimator.GetComponent<Graphic>() : null;
+        if (girl == null && fullScreenBackground != null) girl = fullScreenBackground.GetComponent<Graphic>();
+        yield return DebuffFeedback.PlaySacrifice(sprites, tints, girl);
+
+        UpdateUIAfterChoice();
+        EndEvent();
+    }
+
+    // 상점 품목에서 스낵을 찾고, 없으면 Resources/Snacks에서 찾는다.
+    SnackItemSO FindSnack(SnackType type)
+    {
+        List<BaseItemDataSO> pool = diceManager.shopManager != null ? diceManager.shopManager.allItemsPool : null;
+        if (pool != null)
+            foreach (BaseItemDataSO item in pool)
+                if (item is SnackItemSO snack && snack.snackType == type) return snack;
+        foreach (SnackItemSO snack in Resources.LoadAll<SnackItemSO>(SnackItemSO.ResourceFolder))
+            if (snack != null && snack.snackType == type) return snack;
+        return null;
     }
 
     // 어릿광대용 코팅 4번 띄우기 코루틴

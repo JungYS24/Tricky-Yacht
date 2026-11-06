@@ -196,6 +196,44 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         spriteRenderer.color = finalColor;
     }
 
+    // 판 밖 연출(조우 제물 등)에서 덱 주사위를 그릴 때 쓴다. 가장 큰 눈 면을 판 위와 같은 규칙으로 고르고 코팅 색을 돌려준다.
+    // 프리팹의 Dice로 불러도 된다(이 인스턴스의 상태는 건드리지 않음).
+    public Sprite PreviewFace(DiceData1 data, out Color tint)
+    {
+        tint = Color.white;
+        if (data == null) return null;
+
+        int face = 0;
+        int[] faces = data.faceValues;
+        if (faces != null)
+            for (int i = 1; i < faces.Length; i++)
+                if (faces[i] > faces[face]) face = i;
+        int value = faces != null && faces.Length > 0 ? faces[face] : 6;
+
+        Sprite sprite = null;
+        if (SpecialDiceSprites.TryGetSpecialFaceSprite(data, face, out Sprite special) && special != null)
+            sprite = special;
+        else if (value <= 0 && data.customFaceSprites != null && data.customFaceSprites.Length > 0)
+            sprite = data.customFaceSprites[0];
+        else if (SpecialDiceSprites.TryGetSpecialFaceSprite(data, value - 1, out special) && special != null)
+            sprite = special;
+        else
+        {
+            bool isFixed = faces != null && faces.Length > 0 && faces.All(f => f == faces[0]);
+            if (isFixed && fixedNumberSprites != null && fixedNumberSprites.Length >= 6)
+                sprite = fixedNumberSprites[Mathf.Clamp(value - 1, 0, 5)];
+            else if (diceFaceSprites != null && diceFaceSprites.Length > 0)
+                sprite = diceFaceSprites[Mathf.Clamp(value - 1, 0, diceFaceSprites.Length - 1)];
+        }
+
+        tint = data.type == DiceType.Prism
+            ? Color.HSVToRGB(Mathf.Repeat(Time.time * 0.6f, 1f), 0.55f, coatingBrightness)
+            : data.diceColor * coatingBrightness;
+        if (data.devilCursed) tint *= new Color(0.75f, 0.4f, 1f, 1f);
+        tint.a = 1f;
+        return StampEngraveCache.Get(sprite, data.stampType);
+    }
+
     private System.Collections.IEnumerator IdleAnimationRoutine(int[] faces)
     {
         int index = 0;

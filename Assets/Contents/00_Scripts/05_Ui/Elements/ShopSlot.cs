@@ -60,9 +60,8 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         bool free = price <= 0;
         if (!free && IsOnSale)
         {
-            // 세일 칸: 원래 가격을 작게 긋고 할인 가격을 옆에 둔다.
-            int original = Mathf.Max(0, Mathf.FloorToInt(ListedUnitPrice() * shopPriceMultiplier));
-            SetPriceVisual($"<s><size=70%>{original}</size></s> {price}", false, SalePriceColor);
+            // 세일 칸: 할인된 가격만 초록색으로 보여 준다.
+            SetPriceVisual(price.ToString(), false, SalePriceColor);
             return;
         }
         SetPriceVisual(free ? "0" : price.ToString(), free);
@@ -149,6 +148,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         //정상적으로 아이템이 들어올 때는 자물쇠를 끄고 잠금 해제
         isLocked = false;
         if (lockUI != null) lockUI.SetActive(false);
+        ClearSeal();
 
 
         // 아이콘 색상 초기화
@@ -275,6 +275,7 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     //슬롯을 자물쇠 모드로 만드는 전용 함수
     public void SetLockedSlot()
     {
+        ClearSeal();
         isLocked = true;
         isPurchased = false;
         isAnimating = false;
@@ -288,6 +289,60 @@ public class ShopSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
         buyButton.interactable = false; // 버튼 클릭 방지
         buyButton.onClick.RemoveAllListeners();
+    }
+
+    // 밀렵꾼이 봉인한 칸: 카드를 어둡게 덮고 쇠사슬 X자와 금색 자물쇠를 얹는다(상인 카드 크기에 맞춘 한 장짜리 그림).
+    // 가격·코인·원래 자물쇠는 숨기고, 잠긴 칸처럼 살 수 없고 마우스에도 반응하지 않는다.
+    public void SetSealedSlot(MerchantShopSkin.Look look)
+    {
+        SetLockedSlot();
+        Image card = FindChildImage(ref cardImage, "item_parchment");
+        if (look == null || look.sealOverlay == null || card == null) return; // 그림이 없으면 원래 자물쇠 칸으로 둔다
+
+        if (lockUI != null) lockUI.SetActive(false);
+        if (priceText != null) priceText.text = string.Empty;
+        Image coin = FindChildImage(ref coinImage, "Coin");
+        if (coin != null && coin.enabled)
+        {
+            coin.enabled = false;
+            sealHidCoin = true;
+        }
+
+        if (sealOverlay == null)
+        {
+            var go = new GameObject("SealOverlay", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            go.layer = card.gameObject.layer;
+            var rect = (RectTransform)go.transform;
+            rect.SetParent(card.transform, false);
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            sealOverlay = go.GetComponent<Image>();
+            sealOverlay.raycastTarget = false;
+        }
+        sealOverlay.sprite = look.sealOverlay;
+        sealOverlay.gameObject.SetActive(true);
+        sealOverlay.transform.SetAsLastSibling();
+    }
+
+    // 봉인 그림을 걷고 숨겼던 코인을 되돌린다(상품이 들어오거나 일반 자물쇠 칸이 될 때).
+    void ClearSeal()
+    {
+        if (sealHidCoin && coinImage != null) coinImage.enabled = true;
+        sealHidCoin = false;
+        if (sealOverlay != null) sealOverlay.gameObject.SetActive(false);
+    }
+
+    Image cardImage, coinImage, sealOverlay;
+    bool sealHidCoin;
+
+    Image FindChildImage(ref Image cached, string childName)
+    {
+        if (cached != null) return cached;
+        foreach (Image image in GetComponentsInChildren<Image>(true))
+            if (image.gameObject.name == childName) return cached = image;
+        return null;
     }
 
     public void OnPointerEnter(PointerEventData eventData)

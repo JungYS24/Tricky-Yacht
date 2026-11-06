@@ -41,6 +41,9 @@ public class MerchantShopSkin : ScriptableObject
         public float priceWidth = 150f;
         public float priceFontSize;                           // 0이면 아래 공용 값
         public float coinSize;                                // 0이면 아래 공용 값
+
+        [Header("밀렵꾼 봉인 칸")]
+        public Sprite sealOverlay;                            // 카드와 같은 크기: 어둡게 덮고 쇠사슬 X자 + 금색 자물쇠
     }
 
     [Header("글자 크기 (화면 px)")]

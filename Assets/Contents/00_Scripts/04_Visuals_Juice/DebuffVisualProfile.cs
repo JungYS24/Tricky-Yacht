@@ -97,6 +97,22 @@ public sealed class DebuffVisualProfile : ScriptableObject
     [Min(0.5f)] public float boardGlowPeriod = 2.4f;
     public Color boardGlowColor = new Color(0.62f, 0.22f, 1f);
 
+    [Header("조우: 제물이 된 소녀 (바친 주사위가 녹아 소녀에게 빨려 들어감)")]
+    [Tooltip("소녀 앞에 떠오르는 주사위 크기")]
+    public float sacrificeDieSize = 100f;
+    [Tooltip("안개가 빨려 들어가는 지점. 조우 그림 안에서의 비율(왼쪽 아래 0,0 ~ 오른쪽 위 1,1)")]
+    public Vector2 sacrificeHeart = new Vector2(0.4f, 0.55f);
+    [Tooltip("주사위가 떠올라 멈추는 높이. 조우 그림 아래 끝에서부터의 비율")]
+    [Range(0f, 1f)] public float sacrificeHoverHeight = 0.22f;
+    [Tooltip("녹은 주사위의 안개가 소녀에게 날아가는 시간(기본 속도 기준 초). 클수록 천천히")]
+    [Min(0.1f)] public float sacrificeTravelTime = 0.7f;
+    [Tooltip("안개가 스며들 때 소녀 모양을 따라 뒤에서 번지는 오라 색")]
+    public Color sacrificeTint = new Color(0.72f, 0.45f, 1f);
+    [Tooltip("오라가 가장 진할 때의 불투명도(안쪽 겹 기준, 바깥 겹은 더 연함)")]
+    [Range(0f, 1f)] public float sacrificeAuraAlpha = 0.8f;
+    [Tooltip("오라 가장 바깥 겹이 소녀 그림보다 커지는 배율. 클수록 오라가 넓게 퍼짐")]
+    [Range(1f, 1.2f)] public float sacrificeAuraScale = 1.08f;
+
     [Header("발동 연출 이미지")]
     public Sprite chainLink;
     public Sprite smokePuff;

@@ -142,8 +142,8 @@ public class DiceManager : MonoBehaviour
     [Header("조우자 특수 효과 상태 (임시 저장용)")]
     [HideInInspector] public bool isNextEnemyHPBoosted = false; // 눈먼 점술가 패널티
     [HideInInspector] public bool isNextCombatHPTiedToOne = false; // 숙원의 방랑자 패널티
-    [HideInInspector] public int extraShopSlots = 0; //  슬롯 영구 확장
-    [HideInInspector] public int perfumerWeaknessTurns = 0; // 조향사 시련 턴 수
+    [HideInInspector] public int wandererRestoreHP = 0; // 숙원의 방랑자: 체력 1로 싸우는 전투에서 이기면 되돌릴 체력. 0이면 없음
+    [HideInInspector] public int extraShopSlots = 0; // 상점 칸 증감. 밀렵꾼 봉인이면 음수    [HideInInspector] public int perfumerWeaknessTurns = 0; // 조향사 시련 턴 수
     [HideInInspector] public bool isNextShopFree = false; //녹슨 닻의 선장 무료 상점
 
 
@@ -537,6 +537,7 @@ public class DiceManager : MonoBehaviour
         //(숙원의 방랑자 패널티 적용)
         if (isNextCombatHPTiedToOne)
         {
+            wandererRestoreHP = currentPlayerHP; // 이 전투에서 이기면 되돌릴 체력
             currentPlayerHP = 1; // 플레이어 체력을 1로 고정
             isNextCombatHPTiedToOne = false; // 적용했으니 스위치를 다시 끔
         }
@@ -618,6 +619,16 @@ public class DiceManager : MonoBehaviour
         Dice template = dicePrefab != null ? dicePrefab.GetComponent<Dice>() : null;
         if (template == null || template.diceFaceSprites == null || template.diceFaceSprites.Length == 0) return null;
         return template.diceFaceSprites[template.diceFaceSprites.Length - 1];
+    }
+
+    // 판 밖 연출(조우 제물 등)에서 덱 주사위를 판 위 모습 그대로 그릴 그림과 색. 디버프 주사위는 전용 그림을 쓴다.
+    public Sprite DeckDiePreview(DiceData1 die, out Color tint)
+    {
+        tint = Color.white;
+        if (die == null) return null;
+        if (die.IsDebuff) return DebuffFeedback.DieSprite(die);
+        Dice template = dicePrefab != null ? dicePrefab.GetComponent<Dice>() : null;
+        return template != null ? template.PreviewFace(die, out tint) : null;
     }
 
     void StartNewRound(bool isFromLoad = false, bool returnPreviousDiceToDiscard = true)
@@ -1027,6 +1038,14 @@ public class DiceManager : MonoBehaviour
             DebuffFeedback.PlayTemporaryVanish(deckButton != null ? deckButton.transform : null, vanishing);
         }
         DebuffTrackerHud.Instance?.Refresh();
+
+        // 숙원의 방랑자: 체력 1로 버틴 전투에서 이겼으므로 전투 전 체력으로 되돌린다.
+        if (wandererRestoreHP > 0)
+        {
+            currentPlayerHP = Mathf.Min(wandererRestoreHP, playerMaxHP);
+            wandererRestoreHP = 0;
+            UpdateMainUI("");
+        }
 
         // 공허 바이옴에서 보스를 잡았다면 최종 게임 클리어 처리
         if (currentBiome != null && currentBiome.biomeType == BiomeType.Void)

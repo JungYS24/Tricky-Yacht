@@ -196,7 +196,9 @@ public static class GameStateRestorer
         dm.figureBonusRerolls = data.figureBonusRerolls;
         dm.turnContext.debuffRerollPenalty = skipCombatBootstrap ? 0 : Mathf.Max(0, data.debuffRerollPenalty);
         dm.isPeppermintActive = data.isPeppermintActive;
-
+        dm.isNextCombatHPTiedToOne = data.isNextCombatHPTiedToOne;
+        dm.wandererRestoreHP = Mathf.Max(0, data.wandererRestoreHP);
+        dm.extraShopSlots = data.extraShopSlots;
         if (dm.biomeList.Count > 0)
         {
             dm.currentBiome = dm.biomeList.Find(b => (int)b.biomeType == data.savedBiomeType);

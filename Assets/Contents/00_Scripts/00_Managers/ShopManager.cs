@@ -482,14 +482,21 @@ public class ShopManager : MonoBehaviour
 
 
 
-        int unlockedCount;
+        int baseCount;
         if (mapMerchantActive && stockTable != null && stockTable.Loaded)
-            unlockedCount = Mathf.Clamp(stockTable.SlotCount, 1, shopSlots.Length);
+            baseCount = Mathf.Clamp(stockTable.SlotCount, 1, shopSlots.Length);
         else
         {
-            unlockedCount = 6 + (diceManager.currentStage - 1) / 2;
-            unlockedCount = Mathf.Clamp(unlockedCount, 2, shopSlots.Length);
+            baseCount = 6 + (diceManager.currentStage - 1) / 2;
+            baseCount = Mathf.Clamp(baseCount, 2, shopSlots.Length);
         }
+
+        // 밀렵꾼이 봉인한 칸(extraShopSlots 음수)은 끝에서부터 막는다. 최소 1칸은 열어 둔다.
+        // 상인 상점에서는 카드를 어둡게 덮고 쇠사슬 X자 + 금색 자물쇠로 보여 준다.
+        int seal = diceManager != null ? diceManager.extraShopSlots : 0;
+        int unlockedCount = Mathf.Clamp(baseCount + seal, 1, shopSlots.Length);
+        int sealedCount = Mathf.Max(0, baseCount - unlockedCount);
+        MerchantShopSkin.Look sealLook = mapMerchantActive && merchantSkin != null ? merchantSkin.Find(currentMerchant) : null;
 
         // 주의: 이 for문 아래에 기존 for문이 또 남아있으면 안 됩니다!
         for (int i = 0; i < shopSlots.Length; i++)
@@ -500,8 +507,12 @@ public class ShopManager : MonoBehaviour
             // 아직 해금되지 않은 칸은 '자물쇠 모드'로 만듦
             if (i >= unlockedCount)
             {
-                shopSlots[i].SetLockedSlot();
-                continue; // 자물쇠로 잠갔으니 이번 칸은 여기서 끝내고 다음 칸으로 넘어감
+                // 봉인된 칸(열린 칸 바로 뒤부터 봉인 수만큼)은 봉인 그림, 그 밖은 원래 자물쇠
+                if (sealLook != null && i < unlockedCount + sealedCount)
+                    shopSlots[i].SetSealedSlot(sealLook);
+                else
+                    shopSlots[i].SetLockedSlot();
+                continue; // 잠갔으니 이번 칸은 여기서 끝내고 다음 칸으로 넘어감
             }
 
             // 리롤을 눌렀을 때, 이미 구매한 슬롯은 상품을 바꾸지 않고 건너뜁니다.
