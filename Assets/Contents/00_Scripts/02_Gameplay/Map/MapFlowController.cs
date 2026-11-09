@@ -133,81 +133,6 @@ public class MapFlowController
         OpenCurrentNode(node);
     }
 
-    // 지도 굴림에 쓰는 덱의 여정 주사위. 못 찾으면 null이며, 굴림은 기본 면 구성으로 대신한다.
-    public DiceData1 GetJourneyDiceData() => JourneyDice.Find(dice.deckManager.masterDeck);
-
-    // 여정 주사위 면 스프라이트. 해골/하트/골드처럼 눈 값이 같아도 면 번호로 고른다.
-    public Sprite GetJourneyFaceSprite(DiceData1 die, int faceIndex)
-    {
-        if (die != null && die.customFaceSprites != null && die.customFaceSprites.Length > 0)
-        {
-            int index = die.customFaceSprites.Length == 1 ? 0 : Mathf.Clamp(faceIndex, 0, die.customFaceSprites.Length - 1);
-            if (die.customFaceSprites[index] != null) return die.customFaceSprites[index];
-        }
-        Dice prefabDice = dice.dicePrefab != null ? dice.dicePrefab.GetComponent<Dice>() : null;
-        if (prefabDice != null && prefabDice.diceFaceSprites != null && prefabDice.diceFaceSprites.Length > 0)
-        {
-            int pip = die != null && die.faceValues != null && faceIndex >= 0 && faceIndex < die.faceValues.Length
-                ? die.faceValues[faceIndex] : JourneyDice.MapPipsFromFaceIndex(faceIndex);
-            return prefabDice.diceFaceSprites[Mathf.Clamp(pip - 1, 0, prefabDice.diceFaceSprites.Length - 1)];
-        }
-        return null;
-    }
-
-    // 굴림 연출 중 빠르게 바꿔 보여 줄 면 스프라이트 하나(무작위 면)
-    public Sprite RandomJourneyFaceSprite()
-    {
-        DiceData1 die = GetJourneyDiceData() ?? JourneyDice.CreateDefault();
-        return GetJourneyFaceSprite(die, JourneyDice.RollFaceIndex(die));
-    }
-
-    // 여정 주사위의 면 하나를 굴려 결과를 계산한다. 상태는 바꾸지 않는다.
-    // 덱에서 여정 주사위를 못 찾아도 기본 면 구성으로 굴려 멈추지 않는다.
-    public JourneyRollResult RollJourneyFace()
-    {
-        DiceData1 die = GetJourneyDiceData();
-        if (die == null || die.faceValues == null || die.faceValues.Length == 0)
-            die = JourneyDice.CreateDefault();
-
-        int faceIndex = JourneyDice.RollFaceIndex(die);
-        // 지도 효과량은 면 번호(1~6). 전투 눈금(faceValues)과 섞지 않는다.
-        int mapPips = JourneyDice.MapPipsFromFaceIndex(faceIndex);
-        SpecialDieEffect effect = die.GetFaceEffect(faceIndex);
-        MapTableData table = GetMapTable();
-
-        var result = new JourneyRollResult
-        {
-            faceIndex = faceIndex,
-            pips = mapPips,
-            effect = effect,
-            faceSprite = GetJourneyFaceSprite(die, faceIndex)
-        };
-
-        // 지도에서는 면 효과만 쓴다. 코팅·위성 효과는 전투 결산에서만 적용한다.
-        switch (effect)
-        {
-            case SpecialDieEffect.Thorn:
-                result.outcome = JourneyOutcome.Damage;
-                result.amount = Mathf.Max(0, mapPips);
-                break;
-            case SpecialDieEffect.Heart:
-                result.outcome = JourneyOutcome.Heal;
-                float healMult = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetHealMultiplier() : 1f;
-                result.amount = Mathf.Max(0, TurnCalculator.CalculateHeartHeal(mapPips, healMult));
-                break;
-            case SpecialDieEffect.Coin:
-                result.outcome = JourneyOutcome.Gold;
-                int goldPerPip = BalanceConfig.Current.journeyGoldPerPip;
-                result.amount = Mathf.Max(0, mapPips * goldPerPip);
-                break;
-            default:
-                result.outcome = JourneyOutcome.Move;
-                result.amount = Mathf.Max(1, mapPips);
-                break;
-        }
-        return result;
-    }
-
     // 굴림 결과를 적용한다. 이동이면 true(이동 칸 수 대기), 그 외 효과는 바로 적용하고 false를 돌려준다.
     // appliedAmount: 실제로 깎인 체력 / 회복된 체력 / 지급된 골드(이동이면 0)
     // deferGoldUi: 골드 숫자 갱신을 코인 날아가기 연출에 맡길 때 true(실제 골드는 바로 올라간다)
@@ -221,45 +146,10 @@ public class MapFlowController
         else
         {
             stageProgression.pendingJourneyMove = 0;
-            appliedAmount = ApplyJourneyEffect(result, deferGoldUi);
+            appliedAmount = JourneyDice.ApplyEffect(dice, result, deferGoldUi);
         }
         SaveMapProgress();
         return move;
-    }
-
-    int ApplyJourneyEffect(JourneyRollResult result, bool deferGoldUi)
-    {
-        MapTableData table = GetMapTable();
-        switch (result.outcome)
-        {
-            case JourneyOutcome.Damage:
-                {
-                    // 지도 피해는 최소 체력 아래로 내려가지 않는다. 이미 그보다 낮으면 더 깎지 않는다.
-                    int minHp = table != null ? table.Config.JourneyDamageMinHp : 1;
-                    int hpBefore = dice.currentPlayerHP;
-                    dice.currentPlayerHP = Mathf.Min(dice.currentPlayerHP, Mathf.Max(minHp, dice.currentPlayerHP - result.amount));
-                    int hpLost = Mathf.Max(0, hpBefore - dice.currentPlayerHP);
-                    dice.UpdateMainUI("");
-                    // 몬스터에게 맞았을 때와 같은 화면 붉어짐·피격음(실제로 깎인 체력이 있을 때만)
-                    if (hpLost > 0)
-                    {
-                        HurtVignetteController.Get(dice).PlayShieldOrHealthHit(ui, 0, hpLost, dice.playerStatus.currentShield);
-                        dice.PlayPlayerHurtSound();
-                    }
-                    return hpLost;
-                }
-            case JourneyOutcome.Gold:
-                // 전투와 같은 경로로 지급한다(피규어 골드 증가 효과 포함). 화면 숫자는 deferGoldUi면 코인 연출이 올린다.
-                return shopManager != null ? shopManager.GrantGold(result.amount, deferGoldUi) : 0;
-            case JourneyOutcome.Heal:
-                {
-                    int hpBefore = dice.currentPlayerHP;
-                    dice.playerStatus.Heal(result.amount);
-                    dice.UpdateMainUI("");
-                    return Mathf.Max(0, dice.currentPlayerHP - hpBefore);
-                }
-        }
-        return 0;
     }
 
     public MonsterDataSO RollPortalMonster(MapNode node)

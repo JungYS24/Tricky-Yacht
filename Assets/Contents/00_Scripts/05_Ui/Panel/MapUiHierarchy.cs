@@ -293,7 +293,8 @@ public static class MapUiHierarchy
 
     // 노드 설명 패널을 설정 버튼(Setting_BTN) 바로 아래, 오른쪽 끝을 맞춰 둔다.
     // 설정 버튼은 HUD 쪽 오브젝트라 부모가 달라서 월드 좌표로 옮겨 계산한다.
-    public static void PlaceNodeDesBelowSetting(RectTransform nodeDes)
+    // setting: 부르는 쪽이 기억해 두는 설정 버튼. 비어 있을 때만 캔버스 전체에서 찾아 채운다(매번 전체를 훑지 않도록).
+    public static void PlaceNodeDesBelowSetting(RectTransform nodeDes, ref RectTransform setting)
     {
         if (nodeDes == null) return;
         RectTransform root = nodeDes.parent as RectTransform;
@@ -301,7 +302,7 @@ public static class MapUiHierarchy
         nodeDes.anchorMax = new Vector2(1f, 1f);
         nodeDes.pivot = new Vector2(1f, 1f);
 
-        RectTransform setting = FindSettingButton(root);
+        if (setting == null) setting = FindSettingButton(root);
         if (root == null || setting == null || root.lossyScale.x <= 0.0001f)
         {
             nodeDes.anchoredPosition = NodeDesFallbackPosition;

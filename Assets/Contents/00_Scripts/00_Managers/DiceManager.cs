@@ -1223,10 +1223,11 @@ public class DiceManager : MonoBehaviour
     public bool CanRollJourney() => MapFlow.CanRollJourney();
     public bool IsMapNodeSelectable(int nodeId) => MapFlow.IsMapNodeSelectable(nodeId);
     public void EnterMapNode(int nodeId) => MapFlow.EnterMapNode(nodeId);
-    public DiceData1 GetJourneyDiceData() => MapFlow.GetJourneyDiceData();
-    public Sprite GetJourneyFaceSprite(DiceData1 die, int faceIndex) => MapFlow.GetJourneyFaceSprite(die, faceIndex);
-    public Sprite RandomJourneyFaceSprite() => MapFlow.RandomJourneyFaceSprite();
-    public JourneyRollResult RollJourneyFace() => MapFlow.RollJourneyFace();
+    // 여정 주사위(찾기·면 그림·굴리기)는 JourneyDice가 맡는다.
+    public DiceData1 GetJourneyDiceData() => JourneyDice.FindInDeck(this);
+    public Sprite GetJourneyFaceSprite(DiceData1 die, int faceIndex) => JourneyDice.FaceSprite(this, die, faceIndex);
+    public Sprite RandomJourneyFaceSprite() => JourneyDice.RandomFaceSprite(this);
+    public JourneyRollResult RollJourneyFace() => JourneyDice.Roll(this);
     public bool ApplyJourneyResult(JourneyRollResult result, out int appliedAmount, bool deferGoldUi) => MapFlow.ApplyJourneyResult(result, out appliedAmount, deferGoldUi);
     public void ReturnToMap() => MapFlow.ReturnToMap();
     public void OnMapLootFinished() => MapFlow.OnMapLootFinished();
@@ -1237,4 +1238,9 @@ public class DiceManager : MonoBehaviour
 
     // 이벤트는 선언한 클래스 안에서만 부를 수 있어서 MapFlowController가 이 함수로 알립니다.
     internal void RaiseMapCombatStarted() => MapCombatStarted?.Invoke();
+
+    // 주사위 프리팹의 Dice 컴포넌트. 여정 주사위 굴림 연출이 면을 여러 번 바꿀 때 매번 꺼내지 않도록 한 번만 꺼내 둔다.
+    // 이 씬의 DiceManager가 들고 있어서 씬이 바뀌면 같이 정리된다.
+    Dice dicePrefabDice;
+    internal Dice DicePrefabDice => dicePrefabDice != null ? dicePrefabDice : (dicePrefabDice = dicePrefab != null ? dicePrefab.GetComponent<Dice>() : null);
 }

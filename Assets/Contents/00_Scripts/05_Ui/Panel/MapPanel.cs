@@ -352,8 +352,11 @@ public class MapPanel : MonoBehaviour
             shown++;
         }
         nodeDes.sizeDelta = new Vector2(240f, 16f + shown * rowStep);
-        MapUiHierarchy.PlaceNodeDesBelowSetting(nodeDes);
+        MapUiHierarchy.PlaceNodeDesBelowSetting(nodeDes, ref settingButton);
     }
+
+    // 노드 설명창 위치 기준인 설정 버튼. 처음 한 번 찾아 기억하고, 사라지면 다시 찾는다.
+    RectTransform settingButton;
 
     void RefreshJourneyChrome(DiceManager diceManager)
     {
