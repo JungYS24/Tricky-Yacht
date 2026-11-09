@@ -12,10 +12,15 @@ public static class MapJourney
 
     public static List<int> PassedOnWay(MapData map, int currentNodeId, int targetId, int move, bool forceStop)
     {
-        var passed = new List<int>();
         if (!TryCollect(map, currentNodeId, move, forceStop, out _, out Dictionary<int, int> cameFrom))
-            return passed;
+            return new List<int>();
+        return PassedOnWay(cameFrom, currentNodeId, targetId);
+    }
 
+    // TryCollect가 채운 cameFrom을 목표 칸에서 거꾸로 따라가 지나친 칸만 모은다. 이미 탐색했으면 다시 탐색하지 않고 쓴다.
+    public static List<int> PassedOnWay(Dictionary<int, int> cameFrom, int currentNodeId, int targetId)
+    {
+        var passed = new List<int>();
         int cursor = targetId;
         int guard = 0;
         while (cameFrom.TryGetValue(cursor, out int prev) && guard++ < 128)

@@ -48,16 +48,6 @@ public class StageManager
         }
     }
 
-    // 다음 스테이지로 라운드 증가 및 보스전(바이옴 교체) 타이밍 판정
-    // 반환값이 true이면 "보스를 잡았으니 다음 바이옴을 선택해라"는 뜻
-    public bool AdvanceToNextStage(bool isTutorial)
-    {
-        currentStage++;
-
-        // 튜토리얼이 아니고, 끝자리가 1로 떨어질 때 (11, 21, 31...) 바이옴 선택 타이밍
-        return !isTutorial && (currentStage - 1) % 10 == 0 && currentStage <= 100;
-    }
-
     // 유저가 바이옴 선택 패널에서 고른 맵을 적용
     public void SetNewBiome(List<BiomeDataSO> biomeList, BiomeType selectedType)
     {

@@ -811,9 +811,8 @@ public class EncounterEventPanel : MonoBehaviour
         if (choiceRoot != null) choiceRoot.SetActive(false);
         gameObject.SetActive(false);
 
-        if (diceManager != null && diceManager.useMapFlow && (TutorialManager.Instance == null || !TutorialManager.Instance.isTutorialActive))
+        // 조우가 끝나면 지도로 돌아간다(조우자는 지도의 조우 칸에서만 나온다).
+        if (diceManager != null)
             diceManager.ReturnToMap();
-        else
-            diceManager.ShowLootSelection();
     }
 }

@@ -155,32 +155,6 @@ public static class MapUiHierarchy
         Debug.LogWarning("[Map] RestPanel 하이어라키가 씬에 없습니다. MainScene_Map의 배치를 확인하세요.");
     }
 
-    public static void EnsureOpel(OpelPanel panel)
-    {
-        if (panel == null) return;
-        Transform box = panel.transform.Find("Box");
-        bool created = box == null;
-        if (created)
-        {
-            Stretch(panel.transform as RectTransform);
-            Image dim = GetOrAdd<Image>(panel.gameObject);
-            dim.color = new Color(0.04f, 0.06f, 0.1f, 0.82f);
-            var boxGo = new GameObject("Box", typeof(RectTransform), typeof(Image));
-            boxGo.transform.SetParent(panel.transform, false);
-            box = boxGo.transform;
-            RectTransform boxRect = box as RectTransform;
-            boxRect.sizeDelta = new Vector2(720f, 520f);
-            boxRect.anchorMin = boxRect.anchorMax = new Vector2(0.5f, 0.5f);
-            boxGo.GetComponent<Image>().color = new Color(0.12f, 0.14f, 0.2f, 1f);
-        }
-
-        panel.titleText = EnsureLabel(box, "Title", "오펠", 36, new Vector2(0f, 190f), new Vector2(600f, 70f), created);
-        panel.jupiterButton = EnsureButton(box, "JupiterButton", "목성", new Vector2(0f, 80f), created);
-        panel.marsButton = EnsureButton(box, "MarsButton", "화성", new Vector2(0f, 0f), created);
-        panel.mercuryButton = EnsureButton(box, "MercuryButton", "수성", new Vector2(0f, -80f), created);
-        panel.venusButton = EnsureButton(box, "VenusButton", "금성", new Vector2(0f, -160f), created);
-    }
-
     static void EnsureMapDim(RectTransform root)
     {
         Transform dim = root.Find("MapDim");
@@ -319,7 +293,8 @@ public static class MapUiHierarchy
 
     // 노드 설명 패널을 설정 버튼(Setting_BTN) 바로 아래, 오른쪽 끝을 맞춰 둔다.
     // 설정 버튼은 HUD 쪽 오브젝트라 부모가 달라서 월드 좌표로 옮겨 계산한다.
-    public static void PlaceNodeDesBelowSetting(RectTransform nodeDes)
+    // setting: 부르는 쪽이 기억해 두는 설정 버튼. 비어 있을 때만 캔버스 전체에서 찾아 채운다(매번 전체를 훑지 않도록).
+    public static void PlaceNodeDesBelowSetting(RectTransform nodeDes, ref RectTransform setting)
     {
         if (nodeDes == null) return;
         RectTransform root = nodeDes.parent as RectTransform;
@@ -327,7 +302,7 @@ public static class MapUiHierarchy
         nodeDes.anchorMax = new Vector2(1f, 1f);
         nodeDes.pivot = new Vector2(1f, 1f);
 
-        RectTransform setting = FindSettingButton(root);
+        if (setting == null) setting = FindSettingButton(root);
         if (root == null || setting == null || root.lossyScale.x <= 0.0001f)
         {
             nodeDes.anchoredPosition = NodeDesFallbackPosition;
@@ -521,7 +496,7 @@ public static class MapUiHierarchy
             RectTransform rect = found as RectTransform;
             rect.sizeDelta = area;
             rect.anchoredPosition = position;
-            text.font = MapPanel.BuiltinFont();
+            text.font = BuiltinFont();
             text.fontSize = size;
             text.alignment = TextAnchor.MiddleCenter;
             text.color = Color.white;
@@ -533,39 +508,6 @@ public static class MapUiHierarchy
         return text;
     }
 
-    static Button EnsureButton(Transform parent, string name, string label, Vector2 position, bool place)
-    {
-        Transform found = parent.Find(name);
-        bool created = found == null;
-        if (created)
-        {
-            var go = new GameObject(name, typeof(RectTransform));
-            go.transform.SetParent(parent, false);
-            found = go.transform;
-        }
-        Image image = GetOrAdd<Image>(found.gameObject);
-        Button button = GetOrAdd<Button>(found.gameObject);
-        if (created || place)
-        {
-            RectTransform rect = found as RectTransform;
-            rect.sizeDelta = new Vector2(460f, 64f);
-            rect.anchoredPosition = position;
-            image.color = new Color(0.22f, 0.28f, 0.36f, 1f);
-        }
-        button.targetGraphic = image;
-        Text text = EnsureLabel(found, "Text", label, 26, Vector2.zero, new Vector2(460f, 64f), created || place);
-        if (created || place)
-        {
-            RectTransform textRect = text.rectTransform;
-            textRect.anchorMin = Vector2.zero;
-            textRect.anchorMax = Vector2.one;
-            textRect.offsetMin = Vector2.zero;
-            textRect.offsetMax = Vector2.zero;
-            textRect.anchoredPosition = Vector2.zero;
-        }
-        return button;
-    }
-
     static T GetOrAdd<T>(GameObject target) where T : Component
     {
         T component = target.GetComponent<T>();
@@ -573,7 +515,8 @@ public static class MapUiHierarchy
         return component;
     }
 
-    static void Stretch(RectTransform rect)
+    // 부모를 꽉 채우게 펼친다. 지도 화면 코드(MapPanel, MapSceneSetup)가 같이 쓴다.
+    public static void Stretch(RectTransform rect)
     {
         if (rect == null) return;
         rect.anchorMin = Vector2.zero;
@@ -581,5 +524,13 @@ public static class MapUiHierarchy
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
         rect.localScale = Vector3.one;
+    }
+
+    // 지도 화면의 기본 글꼴(유니티 내장). 지도 화면 코드가 같이 쓴다.
+    public static Font BuiltinFont()
+    {
+        Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (font == null) font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        return font;
     }
 }

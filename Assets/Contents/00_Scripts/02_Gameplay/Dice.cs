@@ -329,15 +329,6 @@ public class Dice : MonoBehaviour, IPointerDownHandler
             if (DiceManager.Instance.biomeSelectionPanel != null && DiceManager.Instance.biomeSelectionPanel.panelRoot.activeInHierarchy) return;
         }
 
-        //튜토리얼 중 클릭 제한 로직
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-        {
-            if (!TutorialManager.Instance.IsDiceClickable(this))
-            {
-                return; // 허락되지 않은 주사위면 여기서 클릭 취소
-            }
-        }
-
         isKept = !isKept;
         OnDiceStateChanged?.Invoke();
 

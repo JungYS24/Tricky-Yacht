@@ -159,12 +159,7 @@ public class Enemy : MonoBehaviour
         MonsterDataSO forcedMonster = dice != null ? dice.pendingForcedMonster : null;
         if (dice != null) dice.pendingForcedMonster = null;
 
-        // 튜토리얼 중이라면 매니저에서 튜토리얼용 데이터를 가져옵니다 ---
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-        {
-            nextMonsterData = TutorialManager.Instance.GetTutorialMonster(currentStage);
-        }
-        else if (TutorialMode.Active && TutorialMode.WeakestMonster(currentBiome) != null)
+        if (TutorialMode.Active && TutorialMode.WeakestMonster(currentBiome) != null)
         {
             // 튜토리얼 모드 첫 전투는 가장 약한 몬스터로 고정합니다.
             nextMonsterData = TutorialMode.WeakestMonster(currentBiome);
@@ -176,10 +171,8 @@ public class Enemy : MonoBehaviour
         }
         else if (currentBiome != null)
         {
-            // 지도의 일반 전투는 층 번호가 10의 배수여도 보스전으로 보지 않습니다.
-            bool bossStage = currentStage % 10 == 0;
-            if (dice != null && dice.UsesMapFlow)
-                bossStage = dice.mapBossBattle;
+            // 지도의 보스 칸에서 시작한 전투만 보스전입니다(층 번호와는 상관없음).
+            bool bossStage = dice != null && dice.mapBossBattle;
             if (bossStage && currentBiome.bossMonster != null)
             {
                 nextMonsterData = currentBiome.bossMonster;
@@ -187,7 +180,7 @@ public class Enemy : MonoBehaviour
             //그 외의 일반 스테이지는 리스트에서 등급에 맞는 몬스터를 랜덤 출현
             else if (currentBiome.biomeMonsters != null && currentBiome.biomeMonsters.Count > 0)
             {
-                bool elite = dice != null && dice.UsesMapFlow && dice.isEliteBattle;
+                bool elite = dice != null && dice.isEliteBattle;
                 nextMonsterData = PickBiomeMonster(currentBiome.biomeMonsters, elite);
             }
         }
@@ -729,7 +722,7 @@ public class Enemy : MonoBehaviour
     static MonsterGrade ResolveGrade(MonsterDataSO data)
     {
         DiceManager dice = DiceManager.Instance;
-        if (dice != null && dice.UsesMapFlow)
+        if (dice != null)
         {
             MapNode node = dice.stageProgression.FindNode(dice.stageProgression.currentNodeId);
             if (node != null && node.type == MapNodeType.Boss) return MonsterGrade.Boss;

@@ -45,17 +45,6 @@ public class BiomeNavigator
         { BiomeType.Skyisland, new List<BiomeType> { BiomeType.Circus, BiomeType.Snow, BiomeType.Beach } }
     };
 
-    public List<BiomeType> GetNextBiomeOptions(BiomeType currentBiome, int currentStage)
-    {
-        // 직선 진행(기존 메인씬)은 스테이지 번호로 Void를 판정합니다.
-        if (currentStage >= 100)
-        {
-            return VoidOptions();
-        }
-
-        return BiomeRoutes.ContainsKey(currentBiome) ? BiomeRoutes[currentBiome] : new List<BiomeType>();
-    }
-
     // 지도 진행은 클리어한 바이옴 수로 Void를 판정합니다. 기준값은 Map_Table의 Biome_Count_To_Void입니다.
     public List<BiomeType> GetNextBiomeOptions(BiomeType currentBiome, int biomeIndex, int biomeCountToVoid)
     {

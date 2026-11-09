@@ -2,24 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MapNode
-{
-    public int id;
-    public int row;
-    public int col;
-    public MapNodeType type;
-    public bool isShortcut;
-    public bool isShopRow;
-    public List<int> children = new List<int>();
-    public List<int> parents = new List<int>();
-}
-
-public class MapData
-{
-    public List<MapNode> nodes = new List<MapNode>();
-    public int bossId;
-    public int seed;
-}
+// 지도 데이터 형식(MapNodeType, MapNode, MapData)은 03_Data/MapData.cs에 있다.
 
 public class MapGenerateResult
 {

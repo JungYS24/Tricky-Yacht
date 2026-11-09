@@ -73,7 +73,6 @@ public class ShopManager : MonoBehaviour
     public RuntimeAnimatorController ronanAnimator;
     public RuntimeAnimatorController opelAnimator;
     public MerchantShopSkin merchantSkin; // 상인별 판·카드·버튼 그림과 배치 (비워 두면 원래 상점 모습 그대로)
-    MerchantShopSkinApplier skinApplier;
     bool mapMerchantActive;
     ShopStockTable stockTable;
     bool stockTableLogged;
@@ -130,7 +129,7 @@ public class ShopManager : MonoBehaviour
         IsShopOpen = true;
         rerollsThisVisit = 0;
         RevealShop();
-        RemoveLegacyMerchantLabel();
+        MerchantLook.RemoveLegacyMerchantLabel();
 
         if (diceManager?.ui != null) diceManager.ui.UpdateGoldUI(currentGold);
         if (GoldCounter.Instance != null) GoldCounter.Instance.SetInstant(currentGold);
@@ -141,7 +140,7 @@ public class ShopManager : MonoBehaviour
         if (FigureEffectManager.Instance != null)
             FigureEffectManager.Instance.EvaluateShopEnteredTriggers(diceManager, this);
 
-        ApplyMerchantPresentation(fromMap);
+        MerchantLook.ApplyMerchantPresentation(fromMap);
 
         Debug.Log($"[Map Shop] merchant={(fromMap ? currentMerchant.ToString() : "tutorial")} shopUI={(shopUI != null ? shopUI.name : "null")} active={shopUI != null && shopUI.activeInHierarchy}");
     }
@@ -159,7 +158,7 @@ public class ShopManager : MonoBehaviour
     void OnShopLocaleChanged(Locale _)
     {
         if (!IsShopOpen) return;
-        ApplyShopTitle(mapMerchantActive);
+        MerchantLook.ApplyShopTitle(mapMerchantActive);
         UpdateRerollUI();
     }
 
@@ -177,186 +176,9 @@ public class ShopManager : MonoBehaviour
         shopUI.transform.SetAsLastSibling();
     }
 
-    // 상점 제목에 상인 이름이 나오므로 예전에 만들어져 씬에 저장된 하단 MerchantName 라벨은 지운다.
-    void RemoveLegacyMerchantLabel()
-    {
-        if (shopUI == null) return;
-        Transform legacy = shopUI.transform.Find("MerchantName");
-        if (legacy != null) Destroy(legacy.gameObject);
-    }
-
-    TextMeshProUGUI shopTitleText;
-    LocalizeStringEvent shopTitleLocalize;
-    Image npcImage;
-    Animator npcAnimator;
-    bool npcRestSaved;
-    Vector2 npcAnchorMin, npcAnchorMax, npcPivot, npcAnchoredPosition, npcSizeDelta;
-    Vector3 npcLocalScale;
-    bool npcPreserveAspect;
-    Sprite npcSprite;
-    bool npcAnimatorEnabled;
-    RuntimeAnimatorController npcController;
-    float npcFootX, npcFootY, npcBodyHeight;
-
-    void ApplyMerchantPresentation(bool fromMap)
-    {
-        BindShopChrome();
-        if (skinApplier == null && merchantSkin != null) skinApplier = new MerchantShopSkinApplier(this);
-        if (fromMap)
-        {
-            ApplyNpc(currentMerchant);
-            ApplyShopTitle(true);
-            skinApplier?.Apply(merchantSkin, currentMerchant, shopTitleText);
-        }
-        else
-        {
-            RestoreNpc();
-            ApplyShopTitle(false);
-            skinApplier?.Restore();
-        }
-    }
-
-    void BindShopChrome()
-    {
-        if (shopUI == null) return;
-        if (shopTitleText == null)
-        {
-            TextMeshProUGUI[] texts = shopUI.GetComponentsInChildren<TextMeshProUGUI>(true);
-            for (int i = 0; i < texts.Length; i++)
-            {
-                if (texts[i].gameObject.name != "Shop_TXT_Pannel") continue;
-                shopTitleText = texts[i];
-                shopTitleLocalize = texts[i].GetComponent<LocalizeStringEvent>();
-                break;
-            }
-        }
-        if (npcImage == null)
-        {
-            Image[] images = shopUI.GetComponentsInChildren<Image>(true);
-            for (int i = 0; i < images.Length; i++)
-            {
-                if (images[i].gameObject.name != "NPC_Image") continue;
-                npcImage = images[i];
-                npcAnimator = images[i].GetComponent<Animator>();
-                break;
-            }
-        }
-    }
-
-    void ApplyShopTitle(bool fromMap)
-    {
-        if (shopTitleText == null) return;
-        if (!fromMap)
-        {
-            if (shopTitleLocalize != null)
-            {
-                shopTitleLocalize.enabled = true;
-                shopTitleLocalize.RefreshString();
-            }
-            return;
-        }
-
-        if (shopTitleLocalize != null) shopTitleLocalize.enabled = false;
-        string key;
-        string fallback;
-        switch (currentMerchant)
-        {
-            case MapMerchant.Nyaon:
-                key = "UI_SHOP_TITLE_NYAON";
-                fallback = "냐온 딜레마, 기묘한 상점";
-                break;
-            case MapMerchant.Ronan:
-                key = "UI_SHOP_TITLE_RONAN";
-                fallback = "남작 로넌의 골동품 상점";
-                break;
-            default:
-                key = "UI_SHOP_TITLE_OPEL";
-                fallback = "오펠의 아르카나 상점";
-                break;
-        }
-        shopTitleText.text = LocalizationManager.GetUi(key, fallback);
-    }
-
-    RuntimeAnimatorController MerchantController(MapMerchant merchant)
-    {
-        switch (merchant)
-        {
-            case MapMerchant.Nyaon: return nyaonAnimator;
-            case MapMerchant.Ronan: return ronanAnimator;
-            default: return opelAnimator;
-        }
-    }
-
-    void SaveNpcRest()
-    {
-        if (npcRestSaved || npcImage == null) return;
-        RectTransform rect = npcImage.rectTransform;
-        npcAnchorMin = rect.anchorMin;
-        npcAnchorMax = rect.anchorMax;
-        npcPivot = rect.pivot;
-        npcAnchoredPosition = rect.anchoredPosition;
-        npcSizeDelta = rect.sizeDelta;
-        npcLocalScale = rect.localScale;
-        npcPreserveAspect = npcImage.preserveAspect;
-        npcSprite = npcImage.sprite;
-        npcAnimatorEnabled = npcAnimator != null && npcAnimator.enabled;
-        npcController = npcAnimator != null ? npcAnimator.runtimeAnimatorController : null;
-        float height = rect.rect.height * Mathf.Abs(rect.localScale.y);
-        float width = rect.rect.width * Mathf.Abs(rect.localScale.x);
-        npcBodyHeight = height;
-        npcFootY = rect.anchoredPosition.y - height * rect.pivot.y;
-        npcFootX = rect.anchoredPosition.x + width * (0.5f - rect.pivot.x);
-        npcRestSaved = true;
-    }
-
-    void ApplyNpc(MapMerchant merchant)
-    {
-        SaveNpcRest();
-        if (npcImage == null) return;
-        RuntimeAnimatorController controller = MerchantController(merchant);
-        if (npcAnimator != null && controller != null)
-        {
-            npcAnimator.enabled = true;
-            npcAnimator.runtimeAnimatorController = controller;
-            npcAnimator.Rebind();
-            npcAnimator.Update(0f);
-        }
-        FitNpcImage();
-    }
-
-    void FitNpcImage()
-    {
-        if (npcImage == null || npcImage.sprite == null || npcBodyHeight <= 1f) return;
-        Rect spriteRect = npcImage.sprite.rect;
-        float aspect = spriteRect.width / Mathf.Max(1f, spriteRect.height);
-        RectTransform rect = npcImage.rectTransform;
-        rect.localScale = Vector3.one;
-        rect.anchorMin = new Vector2(0.5f, 0.5f);
-        rect.anchorMax = new Vector2(0.5f, 0.5f);
-        rect.pivot = new Vector2(0.5f, 0f);
-        rect.sizeDelta = new Vector2(npcBodyHeight * aspect, npcBodyHeight);
-        rect.anchoredPosition = new Vector2(npcFootX, npcFootY);
-        npcImage.preserveAspect = true;
-    }
-
-    void RestoreNpc()
-    {
-        if (!npcRestSaved || npcImage == null) return;
-        if (npcAnimator != null)
-        {
-            npcAnimator.runtimeAnimatorController = npcController;
-            npcAnimator.enabled = npcAnimatorEnabled;
-        }
-        npcImage.sprite = npcSprite;
-        npcImage.preserveAspect = npcPreserveAspect;
-        RectTransform rect = npcImage.rectTransform;
-        rect.anchorMin = npcAnchorMin;
-        rect.anchorMax = npcAnchorMax;
-        rect.pivot = npcPivot;
-        rect.anchoredPosition = npcAnchoredPosition;
-        rect.sizeDelta = npcSizeDelta;
-        rect.localScale = npcLocalScale;
-    }
+    // 지도 상인 모습(NPC 애니메이션·위치, 상점 제목, 판·카드 그림)은 MerchantShopPresenter가 맡습니다. 처음 쓸 때 만듭니다.
+    MerchantShopPresenter merchantLook;
+    MerchantShopPresenter MerchantLook => merchantLook ??= new MerchantShopPresenter(this);
 
     void BindShopStock()
     {
@@ -427,60 +249,6 @@ public class ShopManager : MonoBehaviour
         }
 
         int dataIndex = 0;
-
-        // 튜토리얼 강제 진열 로직 분기
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-        {
-            int step = TutorialManager.Instance.currentStepIndex;
-
-            // [첫 번째 상점] 13~20단계 사이
-            if (step <= 20)
-            {
-                if (shopSlots.Length >= 6)
-                {
-                    shopSlots[0].SetupSlot(TutorialManager.Instance.tutFigure, this);
-                    shopSlots[1].SetupSlot(TutorialManager.Instance.tutSnack, this);
-                    shopSlots[2].SetupSlot(TutorialManager.Instance.tutCoating, this);
-                    shopSlots[3].SetupSlot(TutorialManager.Instance.tutDice, this);
-                    shopSlots[4].SetupSlot(TutorialManager.Instance.tutTicket, this);
-                    if (TutorialManager.Instance.tutDummy != null)
-                        shopSlots[5].SetupSlot(TutorialManager.Instance.tutDummy, this);
-                }
-                return; // 튜토리얼이면 여기서 함수 종료!
-            }
-
-            // [두 번째 상점] 23단계
-            if (step == 22 || step == 23)
-            {
-                for (int i = 0; i < shopSlots.Length; i++)
-                {
-                    shopSlots[i].gameObject.SetActive(true);
-
-                    if (i == 0 && TutorialManager.Instance.tutorialPeppermint != null)
-                        shopSlots[0].SetupSlot(TutorialManager.Instance.tutorialPeppermint, this);
-                    else if (i == 1 && TutorialManager.Instance.tutorialGarnish != null)
-                        shopSlots[1].SetupSlot(TutorialManager.Instance.tutorialGarnish, this);
-                    else if (i == 2 && TutorialManager.Instance.tutorialHeartDice != null)
-                        shopSlots[2].SetupSlot(TutorialManager.Instance.tutorialHeartDice, this);
-                    else if (i == 3 && TutorialManager.Instance.tutorialCoating != null)
-                        shopSlots[3].SetupSlot(TutorialManager.Instance.tutorialCoating, this);
-                    else
-                    {
-                        // 남는 슬롯이 있다면 랜덤으로 채우기
-                        if (dataIndex < shuffled.Count)
-                        {
-                            shopSlots[i].SetupSlot(shuffled[dataIndex], this);
-                            dataIndex++;
-                        }
-                    }
-                }
-                return; // 튜토리얼이면 여기서 함수 종료!
-            }
-        }
-
-        // 튜토리얼이 모두 끝났거나 일반 게임일 때 (완전 랜덤 상점)
-
-
 
         int baseCount;
         if (mapMerchantActive && stockTable != null && stockTable.Loaded)
@@ -595,10 +363,7 @@ public class ShopManager : MonoBehaviour
         {
             //무료 스위치 끄기
             diceManager.isNextShopFree = false;
-            if (diceManager.UsesMapFlow)
-                diceManager.OnShopClosedDuringMap();
-            else
-                diceManager.NextStage();
+            diceManager.OnShopClosedDuringMap();
         }
     }
 
@@ -639,10 +404,6 @@ public class ShopManager : MonoBehaviour
                     // 피규어/간식 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용
                     if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
                     Sfx.Play(SfxId.Shop_Purchase);
-                    if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-                    {
-                        TutorialManager.Instance.OnItemBought(item.itemName);
-                    }
                     return true;
                 }
                 else
@@ -666,11 +427,6 @@ public class ShopManager : MonoBehaviour
                 // 그 외 소모품/티켓류 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용
                 if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
                 Sfx.Play(SfxId.Shop_Purchase);
-
-                if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-                {
-                    TutorialManager.Instance.OnItemBought(item.itemName);
-                }
                 return true;
             }
         }

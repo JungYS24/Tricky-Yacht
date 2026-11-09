@@ -98,12 +98,6 @@ public class CoatingSelectionPanel : MonoBehaviour
         }, () =>
         {
             isBusy = false;
-            // 튜토리얼 중일 때 코팅 처리가 끝났음을 알림
-            if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-            {
-                TutorialManager.Instance.OnCoatingAppliedComplete();
-            }
-
             ClosePanel();
             if (diceManager != null && diceManager.enemy != null) diceManager.ForceUpdateUI();
         });

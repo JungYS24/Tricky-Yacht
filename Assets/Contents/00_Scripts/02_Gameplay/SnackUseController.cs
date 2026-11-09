@@ -81,10 +81,6 @@ public sealed class SnackUseController
         entries.Add(entry);
         slot.MarkSnackUsed(entry, inventory.snackUsedTint);
 
-        // 튜토리얼의 사용 선택 안내는 기존 클릭 시점에 진행합니다.
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-            TutorialManager.Instance.OnItemUsed(snack.itemName);
-
         // 라임 주스와 포춘쿠키는 즉시 연출. 보존되면 아이콘만 숨기고 끝내기까지 칸과 입력을 잠급니다.
         if (entry.IsImmediateSnack)
         {
