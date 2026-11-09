@@ -121,7 +121,6 @@ public class DiceManager : MonoBehaviour
     public EncounterEventPanel encounterEventPanel;
 
     [Header("지도 시스템")]
-    public bool useMapFlow;
     public TextAsset mapTableAsset;
     public MapPanel mapPanel;
     public RestPanel restPanel;
@@ -138,8 +137,6 @@ public class DiceManager : MonoBehaviour
     TravelHudLayout hud;
     internal MapFlowController MapFlow => mapFlow ??= new MapFlowController(this);
     internal TravelHudLayout Hud => hud ??= new TravelHudLayout();
-
-    public bool UsesMapFlow => useMapFlow && (TutorialManager.Instance == null || !TutorialManager.Instance.isTutorialActive);
 
     [Header("조우자 특수 효과 상태 (임시 저장용)")]
     [HideInInspector] public bool isNextEnemyHPBoosted = false; // 눈먼 점술가 패널티
@@ -309,13 +306,10 @@ public class DiceManager : MonoBehaviour
             // 첫 시작은 무조건 숲(Forest)으로 고정
             currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
             saveStateReady = true;
-            if (UsesMapFlow)
-                MapFlow.BeginNewMapRun();
-            else
-                StartNewStage();
+            MapFlow.BeginNewMapRun();
         }
 
-        // 지도 흐름이 아닌 경우(튜토리얼 등)에도 디버프 표시가 화면에 자리 잡도록 한 번 배치합니다.
+        // 디버프 표시가 화면에 자리 잡도록 한 번 배치합니다.
         if (DebuffTrackerHud.Instance != null) DebuffTrackerHud.Instance.Place(MapFlow.TravelScreen);
 
         //튜토리얼 종료 후 메인 게임 진입 시, 현재 설정된 1스테이지(숲) 바이옴의 브금을 강제로 재생!
@@ -343,11 +337,10 @@ public class DiceManager : MonoBehaviour
         isRestoringSave = true;
         try
         {
-            bool resumeCombat = UsesMapFlow && data.mapSaveVersion >= 1 && !string.IsNullOrEmpty(data.savedMonsterName);
-            bool idleMap = UsesMapFlow && !resumeCombat;
+            bool resumeCombat = data.mapSaveVersion >= 1 && !string.IsNullOrEmpty(data.savedMonsterName);
+            bool idleMap = !resumeCombat;
             GameStateRestorer.Restore(this, data, defaultMaxRerolls, ref pendingPeppermintSuccess, idleMap);
-            if (UsesMapFlow)
-                MapFlow.RestoreMapProgress(data);
+            MapFlow.RestoreMapProgress(data);
 
             if (idleMap)
             {
@@ -360,8 +353,7 @@ public class DiceManager : MonoBehaviour
                 return;
             }
 
-            if (UsesMapFlow)
-                MapFlow.ShowCombatScreen();
+            MapFlow.ShowCombatScreen();
 
             if (board.TryRestoreState(data))
             {
@@ -911,15 +903,14 @@ public class DiceManager : MonoBehaviour
         Invoke(nameof(ShowClownEvent), 1.0f);
     }
 
-    // 몇 번째 바이옴인지(0부터). 지도 흐름이 아니면 스테이지 10개를 한 바이옴으로 본다.
-    public int CurrentBiomeTier => UsesMapFlow ? stageProgression.biomeIndex : Mathf.Max(0, (currentStage - 1) / 10);
+    // 몇 번째 바이옴인지(0부터).
+    public int CurrentBiomeTier => stageProgression.biomeIndex;
 
     // 이 바이옴에서 이미 치른 전투 수(지금 전투 제외). 지나친 노드는 싸우지 않았으므로 방문 기록만 센다.
     public int CombatsClearedInBiome
     {
         get
         {
-            if (!UsesMapFlow) return Mathf.Max(0, (currentStage - 1) % 10);
             int count = 0;
             List<int> visited = stageProgression.visitedNodeIds;
             if (visited == null) return 0;
@@ -940,34 +931,11 @@ public class DiceManager : MonoBehaviour
         ? CharacterStatus.Selected.HP
         : BalanceConfig.Current.playerMaxHP;
 
+    // 몬스터 처치 1초 뒤 ProcessStageClear가 Invoke로 부른다(이름으로 불리므로 이름을 바꾸지 않는다).
+    // 조우자는 지도의 조우 칸에서만 나오므로 여기서는 전리품 선택만 띄운다.
     public void ShowClownEvent()
     {
-        // 튜토리얼 중에는 조우자 이벤트를 아예 스킵하고 무조건 전리품으로 감.
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-        {
-            if (currentStage == 3) return; // 3스테이지(보스전)는 아무것도 안 띄우고 종료
-            ShowLootSelection();
-            return;
-        }
-
-        // 지도에서는 조우자가 노드로만 나옵니다.
-        if (useMapFlow)
-        {
-            ShowLootSelection();
-            return;
-        }
-
-        //7, 17, 27, 37... 등 10라운드 주기로 끝자리가 7인 스테이지 클리어 시 조우자 등장
-        if (currentStage % 10 == 1 && encounterEventPanel != null)
-        {
-            // 조우자 이벤트를 시작할 때 현재 바이옴 타입을 넘겨주어 등장 가능한 조우자만 필터링
-            encounterEventPanel.StartEvent(currentBiome.biomeType);
-        }
-        else
-        {
-            // 그 외의 일반 스테이지는 조우자 없이 바로 전리품 선택으로 넘어감
-            ShowLootSelection();
-        }
+        ShowLootSelection();
     }
 
     internal void ShowGameClear(bool demo = false)
@@ -1082,40 +1050,11 @@ public class DiceManager : MonoBehaviour
 
     public void PromptShopChoice() { ui?.HideResult(); ui?.ShowShopChoice(); }
     public void GoToShop() { ui?.HideShopChoice(); shopManager?.OpenShop(); }
+    // 전투 후 "상점 갈래?" 선택에서 다음으로 넘어가기 버튼(Awake에서 연결). 지도로 돌아가거나 보스 처치 후면 바이옴 선택으로 간다.
     public void SkipShopAndNextStage()
     {
         ui?.HideShopChoice();
-        if (UsesMapFlow)
-            OnShopClosedDuringMap();
-        else
-            NextStage();
-    }
-
-    //발표용 떄문에 튜토리얼 수정
-    public void NextStage()
-    {
-        bool isTutorial = TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive;
-
-        // StageManager에게 라운드 증가를 지시하고, 지금이 바이옴을 넘길 타이밍인지 판정받음
-        bool shouldChangeBiome = stageProgression.AdvanceToNextStage(isTutorial);
-
-        if (shouldChangeBiome)
-        {
-            ui?.HideShopChoice();
-            List<BiomeType> nextOptions = biomeNavigator.GetNextBiomeOptions(currentBiome.biomeType, currentStage - 1);
-            biomeSelectionPanel.OpenPanel(this, nextOptions);
-        }
-        else
-        {
-            // 튜토리얼 중이거나, 바이옴 넘어갈 타이밍이 아닐 때는 그대로 게임 진행
-            ui?.HideShopChoice();
-            StartNewStage();
-
-            if (GameSaveManager.Instance != null)
-            {
-                GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
-            }
-        }
+        OnShopClosedDuringMap();
     }
 
     // 바이옴 선택 버튼을 눌렀을 때 실행될 함수
@@ -1124,24 +1063,13 @@ public class DiceManager : MonoBehaviour
         if (biomeSelectionPanel != null) biomeSelectionPanel.ClosePanel();
 
         stageProgression.SetNewBiome(biomeList, selectedType); // 이관된 로직
-        if (UsesMapFlow)
-        {
-            // 비차원(Void)도 지도로 진행한다. 적·엘리트 노드는 MapGenerator 가 차원문으로 바꾼다.
-            MapTableData table = GetMapTable();
-            stageProgression.BeginBiome(table, selectedType);
-            MapFlow.ShowMapScreen();
-
-            if (GameSaveManager.Instance != null)
-                GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
-            return;
-        }
-
-        StartNewStage();
+        // 비차원(Void)도 지도로 진행한다. 적·엘리트 노드는 MapGenerator 가 차원문으로 바꾼다.
+        MapTableData table = GetMapTable();
+        stageProgression.BeginBiome(table, selectedType);
+        MapFlow.ShowMapScreen();
 
         if (GameSaveManager.Instance != null)
-        {
             GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
-        }
     }
 
 
@@ -1195,11 +1123,8 @@ public class DiceManager : MonoBehaviour
         //몬스터 초기화
         enemy.ResetMonsterIndex();
         stageProgression.InitFirstBiome(biomeList);
-        // 새로운 스테이지 시작
-        if (UsesMapFlow)
-            MapFlow.BeginNewMapRun();
-        else
-            StartNewStage();
+        // 새 지도로 다시 시작
+        MapFlow.BeginNewMapRun();
     }
 
     public IEnumerator ShowGameOverPanelDelayed()

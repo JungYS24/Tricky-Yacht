@@ -51,7 +51,6 @@ public static class MapSceneSetup
         EditorUtility.SetDirty(mapPanel);
         EditorUtility.SetDirty(restPanel);
 
-        dice.useMapFlow = true;
         dice.mapTableAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(TablePath);
         dice.mapPanel = mapPanel;
         dice.restPanel = restPanel;

@@ -82,12 +82,6 @@ public class LootSelectionPanel : MonoBehaviour
         }
         Sfx.Play(SfxId.Shop_Purchase);
         LootChosen?.Invoke();
-        //튜토리얼 상태일 때 전리품 선택 완료를 매니저에게 알림
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-        {
-            TutorialManager.Instance.OnLootSelectedComplete();
-        }
-
         ClosePanelAndProceed();
     }
 
@@ -97,16 +91,8 @@ public class LootSelectionPanel : MonoBehaviour
         IsPanelOpen = false;
         panelRoot.SetActive(false);
 
-        // 튜토리얼 11번 스텝(첫 번째 전리품)일 때는 0.5초 대기 없이 그냥 넘김
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive && TutorialManager.Instance.currentStepIndex == 11)
-        {
-            // 아무것도 안 함 (TutorialManager에서 12번 대사를 띄우고 다음 버튼을 기다림)
-        }
-        else
-        {
-            // 메인 게임이거나 튜토리얼 두 번째 전리품(22번)일 때는 DiceManager를 통해 0.5초 코루틴 실행
-            diceManager.StartCoroutine(WaitAndOpenShopRoutine());
-        }
+        // DiceManager를 통해 잠깐 기다린 뒤 다음 단계로 넘어간다(티켓 선택 창이 열려 있으면 닫힐 때까지 기다림).
+        diceManager.StartCoroutine(WaitAndOpenShopRoutine());
     }
 
     private void ShuffleList<T>(List<T> list)
@@ -119,7 +105,7 @@ public class LootSelectionPanel : MonoBehaviour
             list[rnd] = temp;
         }
     }
-    // 0.2초 뒤 상점을 여는 코루틴
+    // 0.2초 뒤 지도 흐름으로 넘기는 코루틴(지도 표의 전투 후 상점 설정이 켜져 있으면 "상점 갈래?" 선택이 뜬다)
     private IEnumerator WaitAndOpenShopRoutine()
     {
         yield return new WaitForSeconds(0.2f);
@@ -133,20 +119,7 @@ public class LootSelectionPanel : MonoBehaviour
             }
         }
 
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-        {
-            if (diceManager.shopManager != null)
-                diceManager.shopManager.OpenShop();
-            TutorialManager.Instance.OnAutoShopEntered();
-        }
-        else if (diceManager.useMapFlow)
-        {
-            diceManager.OnMapLootFinished();
-        }
-        else if (diceManager.shopManager != null)
-        {
-            diceManager.shopManager.OpenShop();
-        }
+        diceManager.OnMapLootFinished();
     }
 
 }

@@ -34,9 +34,6 @@ public class LobbyManager : MonoBehaviour
 
     public void OnStartButtonClick()
     {
-        // 본 게임 시작 시에는 튜토리얼을 끄도록 설정 (PlayerPrefs 활용)
-        PlayerPrefs.SetInt("RunTutorial", 0);
-
         // 처음 새 게임이면 캐릭터 선택 후 지도에서 바로 안내가 이어진다(세이브를 지우기 전에 판단).
         TutorialMode.StartGuidedIfFirstRun();
 
@@ -57,8 +54,6 @@ public class LobbyManager : MonoBehaviour
     //이어하기 전용 클릭 이벤트
     public void OnContinueButtonClick()
     {
-        PlayerPrefs.SetInt("RunTutorial", 0);
-
         //저장된 걸 불러오라는 Load 플래그 1 부여
         PlayerPrefs.SetInt("LoadGame", 1);
 

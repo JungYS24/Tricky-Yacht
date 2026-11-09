@@ -120,54 +120,6 @@ public sealed class DiceBoardController
         // 덱 리필 검사 로직 한 줄로 압축! (DeckManager에게 위임)
         deckManager.CheckAndRefillDrawPile(5);
 
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-        {
-            // 2스테이지 첫 진입 시 하이롤러 주사위 확정 스폰!
-            if (currentStage == 2 && deckManager.drawPile.Count >= 5)
-            {
-                string hrName = TutorialManager.Instance.tutorialHighRollerDice.itemName;
-                int hrIdx = deckManager.drawPile.FindIndex(d => d.diceName == hrName);
-                if (hrIdx != -1)
-                {
-                    var temp = deckManager.drawPile[0];
-                    deckManager.drawPile[0] = deckManager.drawPile[hrIdx];
-                    deckManager.drawPile[hrIdx] = temp;
-                }
-            }
-            // 3스테이지 보스 반격 후 체력 회복 튜토리얼 (하트 주사위 확정)
-            else if (currentStage == 3 && TutorialManager.Instance.currentStepIndex >= 28 && TutorialManager.Instance.currentStepIndex <= 30)
-            {
-                // 하트 주사위는 전체 효과가 하트인 주사위만 찾는다. 5면만 하트인 여정 주사위는 제외.
-                int heartIdx = deckManager.drawPile.FindIndex(d => d.specialEffect == SpecialDieEffect.Heart && !d.isJourneyDice);
-                if (heartIdx == -1)
-                {
-                    int discardIdx = deckManager.discardPile.FindIndex(d => d.specialEffect == SpecialDieEffect.Heart && !d.isJourneyDice);
-                    if (discardIdx != -1)
-                    {
-                        deckManager.drawPile.Insert(0, deckManager.discardPile[discardIdx]);
-                        deckManager.discardPile.RemoveAt(discardIdx);
-                    }
-                }
-                else
-                {
-                    var temp = deckManager.drawPile[0];
-                    deckManager.drawPile[0] = deckManager.drawPile[heartIdx];
-                    deckManager.drawPile[heartIdx] = temp;
-                }
-            }
-            // 3스테이지 보스전 첫 번째 턴 (코팅 주사위 확정)
-            else if (currentStage == 3 && TutorialManager.Instance.currentStepIndex >= 24 && TutorialManager.Instance.currentStepIndex <= 27)
-            {
-                int coatedIdx = deckManager.drawPile.FindIndex(d => d.isCoated);
-                if (coatedIdx != -1)
-                {
-                    var temp = deckManager.drawPile[0];
-                    deckManager.drawPile[0] = deckManager.drawPile[coatedIdx];
-                    deckManager.drawPile[coatedIdx] = temp;
-                }
-            }
-        }
-
         for (int i = 0; i < rollSlots.Length; i++)
         {
             // 복잡했던 덱 리필 및 드로우 로직이 단 한 줄로 끝납니다.
@@ -193,13 +145,6 @@ public sealed class DiceBoardController
             d.rollPos = rollSlots[i].position;
             int initialFace = UnityEngine.Random.Range(0, 6);
             int initialVal = drawnData.faceValues[initialFace];
-
-            //튜토리얼 추가
-            if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-            {
-                int forcedVal = TutorialManager.Instance.GetForcedDiceValue(i);
-                if (forcedVal != -1) { initialVal = forcedVal; initialFace = -1; }
-            }
 
             d.SetData(drawnData, initialVal, initialFace);
             ActiveDice.Add(d);
@@ -328,13 +273,6 @@ public sealed class DiceBoardController
             if (d == null || d.isKept) continue;
             int finalFace = UnityEngine.Random.Range(0, 6);
             int finalResult = d.myData.faceValues[finalFace];
-            //튜토리얼 추가
-            if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-            {
-                int diceIndex = ActiveDice.IndexOf(d);
-                int forcedVal = TutorialManager.Instance.GetForcedDiceValue(diceIndex);
-                if (forcedVal != -1) { finalResult = forcedVal; finalFace = -1; }
-            }
 
             d.PlayRollEffect(finalResult, finalFace);
         }

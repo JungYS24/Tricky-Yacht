@@ -271,7 +271,7 @@ public class GameSaveManager : MonoBehaviour
 
 
         data.currentStage = dice.currentStage;
-        data.mapSaveVersion = dice.useMapFlow ? 1 : 0;
+        data.mapSaveVersion = 1; // 지도 진행 세이브. 0은 지도 도입 이전 세이브(불러올 때 새 지도로 이어 준다)
         data.runSeed = dice.stageProgression.runSeed;
         data.biomeIndex = dice.stageProgression.biomeIndex;
         data.currentNodeId = dice.stageProgression.currentNodeId;

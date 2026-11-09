@@ -31,7 +31,7 @@ public class MapFlowController
 
     public string GetMapStageLabel(string biomeName)
     {
-        if (!dice.useMapFlow || stageProgression.currentMap == null) return null;
+        if (stageProgression.currentMap == null) return null;
         MapTableData table = GetMapTable();
         int total = table != null ? table.Config.MaxPathLength : MapPathLength(stageProgression.currentMap);
         MapNode node = stageProgression.FindNode(stageProgression.currentNodeId);
@@ -54,7 +54,6 @@ public class MapFlowController
 
     public bool CanRollJourney()
     {
-        if (!dice.UsesMapFlow) return false;
         if (stageProgression.pendingJourneyMove > 0) return false;
         if (stageProgression.currentNodeId >= 0 && !stageProgression.currentNodeCleared) return false;
         return true;
@@ -100,7 +99,6 @@ public class MapFlowController
 
     public void EnterMapNode(int nodeId)
     {
-        if (!dice.UsesMapFlow) return;
         MapNode node = stageProgression.FindNode(nodeId);
         if (node == null || !CanPickNode(out int move)) return;
         // 갈 수 있는지와 지나친 칸을 한 번의 탐색으로 함께 구한다(IsMapNodeSelectable과 같은 판정).

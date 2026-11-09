@@ -250,60 +250,6 @@ public class ShopManager : MonoBehaviour
 
         int dataIndex = 0;
 
-        // 튜토리얼 강제 진열 로직 분기
-        if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-        {
-            int step = TutorialManager.Instance.currentStepIndex;
-
-            // [첫 번째 상점] 13~20단계 사이
-            if (step <= 20)
-            {
-                if (shopSlots.Length >= 6)
-                {
-                    shopSlots[0].SetupSlot(TutorialManager.Instance.tutFigure, this);
-                    shopSlots[1].SetupSlot(TutorialManager.Instance.tutSnack, this);
-                    shopSlots[2].SetupSlot(TutorialManager.Instance.tutCoating, this);
-                    shopSlots[3].SetupSlot(TutorialManager.Instance.tutDice, this);
-                    shopSlots[4].SetupSlot(TutorialManager.Instance.tutTicket, this);
-                    if (TutorialManager.Instance.tutDummy != null)
-                        shopSlots[5].SetupSlot(TutorialManager.Instance.tutDummy, this);
-                }
-                return; // 튜토리얼이면 여기서 함수 종료!
-            }
-
-            // [두 번째 상점] 23단계
-            if (step == 22 || step == 23)
-            {
-                for (int i = 0; i < shopSlots.Length; i++)
-                {
-                    shopSlots[i].gameObject.SetActive(true);
-
-                    if (i == 0 && TutorialManager.Instance.tutorialPeppermint != null)
-                        shopSlots[0].SetupSlot(TutorialManager.Instance.tutorialPeppermint, this);
-                    else if (i == 1 && TutorialManager.Instance.tutorialGarnish != null)
-                        shopSlots[1].SetupSlot(TutorialManager.Instance.tutorialGarnish, this);
-                    else if (i == 2 && TutorialManager.Instance.tutorialHeartDice != null)
-                        shopSlots[2].SetupSlot(TutorialManager.Instance.tutorialHeartDice, this);
-                    else if (i == 3 && TutorialManager.Instance.tutorialCoating != null)
-                        shopSlots[3].SetupSlot(TutorialManager.Instance.tutorialCoating, this);
-                    else
-                    {
-                        // 남는 슬롯이 있다면 랜덤으로 채우기
-                        if (dataIndex < shuffled.Count)
-                        {
-                            shopSlots[i].SetupSlot(shuffled[dataIndex], this);
-                            dataIndex++;
-                        }
-                    }
-                }
-                return; // 튜토리얼이면 여기서 함수 종료!
-            }
-        }
-
-        // 튜토리얼이 모두 끝났거나 일반 게임일 때 (완전 랜덤 상점)
-
-
-
         int baseCount;
         if (mapMerchantActive && stockTable != null && stockTable.Loaded)
             baseCount = Mathf.Clamp(stockTable.SlotCount, 1, shopSlots.Length);
@@ -417,10 +363,7 @@ public class ShopManager : MonoBehaviour
         {
             //무료 스위치 끄기
             diceManager.isNextShopFree = false;
-            if (diceManager.UsesMapFlow)
-                diceManager.OnShopClosedDuringMap();
-            else
-                diceManager.NextStage();
+            diceManager.OnShopClosedDuringMap();
         }
     }
 
@@ -461,10 +404,6 @@ public class ShopManager : MonoBehaviour
                     // 피규어/간식 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용
                     if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
                     Sfx.Play(SfxId.Shop_Purchase);
-                    if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-                    {
-                        TutorialManager.Instance.OnItemBought(item.itemName);
-                    }
                     return true;
                 }
                 else
@@ -488,11 +427,6 @@ public class ShopManager : MonoBehaviour
                 // 그 외 소모품/티켓류 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용
                 if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
                 Sfx.Play(SfxId.Shop_Purchase);
-
-                if (TutorialManager.Instance != null && TutorialManager.Instance.isTutorialActive)
-                {
-                    TutorialManager.Instance.OnItemBought(item.itemName);
-                }
                 return true;
             }
         }
