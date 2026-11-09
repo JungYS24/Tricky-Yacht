@@ -10,6 +10,7 @@ public class MapNodeView : MonoBehaviour
     public Image ring;
     int nodeId;
     DiceManager owner;
+    bool clickBound; // 칸 버튼은 지도 한 장 동안 다시 쓰므로 클릭 연결은 한 번만 한다
 
     public void Bind(DiceManager diceManager, int id, Sprite sprite, Color color, bool interactable, bool current, bool visited)
     {
@@ -19,9 +20,14 @@ public class MapNodeView : MonoBehaviour
         if (icon == null) icon = GetComponent<Image>();
         if (button != null)
         {
-            button.onClick.RemoveAllListeners();
             button.interactable = interactable;
-            button.onClick.AddListener(OnClick);
+            // 눌렀을 때 쓰는 칸 번호와 DiceManager는 위에서 매번 갱신한다.
+            if (!clickBound)
+            {
+                button.onClick.RemoveAllListeners();
+                button.onClick.AddListener(OnClick);
+                clickBound = true;
+            }
         }
         if (icon != null)
         {

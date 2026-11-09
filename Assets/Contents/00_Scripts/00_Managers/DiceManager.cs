@@ -104,7 +104,7 @@ public class DiceManager : MonoBehaviour
     public TMPro.TextMeshProUGUI gameClearText;
 
     public BiomeSelectionPanel biomeSelectionPanel;
-    private BiomeNavigator biomeNavigator = new BiomeNavigator();
+    internal readonly BiomeNavigator biomeNavigator = new BiomeNavigator();
 
     [Header("사운드 설정")]
     public AudioSource sfxSource;
@@ -125,7 +125,6 @@ public class DiceManager : MonoBehaviour
     public TextAsset mapTableAsset;
     public MapPanel mapPanel;
     public RestPanel restPanel;
-    public OpelPanel opelPanel;
     public MapIconSet mapIconSet;
 
     // 다음 전투에 강제할 몬스터. Enemy.Initialize가 쓰면 비웁니다.
@@ -134,8 +133,11 @@ public class DiceManager : MonoBehaviour
     [System.NonSerialized] public bool isEliteBattle;
     [System.NonSerialized] public bool mapBossBattle;
 
-    MapTableData cachedMapTable;
-    bool pendingBiomeTransition;
+    // 지도 진행과 지도 화면 HUD 배치는 따로 맡깁니다(아래 "지도" 연결 참고). 처음 쓸 때 만듭니다.
+    MapFlowController mapFlow;
+    TravelHudLayout hud;
+    internal MapFlowController MapFlow => mapFlow ??= new MapFlowController(this);
+    internal TravelHudLayout Hud => hud ??= new TravelHudLayout();
 
     public bool UsesMapFlow => useMapFlow && (TutorialManager.Instance == null || !TutorialManager.Instance.isTutorialActive);
 
@@ -143,7 +145,8 @@ public class DiceManager : MonoBehaviour
     [HideInInspector] public bool isNextEnemyHPBoosted = false; // 눈먼 점술가 패널티
     [HideInInspector] public bool isNextCombatHPTiedToOne = false; // 숙원의 방랑자 패널티
     [HideInInspector] public int wandererRestoreHP = 0; // 숙원의 방랑자: 체력 1로 싸우는 전투에서 이기면 되돌릴 체력. 0이면 없음
-    [HideInInspector] public int extraShopSlots = 0; // 상점 칸 증감. 밀렵꾼 봉인이면 음수    [HideInInspector] public int perfumerWeaknessTurns = 0; // 조향사 시련 턴 수
+    [HideInInspector] public int extraShopSlots = 0; // 상점 칸 증감. 밀렵꾼 봉인이면 음수
+    [HideInInspector] public int perfumerWeaknessTurns = 0; // 조향사 시련 턴 수
     [HideInInspector] public bool isNextShopFree = false; //녹슨 닻의 선장 무료 상점
 
 
@@ -227,6 +230,8 @@ public class DiceManager : MonoBehaviour
     public float multStraight = 2.0f;
     public float multYacht = 2.5f;
     private float[] defaultHandMultipliers; // Awake에서 위 값을 기억해 두고 ResetHandMultipliers에서 되돌림
+    static readonly HandType[] AllHandTypes = (HandType[])Enum.GetValues(typeof(HandType));
+    float unknownHandMult; // 없는 족보 값이 들어왔을 때 쓰는 임시 칸(항상 1배, 실제 배수는 안 바뀜)
 
 
     private readonly List<Dice> keptDice = new List<Dice>(5);
@@ -261,7 +266,7 @@ public class DiceManager : MonoBehaviour
             enemy = Instantiate(enemyPrefab, enemySpawnPoint.position, Quaternion.identity);
         }
 
-        board = new DiceBoardController(dicePrefab, keepSlotParent, rollSlotParent, serializedActiveDice, deckManager, ApplyDrawDebuff);
+        board = new DiceBoardController(dicePrefab, keepSlotParent, rollSlotParent, serializedActiveDice, deckManager, Debuffs.ApplyDrawDebuff);
         DebuffTrackerHud.Create(this); // 덱의 디버프 주사위를 왼쪽 위에 종류별로 보여 주는 표시
 
         // 주사위 상태 변경 이벤트 구독 연동
@@ -269,7 +274,8 @@ public class DiceManager : MonoBehaviour
 
         maxRerolls = BalanceConfig.Current.maxRerolls;
         defaultMaxRerolls = maxRerolls;
-        defaultHandMultipliers = new[] { multHighCard, multOnePair, multTwoPair, multTriple, multFullHouse, multFourOfAKind, multStraight, multYacht };
+        defaultHandMultipliers = new float[AllHandTypes.Length];
+        for (int i = 0; i < AllHandTypes.Length; i++) defaultHandMultipliers[i] = HandMult(AllHandTypes[i]);
 
         if (mainFromClearButton != null)
             mainFromClearButton.onClick.AddListener(OnGameClearMainButtonClick);
@@ -304,13 +310,13 @@ public class DiceManager : MonoBehaviour
             currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
             saveStateReady = true;
             if (UsesMapFlow)
-                BeginNewMapRun();
+                MapFlow.BeginNewMapRun();
             else
                 StartNewStage();
         }
 
         // 지도 흐름이 아닌 경우(튜토리얼 등)에도 디버프 표시가 화면에 자리 잡도록 한 번 배치합니다.
-        if (DebuffTrackerHud.Instance != null) DebuffTrackerHud.Instance.Place(travelScreen);
+        if (DebuffTrackerHud.Instance != null) DebuffTrackerHud.Instance.Place(MapFlow.TravelScreen);
 
         //튜토리얼 종료 후 메인 게임 진입 시, 현재 설정된 1스테이지(숲) 바이옴의 브금을 강제로 재생!
         if (BGMManager.Instance != null && currentBiome != null)
@@ -341,21 +347,21 @@ public class DiceManager : MonoBehaviour
             bool idleMap = UsesMapFlow && !resumeCombat;
             GameStateRestorer.Restore(this, data, defaultMaxRerolls, ref pendingPeppermintSuccess, idleMap);
             if (UsesMapFlow)
-                RestoreMapProgress(data);
+                MapFlow.RestoreMapProgress(data);
 
             if (idleMap)
             {
                 isCalculating = false;
-                ShowMapScreen();
+                MapFlow.ShowMapScreen();
                 if (data.mapSaveVersion >= 1 && !stageProgression.currentNodeCleared && stageProgression.currentNodeId >= 0)
-                    OpenCurrentNode(stageProgression.FindNode(stageProgression.currentNodeId));
+                    MapFlow.OpenCurrentNode(stageProgression.FindNode(stageProgression.currentNodeId));
                 FigureEffectManager.Instance?.EvaluateLowHPTriggers(this, shopManager);
                 saveStateReady = true;
                 return;
             }
 
             if (UsesMapFlow)
-                ShowCombatScreen();
+                MapFlow.ShowCombatScreen();
 
             if (board.TryRestoreState(data))
             {
@@ -394,129 +400,22 @@ public class DiceManager : MonoBehaviour
         board.CaptureForSave(data);
     }
 
-    internal readonly List<DiceData1> currentCombatDebuffs = new List<DiceData1>();
-
-    private void AddNodeDebuffs()
-    {
-        MapNode node = stageProgression.FindNode(stageProgression.currentNodeId);
-        if (node == null) return;
-        switch (node.type)
-        {
-            // 엘리트(도둑·족쇄, 이번 전투만)와 차원문(가시·저주, 영구)은 바이옴 단계별 개수만큼 디버프 주사위를 넣는다.
-            case MapNodeType.Elite:
-            {
-                int count = BalanceConfig.Current.RollDebuffCount(CurrentBiomeTier);
-                for (int i = 0; i < count; i++)
-                    AddCombatDebuff(UnityEngine.Random.Range(0, 2) == 0 ? DebuffDiceType.Thief : DebuffDiceType.Shackle);
-                break;
-            }
-            case MapNodeType.Portal:
-            {
-                BalanceConfig cfg = BalanceConfig.Current;
-                int count = cfg.RollDebuffCount(CurrentBiomeTier);
-                for (int i = 0; i < count; i++)
-                    AddCombatDebuff(UnityEngine.Random.Range(0, 2) == 0 ? DebuffDiceType.Spine : DebuffDiceType.Curse, !cfg.portalDebuffPermanent);
-                break;
-            }
-            case MapNodeType.Boss:
-                AddCombatDebuff(DebuffDiceType.Fake);
-                break;
-        }
-    }
-
-    private void AddCombatDebuff(DebuffDiceType type, bool fightOnly = false)
-    {
-        DiceItemSO source = FindDebuffSource(type);
-        DiceData1 die = deckManager.AddDebuffDice(type, source);
-        if (source == null) ApplyDebuffAppearance(die);
-        currentCombatDebuffs.Add(die);
-        if (fightOnly) fightOnlyDebuffs.Add(die);
-    }
-
-    // 이번 전투에만 넣은 영구형 디버프(차원문의 가시·저주). 전투가 끝나면 덱에서 뺀다. 세이브에는 남지 않는다.
-    readonly List<DiceData1> fightOnlyDebuffs = new List<DiceData1>();
-
-    void RemoveFightOnlyDebuffs()
-    {
-        if (fightOnlyDebuffs.Count == 0) return;
-        System.Predicate<DiceData1> match = die => die != null && fightOnlyDebuffs.Contains(die);
-        board?.RemoveDiceMatching(match);
-        deckManager.masterDeck.RemoveAll(match);
-        deckManager.drawPile.RemoveAll(match);
-        deckManager.discardPile.RemoveAll(match);
-        currentCombatDebuffs.RemoveAll(match);
-        fightOnlyDebuffs.Clear();
-    }
-
-    internal DiceItemSO FindDebuffSource(DebuffDiceType type)
-    {
-        var database = GameSaveManager.Instance != null ? GameSaveManager.Instance.masterItemDatabase : null;
-        return database != null ? database.Find(item => item is DiceItemSO dice && dice.debuffType == type) as DiceItemSO : null;
-    }
-
-    // 기존 아이템 DB의 눈별 에셋에서 외형을 모은다. 디버프 종류와 눈 값은 덱 생성 규칙을 유지한다.
-    internal void ApplyDebuffAppearance(DiceData1 die)
-    {
-        DiceItemSO sourceAsset = FindDebuffSource(die.debuffType);
-        if (sourceAsset != null)
-        {
-            die.customDiceShell = sourceAsset.customDiceShell;
-            die.customFaceSprites = sourceAsset.customFaceSprites != null ? (Sprite[])sourceAsset.customFaceSprites.Clone() : null;
-            return;
-        }
-        if (die.debuffType == DebuffDiceType.Fake)
-        {
-            die.customDiceShell = fakeDiceShell;
-            die.customFaceSprites = new Sprite[] { fakeDiceFace, fakeDiceFace, fakeDiceFace, fakeDiceFace, fakeDiceFace, fakeDiceFace };
-            return;
-        }
-        string assetName;
-        switch (die.debuffType)
-        {
-            case DebuffDiceType.Thief: assetName = "Thief Dice"; break;
-            case DebuffDiceType.Shackle: assetName = "Captive Dice"; break;
-            case DebuffDiceType.Spine: assetName = "Spine_Dice_"; break;
-            case DebuffDiceType.Curse: assetName = "Cursed Dice_"; break;
-            default: return;
-        }
-        bool numbered = die.debuffType == DebuffDiceType.Spine || die.debuffType == DebuffDiceType.Curse;
-        var sprites = new Sprite[6];
-        for (int i = 0; i < 6; i++)
-        {
-            string sourceName = assetName + (numbered ? (i + 1).ToString() : "");
-            DiceItemSO source = GameSaveManager.Instance != null
-                ? GameSaveManager.Instance.masterItemDatabase.Find(item => item is DiceItemSO && item.name == sourceName) as DiceItemSO
-                : null;
-            if (source == null) continue;
-            if (i == 0) die.customDiceShell = source.customDiceShell;
-            sprites[i] = source.customFaceSprites != null && source.customFaceSprites.Length > 0
-                ? source.customFaceSprites[0] : null;
-        }
-        die.customFaceSprites = sprites;
-    }
-
-    public void RemoveCombatDebuffs(bool temporaryOnly = false, bool currentEnemyOnly = false)
-    {
-        System.Predicate<DiceData1> match = die => die != null && die.IsDebuff
-            && (!temporaryOnly || die.IsTemporaryDebuff)
-            && (!currentEnemyOnly || currentCombatDebuffs.Contains(die));
-        board?.RemoveDiceMatching(match);
-        if (currentEnemyOnly)
-        {
-            deckManager.masterDeck.RemoveAll(match);
-            deckManager.drawPile.RemoveAll(match);
-            deckManager.discardPile.RemoveAll(match);
-        }
-        else if (temporaryOnly) deckManager.RemoveTemporaryDebuffDice();
-        else deckManager.RemoveAllDebuffDice();
-        currentCombatDebuffs.RemoveAll(match);
-    }
+    // ===== 전투 디버프 주사위 =====
+    // 넣기·빼기·외형·뽑을 때 발동은 CombatDebuffController가 맡습니다. 처음 쓸 때 만듭니다.
+    // 아래는 바깥 스크립트(세이브, 복원, 피규어, 디버프 표시)가 예전 이름 그대로 쓰는 연결입니다.
+    CombatDebuffController debuffs;
+    internal CombatDebuffController Debuffs => debuffs ??= new CombatDebuffController(this);
+    internal DiceBoardController Board => board;
+    internal List<DiceData1> currentCombatDebuffs => Debuffs.currentCombatDebuffs;
+    internal DiceItemSO FindDebuffSource(DebuffDiceType type) => Debuffs.FindDebuffSource(type);
+    internal void ApplyDebuffAppearance(DiceData1 die) => Debuffs.ApplyDebuffAppearance(die);
+    public void RemoveCombatDebuffs(bool temporaryOnly = false, bool currentEnemyOnly = false) => Debuffs.RemoveCombatDebuffs(temporaryOnly, currentEnemyOnly);
 
     public void StartNewStage()
     {
         if (isStartingCombat) return;
         board.ClearBoard();
-        DiscardDrawTriggers();
+        Debuffs.DiscardDrawTriggers();
         InventoryManager.Instance?.SnackUses.ResetForStage();
         isStageClearing = false;
         enemyDeathHandled = false;
@@ -530,7 +429,7 @@ public class DiceManager : MonoBehaviour
         ui?.UpdateFlameStackUI(stageContext.accumulatedFlameDamage);
 
         RemoveCombatDebuffs(temporaryOnly: true);
-        RemoveFightOnlyDebuffs();
+        Debuffs.RemoveFightOnlyDebuffs();
         currentCombatDebuffs.Clear();
         DevilDiceBoss.ClearCurses(deckManager.masterDeck);
 
@@ -559,7 +458,7 @@ public class DiceManager : MonoBehaviour
         if (currentBiome != null) enemy.Initialize(currentStage, currentBiome);
         else enemy.Initialize(currentStage, null);
 
-        AddNodeDebuffs();
+        Debuffs.AddNodeDebuffs();
 
         // 몬스터 생성 완료 직후 로직
         if (FigureEffectManager.Instance != null)
@@ -587,8 +486,7 @@ public class DiceManager : MonoBehaviour
 
     private IEnumerator PlayCombatIntro(List<DiceData1> incoming)
     {
-        CacheHud();
-        hudObjects.TryGetValue("Deck_BTN", out GameObject deckButton);
+        GameObject deckButton = Hud.Find("Deck_BTN");
         Transform target = deckButton != null ? deckButton.transform : null;
         bool committed = false;
         try
@@ -610,7 +508,7 @@ public class DiceManager : MonoBehaviour
             HandleDiceChanged();
         }
         // 첫 손패가 제자리에 놓인 뒤 뽑을 때 발동한 디버프를 보여 준다.
-        FlushDrawTriggers();
+        Debuffs.FlushDrawTriggers();
     }
 
     // 보스 등장 연출에서 가짜 주사위로 바뀌기 전에 보여 줄 일반 주사위 눈(6).
@@ -664,46 +562,10 @@ public class DiceManager : MonoBehaviour
 
     public int RemainingRerolls => Mathf.Max(0, maxRerolls + snackBonusRerolls + figureBonusRerolls - turnContext.debuffRerollPenalty - currentRerolls);
 
-    // 뽑는 즉시 효과를 적용하고, 화면 연출은 주사위가 보드에 놓인 뒤 FlushDrawTriggers에서 보여 준다.
-    private readonly List<DebuffFeedback.DrawTrigger> pendingDrawTriggers = new List<DebuffFeedback.DrawTrigger>();
-
-    private void ApplyDrawDebuff(DiceData1 die)
-    {
-        if (die == null || !die.TriggersDebuffOnDraw) return;
-        if (die.debuffType == DebuffDiceType.Thief && shopManager != null)
-        {
-            int stolen = Mathf.Min(100, Mathf.Max(0, shopManager.currentGold));
-            shopManager.currentGold -= stolen;
-            // 화면 골드 숫자는 코인이 빠져나가는 연출에서 내린다.
-            pendingDrawTriggers.Add(new DebuffFeedback.DrawTrigger { data = die, stolenGold = stolen });
-        }
-        else if (die.debuffType == DebuffDiceType.Shackle)
-        {
-            turnContext.debuffRerollPenalty++;
-            pendingDrawTriggers.Add(new DebuffFeedback.DrawTrigger { data = die });
-        }
-    }
-
-    private void FlushDrawTriggers()
-    {
-        if (pendingDrawTriggers.Count == 0) return;
-        var triggers = new List<DebuffFeedback.DrawTrigger>(pendingDrawTriggers);
-        pendingDrawTriggers.Clear();
-        DebuffFeedback.PlayDrawTriggers(triggers, activeDiceList, ui, shopManager);
-    }
-
     private IEnumerator FlushDrawTriggersAfter(float delay)
     {
         yield return new WaitForSeconds(delay);
-        FlushDrawTriggers();
-    }
-
-    // 연출을 보여 주지 못하고 넘어가는 경우(새 전투·재시작) 화면 골드만 실제 값에 맞춘다.
-    private void DiscardDrawTriggers()
-    {
-        if (pendingDrawTriggers.Count == 0) return;
-        pendingDrawTriggers.Clear();
-        shopManager?.SyncGoldDisplay();
+        Debuffs.FlushDrawTriggers();
     }
 
     public void ForceUpdateUI() => HandleDiceChanged();
@@ -923,47 +785,37 @@ public class DiceManager : MonoBehaviour
     //티켓 아이템 먹었을 때 호출할 함수
     public void UpgradeHand(HandType handType, float amount)
     {
-        switch (handType)
-        {
-            case HandType.HighCard: multHighCard *= amount; break;
-            case HandType.OnePair: multOnePair *= amount; break;
-            case HandType.TwoPair: multTwoPair *= amount; break;
-            case HandType.Triple: multTriple *= amount; break;
-            case HandType.FullHouse: multFullHouse *= amount; break;
-            case HandType.FourOfAKind: multFourOfAKind *= amount; break;
-            case HandType.Straight: multStraight *= amount; break;
-            case HandType.Yacht: multYacht *= amount; break;
-        }
+        HandMult(handType) *= amount;
     }
 
     // 티켓으로 올린 족보 배수를 인스펙터 기본값으로 되돌린다 (재시작, 심연의 딜러)
     public void ResetHandMultipliers()
     {
         if (defaultHandMultipliers == null) return;
-        multHighCard = defaultHandMultipliers[0];
-        multOnePair = defaultHandMultipliers[1];
-        multTwoPair = defaultHandMultipliers[2];
-        multTriple = defaultHandMultipliers[3];
-        multFullHouse = defaultHandMultipliers[4];
-        multFourOfAKind = defaultHandMultipliers[5];
-        multStraight = defaultHandMultipliers[6];
-        multYacht = defaultHandMultipliers[7];
+        for (int i = 0; i < AllHandTypes.Length; i++)
+            HandMult(AllHandTypes[i]) = defaultHandMultipliers[i];
     }
 
     // 티켓 도감에 보여줄 현재 배수
-    public float GetHandMultiplier(HandType handType)
+    public float GetHandMultiplier(HandType handType) => HandMult(handType);
+
+    // 족보 종류별 배수 칸. 티켓 강화·도감·되돌리기가 모두 이 한 곳을 거친다.
+    // 없는 족보 값이면 임시 칸(1배)을 돌려줘서 실제 배수는 바뀌지 않는다.
+    ref float HandMult(HandType handType)
     {
         switch (handType)
         {
-            case HandType.HighCard: return multHighCard;
-            case HandType.OnePair: return multOnePair;
-            case HandType.TwoPair: return multTwoPair;
-            case HandType.Triple: return multTriple;
-            case HandType.FullHouse: return multFullHouse;
-            case HandType.FourOfAKind: return multFourOfAKind;
-            case HandType.Straight: return multStraight;
-            case HandType.Yacht: return multYacht;
-            default: return 1.0f;
+            case HandType.HighCard: return ref multHighCard;
+            case HandType.OnePair: return ref multOnePair;
+            case HandType.TwoPair: return ref multTwoPair;
+            case HandType.Triple: return ref multTriple;
+            case HandType.FullHouse: return ref multFullHouse;
+            case HandType.FourOfAKind: return ref multFourOfAKind;
+            case HandType.Straight: return ref multStraight;
+            case HandType.Yacht: return ref multYacht;
+            default:
+                unknownHandMult = 1.0f;
+                return ref unknownHandMult;
         }
     }
 
@@ -1026,15 +878,14 @@ public class DiceManager : MonoBehaviour
         // 이번 전투 한정 디버프(도둑·족쇄)를 제거하고, 왼쪽 위 디버프 표시에서 연기처럼 사라지는 모습을 보여 준다.
         var vanishing = new List<DiceData1>();
         foreach (var die in deckManager.masterDeck)
-            if (die != null && (die.IsTemporaryDebuff || fightOnlyDebuffs.Contains(die))) vanishing.Add(die);
+            if (die != null && (die.IsTemporaryDebuff || Debuffs.IsFightOnly(die))) vanishing.Add(die);
         RemoveCombatDebuffs(temporaryOnly: true);
-        RemoveFightOnlyDebuffs();
+        Debuffs.RemoveFightOnlyDebuffs();
         currentCombatDebuffs.Clear();
         DevilDiceBoss.ClearCurses(deckManager.masterDeck);
         if (vanishing.Count > 0)
         {
-            CacheHud();
-            hudObjects.TryGetValue("Deck_BTN", out GameObject deckButton);
+            GameObject deckButton = Hud.Find("Deck_BTN");
             DebuffFeedback.PlayTemporaryVanish(deckButton != null ? deckButton.transform : null, vanishing);
         }
         DebuffTrackerHud.Instance?.Refresh();
@@ -1054,65 +905,10 @@ public class DiceManager : MonoBehaviour
             return;
         }
 
-        int baseClearReward = GetClearRewardGold();
-        baseClearReward = Mathf.FloorToInt(baseClearReward * combatWinGoldMultiplier); // 투탕카멘 2배 적용
-        combatWinGoldMultiplier = 1.0f; // 초기화
-
-        if (shopManager != null)
-        {
-            //스테이지 클리어 기본 골드 카운팅 연출 실행: GrantGold에서 지급과 UI 갱신을 함께 처리
-            shopManager.GrantGold(baseClearReward);
-        }
-
-        // 바이옴 보스 처치 회복. 튜토리얼 모드는 예전처럼 회복하지 않는다.
-        int clearHealPercent = BalanceConfig.Current.biomeClearHealPercent;
-        if (!TutorialMode.Active && enemy.Grade == MonsterGrade.Boss && clearHealPercent > 0)
-        {
-            playerStatus.Heal(Mathf.FloorToInt(playerMaxHP * (clearHealPercent / 100f)));
-            UpdateMainUI("");
-        }
-
-        //스테이지 클리어 시 패시브(Passive) 피규어 효과 일괄 발동
-        if (FigureEffectManager.Instance != null)
-        {
-            FigureEffectManager.Instance.EvaluateStageClearTriggers(this, shopManager);
-        }
-
-        if (pendingPeppermintSuccess)
-        {
-            if (enemy.dropFigureData != null)
-            {
-                InventoryManager.Instance.AddItem(enemy.dropFigureData);
-            }
-        }
-        else if (RollNaturalFigureDrop())
-        {
-            InventoryManager.Instance.AddItem(enemy.dropFigureData);
-            ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_FIGURE_DROPPED", "피규어 획득: {0}", LocalizationManager.GetItemDisplayName(enemy.dropFigureData)));
-        }
+        // 처치 골드, 보스 처치 회복, 클리어 피규어 효과, 피규어 획득은 StageClearRewards가 이 순서대로 준다.
+        StageClearRewards.Give(this, pendingPeppermintSuccess);
 
         Invoke(nameof(ShowClownEvent), 1.0f);
-    }
-
-    // 처치 골드: 몬스터 dropGold x 배율. 보스는 바이옴 클리어 보상을 더하고, 엘리트·보스는 등급 배율을 한 번 더 곱한다.
-    // 튜토리얼 모드는 예전 고정값을 유지한다.
-    int GetClearRewardGold()
-    {
-        if (TutorialMode.Active) return 500;
-        BalanceConfig cfg = BalanceConfig.Current;
-        int gold = Mathf.FloorToInt(enemy.DropGold * cfg.monsterGoldMultiplier);
-        if (enemy.Grade == MonsterGrade.Boss) gold += cfg.biomeClearBonusGold;
-        return Mathf.FloorToInt(gold * cfg.GoldMultiplierFor(enemy.Grade) * cfg.TierGold(CurrentBiomeTier));
-    }
-
-    // 페퍼민트 없이 처치했을 때 등급별 확률로 드롭 피규어를 준다. 이미 가진 피규어는 주지 않는다.
-    bool RollNaturalFigureDrop()
-    {
-        if (TutorialMode.Active || enemy == null || enemy.dropFigureData == null) return false;
-        InventoryManager inventory = InventoryManager.Instance;
-        if (inventory == null || inventory.ownedFigures.Contains(enemy.dropFigureData)) return false;
-        float chance = BalanceConfig.Current.DropRateFor(enemy.Grade) + snackBonusFigureDropRate;
-        return UnityEngine.Random.value < chance;
     }
 
     // 몇 번째 바이옴인지(0부터). 지도 흐름이 아니면 스테이지 10개를 한 바이옴으로 본다.
@@ -1132,15 +928,11 @@ public class DiceManager : MonoBehaviour
                 int id = visited[i];
                 if (id == stageProgression.currentNodeId) continue;
                 MapNode node = stageProgression.FindNode(id);
-                if (node != null && IsCombatNode(node.type)) count++;
+                // 전투 칸(일반·엘리트·차원문)에 보스까지 센다. MapTableData.IsCombatNode는 보스를 빼므로 따로 더한다.
+                if (node != null && (MapTableData.IsCombatNode(node.type) || node.type == MapNodeType.Boss)) count++;
             }
             return count;
         }
-    }
-
-    static bool IsCombatNode(MapNodeType type)
-    {
-        return type == MapNodeType.Enemy || type == MapNodeType.Elite || type == MapNodeType.Portal || type == MapNodeType.Boss;
     }
 
     // 캐릭터 선택에서 고른 시작 체력. 고르지 않고 들어왔으면 기본 최대 체력.
@@ -1178,7 +970,7 @@ public class DiceManager : MonoBehaviour
         }
     }
 
-    private void ShowGameClear(bool demo = false)
+    internal void ShowGameClear(bool demo = false)
     {
         if (gameClearPanel != null)
         {
@@ -1279,23 +1071,6 @@ public class DiceManager : MonoBehaviour
         Sfx.Play(SfxId.Stage_Clear);
     }
 
-    // 현재 족보 이름에 맞는 진짜 배수를 찾아오는 함수
-    public float GetHandMultiplier(HandRank rank)
-    {
-        switch (rank)
-        {
-            case HandRank.HighCard: return multHighCard;
-            case HandRank.OnePair: return multOnePair;
-            case HandRank.TwoPair: return multTwoPair;
-            case HandRank.Triple: return multTriple;
-            case HandRank.Straight: return multStraight;
-            case HandRank.FullHouse: return multFullHouse;
-            case HandRank.FourOfAKind: return multFourOfAKind;
-            case HandRank.Yacht: return multYacht;
-            default: return 1.0f;
-        }
-    }
-
     private readonly MainUIPresenter mainUIPresenter = new MainUIPresenter();
 
     public void UpdateMainUI(string handName)
@@ -1354,7 +1129,7 @@ public class DiceManager : MonoBehaviour
             // 비차원(Void)도 지도로 진행한다. 적·엘리트 노드는 MapGenerator 가 차원문으로 바꾼다.
             MapTableData table = GetMapTable();
             stageProgression.BeginBiome(table, selectedType);
-            ShowMapScreen();
+            MapFlow.ShowMapScreen();
 
             if (GameSaveManager.Instance != null)
                 GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
@@ -1389,7 +1164,7 @@ public class DiceManager : MonoBehaviour
         permanentFigureMultiplier = 0f;
         //재시작시 가짜 주사위 참조 안전하게 비우기
         currentCombatDebuffs.Clear();
-        pendingDrawTriggers.Clear(); // 골드는 아래에서 초기값으로 다시 맞춘다
+        Debuffs.DropDrawTriggers(); // 골드는 아래에서 초기값으로 다시 맞춘다
 
         // 낡은 변수 대신 우리가 만든 상태 초기화 함수를 씀
         playerStatus.ResetStatus(StartingMaxHP);
@@ -1422,7 +1197,7 @@ public class DiceManager : MonoBehaviour
         stageProgression.InitFirstBiome(biomeList);
         // 새로운 스테이지 시작
         if (UsesMapFlow)
-            BeginNewMapRun();
+            MapFlow.BeginNewMapRun();
         else
             StartNewStage();
     }
@@ -1440,841 +1215,26 @@ public class DiceManager : MonoBehaviour
         }
     }
 
-    public MapTableData GetMapTable()
-    {
-        if (cachedMapTable == null && mapTableAsset != null)
-            cachedMapTable = MapTableData.Parse(mapTableAsset.text);
-        return cachedMapTable;
-    }
-
-    public string GetMapStageLabel(string biomeName)
-    {
-        if (!useMapFlow || stageProgression.currentMap == null) return null;
-        MapTableData table = GetMapTable();
-        int total = table != null ? table.Config.MaxPathLength : MapPathLength(stageProgression.currentMap);
-        MapNode node = stageProgression.FindNode(stageProgression.currentNodeId);
-        if (node == null) return biomeName;
-        if (node.type == MapNodeType.Boss) return $"{biomeName} BOSS";
-        return $"{biomeName} {node.row + 1}/{total}";
-    }
-
-    static int MapPathLength(MapData map)
-    {
-        int length = 1;
-        if (map == null || map.nodes == null) return length;
-        for (int i = 0; i < map.nodes.Count; i++)
-        {
-            if (map.nodes[i] != null && map.nodes[i].row > length)
-                length = map.nodes[i].row;
-        }
-        return length;
-    }
-
-    public bool CanRollJourney()
-    {
-        if (!UsesMapFlow) return false;
-        if (stageProgression.pendingJourneyMove > 0) return false;
-        if (stageProgression.currentNodeId >= 0 && !stageProgression.currentNodeCleared) return false;
-        return true;
-    }
-
-    public bool IsMapNodeSelectable(int nodeId)
-    {
-        MapNode node = stageProgression.FindNode(nodeId);
-        if (node == null) return false;
-        int move = stageProgression.pendingJourneyMove;
-        if (move <= 0) return false;
-        if (stageProgression.currentNodeId >= 0 && !stageProgression.currentNodeCleared) return false;
-        MapTableData table = GetMapTable();
-        bool forceStop = table == null || table.Config.ShopRowForceStop;
-        return MapJourney.IsReachable(stageProgression.currentMap, stageProgression.currentNodeId, nodeId, move, forceStop);
-    }
-
-    public void EnterMapNode(int nodeId)
-    {
-        if (!UsesMapFlow) return;
-        MapNode node = stageProgression.FindNode(nodeId);
-        if (node == null || !IsMapNodeSelectable(nodeId)) return;
-
-        Sfx.Play(SfxId.Journey_Step);
-
-        MapTableData table = GetMapTable();
-        bool forceStop = table == null || table.Config.ShopRowForceStop;
-        int move = stageProgression.pendingJourneyMove;
-        List<int> passed = MapJourney.PassedOnWay(stageProgression.currentMap, stageProgression.currentNodeId, nodeId, move, forceStop);
-        if (stageProgression.passedNodeIds == null) stageProgression.passedNodeIds = new List<int>();
-        for (int i = 0; i < passed.Count; i++)
-        {
-            if (!stageProgression.passedNodeIds.Contains(passed[i]))
-                stageProgression.passedNodeIds.Add(passed[i]);
-        }
-
-        stageProgression.pendingJourneyMove = 0;
-        stageProgression.currentNodeId = nodeId;
-        stageProgression.currentNodeCleared = false;
-        if (stageProgression.visitedNodeIds == null) stageProgression.visitedNodeIds = new List<int>();
-        if (!stageProgression.visitedNodeIds.Contains(nodeId))
-            stageProgression.visitedNodeIds.Add(nodeId);
-
-        pendingBiomeTransition = false;
-        if (table != null) stageProgression.ApplyNodeDifficulty(node, table.Config);
-        SaveMapProgress();
-        OpenCurrentNode(node);
-    }
-
-    // 지도 굴림에 쓰는 덱의 여정 주사위. 못 찾으면 null이며, 굴림은 기본 면 구성으로 대신한다.
-    public DiceData1 GetJourneyDiceData() => JourneyDice.Find(deckManager.masterDeck);
-
-    // 여정 주사위 면 스프라이트. 해골/하트/골드처럼 눈 값이 같아도 면 번호로 고른다.
-    public Sprite GetJourneyFaceSprite(DiceData1 die, int faceIndex)
-    {
-        if (die != null && die.customFaceSprites != null && die.customFaceSprites.Length > 0)
-        {
-            int index = die.customFaceSprites.Length == 1 ? 0 : Mathf.Clamp(faceIndex, 0, die.customFaceSprites.Length - 1);
-            if (die.customFaceSprites[index] != null) return die.customFaceSprites[index];
-        }
-        Dice prefabDice = dicePrefab != null ? dicePrefab.GetComponent<Dice>() : null;
-        if (prefabDice != null && prefabDice.diceFaceSprites != null && prefabDice.diceFaceSprites.Length > 0)
-        {
-            int pip = die != null && die.faceValues != null && faceIndex >= 0 && faceIndex < die.faceValues.Length
-                ? die.faceValues[faceIndex] : JourneyDice.MapPipsFromFaceIndex(faceIndex);
-            return prefabDice.diceFaceSprites[Mathf.Clamp(pip - 1, 0, prefabDice.diceFaceSprites.Length - 1)];
-        }
-        return null;
-    }
-
-    // 굴림 연출 중 빠르게 바꿔 보여 줄 면 스프라이트 하나(무작위 면)
-    public Sprite RandomJourneyFaceSprite()
-    {
-        DiceData1 die = GetJourneyDiceData() ?? JourneyDice.CreateDefault();
-        return GetJourneyFaceSprite(die, JourneyDice.RollFaceIndex(die));
-    }
-
-    // 여정 주사위의 면 하나를 굴려 결과를 계산한다. 상태는 바꾸지 않는다.
-    // 덱에서 여정 주사위를 못 찾아도 기본 면 구성으로 굴려 멈추지 않는다.
-    public JourneyRollResult RollJourneyFace()
-    {
-        DiceData1 die = GetJourneyDiceData();
-        if (die == null || die.faceValues == null || die.faceValues.Length == 0)
-            die = JourneyDice.CreateDefault();
-
-        int faceIndex = JourneyDice.RollFaceIndex(die);
-        // 지도 효과량은 면 번호(1~6). 전투 눈금(faceValues)과 섞지 않는다.
-        int mapPips = JourneyDice.MapPipsFromFaceIndex(faceIndex);
-        SpecialDieEffect effect = die.GetFaceEffect(faceIndex);
-        MapTableData table = GetMapTable();
-
-        var result = new JourneyRollResult
-        {
-            faceIndex = faceIndex,
-            pips = mapPips,
-            effect = effect,
-            faceSprite = GetJourneyFaceSprite(die, faceIndex)
-        };
-
-        // 지도에서는 면 효과만 쓴다. 코팅·위성 효과는 전투 결산에서만 적용한다.
-        switch (effect)
-        {
-            case SpecialDieEffect.Thorn:
-                result.outcome = JourneyOutcome.Damage;
-                result.amount = Mathf.Max(0, mapPips);
-                break;
-            case SpecialDieEffect.Heart:
-                result.outcome = JourneyOutcome.Heal;
-                float healMult = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetHealMultiplier() : 1f;
-                result.amount = Mathf.Max(0, TurnCalculator.CalculateHeartHeal(mapPips, healMult));
-                break;
-            case SpecialDieEffect.Coin:
-                result.outcome = JourneyOutcome.Gold;
-                int goldPerPip = BalanceConfig.Current.journeyGoldPerPip;
-                result.amount = Mathf.Max(0, mapPips * goldPerPip);
-                break;
-            default:
-                result.outcome = JourneyOutcome.Move;
-                result.amount = Mathf.Max(1, mapPips);
-                break;
-        }
-        return result;
-    }
-
-    // 굴림 결과를 적용한다. 이동이면 true(이동 칸 수 대기), 그 외 효과는 바로 적용하고 false를 돌려준다.
-    public bool ApplyJourneyResult(JourneyRollResult result)
-    {
-        return ApplyJourneyResult(result, out _, false);
-    }
-
-    // appliedAmount: 실제로 깎인 체력 / 회복된 체력 / 지급된 골드(이동이면 0)
-    // deferGoldUi: 골드 숫자 갱신을 코인 날아가기 연출에 맡길 때 true(실제 골드는 바로 올라간다)
-    public bool ApplyJourneyResult(JourneyRollResult result, out int appliedAmount, bool deferGoldUi)
-    {
-        appliedAmount = 0;
-        if (!CanRollJourney()) return false;
-        bool move = result.outcome == JourneyOutcome.Move;
-        if (move)
-            stageProgression.pendingJourneyMove = Mathf.Max(1, result.amount);
-        else
-        {
-            stageProgression.pendingJourneyMove = 0;
-            appliedAmount = ApplyJourneyEffect(result, deferGoldUi);
-        }
-        SaveMapProgress();
-        return move;
-    }
-
-    int ApplyJourneyEffect(JourneyRollResult result, bool deferGoldUi)
-    {
-        MapTableData table = GetMapTable();
-        switch (result.outcome)
-        {
-            case JourneyOutcome.Damage:
-                {
-                    // 지도 피해는 최소 체력 아래로 내려가지 않는다. 이미 그보다 낮으면 더 깎지 않는다.
-                    int minHp = table != null ? table.Config.JourneyDamageMinHp : 1;
-                    int hpBefore = currentPlayerHP;
-                    currentPlayerHP = Mathf.Min(currentPlayerHP, Mathf.Max(minHp, currentPlayerHP - result.amount));
-                    int hpLost = Mathf.Max(0, hpBefore - currentPlayerHP);
-                    UpdateMainUI("");
-                    // 몬스터에게 맞았을 때와 같은 화면 붉어짐·피격음(실제로 깎인 체력이 있을 때만)
-                    if (hpLost > 0)
-                    {
-                        HurtVignetteController.Get(this).PlayShieldOrHealthHit(ui, 0, hpLost, playerStatus.currentShield);
-                        PlayPlayerHurtSound();
-                    }
-                    return hpLost;
-                }
-            case JourneyOutcome.Gold:
-                // 전투와 같은 경로로 지급한다(피규어 골드 증가 효과 포함). 화면 숫자는 deferGoldUi면 코인 연출이 올린다.
-                return shopManager != null ? shopManager.GrantGold(result.amount, deferGoldUi) : 0;
-            case JourneyOutcome.Heal:
-                {
-                    int hpBefore = currentPlayerHP;
-                    playerStatus.Heal(result.amount);
-                    UpdateMainUI("");
-                    return Mathf.Max(0, currentPlayerHP - hpBefore);
-                }
-        }
-        return 0;
-    }
-
-    public MonsterDataSO RollPortalMonster(MapNode node)
-    {
-        var pool = new List<MonsterDataSO>();
-        if (biomeList == null || node == null) return null;
-        for (int i = 0; i < biomeList.Count; i++)
-        {
-            BiomeDataSO biome = biomeList[i];
-            if (biome == null || biome.biomeType == BiomeType.Void) continue;
-            if (biome.biomeMonsters != null)
-            {
-                for (int m = 0; m < biome.biomeMonsters.Count; m++)
-                {
-                    if (biome.biomeMonsters[m] != null)
-                        pool.Add(biome.biomeMonsters[m]);
-                }
-            }
-        }
-        if (pool.Count == 0) return null;
-
-        int mapSeed = stageProgression.currentMap != null ? stageProgression.currentMap.seed : 0;
-        var rng = new System.Random(unchecked(mapSeed + node.id));
-        return pool[rng.Next(pool.Count)];
-    }
-
-    public void ReturnToMap()
-    {
-        stageProgression.currentNodeCleared = true;
-        pendingBiomeTransition = false;
-        isStageClearing = false;
-        isCalculating = false;
-        ShowMapScreen();
-        SaveMapProgress();
-    }
-
-    public void OnMapLootFinished()
-    {
-        MapNode node = stageProgression.FindNode(stageProgression.currentNodeId);
-        bool boss = node != null && node.type == MapNodeType.Boss;
-        if (boss) pendingBiomeTransition = true;
-
-        MapTableData table = GetMapTable();
-        if (table != null && table.Config.PostBattleShop)
-            PromptShopChoice();
-        else if (boss)
-            OpenBiomeTransition();
-        else
-            ReturnToMap();
-    }
-
-    public void OnShopClosedDuringMap()
-    {
-        if (pendingBiomeTransition)
-            OpenBiomeTransition();
-        else
-            ReturnToMap();
-    }
-
-    void BeginNewMapRun()
-    {
-        MapTableData table = GetMapTable();
-        if (table == null)
-        {
-            Debug.LogWarning("[Map] Map_Table이 없어 직선 진행으로 시작합니다.");
-            StartNewStage();
-            return;
-        }
-
-        stageProgression.BeginRun(UnityEngine.Random.Range(1, int.MaxValue));
-        if (currentBiome == null && biomeList != null)
-            currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
-        BiomeType biome = currentBiome != null ? currentBiome.biomeType : BiomeType.Forest;
-        stageProgression.BeginBiome(table, biome);
-        EnsureMapUi();
-        ShowMapScreen();
-        SaveMapProgress();
-    }
-
-    void RestoreMapProgress(SaveData data)
-    {
-        MapTableData table = GetMapTable();
-        if (data.mapSaveVersion < 1)
-        {
-            stageProgression.BeginRun(UnityEngine.Random.Range(1, int.MaxValue));
-            stageProgression.biomeIndex = Mathf.Max(0, (currentStage - 1) / 10);
-        }
-        else
-        {
-            stageProgression.runSeed = data.runSeed;
-            stageProgression.biomeIndex = data.biomeIndex;
-            stageProgression.currentNodeId = data.currentNodeId;
-            stageProgression.currentNodeCleared = data.currentNodeCleared;
-            stageProgression.visitedNodeIds = data.visitedNodeIds != null
-                ? new List<int>(data.visitedNodeIds)
-                : new List<int>();
-            stageProgression.passedNodeIds = data.passedNodeIds != null
-                ? new List<int>(data.passedNodeIds)
-                : new List<int>();
-            stageProgression.pendingJourneyMove = data.pendingJourneyMove;
-        }
-
-        BiomeType biome = currentBiome != null ? currentBiome.biomeType : BiomeType.Forest;
-        stageProgression.currentMap = table == null
-            ? null
-            : MapGenerator.Generate(stageProgression.runSeed, stageProgression.biomeIndex, biome, table);
-        if (!MapProgressMatches(stageProgression))
-        {
-            stageProgression.currentNodeId = -1;
-            stageProgression.currentNodeCleared = false;
-            stageProgression.ClearMapTrail();
-        }
-        EnsureMapUi();
-    }
-
-    void OpenBiomeTransition()
-    {
-        pendingBiomeTransition = false;
-        stageProgression.currentNodeCleared = true;
-        stageProgression.biomeIndex++;
-        isStageClearing = false;
-        isCalculating = false;
-        HideMapOverlays();
-        SetBoardVisible(false);
-
-        // 데모는 정해진 수의 바이옴 보스를 잡으면 다음 바이옴 선택 대신 클리어 화면으로 끝낸다.
-        int demoLimit = BalanceConfig.Current.demoBiomeLimit;
-        if (demoLimit > 0 && !TutorialMode.Active && stageProgression.biomeIndex >= demoLimit)
-        {
-            ShowGameClear(demo: true);
-            return;
-        }
-
-        MapTableData table = GetMapTable();
-        int threshold = table != null ? table.Config.BiomeCountToVoid : 10;
-        BiomeType current = currentBiome != null ? currentBiome.biomeType : BiomeType.Forest;
-        List<BiomeType> options = biomeNavigator.GetNextBiomeOptions(current, stageProgression.biomeIndex, threshold);
-        if (biomeSelectionPanel != null)
-            biomeSelectionPanel.OpenPanel(this, options);
-        SaveMapProgress();
-    }
-
-    void OpenCurrentNode(MapNode node)
-    {
-        if (node == null) return;
-        switch (node.type)
-        {
-            case MapNodeType.Enemy:
-                BeginMapCombat(false, false, null);
-                break;
-            case MapNodeType.Elite:
-                // TODO: 엘리트 몬스터 풀
-                BeginMapCombat(true, false, null);
-                break;
-            case MapNodeType.Boss:
-                // 비차원 보스(악마주사위)는 조우자 대화창으로 등장 대사를 먼저 보여 주고 전투를 연다.
-                if (currentBiome != null && currentBiome.biomeType == BiomeType.Void && encounterEventPanel != null && !TutorialMode.Active)
-                {
-                    HideMapOverlays();
-                    SetBoardVisible(false);
-                    encounterEventPanel.StartBossIntro(currentBiome.bossMonster, DevilDiceBoss.IntroKeyPrefix, DevilDiceBoss.IntroFallback,
-                        () => BeginMapCombat(false, true, null));
-                    PlaceTravelChrome();
-                }
-                else
-                    BeginMapCombat(false, true, null);
-                break;
-            case MapNodeType.Portal:
-                BeginMapCombat(false, false, RollPortalMonster(node));
-                break;
-            case MapNodeType.Encounter:
-                HideMapOverlays();
-                SetBoardVisible(false);
-                if (encounterEventPanel != null && currentBiome != null)
-                    encounterEventPanel.StartEvent(currentBiome.biomeType);
-                else
-                    ReturnToMap();
-                PlaceTravelChrome();
-                SetHudActive("Book_Button", false);
-                SetHudActive("Deck_BTN", false);
-                break;
-            case MapNodeType.ShopNyaon:
-            case MapNodeType.ShopRonan:
-            case MapNodeType.ShopOpel:
-                HideMapOverlays();
-                SetBoardVisible(false);
-                if (shopManager != null)
-                    shopManager.OpenMapShop(MerchantFor(node.type));
-                else
-                    ReturnToMap();
-                PlaceTravelChrome();
-                break;
-            case MapNodeType.Rest:
-                HideMapOverlays();
-                SetBoardVisible(false);
-                if (restPanel != null) restPanel.Open(this);
-                else ReturnToMap();
-                PlaceTravelChrome();
-                break;
-        }
-    }
-
-    void BeginMapCombat(bool elite, bool boss, MonsterDataSO forcedMonster)
-    {
-        isEliteBattle = elite;
-        mapBossBattle = boss;
-        pendingForcedMonster = forcedMonster;
-        ShowCombatScreen();
-        StartNewStage();
-        MapCombatStarted?.Invoke();
-    }
-
-    static ShopManager.MapMerchant MerchantFor(MapNodeType type)
-    {
-        switch (type)
-        {
-            case MapNodeType.ShopRonan: return ShopManager.MapMerchant.Ronan;
-            case MapNodeType.ShopOpel: return ShopManager.MapMerchant.Opel;
-            default: return ShopManager.MapMerchant.Nyaon;
-        }
-    }
-
-    void ShowMapScreen()
-    {
-        EnsureMapUi();
-        if (restPanel != null) restPanel.Hide();
-        if (opelPanel != null) opelPanel.Hide();
-        SetBoardVisible(false);
-        if (mapPanel != null)
-        {
-            mapPanel.iconSet = mapIconSet;
-            mapPanel.Show(this);
-        }
-        PlaceTravelChrome();
-        UpdateMainUI("");
-    }
-
-    void ShowCombatScreen()
-    {
-        HideMapOverlays();
-        SetBoardVisible(true);
-    }
-
-    void HideMapOverlays()
-    {
-        if (mapPanel != null) mapPanel.Hide();
-        if (restPanel != null) restPanel.Hide();
-        if (opelPanel != null) opelPanel.Hide();
-    }
-
-    static bool MapProgressMatches(StageManager stage)
-    {
-        if (stage == null || stage.currentMap == null) return true;
-        if (stage.currentNodeId >= 0 && stage.FindNode(stage.currentNodeId) == null)
-            return false;
-        if (!NodeListMatches(stage, stage.visitedNodeIds)) return false;
-        if (!NodeListMatches(stage, stage.passedNodeIds)) return false;
-        return true;
-    }
-
-    static bool NodeListMatches(StageManager stage, List<int> ids)
-    {
-        if (ids == null) return true;
-        for (int i = 0; i < ids.Count; i++)
-        {
-            if (stage.FindNode(ids[i]) == null)
-                return false;
-        }
-        return true;
-    }
-
-    void SetBoardVisible(bool visible)
-    {
-        if (rollSlotParent != null) rollSlotParent.gameObject.SetActive(visible);
-        if (keepSlotParent != null) keepSlotParent.gameObject.SetActive(visible);
-        if (ui != null)
-        {
-            if (ui.rollButton != null) ui.rollButton.gameObject.SetActive(visible);
-            if (ui.finishButton != null) ui.finishButton.gameObject.SetActive(visible);
-            if (ui.flameStackRoot != null) ui.flameStackRoot.SetActive(visible);
-            if (ui.resultPanel != null && !visible) ui.resultPanel.SetActive(false);
-            if (!visible)
-            {
-                ui.HideResult();
-                ui.HideShopChoice();
-            }
-        }
-        SetCombatHud(visible);
-        if (visible)
-        {
-            CacheHud();
-            RestoreCombatChrome();
-            if (hudObjects.TryGetValue("ScorePanel", out GameObject score) && score != null)
-            {
-                Image scoreImage = score.GetComponent<Image>();
-                if (scoreImage != null) scoreImage.raycastTarget = true;
-            }
-        }
-        if (!visible && enemy != null)
-            enemy.gameObject.SetActive(false);
-        if (!visible)
-        {
-            HideBoardDice();
-            PlaceTravelChrome();
-        }
-        // 디버프 표시는 전투 화면에서는 나무 패널 옆, 지도 화면에서는 체력 칸 아래로 옮깁니다.
-        travelScreen = !visible;
-        if (DebuffTrackerHud.Instance != null) DebuffTrackerHud.Instance.Place(travelScreen);
-    }
-
-    bool travelScreen;
+    // ===== 지도 =====
+    // 지도 진행은 MapFlowController, 지도 화면의 HUD 배치는 TravelHudLayout이 맡습니다.
+    // 아래는 바깥 스크립트(MapPanel, RestPanel, LootSelectionPanel 등)가 예전 이름 그대로 부를 수 있게 남긴 연결입니다.
+    public MapTableData GetMapTable() => MapFlow.GetMapTable();
+    public string GetMapStageLabel(string biomeName) => MapFlow.GetMapStageLabel(biomeName);
+    public bool CanRollJourney() => MapFlow.CanRollJourney();
+    public bool IsMapNodeSelectable(int nodeId) => MapFlow.IsMapNodeSelectable(nodeId);
+    public void EnterMapNode(int nodeId) => MapFlow.EnterMapNode(nodeId);
+    public DiceData1 GetJourneyDiceData() => MapFlow.GetJourneyDiceData();
+    public Sprite GetJourneyFaceSprite(DiceData1 die, int faceIndex) => MapFlow.GetJourneyFaceSprite(die, faceIndex);
+    public Sprite RandomJourneyFaceSprite() => MapFlow.RandomJourneyFaceSprite();
+    public JourneyRollResult RollJourneyFace() => MapFlow.RollJourneyFace();
+    public bool ApplyJourneyResult(JourneyRollResult result, out int appliedAmount, bool deferGoldUi) => MapFlow.ApplyJourneyResult(result, out appliedAmount, deferGoldUi);
+    public void ReturnToMap() => MapFlow.ReturnToMap();
+    public void OnMapLootFinished() => MapFlow.OnMapLootFinished();
+    public void OnShopClosedDuringMap() => MapFlow.OnShopClosedDuringMap();
 
     // 디버프 표시처럼 실행 중에 붙는 HUD가 기존 HUD 위치를 기준으로 자리를 잡을 때 씁니다.
-    internal RectTransform HudRect(string objectName)
-    {
-        CacheHud();
-        return PlacementRect(objectName);
-    }
+    internal RectTransform HudRect(string objectName) => Hud.RectOf(objectName);
 
-    void PlaceTravelChrome()
-    {
-        CacheHud();
-        if (biomeBackgroundImage != null)
-        {
-            biomeBackgroundImage.gameObject.SetActive(true);
-            biomeBackgroundImage.enabled = true;
-            biomeBackgroundImage.transform.SetAsFirstSibling();
-            if (stageProgression != null && stageProgression.currentBiome != null && stageProgression.currentBiome.backgroundImage != null)
-                biomeBackgroundImage.sprite = stageProgression.currentBiome.backgroundImage;
-        }
-
-        if (mapPanel != null && mapPanel.gameObject.activeSelf)
-            mapPanel.transform.SetSiblingIndex(1);
-
-        RaiseHud("ScorePanel");
-        if (hudObjects.TryGetValue("ScorePanel", out GameObject score) && score != null)
-        {
-            Image scoreImage = score.GetComponent<Image>();
-            if (scoreImage != null) scoreImage.raycastTarget = false;
-        }
-        RaiseHud("FigureSlotArea");
-        RaiseHud("Setting_BTN");
-        EnableHudControl("Book_Button");
-        EnableHudControl("Deck_BTN");
-        EnableHudControl("Setting_BTN");
-        EnableHudControl("CoinPanel");
-        EnableHudControl("HeartPanel");
-        EnableHudControl("FigureSlotArea");
-        ApplyTravelChrome();
-    }
-
-    class HudRectSnapshot
-    {
-        public RectTransform rect;
-        public Transform parent;
-        public int siblingIndex;
-        public Vector2 anchorMin;
-        public Vector2 anchorMax;
-        public Vector2 pivot;
-        public Vector2 anchoredPosition;
-        public Vector2 sizeDelta;
-        public Vector3 localScale;
-        public bool raycast;
-        public bool hasImage;
-    }
-
-    readonly Dictionary<string, HudRectSnapshot> combatPlacements = new Dictionary<string, HudRectSnapshot>();
-    bool combatPlacementsSaved;
-    bool travelPlacementApplied;
-
-    static readonly string[] TravelPlacementNames = { "Book_Button", "Deck_BTN", "CoinPanel", "HeartPanel" };
-
-    void SaveCombatPlacements()
-    {
-        if (combatPlacementsSaved) return;
-        CacheHud();
-        combatPlacementsSaved = true;
-        for (int i = 0; i < TravelPlacementNames.Length; i++)
-        {
-            string objectName = TravelPlacementNames[i];
-            if (!hudObjects.TryGetValue(objectName, out GameObject target) || target == null) continue;
-            RectTransform rect = target.GetComponent<RectTransform>();
-            if (rect == null) continue;
-            Image image = target.GetComponent<Image>();
-            combatPlacements[objectName] = new HudRectSnapshot
-            {
-                rect = rect,
-                parent = rect.parent,
-                siblingIndex = rect.GetSiblingIndex(),
-                anchorMin = rect.anchorMin,
-                anchorMax = rect.anchorMax,
-                pivot = rect.pivot,
-                anchoredPosition = rect.anchoredPosition,
-                sizeDelta = rect.sizeDelta,
-                localScale = rect.localScale,
-                raycast = image != null && image.raycastTarget,
-                hasImage = image != null
-            };
-        }
-    }
-
-    void ApplyTravelChrome()
-    {
-        SaveCombatPlacements();
-        if (!hudObjects.TryGetValue("ScorePanel", out GameObject score) || score == null) return;
-        RectTransform canvas = score.transform.parent as RectTransform;
-        if (canvas == null) return;
-
-        RectTransform deck = PlacementRect("Deck_BTN");
-        RectTransform book = PlacementRect("Book_Button");
-        RectTransform coin = PlacementRect("CoinPanel");
-        RectTransform heart = PlacementRect("HeartPanel");
-
-        if (deck != null)
-            PlaceBottomLeftCenter(deck, canvas, new Vector2(130f, 120f));
-        if (book != null)
-            PlaceBottomLeftCenter(book, canvas, new Vector2(130f, 300f));
-        FitTravelStatusPanels(coin, heart);
-        Vector2 coinPos = new Vector2(312f, -32f);
-        // 남색 패널에서는 골드·체력 칸이 같은 폭이라 지도 화면에서도 오른쪽 끝을 맞춥니다.
-        Vector2 heartPos = new Vector2(coinPos.x, coinPos.y - 66f);
-        if (coin != null)
-        {
-            PlaceAnchored(coin, canvas, new Vector2(0f, 1f), coinPos);
-            SetPanelRaycast(coin, false);
-        }
-        if (heart != null)
-        {
-            PlaceAnchored(heart, canvas, new Vector2(0f, 1f), heartPos);
-            SetPanelRaycast(heart, false);
-        }
-        travelPlacementApplied = true;
-    }
-
-    void RestoreCombatChrome()
-    {
-        SaveCombatPlacements();
-        if (!travelPlacementApplied) return;
-        foreach (KeyValuePair<string, HudRectSnapshot> pair in combatPlacements)
-        {
-            HudRectSnapshot snap = pair.Value;
-            if (snap.rect == null) continue;
-            snap.rect.SetParent(snap.parent, false);
-            snap.rect.anchorMin = snap.anchorMin;
-            snap.rect.anchorMax = snap.anchorMax;
-            snap.rect.pivot = snap.pivot;
-            snap.rect.sizeDelta = snap.sizeDelta;
-            snap.rect.anchoredPosition = snap.anchoredPosition;
-            snap.rect.localScale = snap.localScale;
-            snap.rect.SetSiblingIndex(Mathf.Clamp(snap.siblingIndex, 0, snap.parent.childCount - 1));
-            if (snap.hasImage)
-            {
-                Image image = snap.rect.GetComponent<Image>();
-                if (image != null) image.raycastTarget = snap.raycast;
-            }
-        }
-        travelPlacementApplied = false;
-    }
-
-    void FitTravelStatusPanels(RectTransform coin, RectTransform heart)
-    {
-        float width = 0f;
-        if (coin != null && combatPlacements.TryGetValue("CoinPanel", out HudRectSnapshot coinSnap))
-            width = Mathf.Max(width, coinSnap.sizeDelta.x);
-        if (heart != null && combatPlacements.TryGetValue("HeartPanel", out HudRectSnapshot heartSnap))
-            width = Mathf.Max(width, heartSnap.sizeDelta.x);
-        ApplyTravelPanel(coin, "CoinPanel", width);
-        ApplyTravelPanel(heart, "HeartPanel", width);
-    }
-
-    void ApplyTravelPanel(RectTransform rect, string objectName, float width)
-    {
-        if (rect == null || !combatPlacements.TryGetValue(objectName, out HudRectSnapshot snap)) return;
-        Vector2 size = snap.sizeDelta;
-        if (width > 0f) size.x = width;
-        rect.sizeDelta = size;
-        rect.localScale = snap.localScale * 0.7f;
-    }
-
-    static void PlaceBottomLeftCenter(RectTransform rect, RectTransform canvas, Vector2 center)
-    {
-        rect.SetParent(canvas, false);
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.zero;
-        rect.anchoredPosition = center;
-        rect.SetAsLastSibling();
-    }
-
-    static void PlaceAnchored(RectTransform rect, RectTransform canvas, Vector2 anchor, Vector2 position)
-    {
-        rect.SetParent(canvas, false);
-        rect.anchorMin = anchor;
-        rect.anchorMax = anchor;
-        rect.anchoredPosition = position;
-        rect.SetAsLastSibling();
-    }
-
-    void HideBoardDice()
-    {
-        Dice[] dice = FindObjectsByType<Dice>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-        for (int i = 0; i < dice.Length; i++)
-        {
-            if (dice[i] != null) dice[i].gameObject.SetActive(false);
-        }
-    }
-
-    void SetHudActive(string objectName, bool active)
-    {
-        if (!hudObjects.TryGetValue(objectName, out GameObject target) || target == null) return;
-        target.SetActive(active);
-    }
-
-    RectTransform PlacementRect(string objectName)
-    {
-        if (!hudObjects.TryGetValue(objectName, out GameObject target) || target == null) return null;
-        return target.GetComponent<RectTransform>();
-    }
-
-    static void SetPanelRaycast(RectTransform rect, bool enabled)
-    {
-        Image image = rect.GetComponent<Image>();
-        if (image != null) image.raycastTarget = enabled;
-    }
-
-    void RaiseHud(string objectName)
-    {
-        if (!hudObjects.TryGetValue(objectName, out GameObject target) || target == null) return;
-        target.SetActive(true);
-        target.transform.SetAsLastSibling();
-    }
-
-    void EnableHudControl(string objectName)
-    {
-        if (!hudObjects.TryGetValue(objectName, out GameObject target) || target == null) return;
-        target.SetActive(true);
-        Button button = target.GetComponent<Button>();
-        if (button != null) button.interactable = true;
-    }
-
-    static readonly string[] CombatHudNames =
-    {
-        "ScorePanel_Outer", "Hand Description Text", "Active Figure Text", "Stage_Panel",
-        "Drop_Rate_Panel", "slot_counter_Dice", "slot_counter_chip (1)", "plaque_chips_mult", "panel_score", "Snack"
-    };
-
-    static readonly string[] TravelHudNames =
-    {
-        "CoinPanel", "HeartPanel", "FigureSlotArea", "Setting_BTN", "Book_Button", "Deck_BTN"
-    };
-
-    readonly Dictionary<string, GameObject> hudObjects = new Dictionary<string, GameObject>();
-    bool hudCached;
-
-    void SetCombatHud(bool combat)
-    {
-        CacheHud();
-        for (int i = 0; i < CombatHudNames.Length; i++)
-        {
-            if (hudObjects.TryGetValue(CombatHudNames[i], out GameObject target) && target != null)
-                target.SetActive(combat);
-        }
-        if (hudObjects.TryGetValue("EnemyHPSlider", out GameObject enemyHp) && enemyHp != null)
-            enemyHp.SetActive(combat);
-        if (!combat)
-        {
-            for (int i = 0; i < TravelHudNames.Length; i++)
-            {
-                if (hudObjects.TryGetValue(TravelHudNames[i], out GameObject target) && target != null)
-                    target.SetActive(true);
-            }
-        }
-    }
-
-    void CacheHud()
-    {
-        if (hudCached) return;
-        hudCached = true;
-        var transforms = FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-        var wanted = new HashSet<string>();
-        for (int i = 0; i < CombatHudNames.Length; i++) wanted.Add(CombatHudNames[i]);
-        for (int i = 0; i < TravelHudNames.Length; i++) wanted.Add(TravelHudNames[i]);
-        wanted.Add("ScorePanel");
-        wanted.Add("EnemyHPSlider");
-        for (int i = 0; i < transforms.Length; i++)
-        {
-            if (transforms[i] == null || !wanted.Contains(transforms[i].name)) continue;
-            if (!hudObjects.ContainsKey(transforms[i].name))
-                hudObjects[transforms[i].name] = transforms[i].gameObject;
-        }
-    }
-
-    void EnsureMapUi()
-    {
-        Canvas canvas = FindFirstObjectByType<Canvas>();
-        if (mapPanel == null && canvas != null)
-        {
-            var go = new GameObject("MapRoot", typeof(RectTransform), typeof(MapPanel));
-            go.transform.SetParent(canvas.transform, false);
-            mapPanel = go.GetComponent<MapPanel>();
-            go.SetActive(false);
-        }
-        if (restPanel == null)
-            Debug.LogWarning("[Map] RestPanel이 씬에 없습니다. MainScene_Map의 배치를 확인하세요.");
-        if (opelPanel == null && canvas != null)
-        {
-            var go = new GameObject("OpelPanel", typeof(RectTransform), typeof(OpelPanel));
-            go.transform.SetParent(canvas.transform, false);
-            opelPanel = go.GetComponent<OpelPanel>();
-            go.SetActive(false);
-        }
-        if (mapIconSet == null)
-        {
-            mapIconSet = ScriptableObject.CreateInstance<MapIconSet>();
-            mapIconSet.FillDefaultColors();
-        }
-        if (mapPanel != null) mapPanel.iconSet = mapIconSet;
-    }
-
-    void SaveMapProgress()
-    {
-        if (GameSaveManager.Instance != null)
-            GameSaveManager.Instance.SaveGame(this, InventoryManager.Instance, shopManager);
-    }
+    // 이벤트는 선언한 클래스 안에서만 부를 수 있어서 MapFlowController가 이 함수로 알립니다.
+    internal void RaiseMapCombatStarted() => MapCombatStarted?.Invoke();
 }

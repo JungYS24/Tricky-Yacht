@@ -3,18 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 
-public enum MapNodeType
-{
-    Enemy,
-    Elite,
-    Boss,
-    Encounter,
-    ShopNyaon,
-    ShopRonan,
-    ShopOpel,
-    Portal,
-    Rest
-}
+// 칸 종류(MapNodeType)는 MapData.cs에 있다.
 
 // Map_Table.json 한 줄을 그대로 받는 그릇입니다. Value는 문자열이므로 타입은 따로 해석합니다.
 [Serializable]
@@ -264,6 +253,7 @@ public class MapTableData
         }
     }
 
+    // 일반·엘리트·차원문 전투 칸. 보스는 빠진다(지도 생성의 경로별 적 수 계산 기준). 보스까지 셀 때는 따로 더한다.
     public static bool IsCombatNode(MapNodeType type)
     {
         return type == MapNodeType.Enemy || type == MapNodeType.Elite || type == MapNodeType.Portal;

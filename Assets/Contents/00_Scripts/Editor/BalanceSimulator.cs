@@ -443,7 +443,7 @@ public static class BalanceSimulator
         return run.rng.Next(min, max + 1);
     }
 
-    // DiceManager.GetClearRewardGold 와 같은 계산
+    // StageClearRewards.GetClearRewardGold 와 같은 계산
     static void GrantRewards(World w, RunState run, MonsterDataSO m, MonsterGrade grade, int tier)
     {
         int gold = Mathf.FloorToInt(w.BaseGold(m) * w.cfg.monsterGoldMultiplier);

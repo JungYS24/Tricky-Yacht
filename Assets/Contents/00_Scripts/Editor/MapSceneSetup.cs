@@ -61,34 +61,28 @@ public static class MapSceneSetup
 
         MapPanel mapPanel = FindOrCreate<MapPanel>(canvas.transform, "MapRoot");
         RestPanel restPanel = FindOrCreate<RestPanel>(canvas.transform, "RestPanel");
-        OpelPanel opelPanel = FindOrCreate<OpelPanel>(canvas.transform, "OpelPanel");
-        Stretch(mapPanel.GetComponent<RectTransform>());
-        Stretch(restPanel.GetComponent<RectTransform>());
-        Stretch(opelPanel.GetComponent<RectTransform>());
+        MapUiHierarchy.Stretch(mapPanel.GetComponent<RectTransform>());
+        MapUiHierarchy.Stretch(restPanel.GetComponent<RectTransform>());
         mapPanel.gameObject.SetActive(false);
         restPanel.gameObject.SetActive(false);
-        opelPanel.gameObject.SetActive(false);
 
         MapUiHierarchy.EnsureMap(mapPanel);
         MapUiHierarchy.EnsureRest(restPanel);
-        MapUiHierarchy.EnsureOpel(opelPanel);
         mapPanel.iconSet = icons;
         mapPanel.nodePrefab = prefab;
         EditorUtility.SetDirty(mapPanel);
         EditorUtility.SetDirty(restPanel);
-        EditorUtility.SetDirty(opelPanel);
 
         dice.useMapFlow = true;
         dice.mapTableAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(TablePath);
         dice.mapPanel = mapPanel;
         dice.restPanel = restPanel;
-        dice.opelPanel = opelPanel;
         dice.mapIconSet = icons;
         EditorUtility.SetDirty(dice);
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
         AssetDatabase.SaveAssets();
-        Debug.Log("[Map] MainScene_Map 하이어라키에 MapScroll, Node_Des, RestPanel, OpelPanel을 배치했습니다.");
+        Debug.Log("[Map] MainScene_Map 하이어라키에 MapScroll, Node_Des, RestPanel을 배치했습니다.");
     }
 
     public static void BatchRun()
@@ -163,16 +157,6 @@ public static class MapSceneSetup
                 return canvases[i];
         }
         return canvases.Length > 0 ? canvases[0] : null;
-    }
-
-    static void Stretch(RectTransform rect)
-    {
-        if (rect == null) return;
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-        rect.localScale = Vector3.one;
     }
 }
 #endif

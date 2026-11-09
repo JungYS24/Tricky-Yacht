@@ -35,6 +35,27 @@ public class MapPanel : MonoBehaviour
     Tween resultPopupTween;
     GameObject resultPopupObject;
 
+    // 칸 배치 간격(px)
+    const float ColSpacing = 168f;
+    const float RowSpacing = 128f;
+    const float LeftPad = 280f;
+    const float RightPad = 80f;
+    const float BottomPad = 52f;
+    const float TopPad = 80f;
+
+    // 점선: 선 하나를 이미지 하나로 그리고 점 무늬를 반복(Tiled)해 깐다.
+    const float DotSpacing = 18f;
+    const float DotSize = 8f;
+    static readonly Color DotColor = new Color(0.85f, 0.9f, 0.95f, 0.85f);
+
+    // 지금 그려 둔 지도. 같은 지도면 점선과 칸 버튼을 다시 만들지 않고 칸 상태만 바꾼다.
+    MapData builtMap;
+    RectTransform builtLineLayer;
+    RectTransform builtNodeLayer;
+    readonly Dictionary<int, Vector2> nodePositions = new Dictionary<int, Vector2>();
+    readonly Dictionary<int, MapNodeView> nodeViews = new Dictionary<int, MapNodeView>();
+    readonly HashSet<int> selectableNodes = new HashSet<int>();
+
     public void Hide()
     {
         StopJourneyRoll();
@@ -64,35 +85,71 @@ public class MapPanel : MonoBehaviour
     void Rebuild(DiceManager diceManager)
     {
         if (lineLayer == null || nodeLayer == null || content == null) return;
-        ClearChildren(lineLayer);
-        ClearChildren(nodeLayer);
 
         MapData map = diceManager.stageProgression.currentMap;
         MapTableData table = diceManager.GetMapTable();
-        if (map == null || table == null) return;
+        if (map == null || table == null)
+        {
+            ClearMap();
+            return;
+        }
 
         MapConfig cfg = table.Config;
-        const float colSpacing = 168f;
-        const float rowSpacing = 128f;
-        const float leftPad = 280f;
-        const float rightPad = 80f;
-        const float bottomPad = 52f;
-        const float topPad = 80f;
         FitScrollToBottom();
-        float width = leftPad + rightPad + Mathf.Max(0, cfg.GridWidth - 1) * colSpacing;
-        float height = bottomPad + topPad + cfg.MaxPathLength * rowSpacing;
+        float width = LeftPad + RightPad + Mathf.Max(0, cfg.GridWidth - 1) * ColSpacing;
+        float height = BottomPad + TopPad + cfg.MaxPathLength * RowSpacing;
         content.sizeDelta = new Vector2(width, height);
         FitLayer(lineLayer, content.sizeDelta);
         FitLayer(nodeLayer, content.sizeDelta);
 
-        var positions = new Dictionary<int, Vector2>(map.nodes.Count);
+        // 점선과 칸 버튼은 지도가 바뀔 때만 새로 만든다. 같은 지도면 칸 상태(갈 수 있음·현재·방문)만 바꾼다.
+        if (NeedsBuild(map))
+            BuildMap(map);
+        RefreshNodes(diceManager, map, table);
+
+        RefreshNodeDes(table);
+        PlaceNodeDes();
+        RefreshJourneyChrome(diceManager);
+        Canvas.ForceUpdateCanvases();
+        FocusOnPlayer(diceManager, nodePositions);
+    }
+
+    bool NeedsBuild(MapData map)
+    {
+        if (map != builtMap || lineLayer != builtLineLayer || nodeLayer != builtNodeLayer) return true;
+        if (nodeViews.Count != map.nodes.Count) return true;
+        // 다른 곳에서 칸 버튼이 지워졌으면 다시 만든다.
+        foreach (KeyValuePair<int, MapNodeView> pair in nodeViews)
+        {
+            if (pair.Value == null) return true;
+        }
+        return false;
+    }
+
+    void ClearMap()
+    {
+        ClearChildren(lineLayer);
+        ClearChildren(nodeLayer);
+        nodeViews.Clear();
+        nodePositions.Clear();
+        builtMap = null;
+    }
+
+    // 지도 한 장의 칸 위치, 점선, 칸 버튼을 만든다. 칸 위치의 흔들림은 시드로 정해져 매번 같다.
+    void BuildMap(MapData map)
+    {
+        ClearMap();
+        builtMap = map;
+        builtLineLayer = lineLayer;
+        builtNodeLayer = nodeLayer;
+
         for (int i = 0; i < map.nodes.Count; i++)
         {
             MapNode node = map.nodes[i];
             var jitter = new System.Random(map.seed + node.id * 17);
             float jx = ((float)jitter.NextDouble() * 2f - 1f) * 16f;
             float jy = ((float)jitter.NextDouble() * 2f - 1f) * 10f;
-            positions[node.id] = new Vector2(leftPad + node.col * colSpacing + jx, bottomPad + node.row * rowSpacing + jy);
+            nodePositions[node.id] = new Vector2(LeftPad + node.col * ColSpacing + jx, BottomPad + node.row * RowSpacing + jy);
         }
 
         for (int i = 0; i < map.nodes.Count; i++)
@@ -101,25 +158,19 @@ public class MapPanel : MonoBehaviour
             for (int c = 0; c < node.children.Count; c++)
             {
                 int childId = node.children[c];
-                if (!positions.ContainsKey(childId)) continue;
-                DrawDottedLine(positions[node.id], positions[childId]);
+                if (!nodePositions.ContainsKey(childId)) continue;
+                DrawDottedLine(nodePositions[node.id], nodePositions[childId]);
             }
         }
 
         for (int i = 0; i < map.nodes.Count; i++)
         {
             MapNode node = map.nodes[i];
-            CreateNode(diceManager, table, node, positions[node.id]);
+            nodeViews[node.id] = CreateNode(nodePositions[node.id]);
         }
-
-        RefreshNodeDes(table);
-        PlaceNodeDes();
-        RefreshJourneyChrome(diceManager);
-        Canvas.ForceUpdateCanvases();
-        FocusOnPlayer(diceManager, positions);
     }
 
-    void CreateNode(DiceManager diceManager, MapTableData table, MapNode node, Vector2 position)
+    MapNodeView CreateNode(Vector2 position)
     {
         MapNodeView source = nodeTemplate != null ? nodeTemplate : nodePrefab;
         MapNodeView view = source != null
@@ -132,22 +183,35 @@ public class MapPanel : MonoBehaviour
         rect.pivot = new Vector2(0.5f, 0.5f);
         rect.sizeDelta = new Vector2(78f, 78f);
         rect.anchoredPosition = position;
+        return view;
+    }
 
-        MapNodeTypeRow rule = table.GetNodeRule(node.type);
-        string iconKey = rule != null ? rule.Icon_Key : null;
-        Color tint = Color.white;
-        Sprite sprite = null;
-        if (iconSet != null)
-            sprite = iconSet.GetSprite(iconKey, out tint);
-        bool selectable = diceManager.IsMapNodeSelectable(node.id);
-        bool current = node.id == diceManager.stageProgression.currentNodeId;
-        bool visited = ListHas(diceManager.stageProgression.visitedNodeIds, node.id)
-            || ListHas(diceManager.stageProgression.passedNodeIds, node.id);
-        view.Bind(diceManager, node.id, sprite, tint, selectable, current, visited);
-        if (current && iconSet != null)
-            view.SetCurrentMarker(iconSet.GetSprite(PlayerMarkerKey, out _));
-        if (node.type == MapNodeType.Boss)
-            view.transform.localScale = new Vector3(2.8f, 2.8f, 1f);
+    // 칸 버튼마다 그림·갈 수 있음·현재 칸·방문 표시를 다시 입힌다. 갈 수 있는 칸은 한 번의 탐색으로 모은다.
+    void RefreshNodes(DiceManager diceManager, MapData map, MapTableData table)
+    {
+        StageManager stage = diceManager.stageProgression;
+        diceManager.MapFlow.CollectSelectableNodes(selectableNodes);
+        for (int i = 0; i < map.nodes.Count; i++)
+        {
+            MapNode node = map.nodes[i];
+            if (!nodeViews.TryGetValue(node.id, out MapNodeView view) || view == null) continue;
+
+            MapNodeTypeRow rule = table.GetNodeRule(node.type);
+            string iconKey = rule != null ? rule.Icon_Key : null;
+            Color tint = Color.white;
+            Sprite sprite = null;
+            if (iconSet != null)
+                sprite = iconSet.GetSprite(iconKey, out tint);
+            bool selectable = selectableNodes.Contains(node.id);
+            bool current = node.id == stage.currentNodeId;
+            bool visited = ListHas(stage.visitedNodeIds, node.id) || ListHas(stage.passedNodeIds, node.id);
+            view.Bind(diceManager, node.id, sprite, tint, selectable, current, visited);
+            if (current && iconSet != null)
+                view.SetCurrentMarker(iconSet.GetSprite(PlayerMarkerKey, out _));
+            // Bind가 크기를 1로 되돌리므로 보스 칸 크기는 그 뒤에 다시 키운다.
+            if (node.type == MapNodeType.Boss)
+                view.transform.localScale = new Vector3(2.8f, 2.8f, 1f);
+        }
     }
 
     MapNodeView CreateRuntimeNode()
@@ -162,7 +226,7 @@ public class MapPanel : MonoBehaviour
         var ringGo = new GameObject("Ring", typeof(RectTransform), typeof(Image));
         ringGo.transform.SetParent(go.transform, false);
         var ringRect = ringGo.GetComponent<RectTransform>();
-        Stretch(ringRect);
+        MapUiHierarchy.Stretch(ringRect);
         ringRect.offsetMin = new Vector2(-8f, -8f);
         ringRect.offsetMax = new Vector2(8f, 8f);
         var ring = ringGo.GetComponent<Image>();
@@ -422,7 +486,7 @@ public class MapPanel : MonoBehaviour
         rect.localScale = Vector3.one * 0.6f;
 
         Text text = go.GetComponent<Text>();
-        text.font = BuiltinFont();
+        text.font = MapUiHierarchy.BuiltinFont();
         text.fontSize = 56;
         text.fontStyle = FontStyle.Bold;
         text.alignment = TextAnchor.MiddleCenter;
@@ -465,49 +529,72 @@ public class MapPanel : MonoBehaviour
         KillResultPopup();
     }
 
+    // 실행 중에 만든 점 무늬 텍스처는 씬이 바뀌어도 자동으로 지워지지 않을 수 있어 직접 지운다.
+    void OnDestroy()
+    {
+        if (dotSprite == null) return;
+        Texture2D texture = dotSprite.texture;
+        Destroy(dotSprite);
+        if (texture != null) Destroy(texture);
+        dotSprite = null;
+    }
+
     static bool ListHas(List<int> ids, int id)
     {
         return ids != null && ids.Contains(id);
     }
 
+    // 두 칸 사이 점선. 예전에는 점마다 오브젝트를 만들었지만, 이제 선 하나를 이미지 하나로 두고
+    // 점 하나가 들어간 18px 무늬를 반복해 깐다(Tiled). 점 크기·색은 예전과 같고 간격만 18px로 고정된다.
     void DrawDottedLine(Vector2 from, Vector2 to)
     {
-        if (dotSprite == null) dotSprite = MakeDot();
         Vector2 delta = to - from;
         float distance = delta.magnitude;
-        int dots = Mathf.Max(2, Mathf.FloorToInt(distance / 18f));
-        for (int i = 0; i <= dots; i++)
-        {
-            float t = i / (float)dots;
-            var go = new GameObject("Dot", typeof(RectTransform), typeof(Image));
-            go.transform.SetParent(lineLayer, false);
-            var rect = go.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0f, 0f);
-            rect.anchorMax = new Vector2(0f, 0f);
-            rect.sizeDelta = new Vector2(8f, 8f);
-            rect.anchoredPosition = Vector2.Lerp(from, to, t);
-            var image = go.GetComponent<Image>();
-            image.sprite = dotSprite;
-            image.color = new Color(0.85f, 0.9f, 0.95f, 0.85f);
-            image.raycastTarget = false;
-        }
+        if (distance < 1f) return;
+        if (dotSprite == null) dotSprite = MakeDotTile(lineLayer);
+
+        var go = new GameObject("Line", typeof(RectTransform), typeof(Image));
+        go.transform.SetParent(lineLayer, false);
+        var rect = (RectTransform)go.transform;
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.zero;
+        rect.pivot = new Vector2(0f, 0.5f);
+        rect.anchoredPosition = from;
+        rect.sizeDelta = new Vector2(distance, DotSize);
+        rect.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
+        var image = go.GetComponent<Image>();
+        image.sprite = dotSprite;
+        image.type = Image.Type.Tiled;
+        image.color = DotColor;
+        image.raycastTarget = false;
     }
 
-    static Sprite MakeDot()
+    // 가로 18px × 세로 8px 무늬 한 칸. 가운데에 예전과 같은 지름 8px 점이 하나 있다.
+    // 반복(Repeat)으로 두면 Tiled 이미지가 선 하나를 사각형 하나로 그린다.
+    static Sprite MakeDotTile(Transform layer)
     {
-        const int size = 8;
-        var texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
-        for (int y = 0; y < size; y++)
+        int width = Mathf.RoundToInt(DotSpacing);
+        int height = Mathf.RoundToInt(DotSize);
+        var texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        texture.wrapMode = TextureWrapMode.Repeat;
+        var pixels = new Color32[width * height];
+        float centerX = width * 0.5f - 0.5f;
+        float centerY = height * 0.5f - 0.5f;
+        for (int y = 0; y < height; y++)
         {
-            for (int x = 0; x < size; x++)
+            for (int x = 0; x < width; x++)
             {
-                float dx = x - 3.5f;
-                float dy = y - 3.5f;
-                texture.SetPixel(x, y, dx * dx + dy * dy <= 10f ? Color.white : new Color(0f, 0f, 0f, 0f));
+                float dx = x - centerX;
+                float dy = y - centerY;
+                pixels[y * width + x] = dx * dx + dy * dy <= 10f ? new Color32(255, 255, 255, 255) : new Color32(0, 0, 0, 0);
             }
         }
+        texture.SetPixels32(pixels);
         texture.Apply();
-        return Sprite.Create(texture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), size);
+        // 캔버스 기준 PPU에 맞추면 무늬 한 칸이 화면에서 정확히 18×8로 깔린다.
+        Canvas canvas = layer != null ? layer.GetComponentInParent<Canvas>() : null;
+        float ppu = canvas != null ? canvas.referencePixelsPerUnit : 100f;
+        return Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.5f), ppu, 0, SpriteMeshType.FullRect);
     }
 
     static void ClearChildren(Transform parent)
@@ -527,19 +614,4 @@ public class MapPanel : MonoBehaviour
         layer.localScale = Vector3.one;
     }
 
-    static void Stretch(RectTransform rect)
-    {
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = Vector2.zero;
-        rect.offsetMax = Vector2.zero;
-        rect.localScale = Vector3.one;
-    }
-
-    public static Font BuiltinFont()
-    {
-        Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        if (font == null) font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-        return font;
-    }
 }
