@@ -54,6 +54,9 @@ public class Dice : MonoBehaviour, IPointerDownHandler
         if (hoverJuice == null)
             hoverJuice = gameObject.AddComponent<UiHoverIdleJuice>();
         RefreshHoverJuice();
+
+        // 펠트 위에 놓인 느낌이 나도록 주사위 아래로 살짝 삐져나오는 그림자
+        GroundShadow.Attach(spriteRenderer, 0.95f, 0.22f, 0.02f, 0.55f, -1, true);
     }
 
     // 면 효과 계산용 면 번호. 기록된 번호가 현재 눈과 어긋나면 눈 값이 같은 첫 면으로 대신한다.
