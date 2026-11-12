@@ -11,6 +11,9 @@ public class CharacterApply : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI nameText;
 
+    [Tooltip("씬 시작 시 선택된 상태로 둘 캐릭터")]
+    [SerializeField] private CharacterSelectInteraction defaultSelection;
+
     [Header("정보 패널")]
     [SerializeField] private GameObject guideRoot;
     [SerializeField] private GameObject infoRoot;
@@ -42,19 +45,23 @@ public class CharacterApply : MonoBehaviour
 
         if (guideRoot != null) guideRoot.SetActive(true);
         if (infoRoot != null) infoRoot.SetActive(false);
+
+        if (defaultSelection != null)
+            defaultSelection.Choose();
     }
 
     public void SetCharacter(CharacterData character)
     {
         data = character;
-        nameText.text = LocalizationManager.GetCharacterName(data);
-        SetApplyInteractable(true);
+        nameText.text = data.IsUnlocked ? LocalizationManager.GetCharacterName(data) : "???";
+        // 잠긴 캐릭터는 정보만 볼 수 있고 시작은 못 한다.
+        SetApplyInteractable(data.IsUnlocked);
         RefreshInfo();
     }
 
     public void OnApply()
     {
-        if (data == null)
+        if (data == null || !data.IsUnlocked)
             return;
 
         if (confirmText != null)

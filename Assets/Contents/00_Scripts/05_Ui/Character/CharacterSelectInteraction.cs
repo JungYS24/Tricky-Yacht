@@ -39,6 +39,12 @@ public class CharacterSelectInteraction : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        Choose();
+    }
+
+    // 클릭과 같은 처리. 씬 시작 시 기본 선택에도 쓴다. 잠긴 캐릭터도 고를 수 있고, 시작 가능 여부는 CharacterApply가 정한다.
+    public void Choose()
+    {
         OnClickDisplay.Invoke(characterData);
         Select();
     }
@@ -62,7 +68,6 @@ public class CharacterSelectInteraction : MonoBehaviour, IPointerClickHandler
         {
             nameText.text = "???";
             nameText.color = lockedNameColor;
-            enabled = false;
         }
 
         SetNameTag(false);
