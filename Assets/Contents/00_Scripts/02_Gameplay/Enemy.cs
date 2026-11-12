@@ -38,6 +38,11 @@ public class Enemy : MonoBehaviour
     public Color edgeColorPink = new Color(1f, 0.3f, 0.85f, 1f);
     public Color edgeColorMint = new Color(0.4f, 1f, 0.85f, 1f);
 
+    [Header("발밑 그림자")]
+    [Tooltip("몬스터를 이만큼 아래로 내려 발끝이 HP 줄 뒤로 살짝 들어가게 합니다 (월드 유닛, 0.065 = 1080p에서 약 7px)")]
+    public float footSinkY = 0.065f;
+    private GroundShadow footShadow;
+
     [Header("쉐이더 프로퍼티")]
     public string dissolveProperty = "_DissolveAmount";
     public string edgeColorAProperty = "_EdgeColorA";
@@ -97,7 +102,11 @@ public class Enemy : MonoBehaviour
     void Awake()
     {
         originalScale = transform.localScale;
+        transform.position += Vector3.down * footSinkY;
         originalPosition = transform.position;
+
+        // 바닥에 서 있는 느낌이 나도록 발밑 그림자 (몬스터가 바뀔 때마다 발 위치를 다시 잡음)
+        footShadow = GroundShadow.Attach(monsterImage, 0.44f, 0.06f, 0.016f, 0.47f);
 
         // 기존 체력바 자동 할당 코드
         if (enemyHPSlider == null)
@@ -202,6 +211,7 @@ public class Enemy : MonoBehaviour
                 if (monsterAnimator != null) monsterAnimator.runtimeAnimatorController = null;
                 if (monsterImage != null) monsterImage.sprite = nextMonsterData.monsterSprite;
             }
+            if (footShadow != null) footShadow.Refit(nextMonsterData.monsterSprite);
 
             dropFigureData = nextMonsterData.dropFigureData;
             baseDropRate = nextMonsterData.dropRate;
@@ -623,6 +633,7 @@ public class Enemy : MonoBehaviour
             if (monsterAnimator != null) monsterAnimator.runtimeAnimatorController = null;
             if (monsterImage != null) monsterImage.sprite = monsterData.monsterSprite;
         }
+        if (footShadow != null) footShadow.Refit(monsterData.monsterSprite);
 
         dropFigureData = monsterData.dropFigureData;
         baseDropRate = monsterData.dropRate;
