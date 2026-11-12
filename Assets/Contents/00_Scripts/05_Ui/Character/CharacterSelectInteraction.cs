@@ -13,6 +13,10 @@ public class CharacterSelectInteraction : MonoBehaviour, IPointerClickHandler
 
     [SerializeField] private UnityEvent<CharacterData> OnClickDisplay;
 
+    // 하단 패널은 초상만 보여 주고, 선택된 캐릭터의 전신 IDLE은 화면 중앙 위 표시 영역에 켠다.
+    [Header("전신 표시")]
+    [SerializeField] private GameObject displayFigure;
+
     [Header("선택 연출")]
     [SerializeField] private float selectedScale = 1.15f;
     [SerializeField] private float scaleDuration = 0.15f;
@@ -43,6 +47,9 @@ public class CharacterSelectInteraction : MonoBehaviour, IPointerClickHandler
     {
         defaultScale = transform.localScale;
 
+        if (displayFigure != null)
+            displayFigure.SetActive(false);
+
         bool unlocked = characterData.IsUnlocked;
         if (lockIcon != null)
             lockIcon.SetActive(!unlocked);
@@ -68,7 +75,7 @@ public class CharacterSelectInteraction : MonoBehaviour, IPointerClickHandler
 
         currentSelected = this;
         SetSelected(true);
-        MoveMarker(selectGlow);
+        ShowMarker(selectGlow);
         MoveMarker(selectArrow);
     }
 
@@ -81,6 +88,9 @@ public class CharacterSelectInteraction : MonoBehaviour, IPointerClickHandler
 
         scaleRoutine = StartCoroutine(ScaleTo(target));
         SetNameTag(selected);
+
+        if (displayFigure != null)
+            displayFigure.SetActive(selected);
     }
 
     private void SetNameTag(bool selected)
@@ -93,7 +103,14 @@ public class CharacterSelectInteraction : MonoBehaviour, IPointerClickHandler
             nameTag.sprite = sprite;
     }
 
-    // 발광·화살표는 y를 고정하고 x만 선택 캐릭터 위치로 옮긴다.
+    // 발광은 중앙 전신 발밑에 고정되어 있으므로 켜기만 한다.
+    private static void ShowMarker(RectTransform marker)
+    {
+        if (marker != null)
+            marker.gameObject.SetActive(true);
+    }
+
+    // 화살표는 y를 고정하고 x만 선택한 패널 위치로 옮긴다.
     private void MoveMarker(RectTransform marker)
     {
         if (marker == null)
