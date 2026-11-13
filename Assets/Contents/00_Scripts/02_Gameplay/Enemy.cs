@@ -162,37 +162,10 @@ public class Enemy : MonoBehaviour
         //만약의 사태를 대비한 기본 체력 (리스트가 비어있을 때 등)
         int finalMaxHP = 40;
         int finalAttack = 10;
-        MonsterDataSO nextMonsterData = null;
 
         DiceManager dice = DiceManager.Instance;
-        MonsterDataSO forcedMonster = dice != null ? dice.pendingForcedMonster : null;
-        if (dice != null) dice.pendingForcedMonster = null;
-
-        if (TutorialMode.Active && TutorialMode.WeakestMonster(currentBiome) != null)
-        {
-            // 튜토리얼 모드 첫 전투는 가장 약한 몬스터로 고정합니다.
-            nextMonsterData = TutorialMode.WeakestMonster(currentBiome);
-        }
-        else if (forcedMonster != null)
-        {
-            // 차원문 등, 바이옴 목록보다 먼저 강제 몬스터를 씁니다. 보스 몬스터면 bossAbility도 같이 적용됩니다.
-            nextMonsterData = forcedMonster;
-        }
-        else if (currentBiome != null)
-        {
-            // 지도의 보스 칸에서 시작한 전투만 보스전입니다(층 번호와는 상관없음).
-            bool bossStage = dice != null && dice.mapBossBattle;
-            if (bossStage && currentBiome.bossMonster != null)
-            {
-                nextMonsterData = currentBiome.bossMonster;
-            }
-            //그 외의 일반 스테이지는 리스트에서 등급에 맞는 몬스터를 랜덤 출현
-            else if (currentBiome.biomeMonsters != null && currentBiome.biomeMonsters.Count > 0)
-            {
-                bool elite = dice != null && dice.isEliteBattle;
-                nextMonsterData = PickBiomeMonster(currentBiome.biomeMonsters, elite);
-            }
-        }
+        // 어떤 몬스터를 낼지는 MonsterSpawnRules가 정한다(튜토리얼 → 강제 몬스터 → 보스 → 엘리트·일반).
+        MonsterDataSO nextMonsterData = MonsterSpawnRules.PickMonster(dice, currentBiome);
 
         // 선택된 몬스터(보스 혹은 일반)의 데이터를 덮어씌웁니다.
         if (nextMonsterData != null)
@@ -226,34 +199,11 @@ public class Enemy : MonoBehaviour
             currentMonsterIndex++;
         }
         else DropGold = 0;
-        Grade = ResolveGrade(nextMonsterData);
+        Grade = MonsterSpawnRules.ResolveGrade(nextMonsterData);
 
-        // 바이옴 단계 + 바이옴 안 전투 수로 성장 (BalanceConfig.useLegacyGrowth 면 예전 스테이지 공식)
-        // 튜토리얼 모드는 예전 공식을 그대로 쓴다.
+        // 바이옴 성장, 눈먼 점술가 패널티, 튜토리얼 체력 상한은 MonsterSpawnRules가 계산한다.
+        MonsterSpawnRules.ScaleStats(dice, currentStage, ref finalMaxHP, ref finalAttack);
         BalanceConfig cfg = BalanceConfig.Current;
-        bool legacy = cfg.useLegacyGrowth || TutorialMode.Active || dice == null;
-        int biomeTier = dice != null ? dice.CurrentBiomeTier : 0;
-        int nodeInBiome = dice != null ? dice.CombatsClearedInBiome : 0;
-        if (legacy)
-        {
-            finalMaxHP = Mathf.RoundToInt(finalMaxHP * Mathf.Pow(cfg.legacyHpGrowth, currentStage - 1));
-            finalAttack += currentStage / 2;
-        }
-        else
-        {
-            finalMaxHP = cfg.ScaleHp(finalMaxHP, biomeTier, nodeInBiome, currentStage);
-            finalAttack = cfg.ScaleAtk(finalAttack, biomeTier, nodeInBiome, currentStage);
-        }
-
-        //(눈먼 점술가 패널티 적용)
-        if (DiceManager.Instance != null && DiceManager.Instance.isNextEnemyHPBoosted)
-        {
-            finalMaxHP *= 2; // 적 체력을 2배(100% 증가)로 만듬
-            DiceManager.Instance.isNextEnemyHPBoosted = false; // 적용했으니 스위치를 다시 끔
-        }
-
-        // 튜토리얼 모드에서는 한 턴에 잡힐 정도로 체력을 낮춥니다.
-        if (TutorialMode.Active) finalMaxHP = Mathf.Min(finalMaxHP, TutorialMode.MonsterHp);
 
         // 여기서 최종적으로 체력을 확정(덮어씌워지는 문제 해결)
         MaxHP = finalMaxHP;
@@ -638,7 +588,7 @@ public class Enemy : MonoBehaviour
         dropFigureData = monsterData.dropFigureData;
         baseDropRate = monsterData.dropRate;
         DropGold = monsterData.dropGold;
-        Grade = ResolveGrade(monsterData);
+        Grade = MonsterSpawnRules.ResolveGrade(monsterData);
 
         if (dropFigureData != null && CollectionDataManager.Instance != null)
             CollectionDataManager.Instance.EncounterFigure(dropFigureData);
@@ -707,39 +657,6 @@ public class Enemy : MonoBehaviour
         }
 
         UpdateHPBar(true);
-    }
-
-    // 지도의 엘리트 노드는 엘리트 등급만, 일반 전투는 일반 등급만 뽑는다.
-    // 바이옴 목록에 해당 등급이 없으면 엘리트는 체력이 가장 높은 몬스터, 일반은 목록 전체에서 뽑는다.
-    static MonsterDataSO PickBiomeMonster(List<MonsterDataSO> monsters, bool elite)
-    {
-        MonsterGrade wanted = elite ? MonsterGrade.Elite : MonsterGrade.Normal;
-        var pool = new List<MonsterDataSO>();
-        foreach (MonsterDataSO m in monsters)
-            if (m != null && m.monsterGrade == wanted) pool.Add(m);
-        if (pool.Count > 0) return pool[UnityEngine.Random.Range(0, pool.Count)];
-
-        if (elite)
-        {
-            MonsterDataSO strongest = null;
-            foreach (MonsterDataSO m in monsters)
-                if (m != null && (strongest == null || m.maxHp > strongest.maxHp)) strongest = m;
-            if (strongest != null) return strongest;
-        }
-        return monsters[UnityEngine.Random.Range(0, monsters.Count)];
-    }
-
-    // 지도 노드가 보스·엘리트면 그 등급을, 아니면(일반·차원문·조우) 몬스터 데이터의 등급을 쓴다.
-    static MonsterGrade ResolveGrade(MonsterDataSO data)
-    {
-        DiceManager dice = DiceManager.Instance;
-        if (dice != null)
-        {
-            MapNode node = dice.stageProgression.FindNode(dice.stageProgression.currentNodeId);
-            if (node != null && node.type == MapNodeType.Boss) return MonsterGrade.Boss;
-            if (node != null && node.type == MapNodeType.Elite) return MonsterGrade.Elite;
-        }
-        return data != null ? data.monsterGrade : MonsterGrade.Normal;
     }
 
     // 보스 체력이 기준 비율 이하가 되면 공격 턴을 줄인다. 남은 턴이 새 최대치보다 많으면 함께 줄인다.

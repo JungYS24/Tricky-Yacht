@@ -406,7 +406,7 @@ public static class BalanceSimulator
         }
     }
 
-    // Enemy.PickBiomeMonster 와 같은 규칙
+    // MonsterSpawnRules.PickBiomeMonster 와 같은 규칙
     static MonsterDataSO PickGrade(List<MonsterDataSO> list, MonsterGrade wanted, System.Random rng, bool elite)
     {
         var pool = list.Where(x => x != null && x.monsterGrade == wanted).ToList();
