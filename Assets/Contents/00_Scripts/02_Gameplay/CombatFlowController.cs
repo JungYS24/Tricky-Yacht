@@ -325,4 +325,136 @@ public static class CombatFlowController
             dm.InvokeStartNewRound(0.5f);
         }
     }
+
+    // "끝내기"를 누른 뒤 한 턴 결산 전체 순서(DiceManager.FinishTurnRoutine이 부른다).
+    // 족보 판정 → 눈 공개 → 가시 디버프 → 족보 연출 → 피규어 → 점수 → 최종 피해 → 공격·회복·골드(ProcessTurnResolution)
+    // 안에서 여는 코루틴은 예전처럼 DiceManager가 돌린다(dm.StartCoroutine).
+    public static IEnumerator ResolveTurn(DiceManager dm)
+    {
+        // DiceManager가 매 턴 다시 쓰는 목록과 결산 연출 담당(새로 만들지 않는다).
+        List<Dice> keptDice = dm.KeptDice;
+        List<int> keptValues = dm.KeptValues;
+        List<DiceScoreBonus> diceScoreBonuses = dm.DiceScoreBonuses;
+        TurnResolutionPresenter resolutionPresenter = dm.ResolutionPresenter;
+
+        //데이터 독립 추출 (UI 버퍼 의존 X, 킵된 주사위만 스냅샷 수집)
+        dm.Board.CollectKept(keptDice, keptValues);
+
+        // 안전장치: 킵한 주사위가 정확히 5개가 아니면 결산 중단
+        if (keptValues.Count != 5)
+        {
+            dm.isCalculating = false;
+            dm.ForceUpdateUI();
+            yield break;
+        }
+
+        // 끝내기 직후: 스테이크 회복, 가니쉬/페퍼민트 소멸, 보존된 라임 복귀를 먼저 처리
+        SnackUseController snacks = InventoryManager.Instance != null ? InventoryManager.Instance.SnackUses : null;
+        if (snacks != null) yield return snacks.PlayFinishStart();
+
+        // 족보 판정 (TurnCalculator가 주는 정확한 배수와 이름을 그대로 사용)
+        float handMult = 1.0f;
+        HandRank handRank = TurnCalculator.CalculateHand(keptValues, dm, out handMult);
+        dm.currentHandRank = handRank;
+        string handName = LocalizationManager.GetHandDisplayName(handRank);
+
+        yield return resolutionPresenter.PlayDiceValues(keptDice, dm.resolutionTiming);
+
+        // 가시 디버프는 눈이 뜬 직후 회복·점수 계산보다 먼저 찌른다. 체력이 0이 되면 남은 결산 없이 사망 처리로 끝낸다.
+        var spineDice = new List<Dice>();
+        foreach (var d in keptDice)
+            if (d != null && d.myData != null && d.myData.debuffType == DebuffDiceType.Spine && d.currentValue > 0) spineDice.Add(d);
+        bool downedByThorn = false;
+        yield return CombatFlowController.ProcessDebuffThorn(dm, spineDice, TurnCalculator.CalculateSpineDamage(keptDice), () => downedByThorn = true);
+        if (downedByThorn)
+        {
+            if (snacks != null) yield return snacks.CompleteResolution();
+            dm.ui?.ClearMergedHandDamageText();
+            yield break;
+        }
+
+        yield return resolutionPresenter.PlayHand(dm, keptDice, handRank, handMult, dm.resolutionTiming);
+
+        // 피규어 계산에 필요한 기본 눈금 합만 먼저 구함
+        int baseSumBeforeFigures = 0;
+        foreach (int value in keptValues)
+        {
+            baseSumBeforeFigures += value;
+        }
+
+        int chipsBeforeFigures = dm.snackBonusChips;
+        float multBeforeFigures = dm.snackBonusMult;
+
+        // 피규어 발동 및 선택창 처리가 끝날 때까지 대기
+        if (FigureEffectManager.Instance != null)
+        {
+            yield return dm.StartCoroutine(FigureEffectManager.Instance.EvaluateTurnEndTriggersCoroutine(keptValues, handRank, baseSumBeforeFigures, dm, dm.shopManager));
+        }
+
+        // 피규어 적용 이후의 회복 배수와 적 체력을 사용
+        float healMultUI = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetHealMultiplier() : 1.0f;
+
+        int simEnemyHP = dm.enemy != null ? dm.enemy.CurrentHP : 0;
+
+        // 변경된 코팅·위성을 반영하여 주사위 효과 계산
+        TurnCalcResult calcResult = TurnCalculator.CalculateDiceEffects(keptDice, simEnemyHP, healMultUI, diceScoreBonuses, handRank);
+        int extraIceChipsForDisplay = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetIceChipsBonus() : 0;
+
+        // 주사위별 기본 눈금 표시. 코팅·위성 칩은 아래 순차 결산에서 표시합니다.
+        foreach (var d in keptDice)
+        {
+            if (d == null || d.myData == null) continue;
+
+            // 기존 피규어 발동 알림은 유지
+            if (d.myData.isCoated && d.myData.type == DiceType.Ice)
+            {
+                if (extraIceChipsForDisplay > 0) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.AddIceChips);
+                if (calcResult.iceBonusMult > 0f) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.AddIceMultiplier);
+            }
+        }
+
+        var bonuses = new TurnScoreBonuses
+        {
+            stageChips = dm.stageBonusChips,
+            snackChips = dm.snackBonusChips,
+            stageMult = dm.stageBonusMult,
+            snackMult = dm.snackBonusMult,
+            permanentMult = dm.permanentFigureMultiplier
+        };
+        TurnScoreResult total = TurnCalculator.CalculateScore(calcResult, handMult, bonuses);
+        yield return resolutionPresenter.PlayScore(dm.ui, keptDice, handRank, handName, handMult, calcResult, diceScoreBonuses, bonuses, chipsBeforeFigures, multBeforeFigures, total, dm.resolutionTiming, snacks);
+        if (snacks != null) yield return snacks.CompleteResolution();
+
+        // 다크 데미지 별도 계산 (최신 HP 기준)
+        int darkDamageTotal = TurnCalculator.CalculateDarkDamage(keptDice, simEnemyHP);
+        // 스페이드 스탬프 추가 피해는 배수 없이 최종 피해에 더한다
+        int finalDamage = total.damage + calcResult.stampDamage;
+        // 악마주사위 2페이즈부터: 원페어·투페어는 피해가 들어가지 않는다.
+        if (DevilDiceBoss.BlocksHand(dm.enemy, handRank))
+        {
+            finalDamage = 0;
+            darkDamageTotal = 0;
+            ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_IMMUNE", "원페어·투페어는 악마주사위에게 통하지 않습니다!"));
+        }
+
+        yield return resolutionPresenter.PlayFinalDamage(dm.ui, finalDamage + darkDamageTotal, dm.resolutionTiming);
+
+        // 화염 및 기타 수치 종합
+        int totalFlameDamage = calcResult.flameDamageThisTurn + dm.figureBonusFlameDamage;
+        dm.figureBonusFlameDamage = 0;
+        int finalHeal = calcResult.expectedHeal;
+        int expectedGold = calcResult.expectedGold + calcResult.stampGold; // 코인 주사위·다이아 스탬프 등에서 얻은 골드
+
+        // 코인 면이나 다이아 스탬프로 골드를 준 주사위(코인 날아가기 연출 대상)
+        var coinDice = new List<Dice>();
+        foreach (var d in keptDice)
+        {
+            if (TurnCalculator.GetCoinFlyGold(d) > 0) coinDice.Add(d);
+        }
+
+        // 완벽하게 쪼개진 수치들을 전투 지휘관(CombatFlowController)에게 전달
+        yield return dm.StartCoroutine(CombatFlowController.ProcessTurnResolution(dm, finalDamage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName, calcResult.selfDamage, coinDice,
+            calcResult.stampShield));
+        dm.ui?.ClearMergedHandDamageText();
+    }
 }
