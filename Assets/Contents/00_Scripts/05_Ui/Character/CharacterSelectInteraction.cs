@@ -1,145 +1,168 @@
-using System.Collections;
-using TMPro;
+using DG.Tweening;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
-public class CharacterSelectInteraction : MonoBehaviour, IPointerClickHandler
+// 캐릭터 선택 씬의 흐름만 맡는다: 목록 ↔ 상세 전환, 이전/다음 순환, 키 입력, 시작 요청.
+// 화면 채우기는 CharacterSelectListView / CharacterDetailView, 게임 시작은 기존 CharacterApply가 한다.
+public class CharacterSelectInteraction : MonoBehaviour
 {
-    [SerializeField] private CharacterData characterData;
+    [SerializeField] private CharacterSelectCatalog catalog;
+    [SerializeField] private CharacterSelectListView listView;
+    [SerializeField] private CharacterDetailView detailView;
+    [SerializeField] private CharacterApply apply;
 
-    [SerializeField] private TextMeshProUGUI nameText;
+    [Header("전환")]
+    [SerializeField] private CanvasGroup listGroup;
+    [SerializeField] private CanvasGroup detailGroup;
+    [SerializeField, Range(0.05f, 0.5f)] private float fadeDuration = 0.18f;
+    [SerializeField] private float slideDistance = 32f;
 
-    [SerializeField] private UnityEvent<CharacterData> OnClickDisplay;
+    [Tooltip("씬 진입 시 선택된 캐릭터(카탈로그 순서). 0 = 폰 바르한")]
+    [SerializeField] private int defaultIndex = 0;
 
-    // 하단 패널은 초상만 보여 주고, 선택된 캐릭터의 전신 IDLE은 화면 중앙 위 표시 영역에 켠다.
-    [Header("전신 표시")]
-    [SerializeField] private GameObject displayFigure;
+    // 모든 캐릭터의 시작 골드. 게임 시작 시 DiceManager도 같은 값을 쓴다.
+    public static int StartingGold => BalanceConfig.Current.startGold;
 
-    [Header("선택 연출")]
-    [SerializeField] private float selectedScale = 1.15f;
-    [SerializeField] private float scaleDuration = 0.15f;
+    public int SelectedIndex { get; private set; }
+    public bool IsDetailOpen { get; private set; }
 
-    [Header("이름표")]
-    [SerializeField] private Image nameTag;
-    [SerializeField] private GameObject lockIcon;
-    [SerializeField] private Sprite nameTagSprite;
-    [SerializeField] private Sprite nameTagSelectedSprite;
-    [SerializeField] private Color lockedNameColor = new Color32(0x96, 0xAA, 0xAA, 0xFF);
+    private CanvasGroup contentGroup;
+    private Vector2 contentPosition;
 
-    // 씬에서는 비활성 상태로 두고, 첫 선택 때 켠다.
-    [Header("선택 표시 (모든 캐릭터가 같은 오브젝트를 공유)")]
-    [SerializeField] private RectTransform selectGlow;
-    [SerializeField] private RectTransform selectArrow;
-
-    private static CharacterSelectInteraction currentSelected;
-    private Vector3 defaultScale;
-    private Coroutine scaleRoutine;
-
-    public void OnPointerClick(PointerEventData eventData)
+    private void Start()
     {
-        Choose();
-    }
+        listView.Bind(catalog);
+        listView.CardClicked += OpenDetail;
 
-    // 클릭과 같은 처리. 씬 시작 시 기본 선택에도 쓴다. 잠긴 캐릭터도 고를 수 있고, 시작 가능 여부는 CharacterApply가 정한다.
-    public void Choose()
-    {
-        OnClickDisplay.Invoke(characterData);
-        Select();
-    }
+        detailView.BackButton.onClick.AddListener(ShowList);
+        detailView.PreviousButton.onClick.AddListener(() => Step(-1));
+        detailView.NextButton.onClick.AddListener(() => Step(1));
 
-    public void Awake()
-    {
-        defaultScale = transform.localScale;
-
-        if (displayFigure != null)
-            displayFigure.SetActive(false);
-
-        bool unlocked = characterData.IsUnlocked;
-        if (lockIcon != null)
-            lockIcon.SetActive(!unlocked);
-
-        if (unlocked)
+        if (detailView.Content != null)
         {
-            nameText.text = LocalizationManager.GetCharacterName(characterData);
+            contentPosition = detailView.Content.anchoredPosition;
+            if (!detailView.Content.TryGetComponent(out contentGroup))
+                contentGroup = detailView.Content.gameObject.AddComponent<CanvasGroup>();
+        }
+
+        Select(Mathf.Clamp(defaultIndex, 0, catalog.Count - 1));
+        SetVisible(listGroup, true, instant: true);
+        SetVisible(detailGroup, false, instant: true);
+    }
+
+    private void Update()
+    {
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null)
+            return;
+
+        // 시작 확인 창이 떠 있으면 ESC로 창만 닫는다.
+        if (apply.IsConfirmOpen)
+        {
+            if (keyboard.escapeKey.wasPressedThisFrame)
+                apply.OnFinalApply(false);
+            return;
+        }
+
+        bool left = keyboard.leftArrowKey.wasPressedThisFrame || keyboard.aKey.wasPressedThisFrame;
+        bool right = keyboard.rightArrowKey.wasPressedThisFrame || keyboard.dKey.wasPressedThisFrame;
+        bool confirm = keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame;
+
+        if (IsDetailOpen)
+        {
+            if (left) Step(-1);
+            else if (right) Step(1);
+            else if (keyboard.escapeKey.wasPressedThisFrame || keyboard.backspaceKey.wasPressedThisFrame) ShowList();
+            else if (confirm && CurrentEntry.character != null && CurrentEntry.character.IsUnlocked) apply.OnApply();
         }
         else
         {
-            nameText.text = "???";
-            nameText.color = lockedNameColor;
+            if (left) Select(Wrap(SelectedIndex - 1));
+            else if (right) Select(Wrap(SelectedIndex + 1));
+            else if (confirm) OpenDetail(SelectedIndex);
         }
-
-        SetNameTag(false);
     }
 
-    private void Select()
-    {
-        if (currentSelected != null && currentSelected != this)
-            currentSelected.SetSelected(false);
+    private CharacterSelectEntry CurrentEntry => catalog.entries[SelectedIndex];
 
-        currentSelected = this;
-        SetSelected(true);
-        ShowMarker(selectGlow);
-        MoveMarker(selectArrow);
+    public void OpenDetail(int index)
+    {
+        Select(index);
+        detailView.Bind(CurrentEntry, SelectedIndex, catalog);
+        IsDetailOpen = true;
+        SetVisible(listGroup, false, instant: false);
+        SetVisible(detailGroup, true, instant: false);
     }
 
-    private void SetSelected(bool selected)
+    public void ShowList()
     {
-        Vector3 target = selected ? defaultScale * selectedScale : defaultScale;
-
-        if (scaleRoutine != null)
-            StopCoroutine(scaleRoutine);
-
-        scaleRoutine = StartCoroutine(ScaleTo(target));
-        SetNameTag(selected);
-
-        if (displayFigure != null)
-            displayFigure.SetActive(selected);
-    }
-
-    private void SetNameTag(bool selected)
-    {
-        if (nameTag == null)
+        if (!IsDetailOpen)
             return;
 
-        Sprite sprite = selected ? nameTagSelectedSprite : nameTagSprite;
-        if (sprite != null)
-            nameTag.sprite = sprite;
+        IsDetailOpen = false;
+        listView.SetSelected(SelectedIndex);
+        SetVisible(detailGroup, false, instant: false);
+        SetVisible(listGroup, true, instant: false);
     }
 
-    // 발광은 중앙 전신 발밑에 고정되어 있으므로 켜기만 한다.
-    private static void ShowMarker(RectTransform marker)
+    // 상세 화면에서 이전(-1)/다음(+1) 캐릭터로 순환 이동한다.
+    public void Step(int direction)
     {
-        if (marker != null)
-            marker.gameObject.SetActive(true);
+        Select(Wrap(SelectedIndex + direction));
+        detailView.Bind(CurrentEntry, SelectedIndex, catalog);
+        PlaySlide(direction);
     }
 
-    // 화살표는 y를 고정하고 x만 선택한 패널 위치로 옮긴다.
-    private void MoveMarker(RectTransform marker)
+    // 목록 강조와 CharacterApply의 시작 대상(잠긴 캐릭터는 시작 불가)을 함께 맞춘다.
+    private void Select(int index)
     {
-        if (marker == null)
+        SelectedIndex = index;
+        listView.SetSelected(index);
+        apply.SetCharacter(CurrentEntry.character);
+    }
+
+    private int Wrap(int index)
+    {
+        int count = catalog.Count;
+        return ((index % count) + count) % count;
+    }
+
+    private void PlaySlide(int direction)
+    {
+        if (detailView.Content == null || contentGroup == null)
             return;
 
-        Vector3 position = marker.position;
-        position.x = transform.position.x;
-        marker.position = position;
-        marker.gameObject.SetActive(true);
+        RectTransform content = detailView.Content;
+        content.DOKill();
+        contentGroup.DOKill();
+
+        content.anchoredPosition = contentPosition + new Vector2(slideDistance * direction, 0f);
+        contentGroup.alpha = 0f;
+        content.DOAnchorPos(contentPosition, fadeDuration).SetEase(Ease.OutCubic).SetLink(content.gameObject);
+        contentGroup.DOFade(1f, fadeDuration).SetLink(content.gameObject);
     }
 
-    private IEnumerator ScaleTo(Vector3 target)
+    private void SetVisible(CanvasGroup group, bool visible, bool instant)
     {
-        Vector3 start = transform.localScale;
-        float elapsed = 0f;
+        if (group == null)
+            return;
 
-        while (elapsed < scaleDuration)
+        group.DOKill();
+        group.interactable = visible;
+        group.blocksRaycasts = visible;
+
+        if (visible)
+            group.gameObject.SetActive(true);
+
+        if (instant)
         {
-            elapsed += Time.deltaTime;
-            transform.localScale = Vector3.Lerp(start, target, elapsed / scaleDuration);
-            yield return null;
+            group.alpha = visible ? 1f : 0f;
+            group.gameObject.SetActive(visible);
+            return;
         }
 
-        transform.localScale = target;
-        scaleRoutine = null;
+        group.DOFade(visible ? 1f : 0f, fadeDuration)
+            .SetLink(group.gameObject)
+            .OnComplete(() => { if (!visible) group.gameObject.SetActive(false); });
     }
 }

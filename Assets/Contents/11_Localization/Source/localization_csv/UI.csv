@@ -202,3 +202,71 @@ The adventure continues in the full release.","<color=#00FF00>DEMO CLEAR!</color
 恭喜！
 你已征服体验版的全部三个生物群系！
 更多冒险敬请期待正式版。",데모 종료(BalanceConfig.demoBiomeLimit 바이옴 클리어) 화면
+UI,UI_CHARSELECT_FOOTER,TRICKY YACHT · 플레이어블 캐릭터,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_BACK,목록,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_UNLOCK_HEADER,해금 조건,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_PROVISIONAL,가칭 · 수치 제안,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_START_FIGURE,시작 피규어 · 2개 중 1개 선택,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_UNIQUE_DICE,고유 주사위,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_START_DECK,시작 덱 · {0}개,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_PLAY,플레이,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_BASE_GOLD,기초 골드,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_BASE_HP,기초 체력,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_DICE_COUNT,×{0},,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_GOLD,골드,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_HP,체력,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_OVERVIEW_SUBTITLE,모든 덱은 여정 주사위 1개 + 캐릭터 주사위 11개 = 12개 · 시작 피규어는 2개 중 1개를 골라 시작,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_OVERVIEW_TITLE,캐릭터마다 시작 덱이 다르다,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_OVERVIEW_SECTION,한눈에 보기,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_PAWN_EN_NAME,PAWN VARHAN,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_PAWN_TAG,안정 · 방어,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_PAWN_SUBTITLE,방패를 든 기사,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_PAWN_SUMMARY,"기본 주사위 위주의 정석 덱. 짝수·홀수 주사위 한 쌍으로 배수와 칩을 조금씩 챙기고, 피규어로 버티는 힘을 고른다.",,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_PAWN_DICE1_NAME,짝수 주사위,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_PAWN_DICE1_DESC,"2·4·6만 나오고, 결산 때 배수 +0.2",,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_PAWN_DICE2_NAME,홀수 주사위,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_PAWN_DICE2_DESC,"1·3·5만 나오고, 결산 때 칩 +5",,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_PAWN_FIGURE_A_NAME,기사의 방패,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_PAWN_FIGURE_A_DESC,피격 시 받는 피해 2 감소,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_PAWN_FIGURE_B_NAME,기사의 맹세,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_PAWN_FIGURE_B_DESC,몬스터 전투 종료 후 체력 3 회복,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_BURNTHEAD_EN_NAME,BURNTHEAD,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_BURNTHEAD_TAG,화상 누적,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_BURNTHEAD_SUBTITLE,불을 다루는 병기,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_BURNTHEAD_SUMMARY,덱 전체가 화염. 턴마다 화상을 쌓아 길게 태우는 캐릭터. 체력이 가장 높아 오래 버티며 화상을 굴린다.,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_BURNTHEAD_DICE1_NAME,화염 주사위,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_BURNTHEAD_DICE1_DESC,눈 × 2만큼 적에게 화상을 쌓음. 화상은 이후 턴에도 피해,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_BURNTHEAD_FIGURE_A_NAME,용광로,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_BURNTHEAD_FIGURE_A_DESC,적에게 가하는 화상 피해 50% 증가,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_BURNTHEAD_FIGURE_B_NAME,불씨 심장,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_BURNTHEAD_FIGURE_B_DESC,전투 첫 공격 시 적에게 화상 5 부여,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CHRISTINA_EN_NAME,CHRISTINA,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CHRISTINA_TAG,골드 · 상점,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CHRISTINA_SUBTITLE,여우 소녀,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CHRISTINA_SUMMARY,700골드로 시작하고 코인 주사위로 계속 번다. 상점에서 일찍 빌드를 완성하는 경제형 캐릭터.,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CHRISTINA_DICE1_NAME,코인 주사위,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CHRISTINA_DICE1_DESC,결산 때 눈 × 10 골드 획득,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CHRISTINA_FIGURE_A_NAME,여우 지갑,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CHRISTINA_FIGURE_A_DESC,아이템을 살 때마다 영구 칩 +1 (누적),,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CHRISTINA_FIGURE_B_NAME,여우 구슬,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CHRISTINA_FIGURE_B_DESC,모든 골드 획득량 20% 증가,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CLOVIS_EN_NAME,CLOVIS,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CLOVIS_TAG,회복 · 성장,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CLOVIS_SUBTITLE,생명을 다루는 무녀,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CLOVIS_SUMMARY,하트 주사위로 매 턴 회복하며 버틴다. 최대 체력을 키울수록 공격력도 함께 자라는 성장형 캐릭터.,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CLOVIS_DICE1_NAME,하트 주사위,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CLOVIS_DICE1_DESC,결산 때 눈만큼 체력 회복 (회복 배율 적용),,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CLOVIS_FIGURE_A_NAME,피안화,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CLOVIS_FIGURE_A_DESC,최대 체력이 영구히 늘 때마다 영구 칩 +1 (누적),,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CLOVIS_FIGURE_B_NAME,윤회의 염주,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_CLOVIS_FIGURE_B_DESC,받는 체력 회복량 30% 증가,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_COBICO_EN_NAME,COBICO CRIMSON,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_COBICO_TAG,폭발 · 연쇄,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_COBICO_SUBTITLE,마룡의 심장을 빼앗은 소악마,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_COBICO_SUMMARY,덱 전체가 폭탄. 많이 킵할수록 연쇄로 크게 터지는 한 방형 캐릭터. 체력이 낮은 대신 피해량이 가장 높다.,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_COBICO_DICE1_NAME,폭탄 주사위,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_COBICO_DICE1_DESC,눈 × 2 즉시 폭발 · 6은 크리티컬 2배 · 여러 개 킵하면 연쇄 배수,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_COBICO_FIGURE_A_NAME,마룡의 폭탄,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_COBICO_FIGURE_A_DESC,적에게 가하는 폭탄 피해 50% 증가,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_COBICO_FIGURE_B_NAME,마룡의 심장,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_COBICO_FIGURE_B_DESC,"피격 시 이번 전투 배수 +1 (누적, 전투 종료 시 초기화)",,,,캐릭터 선택 리워크
