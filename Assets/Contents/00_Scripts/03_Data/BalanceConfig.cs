@@ -79,9 +79,9 @@ public class BalanceConfig : ScriptableObject
     [Range(0f, 1f)] public float devilPhase3HpRatio = 0.25f;
 
     [Header("피규어 드롭률 (페퍼민트 없이 처치했을 때)")]
-    [Range(0f, 1f)] public float normalDropRate = 0.12f;
-    [Range(0f, 1f)] public float eliteDropRate = 0.35f;
-    [Range(0f, 1f)] public float bossDropRate = 1f;
+    [Range(0f, 1f)] public float normalDropRate = 0.02f;
+    [Range(0f, 1f)] public float eliteDropRate = 0.05f;
+    [Range(0f, 1f)] public float bossDropRate = 0.1f;
 
     static BalanceConfig current;
 
