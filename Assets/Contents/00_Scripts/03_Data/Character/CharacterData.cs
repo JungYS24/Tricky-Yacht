@@ -8,6 +8,8 @@ public class CharacterData : ScriptableObject
 
     [SerializeField] private int initialHP;
 
+    [SerializeField] private int initialGold = 100;
+
     [SerializeField] private Sprite characterSprite;
 
     [SerializeField] private UnlockFlag unlockCondition;
@@ -25,6 +27,8 @@ public class CharacterData : ScriptableObject
     public string CharacterName => characterName;
 
     public int InitialHP => initialHP;
+
+    public int InitialGold => initialGold;
 
     public Sprite CharacterSprite => characterSprite;
 
