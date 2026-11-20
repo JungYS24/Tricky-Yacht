@@ -9,14 +9,17 @@ public class CharacterStatus
 
     public int HP { get; private set; }
 
+    public int Gold { get; private set; }
+
     public DiceItemSO Dice { get; private set; }
 
     public FigureItemSO Figure { get; private set; }
 
-    public CharacterStatus(string name, int initialHP, DiceItemSO dice, FigureItemSO figure)
+    public CharacterStatus(string name, int initialHP, int initialGold, DiceItemSO dice, FigureItemSO figure)
     {
         CharacterName = name;
         HP            = initialHP;
+        Gold          = initialGold;
         Dice          = dice;
         Figure        = figure;
     }

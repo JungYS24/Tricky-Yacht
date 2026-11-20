@@ -47,7 +47,7 @@ public class CharacterApply : MonoBehaviour
             if (data == null || !data.IsUnlocked)
                 return;
 
-            CharacterStatus.Selected = new(data.CharacterName, data.InitialHP, data.DedicateDiceData, data.DedicateFigureData);
+            CharacterStatus.Selected = new(data.CharacterName, data.InitialHP, data.InitialGold, data.DedicateDiceData, data.DedicateFigureData);
             SceneManager.LoadScene("MainScene_Map");
         }
         else
