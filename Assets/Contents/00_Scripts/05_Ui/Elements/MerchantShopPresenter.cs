@@ -163,17 +163,35 @@ public class MerchantShopPresenter
         FitNpcImage();
     }
 
+    // 상인 IDLE 프레임(256 도트)이 화면에서 정수배로 보이도록 높이를 프레임 높이의 정수배로 맞추고, 발 위치는 그대로 둔다.
+    // 부모(SHOP)의 가로·세로 배율이 서로 달라서, 처음 배율(npcLocalScale)을 유지한 채 가로 크기에서 그 차이를 보정한다.
     void FitNpcImage()
     {
         if (npcImage == null || npcImage.sprite == null || npcBodyHeight <= 1f) return;
         Rect spriteRect = npcImage.sprite.rect;
         float aspect = spriteRect.width / Mathf.Max(1f, spriteRect.height);
         RectTransform rect = npcImage.rectTransform;
-        rect.localScale = Vector3.one;
+        Vector3 parentScale = rect.parent != null ? rect.parent.lossyScale : Vector3.one;
+        Canvas canvas = npcImage.canvas != null ? npcImage.canvas.rootCanvas : null;
+        float canvasScaleY = canvas != null ? Mathf.Abs(canvas.transform.lossyScale.y) : 1f;
+        float screenPerParentY = Mathf.Abs(parentScale.y) / Mathf.Max(1e-6f, canvasScaleY);
+
+        float bodyHeight = npcBodyHeight;
+        if (screenPerParentY > 0f)
+        {
+            float multiple = Mathf.Max(1f, Mathf.Round(npcBodyHeight * screenPerParentY / spriteRect.height));
+            bodyHeight = multiple * spriteRect.height / screenPerParentY;
+        }
+
+        Vector3 scale = new Vector3(Mathf.Abs(npcLocalScale.x), Mathf.Abs(npcLocalScale.y), npcLocalScale.z);
+        if (scale.x < 1e-6f || scale.y < 1e-6f) scale = Vector3.one;
+        float xyRatio = (scale.y * Mathf.Abs(parentScale.y)) / Mathf.Max(1e-6f, scale.x * Mathf.Abs(parentScale.x));
+        float localHeight = bodyHeight / scale.y;
+        rect.localScale = scale;
         rect.anchorMin = new Vector2(0.5f, 0.5f);
         rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.pivot = new Vector2(0.5f, 0f);
-        rect.sizeDelta = new Vector2(npcBodyHeight * aspect, npcBodyHeight);
+        rect.sizeDelta = new Vector2(localHeight * aspect * xyRatio, localHeight);
         rect.anchoredPosition = new Vector2(npcFootX, npcFootY);
         npcImage.preserveAspect = true;
     }
