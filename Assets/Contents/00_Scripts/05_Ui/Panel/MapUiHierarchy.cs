@@ -174,7 +174,7 @@ public static class MapUiHierarchy
         Image dimImage = dim.GetComponent<Image>();
         if (dimImage != null)
         {
-            dimImage.color = new Color(0f, 0f, 0f, 0.52f);
+            dimImage.color = new Color(0f, 0f, 0f, 0.85f); // 지도 뒤 바이옴 배경을 가리는 정도
             dimImage.raycastTarget = false;
         }
         dim.SetAsFirstSibling();

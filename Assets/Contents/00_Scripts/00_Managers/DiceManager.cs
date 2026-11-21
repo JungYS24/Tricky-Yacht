@@ -249,7 +249,7 @@ public class DiceManager : MonoBehaviour
             if (shopManager != null) shopManager.currentGold = BalanceConfig.Current.startGold;
             ui?.UpdateGoldUI(shopManager != null ? shopManager.currentGold : 0);
             if (GoldCounter.Instance != null && shopManager != null) GoldCounter.Instance.SetInstant(shopManager.currentGold);
-            deckManager.InitializeMasterDeck(JourneyDice.FindSource());
+            deckManager.InitializeMasterDeck(JourneyDice.FindSource(), StartingCharacterDie);
 
             // 첫 시작은 무조건 숲(Forest)으로 고정
             currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
@@ -758,6 +758,9 @@ public class DiceManager : MonoBehaviour
     }
 
     // 캐릭터 선택에서 고른 시작 체력. 고르지 않고 들어왔으면 기본 최대 체력.
+    // 캐릭터 선택에서 고른 캐릭터의 전용 주사위. 없으면(폰 바르한·튜토리얼 등) 기본 주사위로 시작한다.
+    public static DiceItemSO StartingCharacterDie => CharacterStatus.Selected != null ? CharacterStatus.Selected.Dice : null;
+
     public static int StartingMaxHP => CharacterStatus.Selected != null && CharacterStatus.Selected.HP > 0
         ? CharacterStatus.Selected.HP
         : BalanceConfig.Current.playerMaxHP;
@@ -928,8 +931,8 @@ public class DiceManager : MonoBehaviour
         // 낡은 변수 대신 우리가 만든 상태 초기화 함수를 씀
         playerStatus.ResetStatus(StartingMaxHP);
 
-        //덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 기본 11개 + 여정 주사위 1개로)
-        deckManager.InitializeMasterDeck(JourneyDice.FindSource());
+        //덱 초기화 (상점에서 샀던 특수 주사위들을 모두 버리고 캐릭터 주사위 11개 + 여정 주사위 1개로)
+        deckManager.InitializeMasterDeck(JourneyDice.FindSource(), StartingCharacterDie);
 
         //골드 초기화 (ShopManager 참조)
         if (shopManager != null)

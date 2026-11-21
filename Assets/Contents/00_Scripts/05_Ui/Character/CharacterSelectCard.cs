@@ -101,11 +101,7 @@ public class CharacterSelectCard : MonoBehaviour, IPointerClickHandler, IPointer
         {
             RectTransform item = items[i];
             Image icon = item.GetComponentInChildren<Image>(true);
-            if (icon != null)
-            {
-                icon.sprite = dice[i].sprite;
-                icon.enabled = dice[i].sprite != null;
-            }
+            CharacterSelectUi.SetDiceIcon(icon, dice[i].sprite);
 
             TextMeshProUGUI count = item.GetComponentInChildren<TextMeshProUGUI>(true);
             if (count != null)

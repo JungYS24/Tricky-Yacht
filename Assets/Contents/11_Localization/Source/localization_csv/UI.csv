@@ -202,7 +202,6 @@ The adventure continues in the full release.","<color=#00FF00>DEMO CLEAR!</color
 恭喜！
 你已征服体验版的全部三个生物群系！
 更多冒险敬请期待正式版。",데모 종료(BalanceConfig.demoBiomeLimit 바이옴 클리어) 화면
-UI,UI_CHARSELECT_FOOTER,TRICKY YACHT · 플레이어블 캐릭터,,,,캐릭터 선택 리워크
 UI,UI_CHARSELECT_BACK,목록,,,,캐릭터 선택 리워크
 UI,UI_CHARSELECT_UNLOCK_HEADER,해금 조건,,,,캐릭터 선택 리워크
 UI,UI_CHARSELECT_PROVISIONAL,가칭 · 수치 제안,,,,캐릭터 선택 리워크
@@ -215,9 +214,8 @@ UI,UI_CHARSELECT_BASE_HP,기초 체력,,,,캐릭터 선택 리워크
 UI,UI_CHARSELECT_DICE_COUNT,×{0},,,,캐릭터 선택 리워크
 UI,UI_CHARSELECT_GOLD,골드,,,,캐릭터 선택 리워크
 UI,UI_CHARSELECT_HP,체력,,,,캐릭터 선택 리워크
-UI,UI_CHARSELECT_OVERVIEW_SUBTITLE,모든 덱은 여정 주사위 1개 + 캐릭터 주사위 11개 = 12개 · 시작 피규어는 2개 중 1개를 골라 시작,,,,캐릭터 선택 리워크
-UI,UI_CHARSELECT_OVERVIEW_TITLE,캐릭터마다 시작 덱이 다르다,,,,캐릭터 선택 리워크
-UI,UI_CHARSELECT_OVERVIEW_SECTION,한눈에 보기,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_OVERVIEW_SUBTITLE,귀인은 고유한 피규어와 시작 주사위 세트를 가지고 있습니다,,,,캐릭터 선택 리워크
+UI,UI_CHARSELECT_OVERVIEW_TITLE,여정을 함께할 귀인을 선택하시오,,,,캐릭터 선택 리워크
 UI,UI_CHARSELECT_PAWN_EN_NAME,PAWN VARHAN,,,,캐릭터 선택 리워크
 UI,UI_CHARSELECT_PAWN_TAG,안정 · 방어,,,,캐릭터 선택 리워크
 UI,UI_CHARSELECT_PAWN_SUBTITLE,방패를 든 기사,,,,캐릭터 선택 리워크

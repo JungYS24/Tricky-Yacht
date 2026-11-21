@@ -14,7 +14,8 @@ public class CharacterSelectInfoCardView : MonoBehaviour
     [SerializeField] private TextMeshProUGUI provisionalText;
     [SerializeField] private TextMeshProUGUI descriptionText;
 
-    public void Bind(CharacterSelectInfoCard card, Color accent, string letter)
+    // isDice: 고유 주사위 카드면 아이콘에 게임 주사위와 같은 떨림을 준다(피규어 카드는 그대로).
+    public void Bind(CharacterSelectInfoCard card, Color accent, string letter, bool isDice = false)
     {
         Sprite sprite = card != null ? card.ResolveIcon() : null;
 
@@ -26,7 +27,9 @@ public class CharacterSelectInfoCardView : MonoBehaviour
             letterText.color = accent;
         }
 
-        if (icon != null)
+        if (isDice)
+            CharacterSelectUi.SetDiceIcon(icon, sprite);
+        else if (icon != null)
         {
             icon.sprite = sprite;
             icon.enabled = sprite != null;
