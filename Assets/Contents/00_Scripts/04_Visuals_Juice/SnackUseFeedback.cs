@@ -56,18 +56,21 @@ public sealed class SnackUseFeedback : MonoBehaviour
         return animationTween;
     }
 
-    public Tween Restore(float duration)
+    public Tween Restore(float duration) => Restore(duration, Color.white);
+
+    // 겹쳐 있던 스낵을 1개 먹고 남은 것이 다시 나타날 때는 이번 턴 사용 표시(회색)까지만 되돌린다.
+    public Tween Restore(float duration, Color target)
     {
         StopAnimation();
         if (icon == null) return null;
         Color initial = icon.color;
         animationTween = DOVirtual.Float(0f, 1f, Mathf.Max(0.05f, duration), t =>
         {
-            if (icon != null) icon.color = Color.Lerp(initial, Color.white, t);
+            if (icon != null) icon.color = Color.Lerp(initial, target, t);
         }).SetEase(Ease.OutQuad).SetLink(gameObject, LinkBehaviour.KillOnDisable).OnKill(() =>
         {
             animationTween = null;
-            if (icon != null) icon.color = Color.white;
+            if (icon != null) icon.color = target;
         });
         return animationTween;
     }

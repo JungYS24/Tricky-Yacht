@@ -246,6 +246,14 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    // 포획 확률 칸(Drop_Rate_Panel). CaptureResolver.RefreshDisplay가 부른다. 씬 글자와 같은 "100 %" 모양을 쓴다.
+    public void UpdateCaptureRateUI(bool figureOwned, float chance)
+    {
+        if (dropRateText == null) return;
+        if (figureOwned) dropRateText.SetText(LocalizationManager.GetSys("SYS_CAPTURE_OWNED", "보유 중"));
+        else dropRateText.SetText("{0:0} %", chance * 100f);
+    }
+
     public void HideResult() => resultPanel.SetActive(false);
     //화염 스택 갱신
     public void UpdateFlameStackUI(int flameDamage)

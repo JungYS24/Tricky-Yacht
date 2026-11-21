@@ -21,6 +21,12 @@ public class InventoryManager : MonoBehaviour
     public Color snackUsedTint = new Color(0.55f, 0.55f, 0.55f, 0.85f);
     [Min(0.05f)] public float snackDissolveDuration = 0.65f;
     [Min(0.05f)] public float snackRestoreDuration = 0.18f;
+
+    [Header("스낵 개수 표시 (×3)")]
+    [Tooltip("칸 크기 대비 글자 크기")]
+    [Range(0.15f, 0.7f)] public float snackCountFontScale = 0.26f;
+    [Tooltip("칸 오른쪽 아래 모서리 기준 위치 (칸 크기 대비, y가 작을수록 아래)")]
+    public Vector2 snackCountPos = new Vector2(0.08f, -0.18f);
     private SnackUseController snackUses;
     public SnackUseController SnackUses => snackUses ?? (snackUses = new SnackUseController(this));
 
@@ -62,6 +68,14 @@ public class InventoryManager : MonoBehaviour
 
         // 스낵 슬롯 초기화
         foreach (var slot in snackSlots) slot.Initialize(this);
+
+        // 스낵 칸은 가만히 있게 흔들림 폭만 0으로 둔다(마우스를 올리면 커지는 효과는 그대로).
+        // 칸이 비었다가 다시 켜질 때 흔들린 위치가 기준으로 남아 조금씩 밀리던 것도 함께 사라진다.
+        foreach (var slot in snackSlots)
+        {
+            var juice = slot != null ? slot.GetComponent<UiHoverIdleJuice>() : null;
+            if (juice != null) juice.WorldShakeAmount = 0f;
+        }
 
         if (sellButton != null) sellButton.onClick.AddListener(SellTargetItem);
 
@@ -162,11 +176,37 @@ public class InventoryManager : MonoBehaviour
             ownedTickets.Add(ticket);
             return true;
         }
-        else if (item is SnackItemSO)
+        else if (item is SnackItemSO snack)
         {
-            return PlaceIntoEmptySlot(item, snackSlots, maxSnackSlots);
+            return AddSnack(snack);
         }
         return false;
+    }
+
+    // 같은 스낵이 이미 있으면 그 칸에 쌓고(개수 제한 없음), 처음 얻는 스낵만 빈 칸을 쓴다.
+    private bool AddSnack(SnackItemSO snack)
+    {
+        InventorySlot same = FindSnackSlot(snack);
+        if (same != null)
+        {
+            same.AddCount(1);
+            return true;
+        }
+        return PlaceIntoEmptySlot(snack, snackSlots, maxSnackSlots);
+    }
+
+    // 같은 스낵이 들어 있는 칸. 없으면 null.
+    public InventorySlot FindSnackSlot(SnackItemSO snack)
+    {
+        if (snack == null) return null;
+        int limit = Mathf.Min(snackSlots.Length, maxSnackSlots);
+        for (int i = 0; i < limit; i++)
+        {
+            InventorySlot slot = snackSlots[i];
+            if (slot != null && !slot.isEmpty && slot.currentItem is SnackItemSO owned && SnackItemSO.IsSameSnack(owned, snack))
+                return slot;
+        }
+        return null;
     }
 
     public void CollectTicketNamesForSave(List<string> destination)
