@@ -244,7 +244,7 @@ public class GameSaveManager : MonoBehaviour
         foreach (var s in inv.snackSlots)
         {
             if (s.CountsAsOwnedSnack && s.currentItem != null)
-                data.ownedSnackIDs.Add(s.currentItem.itemName);
+                for (int k = 0; k < s.OwnedSnackCount; k++) data.ownedSnackIDs.Add(s.currentItem.itemName); // 겹친 스낵은 개수만큼
         }
     }
 

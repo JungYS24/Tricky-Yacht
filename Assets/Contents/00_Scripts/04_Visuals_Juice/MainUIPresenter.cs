@@ -31,6 +31,7 @@ public sealed class MainUIPresenter
         int remainingFinishes = dm.isCalculating ? 0 : 1;
         // 끝내기를 누른 후(결산 중): 시퀀스 코루틴이 각 텍스트를 개별 제어하므로 건드리지 않음
         dm.ui?.UpdateGameUI(stageDisplayName, dm.enemy != null ? dm.enemy.CurrentHP : 0, dm.enemy != null ? dm.enemy.MaxHP : 0, dm.currentPlayerHP, dm.playerMaxHP, remainingRerolls, "", "", previewFigureSprites, remainingFinishes);
+        CaptureResolver.RefreshDisplay(dm); // 포획 확률 칸: 전투 시작 0%(또는 보유 중), 페퍼민트를 누르면 포획 확률
     }
 
     private void CollectKept(DiceManager dm)

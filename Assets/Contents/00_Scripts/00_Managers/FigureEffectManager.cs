@@ -223,7 +223,7 @@ public class FigureEffectManager : MonoBehaviour
                     int snackCount = 0;
                     foreach (var slot in InventoryManager.Instance.snackSlots)
                     {
-                        if (slot.CountsAsOwnedSnack) snackCount++;
+                        snackCount += slot.OwnedSnackCount; // 겹친 스낵은 개수만큼
                     }
                     actualValue = snackCount * effect.effectValue;
                     break;

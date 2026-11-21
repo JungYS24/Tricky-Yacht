@@ -249,7 +249,7 @@ public static class EncounterChoiceEffects
         foreach (var slot in InventoryManager.Instance.snackSlots)
         {
             if (slot == null) continue;
-            if (slot.currentItem != null) destroyed++;
+            if (slot.currentItem != null) destroyed += slot.Count; // 겹친 스낵은 개수만큼
             slot.ClearSlot();
         }
         dice.shopManager.currentGold += destroyed * ExplorerGoldPerSnack;
@@ -275,11 +275,13 @@ public static class EncounterChoiceEffects
             SnackItemSO steak = allSnacks.Find(s => s.snackType == SnackType.Steak);
             SnackItemSO pancake = allSnacks.Find(s => s.snackType == SnackType.Pancake);
 
-            foreach (var slot in InventoryManager.Instance.snackSlots)
+            // 스낵 칸 수만큼(5개) 뽑고, 같은 것끼리는 한 칸에 겹친다(예: 스테이크 ×3, 팬케이크 ×2).
+            InventorySlot[] slots = InventoryManager.Instance.snackSlots;
+            foreach (var slot in slots) slot.ClearSlot(); // 기존 스낵 완벽하게 파괴
+            for (int i = 0; i < slots.Length; i++)
             {
-                slot.ClearSlot(); // 기존 스낵 완벽하게 파괴
                 SnackItemSO randomSnack = (Random.value > 0.5f) ? steak : pancake;
-                if (randomSnack != null) slot.SetItem(randomSnack);
+                if (randomSnack != null) InventoryManager.Instance.AddItem(randomSnack);
             }
         }
     }
@@ -293,11 +295,13 @@ public static class EncounterChoiceEffects
             SnackItemSO peppermint = allSnacks.Find(s => s.snackType == SnackType.Peppermint);
             SnackItemSO cherry = allSnacks.Find(s => s.snackType == SnackType.Cherry);
 
-            foreach (var slot in InventoryManager.Instance.snackSlots)
+            // 스낵 칸 수만큼(5개) 뽑고, 같은 것끼리는 한 칸에 겹친다(예: 페퍼민트 ×2, 체리 ×3).
+            InventorySlot[] slots = InventoryManager.Instance.snackSlots;
+            foreach (var slot in slots) slot.ClearSlot(); // 기존 스낵 완벽하게 파괴
+            for (int i = 0; i < slots.Length; i++)
             {
-                slot.ClearSlot(); // 기존 스낵 완벽하게 파괴
                 SnackItemSO randomSnack = (Random.value > 0.5f) ? peppermint : cherry;
-                if (randomSnack != null) slot.SetItem(randomSnack);
+                if (randomSnack != null) InventoryManager.Instance.AddItem(randomSnack);
             }
         }
     }

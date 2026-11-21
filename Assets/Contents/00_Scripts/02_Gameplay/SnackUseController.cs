@@ -18,6 +18,7 @@ public sealed class SavedSnackSlot
     public float chips;
     public float multiplier;
     public int order;
+    public int count; // 칸에 겹쳐 있던 개수. 중첩 이전 저장에는 없어서 0으로 읽히며 1개로 본다.
 }
 
 // 슬롯 위치를 예약한 사용 기록. 확정 시 보너스를 한 번 적용하고 정산에서는 기록된 수치만 표시합니다.
@@ -60,6 +61,15 @@ public sealed class SnackUseController
             if (dm.isPeppermintActive) return false;
             foreach (var pending in entries)
                 if (pending.IsCurrent && pending.item.snackType == SnackType.Peppermint) return false;
+            // 이미 가진 피규어이거나 피규어를 주지 않는 몬스터면 페퍼민트를 쓰지 않고 이유만 알려 준다.
+            if (!CaptureResolver.CanCapture(dm.enemy))
+            {
+                string message = CaptureResolver.IsFigureOwned(dm.enemy)
+                    ? LocalizationManager.GetSys("SYS_CAPTURE_ALREADY_OWNED", "이미 보유한 피규어입니다.")
+                    : LocalizationManager.GetSys("SYS_CAPTURE_NO_FIGURE", "포획할 피규어가 없습니다.");
+                ToastPopupController.Instance?.ShowToast(message);
+                return false;
+            }
         }
         if (snack.snackType == SnackType.FortuneCookie)
         {
@@ -80,6 +90,7 @@ public sealed class SnackUseController
         };
         entries.Add(entry);
         slot.MarkSnackUsed(entry, inventory.snackUsedTint);
+        if (snack.snackType == SnackType.Peppermint) CaptureResolver.RefreshDisplay(dm); // 포획 확률 칸 0% → 페퍼민트 확률
 
         // 라임 주스와 포춘쿠키는 즉시 연출. 보존되면 아이콘만 숨기고 끝내기까지 칸과 입력을 잠급니다.
         if (entry.IsImmediateSnack)
@@ -155,9 +166,21 @@ public sealed class SnackUseController
             if (!entry.preserved)
             {
                 entry.settled = true;
-                entry.slot.ClearSlot();
+                Consume(entry);
             }
         });
+    }
+
+    // 먹은 1개를 칸에서 뺀다. 같은 칸에 더 남아 있으면 칸은 이번 턴이 끝날 때까지 잠근 채(한 턴에 칸당 1개)
+    // 남은 아이콘을 사용 표시 색으로 다시 보여 준다. 1개뿐이었으면 예전처럼 칸을 비운다.
+    private void Consume(SnackUseEntry entry)
+    {
+        if (entry.slot.Count > 1)
+        {
+            entry.slot.RemoveOne();
+            SnackUseFeedback.Get(entry.slot).Restore(inventory.snackRestoreDuration, inventory.snackUsedTint);
+        }
+        else entry.slot.ClearSlot();
     }
 
     public IEnumerator CompleteVisual(SnackUseEntry entry)
@@ -174,7 +197,7 @@ public sealed class SnackUseController
             Tween reveal = SnackUseFeedback.Get(entry.slot).Restore(inventory.snackRestoreDuration);
             if (reveal != null && reveal.IsActive()) yield return reveal.WaitForCompletion();
         }
-        else entry.slot.ClearSlot();
+        else Consume(entry);
     }
 
     public bool IsScoreEntry(SnackUseEntry entry, bool isChips)
@@ -199,10 +222,27 @@ public sealed class SnackUseController
         foreach (var entry in entries)
         {
             if (!entry.IsCurrent) continue;
-            if (!entry.committed || entry.preserved) entry.slot.ReleaseSnackReservation();
+            // settled: 겹친 스낵에서 이미 1개를 뺀 칸(남은 것은 그대로 두고 잠금만 푼다)
+            if (!entry.committed || entry.preserved || entry.settled) entry.slot.ReleaseSnackReservation();
+            else if (entry.slot.Count > 1)
+            {
+                entry.slot.RemoveOne();
+                entry.slot.ReleaseSnackReservation();
+            }
             else entry.slot.ClearSlot();
         }
         entries.Clear();
+    }
+
+    // 이번 턴에 페퍼민트를 눌러 둔 상태인지(끝내기 전 취소 가능한 예약 포함). 포획 확률 칸 표시에 쓴다.
+    public bool HasPendingPeppermint
+    {
+        get
+        {
+            foreach (var entry in entries)
+                if (entry.IsCurrent && entry.item.snackType == SnackType.Peppermint) return true;
+            return false;
+        }
     }
 
     public void Clear() { entries.Clear(); nextOrder = 0; }
@@ -225,7 +265,8 @@ public sealed class SnackUseController
                 settled = pending != null && pending.settled,
                 chips = pending != null ? pending.chips : 0f,
                 multiplier = pending != null ? pending.multiplier : 0f,
-                order = pending != null ? pending.order : 0
+                order = pending != null ? pending.order : 0,
+                count = slot.Count
             });
         }
     }
@@ -239,8 +280,21 @@ public sealed class SnackUseController
             var snack = (!string.IsNullOrEmpty(saved.itemID) ? saves.FindItemByID(saved.itemID) : null) as SnackItemSO;
             if (snack == null) snack = saves.FindItemByName(saved.itemName) as SnackItemSO;
             var slot = inventory.snackSlots[saved.slotIndex];
-            if (snack == null || slot == null || !slot.isEmpty) continue;
-            slot.SetItem(snack);
+            if (snack == null || slot == null) continue;
+            int count = Mathf.Max(1, saved.count); // 중첩 이전 저장은 칸마다 1개
+            // 중첩 이전 저장에서 같은 스낵이 여러 칸에 있으면 앞 칸으로 합친다. 둘 다 이번 턴에 쓰던 칸이면 따로 둔다.
+            InventorySlot same = inventory.FindSnackSlot(snack);
+            if (same != null && (!saved.pending || same.PendingSnack == null))
+            {
+                same.AddCount(count);
+                slot = same;
+                snack = (SnackItemSO)same.currentItem;
+            }
+            else
+            {
+                if (!slot.isEmpty) continue;
+                slot.SetItem(snack, count);
+            }
             if (!saved.pending) continue;
 
             var entry = new SnackUseEntry
@@ -253,7 +307,8 @@ public sealed class SnackUseController
             nextOrder = Mathf.Max(nextOrder, entry.order + 1);
             slot.MarkSnackUsed(entry, inventory.snackUsedTint);
             if (entry.visualFinished && !entry.settled) SnackUseFeedback.Get(slot).ShowUsed(inventory.snackUsedTint, true);
-            if (entry.settled) SnackUseFeedback.Get(slot).ShowUsed(Color.white);
+            // 소모 방지로 돌아온 스낵은 흰색, 겹친 스낵에서 1개를 먹고 남은 칸은 이번 턴 사용 표시 색
+            if (entry.settled) SnackUseFeedback.Get(slot).ShowUsed(entry.preserved ? Color.white : inventory.snackUsedTint);
             // 즉시 연출 중 저장한 라임/포춘쿠키는 효과를 재지급하지 않고 사라지는 연출만 이어갑니다.
             if (entry.IsImmediateSnack && !entry.visualFinished && !entry.settled) BeginDisappear(entry);
         }

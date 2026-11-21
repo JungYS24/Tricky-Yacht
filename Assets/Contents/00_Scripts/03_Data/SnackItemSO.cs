@@ -124,9 +124,11 @@ public class SnackItemSO : BaseItemDataSO
         return false;
     }
 
-    private static bool IsSameSnack(SnackItemSO a, SnackItemSO b)
+    // 같은 스낵인지. 상점 품목과 Resources 복사본처럼 에셋이 달라도 ID나 이름이 같으면 같은 스낵으로 본다.
+    public static bool IsSameSnack(SnackItemSO a, SnackItemSO b)
     {
         if (a == null || b == null) return false;
+        if (a == b) return true;
         if (!string.IsNullOrEmpty(a.Item_ID) && a.Item_ID == b.Item_ID) return true;
         if (!string.IsNullOrEmpty(a.itemName) && a.itemName == b.itemName) return true;
         return false;
