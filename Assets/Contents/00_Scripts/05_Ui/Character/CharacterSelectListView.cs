@@ -21,14 +21,13 @@ public class CharacterSelectListView : MonoBehaviour
 
     public void Bind(CharacterSelectCatalog catalog)
     {
-        if (sectionText != null) sectionText.text = $"<color=#C98A4B>01</color>   {CharacterSelectLabels.OverviewSection.Get()}";
+        // 상단 섹션 번호("01 한눈에 보기")와 하단 푸터 문구는 쓰지 않는다.
+        if (sectionText != null) sectionText.gameObject.SetActive(false);
+        if (footerText != null) footerText.gameObject.SetActive(false);
         if (titleText != null) titleText.text = CharacterSelectLabels.OverviewTitle.Get();
         if (subtitleText != null) subtitleText.text = CharacterSelectLabels.OverviewSubtitle.Get();
-        if (footerText != null) footerText.text = CharacterSelectLabels.Footer.Get();
         if (cancelText != null) cancelText.text = CharacterSelectLabels.Cancel.Get();
 
-        List<DiceData1> deck = catalog.BuildStartingDeck();
-        List<CharacterSelectCatalog.DeckGroup> dice = catalog.GroupCharacterDice(deck);
         int gold = CharacterSelectInteraction.StartingGold;
         string hp = CharacterSelectLabels.Hp.Get();
         string goldLabel = CharacterSelectLabels.Gold.Get();
@@ -38,8 +37,13 @@ public class CharacterSelectListView : MonoBehaviour
         {
             bool hasEntry = i < catalog.Count;
             cards[i].gameObject.SetActive(hasEntry);
-            if (hasEntry)
-                cards[i].Bind(i, catalog.entries[i], catalog, dice, gold, hp, goldLabel, countFormat);
+            if (!hasEntry)
+                continue;
+
+            // 캐릭터마다 시작 덱(전용 주사위 11개)이 다르므로 카드별로 만든다.
+            List<DiceData1> deck = catalog.BuildStartingDeck(catalog.entries[i].character);
+            List<CharacterSelectCatalog.DeckGroup> dice = catalog.GroupCharacterDice(deck);
+            cards[i].Bind(i, catalog.entries[i], catalog, dice, gold, hp, goldLabel, countFormat);
         }
 
         if (!subscribed && Application.isPlaying)

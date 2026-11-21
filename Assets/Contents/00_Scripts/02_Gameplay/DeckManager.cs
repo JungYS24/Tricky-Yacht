@@ -10,11 +10,15 @@ public class DeckManager
     public List<DiceData1> discardPile = new List<DiceData1>();
 
     // 시작 덱: 기본 주사위 11개 + 여정 주사위 1개 = 12개. 에셋을 못 찾으면 코드 기본 면 구성으로 만든다.
-    public void InitializeMasterDeck(DiceItemSO journeySource = null)
+    // 시작 덱: 여정 주사위 1개 + 캐릭터 주사위 11개. 캐릭터 전용 주사위(startingDie)가 없으면 기본 주사위로 채운다.
+    public const int StartingCharacterDiceCount = 11;
+
+    public void InitializeMasterDeck(DiceItemSO journeySource = null, DiceItemSO startingDie = null)
     {
         masterDeck.Clear();
         masterDeck.Add(JourneyDice.Create(journeySource));
-        for (int i = 0; i < 11; i++) masterDeck.Add(new DiceData1());
+        for (int i = 0; i < StartingCharacterDiceCount; i++)
+            masterDeck.Add(startingDie != null ? startingDie.CreateDiceData() : new DiceData1());
     }
 
     // 덱에 여정 주사위가 없으면(구버전 저장 등) 기본 주사위 1개를 여정 주사위로 바꾼다. 바꿨으면 true.

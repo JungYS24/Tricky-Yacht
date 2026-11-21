@@ -31,11 +31,11 @@ public class CharacterSelectCatalog : ScriptableObject
         return -1;
     }
 
-    // 실제 시작 덱(DeckManager.InitializeMasterDeck)을 그대로 만들어 돌려준다. 덱 규칙이 바뀌면 화면도 따라 바뀐다.
-    public List<DiceData1> BuildStartingDeck()
+    // 실제 시작 덱(DeckManager.InitializeMasterDeck)을 캐릭터 전용 주사위로 그대로 만들어 돌려준다. 덱 규칙이 바뀌면 화면도 따라 바뀐다.
+    public List<DiceData1> BuildStartingDeck(CharacterData character)
     {
         var deck = new DeckManager();
-        deck.InitializeMasterDeck(journeySource);
+        deck.InitializeMasterDeck(journeySource, character != null ? character.DedicateDiceData : null);
         return deck.masterDeck;
     }
 

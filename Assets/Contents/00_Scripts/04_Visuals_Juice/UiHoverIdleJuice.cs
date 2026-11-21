@@ -21,6 +21,16 @@ public class UiHoverIdleJuice : MonoBehaviour, IPointerEnterHandler, IPointerExi
     float noiseSpeed;
     bool cached;
 
+    // 흔들림 폭(월드 단위). UI 캔버스처럼 단위 크기가 다른 곳에서 게임 주사위와 같은 화면 폭으로 맞출 때 쓴다.
+    public float WorldShakeAmount
+    {
+        get => worldShakeAmount;
+        set => worldShakeAmount = value;
+    }
+
+    // 켜면 꺼질 때 흔들기 전 위치로 되돌린다. 다시 켜질 때 흔들린 위치를 기준으로 삼아 조금씩 밀리는 것을 막는다.
+    public bool RestoreOnDisable { get; set; }
+
     void Awake()
     {
         rect = GetComponent<RectTransform>();
@@ -42,6 +52,13 @@ public class UiHoverIdleJuice : MonoBehaviour, IPointerEnterHandler, IPointerExi
     {
         KillTweens();
         transform.localScale = baseScale;
+        if (RestoreOnDisable && cached)
+        {
+            if (rect != null)
+                rect.anchoredPosition = idleAnchoredPos;
+            else
+                transform.localPosition = idleLocalPos;
+        }
     }
 
     void CacheRestPose()

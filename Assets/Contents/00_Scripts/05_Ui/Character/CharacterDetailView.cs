@@ -85,7 +85,7 @@ public class CharacterDetailView : MonoBehaviour
         SetText(subtitleText, entry.subtitle.Get(), accent);
         SetText(summaryText, entry.summary.Get());
 
-        List<DiceData1> deck = catalog.BuildStartingDeck();
+        List<DiceData1> deck = catalog.BuildStartingDeck(data);
         SetText(deckLabel, CharacterSelectLabels.Format(CharacterSelectLabels.StartDeck, deck.Count));
         BindDeck(deck, catalog);
 
@@ -124,12 +124,7 @@ public class CharacterDetailView : MonoBehaviour
                 background.color = deck[i].isJourneyDice ? journeySlotColor : Color.clear;
 
             Image icon = slots[i].childCount > 0 ? slots[i].GetChild(0).GetComponent<Image>() : null;
-            if (icon != null)
-            {
-                Sprite sprite = catalog.DieSprite(deck[i]);
-                icon.sprite = sprite;
-                icon.enabled = sprite != null;
-            }
+            CharacterSelectUi.SetDiceIcon(icon, catalog.DieSprite(deck[i]));
         }
     }
 
@@ -141,7 +136,7 @@ public class CharacterDetailView : MonoBehaviour
         int count = entry.uniqueDice != null ? entry.uniqueDice.Count : 0;
         List<RectTransform> cards = CharacterSelectUi.EnsureItems(uniqueRoot, (RectTransform)uniqueTemplate.transform, count, "UniqueDice_");
         for (int i = 0; i < cards.Count; i++)
-            cards[i].GetComponent<CharacterSelectInfoCardView>().Bind(entry.uniqueDice[i], accent, null);
+            cards[i].GetComponent<CharacterSelectInfoCardView>().Bind(entry.uniqueDice[i], accent, null, true);
     }
 
     private static void SetText(TextMeshProUGUI label, string value)
