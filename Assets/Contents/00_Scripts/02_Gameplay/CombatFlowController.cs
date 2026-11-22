@@ -218,14 +218,17 @@ public static class CombatFlowController
         yield return new WaitForSeconds(0.15f);
     }
 
-    // 폭탄 주사위 즉시 피해. 지금은 일반 피격 표시(빨간 번쩍임 + 피해 숫자)만 쓴다.
+    // 폭탄 주사위 즉시 피해. BombFeedback이 폭탄을 하나씩 터뜨리며 그때마다 피해를 나눠 넣는다
+    // (각 폭탄 자기 피해, 마지막 폭탄에 연쇄 보너스까지). 일반 공격 피격 연출이 끝난 뒤에 시작한다.
     private static IEnumerator ProcessBombDamage(DiceManager dm, int bombDamage)
     {
         if (bombDamage <= 0 || dm.enemy == null || dm.enemy.IsDead || dm.enemy.CurrentHP <= 0) yield break;
-        yield return new WaitForSeconds(0.3f);
-        if (dm.enemy.IsDead || dm.enemy.CurrentHP <= 0) yield break;
-        dm.enemy.TakeDamage(bombDamage, dm.OnEnemyKilled, hitKind: EnemyHitKind.Other);
-        yield return new WaitForSeconds(0.3f);
+        Enemy target = dm.enemy;
+        yield return BombFeedback.Play(dm, dm.KeptDice, bombDamage, (amount, textOffset) =>
+        {
+            if (target != null && !target.IsDead && target.CurrentHP > 0)
+                target.TakeDamage(amount, dm.OnEnemyKilled, hitKind: EnemyHitKind.Bomb, damageTextOffsetX: textOffset);
+        });
     }
 
     private static IEnumerator HandlePlayerDeath(DiceManager dm)
