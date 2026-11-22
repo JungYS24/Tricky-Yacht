@@ -88,6 +88,13 @@ public class CameraShake : MonoBehaviour
         PlayFeedbackShake(elementalShakePixels, elementalShakeDuration);
     }
 
+    // 세기(화면 픽셀)를 직접 정하는 짧은 흔들림. 폭탄 연쇄처럼 점점 세지는 연출용.
+    public void ShakePixels(float pixels, float duration)
+    {
+        if (pixels <= 0f) return;
+        PlayFeedbackShake(pixels, duration);
+    }
+
     private void PlayFeedbackShake(float pixels, float duration)
     {
         if (!isActiveAndEnabled || scoreCamera == null || !scoreCamera.orthographic) return;

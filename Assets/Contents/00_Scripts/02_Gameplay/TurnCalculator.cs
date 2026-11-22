@@ -90,8 +90,26 @@ public static class TurnCalculator
     public static int ApplyBombChain(int rawDamage, int bombCount)
     {
         if (rawDamage <= 0 || bombCount <= 0) return 0;
-        int tenths = Mathf.Min(10 + (bombCount - 1) * BombChainTenthsPerExtraDie, BombChainMaxTenths);
-        return (rawDamage * tenths + 9) / 10;
+        return (rawDamage * BombChainTenths(bombCount) + 9) / 10;
+    }
+
+    // 연쇄 배수(0.1 단위). 1개 10, 2개 15 … 5개 30. 계산과 연출 표시가 같은 값을 쓴다.
+    public static int BombChainTenths(int bombCount)
+    {
+        if (bombCount <= 0) return 0;
+        return Mathf.Min(10 + (bombCount - 1) * BombChainTenthsPerExtraDie, BombChainMaxTenths);
+    }
+
+    // 폭탄 주사위 한 개의 원래 피해(눈 × 2, 6 이상은 2배). 폭탄 면이 아니거나 눈이 0이면 0.
+    public static int BombDieDamage(Dice d, out bool crit)
+    {
+        crit = false;
+        if (d == null || d.myData == null || d.currentValue <= 0) return 0;
+        if (d.myData.GetFaceEffect(d.ResolveFaceIndex()) != SpecialDieEffect.Bomb) return 0;
+        int bomb = d.currentValue * BombDamagePerPip;
+        crit = d.currentValue >= BombCritFace;
+        if (crit) bomb *= BombCritMultiplier;
+        return bomb;
     }
 
     // 하트 면 회복량. 전투 결산과 지도 굴림이 같은 계산을 쓴다.
@@ -228,9 +246,8 @@ public static class TurnCalculator
                     res.selfDamage += d.currentValue;
                     break;
                 case SpecialDieEffect.Bomb:
-                    if (d.currentValue <= 0) break; // 눈이 0이면 터지지 않고 연쇄에도 세지 않는다
-                    int bomb = d.currentValue * BombDamagePerPip;
-                    if (d.currentValue >= BombCritFace) bomb *= BombCritMultiplier;
+                    int bomb = BombDieDamage(d, out _); // 눈이 0이면 0: 터지지 않고 연쇄에도 세지 않는다
+                    if (bomb <= 0) break;
                     bombRawDamage += bomb;
                     bombCount++;
                     break;

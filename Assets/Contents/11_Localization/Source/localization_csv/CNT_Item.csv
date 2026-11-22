@@ -411,7 +411,7 @@ CNT_Item,CNT_Heart_DESC,결산 시 눈금만큼 체력을 회복합니다.,Resto
 CNT_Item,CNT_Flame_NAME,화염 주사위,Flame Dice,フレイムのサイコロ,火焰骰子,
 CNT_Item,CNT_Flame_DESC,결산 시 눈금에 비례한 화상 피해를 줍니다.,Deals burn damage based on this die's face value when scored.,決算時、出目に応じた火傷ダメージを与えます。,结算时根据点数造成灼烧伤害。,
 CNT_Item,CNT_Bomb_NAME,폭탄 주사위,Bomb Dice,ボムのサイコロ,炸弹骰子,
-CNT_Item,CNT_Bomb_DESC,결산 시 눈금의 2배만큼 즉시 폭발 피해를 줍니다. 6이 나오면 피해 2배. 폭탄 주사위를 함께 킵하면 연쇄 배수 (2개 ×1.5 / 3개 ×2 / 4개 ×2.5 / 5개 ×3).,Deals instant explosion damage equal to this die's face value x2 when scored. A 6 deals double. Bomb Dice kept together get a chain multiplier (2: x1.5 / 3: x2 / 4: x2.5 / 5: x3).,決算時、出目の2倍の爆発ダメージを即座に与えます。6はダメージ2倍。ボムのサイコロを一緒にキープすると連鎖倍率(2個×1.5/3個×2/4個×2.5/5個×3)。,结算时立即造成点数x2的爆炸伤害。6点伤害翻倍。同时保留多个炸弹骰子时获得连锁倍率（2个x1.5/3个x2/4个x2.5/5个x3）。,
+CNT_Item,CNT_Bomb_DESC,결산 시 눈금에 비례한 폭탄 피해를 줍니다.,Deals bomb damage based on this die's face value when scored.,決算時、出目に応じた爆弾ダメージを与えます。,结算时根据点数造成炸弹伤害。,
 CNT_Item,CNT_88Dice_NAME,88 주사위,88 Dice,88のサイコロ,88骰子,
 CNT_Item,CNT_88Dice_DESC,모든 면이 88인 주사위입니다.,Every face of this die shows 88.,すべての面が88のサイコロです。,每一面都是88的骰子。,
 CNT_Item,CNT_Rwd_Bandage_N_NAME,응급 붕대,Emergency Bandage,応急包帯,应急绷带,

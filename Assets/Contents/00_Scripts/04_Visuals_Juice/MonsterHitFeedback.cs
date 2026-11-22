@@ -3,7 +3,8 @@ using DG.Tweening;
 using UnityEngine.UI;
 using Coffee.UIEffects;
 
-public enum EnemyHitKind { Other, Normal, Flame, Dark }
+// Bomb: 폭탄 주사위 연쇄 피해. 가볍게 번쩍이기만 하고 진행 중인 피격 연출을 끊지 않는다(BombFeedback).
+public enum EnemyHitKind { Other, Normal, Flame, Dark, Bomb }
 
 // 피해 계산과 분리된 피격 연출. Enemy가 필요할 때 자동 연결합니다.
 [DisallowMultipleComponent]

@@ -265,13 +265,15 @@ public class Enemy : MonoBehaviour
         TakeDamage(damage, onDeathCallback, hitKind: EnemyHitKind.Flame, preserveFlameVisual: true);
     }
 
-    public void TakeDamage(int damage,System.Action onDeathCallback,bool isFirstNormalAttack = false, EnemyHitKind hitKind = EnemyHitKind.Other, bool includesDark = false, bool preserveFlameVisual = false)
+    // damageTextOffsetX: 피해 숫자를 좌우로 옮길 거리(월드 단위). 폭탄 연쇄처럼 연달아 맞을 때 숫자가 겹치지 않게 한다.
+    public void TakeDamage(int damage,System.Action onDeathCallback,bool isFirstNormalAttack = false, EnemyHitKind hitKind = EnemyHitKind.Other, bool includesDark = false, bool preserveFlameVisual = false, float damageTextOffsetX = 0f)
     {
         if (IsDead || damage <= 0) return;
         StopAttackPresentation();
         var currentFeedback = GetComponent<MonsterHitFeedback>();
         bool continueFlame = preserveFlameVisual && hitKind == EnemyHitKind.Flame && currentFeedback != null && currentFeedback.IsFlamePlaying;
-        if (!continueFlame) currentFeedback?.Stop();
+        // 폭탄 연쇄 피해는 진행 중인 피격 연출(일반 공격 등)을 끊지 않는다.
+        if (!continueFlame && hitKind != EnemyHitKind.Bomb) currentFeedback?.Stop();
 
         // 적 체력보다 큰 공격도 실제 감소한 체력까지만 피해로 인정
         int previousHP = CurrentHP;
@@ -308,7 +310,9 @@ public class Enemy : MonoBehaviour
         if (damage > 0)
         {
             if (hitEffectCoroutine != null) StopCoroutine(hitEffectCoroutine);
-            if (hitKind != EnemyHitKind.Other)
+            // 폭탄은 기본 피격처럼 빨갛게 한 번 번쩍이기만 한다(폭발 그림은 BombFeedback이 그린다).
+            bool lightHit = hitKind == EnemyHitKind.Other || hitKind == EnemyHitKind.Bomb;
+            if (!lightHit)
             {
                 // 피해 종류별 오버레이를 사용하고 바탕색은 현재 체력에 맞춥니다.
                 if (monsterImage != null) monsterImage.color = Color.Lerp(Color.red, Color.white, MaxHP > 0 ? (float)CurrentHP / MaxHP : 0f);
@@ -316,7 +320,7 @@ public class Enemy : MonoBehaviour
             }
             else hitEffectCoroutine = StartCoroutine(HitEffectRoutine());
             // 종류에 맞는 연출을 재생합니다. 치명타는 사망 확대와 충돌하지 않게 밀림을 생략합니다.
-            if (hitKind != EnemyHitKind.Other)
+            if (!lightHit)
                 {
                 float strength = 1f + 0.35f * Mathf.Clamp01((float)damage / Mathf.Max(1, MaxHP));
                 if (continueFlame) currentFeedback.ShowFlameContact();
@@ -326,7 +330,7 @@ public class Enemy : MonoBehaviour
             }
 
             // ===== 데미지 텍스트 생성 호출 =====
-            ShowDamageText(damage, hitKind == EnemyHitKind.Flame);
+            ShowDamageText(damage, hitKind == EnemyHitKind.Flame, damageTextOffsetX);
 
         }
 
@@ -349,12 +353,12 @@ public class Enemy : MonoBehaviour
     }
 
     // 데미지 텍스트 생성 함수
-    private void ShowDamageText(int damage, bool smallFlame = false)
+    private void ShowDamageText(int damage, bool smallFlame = false, float offsetX = 0f)
     {
         if (damageTextPrefab == null || uiCanvas == null) return;
 
         // 몬스터의 약간 위쪽에 생성되도록 오프셋 추가
-        Vector3 spawnPosition = transform.position + new Vector3(0, 1f, 0);
+        Vector3 spawnPosition = transform.position + new Vector3(offsetX, 1f, 0);
 
         // 텍스트를 담을 캔버스(uiCanvas)의 자식으로 생성
         GameObject textObj = Instantiate(damageTextPrefab, spawnPosition, Quaternion.identity, uiCanvas.transform);
