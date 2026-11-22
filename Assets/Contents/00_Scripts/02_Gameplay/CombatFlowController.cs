@@ -8,7 +8,8 @@ public static class CombatFlowController
     // coinDice: 코인 면이나 다이아 스탬프로 골드를 준 주사위들(코인 날아가기 연출용). 없으면 골드 숫자를 바로 갱신한다.
     // shieldGain: 하트 스탬프로 얻는 보호막. 몬스터 공격 전에 더해져 이번 턴 공격부터 막는다.
     // 가시 디버프 피해는 여기가 아니라 결산 시작 때 ProcessDebuffThorn에서 먼저 적용한다.
-    public static IEnumerator ProcessTurnResolution(DiceManager dm, int finalDamage, int darkDamage, int finalHeal, int expectedGold, int flameDamage, string handName, int selfDamage = 0, List<Dice> coinDice = null, int shieldGain = 0)
+    // bombDamage: 폭탄 주사위 즉시 피해. 기본 공격 다음에 따로 한 번 들어간다(악마주사위 원페어·투페어 무효와 상관없음).
+    public static IEnumerator ProcessTurnResolution(DiceManager dm, int finalDamage, int darkDamage, int finalHeal, int expectedGold, int flameDamage, string handName, int selfDamage = 0, List<Dice> coinDice = null, int shieldGain = 0, int bombDamage = 0)
     {
         //플레이어 회복
         if (finalHeal > 0)
@@ -63,6 +64,10 @@ public static class CombatFlowController
             yield return dm.StartCoroutine(HandlePlayerDeath(dm));
             yield break;
         }
+
+        // 폭탄 주사위: 기본 공격 다음에 같은 턴에 한 번 터진다(화염과 달리 쌓이지 않는다).
+        // 기본 공격으로 이미 쓰러졌으면 터지지 않는다. 전용 연출은 나중에 이 자리에 붙인다.
+        yield return dm.StartCoroutine(ProcessBombDamage(dm, bombDamage));
 
         // 가시 면 피해: 플레이어 공격이 끝난 뒤에 적용한다.
         // 이번 공격으로 적이 죽었다면 체력은 1 아래로 내려가지 않아 적을 잡은 판에 가시로 죽지 않는다.
@@ -211,6 +216,16 @@ public static class CombatFlowController
             dm.ui.handInfoText.GetComponent<FinalDamageFeedback>()?.PlayAttackPulse();
 
         yield return new WaitForSeconds(0.15f);
+    }
+
+    // 폭탄 주사위 즉시 피해. 지금은 일반 피격 표시(빨간 번쩍임 + 피해 숫자)만 쓴다.
+    private static IEnumerator ProcessBombDamage(DiceManager dm, int bombDamage)
+    {
+        if (bombDamage <= 0 || dm.enemy == null || dm.enemy.IsDead || dm.enemy.CurrentHP <= 0) yield break;
+        yield return new WaitForSeconds(0.3f);
+        if (dm.enemy.IsDead || dm.enemy.CurrentHP <= 0) yield break;
+        dm.enemy.TakeDamage(bombDamage, dm.OnEnemyKilled, hitKind: EnemyHitKind.Other);
+        yield return new WaitForSeconds(0.3f);
     }
 
     private static IEnumerator HandlePlayerDeath(DiceManager dm)
@@ -454,7 +469,7 @@ public static class CombatFlowController
 
         // 완벽하게 쪼개진 수치들을 전투 지휘관(CombatFlowController)에게 전달
         yield return dm.StartCoroutine(CombatFlowController.ProcessTurnResolution(dm, finalDamage, darkDamageTotal, finalHeal, expectedGold, totalFlameDamage, handName, calcResult.selfDamage, coinDice,
-            calcResult.stampShield));
+            calcResult.stampShield, calcResult.bombDamage));
         dm.ui?.ClearMergedHandDamageText();
     }
 }

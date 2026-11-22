@@ -25,6 +25,8 @@ public struct TurnCalcResult
 
     public int oddBonusChips;     // 홀수 주사위: 결산 포함 1개당 칩
     public float evenBonusMult;   // 짝수 주사위: 결산 포함 1개당 배수
+
+    public int bombDamage;        // 폭탄 주사위: 기본 공격 다음에 따로 들어가는 즉시 피해(연쇄 배수·올림까지 적용된 값)
 }
 
 public enum DiceScoreBonusKind
@@ -75,6 +77,22 @@ public static class TurnCalculator
 
     public const int OddChipsPerDie = 5;
     public const float EvenMultPerDie = 0.2f;
+
+    // 폭탄 주사위 수치. 눈 × 2, 6 이상은 그 주사위만 2배.
+    // 연쇄: 1개 ×1, 2개 ×1.5, 3개 ×2, 4개 ×2.5, 5개 ×3 (2개째부터 1개당 ×0.5, 최대 ×3). 마지막에 소수점 올림.
+    public const int BombDamagePerPip = 2;
+    public const int BombCritFace = 6;
+    public const int BombCritMultiplier = 2;
+    public const int BombChainTenthsPerExtraDie = 5;  // 0.1 단위(정수로 계산해 소수 오차로 올림이 틀어지지 않게)
+    public const int BombChainMaxTenths = 30;         // ×3
+
+    // 폭탄 주사위 원래 피해(눈 × 2, 크리티컬 포함)를 모은 값에 연쇄 배수를 곱하고 올린다.
+    public static int ApplyBombChain(int rawDamage, int bombCount)
+    {
+        if (rawDamage <= 0 || bombCount <= 0) return 0;
+        int tenths = Mathf.Min(10 + (bombCount - 1) * BombChainTenthsPerExtraDie, BombChainMaxTenths);
+        return (rawDamage * tenths + 9) / 10;
+    }
 
     // 하트 면 회복량. 전투 결산과 지도 굴림이 같은 계산을 쓴다.
     public static int CalculateHeartHeal(int pips, float healMultiplier)
@@ -185,6 +203,8 @@ public static class TurnCalculator
         float extraIceMult = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetIceMultiplierBonus() : 0f;
         List<int> handValues = null;
         HandRank hand = HandRank.HighCard;
+        int bombRawDamage = 0;
+        int bombCount = 0;
 
         foreach (var d in targetDice)
         {
@@ -206,6 +226,13 @@ public static class TurnCalculator
                     break;
                 case SpecialDieEffect.Thorn:
                     res.selfDamage += d.currentValue;
+                    break;
+                case SpecialDieEffect.Bomb:
+                    if (d.currentValue <= 0) break; // 눈이 0이면 터지지 않고 연쇄에도 세지 않는다
+                    int bomb = d.currentValue * BombDamagePerPip;
+                    if (d.currentValue >= BombCritFace) bomb *= BombCritMultiplier;
+                    bombRawDamage += bomb;
+                    bombCount++;
                     break;
                 case SpecialDieEffect.Odd:
                     if (d.currentValue <= 0) break;
@@ -291,6 +318,7 @@ public static class TurnCalculator
                     break;
             }
         }
+        res.bombDamage = ApplyBombChain(bombRawDamage, bombCount);
         return res;
     }
 }

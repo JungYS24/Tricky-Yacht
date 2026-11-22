@@ -579,6 +579,20 @@
       "Opel": false,
       "Implemented": true,
       "Note": "구매 시 족보 티켓 8종 중 3장 제시 → 1장 선택"
+    },
+    {
+      "No": 42,
+      "Category": "주사위",
+      "Name_KR": "폭탄 주사위",
+      "SO_Name": "Bomb",
+      "SO_Class": "DiceItemSO",
+      "Item_ID": "Bomb",
+      "Price": 50,
+      "Nyaon": false,
+      "Ronan": true,
+      "Opel": false,
+      "Implemented": true,
+      "Note": "테스트 중: ShopManager의 testAlwaysShowBombDice가 켜져 있으면 모든 상점에 1개 이상 진열"
     }
   ]
 }

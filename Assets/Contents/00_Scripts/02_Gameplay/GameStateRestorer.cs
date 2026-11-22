@@ -158,6 +158,8 @@ public static class GameStateRestorer
             foreach (string fID in data.ownedFigureIDs)
             {
                 var item = GameSaveManager.Instance.FindFigureByID(fID);
+                // 아이디로 못 찾으면 이름으로 한 번 더 찾는다(아이디가 비어 있던 피규어는 이름으로 저장된다).
+                if (item == null) item = GameSaveManager.Instance.FindItemByName(fID) as FigureItemSO;
                 if (item != null) InventoryManager.Instance.RestoreItem(item);
                 else Debug.LogError($"[피규어 복원 실패] 저장된 아이디: '{fID}'를 찾을 수 없습니다.");
             }
