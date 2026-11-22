@@ -417,6 +417,7 @@ public class LocalizationManager : MonoBehaviour
             case SpecialDieEffect.Coin: return "Coin";
             case SpecialDieEffect.Heart: return "Heart";
             case SpecialDieEffect.Flame: return "Flame";
+            case SpecialDieEffect.Bomb: return "Bomb";
             case SpecialDieEffect.Even: return "Even";
             case SpecialDieEffect.Odd: return "Odd";
         }
@@ -442,6 +443,8 @@ public class LocalizationManager : MonoBehaviour
             return "Heart";
         if (id == "Flame" || assetName == "Flame")
             return "Flame";
+        if (id == "Bomb" || assetName == "Bomb")
+            return "Bomb";
         if (id == "Coin" || assetName == "Coin")
             return "Coin";
 

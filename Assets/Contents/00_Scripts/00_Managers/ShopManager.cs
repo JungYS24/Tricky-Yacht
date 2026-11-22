@@ -18,6 +18,10 @@ public class ShopManager : MonoBehaviour
     public ShopSlot[] shopSlots;
     public GameObject shopUI;
 
+    [Header("테스트")]
+    [Tooltip("켜 두면 모든 상점(상인과 상관없이)에 폭탄 주사위를 1개 이상 진열합니다. 테스트가 끝나면 끄세요.")]
+    public bool testAlwaysShowBombDice = true;
+
     [Header("설명창(Tooltip) UI")]
     public GameObject tooltipPanel;
     public RectTransform tooltipRect;
@@ -302,6 +306,41 @@ public class ShopManager : MonoBehaviour
                 shopSlots[i].gameObject.SetActive(false);
             }
         }
+
+        ForceBombDiceForTest();
+    }
+
+    // 테스트용(testAlwaysShowBombDice): 사지 않은 진열품 중에 폭탄 주사위가 없으면 마지막 진열 칸을 폭탄 주사위로 바꾼다.
+    // 무작위를 쓰지 않아 다른 진열 순서는 그대로다. 가격은 재고표(로넌 50골드 × 바이옴 가격 배율), 재고표가 없으면 에셋 가격.
+    void ForceBombDiceForTest()
+    {
+        if (!testAlwaysShowBombDice || shopSlots == null || allItemsPool == null) return;
+
+        DiceItemSO bomb = null;
+        foreach (var item in allItemsPool)
+        {
+            if (item is DiceItemSO dice && dice.specialEffect == SpecialDieEffect.Bomb) { bomb = dice; break; }
+        }
+        if (bomb == null) return;
+
+        ShopSlot target = null;
+        for (int i = 0; i < shopSlots.Length; i++)
+        {
+            ShopSlot slot = shopSlots[i];
+            if (slot == null || !slot.gameObject.activeSelf || slot.isLocked || slot.isPurchased || slot.currentData == null) continue;
+            if (slot.currentData == bomb) return; // 이미 진열돼 있음
+            target = slot;
+        }
+        if (target == null) return;
+
+        int listed = -1;
+        if (mapMerchantActive && stockTable != null && stockTable.Loaded)
+        {
+            ShopStockOffer offer = stockTable.Find(bomb);
+            if (offer != null)
+                listed = Mathf.RoundToInt(offer.Row.Price * BalanceConfig.Current.TierShopPrice(diceManager != null ? diceManager.CurrentBiomeTier : 0));
+        }
+        target.SetupSlot(bomb, this, listed);
     }
 
     // 위성 선택창 열기 

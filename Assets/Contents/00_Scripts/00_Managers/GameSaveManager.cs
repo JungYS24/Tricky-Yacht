@@ -235,7 +235,8 @@ public class GameSaveManager : MonoBehaviour
     {
         foreach (var f in inv.ownedFigures)
         {
-            data.ownedFigureIDs.Add(f.Item_ID);    //고유 아이디를 세이브 파일에 기록
+            // 고유 아이디를 세이브 파일에 기록. 아이디가 비어 있는 피규어는 이름으로 기록해 이어하기에서 사라지지 않게 한다.
+            data.ownedFigureIDs.Add(string.IsNullOrEmpty(f.Item_ID) ? f.itemName : f.Item_ID);
         }
 
         inv.CollectTicketNamesForSave(data.ownedTicketIDs);

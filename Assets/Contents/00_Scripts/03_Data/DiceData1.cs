@@ -9,7 +9,8 @@ public enum SpecialDieEffect
     Odd,
     Even,
     Flame,
-    Thorn
+    Thorn,
+    Bomb    // 폭탄 주사위: 결산 때 즉시 폭발 피해. 저장 값이 바뀌지 않게 맨 뒤에 추가한다.
 }
 
 // 기존 특수 면 효과(여정 주사위의 Thorn 등)와 별도로 구분한다.
