@@ -9,7 +9,14 @@ public class UnlockConditionManager : MonoBehaviour
 
     private static UnlockFlag unlockedFlag = 0;
 
+    private static readonly string UNLOCKED_KEY = "unlock";
+
     [SerializeField] private UnlockFlag initialFlag = 0;
+#if UNITY_EDITOR
+    [SerializeField] private bool useUserData;
+#else
+    private bool useUserData = true;
+#endif
 
     /// <summary>
     /// 여러 조건 플래그를 하나의 플래그 값으로 합쳐줍니다.
@@ -58,6 +65,8 @@ public class UnlockConditionManager : MonoBehaviour
         unlockedFlag = isUnlocked ?
             unlockedFlag | flag :
             unlockedFlag & ~flag;
+
+        PlayerPrefs.SetInt(UNLOCKED_KEY, (int)unlockedFlag);
     }
 
     private static UnlockFlag GetMask()
@@ -72,10 +81,6 @@ public class UnlockConditionManager : MonoBehaviour
 
     private void Awake()
     {
-#if UNITY_EDITOR
-        unlockedFlag = initialFlag;
-#else
-        unlockedFlag = (UnlockFlag)PlayerPrefs.GetInt("unlock", 0);
-#endif
+        unlockedFlag = useUserData ? (UnlockFlag)PlayerPrefs.GetInt(UNLOCKED_KEY, 0) : initialFlag;
     }
 }
