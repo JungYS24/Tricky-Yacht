@@ -225,7 +225,8 @@ public class FigureEffectManager : MonoBehaviour
                     actualValue = diceManager.playerMaxHP * (effect.effectValue / 100f);
                     break;
                 case EffectCalcType.IncomingDamage:
-                    actualValue = effect.effectValue; // 뎀감은 별도 함수에서 계산하므로 값만 그대로 넘김
+                    // 피격 시(OnDamaged) 받은 피해 비례 (선인장 화분 반사). 뎀감은 GetTotalDamageReduction에서 따로 계산
+                    actualValue = actualDamage * (effect.effectValue / 100f);
                     break;
                 //덱에 보유 중인 주사위 1개당 N(effectValue)만큼 곱해서 계산
                 case EffectCalcType.DeckDiceCount:
@@ -625,6 +626,7 @@ public class FigureEffectManager : MonoBehaviour
             bool hasHealEffect = false;
             bool destroyAfterRevive = false;
             int reviveHP = 0;
+            int reviveShield = 0; // 얼어붙은 심장: 부활과 함께 얻는 보호막
 
             foreach (var effect in node.effects)
             {
@@ -650,6 +652,13 @@ public class FigureEffectManager : MonoBehaviour
                     reviveHP = Mathf.Max(
                         reviveHP, Mathf.FloorToInt(value));
                 }
+                else if (effect.effectType == FigureEffectType.AddShield)
+                {
+                    if (effect.calcType == EffectCalcType.PlayerMaxHP)
+                        reviveShield += Mathf.FloorToInt(diceManager.playerMaxHP * effect.effectValue / 100f);
+                    else if (effect.calcType == EffectCalcType.Flat)
+                        reviveShield += Mathf.FloorToInt(effect.effectValue);
+                }
                 else if (effect.effectType == FigureEffectType.DestroySelf)
                 {
                     destroyAfterRevive = true;
@@ -661,6 +670,13 @@ public class FigureEffectManager : MonoBehaviour
             // 부활은 도도새 회복 증가를 적용하지 않음
             diceManager.currentPlayerHP = Mathf.Clamp(
                 reviveHP, 1, Mathf.Max(1, diceManager.playerMaxHP));
+
+            // 부활 직후 보호막 지급 (피규어가 사라지기 전에 적용)
+            if (reviveShield > 0)
+            {
+                diceManager.currentShield += reviveShield;
+                diceManager.ui?.UpdateShieldUI(diceManager.currentShield);
+            }
 
             FigureFeedback.Pulse(figure);
 
@@ -677,14 +693,15 @@ public class FigureEffectManager : MonoBehaviour
     }
 
     // 적에게 피해를 입었을 때(피격 시) 발동하는 피규어 처리 (예: 광대의 눈물)
-    public void EvaluateDamagedTriggers(DiceManager diceManager, ShopManager shopManager)
+    // damageTaken: 뎀감까지 적용한 뒤 받은 피해 (보호막으로 막은 양 포함). IncomingDamage 계산에 쓰임
+    public void EvaluateDamagedTriggers(DiceManager diceManager, ShopManager shopManager, int damageTaken = 0)
     {
         if (effectCache.ContainsKey(FigureTriggerType.OnDamaged))
         {
             foreach (var cacheItem in effectCache[FigureTriggerType.OnDamaged])
             {
                 Debug.Log($"[피격 시 발동] {cacheItem.sourceFigure.itemName} 기믹 발동!");
-                StartCoroutine(ExecuteFigureNode(cacheItem, 0, diceManager, shopManager));
+                StartCoroutine(ExecuteFigureNode(cacheItem, 0, diceManager, shopManager, damageTaken));
             }
         }
         // 피격 시 배수가 오르는 등 UI 변화가 생길 수 있으므로 갱신

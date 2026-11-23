@@ -308,9 +308,14 @@ public static class CombatFlowController
 
                 if (FigureEffectManager.Instance != null)
                 {
-                    FigureEffectManager.Instance.EvaluateDamagedTriggers(dm, dm.shopManager);
+                    FigureEffectManager.Instance.EvaluateDamagedTriggers(dm, dm.shopManager, finalEnemyAtk);
                 }
-                if (dm.enemy.IsDead) yield break;
+                // 선인장 화분 반사 등으로 적이 쓰러졌으면 처치 처리 후 종료
+                if (dm.enemy.IsDead || dm.enemy.CurrentHP <= 0)
+                {
+                    dm.OnEnemyKilled();
+                    yield break;
+                }
 
                 dm.enemy.ResetTurn();
                 // 악마주사위 3페이즈: 공격할 때마다 다음 공격 패턴을 다시 굴린다.
