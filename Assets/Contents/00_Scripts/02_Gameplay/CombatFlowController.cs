@@ -260,13 +260,18 @@ public static class CombatFlowController
             // 일반 공격 후 화염 데미지가 0.3초후에 터짐
             yield return new WaitForSeconds(0.3f);
 
-            if (flameDamage > 0)
+            // 화상 스택은 그대로 두고, 이번에 들어가는 피해에만 용광로 등의 % 증가를 곱한다.
+            float flameMult = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetFlameDamageMultiplier() : 1f;
+            int flameHit = flameDamage > 0 ? flameDamage * Mathf.Max(0, Mathf.RoundToInt(flameMult * 100f)) / 100 : 0;
+
+            if (flameHit > 0)
             {
-                yield return dm.enemy.PlayFlameDamage(flameDamage, dm.OnEnemyKilled);
+                yield return dm.enemy.PlayFlameDamage(flameHit, dm.OnEnemyKilled);
+                if (flameHit > flameDamage) FigureEffectManager.Instance?.NotifyPassiveApplied(FigureEffectType.IncreaseFlameDamagePercent);
                 dm.UpdateMainUI(LocalizationManager.GetUi(
                     "UI_FLAME_DAMAGE",
                     "화염 데미지! <color=#FF4500>-{0}</color>",
-                    flameDamage));
+                    flameHit));
 
                 if (dm.enemy.IsDead) yield break;
                 yield return new WaitForSeconds(0.8f);
@@ -303,9 +308,14 @@ public static class CombatFlowController
 
                 if (FigureEffectManager.Instance != null)
                 {
-                    FigureEffectManager.Instance.EvaluateDamagedTriggers(dm, dm.shopManager);
+                    FigureEffectManager.Instance.EvaluateDamagedTriggers(dm, dm.shopManager, finalEnemyAtk);
                 }
-                if (dm.enemy.IsDead) yield break;
+                // 선인장 화분 반사 등으로 적이 쓰러졌으면 처치 처리 후 종료
+                if (dm.enemy.IsDead || dm.enemy.CurrentHP <= 0)
+                {
+                    dm.OnEnemyKilled();
+                    yield break;
+                }
 
                 dm.enemy.ResetTurn();
                 // 악마주사위 3페이즈: 공격할 때마다 다음 공격 패턴을 다시 굴린다.
@@ -437,7 +447,8 @@ public static class CombatFlowController
             snackChips = dm.snackBonusChips,
             stageMult = dm.stageBonusMult,
             snackMult = dm.snackBonusMult,
-            permanentMult = dm.permanentFigureMultiplier
+            permanentMult = dm.permanentFigureMultiplier,
+            permanentChips = dm.permanentFigureChips
         };
         TurnScoreResult total = TurnCalculator.CalculateScore(calcResult, handMult, bonuses);
         yield return resolutionPresenter.PlayScore(dm.ui, keptDice, handRank, handName, handMult, calcResult, diceScoreBonuses, bonuses, chipsBeforeFigures, multBeforeFigures, total, dm.resolutionTiming, snacks);

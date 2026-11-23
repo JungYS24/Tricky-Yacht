@@ -10,10 +10,8 @@ public class MaxHPItemSO : BaseItemDataSO
     {
         if (diceManager != null)
         {
-            // 최대 체력 증가
-            diceManager.playerMaxHP += hpIncreaseAmount;
-            //현재 체력도 증가
-            diceManager.currentPlayerHP += hpIncreaseAmount;
+            // 최대 체력 증가 (현재 체력도 같이 증가)
+            diceManager.IncreaseMaxHP(hpIncreaseAmount);
 
             // 바뀐 체력을 화면 UI에 즉시 반영
             diceManager.ForceUpdateUI();

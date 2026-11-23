@@ -37,7 +37,8 @@ public class SynergyData : BaseItemDataSO
                 break;
 
             case SynergyEffectType.MaxHpUp:
-                diceManager.playerMaxHP += (int)effectValue;
+                // 기존처럼 최대 체력만 증가
+                diceManager.IncreaseMaxHP((int)effectValue, healCurrent: false);
                 break;
 
             case SynergyEffectType.ShopRerollCostDown:

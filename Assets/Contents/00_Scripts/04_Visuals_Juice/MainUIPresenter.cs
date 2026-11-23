@@ -59,7 +59,7 @@ public sealed class MainUIPresenter
         TurnCalcResult calc = uiDiceBuffer.Count > 0
             ? TurnCalculator.CalculateDiceEffects(uiDiceBuffer, 0, 1f)
             : default;
-        chips += calc.oddBonusChips;
+        chips += calc.oddBonusChips + dm.permanentFigureChips;
         float mult = 1f + dm.stageBonusMult + dm.permanentFigureMultiplier + calc.evenBonusMult;
         dm.ui.ShowTurnPreview(dm.currentHandName, chips, mult, 0, 0, 0, calc.oddBonusChips, calc.evenBonusMult);
     }

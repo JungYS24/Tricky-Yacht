@@ -262,6 +262,7 @@ public static class GameStateRestorer
         }
         dm.permanentFigureMultiplier =
     data.permanentFigureMultiplier;
+        dm.permanentFigureChips = data.permanentFigureChips;
 
         dm.figureKillCounts.Clear();
 

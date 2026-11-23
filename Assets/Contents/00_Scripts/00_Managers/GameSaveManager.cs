@@ -104,6 +104,7 @@ public class GameSaveManager : MonoBehaviour
 
         data.permanentFigureMultiplier =
     dice.permanentFigureMultiplier;
+        data.permanentFigureChips = dice.permanentFigureChips;
 
         foreach (var entry in dice.figureKillCounts)
         {
