@@ -40,7 +40,8 @@ public static class CombatFlowController
             dm.ui?.UpdateFlameStackUI(dm.accumulatedFlameDamage);
         }
 
-        // 반복 공격 기능은 사용하지 않음
+        // 추가 공격 횟수(풍신의 북 등)는 이번 결산에서만 쓰고 바로 비운다.
+        int extraAttacks = Mathf.Max(0, dm.extraAttackCount);
         dm.extraAttackCount = 0;
 
         // 피규어 효과로 이미 처치된 경우에는 공격하지 않음
@@ -57,6 +58,16 @@ public static class CombatFlowController
 
         yield return dm.StartCoroutine(
             ProcessPlayerAttack(dm, combinedDamage, darkDamage > 0, finalDamage > 0));
+
+        // 추가 공격: 앞 공격의 피격 연출이 끝난 뒤 같은 피해로 한 번씩 더 때린다.
+        for (int i = 0; i < extraAttacks; i++)
+        {
+            if (dm.currentPlayerHP <= 0 || dm.enemy == null || dm.enemy.IsDead || dm.enemy.CurrentHP <= 0) break;
+            yield return WaitForEnemyHitFeedback(dm.enemy);
+            yield return new WaitForSeconds(0.15f);
+            yield return dm.StartCoroutine(
+                ProcessPlayerAttack(dm, combinedDamage, darkDamage > 0, finalDamage > 0));
+        }
 
         // 반사 피해 등으로 플레이어가 사망한 경우
         if (dm.currentPlayerHP <= 0)
@@ -216,6 +227,18 @@ public static class CombatFlowController
             dm.ui.handInfoText.GetComponent<FinalDamageFeedback>()?.PlayAttackPulse();
 
         yield return new WaitForSeconds(0.15f);
+    }
+
+    // 몬스터 피격 연출(흔들림·번쩍임)이 끝날 때까지 기다린다. 연출이 멈추지 않아도 1초 뒤에는 넘어간다.
+    private static IEnumerator WaitForEnemyHitFeedback(Enemy enemy)
+    {
+        var feedback = enemy != null ? enemy.GetComponent<MonsterHitFeedback>() : null;
+        float limit = 1f;
+        while (feedback != null && feedback.IsPlaying && limit > 0f)
+        {
+            limit -= Time.deltaTime;
+            yield return null;
+        }
     }
 
     // 폭탄 주사위 즉시 피해. BombFeedback이 폭탄을 하나씩 터뜨리며 그때마다 피해를 나눠 넣는다
