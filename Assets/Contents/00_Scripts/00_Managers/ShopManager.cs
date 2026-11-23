@@ -443,6 +443,8 @@ public class ShopManager : MonoBehaviour
                     // 피규어/간식 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용
                     if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
                     Sfx.Play(SfxId.Shop_Purchase);
+                    // 구매 시 발동 피규어 (여우 지갑)
+                    FigureEffectManager.Instance?.EvaluateItemPurchasedTriggers(diceManager, this);
                     return true;
                 }
                 else
@@ -466,6 +468,8 @@ public class ShopManager : MonoBehaviour
                 // 그 외 소모품/티켓류 정상 구매 성공 시 부드럽게 돈 깎이는 연출 적용
                 if (GoldCounter.Instance != null) GoldCounter.Instance.SetGold(currentGold);
                 Sfx.Play(SfxId.Shop_Purchase);
+                // 구매 시 발동 피규어 (여우 지갑)
+                FigureEffectManager.Instance?.EvaluateItemPurchasedTriggers(diceManager, this);
                 return true;
             }
         }

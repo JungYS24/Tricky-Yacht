@@ -163,6 +163,7 @@ public class DiceManager : MonoBehaviour
     public bool isCalculating = false;  //끝내기 버튼                                
     public Dictionary<string, int> figureKillCounts = new Dictionary<string, int>();// 피규어 획득 후 처치 기록. 스테이지가 바뀌어도 유지
     public float permanentFigureMultiplier = 0f;
+    public int permanentFigureChips = 0; // 현재 회차 동안 유지되는 피규어 칩수 (여우 지갑 등)
 
     //족보별 배수
     [Header("족보 배수 설정")]
@@ -924,6 +925,7 @@ public class DiceManager : MonoBehaviour
     {
         if (isStartingCombat) return;
         permanentFigureMultiplier = 0f;
+        permanentFigureChips = 0;
         //재시작시 가짜 주사위 참조 안전하게 비우기
         currentCombatDebuffs.Clear();
         Debuffs.DropDrawTriggers(); // 골드는 아래에서 초기값으로 다시 맞춘다
@@ -959,6 +961,18 @@ public class DiceManager : MonoBehaviour
         stageProgression.InitFirstBiome(biomeList);
         // 새 지도로 다시 시작
         MapFlow.BeginNewMapRun();
+    }
+
+    // 최대 체력을 영구적으로 올리는 곳(피규어, 체력 아이템, 시너지)은 모두 이 함수를 거칩니다.
+    // 올라간 뒤 OnMaxHPIncreased 피규어(피안화)를 한 번 발동합니다.
+    public void IncreaseMaxHP(int amount, bool healCurrent = true)
+    {
+        if (amount <= 0) return;
+
+        playerMaxHP += amount;
+        if (healCurrent) currentPlayerHP += amount;
+
+        FigureEffectManager.Instance?.EvaluateMaxHPIncreasedTriggers(this, shopManager);
     }
 
     public IEnumerator ShowGameOverPanelDelayed()

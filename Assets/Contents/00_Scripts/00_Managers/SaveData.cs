@@ -135,6 +135,7 @@ public class SaveData
     public List<SavedFigureKillCount> figureKillCounts =new List<SavedFigureKillCount>();
 
     public float permanentFigureMultiplier;
+    public int permanentFigureChips; // 여우 지갑 등 회차 동안 유지되는 칩수
 
     // 스테이지당 1회 피규어 사용 기록
     public List<string> usedFigureNodes = new List<string>();

@@ -275,6 +275,7 @@ public sealed class TurnResolutionPresenter
             yield return AnimateSnackBonuses(true, chipsBeforeFigures);
             yield return AnimateBonus(true, bonuses.snackChips - chipsBeforeFigures, LocalizationManager.GetUi("UI_BONUS_FIGURE", "피규어"));
             yield return AnimateBonus(true, bonuses.stageChips, LocalizationManager.GetUi("UI_BONUS_STAGE", "전투 누적"));
+            yield return AnimateBonus(true, bonuses.permanentChips, LocalizationManager.GetUi("UI_BONUS_PERMANENT", "영구 보너스"));
             // 모든 칩 처리가 끝난 뒤 족보 배수부터 표시
             yield return AnimateBonus(false, handMult - 1f, handName, null, true);
             // 이후 배수 보너스 표시

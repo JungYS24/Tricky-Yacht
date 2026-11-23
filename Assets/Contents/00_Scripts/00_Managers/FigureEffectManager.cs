@@ -22,6 +22,8 @@ public class FigureEffectManager : MonoBehaviour
     private float cachedGoldGainMultiplier = 1f;
     private float cachedIceMultiplierBonus = 0f;
     private float cachedIceChipsBonus = 0f;
+    private float cachedFlameDamagePercent = 0f; // 용광로: 화상 피해 증가(%)
+    private float cachedBombDamagePercent = 0f;  // 마룡의 폭탄: 폭탄 피해 증가(%)
 
     private float cachedCoatingDiscount = 0f;
     private float cachedSatelliteDiscount = 0f;
@@ -46,6 +48,8 @@ public class FigureEffectManager : MonoBehaviour
         cachedSnackMultiplier = 1f;
         cachedIceMultiplierBonus = 0f;
         cachedIceChipsBonus = 0f;
+        cachedFlameDamagePercent = 0f;
+        cachedBombDamagePercent = 0f;
 
         if (InventoryManager.Instance == null) return;
 
@@ -97,6 +101,14 @@ public class FigureEffectManager : MonoBehaviour
 
                             case FigureEffectType.AddIceChips:
                                 cachedIceChipsBonus += effect.effectValue;
+                                break;
+
+                            case FigureEffectType.IncreaseFlameDamagePercent:
+                                cachedFlameDamagePercent += effect.effectValue;
+                                break;
+
+                            case FigureEffectType.IncreaseBombDamagePercent:
+                                cachedBombDamagePercent += effect.effectValue;
                                 break;
                         }
                     }
@@ -355,10 +367,13 @@ public class FigureEffectManager : MonoBehaviour
                 case FigureEffectType.AddPermanentMultiplier:
                     diceManager.permanentFigureMultiplier += actualValue; ReportApplied(actualValue != 0f);
                     break;
+                case FigureEffectType.AddPermanentChips:
+                    diceManager.permanentFigureChips += Mathf.FloorToInt(actualValue); ReportApplied(Mathf.FloorToInt(actualValue) != 0);
+                    break;
 
                 //1번 카테고리 특수 효과들
                 case FigureEffectType.MultiplyCombatEndGold: diceManager.combatWinGoldMultiplier *= actualValue; ReportApplied(actualValue != 1f); break;
-                case FigureEffectType.IncreaseMaxHP: diceManager.playerMaxHP += Mathf.FloorToInt(actualValue); diceManager.currentPlayerHP += Mathf.FloorToInt(actualValue); ReportApplied(Mathf.FloorToInt(actualValue) != 0); break;
+                case FigureEffectType.IncreaseMaxHP: diceManager.IncreaseMaxHP(Mathf.FloorToInt(actualValue)); ReportApplied(Mathf.FloorToInt(actualValue) > 0); break;
                 case FigureEffectType.AddExtraAttack: diceManager.extraAttackCount += Mathf.FloorToInt(actualValue); ReportApplied(Mathf.FloorToInt(actualValue) > 0); break;
                 case FigureEffectType.NullifyEnemySkill:
                     diceManager.isEnemySkillNullified = true; ReportApplied(true);
@@ -882,6 +897,50 @@ public class FigureEffectManager : MonoBehaviour
     public int GetIceChipsBonus()
     {
         return Mathf.FloorToInt(cachedIceChipsBonus);
+    }
+
+    // 화상 피해 배율 (기본 1배). 화상 피해를 % 올리는 효과는 여기서 퍼센트를 모두 합산해 한 번만 곱합니다.
+    // 시너지 BurnPowerUp은 현재 % 가 아니라 화상 스택을 고정 수치로 더하는 방식이라 여기에 합산하지 않습니다.
+    public float GetFlameDamageMultiplier()
+    {
+        return Mathf.Max(0f, 1f + cachedFlameDamagePercent / 100f);
+    }
+
+    // 폭탄 피해 배율 (기본 1배). 연쇄 배수까지 적용된 폭탄 피해에 마지막으로 곱합니다.
+    public float GetBombDamageMultiplier()
+    {
+        return Mathf.Max(0f, 1f + cachedBombDamagePercent / 100f);
+    }
+
+    // 상점에서 아이템을 구매했을 때(OnItemPurchased) 발동하는 피규어 처리 (예: 여우 지갑)
+    public void EvaluateItemPurchasedTriggers(DiceManager diceManager, ShopManager shopManager)
+    {
+        if (diceManager == null) return;
+        if (!effectCache.TryGetValue(FigureTriggerType.OnItemPurchased, out var candidates)) return;
+
+        FigureCacheItem[] snapshot = candidates.ToArray();
+        foreach (var cacheItem in snapshot)
+        {
+            Debug.Log($"[아이템 구매 발동] {cacheItem.sourceFigure.itemName} 효과 달성!");
+            StartCoroutine(ExecuteFigureNode(cacheItem, 0, diceManager, shopManager));
+        }
+        diceManager.ForceUpdateUI();
+    }
+
+    // 최대 체력이 영구적으로 늘었을 때(OnMaxHPIncreased) 발동하는 피규어 처리 (예: 피안화)
+    // DiceManager.IncreaseMaxHP에서 증가 1회당 한 번 호출됩니다.
+    public void EvaluateMaxHPIncreasedTriggers(DiceManager diceManager, ShopManager shopManager)
+    {
+        if (diceManager == null) return;
+        if (!effectCache.TryGetValue(FigureTriggerType.OnMaxHPIncreased, out var candidates)) return;
+
+        FigureCacheItem[] snapshot = candidates.ToArray();
+        foreach (var cacheItem in snapshot)
+        {
+            Debug.Log($"[최대 체력 증가 발동] {cacheItem.sourceFigure.itemName} 효과 달성!");
+            StartCoroutine(ExecuteFigureNode(cacheItem, 0, diceManager, shopManager));
+        }
+        diceManager.ForceUpdateUI();
     }
 
     private static bool IsDicePreviewTrigger(FigureTriggerType trigger)

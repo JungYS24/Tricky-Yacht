@@ -56,6 +56,7 @@ public struct TurnScoreBonuses
     public float stageMult;
     public float snackMult;
     public float permanentMult;
+    public int permanentChips; // 여우 지갑 등 회차 동안 유지되는 칩수
 }
 
 public struct TurnScoreResult
@@ -91,6 +92,15 @@ public static class TurnCalculator
     {
         if (rawDamage <= 0 || bombCount <= 0) return 0;
         return (rawDamage * BombChainTenths(bombCount) + 9) / 10;
+    }
+
+    // 마룡의 폭탄 등 폭탄 피해 % 증가. 연쇄 배수까지 적용된 피해에 마지막으로 곱하고 올림한다(정수 계산).
+    public static int ApplyBombDamageMultiplier(int bombDamage, float multiplier)
+    {
+        if (bombDamage <= 0) return 0;
+        int percent = Mathf.Max(0, Mathf.RoundToInt(multiplier * 100f));
+        if (percent == 100) return bombDamage;
+        return (bombDamage * percent + 99) / 100;
     }
 
     // 연쇄 배수(0.1 단위). 1개 10, 2개 15 … 5개 30. 계산과 연출 표시가 같은 값을 쓴다.
@@ -131,7 +141,7 @@ public static class TurnCalculator
     public static TurnScoreResult CalculateScore(TurnCalcResult dice, float handMult, TurnScoreBonuses bonuses)
     {
         // 최종 칩 = 주사위 기본합 + 얼음/위성/스페이드/홀수 + 피규어/스테이지 보너스 + 스낵 보너스
-        int chips = dice.baseSum + dice.iceBonusChips + dice.satelliteBonusChips + dice.stampBonusChips + dice.oddBonusChips + bonuses.stageChips + bonuses.snackChips;
+        int chips = dice.baseSum + dice.iceBonusChips + dice.satelliteBonusChips + dice.stampBonusChips + dice.oddBonusChips + bonuses.stageChips + bonuses.snackChips + bonuses.permanentChips;
         // 최종 배수 = 족보 배수 + 피규어/스테이지 배수 + 스낵 배수 + 프리즘/위성/짝수 배수
         float multiplier = handMult + bonuses.stageMult + bonuses.snackMult + dice.prismMultTotal + dice.satelliteBonusMult + dice.iceBonusMult + dice.evenBonusMult + bonuses.permanentMult;
         multiplier *= dice.curseMultiplier;
@@ -336,6 +346,8 @@ public static class TurnCalculator
             }
         }
         res.bombDamage = ApplyBombChain(bombRawDamage, bombCount);
+        float bombMult = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetBombDamageMultiplier() : 1f;
+        res.bombDamage = ApplyBombDamageMultiplier(res.bombDamage, bombMult);
         return res;
     }
 }

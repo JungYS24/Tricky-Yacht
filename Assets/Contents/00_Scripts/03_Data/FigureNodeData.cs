@@ -9,7 +9,8 @@ public enum FigureTriggerType
     OnePair, TwoPair, Triple, Straight, FullHouse, FourOfAKind, Yacht,
     ThreeOf1, ThreeOf2, ThreeOf3, ThreeOf4, ThreeOf5, ThreeOf6,
     OnDamaged, OnShopEntered, OnItemPurchased, OnDiceReroll, OnCombatEnd, OnSnackUsed,  Always,
-    OnAcquired, OnCombatStart, OnRoundStart, OnDeath, OnLowHP, OnEnemyDamaged,OnFirstNormalAttack, OnDiceDestroyed
+    OnAcquired, OnCombatStart, OnRoundStart, OnDeath, OnLowHP, OnEnemyDamaged,OnFirstNormalAttack, OnDiceDestroyed,
+    OnMaxHPIncreased // 최대 체력이 영구적으로 늘었을 때 (피안화). SO에 숫자로 저장되므로 항상 맨 뒤에 추가
 }
 
 
@@ -65,7 +66,12 @@ public enum FigureEffectType
     AddIceChips,       // 아이스 코팅 주사위의 추가 칩
 
     DamageEnemyOrPlayer,   // 50%로 적 피해, 나머지 50%로 플레이어 피해
-    AddPermanentMultiplier // 현재 회차 동안 유지되는 배수 추가
+    AddPermanentMultiplier, // 현재 회차 동안 유지되는 배수 추가
+
+    // SO에 숫자로 저장되므로 새 효과는 항상 맨 뒤에 추가
+    AddPermanentChips,          // [여우 지갑, 재의 향로, 피안화] 현재 회차 동안 유지되는 칩수 추가
+    IncreaseFlameDamagePercent, // [용광로] 적에게 가하는 화상 피해 증가 (%)
+    IncreaseBombDamagePercent   // [마룡의 폭탄] 적에게 가하는 폭탄 피해 증가 (%)
 }
 
 // 2.값 계산 방식 분리
