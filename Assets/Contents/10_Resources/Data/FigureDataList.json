@@ -1721,7 +1721,7 @@
     "requiredKills": 0,
     "healthThresholdPercent": 15.0,
     "effectType": "HealHP",
-    "calcType": "PlayerMaxHP",
+    "calcType": "Flat",
     "effectValue": 1.0,
     "probability": 0.0,
     "optionalItem": "",
