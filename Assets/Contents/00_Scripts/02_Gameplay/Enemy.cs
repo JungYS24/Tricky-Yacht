@@ -55,6 +55,8 @@ public class Enemy : MonoBehaviour
 
     // 세이브를 위해 몬스터가 자기 이름을 기억하게 함
     public string CurrentMonsterName { get; private set; }
+    // 지금 싸우는 몬스터 데이터(보스 BGM 등 참조용)
+    public MonsterDataSO CurrentMonsterData { get; private set; }
     public int CurrentMonsterIndex { get { return currentMonsterIndex; } }
 
     // 몬스터 출현 순서 리스트
@@ -89,7 +91,9 @@ public class Enemy : MonoBehaviour
     // 악마주사위 애니메이터(AC_DevilDice) 파라미터
     static readonly int DevilCastHash = Animator.StringToHash("Cast");
     static readonly int DevilAngryHash = Animator.StringToHash("Angry");
+    static readonly int DevilCorruptedHash = Animator.StringToHash("Corrupted");
     bool devilAngry;
+    bool devilCorrupted;
 
     private Material monsterRuntimeMat;
     private Vector3 originalScale;
@@ -171,6 +175,8 @@ public class Enemy : MonoBehaviour
         // 어떤 몬스터를 낼지는 MonsterSpawnRules가 정한다(튜토리얼 → 강제 몬스터 → 보스 → 엘리트·일반).
         MonsterDataSO nextMonsterData = MonsterSpawnRules.PickMonster(dice, currentBiome);
 
+        CurrentMonsterData = null;
+        devilCorrupted = false;
         // 선택된 몬스터(보스 혹은 일반)의 데이터를 덮어씌웁니다.
         if (nextMonsterData != null)
         {
@@ -178,6 +184,7 @@ public class Enemy : MonoBehaviour
             CurrentMonsterName = nextMonsterData.monsterName;
             //초기화할 때 몬스터의 능력 기억
             CurrentBossAbility = nextMonsterData.bossAbility;
+            CurrentMonsterData = nextMonsterData;
 
             if (monsterAnimator != null && nextMonsterData.animatorController != null)
             {
@@ -188,6 +195,7 @@ public class Enemy : MonoBehaviour
                 if (monsterAnimator != null) monsterAnimator.runtimeAnimatorController = null;
                 if (monsterImage != null) monsterImage.sprite = nextMonsterData.monsterSprite;
             }
+            SetupBossPresentation(nextMonsterData);
             if (footShadow != null) footShadow.Refit(nextMonsterData.monsterSprite);
 
             dropFigureData = nextMonsterData.dropFigureData;
@@ -585,6 +593,7 @@ public class Enemy : MonoBehaviour
 
         //세이브 파일에서 불러올 때도 능력 기억하기
         CurrentBossAbility = monsterData.bossAbility;
+        CurrentMonsterData = monsterData;
 
         if (monsterAnimator != null && monsterData.animatorController != null)
             monsterAnimator.runtimeAnimatorController = monsterData.animatorController;
@@ -593,6 +602,7 @@ public class Enemy : MonoBehaviour
             if (monsterAnimator != null) monsterAnimator.runtimeAnimatorController = null;
             if (monsterImage != null) monsterImage.sprite = monsterData.monsterSprite;
         }
+        SetupBossPresentation(monsterData);
         if (footShadow != null) footShadow.Refit(monsterData.monsterSprite);
 
         dropFigureData = monsterData.dropFigureData;
@@ -608,6 +618,8 @@ public class Enemy : MonoBehaviour
         AttackPower = attack;
         BaseAttackPower = attack;
         devilPhaseShown = DevilDiceBoss.IsActive(this) ? DevilDiceBoss.Phase(this) : 1;
+        // 3페이즈에서 저장했으면 효과음 없이 타락 모습과 2페이즈 BGM만 맞춘다.
+        if (devilPhaseShown >= 3) EnterDevilCorrupted(playFx: false);
         IsDead = false;
         useExternalDeathSequence = false;
 
@@ -698,14 +710,55 @@ public class Enemy : MonoBehaviour
         int phase = DevilDiceBoss.Phase(this);
         if (phase <= devilPhaseShown) return;
         devilPhaseShown = phase;
-        if (phase == 3) DevilDiceBoss.RollPattern(this);
-        else ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_PHASE2", "악마주사위: 이제 원페어·투페어는 피해를 주지 못합니다!"));
+        if (phase == 3)
+        {
+            EnterDevilCorrupted(playFx: true);
+            DevilDiceBoss.RollPattern(this, eyeRollSfxDelay: 1.2f); // 변신음이 끝날 즈음 눈 굴림 소리
+        }
+        else
+        {
+            Sfx.Play(SfxId.Devil_Laugh);
+            ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_PHASE2", "악마주사위: 이제 원페어·투페어는 피해를 주지 못합니다!"));
+        }
+    }
+
+    // 몬스터를 세팅할 때 타락 상태를 풀고, 보스 전용 BGM이 있으면 튼다.
+    void SetupBossPresentation(MonsterDataSO data)
+    {
+        devilCorrupted = false;
+        if (HasDevilAnimator()) monsterAnimator.SetBool(DevilCorruptedHash, false);
+        if (data != null && data.bossBGM != null) BGMManager.Instance?.ChangeBGM(data.bossBGM);
+    }
+
+    // 악마주사위가 타락한 모습으로 바뀐다. 애니메이터는 Corrupted 상태로 고정되고 BGM은 2페이즈 곡으로 바뀐다.
+    // 지금은 체력 3페이즈 진입에 연결되어 있고, 2페이즈 각성 개편 때 호출 위치만 옮기면 된다.
+    public void EnterDevilCorrupted(bool playFx)
+    {
+        if (devilCorrupted || CurrentBossAbility != BossAbilityType.DevilDice) return;
+        devilCorrupted = true;
+        if (HasDevilAnimator()) monsterAnimator.SetBool(DevilCorruptedHash, true);
+        if (playFx) Sfx.Play(SfxId.Devil_Energy_Rise);
+        if (CurrentMonsterData != null && CurrentMonsterData.bossPhase2BGM != null)
+            BGMManager.Instance?.ChangeBGM(CurrentMonsterData.bossPhase2BGM);
+    }
+
+    // 효과음을 잠시 뒤에 재생한다(겹침 방지용).
+    public void PlaySfxDelayed(SfxId id, float delay)
+    {
+        if (delay <= 0f || !isActiveAndEnabled) { Sfx.Play(id); return; }
+        StartCoroutine(PlaySfxAfter(id, delay));
+    }
+
+    IEnumerator PlaySfxAfter(SfxId id, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        Sfx.Play(id);
     }
 
     // 악마주사위가 저주를 걸 때 시전(IdleB) 애니메이션을 한 번 재생한다. 화난 상태(IdleC)에서는 트리거가 남지 않게 건너뛴다.
     public void PlayDevilCast()
     {
-        if (!HasDevilAnimator() || devilAngry) return;
+        if (!HasDevilAnimator() || devilAngry || devilCorrupted) return;
         monsterAnimator.SetTrigger(DevilCastHash);
     }
 
@@ -714,7 +767,10 @@ public class Enemy : MonoBehaviour
     {
         bool angry = MaxHP > 0 && CurrentHP <= MaxHP * DevilDiceBoss.AngryHpRatio;
         devilAngry = angry && CurrentBossAbility == BossAbilityType.DevilDice;
-        if (HasDevilAnimator()) monsterAnimator.SetBool(DevilAngryHash, devilAngry);
+        if (!HasDevilAnimator()) return;
+        monsterAnimator.SetBool(DevilAngryHash, devilAngry);
+        // 몬스터가 꺼진 상태에서 세팅되면 파라미터가 초기화되므로 타락 여부도 함께 다시 맞춘다.
+        monsterAnimator.SetBool(DevilCorruptedHash, devilCorrupted);
     }
 
     bool HasDevilAnimator()

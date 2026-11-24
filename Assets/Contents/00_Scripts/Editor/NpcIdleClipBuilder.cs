@@ -44,6 +44,7 @@ public static class NpcIdleClipBuilder
         new Target(Npc + "Opell/Opell.png", Npc + "Opell/AC_Opell_UI.anim", DefaultFrameInterval),                          // 오펠
         // 공허 보스
         new Target(Void + "DevilDice/IdleA/DevilDice.png", Void + "DevilDice/IdleA/Devil_Dice_Anim.anim", DevilDiceFrameInterval),     // 데블 다이스
+        new Target(Void + "DevilDice/Corrupted/CorruptedDevilDice_Idle.png", Void + "DevilDice/Corrupted/Devil_Dice_Corrupted.anim", DevilDiceFrameInterval), // 타락한 데블 다이스
     };
 
     [MenuItem("Tools/Sprites/NPC IDLE 클립 다시 만들기")]

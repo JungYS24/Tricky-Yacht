@@ -18,5 +18,10 @@ public enum SfxId
     Dice_Burn_Vanish,
     Game_Start_Door,
     Stamp_Apply,
-    Journey_Roll
+    Journey_Roll,
+    Devil_Curse_Cast,
+    Devil_Curse_Flicker,
+    Devil_Laugh,
+    Devil_Energy_Rise,
+    Devil_Eye_Roll
 }

@@ -59,6 +59,11 @@ public static class BuildNewSfxLibrary
         BindStampApply(library, mixer);
         BindExistingCue(library, SfxId.Journey_Roll,
             "Assets/Contents/08_Audio/SFX/Dice/Cue_Rolling_Dice.asset");
+        BindSingle(library, mixer, SfxId.Devil_Curse_Cast,    "Cue_Devil_Curse_Cast",    0.6f,  "Devil_Curse_Cast");
+        BindSingle(library, mixer, SfxId.Devil_Curse_Flicker, "Cue_Devil_Curse_Flicker", 0.45f, "Devil_Curse_Flicker");
+        BindSingle(library, mixer, SfxId.Devil_Laugh,         "Cue_Devil_Laugh",         0.6f,  "Devil_Laugh");
+        BindSingle(library, mixer, SfxId.Devil_Energy_Rise,   "Cue_Devil_Energy_Rise",   0.65f, "Devil_Energy_Rise");
+        BindSingle(library, mixer, SfxId.Devil_Eye_Roll,      "Cue_Devil_Eye_Roll",      0.6f,  "Devil_Eye_Roll");
 
         EditorUtility.SetDirty(library);
         AssetDatabase.SaveAssets();

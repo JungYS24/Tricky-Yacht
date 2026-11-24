@@ -57,7 +57,10 @@ public static class DevilDiceBoss
         target.myData.devilCursed = true;
         target.SetData(target.myData, target.currentValue, target.ResolveFaceIndex());
         ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_CURSE", "악마주사위가 주사위 하나에 저주를 걸었습니다!"));
-        if (boss != null) boss.PlayDevilCast();
+        // 시전 소리는 애니메이션 상태와 관계없이 항상 낸다(타락한 뒤에도).
+        Sfx.Play(SfxId.Devil_Curse_Cast);
+        if (boss != null) { boss.PlayDevilCast(); boss.PlaySfxDelayed(SfxId.Devil_Curse_Flicker, 0.35f); }
+        else Sfx.Play(SfxId.Devil_Curse_Flicker);
         return true;
     }
 
@@ -74,11 +77,12 @@ public static class DevilDiceBoss
         return IsActive(enemy) && Phase(enemy) >= 2 && (rank == HandRank.OnePair || rank == HandRank.TwoPair);
     }
 
-    // 3페이즈 공격 패턴을 굴린다. 반환값은 나온 눈(1~6).
-    public static int RollPattern(Enemy enemy)
+    // 3페이즈 공격 패턴을 굴린다. 반환값은 나온 눈(1~6). eyeRollSfxDelay만큼 늦게 눈 굴림 소리를 낸다.
+    public static int RollPattern(Enemy enemy, float eyeRollSfxDelay = 0f)
     {
         int face = Random.Range(1, 7);
         enemy.SetAttackPattern(PatternTurns[face - 1], PatternAttack[face - 1]);
+        enemy.PlaySfxDelayed(SfxId.Devil_Eye_Roll, eyeRollSfxDelay);
         ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_PATTERN",
             "악마의 눈 {0}: 공격력 {1}, {2}턴 뒤 공격", face, enemy.AttackPower, enemy.MaxAttackTurn));
         return face;
