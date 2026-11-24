@@ -487,7 +487,7 @@ public class DiceManager : MonoBehaviour
         if (!isFromLoad && DevilDiceBoss.IsActive(enemy))
         {
             DevilDiceBoss.ClearCurses(deckManager.masterDeck);
-            DevilDiceBoss.CurseOneDie(board.ActiveDice);
+            DevilDiceBoss.CurseOneDie(board.ActiveDice, enemy);
         }
         HandleDiceChanged();
         // 전투 시작 연출 중이면 첫 드로우 연출이 끝난 뒤 PlayCombatIntro가 보여 준다.

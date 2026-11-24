@@ -86,6 +86,10 @@ public class Enemy : MonoBehaviour
     public int BaseAttackPower { get; private set; }
     // 악마주사위가 지금까지 들어간 페이즈(토스트·패턴 굴림을 한 번만 하기 위해 기억)
     int devilPhaseShown = 1;
+    // 악마주사위 애니메이터(AC_DevilDice) 파라미터
+    static readonly int DevilCastHash = Animator.StringToHash("Cast");
+    static readonly int DevilAngryHash = Animator.StringToHash("Angry");
+    bool devilAngry;
 
     private Material monsterRuntimeMat;
     private Vector3 originalScale;
@@ -247,6 +251,7 @@ public class Enemy : MonoBehaviour
             monsterRuntimeMat.SetColor(edgeColorBProperty, edgeColorMint);
         }
 
+        UpdateDevilAngry();
         UpdateHPBar(true);
     }
 
@@ -281,6 +286,7 @@ public class Enemy : MonoBehaviour
         CurrentHP -= actualDamage;
         CheckBossPhase2();
         CheckDevilPhase();
+        UpdateDevilAngry();
 
         // 사망 콜백 전에 지급해야 마지막 공격의 효과도 적용됨
         DiceManager dm = DiceManager.Instance;
@@ -630,6 +636,7 @@ public class Enemy : MonoBehaviour
         }
 
         if (attackPowerText != null) attackPowerText.text = $"{AttackPower}";
+        UpdateDevilAngry();
         UpdateHPBar(true);
     }
 
@@ -652,6 +659,7 @@ public class Enemy : MonoBehaviour
         MaxHP = Mathf.Max(1, MaxHP - amount);
         CurrentHP = Mathf.Min(CurrentHP, MaxHP);
         CheckBossPhase2();
+        UpdateDevilAngry();
 
         // 이전 체력바 애니메이션이 새 값을 덮어쓰지 않도록 중단
         if (hpCoroutine != null)
@@ -692,6 +700,27 @@ public class Enemy : MonoBehaviour
         devilPhaseShown = phase;
         if (phase == 3) DevilDiceBoss.RollPattern(this);
         else ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_PHASE2", "악마주사위: 이제 원페어·투페어는 피해를 주지 못합니다!"));
+    }
+
+    // 악마주사위가 저주를 걸 때 시전(IdleB) 애니메이션을 한 번 재생한다. 화난 상태(IdleC)에서는 트리거가 남지 않게 건너뛴다.
+    public void PlayDevilCast()
+    {
+        if (!HasDevilAnimator() || devilAngry) return;
+        monsterAnimator.SetTrigger(DevilCastHash);
+    }
+
+    // 악마주사위 체력이 절반 이하이면 Angry를 켠다. 체력이 가득 찬 전투 시작·초기화 때는 꺼진다.
+    void UpdateDevilAngry()
+    {
+        bool angry = MaxHP > 0 && CurrentHP <= MaxHP * DevilDiceBoss.AngryHpRatio;
+        devilAngry = angry && CurrentBossAbility == BossAbilityType.DevilDice;
+        if (HasDevilAnimator()) monsterAnimator.SetBool(DevilAngryHash, devilAngry);
+    }
+
+    bool HasDevilAnimator()
+    {
+        return CurrentBossAbility == BossAbilityType.DevilDice && monsterAnimator != null
+            && monsterAnimator.runtimeAnimatorController != null && monsterAnimator.isActiveAndEnabled;
     }
 
     // 공격 턴 수와 공격력 배율을 바꾼다(악마주사위 3페이즈). 화면의 턴·공격력 표시도 갱신한다.

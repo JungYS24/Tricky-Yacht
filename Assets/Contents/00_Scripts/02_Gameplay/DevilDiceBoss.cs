@@ -22,6 +22,9 @@ public static class DevilDiceBoss
     static readonly int[] PatternTurns = { 1, 1, 2, 2, 3, 3 };
     static readonly float[] PatternAttack = { 0.6f, 0.6f, 1f, 1f, 1.8f, 1.8f };
 
+    // 체력이 이 비율 이하이면 화난 아이들(IdleC) 애니메이션으로 바뀐다.
+    public const float AngryHpRatio = 0.5f;
+
     public static bool IsActive(Enemy enemy)
     {
         return enemy != null && !enemy.IsDead && enemy.CurrentBossAbility == BossAbilityType.DevilDice && !TutorialMode.Active;
@@ -38,7 +41,8 @@ public static class DevilDiceBoss
     }
 
     // 보드에 놓인 주사위 중 아직 디버프가 아닌 주사위 하나에 저주를 건다. 여정 주사위는 건드리지 않는다.
-    public static bool CurseOneDie(IReadOnlyList<Dice> activeDice)
+    // boss를 넘기면 저주에 성공했을 때 보스의 시전(IdleB) 애니메이션을 재생한다.
+    public static bool CurseOneDie(IReadOnlyList<Dice> activeDice, Enemy boss = null)
     {
         var candidates = new List<Dice>();
         foreach (Dice dice in activeDice)
@@ -53,6 +57,7 @@ public static class DevilDiceBoss
         target.myData.devilCursed = true;
         target.SetData(target.myData, target.currentValue, target.ResolveFaceIndex());
         ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_CURSE", "악마주사위가 주사위 하나에 저주를 걸었습니다!"));
+        if (boss != null) boss.PlayDevilCast();
         return true;
     }
 
