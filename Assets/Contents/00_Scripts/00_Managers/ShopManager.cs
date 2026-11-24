@@ -6,6 +6,7 @@ using UnityEngine.Localization.Components;
 using UnityEngine.Localization.Settings;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Events;
 
 public class ShopManager : MonoBehaviour
 {
@@ -752,4 +753,26 @@ public class ShopManager : MonoBehaviour
     }
 
     public void HideTooltip() => tooltipPanel.SetActive(false);
+
+    public static event UnityAction<int> OnChangeGoldAmount;
+
+    /// <summary>
+    /// 골드를 추가하거나 뺍니다.<br/>
+    /// 이벤트를 발생시킵니다.
+    /// </summary>
+    /// <param name="amount">적용할 골드 양</param>
+    public void AddGold(int amount)
+    {
+        currentGold += amount;
+        OnChangeGoldAmount?.Invoke(amount);
+    }
+
+    /// <summary>
+    /// 적용 이벤트를 발생시키지 않고 조용히 골드 양을 추가합니다.
+    /// </summary>
+    /// <param name="amount">적용할 골드 양</param>
+    public void AddGoldWithoutNotification(int amount)
+    {
+        currentGold += amount;
+    }
 }
