@@ -133,4 +133,16 @@ public sealed class DebuffVisualProfile : ScriptableObject
     public Sprite[] curseCloudFrames;
     [Tooltip("구름 한 프레임 시간(기본 속도 기준, 초)")]
     [Min(0.02f)] public float curseCloudFrameTime = 0.09f;
+
+    [Header("악마주사위 간식 시간 (체력 바를 무는 이빨. 체력 바와 같은 픽셀 크기로 그린다)")]
+    [Tooltip("체력 바 끝을 위에서 무는 윗니(보라 잇몸). 비우면 연출 없이 피해만 들어간다")]
+    public Sprite snackJawUpper;
+    [Tooltip("체력 바 끝을 아래에서 무는 아랫니")]
+    public Sprite snackJawLower;
+    [Tooltip("물린 체력 바 끝에 잠깐 남는 한 입 자국(체력 바 바탕색으로 칠한 그림)")]
+    public Sprite snackBiteMark;
+    [Tooltip("체력을 물었을 때 떨어지는 부스러기(체력 바 빨간색)")]
+    public Sprite[] snackCrumbsRed;
+    [Tooltip("보호막을 물었을 때 떨어지는 부스러기(보호막 회색)")]
+    public Sprite[] snackCrumbsGray;
 }

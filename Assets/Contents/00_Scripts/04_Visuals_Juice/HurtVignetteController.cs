@@ -70,7 +70,8 @@ public class HurtVignetteController : MonoBehaviour
         return owner.gameObject.AddComponent<HurtVignetteController>();
     }
 
-    public void PlayPlayerHit(UIManager ui, int damage)
+    // slash가 false면 화면 할퀴기 자국만 빼고 나머지(붉은 테두리·흔들림·피해 숫자·체력 숫자 튀기)는 그대로 낸다(악마주사위 간식 시간).
+    public void PlayPlayerHit(UIManager ui, int damage, bool slash = true)
     {
         if (damage <= 0) return;
         CameraShake.Instance?.Shake(hurtShakeStrength, hurtShakeDuration);
@@ -92,7 +93,7 @@ public class HurtVignetteController : MonoBehaviour
         hitTween.Append(healthTarget.transform.DOScale(healthBaseScale, 0.18f));
         hitTween.Insert(0f, damageLabel.rectTransform.DOAnchorPosY(damageLabel.rectTransform.anchoredPosition.y + 28f, Mathf.Max(0.1f, damageTextDuration)));
         hitTween.Insert(0.15f, damageLabel.DOFade(0f, Mathf.Max(0.1f, damageTextDuration - 0.15f)));
-        for (int i = 0; i < strikes.Length; i++)
+        for (int i = 0; slash && i < strikes.Length; i++)
         {
             Image strike = strikes[i];
             strike.rectTransform.anchorMin = impactAnchor;
@@ -126,7 +127,8 @@ public class HurtVignetteController : MonoBehaviour
 
     public void UpdateShieldDisplay(UIManager ui, int amount) => Shield.UpdateShieldDisplay(ui, amount);
 
-    public void PlayShieldOrHealthHit(UIManager ui, int blocked, int hpDamage, int remainingShield)
+    // slash: 체력 피격 때 화면 할퀴기 자국을 낼지(PlayPlayerHit 참고).
+    public void PlayShieldOrHealthHit(UIManager ui, int blocked, int hpDamage, int remainingShield, bool slash = true)
     {
         pendingHealthHit?.Kill();
         pendingHealthHit = null;
@@ -138,8 +140,8 @@ public class HurtVignetteController : MonoBehaviour
             if (hpDamage <= 0) CameraShake.Instance?.Shake(shieldShakeStrength, hurtShakeDuration);
         }
         if (hpDamage <= 0) return;
-        if (blocked <= 0) PlayPlayerHit(ui, hpDamage);
-        else pendingHealthHit = DOVirtual.DelayedCall(Mathf.Max(0f, shieldToHealthDelay), () => { pendingHealthHit = null; PlayPlayerHit(ui, hpDamage); }, false);
+        if (blocked <= 0) PlayPlayerHit(ui, hpDamage, slash);
+        else pendingHealthHit = DOVirtual.DelayedCall(Mathf.Max(0f, shieldToHealthDelay), () => { pendingHealthHit = null; PlayPlayerHit(ui, hpDamage, slash); }, false);
     }
 
     [Header("화면 방어 이펙트")]

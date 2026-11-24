@@ -306,7 +306,8 @@ public static class CombatFlowController
 
     // 악마주사위의 매 턴 끝 추가 피해(간식 시간·심연의 숨결). 보호막·피해 감소는 적용하지만 피격으로 치지 않아
     // 피격 피규어(선인장 화분·마룡의 심장 등)는 발동하지 않는다. dealt는 피해 감소 뒤 들어간 양. 체력이 0이 되면 true.
-    private static bool ApplyBossExtraDamage(DiceManager dm, int amount, out int dealt)
+    // slash가 false면 화면 할퀴기 자국을 빼고 피격 표시를 낸다(간식 시간은 이빨이 체력 바를 무는 연출이 대신한다).
+    private static bool ApplyBossExtraDamage(DiceManager dm, int amount, out int dealt, bool slash = true)
     {
         int reduction = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetTotalDamageReduction(amount, dm, true) : 0;
         dealt = Mathf.Max(0, amount - reduction);
@@ -317,7 +318,7 @@ public static class CombatFlowController
         int hpDamage = Mathf.Max(0, hpBefore - dm.currentPlayerHP);
         dm.ui?.UpdateShieldUI(dm.playerStatus.currentShield);
         int blocked = Mathf.Max(0, shieldBefore - dm.playerStatus.currentShield);
-        HurtVignetteController.Get(dm).PlayShieldOrHealthHit(dm.ui, blocked, hpDamage, dm.playerStatus.currentShield);
+        HurtVignetteController.Get(dm).PlayShieldOrHealthHit(dm.ui, blocked, hpDamage, dm.playerStatus.currentShield, slash);
         if (hpDamage > 0) dm.PlayPlayerHurtSound();
         if (dealt > 0) CameraShake.Instance?.ShakePixels(2f, 0.15f);
 
@@ -446,7 +447,11 @@ public static class CombatFlowController
             {
                 bool breath = DevilDiceBoss.Phase(dm.enemy) >= 2;
                 yield return new WaitForSeconds(0.35f);
-                bool playerDown = ApplyBossExtraDamage(dm, turnEndDamage, out int dealt);
+                bool playerDown = false;
+                int dealt = 0;
+                if (breath) playerDown = ApplyBossExtraDamage(dm, turnEndDamage, out dealt);
+                // 간식 시간: 이빨이 체력 바 끝을 무는 순간 피해가 들어간다(DebuffFeedback.PlayDevilSnack).
+                else yield return DebuffFeedback.PlayDevilSnack(dm, dm.enemy, () => playerDown = ApplyBossExtraDamage(dm, turnEndDamage, out dealt, slash: false));
                 dm.UpdateMainUI(breath
                     ? LocalizationManager.GetUi("UI_DEVIL_BREATH", "심연의 숨결! <color=#FF4500>-{0}</color>", dealt)
                     : LocalizationManager.GetUi("UI_DEVIL_SNACK", "간식 시간! <color=#FF4500>-{0}</color>", dealt));
