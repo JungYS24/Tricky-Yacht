@@ -43,7 +43,7 @@ public static class NpcIdleClipBuilder
         new Target(Npc + "Ronen/BaronRonen.png", Npc + "Ronen/AC_BaronRonen_UI.anim", DefaultFrameInterval),                // 남작 로넌
         new Target(Npc + "Opell/Opell.png", Npc + "Opell/AC_Opell_UI.anim", DefaultFrameInterval),                          // 오펠
         // 공허 보스
-        new Target(Void + "DevilDice/DevilDice.png", Void + "DevilDice/Devil_Dice_Anim.anim", DevilDiceFrameInterval),     // 데블 다이스
+        new Target(Void + "DevilDice/IdleA/DevilDice.png", Void + "DevilDice/IdleA/Devil_Dice_Anim.anim", DevilDiceFrameInterval),     // 데블 다이스
     };
 
     [MenuItem("Tools/Sprites/NPC IDLE 클립 다시 만들기")]
