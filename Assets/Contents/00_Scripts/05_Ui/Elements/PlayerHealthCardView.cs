@@ -27,6 +27,12 @@ public sealed class PlayerHealthCardView : MonoBehaviour
 
     void Awake() => Cache();
 
+    // 체력 바 칸(빨간 바). 악마주사위 간식 시간 연출(DebuffFeedback.PlayDevilSnack)이 바 끝을 찾을 때 쓴다.
+    internal RectTransform Fill => fill;
+
+    // 다음 프레임에 바를 따라가지 않고 현재 체력 길이로 바로 맞춘다(간식 시간에 바 끝이 한 번에 물려 나가게).
+    internal void JumpToCurrent() => shownRatio = -1f;
+
     void Cache()
     {
         if (cached) return;

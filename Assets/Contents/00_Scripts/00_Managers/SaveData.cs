@@ -130,6 +130,8 @@ public class SaveData
 
     public int savedMonsterCurrentTurn;//몬스터 턴개념 추가
     public int savedMonsterMaxTurn;
+    public bool savedDevilAwakened;    // 최종보스가 각성해 2페이즈(타락한 악마주사위)인 상태
+    public int savedMonsterBaseAttack; // 악마의 눈이 공격력을 바꾸기 전 기준 공격력
     public bool firstNormalAttackDone;
 
     public List<SavedFigureKillCount> figureKillCounts =new List<SavedFigureKillCount>();

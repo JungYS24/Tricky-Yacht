@@ -78,6 +78,18 @@ public class BalanceConfig : ScriptableObject
     [Tooltip("3페이즈(공격 패턴 굴림) 시작 체력 비율")]
     [Range(0f, 1f)] public float devilPhase3HpRatio = 0.25f;
 
+    [Header("최종보스 악마주사위 (처치형 2페이즈)")]
+    [Tooltip("1페이즈를 쓰러뜨린 뒤 2페이즈(타락한 악마주사위) 최대 체력 = 1페이즈 최대 체력 × 이 값")]
+    public float devilPhase2HpMultiplier = 1f;
+    [Tooltip("1페이즈 간식 시간: 매 턴 끝에 플레이어가 받는 추가 피해")]
+    public int devilSnackDamage = 5;
+    [Tooltip("2페이즈 심연의 숨결: 매 턴 끝에 플레이어가 받는 기본 추가 피해")]
+    public int devilBreathDamage = 8;
+    [Tooltip("2페이즈 심연의 숨결: 덱 안 디버프 주사위 1개당 더하는 피해")]
+    public int devilBreathPerDebuff = 2;
+    [Tooltip("2페이즈 타락의 낙인: 매 턴 시작에 덱에 넣는 디버프 주사위 수(가시·저주 중 무작위, 이번 전투 한정)")]
+    public int devilBrandCount = 2;
+
     [Header("피규어 드롭률 (페퍼민트 없이 처치했을 때)")]
     [Range(0f, 1f)] public float normalDropRate = 0.02f;
     [Range(0f, 1f)] public float eliteDropRate = 0.05f;

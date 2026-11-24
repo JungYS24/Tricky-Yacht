@@ -8,6 +8,7 @@ SYS,SYS_DEVIL_CURSE,악마주사위가 주사위 하나에 저주를 걸었습�
 SYS,SYS_DEVIL_PHASE2,악마주사위: 이제 원페어·투페어는 피해를 주지 못합니다!,Devil Dice: One Pair and Two Pair no longer deal damage!,悪魔のサイコロ：ワンペア・ツーペアではダメージを与えられない！,恶魔骰子：一对和两对将无法造成伤害！,최종보스 2페이즈 진입
 SYS,SYS_DEVIL_IMMUNE,원페어·투페어는 악마주사위에게 통하지 않습니다!,One Pair and Two Pair have no effect on the Devil Dice!,ワンペア・ツーペアは悪魔のサイコロに効かない！,一对和两对对恶魔骰子无效！,최종보스 2페이즈 피해 무효
 SYS,SYS_DEVIL_PATTERN,"악마의 눈 {0}: 공격력 {1}, {2}턴 뒤 공격",Devil eye {0}: {1} damage in {2} turn(s),悪魔の目 {0}：攻撃力 {1}、{2}ターン後に攻撃,恶魔之眼 {0}：攻击力 {1}，{2}回合后攻击,최종보스 3페이즈 공격 패턴
+SYS,SYS_DEVIL_DEVOUR,타락한 악마주사위가 주사위를 삼켰습니다!,The Corrupted Devil Dice devoured one of your dice!,堕落した悪魔のサイコロがダイスを飲み込んだ！,堕落的恶魔骰子吞噬了你的一颗骰子！,최종보스 2페이즈 영혼 포식: 킵한 주사위 1개 영구 소멸
 SYS,SYS_CAPTURE_OWNED,보유 중,Owned,所持済み,已拥有,포획 확률 칸: 이 몬스터의 피규어를 이미 가지고 있을 때
 SYS,SYS_CAPTURE_ALREADY_OWNED,이미 보유한 피규어입니다.,You already own this Figure.,このフィギュアはすでに所持しています。,你已拥有这个手办。,페퍼민트를 눌렀지만 이미 가진 피규어일 때 토스트
 SYS,SYS_CAPTURE_NO_FIGURE,포획할 피규어가 없습니다.,This monster has no Figure to capture.,捕獲できるフィギュアがありません。,没有可捕获的手办。,페퍼민트를 눌렀지만 피규어를 주지 않는 몬스터일 때 토스트

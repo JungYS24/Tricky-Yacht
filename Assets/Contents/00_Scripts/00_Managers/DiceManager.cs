@@ -46,6 +46,12 @@ public class DiceManager : MonoBehaviour
     public SpriteRenderer biomeBackgroundImage; // Canvas에 있는 Biome_Image 연결
     public List<BiomeDataSO> biomeList;                // 만들어둔 Biome 데이터들 (숲, 화산 등)
 
+    [Header("테스트")]
+    [Tooltip("켜면 런의 첫 전투에 최종보스 악마주사위(비차원 보스)가 나온다. 보스전 테스트용")]
+    public bool testDevilBossFirstBattle = true;
+    [Tooltip("0보다 크면 악마주사위 1페이즈 최대 체력을 이 값으로 고정한다(바이옴 성장 무시). 2페이즈 체력은 BalanceConfig 배율을 따른다. 0이면 끔")]
+    public int testDevilBossHp = 50;
+
     [Header("엔딩 UI 설정")]
     public GameObject gameClearPanel;
     public Button mainFromClearButton;
@@ -483,11 +489,12 @@ public class DiceManager : MonoBehaviour
         }
 
         board.SpawnDice(returnPreviousDiceToDiscard, currentStage, applyDrawEffects: !isFromLoad);
-        // 악마주사위 1페이즈부터: 매 턴 보드의 주사위 1개에 저주를 건다. 지난 턴의 저주는 풀린다.
+        // 악마주사위 1페이즈 장난의 저주: 매 턴 보드의 주사위 1개에 저주를 건다. 지난 턴의 저주는 풀린다.
+        // 타락한 뒤(2페이즈)에는 새 저주를 걸지 않는다.
         if (!isFromLoad && DevilDiceBoss.IsActive(enemy))
         {
             DevilDiceBoss.ClearCurses(deckManager.masterDeck);
-            DevilDiceBoss.CurseOneDie(board.ActiveDice, enemy);
+            if (DevilDiceBoss.Phase(enemy) < 2) StartDevilCurse();
         }
         HandleDiceChanged();
         // 전투 시작 연출 중이면 첫 드로우 연출이 끝난 뒤 PlayCombatIntro가 보여 준다.
@@ -499,6 +506,24 @@ public class DiceManager : MonoBehaviour
         {
             FigureEffectManager.Instance.EvaluateRoundStartTriggers(this, shopManager);
         }
+    }
+
+    // 장난의 저주: 대상 주사위를 고른 뒤 연출(보스 오라 → 보라 안개 → 주사위 변신)을 보여 주고, 안개가 닿는 순간 실제로 바꾼다.
+    // 연출 동안에는 굴리기·킵을 막는다(isCalculating). StartNewRound의 HandleDiceChanged보다 먼저 막아 버튼이 켜지지 않게 한다.
+    void StartDevilCurse()
+    {
+        Dice target = DevilDiceBoss.PickCurseTarget(board.ActiveDice, out DebuffDiceType type);
+        if (target == null) return;
+        isCalculating = true;
+        StartCoroutine(PlayDevilCurse(target, type));
+    }
+
+    IEnumerator PlayDevilCurse(Dice target, DebuffDiceType type)
+    {
+        DevilDiceBoss.PlayCurseCast(enemy);
+        yield return DebuffFeedback.PlayDevilCurse(enemy, target, () => DevilDiceBoss.ApplyCurse(target, type, Debuffs.CreateLooseDebuff));
+        isCalculating = false;
+        HandleDiceChanged();
     }
 
     public int RemainingRerolls => Mathf.Max(0, maxRerolls + snackBonusRerolls + figureBonusRerolls - turnContext.debuffRerollPenalty - currentRerolls);
@@ -649,6 +674,14 @@ public class DiceManager : MonoBehaviour
             return;
         enemyDeathHandled = true;
 
+        // 최종보스 1페이즈: 쓰러뜨려도 보상·클리어 대신 각성(2페이즈)으로 넘어간다.
+        if (DevilDiceBoss.ShouldAwaken(enemy))
+        {
+            isCalculating = true; // 각성이 끝나고 새 턴이 시작될 때까지 입력을 막는다
+            StartCoroutine(AwakenDevilRoutine(enemy));
+            return;
+        }
+
         // 포획 보상으로 새 피규어를 얻기 전에 기존 보유 피규어의 처치 수 기록
         FigureEffectManager.Instance?.RecordEnemyKill(this);
 
@@ -689,6 +722,68 @@ public class DiceManager : MonoBehaviour
         }
 
         ProcessStageClear(false);
+    }
+
+    // 악마주사위 각성: 이번 턴 결산(폭탄 연쇄 등)과 굴림이 모두 끝난 뒤 타락한 모습으로 되살아나 2페이즈 체력을 채우고,
+    // 악마의 눈을 굴리고 타락의 낙인을 넣은 다음 새 턴을 시작한다. 각성 컷신은 나중에 AwakenDevil 앞에 붙인다.
+    private IEnumerator AwakenDevilRoutine(Enemy boss)
+    {
+        while (isResolvingTurn || isRolling) yield return null;
+        yield return boss.WaitForHitPresentation();
+        yield return new WaitForSeconds(0.4f);
+        if (boss == null || enemy != boss || currentPlayerHP <= 0) yield break;
+
+        int phase2Hp = Mathf.Max(1, Mathf.RoundToInt(boss.MaxHP * BalanceConfig.Current.devilPhase2HpMultiplier));
+        boss.AwakenDevil(phase2Hp); // 변신음(Devil_Energy_Rise)은 여기서 난다
+        enemyDeathHandled = false;
+        ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_PHASE2", "악마주사위: 이제 원페어·투페어는 피해를 주지 못합니다!"));
+        yield return new WaitForSeconds(1.4f);
+
+        // 악마의 눈: 2페이즈 첫 공격의 턴 수와 공격력을 정한다.
+        DevilDiceBoss.RollPattern(boss);
+        yield return new WaitForSeconds(0.8f);
+
+        yield return PlayDevilBrand();
+        GameSaveManager.Instance?.SaveGame(this, InventoryManager.Instance, shopManager);
+        StartNewRound();
+    }
+
+    // 타락한 악마주사위(2페이즈) 타락의 낙인: 다음 턴을 시작하기 전에 가시·저주 디버프 주사위를 덱에 넣는다(이번 전투 한정).
+    // 전투 시작 디버프 등장 연출(차원문 균열)을 그대로 쓰고, 넣은 주사위는 뽑을 더미에도 섞어 바로 나올 수 있게 한다.
+    internal IEnumerator PlayDevilBrand()
+    {
+        if (!DevilDiceBoss.IsActive(enemy) || DevilDiceBoss.Phase(enemy) < 2 || currentPlayerHP <= 0) yield break;
+        int count = BalanceConfig.Current.devilBrandCount;
+        if (count <= 0) yield break;
+
+        List<DiceData1> incoming = Debuffs.AddDevilBrandDebuffs(count);
+        foreach (var die in incoming) deckManager.masterDeck.Remove(die);
+        GameObject deckButton = Hud.Find("Deck_BTN");
+        Transform target = deckButton != null ? deckButton.transform : null;
+        bool committed = false;
+        try
+        {
+            yield return DebuffFeedback.PlayArrival(enemy, incoming, target, rollSlotParent, NormalDiceFace());
+            CommitBrand(incoming);
+            committed = true;
+        }
+        finally
+        {
+            // 연출 도중 중단돼도 넣을 주사위를 잃지 않는다.
+            if (!committed) CommitBrand(incoming);
+            DebuffFeedback.EndIntro();
+        }
+    }
+
+    void CommitBrand(List<DiceData1> incoming)
+    {
+        foreach (var die in incoming)
+        {
+            deckManager.masterDeck.Add(die);
+            deckManager.drawPile.Insert(UnityEngine.Random.Range(0, deckManager.drawPile.Count + 1), die);
+        }
+        DebuffTrackerHud.Instance?.Refresh();
+        HandleDiceChanged();
     }
 
     // --- 스테이지 클리어 공통 시스템 ---

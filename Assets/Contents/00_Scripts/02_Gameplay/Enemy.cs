@@ -84,10 +84,10 @@ public class Enemy : MonoBehaviour
     public int DropGold { get; private set; }
     // 보스 체력이 일정 비율 이하로 내려가 공격 턴이 줄어든 상태
     public bool IsBossPhase2 { get; private set; }
-    // 공격 패턴이 바뀌기 전 공격력(악마주사위 3페이즈 기준값)
+    // 공격 패턴이 바뀌기 전 공격력(악마주사위 2페이즈 악마의 눈 기준값)
     public int BaseAttackPower { get; private set; }
-    // 악마주사위가 지금까지 들어간 페이즈(토스트·패턴 굴림을 한 번만 하기 위해 기억)
-    int devilPhaseShown = 1;
+    // 악마주사위가 1페이즈를 쓰러뜨리고 각성해 2페이즈(타락한 악마주사위)가 된 상태
+    public bool DevilAwakened { get; private set; }
     // 악마주사위 애니메이터(AC_DevilDice) 파라미터
     static readonly int DevilCastHash = Animator.StringToHash("Cast");
     static readonly int DevilAngryHash = Animator.StringToHash("Angry");
@@ -215,6 +215,9 @@ public class Enemy : MonoBehaviour
 
         // 바이옴 성장, 눈먼 점술가 패널티, 튜토리얼 체력 상한은 MonsterSpawnRules가 계산한다.
         MonsterSpawnRules.ScaleStats(dice, currentStage, ref finalMaxHP, ref finalAttack);
+        // 테스트(DiceManager.testDevilBossHp): 악마주사위 1페이즈 체력을 고정한다.
+        if (dice != null && dice.testDevilBossHp > 0 && CurrentBossAbility == BossAbilityType.DevilDice && !TutorialMode.Active)
+            finalMaxHP = dice.testDevilBossHp;
         BalanceConfig cfg = BalanceConfig.Current;
 
         // 여기서 최종적으로 체력을 확정(덮어씌워지는 문제 해결)
@@ -222,7 +225,7 @@ public class Enemy : MonoBehaviour
         CurrentHP = finalMaxHP;
         AttackPower = finalAttack;
         BaseAttackPower = finalAttack;
-        devilPhaseShown = 1;
+        DevilAwakened = false;
         IsDead = false;
         useExternalDeathSequence = false;
 
@@ -293,7 +296,6 @@ public class Enemy : MonoBehaviour
         int actualDamage = Mathf.Min(CurrentHP, damage);
         CurrentHP -= actualDamage;
         CheckBossPhase2();
-        CheckDevilPhase();
         UpdateDevilAngry();
 
         // 사망 콜백 전에 지급해야 마지막 공격의 효과도 적용됨
@@ -583,7 +585,8 @@ public class Enemy : MonoBehaviour
         enemyHPSlider.value = CurrentHP;
     }
 
-    public void RestoreMonster(MonsterDataSO monsterData, int hp, int maxHp, int attack, int index, int currentTurn, int maxTurn)
+    // devilAwakened: 최종보스 2페이즈(타락)에서 저장했는지. baseAttack: 악마의 눈이 바꾸기 전 공격력(0이면 attack 사용).
+    public void RestoreMonster(MonsterDataSO monsterData, int hp, int maxHp, int attack, int index, int currentTurn, int maxTurn, bool devilAwakened = false, int baseAttack = 0)
     {
         StopAttackPresentation();
         ResetDeathPresentation();
@@ -616,10 +619,10 @@ public class Enemy : MonoBehaviour
         MaxHP = maxHp;
         CurrentHP = hp;
         AttackPower = attack;
-        BaseAttackPower = attack;
-        devilPhaseShown = DevilDiceBoss.IsActive(this) ? DevilDiceBoss.Phase(this) : 1;
-        // 3페이즈에서 저장했으면 효과음 없이 타락 모습과 2페이즈 BGM만 맞춘다.
-        if (devilPhaseShown >= 3) EnterDevilCorrupted(playFx: false);
+        BaseAttackPower = baseAttack > 0 ? baseAttack : attack;
+        // 2페이즈(타락)에서 저장했으면 효과음 없이 타락 모습과 2페이즈 BGM만 맞춘다.
+        DevilAwakened = devilAwakened && CurrentBossAbility == BossAbilityType.DevilDice;
+        if (DevilAwakened) EnterDevilCorrupted(playFx: false);
         IsDead = false;
         useExternalDeathSequence = false;
 
@@ -628,7 +631,8 @@ public class Enemy : MonoBehaviour
         MaxAttackTurn = maxTurn > 0 ? maxTurn : defaultTurn;
         CurrentAttackTurn = currentTurn > 0 ? Mathf.Min(currentTurn, MaxAttackTurn) : MaxAttackTurn;
         // 2페이즈 중에 저장했으면 줄어든 턴이 그대로 저장되어 있다. 1페이즈 세이브라도 체력 조건을 다시 확인한다.
-        IsBossPhase2 = false;
+        // 타락한 악마주사위는 악마의 눈이 턴을 정하므로 체력 비율로 턴을 줄이지 않는다.
+        IsBossPhase2 = DevilAwakened;
         CheckBossPhase2();
         UpdateTurnUI();
 
@@ -703,23 +707,35 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    // 악마주사위 페이즈가 올라가면 한 번 알리고, 3페이즈에 들어서면 바로 공격 패턴을 굴린다.
-    void CheckDevilPhase()
+    // 악마주사위 1페이즈를 쓰러뜨렸을 때 각성한다: 타락한 모습·2페이즈 BGM으로 바뀌고 체력바가 0에서 새 최대 체력까지 차오른다.
+    // 처치 보상은 주지 않는다(DiceManager.OnEnemyKilled가 대신 부른다). 각성 컷신은 나중에 이 앞에 붙인다.
+    public void AwakenDevil(int phase2MaxHp)
     {
-        if (!DevilDiceBoss.IsActive(this) || CurrentHP <= 0) return;
-        int phase = DevilDiceBoss.Phase(this);
-        if (phase <= devilPhaseShown) return;
-        devilPhaseShown = phase;
-        if (phase == 3)
+        if (CurrentBossAbility != BossAbilityType.DevilDice || DevilAwakened) return;
+        StopAttackPresentation();
+        GetComponent<MonsterHitFeedback>()?.Stop();
+        if (hitEffectCoroutine != null) { StopCoroutine(hitEffectCoroutine); hitEffectCoroutine = null; }
+        if (hpCoroutine != null) { StopCoroutine(hpCoroutine); hpCoroutine = null; }
+
+        DevilAwakened = true;
+        IsDead = false;
+        // 타락한 뒤에는 악마의 눈이 공격 턴을 정하므로 체력 비율로 턴을 줄이지 않는다.
+        IsBossPhase2 = true;
+        int from = Mathf.Max(0, CurrentHP);
+        MaxHP = Mathf.Max(1, phase2MaxHp);
+        CurrentHP = MaxHP;
+        if (monsterImage != null) monsterImage.color = Color.white;
+
+        EnterDevilCorrupted(playFx: true);
+        UpdateDevilAngry();
+
+        BindHpBarFx();
+        if (hpBarFx != null)
         {
-            EnterDevilCorrupted(playFx: true);
-            DevilDiceBoss.RollPattern(this, eyeRollSfxDelay: 1.2f); // 변신음이 끝날 즈음 눈 굴림 소리
+            if (enemyHPSlider != null) enemyHPSlider.maxValue = MaxHP;
+            hpBarFx.OnHpChanged(from, CurrentHP, MaxHP); // 회복 연출로 차오르며 사망 페이드도 풀린다
         }
-        else
-        {
-            Sfx.Play(SfxId.Devil_Laugh);
-            ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_PHASE2", "악마주사위: 이제 원페어·투페어는 피해를 주지 못합니다!"));
-        }
+        else UpdateHPBar(true);
     }
 
     // 몬스터를 세팅할 때 타락 상태를 풀고, 보스 전용 BGM이 있으면 튼다.
@@ -731,7 +747,7 @@ public class Enemy : MonoBehaviour
     }
 
     // 악마주사위가 타락한 모습으로 바뀐다. 애니메이터는 Corrupted 상태로 고정되고 BGM은 2페이즈 곡으로 바뀐다.
-    // 지금은 체력 3페이즈 진입에 연결되어 있고, 2페이즈 각성 개편 때 호출 위치만 옮기면 된다.
+    // 1페이즈를 쓰러뜨린 각성(AwakenDevil)과 2페이즈 이어하기(RestoreMonster)에서 부른다.
     public void EnterDevilCorrupted(bool playFx)
     {
         if (devilCorrupted || CurrentBossAbility != BossAbilityType.DevilDice) return;
@@ -779,7 +795,7 @@ public class Enemy : MonoBehaviour
             && monsterAnimator.runtimeAnimatorController != null && monsterAnimator.isActiveAndEnabled;
     }
 
-    // 공격 턴 수와 공격력 배율을 바꾼다(악마주사위 3페이즈). 화면의 턴·공격력 표시도 갱신한다.
+    // 공격 턴 수와 공격력 배율을 바꾼다(악마주사위 2페이즈 악마의 눈). 화면의 턴·공격력 표시도 갱신한다.
     public void SetAttackPattern(int turns, float attackMultiplier)
     {
         MaxAttackTurn = Mathf.Max(1, turns);
