@@ -187,6 +187,10 @@ public class GameSaveManager : MonoBehaviour
             // 현재 남은 턴 수와 최대 턴 수 저장
             data.savedMonsterCurrentTurn = dice.enemy.CurrentAttackTurn;
             data.savedMonsterMaxTurn = dice.enemy.MaxAttackTurn;
+
+            // 최종보스 2페이즈 여부와 악마의 눈 기준 공격력
+            data.savedDevilAwakened = dice.enemy.DevilAwakened;
+            data.savedMonsterBaseAttack = dice.enemy.BaseAttackPower;
         }
     }
 

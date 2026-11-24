@@ -293,6 +293,24 @@ public class MapFlowController
     internal void OpenCurrentNode(MapNode node)
     {
         if (node == null) return;
+
+        // 테스트(DiceManager.testDevilBossFirstBattle): 런의 첫 전투 칸을 비차원 보스 칸처럼 연다(등장 대사 → 악마주사위 보스전).
+        MonsterDataSO testBoss = TestDevilBoss(node);
+        if (testBoss != null)
+        {
+            if (dice.encounterEventPanel != null)
+            {
+                HideMapOverlays();
+                SetBoardVisible(false);
+                dice.encounterEventPanel.StartBossIntro(testBoss, DevilDiceBoss.IntroKeyPrefix, DevilDiceBoss.IntroFallback,
+                    () => BeginMapCombat(false, true, testBoss));
+                PlaceTravelChrome();
+            }
+            else
+                BeginMapCombat(false, true, testBoss);
+            return;
+        }
+
         switch (node.type)
         {
             case MapNodeType.Enemy:
@@ -348,6 +366,15 @@ public class MapFlowController
                 PlaceTravelChrome();
                 break;
         }
+    }
+
+    // 테스트 스위치가 켜져 있고 런의 첫 전투 칸(첫 바이옴, 치른 전투 0)이면 비차원 보스(악마주사위)를 돌려준다. 아니면 null.
+    MonsterDataSO TestDevilBoss(MapNode node)
+    {
+        if (!dice.testDevilBossFirstBattle || TutorialMode.Active || !MapTableData.IsCombatNode(node.type)) return null;
+        if (dice.CurrentBiomeTier != 0 || dice.CombatsClearedInBiome != 0 || dice.biomeList == null) return null;
+        BiomeDataSO voidBiome = dice.biomeList.Find(b => b != null && b.biomeType == BiomeType.Void);
+        return voidBiome != null ? voidBiome.bossMonster : null;
     }
 
     void BeginMapCombat(bool elite, bool boss, MonsterDataSO forcedMonster)

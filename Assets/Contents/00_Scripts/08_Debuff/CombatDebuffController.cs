@@ -24,7 +24,8 @@ public class CombatDebuffController
     {
         MapNode node = dice.stageProgression.FindNode(dice.stageProgression.currentNodeId);
         if (node == null) return;
-        switch (node.type)
+        // 보스전은 보스 칸으로 친다(테스트로 첫 전투 칸을 보스 칸처럼 연 경우 포함).
+        switch (dice.mapBossBattle ? MapNodeType.Boss : node.type)
         {
             // 엘리트(도둑·족쇄, 이번 전투만)와 차원문(가시·저주, 영구)은 바이옴 단계별 개수만큼 디버프 주사위를 넣는다.
             case MapNodeType.Elite:
@@ -43,18 +44,41 @@ public class CombatDebuffController
                 break;
             }
             case MapNodeType.Boss:
-                AddCombatDebuff(DebuffDiceType.Fake);
+                // 최종보스 악마주사위는 시작 가짜 주사위를 넣지 않는다(능력은 DevilDiceBoss).
+                if (dice.enemy == null || dice.enemy.CurrentBossAbility != BossAbilityType.DevilDice)
+                    AddCombatDebuff(DebuffDiceType.Fake);
                 break;
         }
     }
 
-    private void AddCombatDebuff(DebuffDiceType type, bool fightOnly = false)
+    private DiceData1 AddCombatDebuff(DebuffDiceType type, bool fightOnly = false)
     {
         DiceItemSO source = FindDebuffSource(type);
         DiceData1 die = deckManager.AddDebuffDice(type, source);
         if (source == null) ApplyDebuffAppearance(die);
         currentCombatDebuffs.Add(die);
         if (fightOnly) fightOnlyDebuffs.Add(die);
+        return die;
+    }
+
+    // 덱에 넣지 않는 디버프 주사위 데이터(악마주사위 장난의 저주가 보드 주사위를 그 턴만 바꿀 때 쓴다). 가시·저주만 쓴다.
+    internal DiceData1 CreateLooseDebuff(DebuffDiceType type)
+    {
+        DiceItemSO source = FindDebuffSource(type);
+        if (source != null) return source.CreateDiceData();
+        DiceData1 die = new DiceData1(type == DebuffDiceType.Spine ? "가시 주사위" : "저주 주사위", new int[] { 1, 2, 3, 4, 5, 6 });
+        die.debuffType = type;
+        ApplyDebuffAppearance(die);
+        return die;
+    }
+
+    // 타락한 악마주사위(2페이즈) 타락의 낙인: 가시·저주 중 무작위로 count개를 이번 전투 한정으로 덱에 넣고, 넣은 주사위를 돌려준다.
+    internal List<DiceData1> AddDevilBrandDebuffs(int count)
+    {
+        var added = new List<DiceData1>();
+        for (int i = 0; i < count; i++)
+            added.Add(AddCombatDebuff(UnityEngine.Random.Range(0, 2) == 0 ? DebuffDiceType.Spine : DebuffDiceType.Curse, fightOnly: true));
+        return added;
     }
 
     // 이번 전투에만 넣은 영구형 디버프(차원문의 가시·저주). 전투가 끝나면 덱에서 뺀다. 세이브에는 남지 않는다.

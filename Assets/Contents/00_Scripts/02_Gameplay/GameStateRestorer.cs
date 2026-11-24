@@ -219,7 +219,7 @@ public static class GameStateRestorer
             MonsterDataSO savedMonster = GetMonsterDataByName(dm, data.savedMonsterName);
             if (savedMonster != null)
             {
-                dm.enemy.RestoreMonster(savedMonster, data.savedMonsterHP, data.savedMonsterMaxHP, data.savedMonsterAttack, data.savedMonsterIndex, data.savedMonsterCurrentTurn, data.savedMonsterMaxTurn);
+                dm.enemy.RestoreMonster(savedMonster, data.savedMonsterHP, data.savedMonsterMaxHP, data.savedMonsterAttack, data.savedMonsterIndex, data.savedMonsterCurrentTurn, data.savedMonsterMaxTurn, data.savedDevilAwakened, data.savedMonsterBaseAttack);
             }
             else dm.enemy.Initialize(dm.currentStage, dm.currentBiome); // 에러 방지용 안전장치
 

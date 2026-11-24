@@ -127,4 +127,10 @@ public sealed class DebuffVisualProfile : ScriptableObject
     [Header("숫자 표시 색")]
     public Color lossColor = new Color(1f, 0.32f, 0.27f);
     public Color curseColor = new Color(0.45f, 1f, 0.35f);
+
+    [Header("저주 구름 (저주가 배수에 곱해질 때. 점수판과 같은 픽셀 크기로 프레임 재생)")]
+    [Tooltip("저주 주사위 색으로 칠한 구름 프레임. 비우면 예전 초록 연기를 쓴다")]
+    public Sprite[] curseCloudFrames;
+    [Tooltip("구름 한 프레임 시간(기본 속도 기준, 초)")]
+    [Min(0.02f)] public float curseCloudFrameTime = 0.09f;
 }

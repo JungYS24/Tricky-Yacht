@@ -97,6 +97,9 @@ public static class CombatFlowController
             yield break;
         }
 
+        // 타락한 악마주사위(2페이즈) 영혼 포식: 결산이 끝난 뒤 킵한 주사위 하나를 덱에서 영구히 지운다.
+        yield return dm.StartCoroutine(ProcessDevilDevour(dm));
+
         //적 반격 루틴 (이때 누적된 화상 데미지 데이터를 넘겨줌)
         yield return dm.StartCoroutine(ProcessEnemyTurnRoutine(dm, handName, dm.accumulatedFlameDamage));
     }
@@ -254,6 +257,75 @@ public static class CombatFlowController
         });
     }
 
+    // 영혼 포식: 대상이 있으면 주사위가 떨리다 보스 쪽으로 빨려 들어가고, 덱에서 영구히 사라진다.
+    // 주사위 파괴로 취급해 주사위 파괴 피규어(사눈 다이스·재의 향로 등)가 발동한다. 연출은 컷신 작업 때 다듬는다.
+    private static IEnumerator ProcessDevilDevour(DiceManager dm)
+    {
+        Dice target = DevilDiceBoss.PickDevourTarget(dm.enemy, dm.KeptDice, dm.masterDeck);
+        if (target == null) yield break;
+        DiceData1 data = target.myData;
+        Transform die = target.transform;
+        Vector3 start = die.position;
+        Vector3 scale = die.localScale;
+        Vector3 end = dm.enemy != null ? dm.enemy.transform.position : start + Vector3.up * 2f;
+
+        yield return new WaitForSeconds(0.25f);
+        // 떨림(사인, 난수 없음)
+        float elapsed = 0f;
+        const float shakeTime = 0.35f;
+        while (elapsed < shakeTime && die != null)
+        {
+            elapsed += Time.deltaTime;
+            die.position = start + Vector3.right * Mathf.Sin(elapsed * 60f) * 0.04f * (1f - elapsed / shakeTime);
+            yield return null;
+        }
+        // 보스 쪽으로 빨려 들어가며 작아진다
+        Sfx.Play(SfxId.Dice_Burn_Vanish);
+        elapsed = 0f;
+        const float pullTime = 0.4f;
+        while (elapsed < pullTime && die != null)
+        {
+            elapsed += Time.deltaTime;
+            float p = Mathf.Clamp01(elapsed / pullTime);
+            p *= p;
+            die.position = Vector3.Lerp(start, end, p);
+            die.localScale = scale * (1f - p);
+            yield return null;
+        }
+
+        // 풀로 돌려보내기 전에(같은 프레임) 위치·크기를 되돌린다. 흔들림 효과가 줄어든 크기를 기준으로 기억하지 않게 한다.
+        if (die != null) { die.position = start; die.localScale = scale; }
+        DevilDiceBoss.RemoveFromDeck(dm.deckManager, data);
+        dm.Board.RemoveDiceMatching(d => ReferenceEquals(d, data));
+
+        ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_DEVOUR", "타락한 악마주사위가 주사위를 삼켰습니다!"));
+        FigureEffectManager.Instance?.EvaluateDiceDestroyedTriggers(dm, dm.shopManager);
+        dm.ForceUpdateUI();
+        yield return new WaitForSeconds(0.4f);
+    }
+
+    // 악마주사위의 매 턴 끝 추가 피해(간식 시간·심연의 숨결). 보호막·피해 감소는 적용하지만 피격으로 치지 않아
+    // 피격 피규어(선인장 화분·마룡의 심장 등)는 발동하지 않는다. dealt는 피해 감소 뒤 들어간 양. 체력이 0이 되면 true.
+    private static bool ApplyBossExtraDamage(DiceManager dm, int amount, out int dealt)
+    {
+        int reduction = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetTotalDamageReduction(amount, dm, true) : 0;
+        dealt = Mathf.Max(0, amount - reduction);
+
+        int hpBefore = dm.currentPlayerHP;
+        int shieldBefore = dm.playerStatus.currentShield;
+        dm.playerStatus.TakeDamage(dealt);
+        int hpDamage = Mathf.Max(0, hpBefore - dm.currentPlayerHP);
+        dm.ui?.UpdateShieldUI(dm.playerStatus.currentShield);
+        int blocked = Mathf.Max(0, shieldBefore - dm.playerStatus.currentShield);
+        HurtVignetteController.Get(dm).PlayShieldOrHealthHit(dm.ui, blocked, hpDamage, dm.playerStatus.currentShield);
+        if (hpDamage > 0) dm.PlayPlayerHurtSound();
+        if (dealt > 0) CameraShake.Instance?.ShakePixels(2f, 0.15f);
+
+        if (dm.currentPlayerHP <= 0) return true;
+        FigureEffectManager.Instance?.EvaluateLowHPTriggers(dm, dm.shopManager);
+        return false;
+    }
+
     private static IEnumerator HandlePlayerDeath(DiceManager dm)
     {
         bool isRevived = FigureEffectManager.Instance != null && FigureEffectManager.Instance.EvaluateDeathTriggers(dm, dm.shopManager);
@@ -341,8 +413,8 @@ public static class CombatFlowController
                 }
 
                 dm.enemy.ResetTurn();
-                // 악마주사위 3페이즈: 공격할 때마다 다음 공격 패턴을 다시 굴린다.
-                if (DevilDiceBoss.IsActive(dm.enemy) && DevilDiceBoss.Phase(dm.enemy) >= 3)
+                // 타락한 악마주사위(2페이즈) 악마의 눈: 공격할 때마다 다음 공격 패턴을 다시 굴린다.
+                if (DevilDiceBoss.IsActive(dm.enemy) && DevilDiceBoss.Phase(dm.enemy) >= 2)
                     DevilDiceBoss.RollPattern(dm.enemy);
 
                 if (dm.currentPlayerHP <= 0)
@@ -367,6 +439,27 @@ public static class CombatFlowController
                     }
                 }
             }
+
+            // 악마주사위 매 턴 끝 추가 피해: 1페이즈 간식 시간, 2페이즈 심연의 숨결. 피격으로 치지 않는다.
+            int turnEndDamage = DevilDiceBoss.TurnEndDamage(dm.enemy, dm.masterDeck);
+            if (turnEndDamage > 0)
+            {
+                bool breath = DevilDiceBoss.Phase(dm.enemy) >= 2;
+                yield return new WaitForSeconds(0.35f);
+                bool playerDown = ApplyBossExtraDamage(dm, turnEndDamage, out int dealt);
+                dm.UpdateMainUI(breath
+                    ? LocalizationManager.GetUi("UI_DEVIL_BREATH", "심연의 숨결! <color=#FF4500>-{0}</color>", dealt)
+                    : LocalizationManager.GetUi("UI_DEVIL_SNACK", "간식 시간! <color=#FF4500>-{0}</color>", dealt));
+                if (playerDown)
+                {
+                    yield return dm.StartCoroutine(HandlePlayerDeath(dm));
+                    yield break;
+                }
+                yield return new WaitForSeconds(0.6f);
+            }
+
+            // 타락한 악마주사위(2페이즈) 타락의 낙인: 다음 턴을 시작하기 전에 디버프 주사위를 덱에 넣는다.
+            yield return dm.StartCoroutine(dm.PlayDevilBrand());
 
             if (GameSaveManager.Instance != null)
             {

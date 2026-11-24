@@ -81,6 +81,8 @@ public sealed class DiceBoardController
         {
             Dice die = ActiveDice[i];
             if (die == null || !match(die.myData)) continue;
+            // 장난의 저주로 그 턴만 바뀐 주사위가 지워지면 원래 주사위는 버린 더미로 돌려보낸다.
+            if (DevilDiceBoss.IsSwapped(die.myData)) deckManager.discardPile.Add(DevilDiceBoss.OriginalOf(die.myData));
             ReleaseFromKeepSlot(die);
             die.isKept = false;
             die.RefreshHoverJuice();
@@ -104,7 +106,8 @@ public sealed class DiceBoardController
                 dicePool.Add(d);
                 if (returnPreviousDiceToDiscard && d.myData != null)
                 {
-                    deckManager.discardPile.Add(d.myData);
+                    // 장난의 저주로 그 턴만 바뀐 주사위는 원래 주사위로 돌아간다.
+                    deckManager.discardPile.Add(DevilDiceBoss.OriginalOf(d.myData));
                 }
             }
 
@@ -164,7 +167,8 @@ public sealed class DiceBoardController
         for (int i = 0; i < ActiveDice.Count; i++)
         {
             var die = ActiveDice[i];
-            if (die == null || !die.gameObject.activeInHierarchy || die.myData == null || !indices.TryGetValue(die.myData, out int deckIndex)) return;
+            // 장난의 저주로 그 턴만 바뀐 주사위는 원래 주사위로 저장한다.
+            if (die == null || !die.gameObject.activeInHierarchy || die.myData == null || !indices.TryGetValue(DevilDiceBoss.OriginalOf(die.myData), out int deckIndex)) return;
             data.boardDice.Add(new SavedBoardDie { deckIndex = deckIndex, value = die.currentValue, rollSlotIndex = i, keepSlotIndex = die.isKept ? die.currentKeepIndex : -1 });
         }
         foreach (var die in deckManager.drawPile)
@@ -292,8 +296,9 @@ public sealed class DiceBoardController
         }
         if (unkept.Count == 0) return false;
 
+        // 장난의 저주로 그 턴만 바뀐 주사위는 원래 주사위로 더미에 돌아간다.
         var oldData = new List<DiceData1>(unkept.Count);
-        for (int i = 0; i < unkept.Count; i++) oldData.Add(unkept[i].myData);
+        for (int i = 0; i < unkept.Count; i++) oldData.Add(DevilDiceBoss.OriginalOf(unkept[i].myData));
 
         var replacements = new List<DiceData1>(unkept.Count);
         for (int i = 0; i < unkept.Count; i++)

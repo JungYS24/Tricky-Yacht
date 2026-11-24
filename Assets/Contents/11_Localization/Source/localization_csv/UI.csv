@@ -60,6 +60,8 @@ You overcame every trial and conquered the Void.","<color=#00FF00>GAME CLEAR!</c
 UI,UI_UNKNOWN,???,???,???,???,
 UI,UI_DAMAGE_VALUE,<color=#FF5555>= {0} 데미지</color>,<color=#FF5555>= {0} Damage</color>,<color=#FF5555>= {0} ダメージ</color>,<color=#FF5555>= {0} 伤害</color>,
 UI,UI_FLAME_DAMAGE,화염 데미지! <color=#FF4500>-{0}</color>,Flame damage! <color=#FF4500>-{0}</color>,火炎ダメージ！ <color=#FF4500>-{0}</color>,火焰伤害！ <color=#FF4500>-{0}</color>,
+UI,UI_DEVIL_SNACK,간식 시간! <color=#FF4500>-{0}</color>,Snack Time! <color=#FF4500>-{0}</color>,おやつの時間！ <color=#FF4500>-{0}</color>,点心时间！ <color=#FF4500>-{0}</color>,최종보스 1페이즈 간식 시간: 매 턴 끝 추가 피해
+UI,UI_DEVIL_BREATH,심연의 숨결! <color=#FF4500>-{0}</color>,Abyssal Breath! <color=#FF4500>-{0}</color>,深淵の息吹！ <color=#FF4500>-{0}</color>,深渊吐息！ <color=#FF4500>-{0}</color>,최종보스 2페이즈 심연의 숨결: 매 턴 끝 추가 피해
 UI,UI_GOLD_PRICE,{0} G,{0} G,{0} G,{0} G,
 UI,UI_SHOP_TITLE_NYAON,"냐온 딜레마, 기묘한 상점","Nyaon Dilemma's Curious Shop",ニャオン・ジレンマの奇妙な店,喵昂·迪莱玛的奇妙商店,
 UI,UI_SHOP_TITLE_RONAN,남작 로넌의 골동품 상점,Baron Ronan's Antique Shop,ロナン男爵の骨董品店,罗南男爵的古董店,

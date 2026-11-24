@@ -199,13 +199,75 @@ public static partial class DebuffFeedback
         yield return new WaitForSecondsRealtime(Scaled(0.64f));
     }
 
-    // 저주가 배수에 곱해질 때 주사위와 배수 숫자에 초록 연기를 피웁니다.
+    // 저주가 배수에 곱해질 때 저주 구름을 피운다: 예전 연기와 같은 자리(주사위 가운데, 배수 숫자 가운데).
+    // 구름은 저주 주사위 색으로 칠한 프레임 그림이고, 점수판 칸과 같은 픽셀 크기로 고정해 프레임만 바꿔 재생한다(늘리기 없음).
+    // 프레임이 없으면 예전 초록 연기를 쓴다.
     public static void PlayCurse(Dice die, Transform multTarget)
     {
         var p = Profile;
         if (p == null) return;
-        if (die != null) Smoke(DieLocal(die), p.curseSmoke, 0f, 3, 48f);
-        if (multTarget != null) Smoke(UiToLocal(multTarget, new Vector2(0.15f, 0.45f)), p.curseSmoke, 0.08f, 4, 60f);
+        Sprite[] frames = p.curseCloudFrames;
+        if (frames == null || frames.Length == 0 || frames[0] == null)
+        {
+            if (die != null) Smoke(DieLocal(die), p.curseSmoke, 0f, 3, 48f);
+            if (multTarget != null) Smoke(UiToLocal(multTarget, new Vector2(0.15f, 0.45f)), p.curseSmoke, 0.08f, 4, 60f);
+            return;
+        }
+
+        float scale = 1f;
+        if (multTarget != null) TryFindPanelBox(multTarget, out _, out scale);
+        if (die != null) PlayCurseCloud(frames, DieLocal(die), scale, 0f);
+        if (multTarget != null) PlayCurseCloud(frames, UiToLocal(multTarget, new Vector2(0.15f, 0.45f)), scale, 0.08f);
+    }
+
+    // 구름 하나: center에 가운데를 맞추고 프레임을 차례로 바꾼 뒤 지운다. 위치는 정수로 맞춰 픽셀이 번지지 않게 한다.
+    static void PlayCurseCloud(Sprite[] frames, Vector2 center, float scale, float delay)
+    {
+        Sprite first = frames[0];
+        Vector2 size = new Vector2(first.rect.width, first.rect.height) * scale;
+        Image cloud = CreateImage("Curse Cloud", first, size, Layer);
+        cloud.preserveAspect = false;
+        RectTransform rect = cloud.rectTransform;
+        rect.anchoredPosition = new Vector2(Mathf.Round(center.x), Mathf.Round(center.y));
+        cloud.gameObject.SetActive(false);
+
+        float step = Profile != null ? Mathf.Max(0.02f, Profile.curseCloudFrameTime) : 0.09f;
+        Sequence seq = NewSequence(cloud.gameObject);
+        seq.AppendInterval(delay);
+        seq.AppendCallback(() => cloud.gameObject.SetActive(true));
+        for (int i = 1; i < frames.Length; i++)
+        {
+            Sprite next = frames[i];
+            seq.AppendInterval(step);
+            seq.AppendCallback(() => { if (cloud != null && next != null) cloud.sprite = next; });
+        }
+        seq.AppendInterval(step);
+        seq.OnComplete(() => { if (cloud != null) UnityEngine.Object.Destroy(cloud.gameObject); });
+    }
+
+    // 배수 숫자 뒤에 깔린 칸(같은 부모의 이미지 중 숫자 가운데를 덮는 가장 작은 것)을 찾는다.
+    // scale은 그 칸 그림 1px이 오버레이에서 차지하는 크기(점수판과 같은 픽셀 크기로 구름을 그리기 위함). 위치에는 쓰지 않는다.
+    static bool TryFindPanelBox(Transform text, out Rect box, out float scale)
+    {
+        box = default;
+        scale = 1f;
+        var textRect = text as RectTransform;
+        if (textRect == null || text.parent == null) return false;
+        Vector2 center = UiRectInLayer(textRect).center;
+        RectTransform best = null;
+        float bestArea = float.MaxValue;
+        foreach (Transform sibling in text.parent)
+        {
+            if (sibling == text || !sibling.gameObject.activeInHierarchy || !(sibling is RectTransform rect) || sibling.GetComponent<Image>() == null) continue;
+            Rect area = UiRectInLayer(rect);
+            if (!area.Contains(center)) continue;
+            float size = area.width * area.height;
+            if (size < bestArea) { bestArea = size; best = rect; box = area; }
+        }
+        if (best == null) return false;
+        float localWidth = best.rect.width;
+        if (localWidth > 0.01f) scale = Mathf.Max(0.25f, box.width / localWidth);
+        return true;
     }
 
     public static Color CurseColor => Profile != null ? Profile.curseColor : new Color(0.45f, 1f, 0.35f);
