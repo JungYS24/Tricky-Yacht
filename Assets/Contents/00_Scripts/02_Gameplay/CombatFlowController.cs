@@ -486,6 +486,7 @@ public static class CombatFlowController
         {
             finalDamage = 0;
             darkDamageTotal = 0;
+            Sfx.Play(SfxId.Devil_Laugh);
             ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_IMMUNE", "원페어·투페어는 악마주사위에게 통하지 않습니다!"));
         }
 

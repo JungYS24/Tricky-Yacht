@@ -487,7 +487,7 @@ public class DiceManager : MonoBehaviour
         if (!isFromLoad && DevilDiceBoss.IsActive(enemy))
         {
             DevilDiceBoss.ClearCurses(deckManager.masterDeck);
-            DevilDiceBoss.CurseOneDie(board.ActiveDice);
+            DevilDiceBoss.CurseOneDie(board.ActiveDice, enemy);
         }
         HandleDiceChanged();
         // 전투 시작 연출 중이면 첫 드로우 연출이 끝난 뒤 PlayCombatIntro가 보여 준다.
@@ -728,6 +728,11 @@ public class DiceManager : MonoBehaviour
             ShowGameClear();
             return;
         }
+
+        // 보스 전용 BGM을 틀었던 전투면 런이 이어지므로 바이옴 BGM으로 되돌린다.
+        if (enemy != null && enemy.CurrentMonsterData != null && enemy.CurrentMonsterData.bossBGM != null
+            && currentBiome != null && currentBiome.biomeBGM != null)
+            BGMManager.Instance?.ChangeBGM(currentBiome.biomeBGM);
 
         // 처치 골드, 보스 처치 회복, 클리어 피규어 효과, 피규어 획득은 StageClearRewards가 이 순서대로 준다.
         StageClearRewards.Give(this, pendingPeppermintSuccess);

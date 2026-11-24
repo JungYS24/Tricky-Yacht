@@ -22,6 +22,10 @@ public class MonsterDataSO : ScriptableObject
     public Sprite monsterSprite;
     public RuntimeAnimatorController animatorController;
 
+    [Header("Boss BGM (보스 전용, 비우면 바이옴 BGM 유지)")]
+    public AudioClip bossBGM;
+    public AudioClip bossPhase2BGM;
+
     [Header("Monster Stats")]
     public MonsterGrade monsterGrade = MonsterGrade.Normal;
     public int maxHp;
