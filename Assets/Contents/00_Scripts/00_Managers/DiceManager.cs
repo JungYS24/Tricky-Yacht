@@ -725,16 +725,18 @@ public class DiceManager : MonoBehaviour
     }
 
     // 악마주사위 각성: 이번 턴 결산(폭탄 연쇄 등)과 굴림이 모두 끝난 뒤 타락한 모습으로 되살아나 2페이즈 체력을 채우고,
-    // 악마의 눈을 굴리고 타락의 낙인을 넣은 다음 새 턴을 시작한다. 각성 컷신은 나중에 AwakenDevil 앞에 붙인다.
+    // 악마의 눈을 굴리고 타락의 낙인을 넣은 다음 새 턴을 시작한다.
+    // 각성 컷신(DebuffFeedback.PlayDevilAwaken, 약 10초): 눈 감으며 쓰러짐 → 보라 오라와 떠오름 → 눈 뜸·대사 → 각성 애니메이션 → 흰 플래시 아래에서 AwakenDevil → PHASE 2 제목.
     private IEnumerator AwakenDevilRoutine(Enemy boss)
     {
         while (isResolvingTurn || isRolling) yield return null;
         yield return boss.WaitForHitPresentation();
-        yield return new WaitForSeconds(0.4f);
         if (boss == null || enemy != boss || currentPlayerHP <= 0) yield break;
 
         int phase2Hp = Mathf.Max(1, Mathf.RoundToInt(boss.MaxHP * BalanceConfig.Current.devilPhase2HpMultiplier));
-        boss.AwakenDevil(phase2Hp); // 변신음(Devil_Energy_Rise)은 여기서 난다
+        // 변신음(Devil_Energy_Rise)은 컷신이 껍질이 터질 때 낸다.
+        yield return DebuffFeedback.PlayDevilAwaken(boss, () => boss.AwakenDevil(phase2Hp, playFx: false));
+        if (boss == null || enemy != boss) yield break;
         enemyDeathHandled = false;
         ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_PHASE2", "악마주사위: 이제 원페어·투페어는 피해를 주지 못합니다!"));
         yield return new WaitForSeconds(1.4f);
@@ -793,6 +795,8 @@ public class DiceManager : MonoBehaviour
         if (isStageClearing) return; //이미 클리어 처리 중이면 중복 실행 방지
         isStageClearing = true;
         StartCoroutine(PlayStageClearSfxDelayed());
+        // 타락한 악마주사위(2페이즈)의 붉은 배경을 걷는다(테스트로 첫 전투에서 잡고 지도로 돌아가는 경우 포함).
+        DebuffFeedback.SetDevilBackground(false);
 
         // 이번 전투 한정 디버프(도둑·족쇄)를 제거하고, 왼쪽 위 디버프 표시에서 연기처럼 사라지는 모습을 보여 준다.
         var vanishing = new List<DiceData1>();
