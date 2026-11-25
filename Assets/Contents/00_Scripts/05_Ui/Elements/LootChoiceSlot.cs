@@ -18,6 +18,10 @@ public class LootChoiceSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     public RectTransform iconStage;
     public RectTransform iconShadow;
 
+    [Header("등급 스킨 (비어 있으면 바꾸지 않음)")]
+    public LootPanelSkin panelSkin;
+    public Image cardImage;
+
     // 그림 무대의 아이콘 박스. 64px는 2배, 128px는 1배, 그보다 큰 그림(코인 주머니)은 이 박스 안에 맞춘다.
     public const float IconBox = 160f;
     const float HoverLift = 8f;
@@ -57,6 +61,18 @@ public class LootChoiceSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         {
             lootDescText.text = LocalizationManager.GetItemDescription(data);
         }
+        ApplyGradeSkin(data.grade);
+    }
+
+    // 등급에 맞춰 카드 바탕과 이름 색을 바꾼다.
+    private void ApplyGradeSkin(ItemGrade grade)
+    {
+        if (panelSkin == null) return;
+        if (cardImage == null && cardBody != null) cardImage = cardBody.GetComponent<Image>();
+        Sprite panel = panelSkin.PanelFor(grade);
+        if (cardImage != null && panel != null) cardImage.sprite = panel;
+        if (lootNameText != null) lootNameText.color = panelSkin.NameColorFor(grade);
+        if (lootDescText != null) lootDescText.color = panelSkin.descColor;
     }
 
     public void OnPointerEnter(PointerEventData eventData)

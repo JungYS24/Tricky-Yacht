@@ -87,6 +87,9 @@ public class UIManager : MonoBehaviour
     public GameObject settingsPanel;
     public Button settingsOpenButton;
     public Button resumeButton;
+    [Tooltip("설정창 쿠폰 버튼. 누르면 쿠폰 입력 팝업을 연다.")]
+    public Button couponButton;
+    public CouponPopup couponPopup;
 
     //다이스 클릭방지
     public static bool IsSettingsOpen = false;
@@ -115,7 +118,16 @@ public class UIManager : MonoBehaviour
         if (resumeButton != null)
             resumeButton.onClick.AddListener(CloseSettings);
 
+        if (couponButton != null)
+            couponButton.onClick.AddListener(OnClickCoupon);
+
         CloseSettings();
+    }
+
+    public void OnClickCoupon()
+    {
+        if (couponPopup != null)
+            couponPopup.Open();
     }
 
     public void OpenSettings()
@@ -131,6 +143,9 @@ public class UIManager : MonoBehaviour
 
     public void CloseSettings()
     {
+        if (couponPopup != null)
+            couponPopup.Close();
+
         if (settingsPanel != null)
             settingsPanel.SetActive(false);
 

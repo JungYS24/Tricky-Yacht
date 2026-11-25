@@ -270,3 +270,9 @@ UI,UI_CHARSELECT_COBICO_FIGURE_A_NAME,마룡의 폭탄,,,,캐릭터 선택 리�
 UI,UI_CHARSELECT_COBICO_FIGURE_A_DESC,적에게 가하는 폭탄 피해 50% 증가,,,,캐릭터 선택 리워크
 UI,UI_CHARSELECT_COBICO_FIGURE_B_NAME,마룡의 심장,,,,캐릭터 선택 리워크
 UI,UI_CHARSELECT_COBICO_FIGURE_B_DESC,"피격 시 이번 전투 배수 +1 (누적, 전투 종료 시 초기화)",,,,캐릭터 선택 리워크
+UI,Coupon,쿠폰,Coupon,クーポン,兑换码,설정 팝업 쿠폰 버튼
+UI,Game_Section,게임,Game,ゲーム,游戏,설정 팝업 게임 칸 제목
+UI,UI_COUPON_TITLE,쿠폰 입력,Enter Coupon,クーポン入力,输入兑换码,쿠폰 입력 팝업 제목
+UI,UI_COUPON_PLACEHOLDER,쿠폰 코드를 입력하세요,Enter coupon code,クーポンコードを入力,请输入兑换码,쿠폰 입력칸 안내 글자
+UI,UI_COUPON_CONFIRM,확인,Confirm,確認,确认,쿠폰 입력 팝업 확인 버튼
+UI,UI_COUPON_CANCEL,취소,Cancel,キャンセル,取消,쿠폰 입력 팝업 취소 버튼
