@@ -91,7 +91,7 @@ SpriteRenderer:
   m_Size: {x: 2.77, y: 2.85}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!95 &5747651581630805986
 Animator:
@@ -133,6 +133,8 @@ MonoBehaviour:
   deathParticlePrefab: {fileID: 5502091708639216629, guid: 3d67bcf124b34ad4499a49f4c47c7a0e, type: 3}
   damageTextPrefab: {fileID: 4526745784432431259, guid: b62438a987124f44ba0311df009a2f22, type: 3}
   uiCanvas: {fileID: 0}
+  attackPowerText: {fileID: 0}
+  turnText: {fileID: 0}
   hitColor: {r: 1, g: 0, b: 0, a: 1}
   hitEffectDuration: 0.18
   dissolveDuration: 0.8
@@ -142,6 +144,7 @@ MonoBehaviour:
   normalGlowPower: 4
   edgeColorPink: {r: 1, g: 0.3, b: 0.85, a: 1}
   edgeColorMint: {r: 0.4, g: 1, b: 0.85, a: 1}
+  footSinkY: 0.065
   dissolveProperty: _DissolveAmount
   edgeColorAProperty: _EdgeColorA
   edgeColorBProperty: _EdgeColorB
@@ -149,3 +152,9 @@ MonoBehaviour:
   dropFigureData: {fileID: 11400000, guid: 54d773ec539103049b6ca1edaf3c357e, type: 2}
   baseDropRate: 0.42
   useExternalDeathSequence: 0
+  devilDestroyFxPrefab: {fileID: 6027198754270511226, guid: f3a38e248e639d646a6212d347c45d76, type: 3}
+  attackPrepareDuration: 0.12
+  attackLungeDuration: 0.1
+  attackReturnDuration: 0.18
+  attackScale: 1.12
+  attackTravelRatio: 0.12

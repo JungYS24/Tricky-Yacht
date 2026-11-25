@@ -99,6 +99,8 @@ public class Enemy : MonoBehaviour
     private Vector3 originalScale;
     private Vector3 originalPosition;
     public bool useExternalDeathSequence = false;
+    [Tooltip("악마주사위 최종 처치 때 일반 사망 연출 대신 재생할 파괴 이펙트")]
+    [SerializeField] private DevilDiceDestroyFx devilDestroyFxPrefab;
     private Coroutine hitEffectCoroutine;
     private Coroutine hpCoroutine;
     private HpBarFx hpBarFx;
@@ -527,7 +529,33 @@ public class Enemy : MonoBehaviour
     public IEnumerator PlayNormalDeathPresentation()
     {
         // DiceManager의 코루틴에서 실행하므로 몬스터 비활성화 후에도 클리어 처리가 이어집니다.
+        if (CurrentBossAbility == BossAbilityType.DevilDice && devilDestroyFxPrefab != null && monsterImage != null && monsterImage.sprite != null)
+        {
+            yield return DevilDestroyRoutine();
+            yield break;
+        }
         yield return MonsterDeathRoutine(null);
+    }
+
+    // 악마주사위 최종 처치: 보스 그림을 숨기고 같은 자리에 파괴 애니메이션(0프레임이 온전한 주사위)을 재생한다.
+    private IEnumerator DevilDestroyRoutine()
+    {
+        DevilDiceDestroyFx fx = Instantiate(devilDestroyFxPrefab);
+        fx.PlaceOver(monsterImage);
+        bool wasHidden = monsterImage.forceRenderingOff;
+        monsterImage.forceRenderingOff = true;
+
+        // 클립 끝 이벤트를 기다린다. 이벤트가 오지 않아도 멈추지 않게 시간 제한을 둔다.
+        float timeout = 3f;
+        while (fx != null && !fx.IsFinished && timeout > 0f)
+        {
+            timeout -= Time.deltaTime;
+            yield return null;
+        }
+        if (fx != null) Destroy(fx.gameObject);
+
+        monsterImage.forceRenderingOff = wasHidden;
+        gameObject.SetActive(false);
     }
 
     private void ResetDeathPresentation()

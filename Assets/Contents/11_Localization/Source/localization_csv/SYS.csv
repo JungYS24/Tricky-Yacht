@@ -12,3 +12,5 @@ SYS,SYS_DEVIL_DEVOUR,타락한 악마주사위가 주사위를 삼켰습니다!,
 SYS,SYS_CAPTURE_OWNED,보유 중,Owned,所持済み,已拥有,포획 확률 칸: 이 몬스터의 피규어를 이미 가지고 있을 때
 SYS,SYS_CAPTURE_ALREADY_OWNED,이미 보유한 피규어입니다.,You already own this Figure.,このフィギュアはすでに所持しています。,你已拥有这个手办。,페퍼민트를 눌렀지만 이미 가진 피규어일 때 토스트
 SYS,SYS_CAPTURE_NO_FIGURE,포획할 피규어가 없습니다.,This monster has no Figure to capture.,捕獲できるフィギュアがありません。,没有可捕获的手办。,페퍼민트를 눌렀지만 피규어를 주지 않는 몬스터일 때 토스트
+SYS,SYS_COUPON_EMPTY,쿠폰 코드를 입력해 주세요.,Please enter a coupon code.,クーポンコードを入力してください。,请输入兑换码。,쿠폰 입력 팝업: 빈 코드로 확인을 눌렀을 때
+SYS,SYS_COUPON_INVALID,유효하지 않은 쿠폰 코드입니다.,Invalid coupon code.,無効なクーポンコードです。,兑换码无效。,쿠폰 입력 팝업: 없는 코드일 때
