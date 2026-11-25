@@ -145,4 +145,17 @@ public sealed class DebuffVisualProfile : ScriptableObject
     public Sprite[] snackCrumbsRed;
     [Tooltip("보호막을 물었을 때 떨어지는 부스러기(보호막 회색)")]
     public Sprite[] snackCrumbsGray;
+
+    [Header("악마주사위 각성 (1페이즈 체력 0 → 타락한 악마주사위)")]
+    [Tooltip("죽을 때 눈 감기(DevilDice/Awaken/Devil_Dice_EyeClose, 16장): 0~14 = 뜬 눈이 서서히 감김, 15 = 완전히 감긴 채. " +
+             "보스 그림과 같은 칸·기준점(바닥 가운데)으로 잘라 두었다. 비우면 각성 연출 없이 바로 각성한다")]
+    public Sprite[] devilCloseFrames;
+    [Tooltip("각성 애니메이션(DevilDice/Awaken/Devil_Dice_AwakenTransform, 26장 = AI 생성 시트의 11~36번째 장): " +
+             "0~7 붉은 눈 뜸·노려봄, 8~15 금이 퍼짐, 16 껍질이 붉은 몸으로(흰 플래시), 17~25 조각이 떨어지며 타락 모습으로 가라앉음. " +
+             "어느 장을 얼마나 보여 줄지는 DebuffFeedback.DevilAwaken 맨 위 값")]
+    public Sprite[] devilAwakenFrames;
+    [Tooltip("2페이즈 동안 배경 그림에 곱하는 색")]
+    public Color devilBackgroundMultiply = new Color(1f, 0.7f, 0.7f, 1f);
+    [Tooltip("2페이즈 동안 배경 바로 위(몬스터 아래)에 까는 붉은 막. 알파가 세기")]
+    public Color devilBackgroundOverlay = new Color(0.48f, 0.04f, 0.08f, 0.22f);
 }

@@ -29,9 +29,6 @@ public static class DevilDiceBoss
     static readonly int[] PatternTurns = { 1, 1, 2, 2, 3, 3 };
     static readonly float[] PatternAttack = { 0.6f, 0.6f, 1f, 1f, 1.8f, 1.8f };
 
-    // 체력이 이 비율 이하이면 화난 아이들(IdleC) 애니메이션으로 바뀐다.
-    public const float AngryHpRatio = 0.5f;
-
     public static bool IsActive(Enemy enemy)
     {
         return enemy != null && !enemy.IsDead && enemy.CurrentBossAbility == BossAbilityType.DevilDice && !TutorialMode.Active;

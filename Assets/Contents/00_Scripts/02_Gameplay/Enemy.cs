@@ -330,19 +330,24 @@ public class Enemy : MonoBehaviour
             if (hitEffectCoroutine != null) StopCoroutine(hitEffectCoroutine);
             // 폭탄은 기본 피격처럼 빨갛게 한 번 번쩍이기만 한다(폭발 그림은 BombFeedback이 그린다).
             bool lightHit = hitKind == EnemyHitKind.Other || hitKind == EnemyHitKind.Bomb;
+            // 악마주사위 1페이즈를 쓰러뜨리는 타격: 죽지 않고 각성 컷신으로 이어지므로, 체력 0의 새빨간 색으로 바꾸지 않고
+            // 맞기 전 색을 그대로 둔다(컷신이 눈을 감으며 원래 색으로 되돌린다).
+            bool awakening = CurrentHP <= 0 && DevilDiceBoss.ShouldAwaken(this);
             if (!lightHit)
             {
                 // 피해 종류별 오버레이를 사용하고 바탕색은 현재 체력에 맞춥니다.
-                if (monsterImage != null) monsterImage.color = Color.Lerp(Color.red, Color.white, MaxHP > 0 ? (float)CurrentHP / MaxHP : 0f);
+                if (monsterImage != null && !awakening) monsterImage.color = Color.Lerp(Color.red, Color.white, MaxHP > 0 ? (float)CurrentHP / MaxHP : 0f);
                 hitEffectCoroutine = null;
             }
             else hitEffectCoroutine = StartCoroutine(HitEffectRoutine());
             // 종류에 맞는 연출을 재생합니다. 치명타는 사망 확대와 충돌하지 않게 밀림을 생략합니다.
+            // 악마주사위 1페이즈는 쓰러져도 죽지 않고 각성 컷신으로 이어지므로 마지막 타격에도 밀린다.
             if (!lightHit)
                 {
                 float strength = 1f + 0.35f * Mathf.Clamp01((float)damage / Mathf.Max(1, MaxHP));
+                bool recoil = CurrentHP > 0 || awakening;
                 if (continueFlame) currentFeedback.ShowFlameContact();
-                else MonsterHitFeedback.Get(this).Play(monsterImage, CurrentHP > 0, monsterAnimator, strength, hitKind, includesDark);
+                else MonsterHitFeedback.Get(this).Play(monsterImage, recoil, monsterAnimator, strength, hitKind, includesDark);
                 if (hitKind == EnemyHitKind.Normal) CameraShake.Instance?.ShakeImpact(strength);
                 else if (hitKind == EnemyHitKind.Dark) CameraShake.Instance?.ShakeElemental();
             }
@@ -486,9 +491,11 @@ public class Enemy : MonoBehaviour
     private IEnumerator HitEffectRoutine()
     {
         if (monsterImage == null) yield break;
+        Color before = monsterImage.color;
         monsterImage.color = hitColor;
         float hpPercent = MaxHP > 0 ? (float)CurrentHP / MaxHP : 0f;
-        Color targetColor = Color.Lerp(Color.red, Color.white, hpPercent);
+        // 악마주사위 1페이즈를 쓰러뜨리는 타격은 맞기 전 색으로 돌아간다(각성 컷신이 이어진다).
+        Color targetColor = CurrentHP <= 0 && DevilDiceBoss.ShouldAwaken(this) ? before : Color.Lerp(Color.red, Color.white, hpPercent);
 
         float elapsed = 0f;
         while (elapsed < hitEffectDuration)
@@ -736,8 +743,9 @@ public class Enemy : MonoBehaviour
     }
 
     // 악마주사위 1페이즈를 쓰러뜨렸을 때 각성한다: 타락한 모습·2페이즈 BGM으로 바뀌고 체력바가 0에서 새 최대 체력까지 차오른다.
-    // 처치 보상은 주지 않는다(DiceManager.OnEnemyKilled가 대신 부른다). 각성 컷신은 나중에 이 앞에 붙인다.
-    public void AwakenDevil(int phase2MaxHp)
+    // 처치 보상은 주지 않는다(DiceManager.OnEnemyKilled가 대신 부른다). 각성 컷신(DebuffFeedback.PlayDevilAwaken)이 흰 플래시 아래에서 부른다.
+    // playFx: 변신음(Devil_Energy_Rise)을 여기서 낼지. 컷신은 껍질이 터질 때 직접 내므로 false로 부른다.
+    public void AwakenDevil(int phase2MaxHp, bool playFx = true)
     {
         if (CurrentBossAbility != BossAbilityType.DevilDice || DevilAwakened) return;
         StopAttackPresentation();
@@ -754,7 +762,7 @@ public class Enemy : MonoBehaviour
         CurrentHP = MaxHP;
         if (monsterImage != null) monsterImage.color = Color.white;
 
-        EnterDevilCorrupted(playFx: true);
+        EnterDevilCorrupted(playFx);
         UpdateDevilAngry();
 
         BindHpBarFx();
@@ -766,21 +774,23 @@ public class Enemy : MonoBehaviour
         else UpdateHPBar(true);
     }
 
-    // 몬스터를 세팅할 때 타락 상태를 풀고, 보스 전용 BGM이 있으면 튼다.
+    // 몬스터를 세팅할 때 타락 상태(애니메이터·붉은 배경)를 풀고, 보스 전용 BGM이 있으면 튼다.
     void SetupBossPresentation(MonsterDataSO data)
     {
         devilCorrupted = false;
         if (HasDevilAnimator()) monsterAnimator.SetBool(DevilCorruptedHash, false);
+        DebuffFeedback.SetDevilBackground(false);
         if (data != null && data.bossBGM != null) BGMManager.Instance?.ChangeBGM(data.bossBGM);
     }
 
-    // 악마주사위가 타락한 모습으로 바뀐다. 애니메이터는 Corrupted 상태로 고정되고 BGM은 2페이즈 곡으로 바뀐다.
+    // 악마주사위가 타락한 모습으로 바뀐다. 애니메이터는 Corrupted 상태로 고정되고 BGM은 2페이즈 곡으로, 전투 배경은 붉게 바뀐다.
     // 1페이즈를 쓰러뜨린 각성(AwakenDevil)과 2페이즈 이어하기(RestoreMonster)에서 부른다.
     public void EnterDevilCorrupted(bool playFx)
     {
         if (devilCorrupted || CurrentBossAbility != BossAbilityType.DevilDice) return;
         devilCorrupted = true;
         if (HasDevilAnimator()) monsterAnimator.SetBool(DevilCorruptedHash, true);
+        DebuffFeedback.SetDevilBackground(true);
         if (playFx) Sfx.Play(SfxId.Devil_Energy_Rise);
         if (CurrentMonsterData != null && CurrentMonsterData.bossPhase2BGM != null)
             BGMManager.Instance?.ChangeBGM(CurrentMonsterData.bossPhase2BGM);
@@ -806,11 +816,11 @@ public class Enemy : MonoBehaviour
         monsterAnimator.SetTrigger(DevilCastHash);
     }
 
-    // 악마주사위 체력이 절반 이하이면 Angry를 켠다. 체력이 가득 찬 전투 시작·초기화 때는 꺼진다.
+    // 악마주사위 1페이즈는 체력과 관계없이 평소 아이들(IdleA, 날개만 흔들림)을 쓰고, 저주를 걸 때만 시전(IdleB)을 한 번 재생한다.
+    // 화난 아이들(IdleC)은 쓰지 않으므로 Angry는 항상 끈다. 타락 여부는 애니메이터가 다시 세팅될 때를 위해 함께 맞춘다.
     void UpdateDevilAngry()
     {
-        bool angry = MaxHP > 0 && CurrentHP <= MaxHP * DevilDiceBoss.AngryHpRatio;
-        devilAngry = angry && CurrentBossAbility == BossAbilityType.DevilDice;
+        devilAngry = false;
         if (!HasDevilAnimator()) return;
         monsterAnimator.SetBool(DevilAngryHash, devilAngry);
         // 몬스터가 꺼진 상태에서 세팅되면 파라미터가 초기화되므로 타락 여부도 함께 다시 맞춘다.
