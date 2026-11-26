@@ -284,6 +284,8 @@ public class MapFlowController
         MapTableData table = GetMapTable();
         int threshold = table != null ? table.Config.BiomeCountToVoid : 10;
         BiomeType current = currentBiome != null ? currentBiome.biomeType : BiomeType.Forest;
+        if (current == BiomeType.Volcano)
+            UnlockConditionManager.Unlock(UnlockFlag.BeatVolcanoBiom);
         List<BiomeType> options = dice.biomeNavigator.GetNextBiomeOptions(current, stageProgression.biomeIndex, threshold);
         if (dice.biomeSelectionPanel != null)
             dice.biomeSelectionPanel.OpenPanel(dice, options);

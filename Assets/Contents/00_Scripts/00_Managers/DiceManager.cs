@@ -725,6 +725,7 @@ public class DiceManager : MonoBehaviour
         // 공허 바이옴에서 보스를 잡았다면 최종 게임 클리어 처리
         if (currentBiome != null && currentBiome.biomeType == BiomeType.Void)
         {
+            UnlockConditionManager.Unlock(UnlockFlag.BeatVoidBiom);
             ShowGameClear();
             return;
         }
