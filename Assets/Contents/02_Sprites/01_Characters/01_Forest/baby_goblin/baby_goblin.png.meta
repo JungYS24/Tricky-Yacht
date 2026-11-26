@@ -130,11 +130,37 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Baby_Goblin_0
+      name: baby_goblin_0
       rect:
         serializedVersion: 2
         x: 0
@@ -156,7 +182,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Baby_Goblin_1
+      name: baby_goblin_1
       rect:
         serializedVersion: 2
         x: 256
@@ -178,7 +204,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Baby_Goblin_2
+      name: baby_goblin_2
       rect:
         serializedVersion: 2
         x: 512
@@ -200,7 +226,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Baby_Goblin_3
+      name: baby_goblin_3
       rect:
         serializedVersion: 2
         x: 768
@@ -222,7 +248,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Baby_Goblin_4
+      name: baby_goblin_4
       rect:
         serializedVersion: 2
         x: 0
@@ -244,7 +270,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Baby_Goblin_5
+      name: baby_goblin_5
       rect:
         serializedVersion: 2
         x: 256
@@ -266,7 +292,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Baby_Goblin_6
+      name: baby_goblin_6
       rect:
         serializedVersion: 2
         x: 512
@@ -288,7 +314,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Baby_Goblin_7
+      name: baby_goblin_7
       rect:
         serializedVersion: 2
         x: 768
@@ -323,14 +349,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Baby_Goblin_0: -2791132784824272032
-      Baby_Goblin_1: -718890341267610739
-      Baby_Goblin_2: -6699411082640915228
-      Baby_Goblin_3: -9128469921001886688
-      Baby_Goblin_4: -7779368332378127254
-      Baby_Goblin_5: -4772462166487921312
-      Baby_Goblin_6: -346285051981498665
-      Baby_Goblin_7: -3598369591917157969
+      baby_goblin_0: -2791132784824272032
+      baby_goblin_1: -718890341267610739
+      baby_goblin_2: -6699411082640915228
+      baby_goblin_3: -9128469921001886688
+      baby_goblin_4: -7779368332378127254
+      baby_goblin_5: -4772462166487921312
+      baby_goblin_6: -346285051981498665
+      baby_goblin_7: -3598369591917157969
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
