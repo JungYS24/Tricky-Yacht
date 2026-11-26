@@ -72,7 +72,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 64
+  spritePixelsToUnits: 128
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -93,7 +93,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -106,7 +106,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: Standalone
-    maxTextureSize: 2048
+    maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -119,7 +119,33 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
     buildTarget: Android
-    maxTextureSize: 2048
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -134,13 +160,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: banana king kong_0
+      name: banana kingkong_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 128
-        width: 128
-        height: 128
+        y: 256
+        width: 256
+        height: 256
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -156,13 +182,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: banana king kong_1
+      name: banana kingkong_1
       rect:
         serializedVersion: 2
-        x: 128
-        y: 128
-        width: 128
-        height: 128
+        x: 256
+        y: 256
+        width: 256
+        height: 256
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -178,13 +204,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: banana king kong_2
+      name: banana kingkong_2
       rect:
         serializedVersion: 2
-        x: 256
-        y: 128
-        width: 128
-        height: 128
+        x: 512
+        y: 256
+        width: 256
+        height: 256
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -200,13 +226,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: banana king kong_3
+      name: banana kingkong_3
       rect:
         serializedVersion: 2
-        x: 384
-        y: 128
-        width: 128
-        height: 128
+        x: 768
+        y: 256
+        width: 256
+        height: 256
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -222,13 +248,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: banana king kong_4
+      name: banana kingkong_4
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 128
-        height: 128
+        width: 256
+        height: 256
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -244,13 +270,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: banana king kong_5
+      name: banana kingkong_5
       rect:
         serializedVersion: 2
-        x: 128
+        x: 256
         y: 0
-        width: 128
-        height: 128
+        width: 256
+        height: 256
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -266,13 +292,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: banana king kong_6
+      name: banana kingkong_6
       rect:
         serializedVersion: 2
-        x: 256
+        x: 512
         y: 0
-        width: 128
-        height: 128
+        width: 256
+        height: 256
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -288,13 +314,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: banana king kong_7
+      name: banana kingkong_7
       rect:
         serializedVersion: 2
-        x: 384
+        x: 768
         y: 0
-        width: 128
-        height: 128
+        width: 256
+        height: 256
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -313,7 +339,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 062d7ec33433f244f9ce3b42710ad877
     internalID: 0
     vertices: []
     indices: 
@@ -323,14 +349,14 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      banana king kong_0: 1739625774839129488
-      banana king kong_1: -2936973717164919094
-      banana king kong_2: -3026730265145452310
-      banana king kong_3: 582755692157340647
-      banana king kong_4: 3259230301624266531
-      banana king kong_5: -8121083215368321241
-      banana king kong_6: -1236137997135386579
-      banana king kong_7: 3067728634381233947
+      banana kingkong_0: 1739625774839129488
+      banana kingkong_1: -2936973717164919094
+      banana kingkong_2: -3026730265145452310
+      banana kingkong_3: 582755692157340647
+      banana kingkong_4: 3259230301624266531
+      banana kingkong_5: -8121083215368321241
+      banana kingkong_6: -1236137997135386579
+      banana kingkong_7: 3067728634381233947
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
