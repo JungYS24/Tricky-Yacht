@@ -18,6 +18,8 @@ public class UnlockConditionManager : MonoBehaviour
     private bool useUserData = true;
 #endif
 
+    private static RuntimeConditions rc;
+
     /// <summary>
     /// 여러 조건 플래그를 하나의 플래그 값으로 합쳐줍니다.
     /// </summary>
@@ -89,5 +91,43 @@ public class UnlockConditionManager : MonoBehaviour
     private void Awake()
     {
         unlockedFlag = useUserData ? (UnlockFlag)PlayerPrefs.GetInt(UNLOCKED_KEY, 0) : initialFlag;
+
+        rc = new();
+    }
+
+    private class RuntimeConditions
+    {
+        public int UsedGolds { get; private set; } = 0;
+        public int MaxHP { get; private set; } = DiceManager.Instance.playerMaxHP;
+
+        public RuntimeConditions()
+        {
+            ShopManager.OnChangeGoldAmount += AddUsedGold;
+            DiceManager.OnChangeMaxHP += ChangeMaxHP;
+        }
+
+        ~RuntimeConditions()
+        {
+            ShopManager.OnChangeGoldAmount -= AddUsedGold;
+            DiceManager.OnChangeMaxHP -= ChangeMaxHP;
+        }
+
+        public void AddUsedGold(int amount)
+        {
+            UsedGolds += amount;
+            if (UsedGolds >= 7777)
+            {
+                Unlock(UnlockFlag.Spend7777GoldInRun);
+            }
+        }
+
+        public void ChangeMaxHP(int value)
+        {
+            MaxHP = value;
+            if (MaxHP >= 300)
+            {
+                Unlock(UnlockFlag.MaxHPThreshold300);
+            }
+        }
     }
 }
