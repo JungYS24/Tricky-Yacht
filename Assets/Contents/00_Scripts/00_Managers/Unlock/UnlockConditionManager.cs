@@ -48,7 +48,17 @@ public class UnlockConditionManager : MonoBehaviour
     /// </summary>
     /// <param name="flag"></param>
     /// <param name="isUnlocked"></param>
+    [Obsolete(nameof(Unlock) + " 함수를 사용하십시오.", false)]
     public static void SetUnlockCondition(UnlockFlag flag, bool isUnlocked)
+    {
+        Unlock(flag);
+    }
+
+    /// <summary>
+    /// 조건을 해금합니다.
+    /// </summary>
+    /// <param name="flag"></param>
+    public static void Unlock(UnlockFlag flag)
     {
         if ((flag & ~rangeMask) != 0)
         {
@@ -62,10 +72,7 @@ public class UnlockConditionManager : MonoBehaviour
             return;
         }
 
-        unlockedFlag = isUnlocked ?
-            unlockedFlag | flag :
-            unlockedFlag & ~flag;
-
+        unlockedFlag |= flag;
         PlayerPrefs.SetInt(UNLOCKED_KEY, (int)unlockedFlag);
     }
 
