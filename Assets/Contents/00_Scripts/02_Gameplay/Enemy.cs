@@ -266,6 +266,13 @@ public class Enemy : MonoBehaviour
 
         UpdateDevilAngry();
         UpdateHPBar(true);
+
+        // 테스트(DiceManager.testDevilBossPhase2): 악마주사위를 처음부터 2페이즈(타락한 악마주사위)로 시작한다. 각성 컷신은 없다.
+        if (dice != null && dice.testDevilBossPhase2 && DevilDiceBoss.ShouldAwaken(this))
+        {
+            AwakenDevil(Mathf.Max(1, Mathf.RoundToInt(MaxHP * cfg.devilPhase2HpMultiplier)), playFx: false);
+            DevilDiceBoss.RollPattern(this);
+        }
     }
 
 
