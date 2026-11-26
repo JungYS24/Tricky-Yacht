@@ -761,7 +761,7 @@ public class ShopManager : MonoBehaviour
     /// 이벤트를 발생시킵니다.
     /// </summary>
     /// <param name="amount">적용할 골드 양</param>
-    public void AddGold(int amount)
+    public void AddGoldWithNotification(int amount)
     {
         currentGold += amount;
         OnChangeGoldAmount?.Invoke(amount);
@@ -771,7 +771,7 @@ public class ShopManager : MonoBehaviour
     /// 적용 이벤트를 발생시키지 않고 조용히 골드 양을 추가합니다.
     /// </summary>
     /// <param name="amount">적용할 골드 양</param>
-    public void AddGoldWithoutNotification(int amount)
+    public void AddGold(int amount)
     {
         currentGold += amount;
     }

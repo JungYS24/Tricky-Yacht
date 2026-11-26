@@ -1008,7 +1008,7 @@ public class DiceManager : MonoBehaviour
     /// 이벤트를 발생시킵니다.
     /// </summary>
     /// <param name="value"></param>
-    public void ChangeMaxHP(int value)
+    public void ChangeMaxHPWithNotification(int value)
     {
         playerMaxHP = value;
         OnChangeMaxHP?.Invoke(value);
@@ -1018,7 +1018,7 @@ public class DiceManager : MonoBehaviour
     /// 플레이어의 최대 체력을 이벤트를 발생시키지 않고 조용히 변경합니다.
     /// </summary>
     /// <param name="value"></param>
-    public void ChangeMaxHPWithoutNotification(int value)
+    public void ChangeMaxHP(int value)
     {
         playerMaxHP = value;
     }
