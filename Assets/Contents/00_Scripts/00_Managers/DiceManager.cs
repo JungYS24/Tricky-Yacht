@@ -51,6 +51,8 @@ public class DiceManager : MonoBehaviour
     public bool testDevilBossFirstBattle = true;
     [Tooltip("0보다 크면 악마주사위 1페이즈 최대 체력을 이 값으로 고정한다(바이옴 성장 무시). 2페이즈 체력은 BalanceConfig 배율을 따른다. 0이면 끔")]
     public int testDevilBossHp = 50;
+    [Tooltip("켜면 악마주사위가 처음부터 2페이즈(타락한 악마주사위)로 나온다. 각성 컷신 없이 바로 타락한 모습·2페이즈 체력·붉은 배경. 2페이즈 연출 테스트용")]
+    public bool testDevilBossPhase2 = true;
 
     [Header("엔딩 UI 설정")]
     public GameObject gameClearPanel;
@@ -751,7 +753,8 @@ public class DiceManager : MonoBehaviour
     }
 
     // 타락한 악마주사위(2페이즈) 타락의 낙인: 다음 턴을 시작하기 전에 가시·저주 디버프 주사위를 덱에 넣는다(이번 전투 한정).
-    // 전투 시작 디버프 등장 연출(차원문 균열)을 그대로 쓰고, 넣은 주사위는 뽑을 더미에도 섞어 바로 나올 수 있게 한다.
+    // 보스가 입을 벌려 검붉은 연기를 뱉고, 연기가 테이블 가운데로 내려가 그 속에서 디버프 주사위가 나타난 뒤 덱으로 들어간다(DebuffFeedback.PlayDevilSpit).
+    // 넣은 주사위는 뽑을 더미에도 섞어 바로 나올 수 있게 한다.
     internal IEnumerator PlayDevilBrand()
     {
         if (!DevilDiceBoss.IsActive(enemy) || DevilDiceBoss.Phase(enemy) < 2 || currentPlayerHP <= 0) yield break;
@@ -765,7 +768,7 @@ public class DiceManager : MonoBehaviour
         bool committed = false;
         try
         {
-            yield return DebuffFeedback.PlayArrival(enemy, incoming, target, rollSlotParent, NormalDiceFace());
+            yield return DebuffFeedback.PlayDevilSpit(enemy, incoming, target, rollSlotParent);
             CommitBrand(incoming);
             committed = true;
         }
@@ -773,7 +776,6 @@ public class DiceManager : MonoBehaviour
         {
             // 연출 도중 중단돼도 넣을 주사위를 잃지 않는다.
             if (!committed) CommitBrand(incoming);
-            DebuffFeedback.EndIntro();
         }
     }
 

@@ -257,56 +257,33 @@ public static class CombatFlowController
         });
     }
 
-    // 영혼 포식: 대상이 있으면 주사위가 떨리다 보스 쪽으로 빨려 들어가고, 덱에서 영구히 사라진다.
-    // 주사위 파괴로 취급해 주사위 파괴 피규어(사눈 다이스·재의 향로 등)가 발동한다. 연출은 컷신 작업 때 다듬는다.
+    // 영혼 포식: 대상이 있으면 보스가 입을 벌리고, 킵한 주사위가 작아지며 입으로 날아 들어간다(DebuffFeedback.PlayDevilDevour).
+    // 입에 닿는 순간 콱 다물며 주사위가 덱에서 영구히 사라진다. 주사위 파괴로 취급해 주사위 파괴 피규어(사눈 다이스·재의 향로 등)가 발동한다.
     private static IEnumerator ProcessDevilDevour(DiceManager dm)
     {
         Dice target = DevilDiceBoss.PickDevourTarget(dm.enemy, dm.KeptDice, dm.masterDeck);
         if (target == null) yield break;
         DiceData1 data = target.myData;
-        Transform die = target.transform;
-        Vector3 start = die.position;
-        Vector3 scale = die.localScale;
-        Vector3 end = dm.enemy != null ? dm.enemy.transform.position : start + Vector3.up * 2f;
 
-        yield return new WaitForSeconds(0.25f);
-        // 떨림(사인, 난수 없음)
-        float elapsed = 0f;
-        const float shakeTime = 0.35f;
-        while (elapsed < shakeTime && die != null)
+        // 맞는 연출(흔들림·번쩍임)과 폭탄·가시 등 앞의 결산이 모두 끝난 뒤 0.5초 더 쉬었다가 입을 벌린다.
+        yield return WaitForEnemyHitFeedback(dm.enemy);
+        yield return new WaitForSeconds(0.5f);
+        // 연출이 주사위 위치·크기를 되돌린 다음(같은 프레임) 부르므로 풀로 돌려보내도 줄어든 크기가 남지 않는다.
+        yield return DebuffFeedback.PlayDevilDevour(dm.enemy, target, () =>
         {
-            elapsed += Time.deltaTime;
-            die.position = start + Vector3.right * Mathf.Sin(elapsed * 60f) * 0.04f * (1f - elapsed / shakeTime);
-            yield return null;
-        }
-        // 보스 쪽으로 빨려 들어가며 작아진다
-        Sfx.Play(SfxId.Dice_Burn_Vanish);
-        elapsed = 0f;
-        const float pullTime = 0.4f;
-        while (elapsed < pullTime && die != null)
-        {
-            elapsed += Time.deltaTime;
-            float p = Mathf.Clamp01(elapsed / pullTime);
-            p *= p;
-            die.position = Vector3.Lerp(start, end, p);
-            die.localScale = scale * (1f - p);
-            yield return null;
-        }
-
-        // 풀로 돌려보내기 전에(같은 프레임) 위치·크기를 되돌린다. 흔들림 효과가 줄어든 크기를 기준으로 기억하지 않게 한다.
-        if (die != null) { die.position = start; die.localScale = scale; }
-        DevilDiceBoss.RemoveFromDeck(dm.deckManager, data);
-        dm.Board.RemoveDiceMatching(d => ReferenceEquals(d, data));
-
-        ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_DEVOUR", "타락한 악마주사위가 주사위를 삼켰습니다!"));
-        FigureEffectManager.Instance?.EvaluateDiceDestroyedTriggers(dm, dm.shopManager);
-        dm.ForceUpdateUI();
-        yield return new WaitForSeconds(0.4f);
+            Sfx.Play(SfxId.Dice_Burn_Vanish);
+            DevilDiceBoss.RemoveFromDeck(dm.deckManager, data);
+            dm.Board.RemoveDiceMatching(d => ReferenceEquals(d, data));
+            ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_DEVOUR", "타락한 악마주사위가 주사위를 삼켰습니다!"));
+            FigureEffectManager.Instance?.EvaluateDiceDestroyedTriggers(dm, dm.shopManager);
+            dm.ForceUpdateUI();
+        });
+        yield return new WaitForSeconds(0.2f);
     }
 
     // 악마주사위의 매 턴 끝 추가 피해(간식 시간·심연의 숨결). 보호막·피해 감소는 적용하지만 피격으로 치지 않아
     // 피격 피규어(선인장 화분·마룡의 심장 등)는 발동하지 않는다. dealt는 피해 감소 뒤 들어간 양. 체력이 0이 되면 true.
-    // slash가 false면 화면 할퀴기 자국을 빼고 피격 표시를 낸다(간식 시간은 이빨이 체력 바를 무는 연출이 대신한다).
+    // slash가 false면 화면 할퀴기 자국을 빼고 피격 표시를 낸다(간식 시간·심연의 숨결은 이빨이 체력 바를 무는 연출이 대신한다).
     private static bool ApplyBossExtraDamage(DiceManager dm, int amount, out int dealt, bool slash = true)
     {
         int reduction = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetTotalDamageReduction(amount, dm, true) : 0;
@@ -379,8 +356,10 @@ public static class CombatFlowController
 
             dm.enemy.DecreaseTurn();
 
+            bool bossAttacked = false; // 이번 턴에 적이 공격했는지(악마주사위 턴 끝 추가 피해를 조금 늦게 시작한다)
             if (dm.enemy.CurrentAttackTurn <= 0)
             {
+                bossAttacked = true;
                 dm.enemy.PlayAttackAnim();
                 yield return new WaitForSeconds(dm.enemy.AttackContactDelay);
 
@@ -442,16 +421,17 @@ public static class CombatFlowController
             }
 
             // 악마주사위 매 턴 끝 추가 피해: 1페이즈 간식 시간, 2페이즈 심연의 숨결. 피격으로 치지 않는다.
+            // 둘 다 같은 연출(DebuffFeedback.PlayDevilSnack): 보스가 제자리에서 움찔하며 씹고, 이빨이 체력 바 끝을 무는 순간 피해가 들어간다
+            // (할퀴기 자국 없이 붉은 테두리·숫자·작은 흔들림). 화면 글자만 다르다.
             int turnEndDamage = DevilDiceBoss.TurnEndDamage(dm.enemy, dm.masterDeck);
             if (turnEndDamage > 0)
             {
                 bool breath = DevilDiceBoss.Phase(dm.enemy) >= 2;
-                yield return new WaitForSeconds(0.35f);
+                // 적에게 맞은 턴이면 맞는 연출이 지나가도록 0.5초 더 기다린다.
+                yield return new WaitForSeconds(bossAttacked ? 0.85f : 0.35f);
                 bool playerDown = false;
                 int dealt = 0;
-                if (breath) playerDown = ApplyBossExtraDamage(dm, turnEndDamage, out dealt);
-                // 간식 시간: 이빨이 체력 바 끝을 무는 순간 피해가 들어간다(DebuffFeedback.PlayDevilSnack).
-                else yield return DebuffFeedback.PlayDevilSnack(dm, dm.enemy, () => playerDown = ApplyBossExtraDamage(dm, turnEndDamage, out dealt, slash: false));
+                yield return DebuffFeedback.PlayDevilSnack(dm, dm.enemy, () => playerDown = ApplyBossExtraDamage(dm, turnEndDamage, out dealt, slash: false));
                 dm.UpdateMainUI(breath
                     ? LocalizationManager.GetUi("UI_DEVIL_BREATH", "심연의 숨결! <color=#FF4500>-{0}</color>", dealt)
                     : LocalizationManager.GetUi("UI_DEVIL_SNACK", "간식 시간! <color=#FF4500>-{0}</color>", dealt));
