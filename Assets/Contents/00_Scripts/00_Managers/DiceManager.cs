@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
+using UnityEngine.Events;
 
 public class DiceManager : MonoBehaviour
 {
@@ -999,4 +1000,26 @@ public class DiceManager : MonoBehaviour
     // 이 씬의 DiceManager가 들고 있어서 씬이 바뀌면 같이 정리된다.
     Dice dicePrefabDice;
     internal Dice DicePrefabDice => dicePrefabDice != null ? dicePrefabDice : (dicePrefabDice = dicePrefab != null ? dicePrefab.GetComponent<Dice>() : null);
+
+    public static event UnityAction<int> OnChangeMaxHP;
+
+    /// <summary>
+    /// 플레이어의 최대 체력을 변경합니다.
+    /// 이벤트를 발생시킵니다.
+    /// </summary>
+    /// <param name="value"></param>
+    public void ChangeMaxHP(int value)
+    {
+        playerMaxHP = value;
+        OnChangeMaxHP?.Invoke(value);
+    }
+
+    /// <summary>
+    /// 플레이어의 최대 체력을 이벤트를 발생시키지 않고 조용히 변경합니다.
+    /// </summary>
+    /// <param name="value"></param>
+    public void ChangeMaxHPWithoutNotification(int value)
+    {
+        playerMaxHP = value;
+    }
 }
