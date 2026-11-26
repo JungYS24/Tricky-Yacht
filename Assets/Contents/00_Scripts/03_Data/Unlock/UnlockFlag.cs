@@ -7,5 +7,5 @@ public enum UnlockFlag
     BeatVolcanoBiom    = 1 << 0,
     Spend7777GoldInRun = 1 << 1,
     MaxHPThreshold300  = 1 << 2,
-    BiomeClear         = 1 << 3,
+    BeatVoidBiom       = 1 << 3,
 }
