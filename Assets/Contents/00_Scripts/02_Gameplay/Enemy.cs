@@ -267,6 +267,9 @@ public class Enemy : MonoBehaviour
         UpdateDevilAngry();
         UpdateHPBar(true);
 
+        // 새 전투: 지난 전투에서 영혼 포식으로 삼킨 주사위 기록을 비운다(처치 때 튀어나오는 주사위).
+        DevilDiceBoss.ClearDevoured();
+
         // 테스트(DiceManager.testDevilBossPhase2): 악마주사위를 처음부터 2페이즈(타락한 악마주사위)로 시작한다. 각성 컷신은 없다.
         if (dice != null && dice.testDevilBossPhase2 && DevilDiceBoss.ShouldAwaken(this))
         {
@@ -339,7 +342,8 @@ public class Enemy : MonoBehaviour
             bool lightHit = hitKind == EnemyHitKind.Other || hitKind == EnemyHitKind.Bomb;
             // 악마주사위 1페이즈를 쓰러뜨리는 타격: 죽지 않고 각성 컷신으로 이어지므로, 체력 0의 새빨간 색으로 바꾸지 않고
             // 맞기 전 색을 그대로 둔다(컷신이 눈을 감으며 원래 색으로 되돌린다).
-            bool awakening = CurrentHP <= 0 && DevilDiceBoss.ShouldAwaken(this);
+            // 타락한 악마주사위(2페이즈)를 쓰러뜨리는 타격도 같다: 뒤로 밀렸다가 돌아온 뒤 처치 시트(원래 색)로 이어진다.
+            bool awakening = CurrentHP <= 0 && (DevilDiceBoss.ShouldAwaken(this) || IsDevilFinalKill);
             if (!lightHit)
             {
                 // 피해 종류별 오버레이를 사용하고 바탕색은 현재 체력에 맞춥니다.
@@ -348,7 +352,7 @@ public class Enemy : MonoBehaviour
             }
             else hitEffectCoroutine = StartCoroutine(HitEffectRoutine());
             // 종류에 맞는 연출을 재생합니다. 치명타는 사망 확대와 충돌하지 않게 밀림을 생략합니다.
-            // 악마주사위 1페이즈는 쓰러져도 죽지 않고 각성 컷신으로 이어지므로 마지막 타격에도 밀린다.
+            // 악마주사위 1페이즈는 쓰러져도 죽지 않고 각성 컷신으로 이어지므로 마지막 타격에도 밀린다(2페이즈 처치도 밀린 뒤 처치 시트).
             if (!lightHit)
                 {
                 float strength = 1f + 0.35f * Mathf.Clamp01((float)damage / Mathf.Max(1, MaxHP));
@@ -501,8 +505,8 @@ public class Enemy : MonoBehaviour
         Color before = monsterImage.color;
         monsterImage.color = hitColor;
         float hpPercent = MaxHP > 0 ? (float)CurrentHP / MaxHP : 0f;
-        // 악마주사위 1페이즈를 쓰러뜨리는 타격은 맞기 전 색으로 돌아간다(각성 컷신이 이어진다).
-        Color targetColor = CurrentHP <= 0 && DevilDiceBoss.ShouldAwaken(this) ? before : Color.Lerp(Color.red, Color.white, hpPercent);
+        // 악마주사위 1페이즈·2페이즈를 쓰러뜨리는 타격은 맞기 전 색으로 돌아간다(각성 컷신·처치 시트가 이어진다).
+        Color targetColor = CurrentHP <= 0 && (DevilDiceBoss.ShouldAwaken(this) || IsDevilFinalKill) ? before : Color.Lerp(Color.red, Color.white, hpPercent);
 
         float elapsed = 0f;
         while (elapsed < hitEffectDuration)
@@ -543,6 +547,14 @@ public class Enemy : MonoBehaviour
     public IEnumerator PlayNormalDeathPresentation()
     {
         // DiceManager의 코루틴에서 실행하므로 몬스터 비활성화 후에도 클리어 처리가 이어집니다.
+        // 타락한 악마주사위(2페이즈) 처치: 빨간 타락 모습 그대로 금이 가 터지는 처치 시트(DebuffFeedback.PlayDevilDeath).
+        // 시트가 없으면 아래 예전 파괴 애니메이션을 쓴다.
+        if (CurrentBossAbility == BossAbilityType.DevilDice && DevilAwakened && DebuffFeedback.HasDevilDeathFrames(this))
+        {
+            yield return DebuffFeedback.PlayDevilDeath(this);
+            gameObject.SetActive(false);
+            yield break;
+        }
         if (CurrentBossAbility == BossAbilityType.DevilDice && devilDestroyFxPrefab != null && monsterImage != null && monsterImage.sprite != null)
         {
             yield return DevilDestroyRoutine();
@@ -752,7 +764,8 @@ public class Enemy : MonoBehaviour
     // 악마주사위 1페이즈를 쓰러뜨렸을 때 각성한다: 타락한 모습·2페이즈 BGM으로 바뀌고 체력바가 0에서 새 최대 체력까지 차오른다.
     // 처치 보상은 주지 않는다(DiceManager.OnEnemyKilled가 대신 부른다). 각성 컷신(DebuffFeedback.PlayDevilAwaken)이 흰 플래시 아래에서 부른다.
     // playFx: 변신음(Devil_Energy_Rise)을 여기서 낼지. 컷신은 껍질이 터질 때 직접 내므로 false로 부른다.
-    public void AwakenDevil(int phase2MaxHp, bool playFx = true)
+    // refillBar가 false면 체력 바를 빈 채로 두고, 각성 컷신이 나중에 RefillDevilHpBar로 천천히 채운다.
+    public void AwakenDevil(int phase2MaxHp, bool playFx = true, bool refillBar = true)
     {
         if (CurrentBossAbility != BossAbilityType.DevilDice || DevilAwakened) return;
         StopAttackPresentation();
@@ -772,11 +785,27 @@ public class Enemy : MonoBehaviour
         EnterDevilCorrupted(playFx);
         UpdateDevilAngry();
 
+        if (!refillBar) return;
         BindHpBarFx();
         if (hpBarFx != null)
         {
             if (enemyHPSlider != null) enemyHPSlider.maxValue = MaxHP;
             hpBarFx.OnHpChanged(from, CurrentHP, MaxHP); // 회복 연출로 차오르며 사망 페이드도 풀린다
+        }
+        else UpdateHPBar(true);
+    }
+
+    // 타락한 악마주사위(2페이즈)이고 처치 시트가 있으면 true: 마지막 타격에 밀리고 색을 유지한 뒤 처치 시트를 재생한다.
+    bool IsDevilFinalKill => CurrentBossAbility == BossAbilityType.DevilDice && DevilAwakened && DebuffFeedback.HasDevilDeathFrames(this);
+
+    // 각성 컷신: 빈 체력 바를 2페이즈 체력까지 seconds초 동안 천천히 채운다(다 차면 바가 툭 튄다). 0 이하면 바로 맞춘다.
+    public void RefillDevilHpBar(float seconds)
+    {
+        BindHpBarFx();
+        if (hpBarFx != null)
+        {
+            if (enemyHPSlider != null) enemyHPSlider.maxValue = MaxHP;
+            hpBarFx.PlayRefill(CurrentHP, MaxHP, seconds);
         }
         else UpdateHPBar(true);
     }

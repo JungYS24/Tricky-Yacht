@@ -50,9 +50,14 @@ public class DiceManager : MonoBehaviour
     [Tooltip("켜면 런의 첫 전투에 최종보스 악마주사위(비차원 보스)가 나온다. 보스전 테스트용")]
     public bool testDevilBossFirstBattle = true;
     [Tooltip("0보다 크면 악마주사위 1페이즈 최대 체력을 이 값으로 고정한다(바이옴 성장 무시). 2페이즈 체력은 BalanceConfig 배율을 따른다. 0이면 끔")]
-    public int testDevilBossHp = 50;
+    public int testDevilBossHp = 1;
     [Tooltip("켜면 악마주사위가 처음부터 2페이즈(타락한 악마주사위)로 나온다. 각성 컷신 없이 바로 타락한 모습·2페이즈 체력·붉은 배경. 2페이즈 연출 테스트용")]
-    public bool testDevilBossPhase2 = true;
+    public bool testDevilBossPhase2 = false;
+    [Tooltip("켜면 새 런을 숲 대신 공허(비차원) 바이옴에서 시작한다(배경·BGM·지도 모두 공허). 악마주사위를 잡으면 게임 클리어 화면까지 이어진다. 보스전 테스트용. 이어하기는 저장된 바이옴 그대로")]
+    public bool testStartInVoid = true;
+
+    // 맵의 보스방(악마주사위)에서 들어온 전투면 MapFlowController가 켠다. 다음 StartNewStage가 등장 대사를 보여 준 뒤 첫 턴을 시작하고 끈다.
+    [HideInInspector] public bool pendingBossIntro;
 
     [Header("엔딩 UI 설정")]
     public GameObject gameClearPanel;
@@ -260,8 +265,10 @@ public class DiceManager : MonoBehaviour
             if (GoldCounter.Instance != null && shopManager != null) GoldCounter.Instance.SetInstant(shopManager.currentGold);
             deckManager.InitializeMasterDeck(JourneyDice.FindSource(), StartingCharacterDie);
 
-            // 첫 시작은 무조건 숲(Forest)으로 고정
-            currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
+            // 첫 시작은 무조건 숲(Forest)으로 고정. 테스트(testStartInVoid)면 공허(비차원)에서 시작한다(튜토리얼 제외).
+            BiomeType startBiome = testStartInVoid && !TutorialMode.Active ? BiomeType.Void : BiomeType.Forest;
+            currentBiome = biomeList.Find(b => b.biomeType == startBiome);
+            if (currentBiome == null) currentBiome = biomeList.Find(b => b.biomeType == BiomeType.Forest);
             saveStateReady = true;
             MapFlow.BeginNewMapRun();
         }
@@ -415,6 +422,19 @@ public class DiceManager : MonoBehaviour
             FigureEffectManager.Instance.EvaluateCombatStartTriggers(this, shopManager);
         }
 
+        // 보스방(악마주사위) 등장: 전투 화면에 보스가 선 뒤 대사창으로 등장 대사를 보여 주고, 대사가 끝나면 첫 턴을 시작한다.
+        bool bossIntro = pendingBossIntro && currentPlayerHP > 0 && !enemy.IsDead;
+        pendingBossIntro = false;
+        if (bossIntro)
+        {
+            List<DiceData1> incoming = currentCombatDebuffs.Count > 0 ? new List<DiceData1>(currentCombatDebuffs) : null;
+            if (incoming != null) foreach (var die in incoming) deckManager.masterDeck.Remove(die);
+            isStartingCombat = true;
+            HandleDiceChanged();
+            StartCoroutine(PlayBossIntro(incoming));
+            return;
+        }
+
         // 소지 중인 영구 디버프가 아니라, 이번 전투에서 실제로 추가하는 주사위만 연출한다.
         // 전투 시작 피규어가 무효화/제거한 주사위는 이 목록에서 이미 빠져 있다.
         if (currentCombatDebuffs.Count > 0 && currentPlayerHP > 0 && !enemy.IsDead)
@@ -431,6 +451,39 @@ public class DiceManager : MonoBehaviour
             StartNewRound(returnPreviousDiceToDiscard: false);
             FigureEffectManager.Instance?.EvaluateLowHPTriggers(this, shopManager);
         }
+    }
+
+    // 보스방 등장 대사 → (이번 전투 디버프 주사위가 있으면 그 등장 연출) → 첫 턴. 대사 동안 판은 비어 있다.
+    private IEnumerator PlayBossIntro(List<DiceData1> incoming)
+    {
+        bool handedOff = false;
+        try
+        {
+            yield return DebuffFeedback.PlayBossIntroDialogue(DevilDiceBoss.IntroKeyPrefix, DevilDiceBoss.IntroFallback);
+            handedOff = true;
+        }
+        finally
+        {
+            // 대사 도중 끊겨도 넣을 주사위를 잃지 않고 전투 시작 잠금을 푼다.
+            if (!handedOff)
+            {
+                if (incoming != null) deckManager.masterDeck.AddRange(incoming);
+                isStartingCombat = false;
+                HandleDiceChanged();
+            }
+        }
+
+        if (incoming != null && incoming.Count > 0 && currentPlayerHP > 0 && enemy != null && !enemy.IsDead)
+        {
+            yield return PlayCombatIntro(incoming); // 끝나면 첫 턴을 시작하고 잠금을 푼다
+            yield break;
+        }
+        if (incoming != null) deckManager.masterDeck.AddRange(incoming);
+        isStartingCombat = false;
+        HandleDiceChanged();
+        deckManager.PrepareDeckForNewStage();
+        StartNewRound(returnPreviousDiceToDiscard: false);
+        FigureEffectManager.Instance?.EvaluateLowHPTriggers(this, shopManager);
     }
 
     private IEnumerator PlayCombatIntro(List<DiceData1> incoming)
@@ -737,7 +790,8 @@ public class DiceManager : MonoBehaviour
 
         int phase2Hp = Mathf.Max(1, Mathf.RoundToInt(boss.MaxHP * BalanceConfig.Current.devilPhase2HpMultiplier));
         // 변신음(Devil_Energy_Rise)은 컷신이 껍질이 터질 때 낸다.
-        yield return DebuffFeedback.PlayDevilAwaken(boss, () => boss.AwakenDevil(phase2Hp, playFx: false));
+        // 체력 바는 각성 순간 비워 둔 채로 두고, 컷신이 보스가 자리 잡은 뒤 천천히 채운다(DebuffFeedback.PlayDevilAwaken).
+        yield return DebuffFeedback.PlayDevilAwaken(boss, () => boss.AwakenDevil(phase2Hp, playFx: false, refillBar: false));
         if (boss == null || enemy != boss) yield break;
         enemyDeathHandled = false;
         ToastPopupController.Instance?.ShowToast(LocalizationManager.GetSys("SYS_DEVIL_PHASE2", "악마주사위: 이제 원페어·투페어는 피해를 주지 못합니다!"));

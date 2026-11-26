@@ -158,6 +158,10 @@ public sealed class DebuffVisualProfile : ScriptableObject
              "0~8 입이 열리며 몸이 젖혀짐, 9 가장 크게 벌어짐, 10~13 스르르 닫힘, 14 닫히며 찌그러짐, 15~25 원래 모습으로 돌아옴. " +
              "영혼 포식(먹기)과 타락의 낙인(뱉기)이 같이 쓴다. 비우면 입 없이 예전처럼 처리한다")]
     public Sprite[] devilMouthFrames;
+    [Tooltip("타락한 악마주사위(2페이즈) 처치 시트(DevilDice/Death, 36장, 456×256 칸, 바닥 가운데 기준점). " +
+             "0~4 놀라 움찔(3~4 눈 질끈), 5~11 눈을 부릅뜨고 떪, 12~17 금이 가며 빛줄기, 18~21 폭발 섬광, 22~35 조각나 흩어짐. " +
+             "비우면 예전 파괴 애니메이션(조원 프리팹)을 쓴다")]
+    public Sprite[] devilDeathFrames;
     [Tooltip("2페이즈 동안 배경 그림에 곱하는 색")]
     public Color devilBackgroundMultiply = new Color(1f, 0.7f, 0.7f, 1f);
     [Tooltip("2페이즈 동안 배경 바로 위(몬스터 아래)에 까는 붉은 막. 알파가 세기")]

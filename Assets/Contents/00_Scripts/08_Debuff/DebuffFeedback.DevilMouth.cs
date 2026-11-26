@@ -32,7 +32,7 @@ public static partial class DebuffFeedback
     static readonly Vector2 MouthCenterPixel = new Vector2(131f, 155f);
 
     // 영혼 포식(실제 시간, 초)
-    const float DevourOpenHold = 0.3f;    // 입이 다 벌어진 뒤 벌린 채 기다리는 시간(먹힐 주사위가 계속 떤다)
+    const float DevourOpenHold = 0.15f;   // 입이 다 벌어진 뒤 벌린 채 기다리는 시간(먹힐 주사위가 계속 떤다)
     const float DevourFlyTime = 0.65f;    // 먹힐 주사위가 입까지 날아가는 시간(점점 빨라짐)
     const float DevourEndScale = 0.25f;   // 입에 닿을 때 크기(처음 크기 대비)
     const float DevourShake = 0.04f;      // 먹힐 주사위가 떠는 폭(월드 단위)

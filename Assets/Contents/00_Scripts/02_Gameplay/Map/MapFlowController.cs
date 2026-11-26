@@ -294,20 +294,12 @@ public class MapFlowController
     {
         if (node == null) return;
 
-        // 테스트(DiceManager.testDevilBossFirstBattle): 런의 첫 전투 칸을 비차원 보스 칸처럼 연다(등장 대사 → 악마주사위 보스전).
+        // 테스트(DiceManager.testDevilBossFirstBattle): 런의 첫 전투 칸을 비차원 보스 칸처럼 연다(악마주사위 보스전 → 전투 화면에서 등장 대사).
         MonsterDataSO testBoss = TestDevilBoss(node);
         if (testBoss != null)
         {
-            if (dice.encounterEventPanel != null)
-            {
-                HideMapOverlays();
-                SetBoardVisible(false);
-                dice.encounterEventPanel.StartBossIntro(testBoss, DevilDiceBoss.IntroKeyPrefix, DevilDiceBoss.IntroFallback,
-                    () => BeginMapCombat(false, true, testBoss));
-                PlaceTravelChrome();
-            }
-            else
-                BeginMapCombat(false, true, testBoss);
+            dice.pendingBossIntro = true;
+            BeginMapCombat(false, true, testBoss);
             return;
         }
 
@@ -321,17 +313,10 @@ public class MapFlowController
                 BeginMapCombat(true, false, null);
                 break;
             case MapNodeType.Boss:
-                // 비차원 보스(악마주사위)는 조우자 대화창으로 등장 대사를 먼저 보여 주고 전투를 연다.
-                if (currentBiome != null && currentBiome.biomeType == BiomeType.Void && dice.encounterEventPanel != null && !TutorialMode.Active)
-                {
-                    HideMapOverlays();
-                    SetBoardVisible(false);
-                    dice.encounterEventPanel.StartBossIntro(currentBiome.bossMonster, DevilDiceBoss.IntroKeyPrefix, DevilDiceBoss.IntroFallback,
-                        () => BeginMapCombat(false, true, null));
-                    PlaceTravelChrome();
-                }
-                else
-                    BeginMapCombat(false, true, null);
+                // 비차원 보스(악마주사위)는 보스방(전투 화면)에 들어간 뒤 대사창으로 등장 대사를 보여 주고 첫 턴을 시작한다
+                // (DiceManager.PlayBossIntro, 각성 대사와 같은 대사창).
+                dice.pendingBossIntro = currentBiome != null && currentBiome.biomeType == BiomeType.Void && !TutorialMode.Active;
+                BeginMapCombat(false, true, null);
                 break;
             case MapNodeType.Portal:
                 BeginMapCombat(false, false, RollPortalMonster(node));

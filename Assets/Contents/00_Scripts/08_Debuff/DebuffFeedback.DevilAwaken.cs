@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -11,15 +12,17 @@ using UnityEngine.UI;
 // 보스 그림과 같은 칸·기준점(바닥 가운데)으로 잘라 두어 자리가 그대로 맞고, 쓰러짐·떠오름은 보스 위치를 옮겨 actor가 따라간다.
 //  1) 죽음: 마지막 타격에 밀린 뒤(Enemy가 1페이즈 마지막 타격에도 밀림을 켜고, 체력 0의 새빨간 색으로 바꾸지 않는다)
 //     눈이 서서히 감기고 BGM이 끊긴다. 체력에 따라 붉게 물들었던 색은 눈을 감는 동안 원래 색으로 돌아온다.
+//     이때부터 보스만 남기고 화면이 서서히 어두워진다(보스를 뺀 월드 그림 색을 어둡게, 화면 UI는 물러남). 껍질이 터지는 흰 번쩍임에 걷힌다.
 //  2) 쓰러짐: 눈이 반쯤 감길 때 떨어지기 시작해(점점 빨라짐) 다 감길 때 바닥에 닿고, 살짝 납작해졌다가 작게 튄다. 1.2초 정적.
 //  3) 떠오름: 보스 곁에 보라 오라가 크게 차오르며, 눈 감은 채 원래 자리까지 서서히 떠오른다.
 //  4) 눈 뜸: 잠시 뒤 붉은 눈이 확 떠지며(완전히 뜬 장으로 바로) 진동·웃음. 보라 오라는 두 배로 퍼지며 사라지고, 그 뒤 대사가 나온다.
 //  5) 대사: 전투 화면 아래 대사창(조우자 대화창과 같은 스킨)에 각성 대사 한 줄. 그동안 붉은 눈으로 노려보는 장을 천천히 앞뒤로 오간다.
 //     화면을 누르면 대사만 빨리 넘어가고 연출 자체는 건너뛰지 않는다.
 //  6) 껍질 벗겨짐: 금이 퍼짐(길게, 흔들림이 점점 세짐) → 껍질이 붉은 몸으로 바뀌는 장에서 흰 플래시·강한 흔들림. 덮인 사이
-//     awaken(타락한 모습·2페이즈 BGM·체력 다시 채우기·붉은 배경)을 부른다 → 조각이 떨어지는 동안 흔들림이 잦아들며
-//     타락 모습으로 가라앉은 뒤 실제 보스로 바꾼다.
-//  7) 'PHASE 2 · 타락한 악마주사위' 제목.
+//     awaken(타락한 모습·2페이즈 BGM·2페이즈 체력·붉은 배경)을 부른다 → 조각이 떨어지는 동안 흔들림이 잦아들며
+//     타락 모습으로 가라앉은 뒤 실제 보스로 바꾼다. 체력 바는 이때까지 빈 채로 둔다.
+//  7) 빈 체력 바가 1초 동안 2페이즈 체력까지 차오르고 다 차면 툭 튄다(Enemy.RefillDevilHpBar). 연출이 끊기면 바로 맞춘다.
+//  8) 'PHASE 2 · 타락한 악마주사위' 제목.
 // awaken은 연출이 없거나 끊겨도 반드시 한 번 부른다. 컷신이라 아래 시간 값은 실제 시간(초)이다(프로필 durationScale을 쓰지 않는다).
 // 게임의 난수 추첨 순서를 바꾸지 않도록 UnityEngine.Random을 쓰지 않는다.
 public static partial class DebuffFeedback
@@ -31,7 +34,7 @@ public static partial class DebuffFeedback
     const int AwakenCloseFrom = 5;
     const int AwakenCloseTo = 14;
     const int AwakenClosedFrame = 15;
-    const float AwakenCloseFrameTime = 0.09f; // 10장 → 0.9초
+    const float AwakenCloseFrameTime = 0.07f; // 10장 → 0.7초
     const float AwakenFallTime = 0.45f;       // 눈이 반쯤 감길 때부터 다 감길 때까지 떨어진다(점점 빨라짐)
     const float AwakenFallRatio = 1f / 6f;    // 떨어지는 거리 = 보스 키 × 이 비율
     const float AwakenBounceRatio = 0.08f;    // 닿은 뒤 튀는 높이 = 떨어진 거리 × 이 비율
@@ -60,6 +63,12 @@ public static partial class DebuffFeedback
     const int AwakenSettleTo = 25;
     const float AwakenSettleFrameTime = 0.1f;
     const float AwakenSettleHold = 0.25f;      // 마지막 장을 보여 준 뒤 실제 보스로 바꾸기까지
+    const float AwakenHpRefillTime = 1f;       // 보스가 자리 잡은 뒤 빈 체력 바가 2페이즈 체력까지 차오르는 시간(다 차면 바가 툭 튄다)
+    const float AwakenHpRefillHold = 0.2f;     // 다 찬 뒤 'PHASE 2' 제목까지
+    // 화면 어둡게: 눈이 감기기 시작할 때 보스만 남기고 서서히 어두워졌다가, 껍질이 터지는 흰 번쩍임 순간에 걷힌다.
+    const float AwakenDimIn = 0.4f;            // 어두워지는 시간
+    const float AwakenDimDarken = 0.3f;        // 보스를 뺀 월드 그림(배경·판·주사위)이 어두워지는 정도(색에 곱하는 0.7)
+    const float AwakenDimUiAlpha = 0.4f;       // 화면 UI(왼쪽 패널 등)가 물러난 투명도
 
     public static IEnumerator PlayDevilAwaken(Enemy boss, Action awaken)
     {
@@ -75,9 +84,18 @@ public static partial class DebuffFeedback
         SpriteRenderer body = boss != null ? boss.monsterImage : null;
         Sprite[] close = p != null ? p.devilCloseFrames : null;
         Sprite[] frames = p != null ? p.devilAwakenFrames : null;
+        bool refilled = false;
+        void RefillBar(float seconds)
+        {
+            if (refilled) return;
+            refilled = true;
+            if (boss != null) boss.RefillDevilHpBar(seconds);
+        }
+
         if (body == null || !HasFrames(close, AwakenClosedFrame + 1) || !HasFrames(frames, AwakenSettleTo + 1))
         {
             Awaken();
+            RefillBar(AwakenHpRefillTime);
             yield break;
         }
 
@@ -107,15 +125,18 @@ public static partial class DebuffFeedback
         Image[] aura = null;
         Sequence auraTween = null;
         Tween auraBurst = null;
+        AwakenDim dim = null;
         try
         {
             // 1) 죽음: 보스 그림을 숨기고 같은 자리에 눈 감기 그림을 띄운다(맞기 전 색 그대로). 애니메이션·BGM 정지.
+            //    보스만 남기고 화면이 서서히 어두워진다(보스를 뺀 월드 그림 색을 어둡게, 화면 UI는 물러남). 그리는 순서는 그대로다.
             actor = CreateAwakenActor(body, close[AwakenCloseFrom]);
             Color hitTint = body.color;
             actor.color = hitTint;
             body.forceRenderingOff = true;
             if (animator != null) animator.speed = 0f;
             BGMManager.Instance?.StopBGM();
+            dim = BeginAwakenDim(boss);
 
             // 2) 눈이 서서히 감기며 쓰러진다: 반쯤 감길 때 떨어지기 시작해 다 감길 때 바닥에 닿는다.
             //    체력에 따라 붉게 물들었던 색은 눈을 감는 동안 원래 색으로 돌아온다.
@@ -215,6 +236,8 @@ public static partial class DebuffFeedback
             Stretch(flash.rectTransform);
             flash.color = Color.white;
             if (animator != null) animator.speed = animatorSpeed; // 숨겨 둔 보스는 타락한 모습(Corrupted)부터 다시 움직인다
+            EndAwakenDim(dim); // 흰 번쩍임이 덮은 사이 어둠이 걷힌다
+            dim = null;
             Awaken();
             CameraShake.Instance?.ShakeImpact(1.35f);
             float[] flashSteps = { 0.65f, 0.35f, 0.12f, 0f };
@@ -238,11 +261,17 @@ public static partial class DebuffFeedback
             UnityEngine.Object.Destroy(actor.gameObject);
             actor = null;
 
+            // 9) 보스가 자리 잡으면 빈 체력 바가 2페이즈 체력까지 천천히 차오르고, 다 차면 툭 튄다.
+            RefillBar(AwakenHpRefillTime);
+            yield return WaitReal(AwakenHpRefillTime + AwakenHpRefillHold);
+
             yield return ShowAwakenTitle(stage);
         }
         finally
         {
             Awaken(); // 연출이 끊겨도 각성은 한다
+            RefillBar(0f); // 체력 바를 아직 안 채웠으면 바로 맞춘다
+            EndAwakenDim(dim); // 연출이 끊겨도 어둠·UI 투명도는 되돌린다
             if (animator != null && animator.speed == 0f) animator.speed = animatorSpeed;
             auraTween?.Kill();
             auraBurst?.Kill();
@@ -353,6 +382,68 @@ public static partial class DebuffFeedback
         }
     }
 
+    // ---------- 보스방 등장 대사 ----------
+
+    const float BossIntroLead = 0.5f;          // 전투 화면에 보스가 선 뒤 대사창이 뜨기까지
+
+    // 보스방에 들어와 전투 화면에 보스가 선 뒤, 각성 대사와 같은 전투 화면 아래 대사창에 등장 대사를 한 줄씩 보여 준다.
+    // 한 글자씩 나오고 누르면 그 줄이 바로 다 나온다. 다 나온 줄은 누르면(또는 줄 길이만큼 기다리면) 다음 줄로 넘어간다.
+    // 대사 키는 keyPrefix_DLG_01~(조우자 대화창의 보스 등장 대사와 같은 키), 번역이 없으면 fallback. 대사가 끝나면 돌아온다(그다음 첫 턴).
+    public static IEnumerator PlayBossIntroDialogue(string keyPrefix, string[] fallback)
+    {
+        int count = fallback != null ? fallback.Length : 0;
+        if (count == 0) yield break;
+
+        RectTransform stage = NewContainer("Boss Intro", Layer);
+        // 투명한 입력 막: 아래 UI를 누르지 못하게 막고, 누르면 대사를 넘긴다.
+        bool tapped = false;
+        Image catcher = CreateImage("Intro Input", null, Vector2.zero, stage);
+        Stretch(catcher.rectTransform);
+        catcher.color = Color.clear;
+        catcher.raycastTarget = true;
+        var trigger = catcher.gameObject.AddComponent<EventTrigger>();
+        var entry = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
+        entry.callback.AddListener(_ => tapped = true);
+        trigger.triggers.Add(entry);
+        try
+        {
+            yield return WaitReal(BossIntroLead);
+            TextMeshProUGUI line = CreateAwakenDialogue(stage);
+            for (int i = 0; i < count; i++)
+            {
+                LocalizationManager.TryGetLocalized(LocalizationManager.EncounterTable, keyPrefix + "_DLG_" + (i + 1).ToString("D2"), out string text);
+                if (string.IsNullOrEmpty(text)) text = fallback[i];
+                line.text = text;
+                line.maxVisibleCharacters = 0;
+                line.ForceMeshUpdate();
+                int total = line.textInfo.characterCount;
+                float hold = Mathf.Clamp(1.2f + total * 0.03f, 1.5f, 3.5f); // 긴 줄일수록 오래 머문다
+                float typing = 0f, held = 0f;
+                tapped = false;
+                while (true)
+                {
+                    float dt = Time.unscaledDeltaTime;
+                    if (line.maxVisibleCharacters < total)
+                    {
+                        typing += dt;
+                        line.maxVisibleCharacters = tapped ? total : Mathf.Min(total, Mathf.FloorToInt(typing * AwakenCharsPerSecond));
+                        tapped = false;
+                    }
+                    else
+                    {
+                        held += dt;
+                        if (tapped || held >= hold) break;
+                    }
+                    yield return null;
+                }
+            }
+        }
+        finally
+        {
+            if (stage != null) UnityEngine.Object.Destroy(stage.gameObject);
+        }
+    }
+
     // 전투 화면 아래 대사창: 조우자 대화창과 같은 스킨·글꼴·글자색. 돌려주는 글자는 대사창(부모) 안에 있다.
     static TextMeshProUGUI CreateAwakenDialogue(RectTransform parent)
     {
@@ -441,6 +532,86 @@ public static partial class DebuffFeedback
         label.textWrappingMode = TextWrappingModes.NoWrap;
         label.raycastTarget = false;
         return label;
+    }
+
+    // ---------- 각성 중 화면 어둡게 ----------
+
+    // 그리는 순서는 그대로 둔다(보스는 판 뒤, 판 테두리·주사위·체력 바는 보스 앞). 검은 막을 덮는 대신
+    // 보스(와 보스의 자식: 연출 그림·오라·그림자)를 뺀 월드 그림의 색을 곱해 어둡게 하고, 화면 UI 캔버스는 투명도만 낮춘다.
+    sealed class AwakenDim
+    {
+        public readonly List<SpriteRenderer> sprites = new List<SpriteRenderer>();
+        public readonly List<Color> colors = new List<Color>();
+        public readonly List<CanvasGroup> groups = new List<CanvasGroup>();
+        public readonly List<float> alphas = new List<float>();
+        public readonly List<bool> added = new List<bool>();
+        public Tween tween;
+    }
+
+    static AwakenDim BeginAwakenDim(Enemy boss)
+    {
+        var dim = new AwakenDim();
+        Transform bossRoot = boss != null ? boss.transform : null;
+
+        // 월드 그림(배경·판·주사위 등): 보스 쪽은 빼고 원래 색을 기억해 둔다.
+        foreach (SpriteRenderer sprite in UnityEngine.Object.FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None))
+        {
+            if (sprite == null || !sprite.gameObject.activeInHierarchy) continue;
+            if (bossRoot != null && sprite.transform.IsChildOf(bossRoot)) continue;
+            dim.sprites.Add(sprite);
+            dim.colors.Add(sprite.color);
+        }
+
+        // 화면 UI(왼쪽 패널 등): 연출 오버레이(대사창·제목)는 빼고, 화면에 붙은 최상위 캔버스의 투명도를 낮춘다.
+        Canvas layerCanvas = Layer.GetComponent<Canvas>();
+        foreach (Canvas canvas in UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+        {
+            if (canvas == null || !canvas.isRootCanvas || !canvas.isActiveAndEnabled || canvas == layerCanvas) continue;
+            if (canvas.renderMode == RenderMode.WorldSpace) continue;
+            CanvasGroup group = canvas.GetComponent<CanvasGroup>();
+            bool add = group == null;
+            if (add) group = canvas.gameObject.AddComponent<CanvasGroup>();
+            dim.groups.Add(group);
+            dim.alphas.Add(group.alpha);
+            dim.added.Add(add);
+        }
+
+        dim.tween = DOTween.To(() => 0f, k =>
+        {
+            float shade = 1f - AwakenDimDarken * k;
+            for (int i = 0; i < dim.sprites.Count; i++)
+            {
+                SpriteRenderer sprite = dim.sprites[i];
+                if (sprite == null) continue;
+                Color c = dim.colors[i];
+                sprite.color = new Color(c.r * shade, c.g * shade, c.b * shade, c.a);
+            }
+            for (int i = 0; i < dim.groups.Count; i++)
+                if (dim.groups[i] != null) dim.groups[i].alpha = dim.alphas[i] * Mathf.Lerp(1f, AwakenDimUiAlpha, k);
+        }, 1f, AwakenDimIn).SetEase(Ease.OutQuad).SetUpdate(true);
+        return dim;
+    }
+
+    // 어둠을 바로 걷는다: 월드 그림 색과 UI 투명도를 원래대로 돌린다(붙였던 CanvasGroup은 뗀다). 여러 번 불러도 된다.
+    static void EndAwakenDim(AwakenDim dim)
+    {
+        if (dim == null) return;
+        dim.tween?.Kill();
+        dim.tween = null;
+        for (int i = 0; i < dim.sprites.Count; i++)
+            if (dim.sprites[i] != null) dim.sprites[i].color = dim.colors[i];
+        dim.sprites.Clear();
+        dim.colors.Clear();
+        for (int i = 0; i < dim.groups.Count; i++)
+        {
+            CanvasGroup group = dim.groups[i];
+            if (group == null) continue;
+            if (dim.added[i]) UnityEngine.Object.Destroy(group);
+            else group.alpha = dim.alphas[i];
+        }
+        dim.groups.Clear();
+        dim.alphas.Clear();
+        dim.added.Clear();
     }
 
     // ---------- 2페이즈 붉은 배경 ----------

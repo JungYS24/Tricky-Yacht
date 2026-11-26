@@ -179,6 +179,77 @@ public class HpBarFx : MonoBehaviour
         RefreshLowHp(target);
     }
 
+    // 빈 바에서 새 체력(to)까지 duration초 동안 천천히 다시 차오른다(악마주사위 각성). 흐려져 있던 바는 서서히 다시 밝아지고,
+    // 다 차면 숫자와 바가 한 번 툭 튄다. duration이 0 이하면 바로 맞춘다. 일반 회복·피해 연출(OnHpChanged)과는 따로다.
+    public void PlayRefill(int to, int max, float duration)
+    {
+        if (config == null) return;
+        if (duration <= 0f)
+        {
+            SetImmediate(to, max);
+            return;
+        }
+        CaptureBaselines();
+        logicalMax = Mathf.Max(1, max);
+        to = Mathf.Clamp(to, 0, logicalMax);
+        logicalHp = to;
+        ApplySlider(to, logicalMax);
+
+        KillReactive();
+        ghostSeq?.Kill(false);
+        ghostColorTween?.Kill(false);
+        float fadedAlpha = canvasGroup != null ? canvasGroup.alpha : 1f;
+        CancelDeathVisuals();
+        if (canvasGroup != null && fadedAlpha < 1f)
+        {
+            canvasGroup.alpha = fadedAlpha;
+            deathFadeTween = canvasGroup.DOFade(1f, Mathf.Min(0.25f, duration)).SetEase(Ease.OutQuad);
+            Prepare(deathFadeTween);
+        }
+
+        // 빈 바에서 시작
+        float target = Ratio(to, logicalMax);
+        displayHp = 0;
+        WriteText(0, logicalMax);
+        if (fill != null) fill.fillAmount = 0f;
+        if (ghost != null)
+        {
+            ghost.fillAmount = 0f;
+            SetRgb(ghost, config.healGhostColor, 1f);
+        }
+
+        PlayGhost(target, 0f, duration * 0.85f, Ease.OutQuad); // 밝은 잔상이 살짝 앞서 간다
+        PlayHealParticles();
+        PlayFill(target, 0f, duration, Ease.InOutSine);
+        PlayCount(to, 0f, duration, Ease.InOutSine, false);
+
+        Sequence finish = DOTween.Sequence();
+        finish.AppendInterval(duration);
+        finish.AppendCallback(() =>
+        {
+            if (ghost != null) SetRgb(ghost, config.ghostColor, 1f);
+            if (hpText != null)
+            {
+                punchTween?.Kill(false);
+                punchTween = hpText.rectTransform.DOPunchScale(Vector3.one * config.textPunch, config.textPunchDuration, 10, 0.5f);
+                punchTween.OnKill(RestoreTextScale);
+                punchTween.OnComplete(RestoreTextScale);
+                Prepare(punchTween);
+            }
+            if (barRoot != null)
+            {
+                Vector3 baseScale = barRoot.localScale;
+                Tween barPunch = barRoot.DOPunchScale(Vector3.one * 0.08f, 0.3f, 6, 0.6f);
+                barPunch.OnKill(() => { if (barRoot != null) barRoot.localScale = baseScale; });
+                barPunch.OnComplete(() => { if (barRoot != null) barRoot.localScale = baseScale; });
+                Prepare(barPunch);
+            }
+        });
+        ghostColorTween = finish;
+        Prepare(ghostColorTween);
+        RefreshLowHp(target);
+    }
+
     void CancelDeathVisuals()
     {
         if (!IsDeathSequenceActive && deathFadeTween == null && frameTween == null) return;

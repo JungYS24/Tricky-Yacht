@@ -98,10 +98,11 @@ public static class CombatFlowController
         }
 
         // 타락한 악마주사위(2페이즈) 영혼 포식: 결산이 끝난 뒤 킵한 주사위 하나를 덱에서 영구히 지운다.
-        yield return dm.StartCoroutine(ProcessDevilDevour(dm));
+        bool devoured = false;
+        yield return dm.StartCoroutine(ProcessDevilDevour(dm, () => devoured = true));
 
         //적 반격 루틴 (이때 누적된 화상 데미지 데이터를 넘겨줌)
-        yield return dm.StartCoroutine(ProcessEnemyTurnRoutine(dm, handName, dm.accumulatedFlameDamage));
+        yield return dm.StartCoroutine(ProcessEnemyTurnRoutine(dm, handName, dm.accumulatedFlameDamage, devoured));
     }
 
 
@@ -259,15 +260,17 @@ public static class CombatFlowController
 
     // 영혼 포식: 대상이 있으면 보스가 입을 벌리고, 킵한 주사위가 작아지며 입으로 날아 들어간다(DebuffFeedback.PlayDevilDevour).
     // 입에 닿는 순간 콱 다물며 주사위가 덱에서 영구히 사라진다. 주사위 파괴로 취급해 주사위 파괴 피규어(사눈 다이스·재의 향로 등)가 발동한다.
-    private static IEnumerator ProcessDevilDevour(DiceManager dm)
+    // 영혼 포식을 하면 devoured를 부른다(이어지는 적 턴의 앞부분 대기를 줄이는 데 쓴다).
+    private static IEnumerator ProcessDevilDevour(DiceManager dm, System.Action devoured)
     {
         Dice target = DevilDiceBoss.PickDevourTarget(dm.enemy, dm.KeptDice, dm.masterDeck);
         if (target == null) yield break;
         DiceData1 data = target.myData;
+        devoured?.Invoke();
 
-        // 맞는 연출(흔들림·번쩍임)과 폭탄·가시 등 앞의 결산이 모두 끝난 뒤 0.5초 더 쉬었다가 입을 벌린다.
+        // 맞는 연출(흔들림·번쩍임)과 폭탄·가시 등 앞의 결산이 모두 끝난 뒤 0.3초 더 쉬었다가 입을 벌린다.
         yield return WaitForEnemyHitFeedback(dm.enemy);
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.3f);
         // 연출이 주사위 위치·크기를 되돌린 다음(같은 프레임) 부르므로 풀로 돌려보내도 줄어든 크기가 남지 않는다.
         yield return DebuffFeedback.PlayDevilDevour(dm.enemy, target, () =>
         {
@@ -278,7 +281,6 @@ public static class CombatFlowController
             FigureEffectManager.Instance?.EvaluateDiceDestroyedTriggers(dm, dm.shopManager);
             dm.ForceUpdateUI();
         });
-        yield return new WaitForSeconds(0.2f);
     }
 
     // 악마주사위의 매 턴 끝 추가 피해(간식 시간·심연의 숨결). 보호막·피해 감소는 적용하지만 피격으로 치지 않아
@@ -323,15 +325,19 @@ public static class CombatFlowController
         yield break;
     }
 
-    public static IEnumerator ProcessEnemyTurnRoutine(DiceManager dm, string handName, int flameDamage)
+    // afterDevour: 이번 턴에 영혼 포식을 했다. 플레이어 공격의 피격 연출은 이미 한참 전에 끝났으므로
+    // 화염 피해가 없으면 앞부분 대기를 줄여 영혼 포식이 끝나고 약 0.6초 뒤 적 차례가 시작된다(보통은 1.15초).
+    // 화염 피해가 있는 턴은 화염 연출 박자를 그대로 둔다.
+    public static IEnumerator ProcessEnemyTurnRoutine(DiceManager dm, string handName, int flameDamage, bool afterDevour = false)
     {
-        yield return new WaitForSeconds(0.3f);
+        bool quick = afterDevour && flameDamage <= 0;
+        yield return new WaitForSeconds(afterDevour ? 0.1f : 0.3f);
         dm.UpdateMainUI(handName);
 
         if (!dm.enemy.IsDead)
         {
             // 일반 공격 후 화염 데미지가 0.3초후에 터짐
-            yield return new WaitForSeconds(0.3f);
+            yield return new WaitForSeconds(quick ? 0.1f : 0.3f);
 
             // 화상 스택은 그대로 두고, 이번에 들어가는 피해에만 용광로 등의 % 증가를 곱한다.
             float flameMult = FigureEffectManager.Instance != null ? FigureEffectManager.Instance.GetFlameDamageMultiplier() : 1f;
@@ -351,7 +357,7 @@ public static class CombatFlowController
             }
             else
             {
-                yield return new WaitForSeconds(0.55f);
+                yield return new WaitForSeconds(quick ? 0.4f : 0.55f);
             }
 
             dm.enemy.DecreaseTurn();

@@ -85,13 +85,20 @@ public static class DevilDiceBoss
     }
 
     // 주사위를 덱·뽑을 더미·버린 더미에서 영구히 지운다(주사위 파괴와 같은 경로).
+    // 영혼 포식으로 삼킨 주사위로 기록해 두었다가, 보스를 처치할 때 부서지는 몸에서 튀어나오는 연출에 쓴다(덱으로 돌아오지는 않는다).
     public static void RemoveFromDeck(DeckManager deckManager, DiceData1 die)
     {
         if (deckManager == null || die == null) return;
         deckManager.masterDeck.Remove(die);
         deckManager.drawPile.RemoveAll(d => ReferenceEquals(d, die));
         deckManager.discardPile.RemoveAll(d => ReferenceEquals(d, die));
+        devoured.Add(die);
     }
+
+    // 이번 전투에서 영혼 포식으로 삼킨 주사위(처치 연출 전용 기록). 새 몬스터를 세팅할 때 비운다.
+    static readonly List<DiceData1> devoured = new List<DiceData1>();
+    public static IReadOnlyList<DiceData1> Devoured => devoured;
+    public static void ClearDevoured() => devoured.Clear();
 
     // 장난의 저주로 그 턴만 바꿔 놓은 주사위(바뀐 데이터 → 원래 데이터). 바뀐 데이터는 덱에 넣지 않는다.
     static readonly Dictionary<DiceData1, DiceData1> swappedDice = new Dictionary<DiceData1, DiceData1>();

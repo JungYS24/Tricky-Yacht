@@ -1,0 +1,995 @@
+fileFormatVersion: 2
+guid: 1e4b4507d52b4f58a24987a9798b2fd6
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 1802176843868454255
+    second: DevilDice_IdleC_0
+  - first:
+      213: -3376680319631739694
+    second: DevilDice_IdleC_1
+  - first:
+      213: -7207285888584393078
+    second: DevilDice_IdleC_2
+  - first:
+      213: -3269716872132693646
+    second: DevilDice_IdleC_3
+  - first:
+      213: -1206751252457645601
+    second: DevilDice_IdleC_4
+  - first:
+      213: -8113489941072577680
+    second: DevilDice_IdleC_5
+  - first:
+      213: 1381509617858324201
+    second: DevilDice_IdleC_6
+  - first:
+      213: 3342130931340669438
+    second: DevilDice_IdleC_7
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 4096
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 128
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Devil_Dice_Death_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1280
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89da62a2b5664634a7da0a480993d330
+      internalID: 6866954333732852770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_1
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 1280
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf4b8e4cc0af46eab660e1871310e0d5
+      internalID: 4331712143708722194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_2
+      rect:
+        serializedVersion: 2
+        x: 912
+        y: 1280
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9eecb26b10f4442fbdbf23b66a3c8990
+      internalID: 6686697317858339424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_3
+      rect:
+        serializedVersion: 2
+        x: 1368
+        y: 1280
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e100e7260da7477e9f7d3cf97a2820b2
+      internalID: -745791435523626547
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_4
+      rect:
+        serializedVersion: 2
+        x: 1824
+        y: 1280
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50d9d60fc0874f748b993af85a66fce6
+      internalID: 4425851974545357301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_5
+      rect:
+        serializedVersion: 2
+        x: 2280
+        y: 1280
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: edaa1e8e5b9a48b09b39c610232de558
+      internalID: 5650605384877437195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_6
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1024
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7380f3c297ac459691e1a9ec35da1955
+      internalID: 4019482943267256419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_7
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 1024
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2cc2c40b07f44239af3b9e04ba9f0808
+      internalID: -6288641101324051447
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_8
+      rect:
+        serializedVersion: 2
+        x: 912
+        y: 1024
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 571f8f28e87c494ca42cca7bdfc38a6f
+      internalID: -7543484190565266579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_9
+      rect:
+        serializedVersion: 2
+        x: 1368
+        y: 1024
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 302c061163b84c349c400f84111a7548
+      internalID: -3263983398990625922
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_10
+      rect:
+        serializedVersion: 2
+        x: 1824
+        y: 1024
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d694bf0e224342768b3a6f8eb6be7a05
+      internalID: -2052287678188763522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_11
+      rect:
+        serializedVersion: 2
+        x: 2280
+        y: 1024
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50b3b3797c36471f859b5e3f1325831f
+      internalID: -4035014021128518159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 768
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba0420fc3b7140859bbbe99a4c1c9115
+      internalID: 4122454362312007350
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_13
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 768
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c828ae7ecc494696a3ace0f4d2f0d310
+      internalID: 707753084349552487
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_14
+      rect:
+        serializedVersion: 2
+        x: 912
+        y: 768
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7100daa480c54818a0f1acf83ba793a5
+      internalID: -7030454796902607129
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_15
+      rect:
+        serializedVersion: 2
+        x: 1368
+        y: 768
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4a8fb05577d40ae92befab2456ea9f3
+      internalID: -4722303214340033913
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_16
+      rect:
+        serializedVersion: 2
+        x: 1824
+        y: 768
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d07697262daa42c9a7acc8f4c7091129
+      internalID: -7535902465168729021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_17
+      rect:
+        serializedVersion: 2
+        x: 2280
+        y: 768
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 081b3fc961db4661971184477c8f50b2
+      internalID: 9166047312945179537
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_18
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 512
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2970772373a74d1d9a958b54771a63dd
+      internalID: -1717126467715407566
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_19
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 512
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 77a007619acd4f08bafa995522d469b2
+      internalID: 7348223484907274096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_20
+      rect:
+        serializedVersion: 2
+        x: 912
+        y: 512
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc34487f801e4bbe9c76a816b3f247b6
+      internalID: -3502026099873179361
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_21
+      rect:
+        serializedVersion: 2
+        x: 1368
+        y: 512
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3ce499799ad94f9cbcab09627937de06
+      internalID: 3469684073870693738
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_22
+      rect:
+        serializedVersion: 2
+        x: 1824
+        y: 512
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08a2c383a9ce4385894df5a8895328f3
+      internalID: -5103934507847773315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_23
+      rect:
+        serializedVersion: 2
+        x: 2280
+        y: 512
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a286e10b3b634e05b1c38e606c106ccf
+      internalID: 7945676874189224048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_24
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 256
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f79cdb41d434a2c9d22f615945fb36d
+      internalID: -1896540537796485007
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_25
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 256
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d5beb3d209d47ebbdcb4dbc61db2d35
+      internalID: -6512210945301899398
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_26
+      rect:
+        serializedVersion: 2
+        x: 912
+        y: 256
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94431e85c65a46a0b36e398aa22c47cf
+      internalID: -1024116735697493096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_27
+      rect:
+        serializedVersion: 2
+        x: 1368
+        y: 256
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef9808c8d5b44a609238aa5c22dc9454
+      internalID: -5491432522948464530
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_28
+      rect:
+        serializedVersion: 2
+        x: 1824
+        y: 256
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a22b07f742014c88b46fc49d076da796
+      internalID: 6540150554335606096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_29
+      rect:
+        serializedVersion: 2
+        x: 2280
+        y: 256
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2385d5d4da284f12ae9638cf6033bdeb
+      internalID: 8436135244891159397
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 20adc4e56ea24795adcf509340346c2d
+      internalID: -3086086700606525672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_31
+      rect:
+        serializedVersion: 2
+        x: 456
+        y: 0
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e533e928f5654575a304d3c61fad91de
+      internalID: -671716387094294186
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_32
+      rect:
+        serializedVersion: 2
+        x: 912
+        y: 0
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d9486d3f1154607af47e0f25865f1e8
+      internalID: 5718857094127233740
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_33
+      rect:
+        serializedVersion: 2
+        x: 1368
+        y: 0
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da5f6d4876844d27b871f19948f43dae
+      internalID: 4729278478969134368
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_34
+      rect:
+        serializedVersion: 2
+        x: 1824
+        y: 0
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d1efa63d4614081b2ef5b0bb45e0912
+      internalID: 5491199911305161501
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Devil_Dice_Death_35
+      rect:
+        serializedVersion: 2
+        x: 2280
+        y: 0
+        width: 456
+        height: 256
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc1d7a189c894ccdb9b9ab88d7f9cf8b
+      internalID: -3469593768295798200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 390e985af44248ae9a382f674b20e6e6
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Devil_Dice_Death_0: 6866954333732852770
+      Devil_Dice_Death_1: 4331712143708722194
+      Devil_Dice_Death_2: 6686697317858339424
+      Devil_Dice_Death_3: -745791435523626547
+      Devil_Dice_Death_4: 4425851974545357301
+      Devil_Dice_Death_5: 5650605384877437195
+      Devil_Dice_Death_6: 4019482943267256419
+      Devil_Dice_Death_7: -6288641101324051447
+      Devil_Dice_Death_8: -7543484190565266579
+      Devil_Dice_Death_9: -3263983398990625922
+      Devil_Dice_Death_10: -2052287678188763522
+      Devil_Dice_Death_11: -4035014021128518159
+      Devil_Dice_Death_12: 4122454362312007350
+      Devil_Dice_Death_13: 707753084349552487
+      Devil_Dice_Death_14: -7030454796902607129
+      Devil_Dice_Death_15: -4722303214340033913
+      Devil_Dice_Death_16: -7535902465168729021
+      Devil_Dice_Death_17: 9166047312945179537
+      Devil_Dice_Death_18: -1717126467715407566
+      Devil_Dice_Death_19: 7348223484907274096
+      Devil_Dice_Death_20: -3502026099873179361
+      Devil_Dice_Death_21: 3469684073870693738
+      Devil_Dice_Death_22: -5103934507847773315
+      Devil_Dice_Death_23: 7945676874189224048
+      Devil_Dice_Death_24: -1896540537796485007
+      Devil_Dice_Death_25: -6512210945301899398
+      Devil_Dice_Death_26: -1024116735697493096
+      Devil_Dice_Death_27: -5491432522948464530
+      Devil_Dice_Death_28: 6540150554335606096
+      Devil_Dice_Death_29: 8436135244891159397
+      Devil_Dice_Death_30: -3086086700606525672
+      Devil_Dice_Death_31: -671716387094294186
+      Devil_Dice_Death_32: 5718857094127233740
+      Devil_Dice_Death_33: 4729278478969134368
+      Devil_Dice_Death_34: 5491199911305161501
+      Devil_Dice_Death_35: -3469593768295798200
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
