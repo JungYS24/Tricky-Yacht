@@ -509,6 +509,7 @@ public class ShopManager : MonoBehaviour
     public void ShowTicketSelection()
     {
         if (allTicketsPool.Count < 3) return;
+        RestoreTicketSlotLayout();
 
         if (ticketSelectionPanel != null)
         {
@@ -536,10 +537,105 @@ public class ShopManager : MonoBehaviour
         }
     }
 
+    // 전리품 황금 티켓: 족보 8종 전체 중 하나를 골라 upgradeMultiplier 배로 올린다.
+    // 기존 티켓 선택 창을 다시 쓰고, 모자란 칸은 첫 칸을 복제해 4×2로 늘어놓는다(닫으면 원래 3칸 배치로 되돌림).
+    public void ShowTicketSelection(IList<TicketItemSO> candidates, float upgradeMultiplier)
+    {
+        if (candidates == null || candidates.Count == 0 || ticketChoiceSlots == null || ticketChoiceSlots.Length == 0) return;
+
+        if (ticketSelectionPanel != null)
+        {
+            ticketSelectionPanel.SetActive(true);
+            Transform dim = ticketSelectionPanel.transform.Find("DimPanel");
+            if (dim != null) dim.SetAsFirstSibling();
+            ticketSelectionPanel.transform.SetAsLastSibling();
+        }
+        SetTicketCombatButtonsHidden(true);
+
+        CaptureTicketSlotLayout();
+        TicketChoiceSlot template = ticketChoiceSlots[0];
+        while (extraTicketSlots.Count + ticketChoiceSlots.Length < candidates.Count)
+        {
+            TicketChoiceSlot clone = Instantiate(template, template.transform.parent, false);
+            clone.name = $"{template.name} (Choice {extraTicketSlots.Count})";
+            extraTicketSlots.Add(clone);
+        }
+
+        var slots = new List<TicketChoiceSlot>(ticketChoiceSlots);
+        slots.AddRange(extraTicketSlots);
+
+        const int columns = 4;
+        int rows = Mathf.CeilToInt(candidates.Count / (float)columns);
+        Vector2 center = ticketSlotHomes.Count > 1 ? ticketSlotHomes[1].position : Vector2.zero;
+        Vector3 baseScale = ticketSlotHomes.Count > 0 ? ticketSlotHomes[0].scale : Vector3.one;
+        RectTransform templateRect = template.transform as RectTransform;
+        float cardWidth = templateRect != null ? templateRect.rect.width * baseScale.x : 300f;
+        float cardHeight = templateRect != null ? templateRect.rect.height * baseScale.y : 220f;
+        const float shrink = 0.72f;
+        float stepX = cardWidth * shrink + 24f;
+        float stepY = cardHeight * shrink + 18f;
+
+        for (int i = 0; i < slots.Count; i++)
+        {
+            bool used = i < candidates.Count;
+            slots[i].gameObject.SetActive(used);
+            if (!used) continue;
+
+            int row = i / columns;
+            int col = i % columns;
+            int inRow = Mathf.Min(columns, candidates.Count - row * columns);
+            var rect = slots[i].transform as RectTransform;
+            if (rect != null)
+            {
+                rect.anchoredPosition = center + new Vector2((col - (inRow - 1) * 0.5f) * stepX, ((rows - 1) * 0.5f - row) * stepY);
+                rect.localScale = baseScale * shrink;
+            }
+            slots[i].Setup(candidates[i], this, upgradeMultiplier);
+        }
+        ticketLayoutChanged = true;
+    }
+
+    // 3칸 기본 티켓 창의 원래 위치·크기
+    struct TicketSlotHome { public Vector2 position; public Vector3 scale; }
+    readonly List<TicketSlotHome> ticketSlotHomes = new List<TicketSlotHome>();
+    readonly List<TicketChoiceSlot> extraTicketSlots = new List<TicketChoiceSlot>();
+    bool ticketLayoutChanged;
+
+    void CaptureTicketSlotLayout()
+    {
+        if (ticketSlotHomes.Count > 0 || ticketChoiceSlots == null) return;
+        foreach (var slot in ticketChoiceSlots)
+        {
+            var rect = slot != null ? slot.transform as RectTransform : null;
+            ticketSlotHomes.Add(new TicketSlotHome
+            {
+                position = rect != null ? rect.anchoredPosition : Vector2.zero,
+                scale = rect != null ? rect.localScale : Vector3.one
+            });
+        }
+    }
+
+    void RestoreTicketSlotLayout()
+    {
+        if (!ticketLayoutChanged) return;
+        ticketLayoutChanged = false;
+        for (int i = 0; i < ticketChoiceSlots.Length && i < ticketSlotHomes.Count; i++)
+        {
+            var rect = ticketChoiceSlots[i] != null ? ticketChoiceSlots[i].transform as RectTransform : null;
+            if (rect == null) continue;
+            rect.anchoredPosition = ticketSlotHomes[i].position;
+            rect.localScale = ticketSlotHomes[i].scale;
+            ticketChoiceSlots[i].gameObject.SetActive(true);
+        }
+        foreach (var extra in extraTicketSlots)
+            if (extra != null) extra.gameObject.SetActive(false);
+    }
+
     public void CloseTicketSelection()
     {
         if (ticketSelectionPanel != null)
             ticketSelectionPanel.SetActive(false);
+        RestoreTicketSlotLayout();
         SetTicketCombatButtonsHidden(false);
     }
 
@@ -576,6 +672,20 @@ public class ShopManager : MonoBehaviour
     }
 
     // 스탬프 선택창 함수
+    // 티켓·코팅·스탬프·위성 선택 창 중 하나라도 열려 있는지(전리품 효과 큐가 닫힐 때까지 기다릴 때 쓴다).
+    public bool IsAnyChoicePanelOpen
+    {
+        get
+        {
+            if (ticketSelectionPanel != null && ticketSelectionPanel.activeSelf) return true;
+            if (CoatingSelectionPanel.IsPanelOpen || StampSelectionPanel.IsPanelOpen || SatelliteSelectionPanel.IsPanelOpen) return true;
+            if (coatingSelectionPanel != null && coatingSelectionPanel.panelRoot != null && coatingSelectionPanel.panelRoot.activeSelf) return true;
+            if (stampSelectionPanel != null && stampSelectionPanel.panelRoot != null && stampSelectionPanel.panelRoot.activeSelf) return true;
+            if (satelliteSelectionPanel != null && satelliteSelectionPanel.panelRoot != null && satelliteSelectionPanel.panelRoot.activeSelf) return true;
+            return false;
+        }
+    }
+
     public void ShowStampSelection(StampType type, Sprite sealImage)
     {
         if (stampSelectionPanel != null && diceManager != null)

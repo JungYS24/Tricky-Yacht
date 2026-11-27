@@ -132,6 +132,7 @@ public class GameSaveManager : MonoBehaviour
         data.isNextCombatHPTiedToOne = dice.isNextCombatHPTiedToOne;
         data.wandererRestoreHP = dice.wandererRestoreHP;
         data.extraShopSlots = dice.extraShopSlots;
+        data.rewardLegendaryPity = dice.rewardLegendaryPity;
         if (dice.currentBiome != null)
         {
             data.savedBiomeType = (int)dice.currentBiome.biomeType;

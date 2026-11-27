@@ -104,6 +104,7 @@ public class DiceManager : MonoBehaviour
     [HideInInspector] public bool isNextCombatHPTiedToOne = false; // 숙원의 방랑자 패널티
     [HideInInspector] public int wandererRestoreHP = 0; // 숙원의 방랑자: 체력 1로 싸우는 전투에서 이기면 되돌릴 체력. 0이면 없음
     [HideInInspector] public int extraShopSlots = 0; // 상점 칸 증감. 밀렵꾼 봉인이면 음수
+    [HideInInspector] public int rewardLegendaryPity = 0; // 전리품 레전드 천장: 보스 화면을 뺀, 레전드가 안 나온 연속 화면 수
     [HideInInspector] public int perfumerWeaknessTurns = 0; // 조향사 시련 턴 수
     [HideInInspector] public bool isNextShopFree = false; //녹슨 닻의 선장 무료 상점
 
@@ -1088,6 +1089,7 @@ public class DiceManager : MonoBehaviour
         if (isStartingCombat) return;
         permanentFigureMultiplier = 0f;
         permanentFigureChips = 0;
+        rewardLegendaryPity = 0;
         //재시작시 가짜 주사위 참조 안전하게 비우기
         currentCombatDebuffs.Clear();
         Debuffs.DropDrawTriggers(); // 골드는 아래에서 초기값으로 다시 맞춘다

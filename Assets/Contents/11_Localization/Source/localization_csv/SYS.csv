@@ -14,3 +14,6 @@ SYS,SYS_CAPTURE_ALREADY_OWNED,이미 보유한 피규어입니다.,You already o
 SYS,SYS_CAPTURE_NO_FIGURE,포획할 피규어가 없습니다.,This monster has no Figure to capture.,捕獲できるフィギュアがありません。,没有可捕获的手办。,페퍼민트를 눌렀지만 피규어를 주지 않는 몬스터일 때 토스트
 SYS,SYS_COUPON_EMPTY,쿠폰 코드를 입력해 주세요.,Please enter a coupon code.,クーポンコードを入力してください。,请输入兑换码。,쿠폰 입력 팝업: 빈 코드로 확인을 눌렀을 때
 SYS,SYS_COUPON_INVALID,유효하지 않은 쿠폰 코드입니다.,Invalid coupon code.,無効なクーポンコードです。,兑换码无效。,쿠폰 입력 팝업: 없는 코드일 때
+SYS,SYS_LOOT_SNACK_FULL,스낵칸이 가득 찼습니다.,Snack slots are full.,,,전리품 카드: 스낵을 1개도 넣을 수 없을 때
+SYS,SYS_LOOT_SNACK_PARTIAL,스낵칸이 부족해 {0}개 중 {1}개만 받았습니다.,Not enough snack slots: received {1} of {0}.,,,전리품: 스낵이 일부만 들어갔을 때
+SYS,SYS_TICKET_CHOICE_DESC,이 족보의 배수가 영구적으로 ×{0} 된다.,Permanently multiply this hand by x{0}.,,,황금 티켓 선택 창 툴팁

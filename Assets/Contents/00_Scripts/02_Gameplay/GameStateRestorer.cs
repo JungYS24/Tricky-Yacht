@@ -201,6 +201,7 @@ public static class GameStateRestorer
         dm.isNextCombatHPTiedToOne = data.isNextCombatHPTiedToOne;
         dm.wandererRestoreHP = Mathf.Max(0, data.wandererRestoreHP);
         dm.extraShopSlots = data.extraShopSlots;
+        dm.rewardLegendaryPity = Mathf.Max(0, data.rewardLegendaryPity);
         if (dm.biomeList.Count > 0)
         {
             dm.currentBiome = dm.biomeList.Find(b => (int)b.biomeType == data.savedBiomeType);

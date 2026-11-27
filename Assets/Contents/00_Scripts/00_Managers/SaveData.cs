@@ -117,6 +117,7 @@ public class SaveData
     public bool isNextCombatHPTiedToOne; // 숙원의 방랑자: 다음 전투 체력 1
     public int wandererRestoreHP;        // 숙원의 방랑자: 그 전투에서 이기면 되돌릴 체력(0이면 없음)
     public int extraShopSlots;           // 밀렵꾼 상점 칸 봉인(음수)
+    public int rewardLegendaryPity;      // 전리품 레전드 천장 카운터. 예전 저장에는 없어서 0으로 읽힌다.
     public int savedBiomeType; // 바이옴 저장
 
     //싸우던 몬스터 상태 저장
