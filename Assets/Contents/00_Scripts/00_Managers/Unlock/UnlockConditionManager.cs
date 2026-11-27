@@ -98,7 +98,6 @@ public class UnlockConditionManager : MonoBehaviour
     private class RuntimeConditions
     {
         public int UsedGolds { get; private set; } = 0;
-        public int MaxHP { get; private set; } = DiceManager.Instance.playerMaxHP;
 
         public RuntimeConditions()
         {
@@ -123,8 +122,7 @@ public class UnlockConditionManager : MonoBehaviour
 
         public void ChangeMaxHP(int value)
         {
-            MaxHP = value;
-            if (MaxHP >= 300)
+            if (value >= 300)
             {
                 Unlock(UnlockFlag.MaxHPThreshold300);
             }
