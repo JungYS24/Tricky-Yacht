@@ -14,6 +14,7 @@ public class CharacterApply : MonoBehaviour
     [SerializeField] private TextMeshProUGUI[] startLabels;
 
     private CharacterData data;
+    private int selectedIdx = -1;
 
     public bool IsConfirmOpen => finalCheckPanel != null && finalCheckPanel.activeSelf;
 
@@ -26,6 +27,12 @@ public class CharacterApply : MonoBehaviour
     public void SetCharacter(CharacterData character)
     {
         data = character;
+    }
+
+    public void SetDedicateFigure(int idx)
+    {
+        if (idx < data.DedicateFigureDatas.Length)
+            selectedIdx = idx;
     }
 
     // 잠긴 캐릭터는 정보만 볼 수 있고 시작은 못 한다.
@@ -44,10 +51,10 @@ public class CharacterApply : MonoBehaviour
     {
         if (apply)
         {
-            if (data == null || !data.IsUnlocked)
+            if (data == null || !data.IsUnlocked || selectedIdx == -1)
                 return;
 
-            CharacterStatus.Selected = new(data.CharacterName, data.InitialHP, data.InitialGold, data.DedicateDiceData, data.DedicateFigureData);
+            CharacterStatus.Selected = new(data.CharacterName, data.InitialHP, data.InitialGold, data.DedicateDiceData, data.DedicateFigureDatas[selectedIdx]);
             SceneManager.LoadScene("MainScene_Map");
         }
         else

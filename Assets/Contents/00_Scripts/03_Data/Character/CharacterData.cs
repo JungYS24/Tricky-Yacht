@@ -17,7 +17,8 @@ public class CharacterData : ScriptableObject
     [Header("전용 데이터")]
     [SerializeField] private DiceItemSO dedicateDice;
 
-    [SerializeField] private FigureItemSO dedicateFigure;
+    [SerializeField] private FigureItemSO dedicateFigure1;
+    [SerializeField] private FigureItemSO dedicateFigure2;
 
     [Header("선택창 표시")]
     [SerializeField] private Sprite portrait;
@@ -36,7 +37,10 @@ public class CharacterData : ScriptableObject
 
     public DiceItemSO DedicateDiceData => dedicateDice;
 
-    public FigureItemSO DedicateFigureData => dedicateFigure;
+    [System.Obsolete(nameof(DedicateFigureDatas) + "를 사용하십시오.", false)]
+    public FigureItemSO DedicateFigureData => dedicateFigure1;
+
+    public FigureItemSO[] DedicateFigureDatas => new[] { dedicateFigure1, dedicateFigure2 };
 
     public Sprite Portrait => portrait;
 
