@@ -217,6 +217,8 @@ public class MapFlowController
             return;
         }
 
+        UnlockConditionManager.Initialize();
+
         stageProgression.BeginRun(UnityEngine.Random.Range(1, int.MaxValue));
         if (currentBiome == null && dice.biomeList != null)
             currentBiome = dice.biomeList.Find(b => b.biomeType == BiomeType.Forest);

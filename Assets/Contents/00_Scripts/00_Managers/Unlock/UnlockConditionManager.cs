@@ -78,6 +78,11 @@ public class UnlockConditionManager : MonoBehaviour
         PlayerPrefs.SetInt(UNLOCKED_KEY, (int)unlockedFlag);
     }
 
+    public static void Initialize()
+    {
+        rc = new();
+    }
+
     private static UnlockFlag GetMask()
     {
         var flag = UnlockFlag.None;
@@ -91,8 +96,11 @@ public class UnlockConditionManager : MonoBehaviour
     private void Awake()
     {
         unlockedFlag = useUserData ? (UnlockFlag)PlayerPrefs.GetInt(UNLOCKED_KEY, 0) : initialFlag;
+    }
 
-        rc = new();
+    private void OnDestroy()
+    {
+        rc = null;
     }
 
     private class RuntimeConditions
