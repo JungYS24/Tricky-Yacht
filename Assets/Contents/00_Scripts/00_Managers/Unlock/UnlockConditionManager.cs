@@ -113,7 +113,7 @@ public class UnlockConditionManager : MonoBehaviour
 
         public void AddUsedGold(int amount)
         {
-            UsedGolds += amount;
+            UsedGolds += Mathf.Max(0, amount);
             if (UsedGolds >= 7777)
             {
                 Unlock(UnlockFlag.Spend7777GoldInRun);
