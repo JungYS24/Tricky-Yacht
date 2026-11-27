@@ -8,14 +8,21 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 // 디버프 연출(DebuffFeedback의 일부): 최종보스 악마주사위 각성(1페이즈 체력 0 → 2페이즈 타락한 악마주사위). 실제 시간 약 12초.
-// 연출 동안에는 보스 그림을 숨기고, 보스의 자식으로 붙인 그림(actor)에 전용 시트를 재생한다. 두 시트(DevilDice/Awaken)는
-// 보스 그림과 같은 칸·기준점(바닥 가운데)으로 잘라 두어 자리가 그대로 맞고, 쓰러짐·떠오름은 보스 위치를 옮겨 actor가 따라간다.
-//  1) 죽음: 마지막 타격에 밀린 뒤(Enemy가 1페이즈 마지막 타격에도 밀림을 켜고, 체력 0의 새빨간 색으로 바꾸지 않는다)
-//     눈이 서서히 감기고 BGM이 끊긴다. 체력에 따라 붉게 물들었던 색은 눈을 감는 동안 원래 색으로 돌아온다.
-//     이때부터 보스만 남기고 화면이 서서히 어두워진다(보스를 뺀 월드 그림 색을 어둡게, 화면 UI는 물러남). 껍질이 터지는 흰 번쩍임에 걷힌다.
-//  2) 쓰러짐: 눈이 반쯤 감길 때 떨어지기 시작해(점점 빨라짐) 다 감길 때 바닥에 닿고, 살짝 납작해졌다가 작게 튄다. 1.2초 정적.
-//  3) 떠오름: 보스 곁에 보라 오라가 크게 차오르며, 눈 감은 채 원래 자리까지 서서히 떠오른다.
-//  4) 눈 뜸: 잠시 뒤 붉은 눈이 확 떠지며(완전히 뜬 장으로 바로) 진동·웃음. 보라 오라는 두 배로 퍼지며 사라지고, 그 뒤 대사가 나온다.
+// 연출 동안에는 보스 그림을 숨기고, 보스의 자식으로 붙인 그림(actor)에 전용 시트를 재생한다. 시트(DevilDice/Phase1_New의
+// 맞는 동작·평소 동작 장과 각성 시트)는 보스 그림과 같은 칸·기준점(바닥 가운데)으로 잘라 두어 자리가 그대로 맞고,
+// 쓰러짐·떠오름은 보스 위치를 옮겨 actor가 따라간다.
+//  1) 죽음: 마지막 타격에 밀리며 눈을 찡그려 감은 채 멈춘다(Enemy가 1페이즈 마지막 타격에도 밀림을 켜고 애니메이터 HitDown을
+//     재생하며, 체력 0의 새빨간 색으로 바꾸지 않는다). 컷신은 그 동작이 끝나길 기다렸다가 BGM을 끊는다.
+//  2) 쓰러짐: 잠깐 멈췄다가 찡그려 감은 눈 그대로 떨어지고(점점 빨라짐), 바닥에 닿아 살짝 납작해졌다가 작게 튄다.
+//     체력에 따라 붉게 물들었던 색은 떨어지는 동안 원래 색으로 돌아온다. 찡그린 채(몸의 점은 꺼진 채) 누워 있다가 힘이 풀리며
+//     한 가지씩 바뀐다: 먼저 눈만 반쯤 풀렸다가 편히 감기고, 그다음 날개가 천천히 축 늘어진다(점은 꺼진 채, 프로필 devilLimpFrames).
+//     힘이 풀리기 시작할 때부터 보스만 남기고 화면이 서서히 어두워진다(보스를 뺀 월드 그림 색을 어둡게, 화면 UI는 물러남.
+//     껍질이 터지는 흰 번쩍임에 걷힌다). 그대로 정적.
+//  3) 떠오름: 보스 곁에 옅은 보라 오라가 차오르며, 눈 감은 채 원래 자리까지 서서히 떠오르고 그동안 늘어졌던 날개를
+//     천천히 들어 올려 위로 펴며 몸의 점이 서서히 다시 붉어진다(프로필 devilWingFrames). 떠오르는 동안과 꼭대기에서 멈춘 동안
+//     화면이 약하게 떨리며 점점 세진다.
+//  4) 눈 뜸: 잠시 뒤 붉은 눈이 확 떠지며(완전히 뜬 장으로 바로) 웃음과 함께 좌우로 강하게 흔들리고(점점 잦아듦),
+//     보스가 순간 커졌다 돌아오며 화면이 붉게 한 번 번쩍인다. 보라 오라가 확 진해졌다가 두 배로 퍼지며 사라지고, 그 뒤 대사가 나온다.
 //  5) 대사: 전투 화면 아래 대사창(조우자 대화창과 같은 스킨)에 각성 대사 한 줄. 그동안 붉은 눈으로 노려보는 장을 천천히 앞뒤로 오간다.
 //     화면을 누르면 대사만 빨리 넘어가고 연출 자체는 건너뛰지 않는다.
 //  6) 껍질 벗겨짐: 금이 퍼짐(길게, 흔들림이 점점 세짐) → 껍질이 붉은 몸으로 바뀌는 장에서 흰 플래시·강한 흔들림. 덮인 사이
@@ -30,22 +37,47 @@ public static partial class DebuffFeedback
     public const string AwakenLineKey = "ENC_DEVIL_DICE_AWAKEN_DLG_01";
     const string AwakenLineFallback = "좋아, 디저트 시간은 끝이야. 이제부터는… 메인 디시거든.";
 
-    // 눈 감기(프로필 devilCloseFrames): 앞 다섯 장은 거의 뜬 눈이라 건너뛰고 5~14로 감은 뒤 15(감긴 채)로 멈춘다.
-    const int AwakenCloseFrom = 5;
-    const int AwakenCloseTo = 14;
-    const int AwakenClosedFrame = 15;
-    const float AwakenCloseFrameTime = 0.07f; // 10장 → 0.7초
-    const float AwakenFallTime = 0.45f;       // 눈이 반쯤 감길 때부터 다 감길 때까지 떨어진다(점점 빨라짐)
+    // 마지막 타격의 동작(애니메이터 HitDown, 0.4초)이 찡그려 감은 장에 닿을 때까지 기다리는 최대 시간.
+    const float AwakenHitWaitMax = 1f;
+    // 눈 감기(프로필 devilCloseFrames): 0 = 찡그려 감은 눈(HitDown의 마지막 장과 같은 그림). 이 장으로 떨어진다.
+    // 1~2 = 같은 장에서 눈만 반쯤 풀림 → 편히 감김(없으면 건너뛴다).
+    const int AwakenShutFrame = 0;
+    const int AwakenRelaxFrom = 1;
+    const int AwakenRelaxTo = 2;
+    const float AwakenRelaxStepTime = 0.15f;  // 눈이 풀리는 장 하나를 보여 주는 시간(2장 → 0.3초)
+    const float AwakenShutHold = 0.2f;        // BGM이 끊긴 뒤 떨어지기 시작할 때까지 찡그린 채 멈춰 있는 시간
+    const float AwakenFallTime = 0.45f;       // 떨어지는 시간(점점 빨라짐)
     const float AwakenFallRatio = 1f / 6f;    // 떨어지는 거리 = 보스 키 × 이 비율
     const float AwakenBounceRatio = 0.08f;    // 닿은 뒤 튀는 높이 = 떨어진 거리 × 이 비율
-    const float AwakenLieStill = 1.2f;        // 쓰러진 뒤 떠오르기까지
-    const float AwakenRiseTime = 1.8f;        // 원래 자리까지 서서히 떠오르는 시간
+    // 날개(프로필 devilLimpFrames = 점이 꺼진 장, devilWingFrames = 떠오를 때 점이 다시 붉어지는 장. 눈은 모두 편히 감김):
+    // 0 = 날개를 위로 편 모습 ~ 끝 = 축 늘어진 모습.
+    const float AwakenLimpDelay = 1f;         // 바닥에 닿은 뒤 찡그린 채 누워 있다가 힘이 풀리기까지
+    const int AwakenLimpFrom = 7;             // 날개가 처지기 시작하는 장(찡그린 장과 날개 모양이 가장 비슷하다)
+    const float AwakenLimpTime = 0.6f;        // 눈이 편히 감긴 뒤 날개가 고르게 축 늘어지는 시간
+    const float AwakenLieStill = 0.8f;        // 다 늘어진 뒤 떠오르기까지
+    const float AwakenRiseTime = 2.4f;        // 원래 자리까지 서서히 떠오르며 날개를 끝 장 → 0으로 천천히 들어 올리는 시간
+    // 떠오르는 동안과 꼭대기에서 멈춘 동안 화면이 약하게 떨리고 점점 세진다(짧은 흔들림을 이어 낸다). 눈 뜨기 직전이 가장 세다.
+    const float AwakenRumbleFrom = 1f;        // 화면 픽셀
+    const float AwakenRumbleTo = 3f;
+    const float AwakenRumbleStep = 0.1f;      // 이 간격마다 짧은 흔들림 하나
     const float AwakenTopHold = 0.75f;        // 다 올라온 뒤 눈 뜨기까지(보라 오라는 다 찬 채로 머문다)
-    const float AwakenAuraGrow = 0.3f;        // 떠오를 때 보라 오라가 보스보다 커지는 비율(장난의 저주 오라보다 크게)
+    const float AwakenAuraRiseGrow = 0.15f;   // 떠오르는 동안 보라 오라가 보스보다 커지는 비율(장난의 저주 오라 정도로 은은하게)
+    const float AwakenAuraRiseAlpha = 0.55f;  // 떠오르는 동안 보라 오라 진하기(프로필 진하기에 곱함)
+    const float AwakenAuraGrow = 0.3f;        // 눈 뜰 때 보라 오라가 확 진해지며 커지는 비율. 이 크기에서 두 배로 퍼진다
     const float AwakenAuraBurstScale = 2f;    // 눈 뜰 때 보라 오라가 퍼지는 배율(지금 크기의 두 배)
     const float AwakenAuraBurstTime = 0.4f;   // 퍼지며 사라지는 시간. 다 사라지면 대사가 나온다
+    // 눈 뜰 때: 좌우로만 빠르게 떨리는 강한 흔들림(화면 픽셀, 점점 잦아듦), 보스가 순간 커졌다 돌아옴, 붉은 번쩍임(계단식으로 걷힘).
+    // 떠오르는 동안의 잔떨림(최대 3픽셀)에서 확 커진다. 껍질이 터질 때(5.4픽셀 + 조각이 떨어지는 동안 계속 흔들림)보다 한 번은 세다.
+    const float AwakenEyeOpenShakePixels = 8f;
+    const float AwakenEyeOpenShakeTime = 0.5f;
+    const int AwakenEyeOpenShakeSwings = 6;
+    const float AwakenEyeOpenPunch = 1.06f;
+    const float AwakenEyeOpenPunchTime = 0.2f;
+    static readonly Color AwakenEyeFlashColor = new Color(1f, 0.16f, 0.1f);
+    static readonly float[] AwakenEyeFlashSteps = { 0.3f, 0.18f, 0.08f, 0f };
+    const float AwakenEyeFlashStepTime = 0.075f;
 
-    // 각성 애니메이션(프로필 devilAwakenFrames) 구간. 0~2는 눈이 아직 반쯤 감긴 장이라 쓰지 않는다.
+    // 각성 애니메이션(프로필 devilAwakenFrames, Phase1_New 시트는 예전 시트와 장 번호가 같다) 구간. 0~2는 쓰지 않는다.
     const int AwakenEyeOpenFrame = 3;          // 눈 뜸: 완전히 뜬 붉은 눈 장으로 바로 넘어간다
     const int AwakenGlareFrom = 3;             // 대사 동안 천천히 앞뒤로 오가는 노려봄 장(모두 완전히 뜬 눈)
     const int AwakenGlareTo = 7;
@@ -92,12 +124,29 @@ public static partial class DebuffFeedback
             if (boss != null) boss.RefillDevilHpBar(seconds);
         }
 
-        if (body == null || !HasFrames(close, AwakenClosedFrame + 1) || !HasFrames(frames, AwakenSettleTo + 1))
+        Sprite[] wings = p != null ? p.devilWingFrames : null;
+        // 날개 시트가 없으면 찡그린 장 그대로 눕고 떠오른다.
+        bool hasWings = wings != null && wings.Length > AwakenLimpFrom && HasFrames(wings, wings.Length);
+        int drooped = hasWings ? wings.Length - 1 : 0;
+        // 쓰러진 뒤 날개(점이 꺼진 장). 없거나 장 수가 다르면 떠오를 때 장을 그대로 쓴다.
+        Sprite[] limpFrames = p != null ? p.devilLimpFrames : null;
+        if (!hasWings || limpFrames == null || limpFrames.Length != wings.Length || !HasFrames(limpFrames, limpFrames.Length)) limpFrames = wings;
+
+        if (body == null || !HasFrames(close, AwakenShutFrame + 1) || !HasFrames(frames, AwakenSettleTo + 1))
         {
             Awaken();
             RefillBar(AwakenHpRefillTime);
             yield break;
         }
+
+        // 0) 마지막 타격의 동작(HitDown)이 찡그려 감은 장에 닿을 때까지 기다린다. 그 장이 눈 감기 첫 장(AwakenShutFrame)과 같은 그림이다.
+        float hitWait = 0f;
+        while (boss != null && boss.IsDevilHitPlaying && hitWait < AwakenHitWaitMax)
+        {
+            hitWait += Time.unscaledDeltaTime;
+            yield return null;
+        }
+        if (body == null) { Awaken(); RefillBar(0f); yield break; }
 
         Animator animator = body.GetComponent<Animator>();
         float animatorSpeed = animator != null && animator.speed > 0f ? animator.speed : 1f;
@@ -125,39 +174,35 @@ public static partial class DebuffFeedback
         Image[] aura = null;
         Sequence auraTween = null;
         Tween auraBurst = null;
+        Tween punch = null;
         AwakenDim dim = null;
         try
         {
-            // 1) 죽음: 보스 그림을 숨기고 같은 자리에 눈 감기 그림을 띄운다(맞기 전 색 그대로). 애니메이션·BGM 정지.
-            //    보스만 남기고 화면이 서서히 어두워진다(보스를 뺀 월드 그림 색을 어둡게, 화면 UI는 물러남). 그리는 순서는 그대로다.
-            actor = CreateAwakenActor(body, close[AwakenCloseFrom]);
+            // 1) 죽음: 보스 그림을 숨기고 같은 자리에 찡그려 감은 눈 그림을 띄운다(맞기 전 색 그대로). 애니메이션·BGM 정지.
+            //    화면은 아직 밝다(힘이 풀려 눈이 편히 감길 때 어두워진다).
+            actor = CreateAwakenActor(body, close[AwakenShutFrame]);
             Color hitTint = body.color;
             actor.color = hitTint;
             body.forceRenderingOff = true;
             if (animator != null) animator.speed = 0f;
             BGMManager.Instance?.StopBGM();
-            dim = BeginAwakenDim(boss);
 
-            // 2) 눈이 서서히 감기며 쓰러진다: 반쯤 감길 때 떨어지기 시작해 다 감길 때 바닥에 닿는다.
-            //    체력에 따라 붉게 물들었던 색은 눈을 감는 동안 원래 색으로 돌아온다.
-            int closeCount = AwakenCloseTo - AwakenCloseFrom + 1;
-            float closeTime = closeCount * AwakenCloseFrameTime;
-            float fallStart = Mathf.Max(0f, closeTime - AwakenFallTime);
+            // 2) 잠깐 멈췄다가 찡그려 감은 눈 그대로 쓰러져(점점 빨라짐) 그대로 누워 있는다.
+            //    체력에 따라 붉게 물들었던 색은 떨어지는 동안 원래 색으로 돌아온다.
             float time = 0f;
-            while (time < closeTime)
+            float fallEnd = AwakenShutHold + AwakenFallTime;
+            while (time < fallEnd)
             {
                 time += Time.unscaledDeltaTime;
-                actor.sprite = close[AwakenCloseFrom + Mathf.Min(closeCount - 1, Mathf.FloorToInt(time / AwakenCloseFrameTime))];
-                actor.color = Color.Lerp(hitTint, Color.white, Mathf.Clamp01(time / closeTime));
-                if (time > fallStart)
+                actor.color = Color.Lerp(hitTint, Color.white, Mathf.Clamp01(time / fallEnd));
+                if (time > AwakenShutHold)
                 {
-                    float k = Mathf.Clamp01((time - fallStart) / AwakenFallTime);
+                    float k = Mathf.Clamp01((time - AwakenShutHold) / AwakenFallTime);
                     SetLocalY(t, restPos.y - drop * k * k);
                 }
                 yield return null;
             }
             actor.color = Color.white;
-            actor.sprite = close[AwakenClosedFrame];
             SetLocalY(t, lieY);
             t.localScale = Vector3.Scale(restScale, new Vector3(1.05f, 0.93f, 1f));
             yield return WaitReal(0.07f);
@@ -165,25 +210,87 @@ public static partial class DebuffFeedback
             float bounce = drop * AwakenBounceRatio;
             yield return MoveLocalY(t, lieY, lieY + bounce, 0.07f, Ease.OutQuad);
             yield return MoveLocalY(t, lieY + bounce, lieY, 0.07f, Ease.InQuad);
+
+            //    찡그린 채 누워 있다가 힘이 풀리며 한 가지씩 바뀐다: 먼저 눈만 반쯤 풀렸다가 편히 감기고(몸·날개는 그대로),
+            //    그다음 날개가 고르게 축 늘어진다(몸의 점은 꺼진 채). 동작이 한꺼번에 바뀌어 보이지 않게 나눠 둔 것이다.
+            //    힘이 풀리기 시작할 때 보스만 남기고 화면이 서서히 어두워진다(보스를 뺀 월드 그림 색을 어둡게, 화면 UI는 물러남).
+            //    그리는 순서는 그대로다.
+            yield return WaitReal(AwakenLimpDelay);
+            dim = BeginAwakenDim(boss);
+            for (int i = AwakenRelaxFrom; i <= AwakenRelaxTo && i < close.Length; i++)
+            {
+                if (close[i] == null) continue;
+                actor.sprite = close[i];
+                yield return WaitReal(AwakenRelaxStepTime);
+            }
+            if (hasWings)
+            {
+                int limpCount = drooped - AwakenLimpFrom + 1;
+                float limp = 0f;
+                while (limp < AwakenLimpTime)
+                {
+                    limp += Time.unscaledDeltaTime;
+                    float k = Mathf.Clamp01(limp / AwakenLimpTime);
+                    actor.sprite = limpFrames[Mathf.Min(drooped, AwakenLimpFrom + Mathf.FloorToInt(limpCount * k))];
+                    yield return null;
+                }
+                actor.sprite = limpFrames[drooped];
+            }
             yield return WaitReal(AwakenLieStill);
 
-            // 3) 떠오름: 보스 곁에 보라 오라(장난의 저주와 같은 보라 실루엣)가 크게 차오르며, 눈 감은 채 서서히 떠오른다.
+            // 3) 떠오름: 옅은 보라 오라(장난의 저주와 같은 보라 실루엣)가 차오르며 눈 감은 채 서서히 떠오르고, 그동안 늘어진 날개를
+            //    천천히 들어 올려 위로 편다(떠오른 정도에 맞춰 끝 장 → 0). 오라는 actor의 지금 그림을 따라 그린다.
             //    오라는 눈을 뜰 때까지 다 찬 채로 남는다(오라 트윈은 눈 뜰 때 끊는다).
+            //    떠오르는 동안과 꼭대기에서 멈춘 동안 화면이 약하게 떨리고 점점 세진다(짧은 흔들림을 AwakenRumbleStep마다 하나씩).
             aura = CreateBossAura(actor, p.sacrificeTint);
             auraTween = DOTween.Sequence().SetUpdate(true);
-            InsertBossAura(auraTween, aura, actor, AwakenRiseTime * 0.6f, 999f, 999f, AwakenAuraGrow);
-            yield return MoveLocalY(t, lieY, restPos.y, AwakenRiseTime, Ease.InOutQuad);
+            InsertBossAura(auraTween, aura, actor, AwakenRiseTime * 0.6f, 999f, 999f, AwakenAuraRiseGrow, AwakenAuraRiseAlpha);
+            float riseTotal = AwakenRiseTime + AwakenTopHold;
+            float rise = 0f, nextRumble = 0f;
+            while (rise < riseTotal)
+            {
+                rise += Time.unscaledDeltaTime;
+                float u = Mathf.Clamp01(rise / AwakenRiseTime);
+                SetLocalY(t, Mathf.Lerp(lieY, restPos.y, DOVirtual.EasedValue(0f, 1f, u, Ease.InOutQuad)));
+                if (hasWings) actor.sprite = wings[Mathf.Clamp(Mathf.RoundToInt(drooped * (1f - u)), 0, drooped)];
+                if (rise >= nextRumble)
+                {
+                    float grow = Mathf.Clamp01(rise / riseTotal);
+                    CameraShake.Instance?.ShakePixels(Mathf.Lerp(AwakenRumbleFrom, AwakenRumbleTo, grow), AwakenRumbleStep * 0.9f);
+                    nextRumble += AwakenRumbleStep;
+                }
+                yield return null;
+            }
             t.localPosition = restPos;
-            yield return WaitReal(AwakenTopHold);
+            if (hasWings) actor.sprite = wings[0];
 
-            // 4) 눈 뜸: 완전히 뜬 붉은 눈 장으로 확 넘어가며 진동·웃음. 보라 오라는 두 배로 퍼지며 사라지고, 다 사라지면 대사.
+            // 4) 눈 뜸: 완전히 뜬 붉은 눈 장으로 확 넘어가며 웃음과 함께 크게 흔들리고(점점 잦아듦), 보스가 순간 커졌다 돌아오며
+            //    화면이 붉게 한 번 번쩍인다. 보라 오라는 두 배로 퍼지며 사라지고, 다 사라지면 대사.
             actor.sprite = frames[AwakenEyeOpenFrame];
             Sfx.Play(SfxId.Devil_Laugh);
-            CameraShake.Instance?.ShakePixels(3f, 0.15f);
+            CameraShake.Instance?.ShakeSideways(AwakenEyeOpenShakePixels, AwakenEyeOpenShakeTime, AwakenEyeOpenShakeSwings);
+            t.localScale = restScale * AwakenEyeOpenPunch;
+            punch = t.DOScale(restScale, AwakenEyeOpenPunchTime).SetEase(Ease.OutQuad).SetUpdate(true);
+            Image eyeFlash = CreateImage("Awaken Eye Flash", null, Vector2.zero, stage);
+            Stretch(eyeFlash.rectTransform);
+            Color eyeFlashColor = AwakenEyeFlashColor;
+            eyeFlashColor.a = AwakenEyeFlashSteps[0];
+            eyeFlash.color = eyeFlashColor;
             auraTween.Kill();
             auraTween = null;
+            FlareAura(aura, AwakenAuraGrow); // 옅던 오라가 확 진해지며 커진 크기에서
             auraBurst = BurstAura(aura, AwakenAuraBurstScale, AwakenAuraBurstTime);
-            yield return WaitReal(AwakenAuraBurstTime);
+            float burstLeft = AwakenAuraBurstTime;
+            for (int i = 1; i < AwakenEyeFlashSteps.Length; i++)
+            {
+                yield return WaitReal(AwakenEyeFlashStepTime);
+                burstLeft -= AwakenEyeFlashStepTime;
+                eyeFlashColor.a = AwakenEyeFlashSteps[i];
+                if (eyeFlash != null) eyeFlash.color = eyeFlashColor;
+            }
+            if (eyeFlash != null) UnityEngine.Object.Destroy(eyeFlash.gameObject);
+            if (burstLeft > 0f) yield return WaitReal(burstLeft);
+            punch = null; // 0.2초라 이미 끝났다
             auraBurst?.Kill();
             auraBurst = null;
             DestroyAura(aura);
@@ -275,6 +382,7 @@ public static partial class DebuffFeedback
             if (animator != null && animator.speed == 0f) animator.speed = animatorSpeed;
             auraTween?.Kill();
             auraBurst?.Kill();
+            punch?.Kill();
             DestroyAura(aura);
             if (actor != null) UnityEngine.Object.Destroy(actor.gameObject);
             if (body != null)
@@ -342,6 +450,25 @@ public static partial class DebuffFeedback
             yield return null;
         }
         SetLocalY(t, to);
+    }
+
+    // 보라 오라를 바로 다 찬 모습(가장 바깥 겹이 보스보다 grow만큼 커지고 프로필 진하기 그대로)으로 만든다. 눈 뜰 때 퍼지기 직전에 쓴다.
+    static void FlareAura(Image[] layers, float grow)
+    {
+        if (layers == null) return;
+        var p = Profile;
+        float peak = p != null ? p.sacrificeAuraAlpha : 0.8f;
+        for (int i = 0; i < layers.Length && i < AuraLayerReach.Length; i++)
+        {
+            Image layer = layers[i];
+            if (layer == null) continue;
+            Vector3 s = layer.rectTransform.localScale;
+            float size = 1f + grow * AuraLayerReach[i];
+            layer.rectTransform.localScale = new Vector3(Mathf.Sign(s.x) * size, Mathf.Sign(s.y) * size, 1f);
+            Color c = layer.color;
+            c.a = peak * AuraLayerAlpha[i];
+            layer.color = c;
+        }
     }
 
     // 보라 오라가 지금 크기에서 scale배로 퍼지며 흐려져 사라진다(처음에 빠르게 퍼지고 끝에서 느려진다).

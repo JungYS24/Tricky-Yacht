@@ -147,10 +147,17 @@ public sealed class DebuffVisualProfile : ScriptableObject
     public Sprite[] snackCrumbsGray;
 
     [Header("악마주사위 각성 (1페이즈 체력 0 → 타락한 악마주사위)")]
-    [Tooltip("죽을 때 눈 감기(DevilDice/Awaken/Devil_Dice_EyeClose, 16장): 0~14 = 뜬 눈이 서서히 감김, 15 = 완전히 감긴 채. " +
+    [Tooltip("죽을 때 눈(DevilDice/Phase1_New): 0 = 마지막 타격에 찡그려 감은 눈(맞는 동작 시트의 8번째 장, 애니메이터 HitDown이 " +
+             "멈추는 장), 1~2 = 같은 장에서 눈만 반쯤 풀림 → 편히 감김(Devil_Dice_P1_EyeRelax). " +
              "보스 그림과 같은 칸·기준점(바닥 가운데)으로 잘라 두었다. 비우면 각성 연출 없이 바로 각성한다")]
     public Sprite[] devilCloseFrames;
-    [Tooltip("각성 애니메이션(DevilDice/Awaken/Devil_Dice_AwakenTransform, 26장 = AI 생성 시트의 11~36번째 장): " +
+    [Tooltip("떠오를 때 날개(DevilDice/Phase1_New/Devil_Dice_P1_Wings, 32장, 눈은 모두 편히 감김): 0 = 날개를 위로 편 모습 → " +
+             "31 = 날개가 축 늘어진 모습. 떠오르며 31→0으로 서서히 들어 올린다. 몸의 점은 31에서 꺼져 있다가 0으로 갈수록 다시 붉어진다")]
+    public Sprite[] devilWingFrames;
+    [Tooltip("쓰러진 뒤 날개(DevilDice/Phase1_New/Devil_Dice_P1_WingsDark, 32장): devilWingFrames와 같은 장에 몸의 점만 꺼진 그림. " +
+             "눈이 편히 감긴 뒤 7→31로 날개가 축 늘어지고 그대로 누워 있는다. 비우면 devilWingFrames를 쓴다")]
+    public Sprite[] devilLimpFrames;
+    [Tooltip("각성 애니메이션(DevilDice/Phase1_New/Devil_Dice_P1_Awaken, 26장, 예전 시트와 장 번호가 같다): " +
              "0~7 붉은 눈 뜸·노려봄, 8~15 금이 퍼짐, 16 껍질이 붉은 몸으로(흰 플래시), 17~25 조각이 떨어지며 타락 모습으로 가라앉음. " +
              "어느 장을 얼마나 보여 줄지는 DebuffFeedback.DevilAwaken 맨 위 값")]
     public Sprite[] devilAwakenFrames;

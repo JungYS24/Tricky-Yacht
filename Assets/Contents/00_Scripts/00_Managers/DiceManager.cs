@@ -457,6 +457,7 @@ public class DiceManager : MonoBehaviour
     private IEnumerator PlayBossIntro(List<DiceData1> incoming)
     {
         bool handedOff = false;
+        if (enemy != null) enemy.HoldDevilIntroPose(true); // 대사 동안 보스는 기본 자세로 멈춰 있는다
         try
         {
             yield return DebuffFeedback.PlayBossIntroDialogue(DevilDiceBoss.IntroKeyPrefix, DevilDiceBoss.IntroFallback);
@@ -464,6 +465,7 @@ public class DiceManager : MonoBehaviour
         }
         finally
         {
+            if (enemy != null) enemy.HoldDevilIntroPose(false);
             // 대사 도중 끊겨도 넣을 주사위를 잃지 않고 전투 시작 잠금을 푼다.
             if (!handedOff)
             {
