@@ -200,12 +200,18 @@ public static partial class DebuffFeedback
     }
 
     // 저주가 배수에 곱해질 때 저주 구름을 피운다: 예전 연기와 같은 자리(주사위 가운데, 배수 숫자 가운데).
-    // 구름은 저주 주사위 색으로 칠한 프레임 그림이고, 점수판 칸과 같은 픽셀 크기로 고정해 프레임만 바꿔 재생한다(늘리기 없음).
-    // 프레임이 없으면 예전 초록 연기를 쓴다.
+    // 초록 연기 애니메이션(프로필 smokeGreen)이 있으면 그것을 피운다(주사위는 중간 크기, 배수 숫자는 큰 연기 한 덩이씩).
+    // 없으면 예전 구름 프레임(점수판 칸과 같은 픽셀 크기로 프레임만 바꿔 재생)을, 그것도 없으면 예전 초록 연기를 쓴다.
     public static void PlayCurse(Dice die, Transform multTarget)
     {
         var p = Profile;
         if (p == null) return;
+        if (HasSmokeFrames(p.smokeGreen))
+        {
+            if (die != null) Smoke(DieLocal(die), p.curseSmoke, 0f, 1, 60f);
+            if (multTarget != null) Smoke(UiToLocal(multTarget, new Vector2(0.15f, 0.45f)), p.curseSmoke, 0.08f, 1, 100f);
+            return;
+        }
         Sprite[] frames = p.curseCloudFrames;
         if (frames == null || frames.Length == 0 || frames[0] == null)
         {

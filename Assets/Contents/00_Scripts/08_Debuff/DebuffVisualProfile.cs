@@ -58,6 +58,13 @@ public sealed class DebuffVisualProfile : ScriptableObject
     public Sprite riftGlow;
     [Tooltip("착지한 주사위 밑에 까는 그림자")]
     public Sprite groundShadow;
+    [Tooltip("움직이는 차원문(FX/Portal_Rift_Anim, 80×80 칸 9장): 0~2 열린 채 일렁임, 3~6 위아래로 크게 벌어짐(주사위가 나올 때), " +
+             "7~8 가라앉음. 비우면 위 portalRift 한 장을 쓴다. 위치·주사위 착지 자리는 portalRift 크기 기준 그대로다")]
+    public Sprite[] portalRiftFrames;
+    [Tooltip("움직이는 차원문 그림 1px이 화면에서 차지하는 크기(1920 기준). 몬스터·보스 그림과 같은 1.22")]
+    [Min(0.1f)] public float portalFramePixel = 1.22f;
+    [Tooltip("움직이는 차원문 한 장 시간(기본 속도 기준, 초)")]
+    [Min(0.02f)] public float portalFrameTime = 0.08f;
 
     [Header("덱으로 스며드는 안개")]
     [Tooltip("주사위가 녹아내린 뒤 덱으로 날아가는 안개의 밝은 핵 색")]
@@ -118,7 +125,21 @@ public sealed class DebuffVisualProfile : ScriptableObject
     public Sprite smokePuff;
     public Sprite thornShard;
 
-    [Header("연기 색 (흰 연기 이미지에 곱해짐)")]
+    [Header("연기 애니메이션 (AetherAI 이펙트를 게임 픽셀 크기로 줄인 것. 색으로 고른다)")]
+    [Tooltip("164×164 칸 27장: 0~8 큰 연기, 9~17 중간, 18~26 작은 연기(각각 피어나 → 부풀고 → 흩어져 사라짐). " +
+             "연기 색이 보라 계열이면 이것, 빨강이면 smokeRed, 초록이면 smokeGreen, 회색·흰색이면 smokeGrey를 쓴다. 비우면 아래 흰 연기에 색을 곱한다")]
+    public Sprite[] smokePurple;
+    public Sprite[] smokeRed;
+    public Sprite[] smokeGreen;
+    public Sprite[] smokeGrey;
+    [Tooltip("연기 그림 1px이 화면에서 차지하는 크기(1920 기준). 몬스터·보스 그림과 같은 1.22")]
+    [Min(0.1f)] public float smokePixel = 1.22f;
+    [Tooltip("연기 불투명도(살짝 비쳐서 겹쳐도 가벼워 보이게)")]
+    [Range(0f, 1f)] public float smokeAlpha = 0.85f;
+    [Tooltip("연기 한 장 시간(기본 속도 기준, 초)")]
+    [Min(0.02f)] public float smokeFrameTime = 0.065f;
+
+    [Header("연기 색 (흰 연기 이미지에 곱해짐. 연기 애니메이션이 있으면 어느 색 연기를 쓸지만 정한다)")]
     public Color thiefSmoke = new Color(0.29f, 0.26f, 0.32f);
     public Color curseSmoke = new Color(0.24f, 0.9f, 0.16f);
     public Color vanishSmoke = new Color(0.61f, 0.61f, 0.64f);
@@ -129,7 +150,8 @@ public sealed class DebuffVisualProfile : ScriptableObject
     public Color curseColor = new Color(0.45f, 1f, 0.35f);
 
     [Header("저주 구름 (저주가 배수에 곱해질 때. 점수판과 같은 픽셀 크기로 프레임 재생)")]
-    [Tooltip("저주 주사위 색으로 칠한 구름 프레임. 비우면 예전 초록 연기를 쓴다")]
+    [Tooltip("저주 주사위 색으로 칠한 구름 프레임(예전 것). 초록 연기 애니메이션(smokeGreen)이 있으면 그것을 쓰고 이건 쓰지 않는다. " +
+             "둘 다 비우면 예전 초록 연기를 쓴다")]
     public Sprite[] curseCloudFrames;
     [Tooltip("구름 한 프레임 시간(기본 속도 기준, 초)")]
     [Min(0.02f)] public float curseCloudFrameTime = 0.09f;
@@ -147,10 +169,17 @@ public sealed class DebuffVisualProfile : ScriptableObject
     public Sprite[] snackCrumbsGray;
 
     [Header("악마주사위 각성 (1페이즈 체력 0 → 타락한 악마주사위)")]
-    [Tooltip("죽을 때 눈 감기(DevilDice/Awaken/Devil_Dice_EyeClose, 16장): 0~14 = 뜬 눈이 서서히 감김, 15 = 완전히 감긴 채. " +
+    [Tooltip("죽을 때 눈(DevilDice/Phase1_New): 0 = 마지막 타격에 찡그려 감은 눈(맞는 동작 시트의 8번째 장, 애니메이터 HitDown이 " +
+             "멈추는 장), 1~2 = 같은 장에서 눈만 반쯤 풀림 → 편히 감김(Devil_Dice_P1_EyeRelax). " +
              "보스 그림과 같은 칸·기준점(바닥 가운데)으로 잘라 두었다. 비우면 각성 연출 없이 바로 각성한다")]
     public Sprite[] devilCloseFrames;
-    [Tooltip("각성 애니메이션(DevilDice/Awaken/Devil_Dice_AwakenTransform, 26장 = AI 생성 시트의 11~36번째 장): " +
+    [Tooltip("떠오를 때 날개(DevilDice/Phase1_New/Devil_Dice_P1_Wings, 32장, 눈은 모두 편히 감김): 0 = 날개를 위로 편 모습 → " +
+             "31 = 날개가 축 늘어진 모습. 떠오르며 31→0으로 서서히 들어 올린다. 몸의 점은 31에서 꺼져 있다가 0으로 갈수록 다시 붉어진다")]
+    public Sprite[] devilWingFrames;
+    [Tooltip("쓰러진 뒤 날개(DevilDice/Phase1_New/Devil_Dice_P1_WingsDark, 32장): devilWingFrames와 같은 장에 몸의 점만 꺼진 그림. " +
+             "눈이 편히 감긴 뒤 7→31로 날개가 축 늘어지고 그대로 누워 있는다. 비우면 devilWingFrames를 쓴다")]
+    public Sprite[] devilLimpFrames;
+    [Tooltip("각성 애니메이션(DevilDice/Phase1_New/Devil_Dice_P1_Awaken, 26장, 예전 시트와 장 번호가 같다): " +
              "0~7 붉은 눈 뜸·노려봄, 8~15 금이 퍼짐, 16 껍질이 붉은 몸으로(흰 플래시), 17~25 조각이 떨어지며 타락 모습으로 가라앉음. " +
              "어느 장을 얼마나 보여 줄지는 DebuffFeedback.DevilAwaken 맨 위 값")]
     public Sprite[] devilAwakenFrames;

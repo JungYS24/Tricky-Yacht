@@ -92,6 +92,11 @@ public class Enemy : MonoBehaviour
     static readonly int DevilCastHash = Animator.StringToHash("Cast");
     static readonly int DevilAngryHash = Animator.StringToHash("Angry");
     static readonly int DevilCorruptedHash = Animator.StringToHash("Corrupted");
+    static readonly int DevilHitHash = Animator.StringToHash("Hit"); // 맞는 동작 트리거이자 상태 이름(AC_DevilDice_P1)
+    static readonly int DevilHitDownHash = Animator.StringToHash("HitDown"); // 각성으로 이어지는 마지막 타격: 찡그려 감은 눈으로 멈춤
+    static readonly int DevilIdleHash = Animator.StringToHash("IdleA");
+    const float DevilIdleBasePose = 0.125f; // 평소 동작(24장)의 3번째 장: 눈 뜨고 날개 접은 기본 자세
+    float devilHeldSpeed = -1f; // 등장 대사 동안 멈춰 둔 애니메이터의 원래 속도(-1이면 멈춰 있지 않음)
     bool devilAngry;
     bool devilCorrupted;
 
@@ -344,6 +349,10 @@ public class Enemy : MonoBehaviour
             // 맞기 전 색을 그대로 둔다(컷신이 눈을 감으며 원래 색으로 되돌린다).
             // 타락한 악마주사위(2페이즈)를 쓰러뜨리는 타격도 같다: 뒤로 밀렸다가 돌아온 뒤 처치 시트(원래 색)로 이어진다.
             bool awakening = CurrentHP <= 0 && (DevilDiceBoss.ShouldAwaken(this) || IsDevilFinalKill);
+            // 악마주사위 1페이즈: 맞을 때마다 맞는 동작(Hit)을 한 번. 각성으로 이어지는 마지막 타격은 눈을 다시 뜨지 않고
+            // 찡그려 감은 채 멈추는 동작(HitDown)이고, 각성 컷신이 그 모습 그대로 쓰러뜨린다.
+            if (CurrentHP > 0) PlayDevilHit(false);
+            else if (awakening) PlayDevilHit(true);
             if (!lightHit)
             {
                 // 피해 종류별 오버레이를 사용하고 바탕색은 현재 체력에 맞춥니다.
@@ -850,6 +859,59 @@ public class Enemy : MonoBehaviour
     {
         if (!HasDevilAnimator() || devilAngry || devilCorrupted) return;
         monsterAnimator.SetTrigger(DevilCastHash);
+    }
+
+    // 악마주사위 1페이즈가 맞을 때 맞는 동작(Hit)을 한 번 재생한다(연달아 맞으면 처음부터 다시). 끝나면 평소 동작으로 돌아간다.
+    // down: 각성으로 이어지는 마지막 타격. 맞는 동작의 앞부분(찡그려 감은 눈까지, HitDown)만 재생하고 그 장에서 멈춘다.
+    // 타락한 모습(2페이즈)과 Hit이 없는 애니메이터(원래 AC_DevilDice)에서는 건너뛴다.
+    void PlayDevilHit(bool down)
+    {
+        if (!HasDevilAnimator() || devilCorrupted) return;
+        int hash = down && HasAnimatorParameter(DevilHitDownHash) ? DevilHitDownHash : DevilHitHash;
+        if (!HasAnimatorParameter(hash)) return;
+        monsterAnimator.SetTrigger(hash);
+    }
+
+    // 맞는 동작이 재생 중이거나 곧 시작되는지. 각성 컷신이 마지막 타격의 동작(HitDown)이 찡그려 감은 장에 닿을 때까지 기다린다.
+    public bool IsDevilHitPlaying
+    {
+        get
+        {
+            if (!HasDevilAnimator() || !HasAnimatorParameter(DevilHitHash)) return false;
+            bool hasDown = HasAnimatorParameter(DevilHitDownHash);
+            // 아직 넘어가지 않은 트리거
+            if (monsterAnimator.GetBool(DevilHitHash) || (hasDown && monsterAnimator.GetBool(DevilHitDownHash))) return true;
+            AnimatorStateInfo state = monsterAnimator.GetCurrentAnimatorStateInfo(0);
+            if (state.shortNameHash == DevilHitHash) return true;
+            if (hasDown && state.shortNameHash == DevilHitDownHash && state.normalizedTime < 1f) return true; // 끝나면 마지막 장에서 멈춰 있다
+            if (!monsterAnimator.IsInTransition(0)) return false;
+            int next = monsterAnimator.GetNextAnimatorStateInfo(0).shortNameHash;
+            return next == DevilHitHash || (hasDown && next == DevilHitDownHash);
+        }
+    }
+
+    // 보스방 등장 대사 동안 악마주사위를 평소 동작의 기본 자세(눈 뜸, 날개 접음)로 멈춘다. hold가 false면 원래 속도로 다시 움직인다.
+    public void HoldDevilIntroPose(bool hold)
+    {
+        if (hold)
+        {
+            if (devilHeldSpeed >= 0f || !HasDevilAnimator() || devilCorrupted) return;
+            devilHeldSpeed = monsterAnimator.speed > 0f ? monsterAnimator.speed : 1f;
+            monsterAnimator.Play(DevilIdleHash, 0, DevilIdleBasePose);
+            monsterAnimator.Update(0f);
+            monsterAnimator.speed = 0f;
+            return;
+        }
+        if (devilHeldSpeed < 0f) return;
+        if (monsterAnimator != null) monsterAnimator.speed = devilHeldSpeed;
+        devilHeldSpeed = -1f;
+    }
+
+    bool HasAnimatorParameter(int hash)
+    {
+        foreach (AnimatorControllerParameter parameter in monsterAnimator.parameters)
+            if (parameter.nameHash == hash) return true;
+        return false;
     }
 
     // 악마주사위 1페이즈는 체력과 관계없이 평소 아이들(IdleA, 날개만 흔들림)을 쓰고, 저주를 걸 때만 시전(IdleB)을 한 번 재생한다.
