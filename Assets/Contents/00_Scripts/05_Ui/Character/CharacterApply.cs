@@ -38,8 +38,11 @@ public class CharacterApply : MonoBehaviour
     // 잠긴 캐릭터는 정보만 볼 수 있고 시작은 못 한다.
     public void OnApply()
     {
-        if (data == null || !data.IsUnlocked)
+        if (data == null || !data.IsUnlocked || selectedIdx == -1)
+        {
+            Debug.LogWarning("피규어를 선택하지 않았습니다.");
             return;
+        }
 
         if (confirmText != null)
             confirmText.text = LocalizationManager.GetUi("UI_CHARSELECT_CONFIRM", "{0}(으)로 시작할까요?", LocalizationManager.GetCharacterName(data));
