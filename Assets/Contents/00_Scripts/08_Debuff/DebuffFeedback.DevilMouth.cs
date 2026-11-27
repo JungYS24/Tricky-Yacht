@@ -277,11 +277,10 @@ public static partial class DebuffFeedback
         // 입에서 연기가 몇 번 뿜어져 나온다.
         seq.InsertCallback(0f, () =>
         {
-            Smoke(from, smoke, 0f, 3, 64f);
+            Smoke(from, smoke, 0f, 2, 64f);
             CameraShake.Instance?.ShakePixels(2f, 0.12f);
         });
-        seq.InsertCallback(0.12f, () => Smoke(from, smoke, 0f, 2, 52f));
-        seq.InsertCallback(0.24f, () => Smoke(from, smoke, 0f, 1, 44f));
+        seq.InsertCallback(0.14f, () => Smoke(from, smoke, 0f, 1, 52f));
 
         // 앞머리: 흐린 용암빛이 곡선을 따라 내려가며 조금씩 커진다.
         if (p != null && p.roundGlow != null)
@@ -297,26 +296,17 @@ public static partial class DebuffFeedback
             seq.Insert(land - 0.05f, head.DOFade(0f, 0.2f).SetEase(Ease.InQuad));
         }
 
-        // 꼬리: 같은 곡선·같은 빠르기로 촘촘하게 연기를 남긴다.
-        const int trailCount = 12;
-        for (int k = 1; k <= trailCount; k++)
-        {
-            float progress = DOVirtual.EasedValue(0f, 1f, (float)k / trailCount, Ease.InOutSine);
-            Vector2 point = Bezier(from, control, to, progress);
-            float size = k % 2 == 0 ? 56f : 44f;
-            seq.InsertCallback(launch + SpitSmokeTravel * k / trailCount, () => Smoke(point, smoke, 0f, 2, size));
-        }
+        // 꼬리: 같은 곡선 위에 연기 세 덩이를 자리·크기·옆으로 벗어난 정도를 다르게 흩뿌린다. 줄지어 구슬처럼 보이지 않게,
+        // 그리고 보스 바로 아래 체력 바 위는 지나가지 않게 길의 뒤쪽 2/3에만 둔다. 흐름은 용암빛 앞머리가 보여 준다.
+        InsertTrailPuffs(seq, launch, SpitSmokeTravel, from, control, to, Ease.InOutSine, smoke, 3, 0.35f, 1.6f);
 
-        // 테이블에 닿으면 뭉게뭉게 피어오른다.
-        seq.InsertCallback(land, () =>
-        {
-            Smoke(to, smoke, 0f, 6, 120f);
-            Smoke(to, SpitGlowColor, 0.06f, 2, 70f);
-        });
+        // 테이블에 닿으면 큰 연기 한 덩이가 피어오른다.
+        seq.InsertCallback(land, () => Smoke(to, smoke, 0f, 1, 120f));
         return land;
     }
 
-    // 테이블 가운데 연기 속에서 주사위가 어두운 그림자에서 밝아지며 커져 나타나고, 잠깐 머문 뒤 녹아 안개가 되어 덱으로 간다.
+    // 테이블 가운데 연기 속에서 주사위가 투명한 데서 붉은 빛을 띠며 나타나 원래 색으로 돌아오며 커지고, 잠깐 머문 뒤 녹아 안개가 되어 덱으로 간다.
+    // (예전에는 검붉은 그림자에서 밝아져 반투명한 검붉은 사각형으로 보였다)
     static void InsertSpitDice(ArrivalContext ctx, List<DiceData1> dice, float land)
     {
         var p = Profile;
@@ -334,10 +324,10 @@ public static partial class DebuffFeedback
             visual.restPos = slot;
             visual.restScale = emphasis;
             visual.scaler.localScale = Vector3.one * 0.3f;
-            visual.body.color = new Color(0.32f, 0.06f, 0.1f, 0f); // 연기 속 검붉은 그림자
+            visual.body.color = new Color(1f, 0.55f, 0.5f, 0f); // 투명에서 붉은 빛을 띠며 나타난다
 
             float appear = land + 0.08f + i * SpitDieStagger;
-            seq.InsertCallback(appear, () => Smoke(slot, SpitSmokeColor, 0f, 2, 60f));
+            seq.InsertCallback(appear, () => Smoke(slot, SpitSmokeColor, 0f, 1, 40f));
             seq.Insert(appear, visual.body.DOColor(Color.white, SpitDieGrow).SetEase(Ease.OutQuad));
             seq.Insert(appear, visual.scaler.DOScale(emphasis, SpitDieGrow).SetEase(Ease.OutBack));
             InsertDieFly(ctx, visual, appear + SpitDieGrow + SpitDieHold);

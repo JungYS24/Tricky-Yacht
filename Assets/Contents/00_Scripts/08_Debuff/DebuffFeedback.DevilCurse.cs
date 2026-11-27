@@ -156,10 +156,11 @@ public static partial class DebuffFeedback
 
     // 보라 안개 한 줄기: 밝은 핵을 가진 안개가 곡선을 따라 점점 빨라지며 날아가고, 지나간 자리에 옅은 꼬리를 남긴다.
     // 마지막 30% 동안 작아지며 흐려져 대상에 스며든다(제물 연출의 안개와 같은 모양·색).
+    // 꼬리는 예전 연기(TintedSmoke)를 그대로 쓴다: 새 연기 애니메이션은 진해서 날아가는 빛을 가린다.
     static void InsertCurseWisp(Sequence seq, RectTransform stage, Vector2 from, Vector2 control, Vector2 to, float launch, float travel, Color core, Color trail)
     {
         var p = Profile;
-        seq.InsertCallback(launch, () => Smoke(from, trail, 0f, 2, 56f));
+        seq.InsertCallback(launch, () => TintedSmoke(from, trail, 0f, 2, 56f));
         if (p == null || p.roundGlow == null) return;
 
         Image wisp = CreateImage("Curse Wisp", p.roundGlow, new Vector2(56f, 56f), stage);
@@ -188,7 +189,7 @@ public static partial class DebuffFeedback
         {
             float progress = DOVirtual.EasedValue(0f, 1f, (float)k / trailCount, Ease.InQuad);
             Vector2 point = Bezier(from, control, to, progress);
-            seq.InsertCallback(launch + travel * k / trailCount, () => Smoke(point, trail, 0f, 1, 34f));
+            seq.InsertCallback(launch + travel * k / trailCount, () => TintedSmoke(point, trail, 0f, 1, 34f));
         }
     }
 }

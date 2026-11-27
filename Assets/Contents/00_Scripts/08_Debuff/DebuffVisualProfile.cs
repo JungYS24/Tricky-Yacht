@@ -58,6 +58,13 @@ public sealed class DebuffVisualProfile : ScriptableObject
     public Sprite riftGlow;
     [Tooltip("착지한 주사위 밑에 까는 그림자")]
     public Sprite groundShadow;
+    [Tooltip("움직이는 차원문(FX/Portal_Rift_Anim, 80×80 칸 9장): 0~2 열린 채 일렁임, 3~6 위아래로 크게 벌어짐(주사위가 나올 때), " +
+             "7~8 가라앉음. 비우면 위 portalRift 한 장을 쓴다. 위치·주사위 착지 자리는 portalRift 크기 기준 그대로다")]
+    public Sprite[] portalRiftFrames;
+    [Tooltip("움직이는 차원문 그림 1px이 화면에서 차지하는 크기(1920 기준). 몬스터·보스 그림과 같은 1.22")]
+    [Min(0.1f)] public float portalFramePixel = 1.22f;
+    [Tooltip("움직이는 차원문 한 장 시간(기본 속도 기준, 초)")]
+    [Min(0.02f)] public float portalFrameTime = 0.08f;
 
     [Header("덱으로 스며드는 안개")]
     [Tooltip("주사위가 녹아내린 뒤 덱으로 날아가는 안개의 밝은 핵 색")]
@@ -118,7 +125,21 @@ public sealed class DebuffVisualProfile : ScriptableObject
     public Sprite smokePuff;
     public Sprite thornShard;
 
-    [Header("연기 색 (흰 연기 이미지에 곱해짐)")]
+    [Header("연기 애니메이션 (AetherAI 이펙트를 게임 픽셀 크기로 줄인 것. 색으로 고른다)")]
+    [Tooltip("164×164 칸 27장: 0~8 큰 연기, 9~17 중간, 18~26 작은 연기(각각 피어나 → 부풀고 → 흩어져 사라짐). " +
+             "연기 색이 보라 계열이면 이것, 빨강이면 smokeRed, 초록이면 smokeGreen, 회색·흰색이면 smokeGrey를 쓴다. 비우면 아래 흰 연기에 색을 곱한다")]
+    public Sprite[] smokePurple;
+    public Sprite[] smokeRed;
+    public Sprite[] smokeGreen;
+    public Sprite[] smokeGrey;
+    [Tooltip("연기 그림 1px이 화면에서 차지하는 크기(1920 기준). 몬스터·보스 그림과 같은 1.22")]
+    [Min(0.1f)] public float smokePixel = 1.22f;
+    [Tooltip("연기 불투명도(살짝 비쳐서 겹쳐도 가벼워 보이게)")]
+    [Range(0f, 1f)] public float smokeAlpha = 0.85f;
+    [Tooltip("연기 한 장 시간(기본 속도 기준, 초)")]
+    [Min(0.02f)] public float smokeFrameTime = 0.065f;
+
+    [Header("연기 색 (흰 연기 이미지에 곱해짐. 연기 애니메이션이 있으면 어느 색 연기를 쓸지만 정한다)")]
     public Color thiefSmoke = new Color(0.29f, 0.26f, 0.32f);
     public Color curseSmoke = new Color(0.24f, 0.9f, 0.16f);
     public Color vanishSmoke = new Color(0.61f, 0.61f, 0.64f);
@@ -129,7 +150,8 @@ public sealed class DebuffVisualProfile : ScriptableObject
     public Color curseColor = new Color(0.45f, 1f, 0.35f);
 
     [Header("저주 구름 (저주가 배수에 곱해질 때. 점수판과 같은 픽셀 크기로 프레임 재생)")]
-    [Tooltip("저주 주사위 색으로 칠한 구름 프레임. 비우면 예전 초록 연기를 쓴다")]
+    [Tooltip("저주 주사위 색으로 칠한 구름 프레임(예전 것). 초록 연기 애니메이션(smokeGreen)이 있으면 그것을 쓰고 이건 쓰지 않는다. " +
+             "둘 다 비우면 예전 초록 연기를 쓴다")]
     public Sprite[] curseCloudFrames;
     [Tooltip("구름 한 프레임 시간(기본 속도 기준, 초)")]
     [Min(0.02f)] public float curseCloudFrameTime = 0.09f;

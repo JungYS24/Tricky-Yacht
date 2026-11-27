@@ -98,7 +98,6 @@ public static partial class DebuffFeedback
         var p = Profile;
         Sequence seq = ctx.seq;
         Color core = p != null ? p.wispCoreColor : new Color(0.8f, 0.5f, 1f);
-        Color trail = p != null ? p.wispTrailColor : new Color(0.24f, 0.1f, 0.34f);
         const float melt = 0.3f; // travel: 안개가 덱까지 날아가는 시간(기본 속도 기준)
         ctx.firstLaunch = Mathf.Min(ctx.firstLaunch, at);
 
@@ -124,7 +123,7 @@ public static partial class DebuffFeedback
             wispCore.rectTransform.anchoredPosition = from;
         }
         float launch = at + melt * 0.55f;
-        seq.InsertCallback(launch, () => Smoke(from, trail, 0f, 3, 56f));
+        // 녹은 자리와 지나간 길에는 연기를 남기지 않는다(빛나는 안개만 날아간다).
         if (wisp != null)
         {
             RectTransform wispRect = wisp.rectTransform, coreRect = wispCore.rectTransform;
@@ -140,20 +139,35 @@ public static partial class DebuffFeedback
             seq.Insert(launch, wispRect.DOScale(absorb > 0f ? 0.25f : 0.6f, travel).SetEase(Ease.InQuad));
             seq.Insert(launch + travel - fadeOut, wisp.DOFade(0f, fadeOut).SetEase(Ease.InQuad));
             seq.Insert(launch + travel - fadeOut, wispCore.DOFade(0f, fadeOut).SetEase(Ease.InQuad));
-            // 지나간 자리에 옅은 안개 꼬리를 남깁니다(같은 곡선·같은 속도 곡선 위).
-            const int trailCount = 7;
-            for (int k = 1; k < trailCount; k++)
-            {
-                float progress = DOVirtual.EasedValue(0f, 1f, (float)k / trailCount, travelEase);
-                Vector2 point = Bezier(from, control, to, progress);
-                seq.InsertCallback(launch + travel * k / trailCount, () => Smoke(point, trail, 0f, 1, 34f));
-            }
         }
         float arrive = launch + travel;
         DebuffDiceType type = visual.type;
         seq.InsertCallback(arrive, () => DebuffTrackerHud.Bump(type));
         InsertDeckReaction(ctx, arrive);
         return arrive;
+    }
+
+    // 날아가는 길 가운데에 작은 연기 몇 덩이를 흩뿌린다. 같은 간격·같은 크기로 줄지어 구슬처럼 보이지 않게,
+    // 자리·크기·길에서 옆으로 벗어난 정도를 덩이마다 다르게 한다(난수 대신 고정 값).
+    // 진행 정도는 minProgress~1 사이에서 고른다(예: 뱉는 연기는 체력 바 아래부터). sizeScale은 크기 배율.
+    static readonly float[] TrailSpots = { 0.3f, 0.57f, 0.82f };
+    static readonly float[] TrailSides = { 14f, -11f, 6f };
+    static readonly float[] TrailSizes = { 40f, 32f, 28f };
+    static void InsertTrailPuffs(Sequence seq, float at, float travel, Vector2 from, Vector2 control, Vector2 to, Ease ease, Color color,
+        int count, float minProgress = 0f, float sizeScale = 1f)
+    {
+        count = Mathf.Clamp(count, 0, TrailSpots.Length);
+        for (int k = 0; k < count; k++)
+        {
+            float u = Mathf.Lerp(minProgress, 1f, TrailSpots[k]);
+            float progress = DOVirtual.EasedValue(0f, 1f, u, ease);
+            Vector2 point = Bezier(from, control, to, progress);
+            Vector2 ahead = Bezier(from, control, to, Mathf.Min(1f, progress + 0.02f)) - point;
+            Vector2 side = ahead.sqrMagnitude > 0.0001f ? new Vector2(-ahead.y, ahead.x).normalized : Vector2.right;
+            Vector2 spot = point + side * TrailSides[k] * sizeScale;
+            float size = TrailSizes[k] * sizeScale;
+            seq.InsertCallback(at + travel * u, () => Smoke(spot, color, 0f, 1, size));
+        }
     }
 
     static Vector2 Bezier(Vector2 a, Vector2 b, Vector2 c, float t)
@@ -383,8 +397,17 @@ public static partial class DebuffFeedback
         return image;
     }
 
-    // 흰 연기 이미지에 색을 곱해 몇 덩이를 피웁니다. 위치는 난수 대신 황금각으로 흩뜨립니다.
+    // 연기 몇 덩이를 피웁니다. 위치는 난수 대신 황금각으로 흩뜨립니다.
+    // 연기 애니메이션(프로필 smokePurple/Red/Green/Grey)이 있으면 color의 색 계열로 고른 연기를 프레임으로 재생하고,
+    // 없으면 예전처럼 흰 연기 이미지에 색을 곱해 키우며 흐리게 합니다.
     static void Smoke(Vector2 position, Color color, float delay, int puffs, float size)
+    {
+        if (PlaySmokeFrames(position, color, delay, puffs, size)) return;
+        TintedSmoke(position, color, delay, puffs, size);
+    }
+
+    // 예전 연기: 흰 연기 이미지에 색을 곱해 작게 시작해서 키우며 흐리게 한다. 장난의 저주 안개 꼬리는 이 연기를 그대로 쓴다.
+    static void TintedSmoke(Vector2 position, Color color, float delay, int puffs, float size)
     {
         Sprite sprite = Profile != null ? Profile.smokePuff : null;
         if (sprite == null) return;
@@ -407,6 +430,75 @@ public static partial class DebuffFeedback
             seq.Join(puff.DOFade(0f, 0.45f).SetEase(Ease.InQuad));
             seq.OnComplete(() => { if (puff != null) UnityEngine.Object.Destroy(puff.gameObject); });
         }
+    }
+
+    const int SmokeFramesPerSize = 9; // 한 크기당 장 수(시트: 큰 것 → 중간 → 작은 것 순서)
+    const int SmokeMaxPuffs = 3;      // 새 연기는 한 덩이가 풍성해서 덩이 수를 줄인다
+
+    // 연기 색 계열: 채도가 낮으면 회색, 색상이 빨강 근처면 검붉은 연기, 초록 근처면 초록, 나머지는 보라.
+    static Sprite[] SmokeSheet(DebuffVisualProfile p, Color color)
+    {
+        if (p == null) return null;
+        Color.RGBToHSV(color, out float hue, out float saturation, out _);
+        float degrees = hue * 360f;
+        if (saturation < 0.25f) return p.smokeGrey;
+        if (degrees < 40f || degrees >= 330f) return p.smokeRed;
+        if (degrees >= 70f && degrees < 170f) return p.smokeGreen;
+        return p.smokePurple;
+    }
+
+    // size(예전 연기 지름)에 맞는 크기 단: 큰 것(약 150) · 중간(약 75) · 작은 것(약 50). 픽셀 크기는 늘 smokePixel 그대로다.
+    static int SmokeSizeRow(float size) => size >= 90f ? 0 : size >= 50f ? 1 : 2;
+
+    static bool HasSmokeFrames(Sprite[] sheet)
+    {
+        if (sheet == null || sheet.Length < SmokeFramesPerSize * 3) return false;
+        for (int i = 0; i < sheet.Length; i++)
+            if (sheet[i] == null) return false;
+        return true;
+    }
+
+    // 연기 애니메이션 재생: 한 덩이마다 피어나 → 부풀고 → 흩어져 사라지는 장을 차례로 바꾸며 조금 떠오르고, 끝 1/3 동안 흐려진다.
+    // 그림 크기는 칸 크기 × smokePixel(몬스터 그림과 같은 픽셀 밀도)로 고정한다. 살짝 비치게(smokeAlpha) 그리고 위치는 정수로 맞춘다.
+    static bool PlaySmokeFrames(Vector2 position, Color color, float delay, int puffs, float size)
+    {
+        var p = Profile;
+        Sprite[] sheet = SmokeSheet(p, color);
+        if (!HasSmokeFrames(sheet)) return false;
+        int first = SmokeSizeRow(size) * SmokeFramesPerSize;
+        Sprite start = sheet[first];
+        Vector2 cell = new Vector2(start.rect.width, start.rect.height) * Mathf.Max(0.1f, p.smokePixel);
+        float alpha = Mathf.Clamp01(p.smokeAlpha);
+        float step = Mathf.Max(0.02f, p.smokeFrameTime);
+        float life = step * SmokeFramesPerSize;
+        int count = Mathf.Clamp(puffs, 1, SmokeMaxPuffs);
+        float baseAngle = smokeSeed++ * 2.399f;
+        for (int i = 0; i < count; i++)
+        {
+            Image puff = CreateImage("Debuff Smoke", start, cell, Layer);
+            puff.preserveAspect = false;
+            puff.color = new Color(1f, 1f, 1f, alpha);
+            RectTransform rect = puff.rectTransform;
+            float angle = baseAngle + i * Mathf.PI * 2f / count;
+            Vector2 offset = count > 1 ? new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * size * 0.28f : Vector2.zero;
+            Vector2 at = new Vector2(Mathf.Round(position.x + offset.x), Mathf.Round(position.y + offset.y));
+            rect.anchoredPosition = at;
+            puff.gameObject.SetActive(false);
+            float rise = size * 0.18f;
+            float begin = delay + i * 0.05f;
+            Sequence seq = NewSequence(puff.gameObject);
+            seq.InsertCallback(begin, () => { if (puff != null) puff.gameObject.SetActive(true); });
+            for (int f = 1; f < SmokeFramesPerSize; f++)
+            {
+                Sprite next = sheet[first + f];
+                seq.InsertCallback(begin + step * f, () => { if (puff != null) puff.sprite = next; });
+            }
+            seq.Insert(begin, DOTween.To(() => 0f, v => { if (rect != null) rect.anchoredPosition = new Vector2(at.x, Mathf.Round(at.y + v)); }, rise, life).SetEase(Ease.OutQuad));
+            seq.Insert(begin + life * 0.66f, puff.DOFade(0f, life * 0.34f).SetEase(Ease.InQuad));
+            seq.InsertCallback(begin + life, () => { });
+            seq.OnComplete(() => { if (puff != null) UnityEngine.Object.Destroy(puff.gameObject); });
+        }
+        return true;
     }
 
     // 짧게 튀어 올랐다가 사라지는 숫자(−100, −1 등).

@@ -125,6 +125,45 @@ public static partial class DebuffFeedback
         return end + 0.2f;
     }
 
+    const float PortalFirstLaunch = 0.48f; // 균열이 열리기 시작해서 첫 주사위가 튀어나오기까지
+    const float PortalLaunchGap = 0.14f;   // 주사위끼리 튀어나오는 간격
+
+    static bool HasPortalFrames(DebuffVisualProfile p)
+    {
+        if (p == null || p.portalRiftFrames == null || p.portalRiftFrames.Length < 9) return false;
+        foreach (Sprite frame in p.portalRiftFrames)
+            if (frame == null) return false;
+        return true;
+    }
+
+    // 움직이는 차원문 장 바꾸기: 열린 동안 0~2를 앞뒤로 일렁이고, 첫 주사위가 튀어나오기 직전 3~5로 위아래로 크게 벌어져
+    // 주사위가 다 나올 때까지 5·6을 오간 뒤, 7·8로 가라앉고 다시 0~2를 일렁이다 닫힌다(닫힘은 크기 트윈).
+    static void InsertPortalFrames(Sequence seq, Image rift, Sprite[] frames, float start, float firstLaunch, float lastLaunch, float end)
+    {
+        float step = Profile != null ? Mathf.Max(0.02f, Profile.portalFrameTime) : 0.08f;
+        float surgeStep = step * 0.75f;
+        float surgeFrom = firstLaunch - surgeStep * 3f;
+        float settleFrom = lastLaunch + surgeStep * 2f;
+        float settleEnd = settleFrom + step * 2f;
+        int FrameAt(float t)
+        {
+            if (t >= surgeFrom && t < firstLaunch) return 3 + Mathf.Min(2, Mathf.FloorToInt((t - surgeFrom) / surgeStep));
+            if (t >= firstLaunch && t < settleFrom) return 5 + Mathf.FloorToInt((t - firstLaunch) / surgeStep) % 2;
+            if (t >= settleFrom && t < settleEnd) return 7 + Mathf.Min(1, Mathf.FloorToInt((t - settleFrom) / step));
+            int k = Mathf.FloorToInt(Mathf.Max(0f, t - start) / step) % 4; // 0 → 1 → 2 → 1
+            return k == 3 ? 1 : k;
+        }
+        int shown = -1;
+        float length = Mathf.Max(0.01f, end - start);
+        seq.Insert(start, DOTween.To(() => 0f, t =>
+        {
+            int f = FrameAt(start + t);
+            if (f == shown || rift == null) return;
+            shown = f;
+            rift.sprite = frames[f];
+        }, length, length).SetEase(Ease.Linear));
+    }
+
     // 판 위에 보라색 균열이 가는 선에서 벌어지며 열리고, 주사위가 그 안에서 위로 튕겨 나와 앞쪽 판에 떨어진다.
     // 잠깐 크게 보여 주는 동안 균열은 다시 선으로 좁아지며 닫히고, 주사위는 작아지며 덱으로 들어간다.
     // 그리는 순서: 보랏빛 번짐 → 균열 → 그림자 → 주사위(균열에서 솟아오르므로 항상 균열보다 위).
@@ -156,8 +195,11 @@ public static partial class DebuffFeedback
             seq.Insert(start, glow.rectTransform.DOScale(1f, 0.3f).SetEase(Ease.OutQuad));
         }
 
-        // 균열: 가는 선에서 위아래로 벌어지며 열림
-        Image rift = CreateImage("Portal Rift", p.portalRift, riftSize, parent);
+        // 균열: 가는 선에서 위아래로 벌어지며 열림. 움직이는 차원문(portalRiftFrames)이 있으면 그 장으로 그리고
+        // 장의 크기는 칸 × portalFramePixel이다(위치·착지 자리는 위 riftSize 기준 그대로).
+        Sprite[] riftFrames = HasPortalFrames(p) ? p.portalRiftFrames : null;
+        Vector2 riftImageSize = riftFrames != null ? riftFrames[0].rect.size * Mathf.Max(0.1f, p.portalFramePixel) : riftSize;
+        Image rift = CreateImage("Portal Rift", riftFrames != null ? riftFrames[0] : p.portalRift, riftImageSize, parent);
         rift.preserveAspect = false;
         RectTransform riftRect = rift.rectTransform;
         riftRect.anchoredPosition = riftCenter;
@@ -193,15 +235,15 @@ public static partial class DebuffFeedback
             }
 
             // 1단계: 균열이 움찔 줄었다가 주사위를 위쪽 앞으로 빠르게 튕겨 냄. 솟구치며 커지고 밝아집니다.
-            float launch = start + 0.48f + i * 0.14f;
-            seq.Insert(launch - 0.08f, riftRect.DOScale(new Vector3(0.92f, 0.85f, 1f), 0.08f));
-            seq.Insert(launch, riftRect.DOScale(Vector3.one, 0.14f).SetEase(Ease.OutBack));
-            Vector2 sparkAt = riftCenter;
-            seq.InsertCallback(launch, () =>
+            // 움직이는 차원문은 움찔 대신 그림이 위아래로 크게 벌어진다(아래 InsertPortalFrames).
+            float launch = start + PortalFirstLaunch + i * PortalLaunchGap;
+            if (riftFrames == null)
             {
-                Sparks(sparkAt, p.portalSmoke, 10, 90f);
-                Smoke(sparkAt, p.portalSmoke, 0f, 2, 52f);
-            });
+                seq.Insert(launch - 0.08f, riftRect.DOScale(new Vector3(0.92f, 0.85f, 1f), 0.08f));
+                seq.Insert(launch, riftRect.DOScale(Vector3.one, 0.14f).SetEase(Ease.OutBack));
+            }
+            Vector2 sparkAt = riftCenter;
+            seq.InsertCallback(launch, () => Sparks(sparkAt, p.portalSmoke, 10, 90f)); // 빛 조각만(보라 연기 없음)
             seq.Insert(launch, visual.body.DOColor(Color.white, 0.12f));
             seq.Insert(launch, visual.scaler.DOScale(new Vector3(emphasis * 0.95f, emphasis * 1.06f, 1f), 0.2f).SetEase(Ease.OutQuad));
             seq.Insert(launch, mover.DOAnchorPos(peak, 0.2f).SetEase(Ease.OutCubic));
@@ -238,6 +280,8 @@ public static partial class DebuffFeedback
         // 주사위를 보여 주는 동안 균열은 다시 선으로 좁아지며 작고 빠르게 닫힙니다. 시선은 착지한 주사위에 남깁니다.
         float close = lastLand + 0.1f;
         seq.Insert(close, riftRect.DOScale(new Vector3(1.1f, 0f, 1f), 0.18f).SetEase(Ease.InBack));
+        if (riftFrames != null)
+            InsertPortalFrames(seq, rift, riftFrames, start, start + PortalFirstLaunch, start + PortalFirstLaunch + (count - 1) * PortalLaunchGap, close + 0.18f);
         if (glow != null) seq.Insert(close, glow.DOFade(0f, 0.22f));
         seq.InsertCallback(close + 0.16f, () => Smoke(riftCenter, p.portalSmoke, 0f, 1, 40f));
 
