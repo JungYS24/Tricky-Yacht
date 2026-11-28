@@ -48,13 +48,13 @@ public class DiceManager : MonoBehaviour
 
     [Header("테스트")]
     [Tooltip("켜면 런의 첫 전투에 최종보스 악마주사위(비차원 보스)가 나온다. 보스전 테스트용")]
-    public bool testDevilBossFirstBattle = true;
+    public bool testDevilBossFirstBattle = false;
     [Tooltip("0보다 크면 악마주사위 1페이즈 최대 체력을 이 값으로 고정한다(바이옴 성장 무시). 2페이즈 체력은 BalanceConfig 배율을 따른다. 0이면 끔")]
-    public int testDevilBossHp = 1;
+    public int testDevilBossHp = 0;
     [Tooltip("켜면 악마주사위가 처음부터 2페이즈(타락한 악마주사위)로 나온다. 각성 컷신 없이 바로 타락한 모습·2페이즈 체력·붉은 배경. 2페이즈 연출 테스트용")]
     public bool testDevilBossPhase2 = false;
     [Tooltip("켜면 새 런을 숲 대신 공허(비차원) 바이옴에서 시작한다(배경·BGM·지도 모두 공허). 악마주사위를 잡으면 게임 클리어 화면까지 이어진다. 보스전 테스트용. 이어하기는 저장된 바이옴 그대로")]
-    public bool testStartInVoid = true;
+    public bool testStartInVoid = false;
 
     // 맵의 보스방(악마주사위)에서 들어온 전투면 MapFlowController가 켠다. 다음 StartNewStage가 등장 대사를 보여 준 뒤 첫 턴을 시작하고 끈다.
     [HideInInspector] public bool pendingBossIntro;
